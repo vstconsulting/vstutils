@@ -129,11 +129,10 @@
                     ? []
                     : this.instances.map((instance) => instance.getPkValue());
             },
-            toggleSelection(instance) {
-                const instanceId = instance.getPkValue();
-                const index = this.selection.indexOf(instanceId);
+            toggleSelection(pk) {
+                const index = this.selection.indexOf(pk);
                 if (index === -1) {
-                    this.selection.push(instanceId);
+                    this.selection.push(pk);
                 } else {
                     this.$delete(this.selection, index);
                 }

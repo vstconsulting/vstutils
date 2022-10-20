@@ -50,6 +50,19 @@ module.exports = {
                 exclude: [/node_modules/],
             },
             {
+                test: /\.ts$/,
+                use: [
+                    'babel-loader',
+                    {
+                        loader: 'ts-loader',
+                        options: {
+                            appendTsSuffixTo: [/\.vue$/],
+                        }
+                    }
+                ],
+                exclude: [/node_modules/],
+            },
+            {
                 test: /\.((css)|(scss))$/i,
                 use: [
                     'style-loader',
@@ -88,6 +101,12 @@ module.exports = {
             {
                 test: /\.vue$/,
                 loader: 'vue-loader',
+                options: {
+                    loaders: {
+                        ts: 'ts-loader'
+                    },
+                    esModule: true
+                }
             },
         ],
     },

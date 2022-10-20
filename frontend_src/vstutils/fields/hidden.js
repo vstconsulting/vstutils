@@ -1,5 +1,5 @@
 import { BaseField } from './base';
-import EmptyComponent from '../components/EmptyComponent.js';
+import EmptyComponent from '../components/EmptyComponent.ts';
 
 export class HiddenField extends BaseField {
     constructor(options) {

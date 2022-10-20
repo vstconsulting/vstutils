@@ -156,7 +156,7 @@ def subaction(*args, **kwargs):
     response_code = kwargs.pop('response_code', None)
     serializer_class = kwargs.get('serializer_class', None)
     response_serializer = kwargs.pop('response_serializer', serializer_class)
-    is_list = kwargs.pop('is_list', False)
+    is_list = kwargs.pop('is_list', kwargs.get('suffix') == 'List')
 
     assert (
         (response_code is None) or

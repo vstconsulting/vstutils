@@ -238,17 +238,17 @@ describe('utils', () => {
             name: 'test_response_data',
         };
 
-        expect(getRedirectUrlFromResponse(app, undefined, validModel)).toBeUndefined();
-        expect(getRedirectUrlFromResponse(app, responseData, undefined)).toBeUndefined();
-        expect(getRedirectUrlFromResponse(app, 'not_object', validModel)).toBeUndefined();
+        expect(getRedirectUrlFromResponse(undefined, validModel)).toBeUndefined();
+        expect(getRedirectUrlFromResponse(responseData, undefined)).toBeUndefined();
+        expect(getRedirectUrlFromResponse('not_object', validModel)).toBeUndefined();
 
-        expect(getRedirectUrlFromResponse(app, responseData, modelWithoutRedirect)).toBeUndefined();
-        expect(getRedirectUrlFromResponse(app, responseData, validModel)).toBeUndefined();
+        expect(getRedirectUrlFromResponse(responseData, modelWithoutRedirect)).toBeUndefined();
+        expect(getRedirectUrlFromResponse(responseData, validModel)).toBeUndefined();
 
         const viewToBeFound = app.views.get(app.views.entries().next().value[1].path);
         viewToBeFound.operationId = 'test_response_data_redirection_get';
 
-        expect(getRedirectUrlFromResponse(app, { name: 'test_response_data' }, validModel)).toBeUndefined();
-        expect(getRedirectUrlFromResponse(app, responseData, validModel)).toBe(viewToBeFound.path);
+        expect(getRedirectUrlFromResponse({ name: 'test_response_data' }, validModel)).toBeUndefined();
+        expect(getRedirectUrlFromResponse(responseData, validModel)).toBe(viewToBeFound.path);
     });
 });

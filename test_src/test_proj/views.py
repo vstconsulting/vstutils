@@ -73,6 +73,10 @@ class HostGroupViewSet(_HostGroupViewSet):
     copy_related = ['hosts', 'subgroups']
     select_related = True
 
+    @action(suffix='Instance', detail=False)
+    def instance_suffix_action_test(self, *args, **kwsrgs):  # nocv
+        pass
+
 
 @nested_view('subdeephosts', 'id', view=HostGroupViewSet, serializer_class_one=HostGroupViewSet.serializer_class)
 class _DeepHostGroupViewSet(_HostGroupViewSet):

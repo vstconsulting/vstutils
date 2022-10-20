@@ -1,0 +1,249 @@
+{
+    "definitions": {
+        "OneSomePage": {
+            "required": [
+                "phone"
+            ],
+            "properties": {
+                "id": {
+                    "title": "Id",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 1
+                },
+                "active": {
+                    "title": "Active",
+                    "type": "boolean",
+                    "readOnly": true
+                },
+                "phone": {
+                    "title": "Phone",
+                    "type": "string",
+                    "format": "phone",
+                    "default": "78005553535"
+                }
+            }
+        },
+        "Some": {
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "title": "Id",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "city": {
+                    "title": "City",
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 1
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "default": "Msh"
+                }
+            }
+        }
+    },
+    "paths": {
+        "/some_list/": {
+            "get": {
+                "operationId": "some_list",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "minItems": 1,
+                        "uniqueItems": true
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/OneSomePage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-subscribe-labels": [
+                    "deigmata.OneSomePage"
+                ]
+            },
+            "parameters": [],
+            "post": {
+                "operationId": "some_list_add",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/OneSomePage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CREATED",
+                        "schema": {
+                            "$ref": "#/definitions/OneSomePage"
+                        }
+                    }
+                }
+            }
+        },
+        "/some_list/{id}/": {
+            "get": {
+                "operationId": "some_list_get",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "name": "some_number",
+                        "in": "query",
+                        "required": false,
+                        "type": "number"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/OneSomePage"
+                        }
+                    }
+                },
+                "x-subscribe-labels": [
+                    "deigmata.Store"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "delete": {
+                "operationId": "some_list_remove",
+                "parameters": [],
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "some_list_edit",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/OneSomePage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "##/definitions/OneSomePage"
+                        }
+                    }
+                }
+            }
+        },
+        "/some_action/": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "post": {
+                "operationId": "some_action",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Some"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CREATED",
+                        "schema": {
+                            "$ref": "#/definitions/Some"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

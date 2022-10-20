@@ -122,7 +122,7 @@ export default class QuerySet {
     /**
      * Method that returns response model for given operation
      * @param {RequestType} operation
-     * @return {Function|null}
+     * @return {typeof Model|null}
      */
     getResponseModelClass(operation) {
         return this.getModelClass(operation, 1);
@@ -200,9 +200,10 @@ export default class QuerySet {
 
     /**
      * Method, that returns promise with Model instance.
+     * @param {string | number} id?
      * @return {Promise.<Model>}
      */
-    async get(id = undefined, pathParamsValues = null) {
+    async get(id, pathParamsValues = null) {
         if (pathParamsValues) {
             return this.clone({ pathParamsValues }).get(id);
         }

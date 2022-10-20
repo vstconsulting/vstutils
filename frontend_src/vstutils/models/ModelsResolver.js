@@ -48,6 +48,7 @@ export class ModelsResolver {
             this._definitionsModels.set(name, model);
             return model;
         }
+        throw new Error(`Invalid model ref ${reference}`);
     }
 
     /**

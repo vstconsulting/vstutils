@@ -1,0 +1,187 @@
+{
+    "definitions": {
+        "Some": {
+            "properties": {
+                "id": {
+                    "title": "Id",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "store": {
+                    "title": "Store",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1
+                },
+                "status": {
+                    "title": "Status",
+                    "type": "string",
+                    "enum": ["UNCONFIRMED", "REFUND", "PAID", "READY"]
+                },
+                "is_refund": {
+                    "title": "Is refund",
+                    "type": "boolean",
+                    "readOnly": true
+                }
+            }
+        }
+    },
+    "paths": {
+        "/some_list/": {
+            "get": {
+                "operationId": "some_list_list",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": false,
+                        "type": "array",
+                        "items": { "type": "integer" },
+                        "collectionFormat": "csv",
+                        "minItems": 1,
+                        "uniqueItems": true
+                    },
+                    {
+                        "name": "store",
+                        "in": "query",
+                        "required": false,
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "collectionFormat": "csv",
+                        "minItems": 1,
+                        "uniqueItems": true
+                    },
+                    {
+                        "name": "__store",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "collectionFormat": "csv",
+                        "minItems": 1,
+                        "uniqueItems": true
+                    },
+                    {
+                        "name": "status__not",
+                        "in": "query",
+                        "required": false,
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "collectionFormat": "csv",
+                        "minItems": 1,
+                        "uniqueItems": true
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "required": false,
+                        "type": "array",
+                        "items": { "type": "integer" },
+                        "collectionFormat": "csv",
+                        "minItems": 1,
+                        "uniqueItems": true
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "id",
+                                "-id",
+                                "store",
+                                "-store",
+                                "status",
+                                "-status",
+                                "is_refund",
+                                "-is_refund"
+                            ]
+                        },
+                        "collectionFormat": "csv",
+                        "minItems": 1,
+                        "uniqueItems": true
+                    },
+                    {
+                        "name": "__search",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": { "$ref": "#/definitions/Some" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-subscribe-labels": ["deigmata.Some"]
+            },
+            "parameters": []
+        },
+        "/some_list/{some_list_id}": {
+            "delete": {
+                "operationId": "some_list_remove",
+                "parameters": [],
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "some_list_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        }
+    }
+}

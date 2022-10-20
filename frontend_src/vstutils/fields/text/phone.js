@@ -91,7 +91,7 @@ export class PhoneField extends MaskedField {
         return [PhoneFieldMixin];
     }
 
-    getInitialValue() {
+    getEmptyValue() {
         return null;
     }
 }

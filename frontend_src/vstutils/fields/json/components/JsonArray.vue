@@ -1,5 +1,5 @@
 <template>
-    <Card :title="title">
+    <Card :title="title" collapsable>
         <component
             :is="jsonMapper.getComponent(subValue)"
             v-for="(subValue, idx) in value"

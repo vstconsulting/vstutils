@@ -1,5 +1,5 @@
 <template>
-    <div v-show="!hidden" class="dropdown">
+    <div class="dropdown">
         <button
             :id="buttonId"
             class="btn btn-secondary dropdown-toggle"
@@ -28,7 +28,6 @@
 </template>
 
 <script>
-    import signals from '../../signals';
     import ComponentIDMixin from '../../ComponentIDMixin.js';
 
     export default {
@@ -45,33 +44,6 @@
         computed: {
             buttonId() {
                 return `compact-operations-${this.componentId}`;
-            },
-        },
-        mounted() {
-            this.slot = signals.on({
-                signal: 'pageDataUpdated',
-                callback: () => {
-                    this.$nextTick().then(() => {
-                        setTimeout(() => {
-                            this.hidden = this.isAllHidden();
-                        }, 1);
-                    });
-                },
-            });
-        },
-        beforeDestroy() {
-            signals.disconnect(this.slot, 'pageDataUpdated');
-        },
-        methods: {
-            isAllHidden() {
-                if (this.$refs.menu) {
-                    for (const child of this.$refs.menu.children) {
-                        if (getComputedStyle(child).getPropertyValue('display') !== 'none') {
-                            return false;
-                        }
-                    }
-                }
-                return true;
             },
         },
     };

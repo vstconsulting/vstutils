@@ -2,7 +2,7 @@
     <a v-if="showPopover" ref="popover" class="popover-symbol" tabindex="0" v-text="linkText" />
 </template>
 
-<script setup>
+<script setup lang="ts">
     /**
      * @see {@link https://getbootstrap.com/docs/4.6/components/popovers/}
      */
@@ -16,18 +16,18 @@
         customClass: { type: String, default: '' },
     });
     const showPopover = computed(() => props.title || props.content);
-    const popover = ref(null);
+    const popover = ref<HTMLElement | null>(null);
     let popoverCreated = false;
 
     function destroyPopover() {
-        if (popoverCreated) {
+        if (popoverCreated && popover.value) {
             $(popover.value).popover('dispose');
         }
     }
 
     function initPopover() {
         destroyPopover();
-        if (showPopover.value) {
+        if (showPopover.value && popover.value) {
             $(popover.value).popover({
                 html: true,
                 placement: 'auto',

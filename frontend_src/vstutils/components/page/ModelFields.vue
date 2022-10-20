@@ -1,5 +1,5 @@
 <template>
-    <div class="row" :class="rootClasses">
+    <div class="row">
         <div v-if="hideNotRequired && editable" class="col-12">
             <div class="card">
                 <div class="card-body">
@@ -11,48 +11,65 @@
                 </div>
             </div>
         </div>
-        <div
-            v-for="(group, idx) in filteredFieldsInstancesGroups"
-            :key="idx"
-            :class="fieldsGroupClasses(group)"
-        >
-            <div class="card" :class="groupsClasses">
-                <h5 v-if="group.title" class="card-header">
-                    {{ $t(group.title) }}
-                </h5>
-                <div class="card-body">
-                    <component
-                        :is="field.component"
-                        v-for="field in group.fields"
-                        :key="field.name"
-                        :field="field"
-                        :data="data"
-                        :type="fieldsType"
-                        :error="fieldsErrors && fieldsErrors[field.name]"
-                        :hideable="hideNotRequired && !field.required"
-                        style="margin-bottom: 1rem"
-                        @hide-field="hiddenFields.push(field)"
-                        @set-value="$emit('set-value', $event)"
-                    />
+        <template v-if="displayFlat">
+            <component
+                :is="field.component"
+                v-for="field in filteredFieldsInstancesGroups[0].fields"
+                :key="field.name"
+                :class="flatFieldsClasses"
+                :field="field"
+                :data="data"
+                :type="fieldsType"
+                :error="fieldsErrors && fieldsErrors[field.name]"
+                :hideable="hideNotRequired && !field.required"
+                style="margin-bottom: 1rem"
+                @hide-field="hiddenFields.push(field)"
+                @set-value="$emit('set-value', $event)"
+            />
+        </template>
+        <template v-else>
+            <div
+                v-for="(group, idx) in filteredFieldsInstancesGroups"
+                :key="idx"
+                :class="fieldsGroupClasses(group)"
+            >
+                <div class="card" :class="groupsClasses">
+                    <h5 v-if="group.title" class="card-header">
+                        {{ $t(group.title) }}
+                    </h5>
+                    <div class="card-body">
+                        <component
+                            :is="field.component"
+                            v-for="field in group.fields"
+                            :key="field.name"
+                            :field="field"
+                            :data="data"
+                            :type="fieldsType"
+                            :error="fieldsErrors && fieldsErrors[field.name]"
+                            :hideable="hideNotRequired && !field.required"
+                            style="margin-bottom: 1rem"
+                            @hide-field="hiddenFields.push(field)"
+                            @set-value="$emit('set-value', $event)"
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
+        </template>
     </div>
 </template>
 
 <script>
     import HideNotRequiredSelect from './HideNotRequiredSelect.vue';
-    import { classesFromFields } from '../../utils';
 
     export default {
         name: 'ModelFields',
         components: { HideNotRequiredSelect },
-        inject: {
-            entityViewClasses: { default: null },
-        },
         props: {
             data: { type: Object, required: true },
             model: { type: Function, required: true },
+
+            flatIfPossible: { type: Boolean, default: false },
+            flatFieldsClasses: { type: [String, Array, Object], default: null },
 
             fieldsGroups: {
                 type: Array,
@@ -82,6 +99,13 @@
             };
         },
         computed: {
+            displayFlat() {
+                return (
+                    this.flatIfPossible &&
+                    this.filteredFieldsInstancesGroups.length === 1 &&
+                    !this.filteredFieldsInstancesGroups[0].title
+                );
+            },
             fieldsType() {
                 return this.editable ? 'edit' : 'readonly';
             },
@@ -114,22 +138,6 @@
                         fields: group.fields.filter((field) => this.shouldShowField(field)),
                     }))
                     .filter((group) => group.fields.length > 0);
-            },
-            flatFields() {
-                return this.filteredFieldsInstancesGroups.flatMap((group) => group.fields);
-            },
-            rootClasses() {
-                return classesFromFields(this.flatFields, this.data);
-            },
-        },
-        watch: {
-            rootClasses: {
-                handler(val, oldVal) {
-                    if (!this.entityViewClasses) return;
-                    if (oldVal) this.entityViewClasses.remove(oldVal);
-                    this.entityViewClasses.add(val);
-                },
-                immediate: true,
             },
         },
         created() {

@@ -1,9 +1,11 @@
 import Vue from 'vue';
+import { defineStore } from 'pinia';
 import BaseApp from './BaseApp.js';
 import { openapi_dictionary } from './vstutils/api';
 import { capitalize, guiLocalSettings, RequestTypes } from './vstutils/utils';
 import { PageNewView, ViewConstructor, ViewsTree } from './vstutils/views';
-import { StoreConstructor } from './vstutils/store';
+import { AutoUpdateController, useAutoUpdateStore } from './vstutils/autoupdate';
+import { pinia, GLOBAL_STORE, createLocalSettingsStore, createUserSettingsStore } from './vstutils/store';
 import { ModelsResolver } from './vstutils/models';
 import { RouterConstructor, mixins as routerMixins } from './vstutils/router';
 import { QuerySetsResolver } from './vstutils/querySet';
@@ -17,6 +19,9 @@ export * from './app.common.js';
 import * as spa from './app.common.js';
 window.spa = spa;
 
+const getApp = utils.getApp;
+export { getApp };
+
 /**
  * Class for a App object.
  * App object - JS object, that has all properties, needed for an application work.
@@ -27,8 +32,8 @@ export class App extends BaseApp {
      * @param {AppConfiguration} config Object with OpenAPI schema.
      * @param {FakeCache} cache Cache instance (is supposed to be instance of FilesCache class).
      */
-    constructor(config, cache) {
-        super(config, cache);
+    constructor(config, cache, vue) {
+        super(config, cache, vue);
         this.fieldsResolver = new FieldsResolver(this.config.schema);
         addDefaultFields(this.fieldsResolver);
         this.modelsResolver = new ModelsResolver(this.fieldsResolver, this.config.schema);
@@ -39,9 +44,11 @@ export class App extends BaseApp {
         /** @type {QuerySetsResolver} */
         this.qsResolver = null;
 
-        let storeConstructor = new StoreConstructor(this, this.config.isDebug);
-        signals.emit('app.beforeInitStore', { storeConstructor });
-        this.store = storeConstructor.getStore();
+        this.userSettingsStore = createUserSettingsStore(this.api)(pinia);
+        this.store = defineStore('global', GLOBAL_STORE)(pinia);
+
+        this.autoUpdateStore = useAutoUpdateStore(pinia);
+        this.autoUpdateController = new AutoUpdateController(this.autoUpdateStore, this.centrifugoClient);
 
         /**
          * Main(root) Vue instance for current application, that has access to the app store and app router.
@@ -195,7 +202,8 @@ export class App extends BaseApp {
 
     initLocalSettings() {
         this.localSettingsModel = this.modelsResolver.bySchemaObject({}, '_LocalSettings');
-        this.store.dispatch('localSettings/load');
+        this.localSettingsStore = createLocalSettingsStore(window.localStorage, 'localSettings')(pinia);
+        this.localSettingsStore.load();
     }
 
     /**
@@ -225,11 +233,11 @@ export class App extends BaseApp {
                 x_menu: this.config.schema.info['x-menu'],
                 x_docs: this.config.schema.info['x-docs'],
             },
+            pinia,
             router: this.router,
-            store: this.store,
             i18n: this.i18n,
         });
-
+        this.rootVm = this.application;
         signals.emit('app.afterInit', { app: this });
     }
 

@@ -1,0 +1,263 @@
+{
+    "swagger": "2.0",
+    "basePath": "/api/v1",
+    "consumes": [
+        "application/json"
+    ],
+    "schemes": [
+        "http"
+    ],
+    "securityDefinitions": {
+        "basic": {
+            "type": "basic"
+        }
+    },
+    "security": [
+        {
+            "basic": []
+        }
+    ],
+    "host": "test.vst",
+    "info": {
+        "title": "Test Project",
+        "version": "v1",
+        "termsOfService": "",
+        "contact": {
+            "name": "System Administrator"
+        },
+        "x-docs": {
+            "has_docs": false,
+            "docs_url": "/docs/"
+        },
+        "x-links": {
+            "vstutils": {
+                "url": "https://github.com/vstconsulting/vstutils.git",
+                "name": "VST Utils sources"
+            }
+        },
+        "x-menu": [],
+        "x-page-limit": 20,
+        "x-settings": {
+            "static_path": "/static/",
+            "enable_gravatar": true,
+            "time_zone": "UTC",
+            "logout_url": "/account/logout/",
+            "login_url": "/account/login/"
+        },
+        "x-versions": {
+            "application": "1.0.0",
+            "library": "1.0.0",
+            "vstutils": "5.0.0b57",
+            "django": "3.2.3",
+            "djangorestframework": "3.12.4",
+            "drf_yasg": "1.20.0"
+        },
+        "x-user-id": 1
+    },
+    "definitions": {
+        "User": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "username": {
+                    "title": "Username",
+                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "type": "string",
+                    "pattern": "^[\\\\w.@+-]+$",
+                    "maxLength": 150,
+                    "minLength": 1
+                },
+                "is_active": {
+                    "title": "Is active",
+                    "type": "boolean",
+                    "default": true
+                }
+            },
+            "x-properties-groups": {
+                "": [
+                    "id",
+                    "username",
+                    "is_active"
+                ]
+            },
+            "x-view-field-name": "username",
+            "x-translate-model": "User"
+        }
+    },
+    "paths": {
+        "/user/": {
+            "get": {
+                "operationId": "user_list",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "minItems": 1,
+                        "uniqueItems": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/User"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-subscribe-labels": [
+                    "test.User"
+                ]
+            },
+            "post": {
+                "operationId": "user_add",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CREATED",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            },
+            "parameters": []
+        },
+        "/user/{id}/": {
+            "get": {
+                "operationId": "user_get",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                },
+                "tags": [
+                    "user"
+                ],
+                "x-subscribe-labels": [
+                    "deigmata.User"
+                ]
+            },
+            "put": {
+                "operationId": "user_update",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                },
+                "tags": [
+                    "user"
+                ]
+            },
+            "patch": {
+                "operationId": "user_edit",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                },
+                "tags": [
+                    "user"
+                ]
+            },
+            "delete": {
+                "operationId": "user_remove",
+                "parameters": [],
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    }
+                },
+                "tags": [
+                    "user"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this user.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        }
+    }
+}

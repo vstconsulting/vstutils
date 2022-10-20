@@ -1981,6 +1981,18 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertTrue(len(api['paths']['/files/query_serializer_test_list/']['get']['parameters']) > 1)
         self.assertTrue(api['paths']['/files/query_serializer_test_list/']['get']['x-list'])
 
+        self.assertFalse(api['paths']['/files/is_list_false_action_test/']['get']['x-list'])
+        self.assertEqual(len(api['paths']['/files/is_list_false_action_test/']['get']['parameters']), 0)
+
+        self.assertTrue(api['paths']['/files/list_suffix_action_test/']['get']['x-list'])
+        self.assertIn(
+            {'name': 'test_value', 'in': 'query', 'required': True, 'type': 'string', 'enum': ['TEST1', 'TEST2']},
+            api['paths']['/files/list_suffix_action_test/']['get']['parameters']
+        )
+
+        self.assertFalse(api['paths']['/hosts/instance_suffix_action_test/']['get']['x-list'])
+        self.assertEqual(len(api['paths']['/hosts/instance_suffix_action_test/']['get']['parameters']), 0)
+
         # Check x-list param on get methods
         self.assertFalse(api['paths']['/files/query_serializer_test/']['get']['x-list'])
         self.assertTrue(api['paths']['/files/query_serializer_test_list/']['get']['x-list'])

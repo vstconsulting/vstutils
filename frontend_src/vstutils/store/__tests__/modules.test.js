@@ -1,42 +1,29 @@
-import { expect, jest, test, describe } from '@jest/globals';
-import Vuex from 'vuex';
-import { LIST_STORE_MODULE } from '../components_state/commonStoreModules.js';
-import { mergeDeep, RequestTypes } from '../../utils';
-import default_nested_module from '../components_state/default_nested_module.js';
-import { createLocalVue } from '@vue/test-utils';
-import { QuerySet } from '../../querySet';
-import { Model, makeModel } from '../../models';
-import { IntegerField } from '../../fields/numbers/integer';
-import { StringField } from '../../fields/text';
+import { expect, jest, test, describe, beforeAll } from '@jest/globals';
+import { defineStore } from 'pinia';
+import { createListViewStore } from '../page.ts';
+import { createApp } from '../../../unittests/create-app';
+import { createSchema } from '../../../unittests/schema';
 
 jest.mock('../../api');
 
 describe('List store module', () => {
-    const localVue = createLocalVue();
-    localVue.use(Vuex);
+    let app;
+    let store;
 
-    const store = new Vuex.Store({
-        modules: {
-            list: mergeDeep({}, default_nested_module, LIST_STORE_MODULE),
-        },
+    beforeAll(async () => {
+        app = await createApp({ schema: createSchema() });
+        store = defineStore('LIST_STORE_MODULE', createListViewStore(app.views.get('/user/')))(app.pinta);
     });
 
-    const User = makeModel(
-        class extends Model {
-            static declaredFields = [new IntegerField({ name: 'id' }), new StringField({ name: 'username' })];
-        },
-    );
-
-    const qs = new QuerySet('user', { [RequestTypes.LIST]: User });
-
     test('Set queryset', async () => {
-        store.commit('list/setQuerySet', qs);
+        const qs = app.views.get('/user/').objects;
 
-        store.commit('list/setFilters', { username: 'testUser' });
+        store.setQuerySet(qs);
+        store.setQuery({ username: 'testUser' });
 
-        expect(store.getters['list/queryset']).not.toBe(qs);
+        expect(store.queryset).not.toBe(qs);
 
         expect(qs.query).toStrictEqual({});
-        expect(store.getters['list/queryset'].query).toStrictEqual({ username: 'testUser' });
+        expect(store.queryset.query).toStrictEqual({ username: 'testUser', limit: 20, offset: 0 });
     });
 });

@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="card-header">
+        <div v-if="showHeader" class="card-header">
             <h3 class="card-title">
                 <template v-if="title">
                     {{ title }}
@@ -10,7 +10,7 @@
             <div class="card-tools">
                 <slot name="tools" />
                 <button
-                    v-if="isCollapsable"
+                    v-if="collapsable"
                     type="button"
                     class="btn btn-tool"
                     data-card-widget="collapse"
@@ -33,9 +33,14 @@
     export default {
         props: {
             title: { type: String, default: '' },
-            isCollapsable: { type: Boolean, default: true },
+            collapsable: { type: Boolean, default: false },
             cardBodyClasses: { type: [String, Array], default: '' },
             loading: { type: Boolean, default: false },
+        },
+        computed: {
+            showHeader() {
+                return this.title || this.$slots.title || this.$slots.tools || this.collapsable;
+            },
         },
     };
 </script>

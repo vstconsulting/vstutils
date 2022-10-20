@@ -1,19 +1,29 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect, test, beforeAll } from '@jest/globals';
 import { HttpMethods, RequestTypes } from '../../utils';
 import openapi_dictionary from '../../api/openapi.js';
 import ViewConstructor from '../ViewConstructor.js';
 import testSchema from './../../../__mocks__/testSchema.json';
-import { PageEditView, ViewTypes } from '../View.js';
+import { PageEditView, ViewTypes } from '../View.ts';
 import { addDefaultFields, FieldsResolver } from '../../fields';
 import { ModelsResolver } from '../../models';
+import { createSchema } from '../../../unittests/schema';
+import { StringField } from '../../fields/text';
+import { ArrayField } from '../../fields/array';
+import { NumberField } from '../../fields/numbers';
+import { createApp } from '../../../unittests/create-app';
 
 describe('ViewConstructor', () => {
-    const fieldsResolver = new FieldsResolver(testSchema);
-    addDefaultFields(fieldsResolver);
-    const modelsResolver = new ModelsResolver(fieldsResolver, testSchema);
-    const viewConstructor = new ViewConstructor(openapi_dictionary, modelsResolver, fieldsResolver);
-    const views = viewConstructor.generateViews(testSchema);
-    const modelsClasses = modelsResolver._definitionsModels;
+    let views;
+    let modelsClasses;
+
+    beforeAll(() => {
+        const fieldsResolver = new FieldsResolver(testSchema);
+        addDefaultFields(fieldsResolver);
+        const modelsResolver = new ModelsResolver(fieldsResolver, testSchema);
+        const viewConstructor = new ViewConstructor(openapi_dictionary, modelsResolver, fieldsResolver);
+        views = viewConstructor.generateViews(testSchema);
+        modelsClasses = modelsResolver._definitionsModels;
+    });
 
     test.each(['/fragment1/fragment2/fragment3/fragment4/author/', '/author/'])(
         'authors view (%s)',
@@ -324,4 +334,52 @@ describe('ViewConstructor', () => {
 
         expect(parentsPaths).toStrictEqual(expectedPaths);
     });
+});
+
+test('detail view filters', async () => {
+    const schema = createSchema({
+        paths: {
+            '/some/{id}/': {
+                parameters: [{ name: 'id', in: 'path', required: true, type: 'integer' }],
+                get: {
+                    operationId: 'some_get',
+                    responses: {
+                        200: { schema: { properties: { id: { type: 'number' } } } },
+                    },
+                    parameters: [
+                        { name: 'filter', in: 'query', required: false, type: 'string' },
+                        {
+                            name: 'number_array',
+                            in: 'query',
+                            required: false,
+                            type: 'array',
+                            collectionFormat: 'pipes',
+                            items: { type: 'number' },
+                        },
+                    ],
+                },
+            },
+            '/without_filters/{id}/': {
+                parameters: [{ name: 'id', in: 'path', required: true, type: 'integer' }],
+                get: {
+                    operationId: 'without_filters_get',
+                    responses: {
+                        200: { schema: { properties: { id: { type: 'number' } } } },
+                    },
+                    parameters: [],
+                },
+            },
+        },
+    });
+    const app = await createApp({ schema });
+
+    const view = app.views.get('/some/{id}/');
+    const model = view.filtersModelClass;
+    expect(model).not.toBeNull();
+    expect(model.fields.size).toBe(2);
+    expect(model.fields.get('filter')).toBeInstanceOf(StringField);
+    expect(model.fields.get('number_array')).toBeInstanceOf(ArrayField);
+    expect(model.fields.get('number_array').itemField).toBeInstanceOf(NumberField);
+
+    expect(app.views.get('/without_filters/{id}/').filtersModelClass).toBeNull();
 });

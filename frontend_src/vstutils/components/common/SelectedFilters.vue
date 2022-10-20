@@ -8,7 +8,7 @@
 </template>
 
 <script>
-    import { IGNORED_FILTERS } from '../../utils';
+    import { IGNORED_FILTERS, ViewTypes } from '../../utils';
 
     export default {
         name: 'SelectedFilters',
@@ -31,7 +31,10 @@
                 return {};
             },
             activeFilters() {
-                return Object.keys(this.filters).filter((filter) => !IGNORED_FILTERS.includes(filter));
+                if (this.view.type === ViewTypes.LIST) {
+                    return Object.keys(this.filters).filter((filter) => !IGNORED_FILTERS.includes(filter));
+                }
+                return [];
             },
             pills() {
                 return this.activeFilters.map((name) => ({
@@ -46,7 +49,7 @@
         },
         methods: {
             clearFilter(name) {
-                this.$root.$refs.currentViewComponent.applyFilters(
+                this.$app.store.page.applyFilters(
                     Object.fromEntries(Object.entries(this.filters).filter((entry) => entry[0] !== name)),
                 );
             },

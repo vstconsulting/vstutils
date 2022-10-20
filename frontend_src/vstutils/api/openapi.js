@@ -1,4 +1,4 @@
-import { ViewTypes } from '../utils';
+import { getApp, ViewTypes } from '../utils';
 import FiltersModal from '../components/list/FiltersModal.vue';
 import AddChildModal from '../components/list/AddChildModal.vue';
 import NestedDeletionModal from '../components/common/NestedDeletionModal.vue';
@@ -25,6 +25,9 @@ const openapi_dictionary = {
                     style: { order: 100, marginLeft: 'auto' },
                     doNotGroup: true,
                     confirmationRequired: true,
+                    isEmpty: true,
+                    handler: (...args) => getApp().store.page.removeInstance(...args),
+                    handlerMany: (...args) => getApp().store.page.removeInstances(...args),
                 },
                 nested_remove: {
                     name: 'remove',
@@ -79,6 +82,7 @@ const openapi_dictionary = {
                     iconClasses: ['fas', 'fa-save'],
                     style: { order: -10 },
                     doNotGroup: true,
+                    handler: (...args) => getApp().store.page.save(...args),
                 },
             },
             page_edit: {
@@ -89,6 +93,7 @@ const openapi_dictionary = {
                     doNotShowOnList: true,
                     style: { order: -9 },
                     doNotGroup: true,
+                    handler: (...args) => getApp().store.page.save(...args),
                 },
                 reload: {
                     name: 'reload',
@@ -97,6 +102,7 @@ const openapi_dictionary = {
                     doNotShowOnList: true,
                     style: { order: -8 },
                     doNotGroup: true,
+                    handler: (...args) => getApp().store.page.reload(...args),
                 },
                 cancel: {
                     name: 'cancel',
@@ -106,6 +112,7 @@ const openapi_dictionary = {
                     doNotShowOnList: true,
                     style: { order: 100, marginLeft: 'auto' },
                     doNotGroup: true,
+                    handler: (...args) => getApp().store.page.cancel(...args),
                 },
             },
             action: {
@@ -113,6 +120,7 @@ const openapi_dictionary = {
                     name: 'execute',
                     style: { order: -7 },
                     doNotGroup: true,
+                    handler: (...args) => getApp().store.page.execute(...args),
                 },
             },
         },

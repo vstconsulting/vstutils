@@ -1,26 +1,29 @@
+import { computed } from 'vue';
 import signals from '../signals.js';
 import Gravatar from './Gravatar.js';
 import TFAPage from './TFAPage.vue';
 import { IntegerField } from '../fields/numbers/integer.js';
-import { generatePassword } from '../utils';
+import { guiPopUp, pop_up_msg } from '../popUp';
+import { generatePassword, getApp, generateBase32String, generateRandomString } from '../utils';
+import { getRedirectUrl } from '../store/helpers';
 import './settings.js';
+import { openPage } from '../utils';
 export { Gravatar };
 
 const usersPath = '/user/';
 const usersDetailPath = `${usersPath}{id}/`;
 
+const RECOVERY_CODE_LENGTH = 10;
+
 function addGeneratePasswordAction(view) {
     view.actions.set('generate_password', {
         name: 'generate_password',
         title: 'Generate password',
-    });
-    view.mixins.push({
-        methods: {
-            generate_passwordInstance() {
-                const password = generatePassword();
-                this.setFieldValue({ field: 'password', value: password });
-                this.setFieldValue({ field: 'password2', value: password });
-            },
+        handler: () => {
+            const app = getApp();
+            const password = generatePassword();
+            app.store.page.setFieldValue({ field: 'password', value: password });
+            app.store.page.setFieldValue({ field: 'password2', value: password });
         },
     });
 }
@@ -58,6 +61,42 @@ signals.once('allViews.created', ({ views }) => {
     const tfaView = views.get(`${usersDetailPath}twofa/`);
     tfaView.mixins.push(TFAPage);
     tfaView.params.method = 'PUT';
+    tfaView.title = 'Two factor authentication';
+    tfaView.extendStore((store) => {
+        const app = getApp();
+
+        async function fetchData() {
+            await store.fetchData(store.getInstancePk());
+            if (!store.sandbox.enabled) {
+                store.setFieldValue({
+                    field: 'secret',
+                    value: generateBase32String(),
+                });
+
+                const codes = [];
+                const half = Math.ceil(RECOVERY_CODE_LENGTH / 2);
+                for (let i = 0; i < 15; i++) {
+                    const code = generateRandomString(RECOVERY_CODE_LENGTH).toLowerCase();
+                    codes.push(code.slice(0, half) + '-' + code.slice(half));
+                }
+                store.setFieldValue({ field: 'recovery', value: codes.join(',') });
+            }
+        }
+
+        const secretUri = computed(() => {
+            if (store.sandbox.value.secret) {
+                const username = app.user.getViewFieldValue();
+                return `otpauth://totp/${username}@${app.config.projectName}?secret=${store.sandbox.secret}`;
+            }
+            return null;
+        });
+
+        return {
+            ...store,
+            fetchData,
+            secretUri,
+        };
+    });
 
     // Hide settings view
     views.get(`${usersDetailPath}_settings/`).hidden = true;
@@ -71,6 +110,38 @@ signals.once('allViews.created', ({ views }) => {
     if (newUserView) {
         addGeneratePasswordAction(newUserView);
     }
+});
+
+signals.connect('</user/{id}/twofa/>filterActions', (obj) => {
+    const app = getApp();
+    obj.actions = [
+        {
+            name: 'save',
+            title: obj.data.enabled ? 'Disable' : 'Enable',
+            async handler() {
+                try {
+                    app.store.page.validateAndSetInstanceData();
+                } catch (e) {
+                    app.error_handler.defineErrorAndShow(e);
+                    return;
+                }
+                app.store.page.loading = true;
+                const instance = app.store.page.instance;
+                try {
+                    await instance.update('put');
+                    app.store.page.loading = false;
+                    app.store.page.changedFields = [];
+                    guiPopUp.success(app.i18n.t(pop_up_msg.instance.success.save, ['', 'TFA']));
+                    openPage({ path: getRedirectUrl({ instance }) });
+                } catch (error) {
+                    app.store.page.loading = false;
+                    let str = app.error_handler.errorToString(error);
+                    let srt_to_show = app.i18n.t(pop_up_msg.instance.error.save, [str]);
+                    app.error_handler.showError(srt_to_show, str);
+                }
+            },
+        },
+    ];
 });
 
 class UserIDField extends IntegerField {

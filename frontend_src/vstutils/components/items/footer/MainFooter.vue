@@ -33,10 +33,10 @@
         },
         computed: {
             title() {
-                return this.$store.state.pageTitle;
+                return this.$app.store.title;
             },
             breadcrumbs() {
-                return this.$store.state.breadcrumbs;
+                return this.$app.store.breadcrumbs;
             },
         },
     };

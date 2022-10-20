@@ -1,5 +1,3 @@
-import Vue from 'vue';
-
 /**
  * Class, that registers Vue components
  */
@@ -24,12 +22,12 @@ class ComponentsRegistrator {
     /**
      * Method, that registers all added components
      */
-    registerAll() {
+    registerAll(vue) {
         for (let [name, component] of Object.entries(this.components)) {
-            if (Vue.options.components[name]) {
+            if (vue.options.components[name]) {
                 throw new Error(`Component ${name} already registered`);
             }
-            Vue.component(name, component);
+            vue.component(name, component);
         }
     }
 }

@@ -14,7 +14,7 @@ module.exports = {
     collectCoverage: true,
 
     // An array of glob patterns indicating a set of files for which coverage information should be collected
-    collectCoverageFrom: ['**/vstutils/**/*.js'],
+    collectCoverageFrom: ['**/vstutils/**/*.{js,ts}'],
 
     // A list of reporter names that Jest uses when writing coverage reports
     coverageReporters: ['text', 'text-summary'],
@@ -42,7 +42,8 @@ module.exports = {
 
     // A map from regular expressions to paths to transformers
     transform: {
-        '^.+\\.(js|jsx)$': 'babel-jest',
-        '.*\\.(vue)$': '@vue/vue2-jest',
+        '^.+\\.js$': 'babel-jest',
+        '^.+\\.ts?$': 'ts-jest',
+        '.*\\.vue$': '@vue/vue2-jest',
     },
 };

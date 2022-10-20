@@ -1,4 +1,4 @@
-import { Model, ModelClass, makeModel } from './Model.js';
+import { Model, makeModel } from './Model.js';
 import { ModelsResolver } from './ModelsResolver.js';
 import { StringField } from '../fields/text';
 
@@ -17,4 +17,4 @@ const NoModel = makeModel(
     'NoModel',
 );
 
-export { Model, makeModel, ModelClass, ModelsResolver, NoModel };
+export { Model, makeModel, ModelsResolver, NoModel };

@@ -2,7 +2,7 @@ import Centrifuge from 'centrifuge';
 import { apiConnector } from './vstutils/api';
 import { globalComponentsRegistrator } from './vstutils/ComponentsRegistrator.js';
 import { ErrorHandler } from './vstutils/popUp';
-import { RequestTypes } from './vstutils/utils';
+import { RequestTypes, __setApp } from './vstutils/utils';
 import AppRoot from './vstutils/AppRoot.vue';
 import { TranslationsManager } from './vstutils/api/TranslationsManager.js';
 import { i18n } from './vstutils/translation.js';
@@ -28,10 +28,12 @@ export default class BaseApp {
      * Constructor of App class.
      * @param {AppConfiguration} config Object with OpenAPI schema.
      * @param {FakeCache} cache Object, that manages api responses cache operations.
+     * @param {Vue} vue
      */
-    constructor(config, cache) {
+    constructor(config, cache, vue) {
+        __setApp(this);
         this.config = config;
-
+        this.vue = vue ?? globalThis.Vue;
         this.schema = config.schema;
         /**
          * Application router. Will be available after BaseApp#mountApplication.
@@ -89,7 +91,7 @@ export default class BaseApp {
      */
     afterInitialDataBeforeMount() {}
     loadSettings() {
-        return this.store.dispatch('userSettings/load');
+        return this.userSettingsStore.load();
     }
     /**
      * Method, that starts work of app.
@@ -118,7 +120,7 @@ export default class BaseApp {
         const UserModel = usersQs.getModelClass(RequestTypes.RETRIEVE);
         this.user = new UserModel(this.rawUser, usersQs);
 
-        this.global_components.registerAll();
+        this.global_components.registerAll(this.vue);
 
         this.prepare();
     }

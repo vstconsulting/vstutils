@@ -4,12 +4,10 @@
     </div>
 </template>
 <script>
-    import BasestViewMixin from '../../views/mixins/BasestViewMixin.js';
     import ErrorPage from '../../components/ErrorPage';
 
     export default {
         components: { ErrorPage },
-        mixins: [BasestViewMixin],
         data() {
             return {
                 message: 'Page matching current url was not found',

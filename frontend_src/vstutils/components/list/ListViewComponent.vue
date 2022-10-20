@@ -1,19 +1,7 @@
 <template>
-    <EntityView
-        :error="error"
-        :loading="loading"
-        :response="response"
-        :title="title"
-        :view="view"
-        :actions="actions"
-        :sublinks="sublinks"
-        :show-back-button="showBackButton"
-        :instances="instances"
-        @execute-action="executeAction"
-        @open-sublink="openSublink"
-    >
+    <div>
         <portal v-if="showSearch && searchField" to="topNavigation">
-            <form class="search-form" @submit.prevent="applySearchFilter">
+            <form class="search-form" @submit.prevent="store.applySearchFilter(searchFieldValue)">
                 <input
                     v-model="searchFieldValue"
                     class="form-control form-control-sm form-control-border search-input"
@@ -31,6 +19,7 @@
                 {{ totalNumberOfInstances }}
             </span>
         </portal>
+
         <portal to="appendButtonsRow">
             <Pagination
                 v-bind="pagination"
@@ -39,6 +28,7 @@
                 @open-page="goToPage"
             />
         </portal>
+
         <div class="list-content-component" :class="`list-${model.name}`">
             <template v-if="isEmpty">
                 <p class="text-center empty-list-p">
@@ -54,8 +44,10 @@
                     :instance-actions="instanceActions"
                     :instance-sublinks="instanceSublinks"
                     @row-clicked="openPageView"
-                    @execute-instance-action="({ action, instance }) => executeAction(action, instance)"
-                    @open-instance-sublink="({ sublink, instance }) => openSublink(sublink, instance)"
+                    @execute-instance-action="
+                        ({ action, instance }) => $app.actions.execute({ action, instance, fromList: true })
+                    "
+                    @open-instance-sublink="({ sublink, instance }) => $u.openSublink(sublink, instance)"
                     @toggle-selection="toggleSelection"
                     @toggle-all-selection="toggleAllSelection"
                 />
@@ -74,23 +66,20 @@
                 </div>
             </template>
         </div>
-    </EntityView>
+    </div>
 </template>
 
 <script>
-    import ViewWithAutoUpdateMixin from '../../views/mixins/ViewWithAutoUpdateMixin.js';
-    import $ from 'jquery';
     import { guiPopUp, pop_up_msg } from '../../popUp';
-    import EntityView from '../common/EntityView.vue';
     import ListTable from './ListTable.vue';
     import MultiActions from './MultiActions.vue';
     import Pagination from './Pagination.vue';
-    import { formatPath, IGNORED_FILTERS, joinPaths, makeQueryString, RequestTypes } from '../../utils';
-    import { BaseViewMixin } from '../BaseViewMixin.js';
+    import { formatPath, joinPaths, mapStoreState, mapStoreActions } from '../../utils';
+    import { BaseViewMixin } from '../BaseViewMixin.ts';
 
     export default {
-        components: { Pagination, MultiActions, ListTable, EntityView },
-        mixins: [BaseViewMixin, ViewWithAutoUpdateMixin],
+        components: { Pagination, MultiActions, ListTable },
+        mixins: [BaseViewMixin],
         provide() {
             return {
                 multiActionsClasses: {
@@ -112,14 +101,8 @@
             searchField() {
                 return this.view?.filters?.['__search'];
             },
-            isEmpty() {
-                return !this.instances || (this.instances && !this.instances.length);
-            },
             showBackButton() {
                 return true;
-            },
-            model() {
-                return this.view.objects.getResponseModelClass(RequestTypes.LIST);
             },
             /**
              * Property that returns total number total number of instances, or -1 if
@@ -133,175 +116,23 @@
             fields() {
                 return Array.from(this.model.fields.values()).filter((field) => !field.hidden);
             },
-            filters() {
-                return this.$store.getters[this.storeName + '/filters'];
-            },
-            instances() {
-                return this.$store.getters[this.storeName + '/instances'];
-            },
-            selection() {
-                return this.$store.getters[this.storeName + '/selection'];
-            },
-            pagination() {
-                return this.$store.getters[this.storeName + '/pagination'];
-            },
-            instanceActions() {
-                if (this.view.pageView) {
-                    return Array.from(this.view.pageView.actions.values()).filter(
-                        (action) => !action.hidden && !action.doNotShowOnList,
-                    );
-                }
-                return [];
-            },
-            instanceSublinks() {
-                if (this.view.pageView) {
-                    return Array.from(this.view.pageView.sublinks.values()).filter(
-                        (sublink) => !sublink.hidden,
-                    );
-                }
-                return [];
-            },
-            multiActions() {
-                return Array.from(this.view.multiActions.values());
-            },
             uniqMultiActionsClasses() {
                 return Array.from(new Set(this.multiActionsClasses));
             },
+            ...mapStoreState([
+                'model',
+                'filters',
+                'instances',
+                'isEmpty',
+                'selection',
+                'pagination',
+                'multiActions',
+                'instanceActions',
+                'instanceSublinks',
+                'filters',
+            ]),
         },
         methods: {
-            /**
-             * Redefinition of 'onCreatedHandler()' from base mixin.
-             */
-            onCreatedHandler() {
-                this.fetchData();
-            },
-            /**
-             * Redefinition of 'fetchData()' from base mixin.
-             */
-            async fetchData() {
-                this.commitMutation('setSelection', []);
-
-                this.initLoading();
-
-                try {
-                    await this.dispatchAction('fetchData', { filters: this.generateBaseFilters() });
-
-                    this.setLoadingSuccessful();
-                    if (this.view.params.autoupdate) {
-                        this.startAutoUpdate();
-                    }
-                } catch (error) {
-                    this.setLoadingError(error);
-                }
-            },
-            filterNonEmpty(obj) {
-                return Object.fromEntries(Object.entries(obj).filter((entry) => entry[1]));
-            },
-            /**
-             * Method, that generates object
-             * with values of base list QuerySet filters(limit, offset).
-             * @return {object}
-             */
-            generateBaseFilters() {
-                const limit = this.pagination.pageSize || this.$app.config.defaultPageLimit;
-                const page = this.$route.query.page || 1;
-                const query = { limit, offset: limit * (page - 1) };
-                if (this.view.deepNestedParentView) {
-                    query.__deep_parent = this.params[this.view.parent.pkParamName];
-                } else if (this.view.deepNestedView) {
-                    query.__deep_parent = '';
-                }
-                return $.extend(true, query, this.filterNonEmpty(this.$route.query));
-            },
-            applyFilters(filters) {
-                this.commitMutation('setFilters', this.filterNonEmpty(filters));
-                this.filterInstances();
-            },
-            /**
-             * Method, that returns object with values of QuerySet filters from store.
-             * @return {object}
-             */
-            getFiltersPrepared() {
-                return Object.fromEntries(
-                    Object.keys(this.filters)
-                        .filter((name) => this.filters[name] !== undefined)
-                        .map((name) => [name, this.filters[name]]),
-                );
-            },
-            /**
-             * Method, that handles 'filterInstances' event.
-             * Method opens page, that satisfies current filters values.
-             */
-            filterInstances() {
-                let filters = this.getFiltersPrepared();
-
-                for (let filter in filters) {
-                    if (IGNORED_FILTERS.includes(filter)) {
-                        delete filters[filter];
-                    }
-                }
-
-                return this.openPage(this.$route.path + makeQueryString(filters));
-            },
-            /**
-             * Removes one instance
-             * @param action
-             * @param {Model} instance
-             * @param purge
-             * @returns {Promise<void>}
-             * @private
-             */
-            async removeInstance(action, instance, purge = false) {
-                try {
-                    await instance.delete(purge);
-                    guiPopUp.success(
-                        this.$t(pop_up_msg.instance.success.remove).format([
-                            instance.getViewFieldString() || instance.getPkValue(),
-                            this.$t(this.view.name),
-                        ]),
-                    );
-                    this.commitMutation('unselectIds', [instance.getPkValue()]);
-                } catch (error) {
-                    const str = window.app.error_handler.errorToString(error);
-                    const strToShow = this.$t(pop_up_msg.instance.error.remove).format([
-                        instance.getViewFieldValue(),
-                        this.$t(this.view.name),
-                        str,
-                    ]);
-
-                    window.app.error_handler.showError(strToShow, str);
-                }
-            },
-            /**
-             * Method, that removes instances from list.
-             * @returns {Promise}
-             */
-            async removeInstances(action, instances, purge = false) {
-                const removedInstancesIds = [];
-                try {
-                    await Promise.all(
-                        instances.map((instance) =>
-                            instance.delete(purge).then(() => {
-                                removedInstancesIds.push(instance.getPkValue());
-                            }),
-                        ),
-                    );
-                    guiPopUp.success(this.$t(pop_up_msg.instance.success.removeMany));
-                } catch (error) {
-                    const str = window.app.error_handler.errorToString(error);
-                    const strToShow = this.$t(pop_up_msg.instance.error.removeMany, [str]);
-                    window.app.error_handler.showError(strToShow, str);
-                }
-                this.commitMutation('unselectIds', removedInstancesIds);
-            },
-            executeEmptyActionOnInstances(action) {
-                const selected = this.instances.filter((instance) =>
-                    this.selection.includes(instance.getPkValue()),
-                );
-
-                for (let instance of selected) this.executeEmptyAction(action, instance);
-            },
-
             /**
              * Method, that adds child instance to parent list.
              * @param {object} opt
@@ -332,16 +163,6 @@
                 });
             },
 
-            // Selections
-
-            toggleSelection(instance) {
-                this.commitMutation('toggleSelection', instance.getPkValue());
-            },
-
-            toggleAllSelection() {
-                this.dispatchAction('toggleAllSelection');
-            },
-
             // Page view
 
             openPageView(instance) {
@@ -361,44 +182,14 @@
 
             // Multi actions
 
-            async executeMultiAction(action, skipConfirmation = false) {
-                if (action.confirmationRequired && !skipConfirmation) {
-                    this.requestConfirmation(() => this.executeMultiAction(action, true), action.title);
-                    return;
-                }
+            async executeMultiAction(action) {
                 const instances = this.instances.filter((instance) =>
                     this.selection.includes(instance.getPkValue()),
                 );
 
-                if (typeof this[`${action.name}Instances`] === 'function' && instances) {
-                    return this[`${action.name}Instances`](action, instances);
-                }
-
-                await Promise.all(instances.map((instance) => this.executeAction(action, instance, true)));
-
-                this.afterMultiAction(action, instances);
+                return this.$app.actions.execute({ action, instances });
             },
 
-            // eslint-disable-next-line no-unused-vars
-            afterMultiAction(action, instances) {
-                this.dispatchAction('updateData');
-            },
-            setSearchFieldValue({ value }) {
-                this.searchFieldValue = value;
-            },
-            applyFieldsFilters(filters) {
-                this.applyFilters({
-                    ...filters,
-                    [this.searchField.name]: this.filters[this.searchField.name],
-                });
-            },
-            applySearchFilter() {
-                this.applyFilters({
-                    ...this.filters,
-                    [this.searchField.name]: this.searchFieldValue,
-                });
-                this.searchFieldValue = '';
-            },
             addMultiActionsClasses(classes) {
                 if (typeof classes === 'string') classes = [classes];
                 classes.forEach((cls) => {
@@ -412,6 +203,7 @@
                     if (idx !== -1) this.multiActionsClasses.splice(idx, 1);
                 });
             },
+            ...mapStoreActions(['fetchData', 'toggleSelection', 'toggleAllSelection']),
         },
     };
 </script>

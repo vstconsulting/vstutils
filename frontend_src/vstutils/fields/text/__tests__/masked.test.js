@@ -79,11 +79,11 @@ describe('MaskedField', () => {
         expect(patternMask.mask).toMatchObject({ mask: 'pattern' });
     });
     test('check initial value', () => {
-        expect(regexMask.getInitialValue()).toBe('');
-        expect(patternMask.getInitialValue()).toBe('');
-        expect(patternWithDefinitionsMask.getInitialValue()).toBe('');
-        expect(nestedMask.getInitialValue()).toBe('');
-        expect(dynamicMask.getInitialValue()).toBe('');
+        expect(regexMask.getEmptyValue()).toBe('');
+        expect(patternMask.getEmptyValue()).toBe('');
+        expect(patternWithDefinitionsMask.getEmptyValue()).toBe('');
+        expect(nestedMask.getEmptyValue()).toBe('');
+        expect(dynamicMask.getEmptyValue()).toBe('');
     });
 
     test('complex masks', () => {

@@ -13,9 +13,7 @@
 </template>
 
 <script>
-    import BasestViewMixin from '../../views/mixins/BasestViewMixin.js';
     export default {
-        mixins: [BasestViewMixin],
         data() {
             return {
                 message: '',

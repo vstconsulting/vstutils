@@ -24,4 +24,3 @@ and also you will know how you can redefine some standard models, views and fiel
    backend
    quickstart-front
    frontend-manual
-   frontend-classes

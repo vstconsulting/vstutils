@@ -1,17 +1,19 @@
 import Vue from 'vue';
+import * as Vue27 from 'vue';
 window.Vue = Vue;
+window.Vue27 = Vue27;
 
 import VueRouter from 'vue-router';
 window.VueRouter = VueRouter;
 Vue.use(VueRouter);
 
-import Vuex from 'vuex';
-window.Vuex = Vuex;
-Vue.use(Vuex);
-
 import VueI18n from 'vue-i18n';
 window.VueI18n = VueI18n;
 Vue.use(VueI18n);
+
+import * as pinia from 'pinia';
+window.pinia = pinia;
+Vue.use(pinia.PiniaVuePlugin);
 
 import PortalVue from 'portal-vue';
 window.PortalVue = PortalVue;
@@ -23,4 +25,4 @@ Vue.directive('element-bound', {
     },
 });
 
-export { Vue, VueRouter, Vuex, VueI18n, PortalVue };
+export { Vue, VueRouter, VueI18n, PortalVue };

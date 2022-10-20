@@ -4,11 +4,10 @@
         <div :class="containerClass">
             <div class="top-row d-print-none">
                 <ButtonsRow
-                    v-if="!error && showTopButtons"
+                    v-if="!error && showTopButtons && view"
                     :view="view"
                     :actions="actions"
                     :sublinks="sublinks"
-                    :instances="instances"
                     :style="loading ? 'visibility: hidden' : ''"
                     @execute-action="$emit('execute-action', $event)"
                     @open-sublink="$emit('open-sublink', $event)"
@@ -16,10 +15,13 @@
                 <portal-target name="appendButtonsRow" />
             </div>
 
-            <SelectedFilters v-if="!error && showUsedFilters" :view="view" />
+            <SelectedFilters v-if="!error && showUsedFilters && view" :view="view" />
 
             <ErrorPage v-if="error" :error-data="errorData" :error="error" />
-            <slot v-else-if="response" />
+
+            <div v-show="showPage">
+                <slot />
+            </div>
         </div>
     </div>
 </template>
@@ -33,16 +35,8 @@
     export default {
         name: 'EntityView',
         components: { ErrorPage, ButtonsRow, Preloader, SelectedFilters },
-        provide() {
-            return {
-                entityViewClasses: {
-                    add: this.addClasses,
-                    remove: this.removeClasses,
-                },
-            };
-        },
         props: {
-            view: { type: Object, required: true },
+            view: { type: Object, default: null },
             loading: { type: Boolean, required: true },
             error: { type: [Object, Error], default: () => ({}) },
             response: { type: Boolean, default: false },
@@ -51,14 +45,11 @@
             isContainerFluid: { type: Boolean, default: true },
             actions: { type: Array, default: () => [] },
             sublinks: { type: Array, default: () => [] },
-            instances: { type: Array, default: () => [] },
-        },
-        data() {
-            return {
-                rootClasses: [],
-            };
         },
         computed: {
+            showPage() {
+                return !this.error && this.response;
+            },
             errorData() {
                 if (this.error) {
                     return window.app.error_handler.errorToString(this.error);
@@ -68,18 +59,8 @@
             containerClass() {
                 return this.isContainerFluid ? 'container-fluid' : 'container';
             },
-        },
-        methods: {
-            addClasses(classes) {
-                if (typeof classes === 'string') classes = [classes];
-                this.rootClasses = this.rootClasses.concat(classes);
-            },
-            removeClasses(classes) {
-                if (typeof classes === 'string') classes = [classes];
-                classes.forEach((c) => {
-                    const idx = this.rootClasses.indexOf(c);
-                    if (idx !== -1) this.rootClasses.splice(idx, 1);
-                });
+            rootClasses() {
+                return this.$app.store.entityViewClasses;
             },
         },
     };

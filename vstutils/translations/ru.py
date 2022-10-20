@@ -219,6 +219,7 @@ TRANSLATION = {
     'Actions': 'Действия',
     'Index': 'Индекс',
     'Download with headers': 'Скачать с заголовками столбцов',
+    'Changes you made may not be saved.': 'Внесенные изменения могут быть не сохранены.',
 }
 
 SERVER_TRANSLATION = {

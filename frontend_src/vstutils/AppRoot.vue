@@ -8,7 +8,15 @@
         </aside>
 
         <div class="content-wrapper">
-            <router-view ref="currentViewComponent" />
+            <EntityView
+                v-bind="entityViewProps"
+                @execute-action="
+                    (action) => $app.actions.execute({ action, instance: $app.store.page.instance })
+                "
+                @open-sublink="$u.openSublink($event, $app.store.page.instance)"
+            >
+                <router-view :key="$route.path" ref="currentViewComponent" />
+            </EntityView>
         </div>
 
         <MainFooter
@@ -40,14 +48,16 @@
             @reject="reject"
         />
 
+        <component :is="c" v-for="(c, idx) in additionalComponents" :key="idx" />
+
         <portal-target name="root-bottom" multiple />
     </div>
 </template>
 <script>
-    import { AutoUpdateController } from './autoupdate';
     import ControlSidebar from './components/items/ControlSidebar.vue';
     import { Logo, MainFooter, Sidebar, TopNavigation } from './components/items';
     import ConfirmModal from './components/common/ConfirmModal';
+    import EntityView from './components/common/EntityView.vue';
 
     const DARK_MODE_CLASS = 'dark-mode';
 
@@ -60,8 +70,8 @@
             Sidebar,
             Logo,
             ConfirmModal,
+            EntityView,
         },
-        mixins: [AutoUpdateController],
         provide() {
             return {
                 requestConfirmation: this.initConfirmation,
@@ -82,9 +92,33 @@
                     actionName: '',
                 },
                 isControlSidebarOpen: false,
+                userSettings: this.$app.userSettingsStore,
             };
         },
         computed: {
+            entityViewProps() {
+                const store = this.$app.store.page;
+
+                if (store) {
+                    return {
+                        error: store.error,
+                        loading: store.loading,
+                        response: store.response,
+                        view: store.view,
+                        actions: store.actions,
+                        sublinks: store.sublinks,
+                    };
+                }
+
+                return {
+                    error: null,
+                    loading: false,
+                    response: true,
+                    view: null,
+                    actions: [],
+                    sublinks: [],
+                };
+            },
             showBackButton() {
                 return this.$route.name !== 'home';
             },
@@ -118,14 +152,22 @@
             classes() {
                 return [];
             },
+            additionalComponents() {
+                return [];
+            },
         },
         watch: {
             currentRouteClassName: { handler: 'updateBodyClass', immediate: true },
-            '$store.state.userSettings.settings.main.language': { handler: 'setLanguage', immediate: true },
-            '$store.state.userSettings.settings.main.dark_mode': { handler: 'setDarkMode', immediate: true },
+            'userSettings.settings.main.language': { handler: 'setLanguage', immediate: true },
+            'userSettings.settings.main.dark_mode': { handler: 'setDarkMode', immediate: true },
         },
         created() {
             document.body.classList.add(...this.bodyClasses);
+            this.$app.autoUpdateController.init();
+            this.$app.autoUpdateController.start();
+        },
+        beforeDestroy() {
+            this.$app.autoUpdateController.stop();
         },
         methods: {
             goBack() {
@@ -160,7 +202,7 @@
             },
             closeControlSidebar() {
                 document.body.classList.remove('control-sidebar-slide-open');
-                if (this.$store.state.userSettings.changed) {
+                if (this.userSettings.changed) {
                     this.$refs.saveSettingsModal.openModal();
                 }
                 this.isControlSidebarOpen = false;
@@ -188,12 +230,12 @@
                 }
             },
             async saveSettings() {
-                await this.$store.dispatch('userSettings/save');
+                await this.userSettings.save();
                 window.location.reload();
             },
             rollbackSettings() {
                 this.$refs.saveSettingsModal.closeModal();
-                this.$store.commit('userSettings/rollback');
+                this.userSettings.rollback();
             },
         },
     };

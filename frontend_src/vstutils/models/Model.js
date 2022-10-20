@@ -66,16 +66,6 @@ class ModelUtils {
  */
 
 /**
- * Decorator that creates model class. Must be used as `@MakeModel(name)`.
- * Name is optional if class is not anonymous, but parentheses is required.
- * @param {string} [name] - Name if model
- * @return {ModelClass_innerFunction}
- */
-export function ModelClass(name) {
-    return (cls) => makeModel(cls, name);
-}
-
-/**
  * @param {RawModel} cls
  * @param {string} [name]
  * @return {Function}
@@ -167,6 +157,8 @@ export class Model {
     static nonBulkMethods = null;
     /** @type {string|null} */
     static translateModel = null;
+    /** @type {Map<string, BaseField>} */
+    static fields = new Map();
 
     /**
      * @param {InnerData=} data
@@ -186,6 +178,21 @@ export class Model {
     }
 
     /**
+     * @param {Record<string, unknown>} representData
+     * @return {Record<string, unknown>}
+     */
+    static representToInner(representData) {
+        const data = {};
+        for (const field of this.fields.values()) {
+            const value = field.toInner(representData);
+            if (field.required || value !== undefined) {
+                data[field.name] = value;
+            }
+        }
+        return data;
+    }
+
+    /**
      * @param {Object=} providedData
      * @return {InnerData}
      */
@@ -201,7 +208,7 @@ export class Model {
 
     /**
      * @property @property {Array<string>} [fieldsNames]
-     * @return {InnerData}
+     * @return {Record<string, unknown>}
      */
     _getInnerData(fieldsNames = null) {
         let selectedFields = Array.from(this._fields.values());
@@ -219,7 +226,7 @@ export class Model {
     }
 
     /**
-     * @return {RepresentData}
+     * @return {Record<string, unknown>}
      */
     _getRepresentData() {
         const data = {};
