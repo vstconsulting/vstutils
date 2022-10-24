@@ -1128,6 +1128,8 @@
             "post": {
                 "operationId": "author_post_archive",
                 "description": "",
+                "x-title": "Archive action",
+                "x-icons": ["fas", "fa-calculator"],
                 "parameters": [
                     {
                         "name": "data",
@@ -3127,6 +3129,8 @@
             "post": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_archive",
                 "description": "",
+                "x-title": "Archive action",
+                "x-icons": ["fas", "fa-calculator"],
                 "parameters": [
                     {
                         "name": "data",

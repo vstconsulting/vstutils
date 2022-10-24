@@ -126,7 +126,8 @@ describe('ViewConstructor', () => {
             const archiveMultiAction = view.multiActions.get('archive');
             expect(archiveMultiAction).toBeDefined();
             expect(archiveMultiAction.name).toBe('archive');
-            expect(archiveMultiAction.title).toBe('Archive');
+            expect(archiveMultiAction.title).toBe('Archive action');
+            expect(archiveMultiAction.iconClasses).toStrictEqual(['fas', 'fa-calculator']);
             expect(archiveMultiAction.isEmpty).toBeTruthy();
 
             const changeTitleMultiAction = view.multiActions.get('change_title');

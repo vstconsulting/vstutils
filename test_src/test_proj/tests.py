@@ -3581,6 +3581,15 @@ class ProjectTestCase(BaseTestCase):
             'crontab'
         )
 
+        self.assertEqual(
+            data['paths']['/hosts/{id}/hosts/{hosts_id}/test3/']['post']['x-title'],
+            'Test 3 action'
+        )
+        self.assertEqual(
+            data['paths']['/hosts/{id}/hosts/{hosts_id}/test3/']['post']['x-icons'],
+            ["fas", "fa-calculator"]
+        )
+
     def test_manifest_json(self):
         result = self.get_result('get', '/manifest.json')
         self.assertEqual(result['name'], 'Example project')
