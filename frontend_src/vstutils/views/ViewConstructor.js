@@ -166,7 +166,7 @@ export default class ViewConstructor {
             let hasRemoveAction = false;
 
             /**
-             * @type {Action}
+             * @type {ActionView}
              */
             let action = null;
 
@@ -259,7 +259,7 @@ export default class ViewConstructor {
 
                     const params = {
                         name: operationOptions.name,
-                        title: operationOptions.title,
+                        title: operationOptions['x-title'] || operationOptions.title,
                         method: httpMethod,
                         path,
                         requestModel,
@@ -267,6 +267,7 @@ export default class ViewConstructor {
                         isMultiAction,
                         isEmpty,
                         hidden: operationOptions['x-hidden'],
+                        iconClasses: operationOptions['x-icons'] || operationOptions.iconClasses,
                     };
                     if (!isEmpty) {
                         operationOptions.action = params;

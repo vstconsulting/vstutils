@@ -35,7 +35,12 @@ class HostViewSet(Host.generated_view):
     }
     select_related = True
 
-    @subaction(detail=True, serializer_class=Host.generated_view.serializer_class)
+    @subaction(
+        detail=True,
+        serializer_class=Host.generated_view.serializer_class,
+        icons=["fas", "fa-calculator"],
+        title='Test 3 action'
+    )
     def test3(self, request, *args, **kwargs):
         return responses.HTTP_201_CREATED("OK")  # nocv
 

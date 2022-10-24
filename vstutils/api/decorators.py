@@ -150,6 +150,10 @@ def subaction(*args, **kwargs):
     :type require_confirmation: bool
     :param is_list: Mark this action as paginated list with all rules and parameters.
     :type is_list: bool
+    :param title: Override action title.
+    :type title: str
+    :param icons: Setup action icon classes.
+    :type icons: tuple,list
     """
 
     operation_description = kwargs.pop('description', None)
@@ -157,6 +161,8 @@ def subaction(*args, **kwargs):
     serializer_class = kwargs.get('serializer_class', None)
     response_serializer = kwargs.pop('response_serializer', serializer_class)
     is_list = kwargs.pop('is_list', kwargs.get('suffix') == 'List')
+    title = kwargs.pop('title', None)
+    icons = kwargs.pop('icons', None)
 
     assert (
         (response_code is None) or
@@ -185,6 +191,12 @@ def subaction(*args, **kwargs):
 
         override_kw['x-require-confirmation'] = bool(require_confirmation)
         override_kw['query_serializer'] = kwargs.get('query_serializer')
+
+        if title:
+            override_kw['x-title'] = title
+
+        if icons and isinstance(icons, (tuple, list)):
+            override_kw['x-icons'] = icons
 
         if 'GET' in methods or 'get' in methods:
             override_kw['x-list'] = is_list

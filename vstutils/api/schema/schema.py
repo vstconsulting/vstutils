@@ -207,9 +207,8 @@ class VSTAutoSchema(SwaggerAutoSchema):
                 result['x-deep-nested-view'] = deep_nested_subview
             result['x-list'] = self.is_list_view()
         else:
-            if 'x-multiaction' in self.overrides:
-                result['x-multiaction'] = self.overrides['x-multiaction']
-            if 'x-require-confirmation' in self.overrides:
-                result['x-require-confirmation'] = self.overrides['x-require-confirmation']
+            for param in ('x-multiaction', 'x-require-confirmation', 'x-icons', 'x-title'):
+                if param in self.overrides:
+                    result[param] = self.overrides[param]
 
         return result
