@@ -43,7 +43,21 @@ def update_declared_fields(
     return serializer_class
 
 
-class BaseSerializer(serializers.Serializer):
+class DependFromFkSerializerMixin:
+    def to_internal_value(self, data):
+        if self.instance is not None and self.partial and isinstance(data, _t.Mapping):
+            missed_interfield_connections: _t.Iterable[fields.DependFromFkField] = {
+                f
+                for f in self._writable_fields
+                if isinstance(f, fields.DependFromFkField) and f.field in data and f.field_name not in data
+            }
+            for depend_field in missed_interfield_connections:
+                data[depend_field.field_name] = getattr(self.instance, depend_field.field_name, None)
+
+        return super().to_internal_value(data)
+
+
+class BaseSerializer(DependFromFkSerializerMixin, serializers.Serializer):
     """
     Default serializer with logic to work with objects.
     Read more in `DRF serializer's documentation
@@ -65,7 +79,7 @@ class BaseSerializer(serializers.Serializer):
         return instance
 
 
-class VSTSerializer(serializers.ModelSerializer):
+class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer):
     """
     Default model serializer based on :class:`rest_framework.serializers.ModelSerializer`.
     Read more in `DRF documentation <https://www.django-rest-framework.org/api-guide/serializers/#modelserializer>`_

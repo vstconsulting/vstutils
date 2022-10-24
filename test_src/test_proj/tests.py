@@ -4398,6 +4398,21 @@ class ProjectTestCase(BaseTestCase):
                 'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
                 'headers': {"HTTP_IF_NONE_MATCH": '<<6[headers][ETag]>>'},
             },
+            {
+                'method': 'post',
+                'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
+                'data': {
+                    'key': '<<0[data][id]>>',
+                    'value': 'test_val',
+                }
+            },
+            {
+                'method': 'patch',
+                'path': ['testcontenttype', '<<1[data][id]>>', 'vars', '<<10[data][id]>>'],
+                'data': {
+                    'key': '<<5[data][id]>>',
+                }
+            },
         ]
         results = self.bulk(bulk_data)
         self.assertEqual(results[1]['status'], 201, results[1])
@@ -4412,6 +4427,9 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[7]['data'], {'value': ['A valid integer is required.']})
         self.assertEqual(results[8]['status'], 200, results[8])
         self.assertEqual(results[9]['status'], 304, results[9])
+        self.assertEqual(results[10]['status'], 201, results[10])
+        self.assertEqual(results[11]['status'], 400, results[11])
+        self.assertEqual(results[11]['data'], {'value': ['A valid integer is required.']})
 
     @override_settings(CASE_SENSITIVE_API_FILTER=False)
     def test_filters_case_insensitive(self):
