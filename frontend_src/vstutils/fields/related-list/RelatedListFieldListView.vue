@@ -1,34 +1,25 @@
 <template>
-    <div style="display: contents">
-        <i v-if="isEmpty" class="fas fa-eye" @click.stop="isModalOpen = true" />
-        <i v-else class="inactive fas fa-eye" title="Empty" />
-
-        <Modal v-if="isModalOpen" :opt="{ footer: false }" @close="isModalOpen = false">
-            <template #header>
-                <h3>{{ field.title }}</h3>
-            </template>
-            <template #body>
-                <component :is="fieldComponent" :value="value" :model="field.itemsModel" />
-            </template>
-        </Modal>
-    </div>
+    <BootstrapModal :title="$t(field.title)">
+        <template #body>
+            <component :is="fieldComponent" :value="value" :model="field.itemsModel" />
+        </template>
+        <template #activator="{ openModal }">
+            <i v-if="isEmpty" class="fas fa-eye" @click.stop="openModal" />
+            <i v-else class="inactive fas fa-eye" title="Empty" />
+        </template>
+    </BootstrapModal>
 </template>
 
 <script>
     import { BaseFieldListView } from '../base';
-    import { Modal } from '../../components/items';
+    import BootstrapModal from '../../components/BootstrapModal.vue';
     import ListView from './ListView.vue';
     import TableView from './TableView.vue';
     import RelatedListFieldContentMixin from './RelatedListFieldContentMixin.js';
 
     export default {
-        components: { TableView, ListView, Modal },
+        components: { TableView, ListView, BootstrapModal },
         mixins: [BaseFieldListView, RelatedListFieldContentMixin],
-        data() {
-            return {
-                isModalOpen: false,
-            };
-        },
     };
 </script>
 

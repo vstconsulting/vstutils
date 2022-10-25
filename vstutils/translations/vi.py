@@ -161,6 +161,8 @@ TRANSLATION = {
     'I accept the ': 'Tôi chấp nhận ',
     'Zoom': 'Thu phóng',
     'Scale': 'Tỉ lệ',
+    'Rotate': 'Quay',
+    'Crop': 'Trồng trọt',
     'This file format is not supported': 'Định dạng tệp này không được hỗ trợ',
     'Oops! Something went wrong.': 'Một cái gì đó đã đi sai.',
     '[Object not found]': '[Không tìm thấy đối tượng]',

@@ -1,32 +1,23 @@
 <template>
-    <div
-        v-if="src"
-        class="named-bin-image"
-        :style="{ backgroundImage: cssUrl }"
-        @click.stop="isModalOpen = true"
-    >
-        <Modal v-show="isModalOpen" :opt="{ footer: false }" @close="isModalOpen = false">
-            <template #body>
-                <img v-if="src" :src="src" alt="" class="image-field-content" />
-            </template>
-        </Modal>
-    </div>
+    <BootstrapModal v-if="src">
+        <template #body>
+            <img :src="src" alt="" class="image-field-content" />
+        </template>
+        <template #activator="{ openModal }">
+            <div class="named-bin-image" :style="{ backgroundImage: cssUrl }" @click.stop="openModal" />
+        </template>
+    </BootstrapModal>
 </template>
 
 <script>
     import { BaseFieldListView } from '../../base';
-    import Modal from '../../../components/items/modal/Modal.vue';
+    import BootstrapModal from '../../../components/BootstrapModal.vue';
     import { makeDataImageUrl } from '../../../utils';
 
     export default {
         name: 'NamedBinaryImageFieldListView',
-        components: { Modal },
+        components: { BootstrapModal },
         mixins: [BaseFieldListView],
-        data() {
-            return {
-                isModalOpen: false,
-            };
-        },
         computed: {
             src() {
                 return this.value?.content ? makeDataImageUrl(this.value) : null;

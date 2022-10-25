@@ -163,6 +163,8 @@ TRANSLATION = {
     'I accept the ': '我接受 ',
     'Zoom': '飛漲',
     'Scale': '規模',
+    'Rotate': '旋转',
+    'Crop': '庄稼',
     'This file format is not supported': '不支持此文件格式',
     'Oops! Something went wrong.': '哎呀！ 出了些问题。',
     '[Object not found]': '[未找到对象]',

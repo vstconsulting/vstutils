@@ -27,8 +27,6 @@ commands =
   install: bash -c "pip install {envdir}/dist/{{project_name}}-$(python -c 'import {{project_name}}; print({{project_name}}.__version__)').tar.gz"
   install: rm -f {envdir}/test.py {envdir}/test.pyc
   install: bash -c "cd {envdir} && ln -s {toxinidir}/test.py && python -m {{project_name}} test -v 2 --failfast --parallel 8"
-  install: rm -f {envdir}/test.py {envdir}/test.pyc
-  install: bash -c "cd {envdir} && ln -s {toxinidir}/test.py && python -m {{project_name}} test -v 2 --failfast --parallel 8"
   coverage: python setup.py install_egg_info
   coverage: pip install -U -e .[test]
   coverage: coverage debug sys
@@ -76,7 +74,6 @@ skipsdist = True
 setenv =
     CCACHE_DIR = {envdir}/.ccache
     BUILD_COMPILE = true
-    PIP_USE_FEATURE = 2020-resolver
 passenv = *
 whitelist_externals = *
 commands =
