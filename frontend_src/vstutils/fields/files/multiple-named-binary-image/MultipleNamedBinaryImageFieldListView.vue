@@ -1,42 +1,27 @@
 <template>
-    <div>
-        <i class="fas fa-eye" @click.stop="isModalOpen = true" />
-        <Modal
-            v-if="isModalOpen"
-            :opt="{ footer: false }"
-            styles="width: 90vw; max-width: 1000px"
-            @close="isModalOpen = false"
-        >
-            <template #header>
-                <h3>{{ $t(field.title) }}</h3>
-            </template>
-            <template #body>
-                <div class="input-group">
-                    {{ val }}
-                </div>
-                <Carousel v-if="value && value.length" :items="value" :name="$t(field.title)" />
-            </template>
-        </Modal>
-    </div>
+    <BootstrapModal styles="width: 90vw; max-width: 1000px" :title="$t(field.title)">
+        <template #body>
+            <div class="input-group">
+                {{ val }}
+            </div>
+            <Carousel v-if="value && value.length" :items="value" :name="$t(field.title)" />
+        </template>
+
+        <template #activator="{ openModal }">
+            <i class="fas fa-eye" @click.stop="openModal" />
+        </template>
+    </BootstrapModal>
 </template>
 
 <script>
     import { BaseFieldContentReadonlyMixin } from '../../base';
     import { MultipleNamedBinaryFileFieldContentReadonly } from '../multiple-named-binary-file';
-    import { Modal } from '../../../components/items';
+    import BootstrapModal from '../../../components/BootstrapModal.vue';
     import Carousel from './Carousel';
 
     export default {
-        components: {
-            Modal,
-            Carousel,
-        },
+        components: { BootstrapModal, Carousel },
         mixins: [BaseFieldContentReadonlyMixin, MultipleNamedBinaryFileFieldContentReadonly],
-        data() {
-            return {
-                isModalOpen: false,
-            };
-        },
     };
 </script>
 

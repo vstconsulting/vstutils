@@ -79,6 +79,7 @@ Throughout this tutorial, we’ll go through a creation of a basic poll applicat
 
 
     These commands create several files in ``project directory``.
+
     .. sourcecode::
 
        /{{app_dir}}/{{app_name}}

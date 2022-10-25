@@ -97,7 +97,6 @@
 <script>
     import TableRowMixin from '../../fields/TableRowMixin.js';
     import SelectToggleButton from './SelectToggleButton.vue';
-    import Modal from '../items/modal/Modal.vue';
     import BootstrapModal from '../BootstrapModal.vue';
     import { formatPath, joinPaths, tableColumnClasses, classesFromFields } from '../../utils';
     import signals from '../../signals';
@@ -108,7 +107,7 @@
      */
     export default {
         name: 'ListTableRow',
-        components: { BootstrapModal, Modal, SelectToggleButton },
+        components: { BootstrapModal, SelectToggleButton },
         mixins: [TableRowMixin],
         inject: { multiActionsClasses: { default: null } },
         props: {

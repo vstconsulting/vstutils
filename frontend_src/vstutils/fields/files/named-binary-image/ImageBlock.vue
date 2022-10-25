@@ -1,23 +1,26 @@
 <template>
     <div class="image-field-content-wrapper">
-        <img :src="img_src" :alt="img_alt" class="image-field-content" @click="openImage" />
-        <Modal v-show="show_modal" :opt="modal_opt" @close="closeImage">
-            <template #header>
-                <h3>{{ $t(img_alt) }}</h3>
+        <BootstrapModal :title="$t(img_alt)">
+            <img style="max-height: 80vh" :src="img_src" :alt="img_alt" class="image-field-content" />
+            <template #activator="{ openModal }">
+                <img
+                    :src="img_src"
+                    :alt="img_alt"
+                    class="image-field-content"
+                    style="cursor: pointer"
+                    @click="openModal"
+                />
             </template>
-            <template #body>
-                <img style="max-height: 80vh" :src="img_src" :alt="img_alt" class="image-field-content" />
-            </template>
-        </Modal>
+        </BootstrapModal>
     </div>
 </template>
 
 <script>
     import { BaseFieldInnerComponentMixin } from '../../base';
-    import Modal from '../../../components/items/modal/Modal.vue';
+    import BootstrapModal from '../../../components/BootstrapModal';
     import { makeDataImageUrl } from '../../../utils';
     export default {
-        components: { Modal },
+        components: { BootstrapModal },
         mixins: [BaseFieldInnerComponentMixin],
         data() {
             return {
@@ -37,14 +40,6 @@
             },
             img_alt() {
                 return this.field.title;
-            },
-        },
-        methods: {
-            openImage() {
-                this.show_modal = true;
-            },
-            closeImage() {
-                this.show_modal = false;
             },
         },
     };

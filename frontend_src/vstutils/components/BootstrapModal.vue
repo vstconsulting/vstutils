@@ -7,6 +7,7 @@
                 v-element-bound="onModalCreated"
                 class="modal fade"
                 :class="wrapperClasses"
+                tabindex="-1"
                 role="dialog"
                 @click.stop
             >
@@ -32,7 +33,7 @@
                                 <slot name="body" />
                                 <slot />
                             </div>
-                            <div v-show="!hideFooter" class="modal-footer">
+                            <div v-show="$slots.footer" class="modal-footer">
                                 <slot name="footer" />
                             </div>
                         </slot>
@@ -56,7 +57,6 @@
             wrapperClasses: { type: [Array, String], default: null },
             classes: { type: [Array, String], default: null },
             loading: { type: Boolean, default: false },
-            hideFooter: { type: Boolean, default: false },
         },
         data() {
             return {
@@ -79,6 +79,9 @@
                     .modal({ show: true })
                     .on('hide.bs.modal', () => {
                         this.callCloseCallback();
+                    })
+                    .on('shown.bs.modal', () => {
+                        this.$emit('shown');
                     });
             },
             open() {

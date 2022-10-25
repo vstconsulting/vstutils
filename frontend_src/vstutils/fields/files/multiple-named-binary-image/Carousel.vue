@@ -91,8 +91,8 @@
                 }
             },
             onClick(item) {
-                this.$refs.modal.open();
                 this.activeItem = { imgSrc: item.imgSrc, name: item.name };
+                this.$refs.modal.open();
             },
         },
     };
@@ -121,7 +121,7 @@
     .splide__content {
         border-radius: 5px;
         position: relative;
-        box-shadow: 1px 1px 5px 0px #b0b0b0;
+        box-shadow: 1px 1px 5px 0 #b0b0b0;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
