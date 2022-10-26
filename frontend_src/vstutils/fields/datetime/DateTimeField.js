@@ -6,16 +6,24 @@ import DateTimeFieldMixin from './DateTimeFieldMixin.js';
  * Date-time guiField class.
  */
 class DateTimeField extends BaseField {
+    constructor(options) {
+        super(options);
+
+        this.dateRepresentFormat = this.props.format || 'llll';
+    }
     toInner(data) {
         const value = super.toInner(data);
         if (!value) return;
-        return moment.tz(value, moment.tz.guess()).tz(this.constructor.app.api.getTimeZone()).format();
+        return moment
+            .tz(value, moment.tz.guess())
+            .tz(this.constructor?.app?.api?.getTimeZone() || 'UTC')
+            .format();
     }
 
     toRepresent(data) {
         const value = super.toRepresent(data);
         if (!value) return;
-        return moment.tz(value, this.constructor.app.api.getTimeZone()).tz(moment.tz.guess());
+        return moment.tz(value, this.constructor?.app?.api?.getTimeZone() || 'UTC').tz(moment.tz.guess());
     }
     /**
      * Redefinition of base guiField static property 'mixins'.
