@@ -4,13 +4,15 @@
 const DateTimeFieldContent = {
     data() {
         return {
-            format: 'llll',
             inputType: 'datetime-local',
         };
     },
     computed: {
         preparedValue() {
             return this.value ? this.value.format(this.format) : '';
+        },
+        format() {
+            return this.field?.dateRepresentFormat || 'llll';
         },
     },
 };
