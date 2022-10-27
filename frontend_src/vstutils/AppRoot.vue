@@ -4,7 +4,14 @@
 
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <Logo :title="info.title" />
-            <Sidebar :menu="x_menu" :docs="x_docs" />
+            <Sidebar :menu="menuItems">
+                <template v-if="sidebarTopComponent" #top>
+                    <component :is="sidebarTopComponent" />
+                </template>
+                <template v-if="sidebarBottomComponent" #bottom>
+                    <component :is="sidebarBottomComponent" />
+                </template>
+            </Sidebar>
         </aside>
 
         <div class="content-wrapper">
@@ -55,7 +62,7 @@
 </template>
 <script>
     import ControlSidebar from './components/items/ControlSidebar.vue';
-    import { Logo, MainFooter, Sidebar, TopNavigation } from './components/items';
+    import { Logo, MainFooter, Sidebar, TopNavigation, convertXMenuToSidebar } from './components/items';
     import ConfirmModal from './components/common/ConfirmModal';
     import EntityView from './components/common/EntityView.vue';
 
@@ -96,6 +103,32 @@
             };
         },
         computed: {
+            sidebarTopComponent() {
+                return null;
+            },
+            sidebarBottomComponent() {
+                return null;
+            },
+            menuItems() {
+                const menu = convertXMenuToSidebar(this.x_menu);
+
+                menu.unshift({
+                    name: 'Home',
+                    to: '/',
+                    icon: 'fas fa-tachometer-alt',
+                });
+
+                if (this.x_docs && this.x_docs.has_docs && this.x_docs.docs_url) {
+                    menu.push({
+                        name: 'Documentation',
+                        href: this.x_docs.docs_url,
+                        icon: 'fa fa-book',
+                        origin_link: true,
+                    });
+                }
+
+                return menu;
+            },
             entityViewProps() {
                 const store = this.$app.store.page;
 

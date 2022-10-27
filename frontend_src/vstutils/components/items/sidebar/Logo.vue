@@ -8,24 +8,16 @@
 </template>
 
 <script>
-    import $ from 'jquery';
+    import { hideSidebar } from './utils';
 
-    /**
-     * Logo component.
-     */
     export default {
         name: 'Logo',
         props: {
-            title: {
-                type: String,
-                default: () => '',
-            },
+            title: { type: String, default: '' },
         },
         methods: {
             hideSidebar() {
-                if (document.body.classList.contains('sidebar-open')) {
-                    $('[data-widget="pushmenu"]').PushMenu('collapse');
-                }
+                hideSidebar();
             },
         },
     };

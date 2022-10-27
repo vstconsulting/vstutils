@@ -29,7 +29,3 @@ declare global {
         get last(): T;
     }
 }
-
-declare module '*.vue' {
-    export default Vue;
-}
