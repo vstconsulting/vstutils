@@ -12,6 +12,16 @@ declare global {
     }
 }
 
+export interface XMenuItem {
+    name: string;
+    span_class?: string | string[];
+    url?: string;
+    origin_link?: boolean;
+    sublinks?: XMenuItem[];
+}
+
+export type XMenu = XMenuItem[];
+
 interface Schema {
     info: {
         'x-settings': {
@@ -21,6 +31,7 @@ interface Schema {
             [key: string]: any;
         };
         'x-page-limit': number;
+        'x-menu': XMenu;
         [key: string]: any;
     };
     [key: string]: any;
