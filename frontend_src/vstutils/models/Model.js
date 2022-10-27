@@ -273,7 +273,7 @@ export class Model {
      * Method, that returns instance's value of PK field.
      */
     getPkValue() {
-        return this._parentInstance?.getPkValue() || this._data[this._pkFieldName];
+        return this._parentInstance?.getPkValue() || this._data[this._pkField?.name];
     }
 
     /**
@@ -297,11 +297,11 @@ export class Model {
             if (value instanceof Model) {
                 return value.getViewFieldString();
             }
+            if (value && typeof value === 'object') {
+                value = value.name || value.title;
+            }
             if (value === null || value === undefined) {
                 return;
-            }
-            if (typeof value === 'object') {
-                value = value.name || value.title;
             }
             const strValue = this._viewField.translateValue(String(value));
 

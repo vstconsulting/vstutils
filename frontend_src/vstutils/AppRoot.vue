@@ -55,7 +55,7 @@
             @reject="reject"
         />
 
-        <component :is="c" v-for="(c, idx) in additionalComponents" :key="idx" />
+        <component :is="c" v-for="(c, name) in additionalComponents" :ref="name" :key="name" />
 
         <portal-target name="root-bottom" multiple />
     </div>
@@ -153,7 +153,7 @@
                 };
             },
             showBackButton() {
-                return this.$route.name !== 'home';
+                return this.$route.name !== 'home' && this.$route.meta?.view.showBackButton;
             },
             showTitle() {
                 return true;
@@ -186,7 +186,7 @@
                 return [];
             },
             additionalComponents() {
-                return [];
+                return {};
             },
         },
         watch: {
