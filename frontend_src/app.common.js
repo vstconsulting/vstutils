@@ -89,4 +89,5 @@ export {
 import './gui.css';
 
 import './vstutils/styles/scrollbar.css';
+import './vstutils/styles/sidebar.css';
 import './vstutils/dark.scss';

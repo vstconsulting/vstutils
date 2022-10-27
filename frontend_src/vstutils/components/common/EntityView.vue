@@ -4,7 +4,7 @@
         <div :class="containerClass">
             <div class="top-row d-print-none">
                 <ButtonsRow
-                    v-if="!error && showTopButtons && view"
+                    v-if="!error && view && view.showOperationButtons"
                     :view="view"
                     :actions="actions"
                     :sublinks="sublinks"
@@ -40,7 +40,6 @@
             loading: { type: Boolean, required: true },
             error: { type: [Object, Error], default: () => ({}) },
             response: { type: Boolean, default: false },
-            showTopButtons: { type: Boolean, default: true },
             showUsedFilters: { type: Boolean, default: true },
             isContainerFluid: { type: Boolean, default: true },
             actions: { type: Array, default: () => [] },

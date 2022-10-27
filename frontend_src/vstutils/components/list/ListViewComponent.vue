@@ -101,9 +101,6 @@
             searchField() {
                 return this.view?.filters?.['__search'];
             },
-            showBackButton() {
-                return true;
-            },
             /**
              * Property that returns total number total number of instances, or -1 if
              * instances has no count

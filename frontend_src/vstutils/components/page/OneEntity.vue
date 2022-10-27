@@ -69,9 +69,6 @@
             modelsFieldsWrapperClasses() {
                 return 'col-12';
             },
-            showBackButton() {
-                return true;
-            },
             fieldsGroups() {
                 return undefined;
             },

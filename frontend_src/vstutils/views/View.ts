@@ -100,6 +100,9 @@ export class View {
     actions = new Map<string, Action>();
     parent: View | null = null;
 
+    showOperationButtons = true;
+    showBackButton = true;
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     storeDefinitionFactory: (view: any) => () => unknown = (view) => () => useBasePageData(view);
 

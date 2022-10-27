@@ -373,8 +373,8 @@ export default class ViewConstructor {
 
             // Set edit view actions
             if (editView) {
-                const saveAction = this.dictionary.paths.operations.page_edit.save;
-                const reloadAction = this.dictionary.paths.operations.page_edit.reload;
+                const saveAction = mergeDeep({}, this.dictionary.paths.operations.page_edit.save);
+                const reloadAction = mergeDeep({}, this.dictionary.paths.operations.page_edit.reload);
                 editView.actions.set(saveAction.name, saveAction);
                 editView.actions.set(reloadAction.name, reloadAction);
             }
