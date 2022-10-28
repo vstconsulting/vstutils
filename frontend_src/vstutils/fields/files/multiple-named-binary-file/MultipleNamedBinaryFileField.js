@@ -57,6 +57,9 @@ class MultipleNamedBinFileField extends NamedBinaryFileField {
 
     toRepresent(data) {
         let value = data[this.options.name];
+        if (typeof value === 'string') {
+            value = JSON.parse(value);
+        }
         if (Array.isArray(value)) {
             value = value.map((file) => this.ensureMediaTypeExists(file));
         }

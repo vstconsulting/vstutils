@@ -49,6 +49,8 @@ TRANSLATION = {
     'Purge': 'Удалить',
     'Select an action for this instances': 'Выберите действие для объектов',
     'Username not': 'Имя пользователя не',
+    'Download file': 'Загрузить файл',
+    'File list': 'Список файлов',
 
     # fields
     'Id': 'Идентификатор',

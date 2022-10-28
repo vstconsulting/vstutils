@@ -1,5 +1,6 @@
 import MultipleNamedBinaryFileFieldContentReadonly from './MultipleNamedBinaryFileFieldContentReadonly.vue';
 import MultipleNamedBinaryFileFieldContentEdit from './MultipleNamedBinaryFileFieldContentEdit.vue';
+import MultipleNamedBinaryFileFieldContentList from './MultipleNamedBinaryFileFieldContentList';
 import { readFileAsObject } from '../../../utils';
 
 const MultipleNamedBinaryFileFieldMixin = {
@@ -28,6 +29,7 @@ const MultipleNamedBinaryFileFieldMixin = {
     components: {
         field_content_readonly: MultipleNamedBinaryFileFieldContentReadonly,
         field_content_edit: MultipleNamedBinaryFileFieldContentEdit,
+        field_list_view: MultipleNamedBinaryFileFieldContentList,
     },
 };
 
