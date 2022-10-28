@@ -49,7 +49,8 @@ TRANSLATION = {
     'Purge': '刪除',
     'Select an action for this instances': '為此實例選擇一個操作',
     'Username not': '用户名不是',
-
+    'Download file': '下载文件',
+    'File list': '文件列表',
 
     # fields
     'Id': '标识符',

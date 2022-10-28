@@ -49,6 +49,8 @@ TRANSLATION = {
     'Purge': 'Xóa',
     'Select an action for this instances': 'Chọn một hành động cho trường hợp này',
     'Username not': 'Tên người dùng không phải',
+    'Download file': 'Tải tập tin',
+    'File list': 'Danh sách tệp',
 
     # fields
     'Id': 'định danh',

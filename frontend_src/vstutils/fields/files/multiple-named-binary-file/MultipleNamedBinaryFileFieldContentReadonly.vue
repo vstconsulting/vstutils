@@ -8,7 +8,7 @@
                 <li
                     v-for="(file, idx) in value"
                     :key="idx"
-                    title="Download file"
+                    :title="$t('Download file')"
                     @click="fileClickHandler(file)"
                 >
                     <div>

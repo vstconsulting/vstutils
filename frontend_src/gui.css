@@ -970,7 +970,13 @@ img.image-field-content {
 }
 
 .cursor-pointer {
+    cursor: pointer;
 }
+
+.cursor-not-allowed {
+    cursor: not-allowed !important;
+}
+
 
 .cursor-pointer:hover {
     cursor: pointer;
@@ -1666,14 +1672,6 @@ input[type='color'] {
 
 .power-on {
     color: #00c0ef;
-}
-
-.cursor-pointer {
-    cursor: pointer;
-}
-
-.cursor-not-allowed {
-    cursor: not-allowed !important;
 }
 
 .hidden-section {
