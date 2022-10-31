@@ -1,6 +1,6 @@
 import Vue, { computed } from 'vue';
 import { joinPaths, pathToArray, capitalize, ViewTypes, getApp } from './utils';
-// TODO import type { View } from './views';
+import { View, PageEditView, PageView } from './views';
 
 export interface Breadcrumb {
     link?: string;
@@ -8,18 +8,15 @@ export interface Breadcrumb {
     iconClasses?: string;
 }
 
-export function getBreadcrumb(view: any, fragment: string): Breadcrumb {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+export function getBreadcrumb(view: View, fragment: string): Breadcrumb {
     if (view.type === ViewTypes.PAGE_NEW) {
         return { iconClasses: 'fas fa-plus' };
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (view.type === ViewTypes.PAGE_EDIT && !view.isEditStyleOnly) {
+    if (view.type === ViewTypes.PAGE_EDIT && !(view as PageEditView).isEditStyleOnly) {
         return { iconClasses: 'fas fa-pen' };
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    return { name: view.pkParamName ? capitalize(fragment) : view.title };
+    return { name: (view as PageView).pkParamName ? capitalize(fragment) : view.title };
 }
 
 export const useBreadcrumbs = () => {
@@ -30,13 +27,13 @@ export const useBreadcrumbs = () => {
         const dt = pathToArray(rootVm.$route.path);
         const crumbs: Breadcrumb[] = [{ iconClasses: 'fas fa-home', link: '/' }];
         for (let i = 0; i < dt.length; i++) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             const { route } = app.router.resolve(joinPaths(...dt.slice(0, i + 1)));
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-            const view = route.meta?.view;
+            const view = route.meta?.view as View | undefined;
             if (view) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                crumbs.push({ link: i === dt.length - 1 ? null : route.path, ...getBreadcrumb(view, dt[i]) });
+                crumbs.push({
+                    link: i === dt.length - 1 ? undefined : route.path,
+                    ...getBreadcrumb(view, dt[i]),
+                });
             }
         }
 

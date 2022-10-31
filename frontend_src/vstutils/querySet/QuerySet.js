@@ -86,7 +86,7 @@ export default class QuerySet {
      *
      * @param {RequestType} operation
      * @param {number} modelType - 0 for request and 1 for response
-     * @return {Function|null}
+     * @return {typeof Model|null}
      */
     getModelClass(operation, modelType = 1) {
         if (this.models[operation]) {

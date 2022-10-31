@@ -14,7 +14,7 @@ interface SubscriptionsUpdateMessage {
 
 export class AutoUpdateController {
     store: AutoUpdateStore;
-    centrifugo?: Centrifuge;
+    centrifugo?: Centrifuge | null;
     centrifugoSubscription?: Centrifuge.Subscription;
     isStarted = false;
 
@@ -26,7 +26,7 @@ export class AutoUpdateController {
     bulkedActionsTimeout?: ReturnType<typeof setTimeout>;
     bulkedActionsDelay = 1000;
 
-    constructor(store: AutoUpdateStore, centrifuge?: Centrifuge) {
+    constructor(store: AutoUpdateStore, centrifuge?: Centrifuge | null) {
         this.store = store;
         this.centrifugo = centrifuge;
     }

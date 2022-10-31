@@ -1,19 +1,14 @@
 import $ from 'jquery';
 import VueRouter from 'vue-router';
 import moment from 'moment';
-import { LocalSettings } from './localSettings';
 import signals from '../signals.js';
 import { i18n } from '../translation.js';
-
-export const guiLocalSettings = new LocalSettings('guiLocalSettings');
+import { getApp } from './app-helpers';
+import { LocalSettings } from './localSettings';
 
 export const EMPTY = Symbol('EMPTY');
+export const guiLocalSettings = new LocalSettings('guiLocalSettings');
 
-/**
- * @param {Object} obj
- * @param {string} prop
- * @return {boolean}
- */
 export function hasOwnProp(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
 }
@@ -235,8 +230,8 @@ export function saveHideMenuSettings() {
 
 /**
  * https://stackoverflow.com/a/25456134/7835270
- * @param {Object} x
- * @param {Object} y
+ * @param {any} x
+ * @param {any} y
  * @returns {boolean}
  */
 export function deepEqual(x, y) {
@@ -432,11 +427,13 @@ export function getTimeInUptimeFormat(time) {
     }
 }
 
-Object.defineProperty(Array.prototype, 'last', {
-    get: function () {
-        return this[this.length - 1];
-    },
-});
+if (!('last' in Array.prototype)) {
+    Object.defineProperty(Array.prototype, 'last', {
+        get: function () {
+            return this[this.length - 1];
+        },
+    });
+}
 
 /**
  * Class, that defines enumerable and non_enumerable properties of some object.
@@ -831,24 +828,6 @@ export const RequestTypes = {
 };
 
 /**
- * @typedef {string} HttpMethod
- */
-
-/**
- * Enum for HTTP methods
- * @enum {HttpMethod}
- */
-export const HttpMethods = {
-    GET: 'get',
-    POST: 'post',
-    PUT: 'put',
-    PATCH: 'patch',
-    DELETE: 'delete',
-
-    ALL: ['get', 'post', 'put', 'patch', 'delete'],
-};
-
-/**
  * Enum for HTTP methods
  */
 export const FieldViews = {
@@ -1080,12 +1059,6 @@ export function generateBase32String(length = 32) {
     return generateRandomString(length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567');
 }
 
-export const BulkType = {
-    SIMPLE: 'put',
-    TRANSACTIONAL: 'post',
-    ASYNC: 'patch',
-};
-
 export function tableColumnClasses(field) {
     const classes = ['column', `column-${field.name}`, `column-format-${field.format}`];
     if (field.model?.pkField === field) {
@@ -1096,7 +1069,7 @@ export function tableColumnClasses(field) {
 
 export function classesFromFields(fields, data) {
     return fields
-        .filter((f) => ['choices', 'boolean'].includes(f.format))
+        .filter((f) => f.format === 'choices' || f.type === 'boolean')
         .map((f) => {
             let cls = `field-${f.name}`;
             const value = f._getValueFromData(data);
@@ -1449,22 +1422,6 @@ export function mapStoreActions(names) {
     return mapped;
 }
 
-let __appRef = null;
-
-/**
- * @param {import('./../../spa.js').App} app
- */
-export function __setApp(app) {
-    __appRef = app;
-}
-
-/**
- * @returns {import('./../../spa.js').App}
- */
-export function getApp() {
-    return __appRef;
-}
-
 export const getUniqueId = (() => {
     let id = 0;
     return () => String(++id);
@@ -1476,4 +1433,27 @@ export function openSublink(sublink, instance = undefined) {
         ? joinPaths(router.currentRoute.path, sublink.appendFragment)
         : sublink.href;
     return router.push(formatPath(path, router.currentRoute.params, instance));
+}
+
+/**
+ * @param {string} text
+ * @returns {string}
+ */
+export function smartTranslate(text) {
+    if (text === undefined || text === null) {
+        return '';
+    }
+
+    text = String(text);
+
+    if (i18n.te(text)) {
+        return i18n.t(text);
+    }
+
+    const lower = text.toLowerCase();
+    if (i18n.te(lower)) {
+        return capitalize(i18n.t(lower));
+    }
+
+    return text;
 }

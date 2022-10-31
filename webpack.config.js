@@ -15,7 +15,7 @@ module.exports = {
     mode: isProd ? 'production' : 'development',
     entry: {
         'app_loader': path.resolve(frontendSrc, 'app_loader/index.js'),
-        'spa': path.resolve(frontendSrc, 'spa.js'),
+        'spa': path.resolve(frontendSrc, 'spa.ts'),
         'base': path.resolve(frontendSrc, 'base/index.js'),
     },
     output: {
@@ -39,6 +39,7 @@ module.exports = {
     resolve: {
         alias: {
             vue$: 'vue/dist/vue.esm.js',
+            '@': path.resolve(__dirname, 'frontend_src'),
         },
         extensions: ['.tsx', '.ts', '.js', '.vue'],
     },

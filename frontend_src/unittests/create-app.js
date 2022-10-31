@@ -1,12 +1,12 @@
-import { App } from '../spa.js';
+import { App } from '@/vstutils/app.ts';
 import { AppConfiguration } from '../vstutils/AppConfiguration.ts';
-import { FakeCache } from '../app_loader/Cache.js';
+import { DummyCache } from '@/cache';
 import { createLocalVue } from '@vue/test-utils';
 
 import testSchema from '../__mocks__/testSchema.json';
 
-export function createApp({ schema = testSchema } = {}) {
-    const config = new AppConfiguration({
+export function createAppConfig({ schema = testSchema } = {}) {
+    return new AppConfiguration({
         isDebug: true,
         hostUrl: 'http://localhost',
         endpointUrl: 'http://localhost/api/endpoint/',
@@ -14,7 +14,11 @@ export function createApp({ schema = testSchema } = {}) {
         isStaff: false,
         schema,
     });
-    const cache = new FakeCache();
+}
+
+export function createApp({ schema = testSchema } = {}) {
+    const config = createAppConfig({ schema });
+    const cache = new DummyCache();
     const app = new App(config, cache, createLocalVue());
 
     const loadLanguages = app.translationsManager.loadLanguages;

@@ -186,7 +186,7 @@ export default class ViewConstructor {
                 path.startsWith(deepParentView.path),
             );
 
-            for (const httpMethod of HttpMethods.ALL) {
+            for (const httpMethod of Object.values(HttpMethods)) {
                 const operationSchema = pathSchema[httpMethod];
                 if (!operationSchema) continue;
                 const operationId = operationSchema[this.dictionary.paths.operation_id.name];

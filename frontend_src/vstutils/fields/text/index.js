@@ -7,7 +7,7 @@ import PlainTextFieldMixin from './PlainTextFieldMixin.js';
 import StringArrayField from './StringArrayField.js';
 import StringArrayFieldListView from './StringArrayFieldListView.vue';
 import StringArrayFieldMixin from './StringArrayFieldMixin.js';
-import StringField from './StringField.js';
+import StringField from './StringField.ts';
 import TextAreaField from './TextAreaField.js';
 import TextAreaFieldContentEdit from './TextAreaFieldContentEdit.vue';
 import TextAreaFieldContentReadonly from './TextAreaFieldContentReadonly.vue';

@@ -1,6 +1,7 @@
 import { computed, ref, watch } from 'vue';
 import type { StoreGeneric } from 'pinia';
 import type { Breadcrumb } from '../breadcrumbs';
+import { Store, StoreState, StoreGetters, StoreActions } from 'pinia';
 
 export const GLOBAL_STORE = () => {
     const page = ref<StoreGeneric>(null as unknown as StoreGeneric);
@@ -32,3 +33,10 @@ export const GLOBAL_STORE = () => {
 
     return { title, breadcrumbs, page, entityViewClasses, setPage };
 };
+
+export type GlobalStore = Store<
+    'global',
+    StoreState<ReturnType<typeof GLOBAL_STORE>>,
+    StoreGetters<ReturnType<typeof GLOBAL_STORE>>,
+    StoreActions<ReturnType<typeof GLOBAL_STORE>>
+>;

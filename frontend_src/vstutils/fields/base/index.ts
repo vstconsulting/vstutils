@@ -1,4 +1,4 @@
-import BaseField from './BaseField.js';
+import BaseField from './BaseField';
 import BaseFieldContentEdit from './BaseFieldContentEdit.vue';
 import BaseFieldContentMixin from './BaseFieldContentMixin.js';
 import BaseFieldContentReadonlyMixin from './BaseFieldContentReadonlyMixin.vue';

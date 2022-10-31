@@ -1,4 +1,4 @@
-import { APIResponse, ApiConnector as OriginalApiConnector } from '../ApiConnector.js';
+import { APIResponse, ApiConnector as OriginalApiConnector } from '../ApiConnector.ts';
 export { APIResponse };
 
 export class ApiConnector extends OriginalApiConnector {

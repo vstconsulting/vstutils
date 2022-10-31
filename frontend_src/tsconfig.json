@@ -9,11 +9,13 @@
         "noImplicitReturns": true,
         "module": "es2020",
         "moduleResolution": "node",
-        "esModuleInterop": true,
         "types": [
             "jquery",
-            "bootstrap"
-        ]
+            "bootstrap",
+        ],
+        "paths": {
+            "@/*": ["./*"],
+        }
     },
     "vueCompilerOptions": {
         "target": 2.7

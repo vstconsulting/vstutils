@@ -66,7 +66,7 @@ import * as users from './vstutils/users';
 
 export * from './vstutils/ComponentsRegistrator.js';
 export * from './vstutils/AppConfiguration.ts';
-export * from './app_loader/Cache.js';
+export * from '@/cache';
 
 export {
     AppRoot,
@@ -89,5 +89,5 @@ export {
 import './gui.css';
 
 import './vstutils/styles/scrollbar.css';
-import './vstutils/styles/sidebar.css';
+import './vstutils/styles/common.css';
 import './vstutils/dark.scss';

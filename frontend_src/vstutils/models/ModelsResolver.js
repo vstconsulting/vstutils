@@ -1,5 +1,5 @@
 import signals from '../signals.js';
-import BaseField from '../fields/base/BaseField.js';
+import BaseField from '../fields/base/BaseField.ts';
 import { makeModel, Model } from './Model.js';
 
 const REF_PROPERTY = '$ref';
@@ -55,7 +55,7 @@ export class ModelsResolver {
      * Resolves model by schema object. Schema object or $ref is supported.
      * @param {Object} modelSchema
      * @param {string} [modelName]
-     * @return {Function}
+     * @return {typeof Model}
      * @see {@link https://swagger.io/specification/v2/#schemaObject}
      */
     bySchemaObject(modelSchema, modelName) {

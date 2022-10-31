@@ -1,6 +1,6 @@
 import VueI18n from 'vue-i18n';
 import '../libs/vue.js';
-import { getCookie } from './utils';
+import { getCookie } from './utils/todo';
 
 export const RUPluralizationRule = (choice, choicesLength) => {
     if (choice === 0) {

@@ -1,5 +1,5 @@
 import type { ComponentOptions } from 'vue';
-import type Vue from 'vue';
+import type { Vue } from 'vue/types/vue';
 import type { Route, RouteConfig } from 'vue-router';
 import type { Operation as SwaggerOperation } from 'swagger-schema-official';
 import {
@@ -16,6 +16,7 @@ import type { QuerySet } from '../querySet';
 import { Model } from '../models';
 import type { BaseField } from '../fields/base';
 import { useBasePageData } from '../store/helpers';
+import { IAppInitialized } from '../app';
 export { ViewTypes };
 
 export interface Operation {
@@ -24,12 +25,12 @@ export interface Operation {
     styles?: Record<string, string>;
     classes?: string[];
     iconClasses?: string[];
-    hidden: boolean;
+    appendFragment?: string;
+    hidden?: boolean;
 }
 
 export interface Sublink extends Operation {
     href?: string;
-    appendFragment?: string;
 }
 
 /**
@@ -42,17 +43,26 @@ export interface Action extends Operation {
     isMultiAction: boolean;
     component?: any;
     path?: string;
-    method?: string;
+    href?: string;
+    method?: HttpMethods;
     doNotShowOnList?: boolean;
-    handler?: ({ action, instance }: { action: Action; instance: Model }) => Promise<void>;
-    handlerMany?: ({ action, instances }: { action: Action; instances: Model[] }) => Promise<void>;
+    confirmationRequired?: boolean;
+    view?: View;
+    responseModel?: typeof Model;
+    handler?: (args: {
+        action: Action;
+        instance?: Model;
+        fromList?: boolean;
+        disablePopUp?: boolean;
+    }) => Promise<void>;
+    handlerMany?: (args: { action: Action; instances: Model[]; disablePopUp?: boolean }) => Promise<void>;
     redirectPath?: string | (() => string);
+    onAfter?: (args: { app: IAppInitialized; action: Action; response: unknown; instance?: Model }) => void;
 }
 
-interface NotEmptyAction extends Action {
+export interface NotEmptyAction extends Action {
     isEmpty: false;
     requestModel: typeof Model;
-    responseModel: typeof Model;
 }
 
 type ViewType = keyof typeof ViewTypes;
@@ -62,7 +72,7 @@ interface ViewParams extends SwaggerOperation {
     level: number;
     name: string;
     path: string;
-    method: string;
+    method: HttpMethods;
     type?: ViewType;
     title?: string;
     isDeepNested?: boolean;
@@ -162,7 +172,7 @@ export class View {
             provide() {
                 return {
                     view: thisView,
-                    pageComponent: this,
+                    pageComponent: this as Vue,
                 };
             },
         };
@@ -346,7 +356,7 @@ interface ActionViewParams extends PageViewParams {
 export class ActionView extends View {
     static viewType: ViewType = 'ACTION';
     hideReadonlyFields = true;
-    method: string;
+    method: HttpMethods;
     action: NotEmptyAction;
 
     storeDefinitionFactory: (view: any) => any = createActionViewStore;

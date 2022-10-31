@@ -1,7 +1,7 @@
 import { createPinia } from 'pinia';
-import { GLOBAL_STORE } from './globalStore';
-import { createLocalSettingsStore } from './localSettingsStore';
-import { createUserSettingsStore } from './userSettingsStore';
+import { GLOBAL_STORE, GlobalStore } from './globalStore';
+import { createLocalSettingsStore, LocalSettingsStore } from './localSettingsStore';
+import { createUserSettingsStore, UserSettingsStore } from './userSettingsStore';
 import {
     createListViewStore,
     createDetailViewStore,
@@ -19,6 +19,9 @@ export {
     createEditViewStore,
     createNewViewStore,
     createActionViewStore,
+    LocalSettingsStore,
+    UserSettingsStore,
+    GlobalStore,
 };
 
 export const pinia = createPinia();

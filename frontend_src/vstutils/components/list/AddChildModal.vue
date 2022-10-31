@@ -22,7 +22,7 @@
     import OperationButton from '../common/OperationButton.vue';
     import { guiPopUp, pop_up_msg } from '../../popUp';
     import { Model, makeModel } from '../../models';
-    import StringField from '../../fields/text/StringField.js';
+    import StringField from '../../fields/text/StringField.ts';
     import BaseListModal from './BaseListModal';
 
     const AppendNestedModel = makeModel(

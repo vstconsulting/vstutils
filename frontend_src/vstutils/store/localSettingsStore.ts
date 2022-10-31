@@ -42,3 +42,5 @@ export const createLocalSettingsStore = (storage: Storage, itemName: string) =>
             },
         },
     });
+
+export type LocalSettingsStore = ReturnType<ReturnType<typeof createLocalSettingsStore>>;

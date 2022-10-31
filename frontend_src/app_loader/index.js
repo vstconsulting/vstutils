@@ -1,4 +1,4 @@
-import { cachePromise } from './Cache.js';
+import { globalCache } from '@/cache';
 import LoadingPageController from './LoadingPageController.js';
 import { cleanAllCacheAndReloadPage, cleanOpenApiCacheAndReloadPage } from './cleanCacheHelpers.js';
 import { StaticFilesLoader } from './StaticFilesLoader.js';
@@ -103,9 +103,5 @@ async function startApp(cache) {
 }
 
 window.onload = () => {
-    try {
-        cachePromise.then((cache) => startApp(cache));
-    } catch (e) {
-        pageController.appendError(e);
-    }
+    startApp(globalCache);
 };
