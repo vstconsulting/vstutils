@@ -1,6 +1,7 @@
 import { Model, makeModel } from './Model.js';
 import { ModelsResolver } from './ModelsResolver.js';
-import { StringField } from '../fields/text';
+import StringField from '../fields/text/StringField';
+export * from './errors';
 
 const NoModel = makeModel(
     class extends Model {

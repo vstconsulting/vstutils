@@ -22,14 +22,14 @@ interface RedirectOptions {
     concat_field_name?: boolean;
 }
 
-interface FieldXOptions {
+export interface FieldXOptions {
     prependText?: string;
     appendText?: string;
     redirect?: RedirectOptions;
     translateFieldName?: string;
 }
 
-type FieldOptions<XOptions extends FieldXOptions, Inner> = Omit<Schema, 'default'> & {
+export type FieldOptions<XOptions extends FieldXOptions, Inner> = Omit<Schema, 'default'> & {
     name: string;
     title?: string;
     'x-hidden'?: boolean;
@@ -40,7 +40,7 @@ type FieldOptions<XOptions extends FieldXOptions, Inner> = Omit<Schema, 'default
     default?: Inner;
 };
 
-interface Field<Inner, Represent, XOptions extends FieldXOptions = FieldXOptions> {
+export interface Field<Inner, Represent, XOptions extends FieldXOptions = FieldXOptions> {
     options: FieldOptions<XOptions, Inner>;
     props: XOptions;
 
@@ -88,7 +88,7 @@ interface Field<Inner, Represent, XOptions extends FieldXOptions = FieldXOptions
     parseFieldError(errorData: unknown, instanceData: FieldsData): string | Record<string, unknown>;
 }
 
-class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldXOptions>
+export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldXOptions>
     implements Field<Inner, Represent, XOptions>
 {
     static fkLinkable = true;

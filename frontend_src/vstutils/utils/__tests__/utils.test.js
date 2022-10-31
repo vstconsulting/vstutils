@@ -6,7 +6,6 @@ import {
     hexToRgbA,
     isEmptyObject,
     mergeDeep,
-    ModelValidationError,
     randomSleep,
     sliceLongString,
     stringToBoolean,
@@ -15,7 +14,6 @@ import {
     smartTranslate,
 } from '@/vstutils/utils';
 import { i18n } from '@/vstutils/translation.js';
-import { StringField } from '../../fields/text';
 import { createApp } from '../../../unittests/create-app';
 
 describe('utils', () => {
@@ -178,12 +176,6 @@ describe('utils', () => {
         jest.advanceTimersByTime(600);
         await promise;
         expect(callback).toBeCalledTimes(1);
-    });
-
-    test('ModelValidationError', () => {
-        const field = new StringField({ name: 'name' });
-        const err = new ModelValidationError([{ field, message: 'Err 1' }]);
-        expect(err.toFieldsErrors()).toStrictEqual({ name: 'Err 1' });
     });
 
     test('chunkArray', () => {
