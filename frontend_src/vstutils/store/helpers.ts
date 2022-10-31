@@ -13,7 +13,7 @@ import {
 import { defineStore, Store, StoreActions, StoreState, StoreGetters } from 'pinia';
 import type { Model } from '../models';
 import type { QuerySet } from '../querySet';
-import type { View, ActionView } from '../views';
+import type { View, ActionView, NotEmptyAction } from '../views';
 import signals from '../signals';
 import {
     ModelValidationError,
@@ -25,12 +25,13 @@ import {
     mergeDeep,
     getUniqueId,
     classesFromFields,
+    smartTranslate,
 } from '../utils';
 import { useBreadcrumbs } from '../breadcrumbs';
 import { i18n } from '../translation';
-import type { NavigationGuard } from 'vue-router';
-import type { App } from '../../spa';
-import VueRouter from 'vue-router';
+import type { NavigationGuard, Route } from 'vue-router';
+import type { IApp } from '@/vstutils/app';
+import { APIResponse } from '../api';
 
 export interface InstancesList extends Array<Model> {
     extra?: {
@@ -40,21 +41,18 @@ export interface InstancesList extends Array<Model> {
 }
 
 export function getRedirectUrl(): string {
-    /* eslint-disable */
     const url = getApp()
         .router.currentRoute.path.replace(/\/edit\/?$/, '')
-        .replace(/\/new\/?$/, '') as string;
-    /* eslint-enable */
+        .replace(/\/new\/?$/, '');
     return url;
 }
 
 export const useInstanceTitle = ({ view, instance }: { view: View; instance: Ref<Model | null> }) => {
-    return computed(() => instance.value?.getViewFieldString(false) || i18n.t(view.title));
+    return computed(() => instance.value?.getViewFieldString(false) || smartTranslate(view.title));
 };
 
 export const useQuerySet = (view: View) => {
     const app = getApp();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const queryset = ref<QuerySet>(view.objects.formatPath(app.router.currentRoute.params));
     function setQuerySet(qs: QuerySet) {
         queryset.value = qs;
@@ -84,7 +82,6 @@ export const useOperations = ({
             data: data?.value,
             isListItem,
         };
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         signals.emit(`<${view.path}>filterActions`, obj);
         return obj.actions;
     });
@@ -94,7 +91,6 @@ export const useOperations = ({
             data: data?.value,
             isListItem,
         };
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         signals.emit(`<${view.path}>filterSublinks`, obj);
         return obj.sublinks;
     });
@@ -107,7 +103,7 @@ export const useBasePageData = (view: View) => {
     const error = ref<unknown>(null);
     const response = ref<unknown>(null);
     const title = computed<string>(() => {
-        return i18n.t(view.title) as string;
+        return smartTranslate(view.title);
     });
     const breadcrumbs = useBreadcrumbs();
 
@@ -155,8 +151,8 @@ export const useSelection = (instances: Ref<Model[]>) => {
         ),
     );
 
-    function setSelection(newSelection: string[] | number[]) {
-        selection.value = newSelection;
+    function setSelection(newSelection?: string[] | number[]) {
+        selection.value = newSelection ?? [];
     }
 
     function unselectIds(ids: (number | string)[]) {
@@ -193,7 +189,6 @@ export function useListFilters(qs: Ref<QuerySet>) {
         pageNumber: number;
     }>({
         count: 0,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         pageSize: app.config.defaultPageLimit,
         pageNumber: 1,
     });
@@ -225,9 +220,7 @@ export function useQueryBasedFiltering() {
         );
     }
 
-    /* eslint-disable */
-
-    function applyFilters(filters: Record<string, any>): Promise<void> {
+    function applyFilters(filters: Record<string, any>): Promise<Route | void> {
         filters = getFiltersPrepared(filters);
 
         for (const filter in filters) {
@@ -236,24 +229,22 @@ export function useQueryBasedFiltering() {
             }
         }
 
-        return openPage(getApp().rootVm?.$route.path + makeQueryString(filters));
+        return openPage(getApp().rootVm.$route.path + makeQueryString(filters));
     }
 
     function applyFieldsFilters(filters: Record<string, any>) {
-        applyFilters({
+        return applyFilters({
             ...filters,
-            [searchFieldName]: getApp().rootVm?.$route.query[searchFieldName],
+            [searchFieldName]: getApp().rootVm.$route.query[searchFieldName],
         });
     }
 
     function applySearchFilter(value: string) {
-        applyFilters({
-            ...getApp().rootVm?.$route.query,
+        return applyFilters({
+            ...getApp().rootVm.$route.query,
             [searchFieldName]: value,
         });
     }
-
-    /* eslint-enable */
 
     return { applyFilters, applyFieldsFilters, applySearchFilter };
 }
@@ -264,7 +255,7 @@ export const PAGE_WITH_INSTANCE = () => {
     const instance = shallowRef<Model | null>(null);
     const sandbox = ref<Record<string, any>>({});
     const providedInstance = computed<Model | undefined>(
-        () => app.rootVm?.$route.params.providedInstance as Model | undefined,
+        () => app.rootVm.$route.params.providedInstance as unknown as Model | undefined,
     );
 
     function setInstance(newInstance: Model) {
@@ -319,9 +310,7 @@ export const createActionStore = (view: ActionView) => {
     async function execute() {
         try {
             pageWithEditableData.changedFields.value = [];
-            const executeAction = view.actions.get('execute');
-            // TODO actions.js -> actions.ts
-            /* eslint-disable */
+            const executeAction = view.actions.get('execute') as NotEmptyAction;
             const response = await app.actions.executeWithData({
                 action: executeAction,
                 data: pageWithEditableData.sandbox.value,
@@ -330,14 +319,10 @@ export const createActionStore = (view: ActionView) => {
                 path: view.getRequestPath(app.router.currentRoute),
                 throwError: true,
             });
-            /* eslint-enable */
             pageWithEditableData.fieldsErrors.value = {};
-            openPage(
-                // TODO spa.js -> spa.ts
-                executeAction?.redirectPath ??
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
-                    getRedirectUrlFromResponse(response.data, view.action.responseModel) ??
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+            void openPage(
+                executeAction.redirectPath ??
+                    getRedirectUrlFromResponse((response as APIResponse).data, view.action.responseModel) ??
                     view.getRedirectUrl(app.router.currentRoute),
             );
         } catch (e) {
@@ -360,9 +345,9 @@ export const createActionStore = (view: ActionView) => {
 
 type BaseViewStore = Store<
     `page_${string}`,
-    StoreState<typeof useBasePageData>,
-    StoreGetters<typeof useBasePageData>,
-    StoreActions<typeof useBasePageData>
+    StoreState<ReturnType<typeof useBasePageData>>,
+    StoreGetters<ReturnType<typeof useBasePageData>>,
+    StoreActions<ReturnType<typeof useBasePageData>>
 > & {
     fetchData?: () => Promise<void>;
     updateData?: () => Promise<void>;
@@ -373,8 +358,9 @@ export function useViewStore<T extends View>(view: T) {
     const app = getApp();
     const store = defineStore(`page_${getUniqueId()}`, view.getStoreDefinition())() as BaseViewStore;
     if (store.fetchData) {
-        void store.fetchData();
+        store.fetchData();
     }
+
     app.store.setPage(store);
 
     onUnmounted(() => {
@@ -388,9 +374,9 @@ export const onRouterBeforeEach = (() => {
     const handlers = new Map<number, NavigationGuard>();
     let lastId = 0;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    signals.once('app.afterInit', ({ app }: { app: App }) => {
-        (app.router as VueRouter).beforeEach((to, from, next) => {
+    signals.once('app.afterInit', (args: unknown) => {
+        const app = (args as { app: IApp }).app;
+        app.router!.beforeEach((to, from, next) => {
             if (handlers.size > 0) {
                 for (const handler of handlers.values()) {
                     handler(to, from, next);

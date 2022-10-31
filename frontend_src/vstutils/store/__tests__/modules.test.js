@@ -1,10 +1,8 @@
-import { expect, jest, test, describe, beforeAll } from '@jest/globals';
+import { expect, test, describe, beforeAll } from '@jest/globals';
 import { defineStore } from 'pinia';
 import { createListViewStore } from '../page.ts';
 import { createApp } from '../../../unittests/create-app';
 import { createSchema } from '../../../unittests/schema';
-
-jest.mock('../../api');
 
 describe('List store module', () => {
     let app;

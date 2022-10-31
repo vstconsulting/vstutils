@@ -92,6 +92,6 @@
     }
 
     function executeEmptyAction() {
-        app.actions.executeEmpty({ action: props.emptyAction });
+        app.actions.executeEmpty({ action: props.emptyAction! });
     }
 </script>

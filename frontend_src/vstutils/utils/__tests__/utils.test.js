@@ -12,7 +12,9 @@ import {
     stringToBoolean,
     generatePassword,
     getRedirectUrlFromResponse,
-} from '../index.js';
+    smartTranslate,
+} from '@/vstutils/utils';
+import { i18n } from '@/vstutils/translation.js';
 import { StringField } from '../../fields/text';
 import { createApp } from '../../../unittests/create-app';
 
@@ -250,5 +252,19 @@ describe('utils', () => {
 
         expect(getRedirectUrlFromResponse({ name: 'test_response_data' }, validModel)).toBeUndefined();
         expect(getRedirectUrlFromResponse(responseData, validModel)).toBe(viewToBeFound.path);
+    });
+
+    test('smart translation', () => {
+        i18n.setLocaleMessage('ru', {
+            Hello: 'Привет',
+            world: 'мир',
+        });
+        i18n.locale = 'ru';
+
+        expect(smartTranslate('Hello')).toBe('Привет');
+        expect(smartTranslate('World')).toBe('Мир');
+        expect(smartTranslate(undefined)).toBe('');
+        expect(smartTranslate(null)).toBe('');
+        expect(smartTranslate('VST')).toBe('VST');
     });
 });

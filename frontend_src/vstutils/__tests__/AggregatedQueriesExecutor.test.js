@@ -1,16 +1,25 @@
-import { expect, jest, test, describe } from '@jest/globals';
+import { expect, beforeEach, test, describe, beforeAll } from '@jest/globals';
+import fetchMock from 'jest-fetch-mock';
 import { makeModel, Model } from '../models/Model.js';
 import QuerySet from '../querySet/QuerySet.js';
-import StringField from '../fields/text/StringField.js';
+import { StringField } from '../fields/text/';
 import { IntegerField } from '../fields/numbers/integer.js';
-import { APIResponse, apiConnector } from '../api';
 import { RequestTypes } from '../utils';
 import { AggregatedQueriesExecutor } from '../AggregatedQueriesExecutor.js';
 import { NotFoundError } from '../querySet/errors.js';
-
-jest.mock('./../api');
+import { apiConnector } from '../api/ApiConnector';
+import { createAppConfig } from '../../unittests/create-app';
 
 describe('AggregatedQueriesExecutor', () => {
+    beforeAll(() => {
+        apiConnector.initConfiguration(createAppConfig());
+        fetchMock.enableMocks();
+    });
+
+    beforeEach(() => {
+        fetchMock.resetMocks();
+    });
+
     const idField = new IntegerField({ name: 'id', readOnly: true });
     const nameField = new StringField({ name: 'name' });
 
@@ -30,20 +39,6 @@ describe('AggregatedQueriesExecutor', () => {
     ];
 
     test('execute', async () => {
-        apiConnector._requestHandler = (request) => {
-            expect(request.method).toBe('get');
-            expect(request.path).toStrictEqual(['users']);
-
-            expect(request.query.id).toBe('1,2,3,4');
-
-            return new APIResponse(200, {
-                count: 3,
-                next: null,
-                previous: null,
-                results: usersData,
-            });
-        };
-
         const executor = new AggregatedQueriesExecutor(usersQueryset, 'id');
 
         async function assertDataValid(promise, expectedData) {
@@ -70,6 +65,19 @@ describe('AggregatedQueriesExecutor', () => {
             assertDataValid(executor.query(1), usersData[0]),
         ]);
 
+        fetchMock.mockResponseOnce(
+            JSON.stringify([
+                {
+                    status: 200,
+                    data: {
+                        count: 3,
+                        next: null,
+                        previous: null,
+                        results: usersData,
+                    },
+                },
+            ]),
+        );
         await executor.execute();
         await checks;
     });

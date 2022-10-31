@@ -130,7 +130,7 @@ export function makeModel(cls, name) {
 
 /**
  * Data that goes to/from api
- * @typedef {Object} InnerData
+ * @typedef {Record<string, unknown>} InnerData
  */
 
 /**
@@ -157,11 +157,11 @@ export class Model {
     static nonBulkMethods = null;
     /** @type {string|null} */
     static translateModel = null;
-    /** @type {Map<string, BaseField>} */
+    /** @type {Map<string, Field>} */
     static fields = new Map();
 
     /**
-     * @param {InnerData=} data
+     * @param {InnerData} data
      * @param {QuerySet=} queryset
      * @param {Model=} parentInstance
      */
@@ -301,7 +301,7 @@ export class Model {
                 value = value.name || value.title;
             }
             if (value === null || value === undefined) {
-                return;
+                return '';
             }
             const strValue = this._viewField.translateValue(String(value));
 

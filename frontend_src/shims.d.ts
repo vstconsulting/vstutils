@@ -1,25 +1,5 @@
-import Vue from 'vue';
-import type { App } from './spa.js';
-
-declare module 'vue/types/vue' {
-    interface VueConstructor {
-        $app: App;
-        $st(text: string): string;
-    }
-}
-
-declare module 'vue/types/vue' {
-    interface Vue {
-        $app: App;
-        $st(text: string): string;
-    }
-}
-
-declare module 'vue/types/options' {
-    interface ComponentOptions<V extends Vue> {
-        app?: App;
-    }
-}
+import { IApp } from './vstutils/app';
+import type * as SPA from './app.common.js';
 
 declare global {
     interface String {
@@ -28,4 +8,12 @@ declare global {
     interface Array<T> {
         get last(): T;
     }
+
+    /* eslint-disable no-var */
+    var spa: typeof SPA;
+    var App: new (...args: any[]) => IApp;
+    var __currentApp: IApp;
+    /* eslint-enable no-var */
 }
+
+export {};

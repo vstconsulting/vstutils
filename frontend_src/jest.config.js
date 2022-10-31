@@ -30,6 +30,8 @@ module.exports = {
         '^(admin-lte|bootstrap).*(\\.js)?': '<rootDir>/__mocks__/fileMock.js',
         '^(admin-lte|bootstrap).*(\\.(js|scss))?': '<rootDir>/__mocks__/styleMock.js',
         '^(@splidejs/vue-splide).*': '<rootDir>/__mocks__/fileMock.js',
+
+        '^@/(.*)$': '<rootDir>/$1',
     },
 
     // A list of paths to directories that Jest should use to search for files in

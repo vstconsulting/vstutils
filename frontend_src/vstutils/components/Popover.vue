@@ -6,7 +6,7 @@
     /**
      * @see {@link https://getbootstrap.com/docs/4.6/components/popovers/}
      */
-    import $ from 'jquery';
+    import * as $ from 'jquery';
     import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 
     const props = defineProps({

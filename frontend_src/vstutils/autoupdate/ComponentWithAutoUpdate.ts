@@ -8,7 +8,6 @@ export default defineComponent({
     computed: {
         autoUpdatePK() {
             if (typeof this.getInstancePk === 'function') {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return (this.getInstancePk as () => number | string)();
             }
             return undefined;

@@ -30,33 +30,22 @@ class OpenAPILoader {
     }
 
     /**
-     * Method, that promises to load OpenApi schema from cache.
-     * @return {Promise} Promise of loading of OpenApi schema from Cache.
-     */
-    loadSchemaFromCache() {
-        return this.cache
-            .get(this.cacheKey)
-            .then((response) => {
-                return JSON.parse(response.data);
-            })
-            .catch(() => {
-                return this.loadSchemaFromApi().then((openapi) => {
-                    this.cache.set(this.cacheKey, JSON.stringify(openapi));
-                    return openapi;
-                });
-            });
-    }
-
-    /**
      * Method, that promises to load OpenApi schema.
      * @return {promise} Promise of OpenApi schema loading.
      */
-    loadSchema() {
-        let method = this.cache ? 'loadSchemaFromCache' : 'loadSchemaFromApi';
-        return this[method]().catch((error) => {
+    async loadSchema() {
+        const cached = await this.cache.getJson(this.cacheKey);
+        if (cached) {
+            return cached;
+        }
+        try {
+            const schema = await this.loadSchemaFromApi();
+            this.cache.set(this.cacheKey, JSON.stringify(schema));
+            return schema;
+        } catch (error) {
             console.error('Some error occurred during attempt of getting of OpenAPI schema.');
             throw error;
-        });
+        }
     }
 }
 

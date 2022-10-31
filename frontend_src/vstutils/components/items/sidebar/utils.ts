@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import * as $ from 'jquery';
 import type { RawLocation } from 'vue-router';
 import type { Action } from '../../../views';
 import { XMenu } from '../../../AppConfiguration';
@@ -39,11 +39,8 @@ export function convertXMenuToSidebar(xMenu: XMenu): MenuItem[] {
             if (fragments.length > 1) {
                 const viewPath = `/${fragments.slice(0, -1).join('/')}/`;
                 const actionName = fragments.at(-1);
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-                const action = app.views.get(viewPath)?.actions.get(actionName);
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                const action = app.views.get(viewPath)?.actions.get(actionName!);
                 if (action?.isEmpty) {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     emptyAction = action;
                 }
             }

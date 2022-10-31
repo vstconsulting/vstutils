@@ -14,7 +14,6 @@ export function useAutoUpdate({
     pk?: CentrifugoAutoUpdateAction['pk'];
     startOnMount?: boolean;
 }) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const app = getApp();
     const id = getUniqueId();
 
@@ -32,10 +31,7 @@ export function useAutoUpdate({
                   callback: callback,
                   triggerType: 'timer',
               };
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return
     const start = () => app.autoUpdateStore.subscribe(autoUpdateAction);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return
     const stop = () => app.autoUpdateStore.unsubscribe(id);
 
     if (startOnMount) {

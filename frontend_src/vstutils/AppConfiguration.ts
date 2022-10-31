@@ -1,3 +1,5 @@
+import type { Spec, Info, Schema } from 'swagger-schema-official';
+
 declare global {
     interface Window {
         isDebug: boolean;
@@ -22,18 +24,27 @@ export interface XMenuItem {
 
 export type XMenu = XMenuItem[];
 
-interface Schema {
-    info: {
-        'x-settings': {
-            static_path: string;
-            login_url: string;
-            logout_url: string;
-            [key: string]: any;
-        };
-        'x-page-limit': number;
-        'x-menu': XMenu;
+export interface AppInfo extends Info {
+    'x-settings': {
+        static_path: string;
+        login_url: string;
+        logout_url: string;
         [key: string]: any;
     };
+    'x-docs': {
+        has_docs: boolean;
+        docs_url: string;
+    };
+    'x-page-limit': number;
+    'x-menu': XMenu;
+    'x-centrifugo-address'?: string;
+    'x-centrifugo-token'?: string;
+    [key: string]: any;
+}
+
+export interface AppSchema extends Spec {
+    info: AppInfo;
+    definitions: Record<string, Schema>;
     [key: string]: any;
 }
 
@@ -47,7 +58,7 @@ interface Params {
     fullUserVersion?: string;
     isSuperuser?: boolean;
     isStaff?: boolean;
-    schema: Schema;
+    schema: AppSchema;
     defaultPageLimit?: number;
 }
 
@@ -61,7 +72,7 @@ export class AppConfiguration {
     fullUserVersion: string;
     isSuperuser: boolean;
     isStaff: boolean;
-    schema: Record<string, any>;
+    schema: AppSchema;
     defaultPageLimit: number;
     staticPath: string;
     urls: {

@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-    import $ from 'jquery';
+    import * as $ from 'jquery';
     import SidebarItem from './SidebarItem.vue';
     import { hideSidebar, MenuItem, openSidebar } from './utils';
     import { onMounted } from 'vue';
@@ -31,8 +31,7 @@
         if ('ontouchstart' in window) {
             // @ts-expect-error jquery has no types
             $('body').swipe({
-                // @ts-expect-error jquery has no types
-                swipe: (event, direction) => {
+                swipe: (_event: any, direction: string) => {
                     if (direction === 'right') {
                         openSidebar();
                     } else if (direction === 'left') {

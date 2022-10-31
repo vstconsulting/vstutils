@@ -1,4 +1,4 @@
-import { cachePromise } from './Cache.js';
+import { globalCache } from '@/cache';
 
 /**
  * Function, that cleans files cache, unregisters current Service Worker instance and reloads page.
@@ -23,7 +23,7 @@ async function cleanAllCacheAndReloadPage({ resetAll = false } = {}) {
     }
 
     try {
-        await (await cachePromise).clearAllCache();
+        await globalCache.clear();
     } finally {
         if (resetAll) {
             localStorage.clear();
@@ -40,7 +40,7 @@ async function cleanAllCacheAndReloadPage({ resetAll = false } = {}) {
  */
 async function cleanOpenApiCacheAndReloadPage() {
     try {
-        await (await cachePromise).delete('openapi');
+        await globalCache.delete('openapi');
     } finally {
         window.location.reload(true);
     }

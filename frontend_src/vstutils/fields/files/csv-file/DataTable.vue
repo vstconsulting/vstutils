@@ -146,4 +146,8 @@
     .csv-table::v-deep span.missedValue::before {
         content: var(--required-error-text);
     }
+    .csv-table::v-deep .header-cell-inner {
+        text-align: center !important;
+        word-break: break-word !important;
+    }
 </style>

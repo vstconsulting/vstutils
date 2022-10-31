@@ -1,3 +1,3 @@
-.main-sidebar {
+.main-sidebar, .iziToast-wrapper {
   padding-top: env(safe-area-inset-top);
 }

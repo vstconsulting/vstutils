@@ -1,19 +1,20 @@
-import { jest, expect, test, describe, beforeAll } from '@jest/globals';
-import { apiConnector, APIResponse } from '../../../api';
+import { expect, test, describe, beforeAll, beforeEach } from '@jest/globals';
+import fetchMock from 'jest-fetch-mock';
 import { FKField } from '../fk';
 import { createApp } from '../../../../unittests/create-app.js';
-
-jest.mock('../../../api');
 
 describe('FKfield', () => {
     /** @type {App} */
     let app, modelsClasses;
 
-    beforeAll(() => {
-        return createApp().then((a) => {
-            app = a;
-            modelsClasses = app.modelsResolver._definitionsModels;
-        });
+    beforeEach(() => {
+        fetchMock.resetMocks();
+    });
+
+    beforeAll(async () => {
+        app = await createApp();
+        modelsClasses = app.modelsResolver._definitionsModels;
+        fetchMock.enableMocks();
     });
 
     test('Test Fk model', async () => {
@@ -28,21 +29,23 @@ describe('FKfield', () => {
         const post1 = new Post({ id: 1, name: 'post1', author: 1 });
         const post2 = new Post({ id: 2, name: 'post1', author: 2 });
         const instances = [post1, post2];
-        apiConnector._requestHandler = (req) => {
-            if (Array.isArray(req.path)) req.path = req.path.join('/');
-            if (req.path === 'author') {
-                expect(req.query).toStrictEqual({ id: '1,2', limit: 2 });
-                return new APIResponse(200, {
-                    count: 2,
-                    next: null,
-                    previous: null,
-                    results: [
-                        { id: 1, name: 'a1', posts: [] },
-                        { id: 2, name: 'a2', posts: [] },
-                    ],
-                });
-            }
-        };
+
+        fetchMock.mockResponseOnce(
+            JSON.stringify([
+                {
+                    status: 200,
+                    data: {
+                        count: 2,
+                        next: null,
+                        previous: null,
+                        results: [
+                            { id: 1, name: 'a1', posts: [] },
+                            { id: 2, name: 'a2', posts: [] },
+                        ],
+                    },
+                },
+            ]),
+        );
         expect(post1._data.author).toBe(1);
         expect(post2._data.author).toBe(2);
         await authorFkField.prefetchValues(instances, '/post/');

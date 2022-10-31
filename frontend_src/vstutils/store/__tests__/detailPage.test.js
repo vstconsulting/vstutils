@@ -127,7 +127,7 @@ test('createEditViewStore', async () => {
     expect(store).not.toBeNull();
 
     // Push our path to router
-    app.router.push('/some_list/15/edit');
+    app.router.push('/some_list/16/edit');
     expect(store.response).toBeFalsy();
 
     // Mock response with empty results and make sure that response is received
@@ -177,7 +177,7 @@ test('patchEditViewStore', async () => {
     const editView = app.views.get('/some_list/{id}/edit/');
 
     const store = defineStore('patch_store', editView.getStoreDefinition())();
-    app.router.push('/some_list/15/edit');
+    app.router.push('/some_list/17/edit');
 
     fetchMock.mockResponseOnce(
         JSON.stringify([

@@ -48,9 +48,7 @@ const createRemoveInstance =
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 unselect?.(instance.getPkValue());
             } else {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                 const route = app.router.currentRoute;
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
                 return openPage(route.path.replace(/[^/]+\/?$/, ''));
             }
         } catch (error) {
@@ -116,14 +114,12 @@ export const createListViewStore = (view: ListView) => () => {
     }
 
     function getQuery(): Route['query'] {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const route = app.router.currentRoute as Route;
+        const route = app.router.currentRoute;
         let query = route.query;
 
         let deepParentFilter: string | null = null;
 
         if (view.deepNestedParentView) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             deepParentFilter = route.params[(view.parent! as PageView).pkParamName!];
         } else if (view.deepNestedView) {
             deepParentFilter = '';
@@ -195,7 +191,6 @@ export const createListViewStore = (view: ListView) => () => {
         setQuery,
         updateData,
         fetchData,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         removeInstance: createRemoveInstance({
             pageView: view.pageView,
             unselect: (id) => selection.unselectIds([id]),
@@ -224,8 +219,7 @@ export const createDetailViewStore = (view: PageView) => () => {
         if (pageWithInstance.instance.value) {
             return pageWithInstance.instance.value.getPkValue() as number | string;
         }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-        return app.router.currentRoute.params[view.pkParamName];
+        return app.router.currentRoute.params[view.pkParamName!];
     }
 
     function getAutoUpdatePk() {
@@ -275,7 +269,6 @@ export const createDetailViewStore = (view: PageView) => () => {
 
     async function fetchData(instancePk?: string | number) {
         base.initLoading();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
         setFilters(app.router.currentRoute.query);
 
         try {
@@ -297,15 +290,13 @@ export const createDetailViewStore = (view: PageView) => () => {
 
     function applyFilters() {
         if (view.filtersModelClass) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
             const query = view.filtersModelClass.representToInner(filters.value);
-            openPage({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+            return openPage({
                 path: app.router.currentRoute.path,
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
                 query: { ...app.router.currentRoute.query, ...query },
             });
         }
+        return undefined;
     }
 
     return {
@@ -368,10 +359,9 @@ export const createNewViewStore = (view: PageNewView) => () => {
 
             guiPopUp.success(i18n.t(pop_up_msg.instance.success.save, [name, view.name]) as string);
             if (view.isDeepNested) {
-                openPage(getRedirectUrl());
-                return;
+                return openPage(getRedirectUrl());
             }
-            openPage({ path: getRedirectUrl(), params: { providedInstance } });
+            return openPage({ path: getRedirectUrl(), params: { providedInstance } });
         } catch (error) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
             const modelValidationError = instance.parseModelError((error as any).data);
@@ -379,7 +369,6 @@ export const createNewViewStore = (view: PageNewView) => () => {
                 pageWithEditableData.fieldsErrors.value = modelValidationError.toFieldsErrors();
             }
             app.error_handler.showError(
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 i18n.t(pop_up_msg.instance.error.create, [
                     app.error_handler.errorToString(modelValidationError || error),
                 ]) as string,
@@ -450,10 +439,9 @@ export const createEditViewStore = (view: PageEditView) => () => {
 
             guiPopUp.success(i18n.t(pop_up_msg.instance.success.save, [name, view.name]) as string);
             if (view.isDeepNested) {
-                openPage(getRedirectUrl());
-                return;
+                return openPage(getRedirectUrl());
             }
-            openPage({ path: getRedirectUrl(), params: { providedInstance } });
+            return openPage({ path: getRedirectUrl(), params: { providedInstance } });
         } catch (error) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
             const modelValidationError = instance.parseModelError((error as any).data);
@@ -475,7 +463,6 @@ export const createEditViewStore = (view: PageEditView) => () => {
     }
     function cancel() {
         pageViewStore.changedFields.value = [];
-        (app.rootVm?.goBack as unknown as () => void)();
     }
 
     return { ...pageViewStore, model, setInstance, save, reload, cancel };

@@ -57,3 +57,5 @@ export const createUserSettingsStore = (api: ApiConnector) =>
             },
         },
     });
+
+export type UserSettingsStore = ReturnType<ReturnType<typeof createUserSettingsStore>>;
