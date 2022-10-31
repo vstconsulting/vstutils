@@ -51,6 +51,10 @@ TRANSLATION = {
     'Username not': 'Имя пользователя не',
     'Download file': 'Загрузить файл',
     'File list': 'Список файлов',
+    'Select file': 'Выбрать файл',
+    'Select files': 'Выбрать файлы',
+    'Clear field': 'Очистить поле',
+    'Column is required!': 'Колонка обязательна',
 
     # fields
     'Id': 'Идентификатор',

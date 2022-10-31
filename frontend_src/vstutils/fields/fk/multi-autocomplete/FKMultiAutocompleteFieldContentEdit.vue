@@ -27,7 +27,7 @@
             @set-new-value="setValueInStore"
             @update-query-set="updateQuerySet"
         />
-        <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
+        <ClearButton @click.native="clearValue" />
     </div>
 </template>
 

@@ -64,6 +64,11 @@
     export default {
         name: 'ModelFields',
         components: { HideNotRequiredSelect },
+        provide() {
+            return {
+                requireValueOnClear: this.requireValueOnClear,
+            };
+        },
         props: {
             data: { type: Object, required: true },
             model: { type: Function, required: true },
@@ -92,6 +97,8 @@
             fieldsErrors: { type: Object, default: () => ({}) },
 
             groupsClasses: { type: [String, Object, Array], default: '' },
+
+            requireValueOnClear: { type: Boolean, default: false },
         },
         data() {
             return {

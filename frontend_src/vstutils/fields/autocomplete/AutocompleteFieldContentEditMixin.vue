@@ -12,7 +12,7 @@
 
         <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
         <SetDefaultButton v-if="hasDefaultValue" @click.native="$emit('set-value', field.default)" />
-        <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
+        <ClearButton @click.native="clearValue" />
     </div>
 </template>
 

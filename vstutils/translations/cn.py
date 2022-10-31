@@ -51,6 +51,10 @@ TRANSLATION = {
     'Username not': '用户名不是',
     'Download file': '下载文件',
     'File list': '文件列表',
+    'Select file': '选择文件',
+    'Select files': '选择文件',
+    'Clear field': '清场',
+    'Column is required!': '列是必需的!',
 
     # fields
     'Id': '标识符',

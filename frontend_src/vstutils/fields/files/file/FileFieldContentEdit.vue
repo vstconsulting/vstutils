@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="file-buttons">
-            <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
+            <ClearButton @click.native="clearValue" />
             <ReadFileButton :media-types="field.allowedMediaTypes" @read-file="$parent.readFile($event)" />
             <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
         </div>

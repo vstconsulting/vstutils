@@ -51,6 +51,10 @@ TRANSLATION = {
     'Username not': 'Tên người dùng không phải',
     'Download file': 'Tải tập tin',
     'File list': 'Danh sách tệp',
+    'Select file': 'Chọn tập tin',
+    'Select files': 'Chọn tệp tin',
+    'Clear field': 'Vùng đất thoáng đãng',
+    'Column is required!': 'Cột là bắt buộc!',
 
     # fields
     'Id': 'định danh',
