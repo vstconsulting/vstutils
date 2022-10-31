@@ -43,6 +43,5 @@
 <style>
     tr td.column-format-namedbinimage {
         height: inherit;
-        padding: 1px !important;
     }
 </style>

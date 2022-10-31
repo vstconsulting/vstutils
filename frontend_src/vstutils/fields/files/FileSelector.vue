@@ -15,7 +15,7 @@
             v-else
             class="btn btn-secondary"
             style="margin-bottom: 0"
-            :title="$t(helpText)"
+            :title="$tc(helpText)"
             @change="changeHandler"
         >
             <input

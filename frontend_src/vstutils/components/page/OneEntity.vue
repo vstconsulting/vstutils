@@ -31,6 +31,7 @@
                 :fields-errors="fieldsErrors"
                 :hide-read-only="hideReadOnly"
                 :hide-not-required="hideNotRequired"
+                :require-value-on-clear="view.type === $u.ViewTypes.PAGE_NEW"
                 @set-value="setFieldValue"
             />
         </div>

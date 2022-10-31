@@ -23,7 +23,7 @@
         </div>
         <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
         <SetDefaultButton v-if="hasDefaultValue" @click.native="$emit('set-value', field.default)" />
-        <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
+        <ClearButton @click.native="clearValue" />
     </div>
 </template>
 
@@ -39,6 +39,12 @@
         name: 'BaseFieldContentEdit',
         components: { ClearButton, SetDefaultButton, HideButton },
         mixins: [BaseFieldContentMixin, BaseFieldInnerComponentMixin, FieldLabelIdMixin],
+        inject: {
+            requireValueOnClear: {
+                from: 'requireValueOnClear',
+                default: false,
+            },
+        },
         props: {
             field: { type: Object, required: true },
             // eslint-disable-next-line vue/require-prop-types
@@ -66,6 +72,12 @@
         methods: {
             setValue(value) {
                 this.$emit('set-value', value);
+            },
+            clearValue() {
+                this.$emit(
+                    'set-value',
+                    this.field.getInitialValue({ requireValue: !this.requireValueOnClear }),
+                );
             },
         },
     };

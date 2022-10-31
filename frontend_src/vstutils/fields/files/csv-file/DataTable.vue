@@ -139,10 +139,17 @@
 </script>
 
 <style scoped>
-    .csv-table::v-deep .item-cell.missedValue {
-        border: 1px solid red;
+    .csv-table::v-deep .item-cell {
+        margin: -1px -1px 0 0;
+        border: 1px solid transparent;
+        border-bottom: 1px solid #ebeef5;
     }
-
+    .csv-table::v-deep .item-line:first-child {
+        padding: 1px 0 0 0;
+    }
+    .csv-table::v-deep .item-cell.missedValue {
+        border-color: red;
+    }
     .csv-table::v-deep span.missedValue::before {
         content: var(--required-error-text);
     }

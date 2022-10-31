@@ -76,7 +76,7 @@ export interface Field<Inner, Represent, XOptions extends FieldXOptions = FieldX
     prepareFieldForView(path: string): void;
     afterInstancesFetched(instances: Model[], queryset: QuerySet): Promise<void>;
 
-    getInitialValue(): Inner | undefined | null;
+    getInitialValue(args?: { requireValue: boolean }): Inner | undefined | null;
     getEmptyValue(): Inner | undefined | null;
 
     toDescriptor(): ModelPropertyDescriptor<Represent>;
@@ -193,8 +193,8 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
     /**
      * Returns field default value if any, or empty value otherwise
      */
-    getInitialValue(): Inner | undefined | null {
-        if (this.required) {
+    getInitialValue({ requireValue = false } = {}): Inner | undefined | null {
+        if (this.required || requireValue) {
             return this.hasDefault ? this.default : this.getEmptyValue();
         }
         return undefined;

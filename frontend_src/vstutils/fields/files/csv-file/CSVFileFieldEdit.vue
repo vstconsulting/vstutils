@@ -49,12 +49,14 @@
                     meta: null,
                 },
                 tableConfig: this.field.getTableConfig(),
-                requiredErrorTextVar: `--required-error-text: "${this.$t('Column is required!')}"`,
             };
         },
         computed: {
             rows() {
                 return this.value || [];
+            },
+            requiredErrorTextVar() {
+                return `--required-error-text: "${this.$tc('Column is required!')}"`;
             },
         },
         watch: {

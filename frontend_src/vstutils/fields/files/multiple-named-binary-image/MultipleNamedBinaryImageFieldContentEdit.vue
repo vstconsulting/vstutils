@@ -21,7 +21,7 @@
 
             <ReadFileButton :media-types="field.allowedMediaTypes" @read-file="readFiles" />
             <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
-            <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
+            <ClearButton @click.native="clearValue" />
         </div>
         <Carousel
             v-if="value && value.length"

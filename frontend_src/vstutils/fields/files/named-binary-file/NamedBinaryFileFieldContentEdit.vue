@@ -5,7 +5,7 @@
         :media-types="field.allowedMediaTypes"
         :text="val"
         @read-file="readFile"
-        @clear="$emit('set-value', field.getInitialValue())"
+        @clear="clearValue"
         @hide="$emit('hide-field', field)"
     />
 </template>
