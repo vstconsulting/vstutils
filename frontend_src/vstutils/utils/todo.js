@@ -1184,54 +1184,6 @@ export function iterFind(iterator, callbackFn) {
 }
 
 /**
- * @typedef {Object} FieldValidationErrorInfo
- * @property {BaseField} field
- * @property {string|Object} message
- */
-
-/**
- * Class that stores errors related to model's fields
- */
-export class ModelValidationError extends Error {
-    /**
-     * @param {FieldValidationErrorInfo[]} errors
-     */
-    constructor(errors = []) {
-        super();
-        this.errors = errors;
-    }
-
-    /**
-     * @return {Object}
-     */
-    toFieldsErrors() {
-        const fieldsErrors = {};
-        for (const { field, message } of this.errors) {
-            if (!message) {
-                continue;
-            }
-            if (typeof message === 'object') {
-                fieldsErrors[field.name] = message;
-            } else {
-                fieldsErrors[field.name] = i18n.t(message);
-            }
-        }
-        return fieldsErrors;
-    }
-
-    /**
-     * @return {string}
-     */
-    toHtmlString() {
-        const lines = [];
-        for (const { field, message } of this.errors) {
-            lines.push(`<b>${i18n.t(escapeHtml(field.title))}</b>: ${i18n.t(escapeHtml(message))}`);
-        }
-        return lines.join('<br />');
-    }
-}
-
-/**
  * Function that wraps object in Proxy
  * @param {object} target
  * @param {string|symbol} propertyToProxy

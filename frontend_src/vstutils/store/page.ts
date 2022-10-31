@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue';
-import type { Model } from '../models';
+import { Model, ModelValidationError } from '../models';
 import type { PageEditView, PageNewView, PageView, ActionView, Action, ListView } from '../views';
-import { isInstancesEqual, ModelValidationError, RequestTypes, openPage, getApp } from '../utils';
+import { isInstancesEqual, RequestTypes, openPage, getApp } from '../utils';
 import { i18n } from '../translation';
 import { guiPopUp, pop_up_msg } from '../popUp';
 import { Route } from 'vue-router';

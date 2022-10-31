@@ -1,5 +1,5 @@
 import { guiPopUp } from './PopUp';
-import { ModelValidationError } from '../utils';
+import { ModelValidationError } from '@/vstutils/models/errors';
 
 const SPECIAL_ERRORS_KEYS = ['non_field_errors', 'other_errors'];
 

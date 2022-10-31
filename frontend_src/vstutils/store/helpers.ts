@@ -11,12 +11,11 @@ import {
     onBeforeUnmount,
 } from 'vue';
 import { defineStore, Store, StoreActions, StoreState, StoreGetters } from 'pinia';
-import type { Model } from '../models';
+import { Model, ModelValidationError } from '../models';
 import type { QuerySet } from '../querySet';
 import type { View, ActionView, NotEmptyAction } from '../views';
 import signals from '../signals';
 import {
-    ModelValidationError,
     openPage,
     getRedirectUrlFromResponse,
     getApp,

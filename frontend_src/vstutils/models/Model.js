@@ -1,4 +1,5 @@
-import { escapeHtml, hasOwnProp, mergeDeep, ModelValidationError } from '../utils';
+import { escapeHtml, hasOwnProp, mergeDeep } from '../utils';
+import { ModelValidationError } from './errors';
 
 class ModelUtils {
     static pkFields = ['id', 'pk'];
