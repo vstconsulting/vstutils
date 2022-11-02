@@ -57,7 +57,7 @@ export class ActionsManager {
 
         if (action.confirmationRequired && !skipConfirmation) {
             return this.requestConfirmation({ title: action.title }).then(() => {
-                args.skipConfirmation = false;
+                args.skipConfirmation = true;
                 return this.execute(args);
             });
         }

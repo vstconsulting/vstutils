@@ -119,7 +119,18 @@
                 if (this.cropper) {
                     return;
                 }
+
+                const minCroppedWidth = this.config.width.min;
+                const minCroppedHeight = this.config.height.min;
+                const maxCroppedWidth = this.config.width.max;
+                const maxCroppedHeight = this.config.height.max;
+
                 this.cropper = new Cropper(this.$refs.image, {
+                    dragMode: 'move',
+                    data: {
+                        width: (minCroppedWidth + maxCroppedWidth) / 2,
+                        height: (minCroppedHeight + maxCroppedHeight) / 2,
+                    },
                     ready: () => {
                         this.ready = true;
                     },
@@ -131,15 +142,19 @@
                         this.width = w;
                         this.height = h;
 
-                        const newData = ['width', 'height'].reduce((map, val) => {
-                            const { min, max } = this.config[val];
-                            const value = event.detail[val];
-                            if (value < min || value > max) {
-                                map.set(val, Math.max(min, Math.min(max, value)));
-                            }
-                            return map;
-                        }, new Map());
-                        if (newData.size) this.cropper.setData(Object.fromEntries(newData));
+                        if (
+                            (this.width < minCroppedWidth ||
+                                this.height < minCroppedHeight ||
+                                this.width > maxCroppedWidth ||
+                                this.height > maxCroppedHeight) &&
+                            this.cropper.element.clientHeight >= this.height &&
+                            this.cropper.cropper.clientWidth >= this.width
+                        ) {
+                            this.cropper.setData({
+                                width: Math.max(minCroppedWidth, Math.min(maxCroppedWidth, this.width)),
+                                height: Math.max(minCroppedHeight, Math.min(maxCroppedHeight, this.height)),
+                            });
+                        }
                     },
                 });
             },
