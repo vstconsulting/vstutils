@@ -5,7 +5,6 @@ window.Vue27 = Vue27;
 
 import VueI18n from 'vue-i18n';
 window.VueI18n = VueI18n;
-Vue.use(VueI18n);
 
 import * as pinia from 'pinia';
 window.pinia = pinia;
