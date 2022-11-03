@@ -36,14 +36,12 @@
             return {
                 view: undefined,
                 action: undefined,
-                viewComponent: undefined,
             };
         },
         methods: {
             execute({ instances, action }) {
                 this.instances = instances;
                 this.action = action;
-                this.viewComponent = this.$root.$refs.currentViewComponent;
                 this.openModal();
             },
             closeModal() {
@@ -54,17 +52,28 @@
             },
             async performDeletion(purge) {
                 this.closeModal();
-                if (this.viewComponent.view.type === ViewTypes.PAGE) {
-                    await this.viewComponent.removeInstance(purge);
+                if (this.$app.store.page.view.type === ViewTypes.PAGE) {
+                    await this.$app.store.page.removeInstance({
+                        instance: this.$app.store.page.instance,
+                        purge,
+                    });
                     return;
                 }
                 if (this.instances.length === 1) {
-                    await this.viewComponent.removeInstance(this.action, this.instances.pop(), purge);
+                    await this.$app.store.page.removeInstance({
+                        action: this.action,
+                        instance: this.instances.pop(),
+                        fromList: true,
+                        purge,
+                    });
                     return;
                 }
-                await this.viewComponent.removeInstances(this.action, this.instances, purge);
-                await this.viewComponent.dispatchAction('toggleAllSelection');
-                this.viewComponent.fetchData();
+                await this.$app.store.page.removeInstances({
+                    action: this.action,
+                    instances: this.instances,
+                    purge,
+                });
+                this.$app.store.page.toggleAllSelection();
             },
         },
     };
