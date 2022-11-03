@@ -1,7 +1,7 @@
 import VueRouter from 'vue-router';
 import signals from '../signals.js';
-import { View, mixins } from '../views';
-import Home from './customPages/Home.js';
+import { View } from '../views';
+import { NotFound, Home } from '@/vstutils/router/customPages';
 
 export default class RouterConstructor {
     /**
@@ -11,7 +11,6 @@ export default class RouterConstructor {
      */
     constructor(views) {
         this.views = views;
-        this.custom_components_templates = mixins.customRoutesComponentsTemplates;
         this.routes = this.formAllRoutes();
     }
 
@@ -30,13 +29,7 @@ export default class RouterConstructor {
     formAllRoutes() {
         let routes = [];
 
-        routes = routes.concat(this.formRoutesBasedOnViews(), this.formRoutesBasedOnCustomComponents(), {
-            name: '404',
-            path: '*',
-            component: this.custom_components_templates['404'] || {},
-        });
-
-        this.emitSignalAboutRouteCreation(routes.last);
+        routes = routes.concat(this.formRoutesBasedOnViews());
 
         signals.emit('allRoutes.created', routes);
 
@@ -48,55 +41,21 @@ export default class RouterConstructor {
      * @return {array} Routes Array.
      */
     formRoutesBasedOnViews() {
-        let routes = [];
-        for (let view of this.views.values()) {
-            if (view.hidden) continue;
-            routes.push(view.toRoute());
-            this.emitSignalAboutRouteCreation(routes.last);
-        }
-
         if (!this.views.has('/')) {
             const homeView = new View({ path: '/', routeName: 'home' }, null, [Home]);
             this.views.set('/', homeView);
-            routes.push(homeView.toRoute());
-            this.emitSignalAboutRouteCreation(routes.last);
         }
 
-        return routes;
-    }
+        if (!this.views.has('*')) {
+            const notFoundView = new View({ path: '*', routeName: '404' }, null, [NotFound]);
+            this.views.set('*', notFoundView);
+        }
 
-    /**
-     * Method, that forms array of possible routes of App based on App custom views components
-     * (this.custom_components_templates).
-     * @return {array} Routes Array.
-     */
-    formRoutesBasedOnCustomComponents() {
         let routes = [];
 
-        for (let item in this.custom_components_templates) {
-            if (!Object.prototype.hasOwnProperty.call(this.custom_components_templates, item)) {
-                continue;
-            }
-
-            if (['home', '404'].includes(item)) {
-                continue;
-            }
-
-            let path_template = item.replace(/{/g, ':').replace(/}/g, '');
-
-            if (
-                this.custom_components_templates[item].getPathTemplateForRouter &&
-                typeof this.custom_components_templates[item].getPathTemplateForRouter === 'function'
-            ) {
-                path_template = this.custom_components_templates[item].getPathTemplateForRouter(item);
-            }
-
-            routes.push({
-                name: item,
-                path: path_template,
-                component: this.custom_components_templates[item],
-            });
-
+        for (let view of this.views.values()) {
+            if (view.hidden) continue;
+            routes.push(view.toRoute());
             this.emitSignalAboutRouteCreation(routes.last);
         }
 

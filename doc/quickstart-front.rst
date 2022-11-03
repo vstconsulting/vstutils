@@ -225,7 +225,6 @@ For example this style will show pk column on all list views of `Order` model:
 View customization
 -------------------
 
-
 Listen for signal `"allViews.created"` and add new custom mixin to the view.
 
 Next code snippet depicts rendering new view instead of default view.
@@ -259,6 +258,16 @@ For example, override breadcrumbs computed property to turn off breadcrumbs on A
           },
         },
       });
+    });
+
+Sometimes you may need to hide detail page for some reason, but still want all actions and sublinks to be accessible from list page.
+To do it you also should listen signal `"allViews.created"` and change parameter `hidden` from default `false` to `true`, for example:
+
+.. sourcecode:: javascript
+
+    spa.signals.once('allViews.created', ({ views }) => {
+        const authorView = views.get('/author/{id}/');
+        authorView.hidden = true;
     });
 
 

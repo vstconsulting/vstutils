@@ -163,6 +163,9 @@
             // Page view
 
             openPageView(instance) {
+                if (this.view.pageView.hidden) {
+                    return;
+                }
                 if (this.view.isDeepNested) {
                     return this.$router.push(joinPaths(this.$route.path, instance.getPkValue()));
                 }
