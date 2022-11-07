@@ -4,10 +4,11 @@
     </div>
 </template>
 <script>
-    import ErrorPage from '../../components/ErrorPage';
+    import { BaseViewMixin, ErrorPage } from '@/vstutils/components';
 
     export default {
         components: { ErrorPage },
+        mixins: [BaseViewMixin],
         data() {
             return {
                 message: 'Page matching current url was not found',

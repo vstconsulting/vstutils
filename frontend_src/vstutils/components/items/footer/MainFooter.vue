@@ -16,7 +16,12 @@
             {{ title }}
         </h1>
         <portal-target name="titleAppend" />
-        <Breadcrumbs v-if="showBreadcrumbs && breadcrumbs" :items="breadcrumbs" style="margin-left: auto" />
+        <Breadcrumbs
+            v-if="showBreadcrumbs && breadcrumbs"
+            v-show="!$app.store.page.loading"
+            :items="breadcrumbs"
+            style="margin-left: auto"
+        />
     </footer>
 </template>
 

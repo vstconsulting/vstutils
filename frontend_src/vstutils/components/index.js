@@ -13,5 +13,15 @@ import EmptyComponent from './EmptyComponent.ts';
 import Popover from './Popover.vue';
 import { BaseViewMixin } from './BaseViewMixin.ts';
 import TagsSelector from './TagsSelector.vue';
+import ErrorPage from './ErrorPage.vue';
 
-export { AddChildModal, BootstrapModal, Card, EmptyComponent, Popover, BaseViewMixin, TagsSelector };
+export {
+    AddChildModal,
+    BaseViewMixin,
+    BootstrapModal,
+    Card,
+    EmptyComponent,
+    ErrorPage,
+    Popover,
+    TagsSelector,
+};

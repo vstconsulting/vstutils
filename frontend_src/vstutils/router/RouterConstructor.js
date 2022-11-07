@@ -48,6 +48,7 @@ export default class RouterConstructor {
 
         if (!this.views.has('*')) {
             const notFoundView = new View({ path: '*', routeName: '404' }, null, [NotFound]);
+            notFoundView.showOperationButtons = false;
             this.views.set('*', notFoundView);
         }
 

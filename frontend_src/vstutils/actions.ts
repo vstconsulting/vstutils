@@ -9,7 +9,7 @@ import {
     openPage,
     HttpMethods,
 } from './utils';
-import { Action, View, NotEmptyAction } from './views';
+import type { Action, IView, NotEmptyAction } from './views';
 import { i18n } from './translation';
 import { Model } from './models';
 import { Route } from 'vue-router';
@@ -35,7 +35,7 @@ export class ActionsManager {
     }
 
     get currentView() {
-        return this.app.router.currentRoute.meta?.view as View;
+        return this.app.router.currentRoute.meta?.view as IView;
     }
 
     execute(args: {

@@ -403,10 +403,6 @@ export class App implements IApp {
         //                  in tests, so use router.constructor instead.
         Vue.use(this.router.constructor);
 
-        // @ts-expect-error For some reason direct import of vue-i18n does not work
-        //                  in tests, so use i18n.constructor instead.
-        Vue.use(this.i18n.constructor);
-
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         Vue.prototype.$app = this;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

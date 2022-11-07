@@ -1,6 +1,6 @@
-import Vue, { computed } from 'vue';
-import { joinPaths, pathToArray, capitalize, ViewTypes, getApp } from './utils';
-import { View, PageEditView, PageView } from './views';
+import { computed } from 'vue';
+import type { Model } from './models';
+import { getApp } from './utils';
 
 export interface Breadcrumb {
     link?: string;
@@ -8,34 +8,40 @@ export interface Breadcrumb {
     iconClasses?: string;
 }
 
-export function getBreadcrumb(view: View, fragment: string): Breadcrumb {
-    if (view.type === ViewTypes.PAGE_NEW) {
-        return { iconClasses: 'fas fa-plus' };
-    }
-    if (view.type === ViewTypes.PAGE_EDIT && !(view as PageEditView).isEditStyleOnly) {
-        return { iconClasses: 'fas fa-pen' };
-    }
-
-    return { name: (view as PageView).pkParamName ? capitalize(fragment) : view.title };
-}
-
 export const useBreadcrumbs = () => {
     const app = getApp();
-    const rootVm = app.rootVm as Vue;
 
     return computed(() => {
-        const dt = pathToArray(rootVm.$route.path);
-        const crumbs: Breadcrumb[] = [{ iconClasses: 'fas fa-home', link: '/' }];
-        for (let i = 0; i < dt.length; i++) {
-            const { route } = app.router.resolve(joinPaths(...dt.slice(0, i + 1)));
-            const view = route.meta?.view as View | undefined;
-            if (view) {
-                crumbs.push({
-                    link: i === dt.length - 1 ? undefined : route.path,
-                    ...getBreadcrumb(view, dt[i]),
-                });
-            }
+        if (app.rootVm.$route.name === 'home') {
+            return [];
         }
+
+        const crumbs: Breadcrumb[] = [{ iconClasses: 'fas fa-home', link: '/' }];
+        for (const { view, path, state } of app.store.viewItems) {
+            let link = path;
+            let name = view.title;
+            let iconClasses = '';
+
+            if (view.isNewPage()) {
+                name = '';
+                link = '';
+                iconClasses = 'fas fa-plus';
+            } else if (view.isEditPage() && !view.isEditStyleOnly) {
+                name = '';
+                link = '';
+                iconClasses = 'fas fa-pen';
+            } else if (view.isDetailPage() && view.useViewFieldAsTitle) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+                const instanceName = (state as { instance?: Model }).instance?.getViewFieldString(false);
+                if (instanceName) {
+                    name = instanceName;
+                }
+            }
+
+            crumbs.push({ link, name, iconClasses });
+        }
+
+        crumbs.at(-1)!.link = '';
 
         if (crumbs.length > 4) {
             return [...crumbs.slice(0, 2), { name: '...' }, ...crumbs.slice(-2)];

@@ -2,6 +2,7 @@ import { App } from '@/vstutils/app.ts';
 import { AppConfiguration } from '../vstutils/AppConfiguration.ts';
 import { DummyCache } from '@/cache';
 import { createLocalVue } from '@vue/test-utils';
+import VueI18n from 'vue-i18n';
 
 import testSchema from '../__mocks__/testSchema.json';
 
@@ -19,7 +20,9 @@ export function createAppConfig({ schema = testSchema } = {}) {
 export function createApp({ schema = testSchema } = {}) {
     const config = createAppConfig({ schema });
     const cache = new DummyCache();
-    const app = new App(config, cache, createLocalVue());
+    const vue = createLocalVue();
+    vue.use(VueI18n);
+    const app = new App(config, cache, vue);
 
     const loadLanguages = app.translationsManager.loadLanguages;
     app.translationsManager.loadLanguages = () =>
