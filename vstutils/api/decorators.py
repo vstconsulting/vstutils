@@ -287,8 +287,8 @@ class NestedViewMixin:
             from vstutils.models import notify_clients
 
             self.nested_manager.remove(instance)
-            notify_clients(instance.__class__, instance.pk)
-            notify_clients(self.nested_parent_object.__class__, self.nested_parent_object.pk)
+            notify_clients(instance.__class__, {'pk': instance.pk})
+            notify_clients(self.nested_parent_object.__class__, {'pk': self.nested_parent_object.pk})
         else:
             instance.delete()
 
@@ -371,7 +371,7 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
                 return True
 
         notif_objects = tuple(
-            (label, pk)
+            (label, {'pk': pk})
             for pk in id_list
         )
         id_list += super()._data_create(

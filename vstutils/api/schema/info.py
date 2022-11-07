@@ -40,6 +40,7 @@ api_info_dict = OrderedDict(
             login_url=reverse_lazy('login'),
         ),
         'x-page-limit': settings.PAGE_LIMIT,
+        'x-subscriptions-prefix': settings.SUBSCRIPTIONS_PREFIX
     }
 )
 

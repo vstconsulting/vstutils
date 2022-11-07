@@ -1,8 +1,8 @@
 # cython: binding=True
 import typing as _t
 import logging
-import uuid
 
+import orjson
 from django.db.models import signals
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -11,28 +11,28 @@ from cent import Client as CentrifugoClient  # type: ignore
 from .base import get_proxy_labels
 from ..utils import raise_context_decorator_with_default, raise_context
 from .model import BaseModel
-
+from ..api.renderers import ORJSONRenderer
 
 logger = logging.getLogger('vstutils')
 
 
 class Notificator:
     client_class = CentrifugoClient
-    default_channel = "subscriptions_update"
 
     queue: _t.List[_t.Tuple[_t.Sequence[_t.Text], _t.Any]]
     cent_client: CentrifugoClient
-    channel: _t.Text
+    label: _t.Text
 
-    def __init__(self, queue=None, client=None, channel=None):
+    _json_renderer = ORJSONRenderer()
+
+    def __init__(self, queue=None, client=None, label=None):
         self.queue = queue or []
         self.cent_client = client or self.get_client()
-        self.channel = channel or self.default_channel
+        self.label = label
         self._signals: _t.List[signals.ModelSignal] = []
         if self.cent_client is not None:
             self.connect_signal(signals.post_save)
             self.connect_signal(signals.post_delete)
-        logger.debug(f'Notificator for channel {self.channel} initialized.')
 
     def connect_signal(self, signal: signals.ModelSignal):
         if signal not in self._signals:
@@ -57,38 +57,42 @@ class Notificator:
     def create_notification_from_instance(self, instance):  # pylint: disable=invalid-name
         model = instance.__class__
         self.queue.append(
-            ((model._meta.label, *get_proxy_labels(model)), instance.pk)
+            ((model._meta.label, *get_proxy_labels(model)), {'pk': instance.pk})
         )
 
-    def create_notification(self, label, pk):
-        if isinstance(label, str):
-            label = (label,)
+    def create_notification(self, labels, data):
+        if isinstance(labels, str):
+            labels = (labels,)
+        data = orjson.loads(self._json_renderer.render(data) or '{}')
         self.queue.append(
-            (label, pk)
+            (labels, data)
         )
 
     @raise_context_decorator_with_default()
     def send(self):
-        self.queue, objects = [], set(self.queue)
+        self.queue, objects = [], tuple(self.queue)
 
-        for labels, pk in objects:
-            if isinstance(pk, uuid.UUID):
-                pk = str(pk)
+        sent_channels = set()
+        provided_label = self.label
+        for obj_labels, data in objects:
             with raise_context():
-                self.cent_client.add("publish", self.cent_client.get_publish_params(
-                    self.channel,
-                    {
-                        "subscribe-label": labels,
-                        "pk": pk
-                    }
-                ))
+                for obj_label in obj_labels:
+                    channel = self.get_subscription_channel(provided_label or obj_label)
+                    self.cent_client.add("publish", self.cent_client.get_publish_params(
+                        channel=channel,
+                        data=data,
+                    ))
+                    sent_channels.add(channel)
         if objects:
-            logger.debug(f'Send notifications about {len(objects)} updates.')
+            logger.debug(f'Send notifications about {len(objects)} updates to channel(s) {sent_channels}.')
             return self.cent_client.send()
 
     def disconnect_all(self):
         for signal in self._signals:
             self.disconnect_signal(signal)
+
+    def get_subscription_channel(self, label: str):
+        return f'{settings.SUBSCRIPTIONS_PREFIX}.{label}'
 
     def __del__(self):
         self.disconnect_all()

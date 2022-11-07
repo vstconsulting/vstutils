@@ -196,7 +196,6 @@
         },
         created() {
             document.body.classList.add(...this.bodyClasses);
-            this.$app.autoUpdateController.init();
             this.$app.autoUpdateController.start();
         },
         beforeDestroy() {

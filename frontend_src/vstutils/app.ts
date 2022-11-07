@@ -10,7 +10,7 @@ import { apiConnector, ApiConnector, openapi_dictionary } from '@/vstutils/api';
 import { Language, TranslationsManager } from '@/vstutils/api/TranslationsManager';
 import { AppConfiguration } from '@/vstutils/AppConfiguration';
 import AppRoot from '@/vstutils/AppRoot.vue';
-import { AutoUpdateController, useAutoUpdateStore } from '@/vstutils/autoupdate';
+import { AutoUpdateController } from '@/vstutils/autoupdate';
 import { ComponentsRegistrator, globalComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
 import { addDefaultFields, FieldsResolver } from '@/vstutils/fields';
 import { Model, ModelsResolver } from '@/vstutils/models';
@@ -82,7 +82,6 @@ export interface IApp {
     localSettingsStore: LocalSettingsStore | null;
     localSettingsModel: typeof Model | null;
 
-    autoUpdateStore: ReturnType<typeof useAutoUpdateStore>;
     autoUpdateController: AutoUpdateController;
 
     actions: ActionsManager;
@@ -138,7 +137,6 @@ export class App implements IApp {
     localSettingsStore: LocalSettingsStore | null = null;
     localSettingsModel: typeof Model | null;
 
-    autoUpdateStore: ReturnType<typeof useAutoUpdateStore>;
     autoUpdateController: AutoUpdateController;
 
     actions: ActionsManager;
@@ -203,8 +201,10 @@ export class App implements IApp {
         this.userSettingsStore = createUserSettingsStore(this.api)(pinia);
         this.store = defineStore('global', GLOBAL_STORE)(pinia);
 
-        this.autoUpdateStore = useAutoUpdateStore(pinia);
-        this.autoUpdateController = new AutoUpdateController(this.autoUpdateStore, this.centrifugoClient);
+        this.autoUpdateController = new AutoUpdateController(
+            this.centrifugoClient,
+            this.schema.info['x-subscriptions-prefix'],
+        );
 
         this.localSettingsModel = null;
 

@@ -1,5 +1,5 @@
 import { defineComponent } from 'vue';
-import type { CentrifugoAutoUpdateAction, TimerAutoUpdateAction } from './autoUpdateStore';
+import type { CentrifugoAutoUpdateAction, TimerAutoUpdateAction } from './AutoUpdateController';
 import type { View } from './../views';
 import ComponentIDMixin from '../ComponentIDMixin.js';
 
@@ -29,28 +29,28 @@ export default defineComponent({
         autoUpdateCallback() {
             return this.updateData;
         },
-        getAutoUpdateAction(): CentrifugoAutoUpdateAction | TimerAutoUpdateAction {
+        getAutoUpdateAction(): TimerAutoUpdateAction | CentrifugoAutoUpdateAction {
             const labels = this.autoupdateSubscriptionLabels;
             if (this.autoupdateTriggerType === 'centrifugo' && labels) {
                 return {
                     id: this.componentId,
-                    triggerType: 'centrifugo',
                     callback: this.autoUpdateCallback(),
                     labels,
                     pk: this.autoUpdatePK,
+                    type: 'centrifugo',
                 };
             }
             return {
                 id: this.componentId,
-                triggerType: 'timer',
                 callback: this.autoUpdateCallback(),
+                type: 'timer',
             };
         },
         startAutoUpdate() {
-            this.$app.autoUpdateStore.subscribe(this.getAutoUpdateAction());
+            this.$app.autoUpdateController.subscribe(this.getAutoUpdateAction());
         },
         stopAutoUpdate() {
-            this.$app.autoUpdateStore.unsubscribe(this.componentId);
+            this.$app.autoUpdateController.unsubscribe(this.componentId);
         },
     },
 });

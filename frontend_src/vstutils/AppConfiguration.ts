@@ -39,6 +39,7 @@ export interface AppInfo extends Info {
     'x-menu': XMenu;
     'x-centrifugo-address'?: string;
     'x-centrifugo-token'?: string;
+    'x-subscriptions-prefix': string;
     [key: string]: any;
 }
 

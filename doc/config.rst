@@ -330,6 +330,7 @@ every 5 seconds (by default).
 * **token_hmac_secret_key** - API key for jwt-token generation.
 * **timeout** - Connection timeout.
 * **verify** - Connection verification.
+* **subscriptions_prefix** - Prefix used for generating update channels, by default "{VST_PROJECT}.update".
 
 .. note::
     These settings also add parameters to the OpenApi schema and change how the auto-update system works in the GUI.
