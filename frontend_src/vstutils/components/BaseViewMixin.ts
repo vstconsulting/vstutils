@@ -1,4 +1,4 @@
-import { defineComponent, provide } from 'vue';
+import { defineComponent, provide, PropType } from 'vue';
 import type { View } from '../views';
 import { mapStoreActions, mapStoreState } from '../utils';
 import { useAutoUpdate } from '../autoupdate';
@@ -7,7 +7,7 @@ import { useViewStore } from '../store/helpers';
 export const BaseViewMixin = defineComponent({
     inject: ['requestConfirmation'],
     props: {
-        view: { type: Object, required: true } as unknown as { type: typeof View; required: true },
+        view: { type: Object as PropType<View>, required: true },
         query: { type: Object, default: () => ({}) },
         params: { type: Object, default: () => ({}) },
     },

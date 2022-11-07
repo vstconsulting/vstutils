@@ -1,25 +1,34 @@
-import { computed, ref, watch } from 'vue';
-import type { StoreGeneric } from 'pinia';
-import type { Breadcrumb } from '../breadcrumbs';
-import { Store, StoreState, StoreGetters, StoreActions } from 'pinia';
+import type { Store, StoreActions, StoreGetters, StoreState } from 'pinia';
+import { computed, ComputedRef, ref, watch } from 'vue';
 
-export const GLOBAL_STORE = () => {
-    const page = ref<StoreGeneric>(null as unknown as StoreGeneric);
+import { BaseViewStore, useParentViews } from './helpers';
+
+import type { Breadcrumb } from '../breadcrumbs';
+
+export const GLOBAL_STORE = (): {
+    page: ComputedRef<BaseViewStore>;
+    title: ComputedRef<string | undefined>;
+    breadcrumbs: ComputedRef<Breadcrumb[] | undefined>;
+    entityViewClasses: ComputedRef<string[]>;
+    viewItems: ReturnType<typeof useParentViews>['items'];
+    viewItemsMap: ReturnType<typeof useParentViews>['itemsMap'];
+    setPage(store: BaseViewStore): Promise<void>;
+} => {
+    const page = ref<BaseViewStore | null>(null);
 
     const title = computed(() => {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        return page.value?.title as string | undefined;
+        return page.value?.title;
     });
 
     const breadcrumbs = computed(() => {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-unsafe-return
         return page.value?.breadcrumbs as Breadcrumb[] | undefined;
     });
 
-    const entityViewClasses = computed<string[]>(() => {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-unsafe-return
-        return (page.value?.entityViewClasses as string[] | undefined) ?? [];
+    const entityViewClasses = computed(() => {
+        return page.value?.entityViewClasses ?? [];
     });
+
+    const parentViews = useParentViews();
 
     watch(title, (newTitle) => {
         if (newTitle) {
@@ -27,11 +36,20 @@ export const GLOBAL_STORE = () => {
         }
     });
 
-    function setPage(store: StoreGeneric) {
+    function setPage(store: BaseViewStore) {
         page.value = store;
+        return parentViews.push(store);
     }
 
-    return { title, breadcrumbs, page, entityViewClasses, setPage };
+    return {
+        title,
+        breadcrumbs,
+        page: page as ComputedRef<BaseViewStore>,
+        entityViewClasses,
+        viewItems: parentViews.items,
+        viewItemsMap: parentViews.itemsMap,
+        setPage,
+    };
 };
 
 export type GlobalStore = Store<

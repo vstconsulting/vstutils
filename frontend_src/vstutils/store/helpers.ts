@@ -1,36 +1,103 @@
+import { defineStore, StoreGeneric } from 'pinia';
 import {
-    ref,
-    reactive,
     computed,
-    shallowRef,
-    set,
     del,
-    Ref,
-    onUnmounted,
-    onMounted,
     onBeforeUnmount,
+    onMounted,
+    onUnmounted,
+    reactive,
+    ref,
+    Ref,
+    set,
+    shallowReadonly,
+    shallowRef,
 } from 'vue';
-import { defineStore, Store, StoreActions, StoreState, StoreGetters } from 'pinia';
+
+import { APIResponse } from '../api';
+import { useBreadcrumbs } from '../breadcrumbs';
 import { Model, ModelValidationError } from '../models';
-import type { QuerySet } from '../querySet';
-import type { View, ActionView, NotEmptyAction } from '../views';
 import signals from '../signals';
+import { i18n } from '../translation';
 import {
-    openPage,
-    getRedirectUrlFromResponse,
-    getApp,
-    makeQueryString,
-    IGNORED_FILTERS,
-    mergeDeep,
-    getUniqueId,
     classesFromFields,
+    getApp,
+    getRedirectUrlFromResponse,
+    getUniqueId,
+    IGNORED_FILTERS,
+    joinPaths,
+    makeQueryString,
+    mergeDeep,
+    openPage,
+    pathToArray,
     smartTranslate,
 } from '../utils';
-import { useBreadcrumbs } from '../breadcrumbs';
-import { i18n } from '../translation';
+
+import type { QuerySet } from '../querySet';
+import type { IView, ActionView, NotEmptyAction } from '../views';
 import type { NavigationGuard, Route } from 'vue-router';
 import type { IApp } from '@/vstutils/app';
-import { APIResponse } from '../api';
+
+export function useParentViews() {
+    interface Item {
+        view: IView;
+        state: unknown;
+        path: string;
+    }
+
+    const items = ref<Item[]>([]);
+    const itemsMap = computed(() => new Map(items.value.map((item) => [item.view.path, item])));
+
+    async function push(store: BaseViewStore): Promise<void> {
+        const view = store.view;
+        const router = getApp().router;
+        const path = router.currentRoute.path;
+
+        const promises: Promise<Item>[] = [];
+
+        const dt = pathToArray(path);
+        // Iterate all available pathes except last. For example page
+        // with url /1/2/3/4/ will iterate over pathes /1/, /1/2/, /1/2/3/
+        for (let idx = 0; idx < dt.length - 1; idx++) {
+            const resolved = router.resolve(joinPaths(...dt.slice(0, idx + 1)));
+
+            // Use already resolved state if exists
+            if (resolved.route.fullPath === items.value[idx]?.path) {
+                promises.push(Promise.resolve(items.value[idx]) as Promise<Item>);
+                continue;
+            }
+
+            const resolvedView = resolved.route.meta?.view as IView | undefined;
+            if (resolvedView) {
+                promises.push(
+                    resolvedView
+                        .resolveState({ route: resolved.route })
+                        .catch((error) => {
+                            console.warn(`Error while resolving view "${view.path}" state`, error);
+                        })
+                        .then((state) => ({ view: resolvedView, path: resolved.route.path, state })),
+                );
+            }
+        }
+
+        // Last element is always current page so we can use store to resolve state
+        promises.push(
+            view
+                .resolveState({ route: router.currentRoute, store })
+                .catch((error) => {
+                    console.warn(`Error while resolving view "${view.path}" state`, error);
+                })
+                .then((state) => ({ view, path, state })),
+        );
+
+        items.value = await Promise.all(promises);
+    }
+
+    return {
+        items: shallowReadonly(items),
+        itemsMap,
+        push,
+    };
+}
 
 export interface InstancesList extends Array<Model> {
     extra?: {
@@ -46,11 +113,19 @@ export function getRedirectUrl(): string {
     return url;
 }
 
-export const useInstanceTitle = ({ view, instance }: { view: View; instance: Ref<Model | null> }) => {
-    return computed(() => instance.value?.getViewFieldString(false) || smartTranslate(view.title));
+export const useInstanceTitle = ({ view, instance }: { view: IView; instance: Ref<Model | null> }) => {
+    return computed(() => {
+        if (view.isDetailPage() && view.useViewFieldAsTitle) {
+            return instance.value?.getViewFieldString(false) || smartTranslate(view.title);
+        }
+        return smartTranslate(view.title);
+    });
 };
 
-export const useQuerySet = (view: View) => {
+export const useQuerySet = (view: IView) => {
+    if (!view.objects) {
+        throw new Error(`View ${view.path} has no queryset`);
+    }
     const app = getApp();
     const queryset = ref<QuerySet>(view.objects.formatPath(app.router.currentRoute.params));
     function setQuerySet(qs: QuerySet) {
@@ -71,7 +146,7 @@ export const useOperations = ({
     data,
     isListItem = false,
 }: {
-    view: View;
+    view: IView;
     data?: Ref<Record<string, any>>;
     isListItem?: boolean;
 }) => {
@@ -97,7 +172,7 @@ export const useOperations = ({
     return { actions, sublinks };
 };
 
-export const useBasePageData = (view: View) => {
+export const useBasePageData = (view: IView) => {
     const loading = ref(false);
     const error = ref<unknown>(null);
     const response = ref<unknown>(null);
@@ -139,6 +214,16 @@ export const useBasePageData = (view: View) => {
         setLoadingError,
         fetchData,
     };
+};
+
+export type BaseViewStore = StoreGeneric & {
+    readonly view: IView;
+    readonly title: string;
+    fetchData?: () => Promise<void>;
+    updateData?: () => Promise<void>;
+    getAutoUpdatePk?: () => string | number;
+    entityViewClasses?: string[];
+    getStateToSave?(): unknown;
 };
 
 export const useSelection = (instances: Ref<Model[]>) => {
@@ -342,25 +427,14 @@ export const createActionStore = (view: ActionView) => {
     };
 };
 
-type BaseViewStore = Store<
-    `page_${string}`,
-    StoreState<ReturnType<typeof useBasePageData>>,
-    StoreGetters<ReturnType<typeof useBasePageData>>,
-    StoreActions<ReturnType<typeof useBasePageData>>
-> & {
-    fetchData?: () => Promise<void>;
-    updateData?: () => Promise<void>;
-    getAutoUpdatePk?: () => string | number;
-};
-
-export function useViewStore<T extends View>(view: T) {
+export function useViewStore<T extends IView>(view: T) {
     const app = getApp();
     const store = defineStore(`page_${getUniqueId()}`, view.getStoreDefinition())() as BaseViewStore;
     if (store.fetchData) {
-        store.fetchData();
+        void store.fetchData();
     }
 
-    app.store.setPage(store);
+    void app.store.setPage(store);
 
     onUnmounted(() => {
         store.$dispose();

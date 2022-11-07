@@ -200,7 +200,7 @@ export default class QuerySet {
 
     /**
      * Method, that returns promise with Model instance.
-     * @param {string | number} id?
+     * @param {string | number | undefined} id
      * @return {Promise.<Model>}
      */
     async get(id, pathParamsValues = null) {

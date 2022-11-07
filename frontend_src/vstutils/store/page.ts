@@ -20,6 +20,7 @@ import {
     useQueryBasedFiltering,
     useEntityViewClasses,
     usePageLeaveConfirmation,
+    BaseViewStore,
 } from './helpers';
 
 const createRemoveInstance =
@@ -318,6 +319,10 @@ export const createDetailViewStore = (view: PageView) => () => {
     };
 };
 
+export type DetailPageStore = BaseViewStore & {
+    instance: Model;
+};
+
 export const createNewViewStore = (view: PageNewView) => () => {
     const qsStore = useQuerySet(view);
     const pageWithEditableData = PAGE_WITH_EDITABLE_DATA(PAGE_WITH_INSTANCE());
@@ -463,6 +468,7 @@ export const createEditViewStore = (view: PageEditView) => () => {
     }
     function cancel() {
         pageViewStore.changedFields.value = [];
+        return app.router.back();
     }
 
     return { ...pageViewStore, model, setInstance, save, reload, cancel };

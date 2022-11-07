@@ -3,6 +3,7 @@ import { DateTimeField } from '../index';
 import { mount } from '@vue/test-utils';
 import moment from 'moment-timezone';
 import { createApp } from '@/unittests/create-app.js';
+import VueI18n from 'vue-i18n';
 
 let app;
 
@@ -62,7 +63,7 @@ describe('DateTimeField', () => {
                     };
                 },
             },
-            { localVue: app.vue, mocks: { $t: (str) => str } },
+            { localVue: app.vue, i18n: new VueI18n() },
         );
 
         const contentLines = wrapper.element.textContent.split('\n');

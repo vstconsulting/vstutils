@@ -1,4 +1,4 @@
-import type { ComponentOptions } from 'vue';
+import { ComponentOptions, ref, Ref, toRef } from 'vue';
 import type { Vue } from 'vue/types/vue';
 import type { Route, RouteConfig } from 'vue-router';
 import type { Operation as SwaggerOperation } from 'swagger-schema-official';
@@ -15,8 +15,9 @@ import { formatPath, HttpMethods, joinPaths, pathToArray, ViewTypes } from '../u
 import type { QuerySet } from '../querySet';
 import { Model } from '../models';
 import type { BaseField } from '../fields/base';
-import { useBasePageData } from '../store/helpers';
+import { BaseViewStore, useBasePageData } from '../store/helpers';
 import { IAppInitialized } from '../app';
+import { DetailPageStore } from '../store/page';
 export { ViewTypes };
 
 export interface Operation {
@@ -85,10 +86,57 @@ interface ViewParams extends SwaggerOperation {
     [key: string]: any;
 }
 
+type ViewStoreOptions = () => Record<string, unknown>;
+
+export interface IView<
+    TParams extends ViewParams = ViewParams,
+    TStore extends BaseViewStore = BaseViewStore,
+    TSavedState = unknown,
+> {
+    type: ViewType;
+    path: string;
+    operationId: string;
+    title: string;
+    params: TParams;
+    parent?: IView | null;
+    level: number;
+    name: string;
+    isDeepNested: boolean;
+    hidden: boolean;
+    routeName: string;
+    mixins: typeof Vue[];
+
+    sublinks: Map<string, Sublink>;
+    actions: Map<string, Action>;
+
+    autoupdate?: boolean;
+    subscriptionLabels?: string[] | null;
+
+    objects?: QuerySet;
+
+    modelsList: [typeof Model | null, typeof Model | null];
+
+    showOperationButtons: boolean;
+    showBackButton: boolean;
+
+    resolveState(args: { route: Route; store?: TStore }): Promise<TSavedState>;
+
+    getStoreDefinition(): ViewStoreOptions;
+
+    getRoutePath(): string;
+    toRoute(): RouteConfig;
+
+    isEditPage(): this is PageEditView;
+    isDetailPage(): this is PageView;
+    isListPage(): this is ListView;
+    isNewPage(): this is PageNewView;
+    isActionPage(): this is ActionView;
+}
+
 /**
  * View class - constructor, that returns view object.
  */
-export class View {
+export class View implements IView {
     static viewType: ViewType = 'PAGE';
 
     params: ViewParams;
@@ -104,19 +152,20 @@ export class View {
     routeName: string;
     autoupdate: boolean;
     subscriptionLabels: string[] | null;
-    mixins: (ComponentOptions<Vue> | typeof Vue)[];
+    mixins: typeof Vue[];
 
     sublinks = new Map<string, Sublink>();
     actions = new Map<string, Action>();
-    parent: View | null = null;
+    parent: IView | null = null;
 
     showOperationButtons = true;
     showBackButton = true;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    storeDefinitionFactory: (view: any) => () => unknown = (view) => () => useBasePageData(view);
+    storeDefinitionFactory: (view: IView) => () => Record<string, unknown> = (view) => () =>
+        useBasePageData(view);
 
-    constructor(params: ViewParams, objects: QuerySet, mixins: (ComponentOptions<Vue> | typeof Vue)[] = []) {
+    constructor(params: ViewParams, objects: QuerySet, mixins: typeof Vue[] = []) {
         this.params = params;
         this.objects = objects;
         this.type = params.type ?? (this.constructor as typeof View).viewType;
@@ -133,21 +182,40 @@ export class View {
         this.mixins = mixins;
     }
 
-    extendStore(customDefinition: (originalStore: unknown) => unknown) {
+    isEditPage(): this is PageEditView {
+        return this instanceof PageEditView;
+    }
+    isDetailPage(): this is PageView {
+        return this instanceof PageView;
+    }
+    isListPage(): this is ListView {
+        return this instanceof ListView;
+    }
+    isNewPage(): this is PageNewView {
+        return this instanceof PageNewView;
+    }
+    isActionPage(): this is ActionView {
+        return this instanceof ActionView;
+    }
+
+    extendStore(customDefinition: (originalStore: unknown) => Record<string, unknown>) {
         const originalStoreDefinitionFactory = this.storeDefinitionFactory;
-        this.storeDefinitionFactory = (view: any) => () =>
+        this.storeDefinitionFactory = (view: IView) => () =>
             customDefinition(originalStoreDefinitionFactory(view)());
+    }
+
+    resolveState({ route, store }: { route: Route; store?: BaseViewStore }): Promise<unknown> {
+        return Promise.resolve(undefined);
     }
 
     /**
      * Property that returns array with request and response model
-     * @return {Function[]}
      */
-    get modelsList() {
+    get modelsList(): [typeof Model | null, typeof Model | null] {
         return [this.params.requestModel || null, this.params.responseModel || null];
     }
 
-    getStoreDefinition(): () => unknown {
+    getStoreDefinition(): ViewStoreOptions {
         return this.storeDefinitionFactory(this);
     }
 
@@ -205,9 +273,10 @@ interface ListViewParams extends ViewParams {
     'x-deep-nested-view'?: string;
 }
 
-export class ListView extends View {
+export class ListView extends View implements IView<ListViewParams> {
     static viewType: ViewType = 'LIST';
 
+    declare params: ListViewParams;
     multiActions = new Map<string, Action>();
     pageView: PageView | null = null;
     nestedQueryset: QuerySet | null = null;
@@ -219,11 +288,7 @@ export class ListView extends View {
 
     storeDefinitionFactory: (view: any) => any = createListViewStore;
 
-    constructor(
-        params: ListViewParams,
-        objects: QuerySet,
-        mixins: (ComponentOptions<Vue> | typeof Vue)[] = [ListViewComponent as ComponentOptions<Vue>],
-    ) {
+    constructor(params: ListViewParams, objects: QuerySet, mixins = [ListViewComponent]) {
         super(params, objects, mixins);
 
         this.filters = params.filters;
@@ -252,23 +317,25 @@ interface PageViewParams extends ViewParams {
     isFileResponse?: boolean;
 }
 
-export class PageView extends View {
+interface PageViewSavedState {
+    instance: Ref<Model>;
+}
+
+export class PageView extends View implements IView<PageViewParams, DetailPageStore, PageViewSavedState> {
     static viewType: ViewType = 'PAGE';
 
+    declare params: PageViewParams;
     parent: ListView | null = null;
     listView: ListView | null = null;
     pkParamName: string | null = null;
     isFileResponse: boolean;
     hideReadonlyFields = false;
     filtersModelClass: typeof Model | null = null;
+    useViewFieldAsTitle = true;
 
     storeDefinitionFactory: (view: any) => any = createDetailViewStore;
 
-    constructor(
-        params: PageViewParams,
-        objects: QuerySet,
-        mixins: (ComponentOptions<Vue> | typeof Vue)[] = [OneEntity as ComponentOptions<Vue>],
-    ) {
+    constructor(params: PageViewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);
         this.isFileResponse = params.isFileResponse ?? false;
     }
@@ -281,12 +348,26 @@ export class PageView extends View {
                 deepNestedParentView.getRoutePath().replace(/\/$/, ''),
                 deepNestedParentView.deepNestedViewFragment,
                 this.pkParamName,
-                (this.parent?.parent as PageView).pkParamName,
+                (this.parent?.parent as unknown as PageView).pkParamName,
             ]);
         } else if (this.isDeepNested) {
             return joinPaths(this.parent?.getRoutePath(), `:${this.pkParamName ?? ''}`);
         }
         return super.getRoutePath();
+    }
+
+    async resolveState(args: { route: Route; store?: DetailPageStore }): Promise<PageViewSavedState> {
+        const { route, store } = args;
+        if (store) {
+            return { instance: toRef(store, 'instance') };
+        }
+        return {
+            instance: ref(
+                (await this.objects
+                    .formatPath(route.params)
+                    .get(this.pkParamName ? route.params[this.pkParamName] : undefined)) as Model,
+            ),
+        };
     }
 }
 
@@ -294,9 +375,10 @@ interface PageNewParams extends ViewParams {
     'x-allow-append'?: boolean;
 }
 
-export class PageNewView extends View {
+export class PageNewView extends View implements IView<PageNewParams> {
     static viewType: ViewType = 'PAGE_NEW';
 
+    declare params: PageNewParams;
     nestedAllowAppend: boolean;
     multiActions = new Map<string, Action>();
     listView: ListView | null = null;
@@ -304,11 +386,7 @@ export class PageNewView extends View {
 
     storeDefinitionFactory: (view: any) => any = createNewViewStore;
 
-    constructor(
-        params: PageNewParams,
-        objects: QuerySet,
-        mixins: (ComponentOptions<Vue> | typeof Vue)[] = [OneEntity as ComponentOptions<Vue>],
-    ) {
+    constructor(params: PageNewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);
 
         /**
@@ -322,7 +400,7 @@ export class PageNewView extends View {
     }
 }
 
-export class PageEditView extends PageView {
+export class PageEditView extends PageView implements IView<PageViewParams> {
     static viewType: ViewType = 'PAGE_EDIT';
 
     isEditStyleOnly = false;
@@ -331,11 +409,7 @@ export class PageEditView extends PageView {
 
     storeDefinitionFactory: (view: any) => any = createEditViewStore;
 
-    constructor(
-        params: PageViewParams,
-        objects: QuerySet,
-        mixins: (ComponentOptions<Vue> | typeof Vue)[] = [OneEntity as ComponentOptions<Vue>],
-    ) {
+    constructor(params: PageViewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);
 
         this.isPartial = params.method === HttpMethods.PATCH;
@@ -353,19 +427,16 @@ interface ActionViewParams extends PageViewParams {
     action: NotEmptyAction;
 }
 
-export class ActionView extends View {
+export class ActionView extends View implements IView<ActionViewParams> {
     static viewType: ViewType = 'ACTION';
+    declare params: ActionViewParams;
     hideReadonlyFields = true;
     method: HttpMethods;
     action: NotEmptyAction;
 
     storeDefinitionFactory: (view: any) => any = createActionViewStore;
 
-    constructor(
-        params: ActionViewParams,
-        objects: QuerySet,
-        mixins: (ComponentOptions<Vue> | typeof Vue)[] = [OneEntity as ComponentOptions<Vue>],
-    ) {
+    constructor(params: ActionViewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);
 
         this.method = params.method;
