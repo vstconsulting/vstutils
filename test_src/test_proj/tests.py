@@ -75,6 +75,8 @@ from .models import (
     OverridenModelWithBinaryFiles,
     ModelWithBinaryFiles,
     ModelForCheckFileAndImageField,
+    ModelWithNestedModels,
+    ProtectedBySignal,
 )
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
@@ -4652,7 +4654,7 @@ class ProjectTestCase(BaseTestCase):
             {'method': 'get', 'path': ['modelwithnested', '<<0[data][id]>>', 'groups', '<<8[data][id]>>']},
 
             # Check if X-Purge-Nested header logic works correctly
-            # If header == 'true' nested object should be deleted.
+            # If header == 'true' realtion and nested object should be deleted.
             # Otherwise it should be removed from nested, not deleted.
             # Header should work only with nested/deep_nested with `allow_append=True` property.
 
@@ -4761,6 +4763,38 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(deep_results[28]['status'], 201)
         self.assertEqual(deep_results[29]['status'], 204)
         self.assertEqual(deep_results[30]['status'], 404)
+
+    def test_purge_delete(self):
+        model_with_nested_1 = ModelWithNestedModels.objects.create(name='test instance 1')
+        model_with_nested_2 = ModelWithNestedModels.objects.create(name='test instance 2')
+
+        protected = ProtectedBySignal.objects.create(name='protected')
+
+        model_with_nested_1.protected.add(protected)
+        model_with_nested_2.protected.add(protected)
+
+        results = self.bulk([
+            # [0] protected instance is used on model_with_nested_2 so this request will fail
+            {
+                'method': 'delete',
+                'path': ['modelwithnested', model_with_nested_1.id, 'protected', protected.id],
+                'headers': {'HTTP_X_Purge_Nested': 'true'}
+            },
+            # [1] remove protected instance from model_with_nested_2
+            {
+                'method': 'delete',
+                'path': ['modelwithnested', model_with_nested_2.id, 'protected', protected.id],
+            },
+            # [2] this action will remove rotected instance from model_with_nested_1 and then remove protected instance itself
+            {
+                'method': 'delete',
+                'path': ['modelwithnested', model_with_nested_1.id, 'protected', protected.id],
+                'headers': {'HTTP_X_Purge_Nested': 'true'}
+            },
+        ])
+        self.assertEqual(results[0]['status'], 400)
+        self.assertEqual(results[1]['status'], 204)
+        self.assertEqual(results[2]['status'], 204)
 
     def test_csv_field_data(self):
         author = Author.objects.create(name='author_1')
