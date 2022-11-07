@@ -38,5 +38,5 @@ def bulk_notify_clients(
 ) -> _t.Optional[_t.List]:
     ...
 
-def notify_clients(model: _t.Union[BModel, models.Model], pk: _t.Optional[_t.Any] = None) -> None:
+def notify_clients(model: _t.Union[BModel, models.Model], data: _t.Optional[_t.Any] = None) -> None:
     ...

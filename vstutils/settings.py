@@ -1380,6 +1380,7 @@ NOTIFICATOR_CLIENT_CLASS = web.get(
     'notificator_client_class',
     fallback='vstutils.models.cent_notify.Notificator'
 )
+SUBSCRIPTIONS_PREFIX = CENTRIFUGO_CLIENT_KWARGS.pop('subscriptions_prefix', f'{VST_PROJECT}.update')
 
 THROTTLE = config['throttle'].all()
 

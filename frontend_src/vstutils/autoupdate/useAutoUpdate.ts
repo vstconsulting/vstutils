@@ -1,6 +1,7 @@
 import { onBeforeUnmount, onMounted } from 'vue';
 
-import { TimerAutoUpdateAction, CentrifugoAutoUpdateAction, AutoUpdateAction } from './autoUpdateStore';
+import { AutoUpdateAction } from './AutoUpdateController';
+import { TimerAutoUpdateAction, CentrifugoAutoUpdateAction } from './AutoUpdateController';
 import { getApp, getUniqueId } from '../utils';
 
 export function useAutoUpdate({
@@ -10,7 +11,7 @@ export function useAutoUpdate({
     startOnMount = true,
 }: {
     callback: AutoUpdateAction['callback'];
-    labels?: CentrifugoAutoUpdateAction['labels'];
+    labels?: string[];
     pk?: CentrifugoAutoUpdateAction['pk'];
     startOnMount?: boolean;
 }) {
@@ -21,18 +22,18 @@ export function useAutoUpdate({
         app.centrifugoClient?.isConnected() && labels
             ? {
                   id,
-                  callback: callback,
-                  triggerType: 'centrifugo',
-                  labels: labels,
-                  pk: pk,
+                  callback,
+                  labels,
+                  type: 'centrifugo',
+                  pk,
               }
             : {
                   id,
-                  callback: callback,
-                  triggerType: 'timer',
+                  callback,
+                  type: 'timer',
               };
-    const start = () => app.autoUpdateStore.subscribe(autoUpdateAction);
-    const stop = () => app.autoUpdateStore.unsubscribe(id);
+    const start = () => app.autoUpdateController.subscribe(autoUpdateAction);
+    const stop = () => app.autoUpdateController.unsubscribe(id);
 
     if (startOnMount) {
         onMounted(start);

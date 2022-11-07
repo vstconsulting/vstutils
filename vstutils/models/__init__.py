@@ -2,6 +2,7 @@
 Default Django model classes overrides in `vstutils.models` module.
 """
 import logging
+import orjson
 
 from django.apps import apps
 from django.db import models
@@ -209,19 +210,19 @@ class BModel(BaseModel):
 
 
 @raise_context()
-def bulk_notify_clients(channel=None, objects=()):
+def bulk_notify_clients(objects=(), label=None):
     if not settings.CENTRIFUGO_CLIENT_KWARGS:
         return
     notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
-    notificator = notificator_class([], channel=channel)
-    for labels, pk in objects:
-        notificator.create_notification(labels, pk)
+    notificator = notificator_class([], label=label)
+    for labels, data in objects:
+        notificator.create_notification(labels, data)
     return notificator.send()
 
 
 @raise_context()
-def notify_clients(model, pk=None):
+def notify_clients(model, data=None):
     logger.debug(f'Notify clients about model update: {model._meta.label}')
     bulk_notify_clients(objects=(
-        ((model._meta.label, *get_proxy_labels(model)), pk),
+        ((model._meta.label, *get_proxy_labels(model)), data),
     ))

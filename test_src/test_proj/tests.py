@@ -5073,38 +5073,95 @@ class WebSocketTestCase(BaseTestCase):
         host_obj2 = Host.objects.create(name="centrifuga2")
         mwu = ModelWithUuid.objects.create(data='123')
 
-        with self.patch('test_proj.test_notificator.Client.send') as send_callback:
-            send_callback.side_effect = None
+        # 0
+        notify_clients(Host, {'pk': host_obj.id})
+        # 1
+        bulk_notify_clients((
+            (f'{Host._meta.label}', {'pk': host_obj.id}),
+        ))
+        # 2
+        bulk_notify_clients((
+            (f'{Host._meta.label}', {'pk': host_obj.id}),
+            (f'{Host._meta.label}', {'pk': host_obj.id}),
+        ), 'some-channel')
 
-            # default complex call
-            notify_clients(Host, host_obj.id)
-            self.assertEqual(send_callback.call_count, 1)
-            # call with single label
-            bulk_notify_clients(objects=(
-                (Host._meta.label, host_obj.id),
-            ))
-            self.assertEqual(send_callback.call_count, 2)
-            # call on model with uuid as pk
-            notify_clients(ModelWithUuid, mwu.id)
-            self.assertEqual(send_callback.call_count, 3)
+        # 3
+        notify_clients(ModelWithUuid, {'pk': mwu.id, 'some-data': mwu.data})
 
-            # call via api
-            results = self.bulk([
-                {"method": "get", "path": ['subhosts', host_obj.id]},
-                {"method": "delete", "path": ['subhosts', host_obj.id]},
-                {"method": "delete", "path": ['subhosts', host_obj2.id]},
-            ])
-            for result in results:
-                self.assertIn(result['status'], (200, 201, 204))
+        # 4
+        results = self.bulk([
+            {"method": "get", "path": ['subhosts', host_obj.id]},
+            {"method": "delete", "path": ['subhosts', host_obj.id]},
+            {"method": "delete", "path": ['subhosts', host_obj2.id]},
+        ])
+        for result in results:
+            self.assertIn(result['status'], {200, 201, 204})
 
-            self.assertEqual(send_callback.call_count, 4)
+        from .tasks import CreateHostTask
+        # 5
+        CreateHostTask.do(name='centrifugafromtask')
 
-            # call via celery task
-            from .tasks import CreateHostTask
-            CreateHostTask.do(name='centrifugafromtask')
+        from test_proj.test_notificator import messages_log
 
-            self.assertEqual(send_callback.call_count, 5)
+        # notify
+        self.assertEqual(len(messages_log[0]), 1)
+        self.assertEqual(messages_log[0][0]['method'], 'publish')
+        self.assertDictEqual(messages_log[0][0]['params'], {
+            **messages_log[0][0]['params'],
+            'channel': f'{settings.VST_PROJECT}.update.test_proj.Host',
+            'data': {'pk': host_obj.id},
+        })
 
+        # bulk notify
+        self.assertEqual(len(messages_log[1]), 1)
+        self.assertEqual(messages_log[1][0]['method'], 'publish')
+        self.assertDictEqual(messages_log[1][0]['params'], {
+            **messages_log[1][0]['params'],
+            'channel': f'{settings.VST_PROJECT}.update.test_proj.Host',
+            'data': {'pk': host_obj.id},
+        })
+
+        # bulk notify with channel provided
+        self.assertEqual(len(messages_log[2]), 2)
+        for msg in messages_log[2]:
+            self.assertEqual(msg['method'], 'publish')
+            self.assertDictEqual(msg['params'], {
+                **msg['params'],
+                'channel': 'test_proj.update.some-channel',
+                'data': {'pk': host_obj.id},
+            })
+
+        # notify for uuid model
+        self.assertEqual(len(messages_log[3]), 1)
+        self.assertEqual(messages_log[3][0]['method'], 'publish')
+        self.assertDictEqual(messages_log[3][0]['params'], {
+            **messages_log[3][0]['params'],
+            'channel': f'{settings.VST_PROJECT}.update.test_proj.ModelWithUuid',
+            'data': {'pk': str(mwu.id), 'some-data': mwu.data},
+        })
+
+        # api call
+        self.assertEqual(len(messages_log[4]), 2)
+        self.assertEqual(messages_log[4][0]['method'], 'publish')
+        self.assertDictEqual(messages_log[4][0]['params'], {
+            **messages_log[4][0]['params'],
+            'channel': f'{settings.VST_PROJECT}.update.test_proj.Host',
+            'data': {'pk': host_obj.id},
+        })
+        self.assertEqual(messages_log[4][1]['method'], 'publish')
+        self.assertDictEqual(messages_log[4][1]['params'], {
+            **messages_log[4][1]['params'],
+            'channel': f'{settings.VST_PROJECT}.update.test_proj.Host',
+            'data': {'pk': host_obj2.id},
+        })
+
+        # celery
+        self.assertEqual(len(messages_log[5]), 1)
+        self.assertEqual(messages_log[5][0]['method'], 'publish')
+        self.assertDictEqual(messages_log[5][0]['params'], {
+            **messages_log[5][0]['params'],
+            'channel': f'{settings.VST_PROJECT}.update.test_proj.Host',
+        })
 
 class ThrottleTestCase(BaseTestCase):
     def throttle_requests(self):
