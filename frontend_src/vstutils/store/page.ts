@@ -38,6 +38,9 @@ const createRemoveInstance =
     }) => {
         const app = getApp();
         try {
+            if (!fromList) {
+                app.store.page.stopAutoUpdate();
+            }
             await instance.delete(purge);
             guiPopUp.success(
                 i18n.t(pop_up_msg.instance.success.remove, [

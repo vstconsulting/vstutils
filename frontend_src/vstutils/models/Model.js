@@ -160,6 +160,8 @@ export class Model {
     static translateModel = null;
     /** @type {Map<string, Field>} */
     static fields = new Map();
+    /** @type {Field} */
+    static pkField;
 
     /**
      * @param {InnerData} data

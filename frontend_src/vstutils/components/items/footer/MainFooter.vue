@@ -62,5 +62,7 @@
         margin: 0;
         font-size: 1rem;
         line-height: 1.5;
+        overflow: hidden;
+        white-space: nowrap;
     }
 </style>

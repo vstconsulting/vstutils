@@ -1,7 +1,6 @@
 import { defineComponent, provide, PropType } from 'vue';
 import type { View } from '../views';
 import { mapStoreActions, mapStoreState } from '../utils';
-import { useAutoUpdate } from '../autoupdate';
 import { useViewStore } from '../store/helpers';
 
 export const BaseViewMixin = defineComponent({
@@ -15,13 +14,6 @@ export const BaseViewMixin = defineComponent({
         // eslint-disable-next-line vue/no-setup-props-destructure
         const view = props.view;
         const store = useViewStore(view);
-        if (view.autoupdate && store.updateData) {
-            useAutoUpdate({
-                callback: store.updateData,
-                pk: store.getAutoUpdatePk ? store.getAutoUpdatePk() : null,
-                labels: view.subscriptionLabels || undefined,
-            });
-        }
 
         provide('view', view);
 

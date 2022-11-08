@@ -13,11 +13,12 @@ import {
     shallowRef,
 } from 'vue';
 
-import { APIResponse } from '../api';
-import { useBreadcrumbs } from '../breadcrumbs';
-import { Model, ModelValidationError } from '../models';
-import signals from '../signals';
-import { i18n } from '../translation';
+import { APIResponse } from '@/vstutils/api';
+import { useAutoUpdate } from '@/vstutils/autoupdate';
+import { useBreadcrumbs } from '@/vstutils/breadcrumbs';
+import { Model, ModelValidationError } from '@/vstutils/models';
+import signals from '@/vstutils/signals';
+import { i18n } from '@/vstutils/translation';
 import {
     classesFromFields,
     getApp,
@@ -29,8 +30,7 @@ import {
     mergeDeep,
     openPage,
     pathToArray,
-    smartTranslate,
-} from '../utils';
+} from '@/vstutils/utils';
 
 import type { QuerySet } from '../querySet';
 import type { IView, ActionView, NotEmptyAction } from '../views';
@@ -116,9 +116,9 @@ export function getRedirectUrl(): string {
 export const useInstanceTitle = ({ view, instance }: { view: IView; instance: Ref<Model | null> }) => {
     return computed(() => {
         if (view.isDetailPage() && view.useViewFieldAsTitle) {
-            return instance.value?.getViewFieldString(false) || smartTranslate(view.title);
+            return instance.value?.getViewFieldString(false) || i18n.st(view.title);
         }
-        return smartTranslate(view.title);
+        return i18n.st(view.title);
     });
 };
 
@@ -177,9 +177,25 @@ export const useBasePageData = (view: IView) => {
     const error = ref<unknown>(null);
     const response = ref<unknown>(null);
     const title = computed<string>(() => {
-        return smartTranslate(view.title);
+        return i18n.st(view.title);
     });
     const breadcrumbs = useBreadcrumbs();
+
+    const {
+        start: startAutoUpdate,
+        stop: stopAutoUpdate,
+        setCallback: setAutoUpdateCallback,
+        setPk: setAutoUpdatePk,
+    } = useAutoUpdate({
+        callback: () =>
+            getApp().store.page.updateData?.() ??
+            Promise.reject(
+                `Please provide auto update callback or disable auto update for view ${view.path}`,
+            ),
+        pk: () => getApp().store.page.getAutoUpdatePk?.(),
+        labels: view.subscriptionLabels || undefined,
+        startOnMount: view.autoupdate,
+    });
 
     function initLoading() {
         error.value = null;
@@ -213,6 +229,10 @@ export const useBasePageData = (view: IView) => {
         setLoadingSuccessful,
         setLoadingError,
         fetchData,
+        startAutoUpdate,
+        stopAutoUpdate,
+        setAutoUpdateCallback,
+        setAutoUpdatePk,
     };
 };
 
@@ -224,6 +244,10 @@ export type BaseViewStore = StoreGeneric & {
     getAutoUpdatePk?: () => string | number;
     entityViewClasses?: string[];
     getStateToSave?(): unknown;
+    startAutoUpdate(): void;
+    stopAutoUpdate(): void;
+    setAutoUpdateCallback(callback: Promise<unknown>): void;
+    setAutoUpdatePk(pk: number | string): void;
 };
 
 export const useSelection = (instances: Ref<Model[]>) => {
