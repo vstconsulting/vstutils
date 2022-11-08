@@ -263,14 +263,15 @@ class NestedViewMixin:
     def perform_destroy(self, instance):
         purge_nested = self.master_view.request.headers.get('X-Purge-Nested', 'false') == 'true'
 
-        if self.master_view.nested_allow_append and not purge_nested:  # type: ignore
+        if self.master_view.nested_allow_append:
             # pylint: disable=import-outside-toplevel
             from vstutils.models import notify_clients
 
             self.nested_manager.remove(instance)
             notify_clients(instance.__class__, instance.pk)
             notify_clients(self.nested_parent_object.__class__, self.nested_parent_object.pk)
-        else:
+
+        if not self.master_view.nested_allow_append or purge_nested:
             instance.delete()
 
     @transaction.atomic()
