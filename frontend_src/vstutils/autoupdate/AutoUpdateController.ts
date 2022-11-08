@@ -13,20 +13,31 @@ export interface TimerAutoUpdateAction extends AutoUpdateAction {
 }
 
 export interface CentrifugoAutoUpdateAction extends AutoUpdateAction {
-    pk?: number | string | null;
+    pk?: SubscriptionPk;
     channels?: CentrifugoChannel[];
     labels?: string[];
     type: 'centrifugo';
 }
 
-interface CentrifugoSubscriptionData {
-    callback: () => Promise<unknown>;
-    subscription: Centrifuge.Subscription;
+export interface SubscribedCentrifugoAction extends CentrifugoAutoUpdateAction {
+    pk?: string;
+    channels: CentrifugoChannel[];
+    labels?: never;
 }
 
 type CentrifugoChannel = string;
 type ActionId = string;
 type SubscriberId = string;
+type SubscriptionPk = string | number | undefined;
+
+interface PublicationContext extends Centrifuge.PublicationContext {
+    data:
+        | {
+              pk?: string | number;
+              [key: string]: unknown;
+          }
+        | undefined;
+}
 
 export class AutoUpdateController {
     centrifugo?: Centrifuge | null;
@@ -40,23 +51,31 @@ export class AutoUpdateController {
     >();
 
     // Centrifugo related
-    bulkedActions: CentrifugoSubscriptionData[] = [];
+    bulkedActions: SubscribedCentrifugoAction[] = [];
     nextBulkExecutionPromise: Promise<unknown> = Promise.resolve();
 
-    centrifugoSubscribers: Map<SubscriberId, CentrifugoSubscriptionData[]> = new Map<
-        SubscriberId,
-        CentrifugoSubscriptionData[]
-    >();
-    centrifugoActiveSubscriptions: Map<Centrifuge.Subscription, number> = new Map<
-        Centrifuge.Subscription,
-        number
-    >();
+    centrifugoSubscribers = new Map<SubscriberId, SubscribedCentrifugoAction>();
+    channelSubscriptions = new Map<CentrifugoChannel, { sub: Centrifuge.Subscription; count: number }>();
+    channelSubscribers = new Map<CentrifugoChannel, Map<SubscriptionPk, SubscribedCentrifugoAction[]>>();
 
     subscriptionsPrefix: string;
 
     constructor(centrifuge?: Centrifuge | null, subscriptionsPrefix?: string | null) {
         this.centrifugo = centrifuge;
         this.subscriptionsPrefix = subscriptionsPrefix ?? '';
+    }
+
+    private async executeCallbacks(actions: Iterable<{ callback: () => unknown }>): Promise<void> {
+        const promises = [];
+        for (const action of actions) {
+            promises.push(action.callback());
+        }
+        const results = await Promise.allSettled(promises);
+        for (const result of results) {
+            if (result.status === 'rejected') {
+                console.warn('Auto update callback failed', result.reason);
+            }
+        }
     }
 
     subscribe(action: TimerAutoUpdateAction | CentrifugoAutoUpdateAction) {
@@ -69,25 +88,45 @@ export class AutoUpdateController {
         }
 
         // Centrifugo subscription
-        const channels =
-            action.channels ??
-            action.labels?.map((label) => {
-                if (this.subscriptionsPrefix) {
-                    return `${this.subscriptionsPrefix}.${label}`;
-                }
-                return label;
-            }) ??
-            [];
+        const centAction: SubscribedCentrifugoAction = {
+            id: action.id,
+            type: 'centrifugo',
+            pk: action.pk === undefined ? undefined : String(action.pk),
+            callback: action.callback,
+            channels:
+                action.channels ??
+                action.labels!.map((label) => {
+                    if (this.subscriptionsPrefix) {
+                        return `${this.subscriptionsPrefix}.${label}`;
+                    }
+                    return label;
+                }),
+        };
+        this.centrifugoSubscribers.set(subscriberId, centAction);
 
-        for (const channel of channels) {
-            const subscription = this.centrifugo!.subscribe(channel, () => {
-                this.onCentrifugoUpdate(subscriberId);
-            });
-            this.addCentrifugoSubscriptionData(subscriberId, {
-                callback: action.callback,
-                subscription,
-            });
-            this.addCentrifugoActiveSubscription(subscription);
+        for (const channel of centAction.channels) {
+            let subscription = this.channelSubscriptions.get(channel);
+            if (!subscription) {
+                subscription = { sub: this.centrifugo!.subscribe(channel), count: 0 };
+                this.channelSubscriptions.set(channel, subscription);
+                subscription.sub.on('publish', (event: PublicationContext) =>
+                    this.onCentrifugoUpdate(channel, event),
+                );
+            }
+            subscription.count = subscription.count + 1;
+
+            let channelSubscriptions = this.channelSubscribers.get(channel);
+            if (!channelSubscriptions) {
+                channelSubscriptions = new Map();
+                this.channelSubscribers.set(channel, channelSubscriptions);
+            }
+
+            let pkSubscriptions = channelSubscriptions.get(centAction.pk);
+            if (!pkSubscriptions) {
+                pkSubscriptions = [];
+                channelSubscriptions.set(centAction.pk, pkSubscriptions);
+            }
+            pkSubscriptions.push(centAction);
         }
     }
 
@@ -99,15 +138,40 @@ export class AutoUpdateController {
         }
 
         // Centrifugo subscription
-        const subDatas = this.centrifugoSubscribers.get(subscriberId) ?? [];
-        subDatas.forEach((subData) => {
-            const activeSubs = this.centrifugoActiveSubscriptions.get(subData.subscription)! - 1;
-            this.centrifugoActiveSubscriptions.set(subData.subscription, activeSubs);
-            if (activeSubs <= 0) {
-                subData.subscription.unsubscribe();
-                this.centrifugoActiveSubscriptions.delete(subData.subscription);
+        const action = this.centrifugoSubscribers.get(subscriberId);
+        if (!action) {
+            return;
+        }
+
+        for (const channel of action.channels) {
+            // Remove subscribers
+            const subscribers = this.channelSubscribers.get(channel);
+            if (subscribers?.has(action.pk)) {
+                const pkSubscribers = subscribers.get(action.pk)!;
+                const idx = pkSubscribers.indexOf(action);
+                if (idx !== -1) {
+                    pkSubscribers.splice(idx, 1);
+                    if (pkSubscribers.length === 0) {
+                        subscribers.delete(action.pk);
+                    }
+                }
+                if (subscribers.size === 0) {
+                    this.channelSubscribers.delete(channel);
+                }
             }
-        });
+
+            // Remove and stop subscription
+            const subscription = this.channelSubscriptions.get(channel);
+            if (subscription) {
+                subscription.count = subscription.count - 1;
+                if (subscription.count === 0) {
+                    subscription.sub.unsubscribe();
+                    subscription.sub.removeAllListeners();
+                    this.channelSubscriptions.delete(channel);
+                }
+            }
+        }
+
         this.centrifugoSubscribers.delete(subscriberId);
     }
 
@@ -143,46 +207,44 @@ export class AutoUpdateController {
     }
 
     private updateTimerData() {
-        return Promise.allSettled(
-            Array.from(this.timerSubscribers.values()).map((action) => action.callback()),
-        );
+        return this.executeCallbacks(this.timerSubscribers.values());
     }
 
     // Centrifugo related
-    private addCentrifugoActiveSubscription(subscription: Centrifuge.Subscription) {
-        const activeSubs = this.centrifugoActiveSubscriptions.get(subscription) ?? 0;
-        this.centrifugoActiveSubscriptions.set(subscription, activeSubs + 1);
-    }
 
-    private addCentrifugoSubscriptionData(id: SubscriberId, subscriptionData: CentrifugoSubscriptionData) {
-        const subDatas = this.centrifugoSubscribers.get(id);
-        if (!subDatas) {
-            this.centrifugoSubscribers.set(id, [subscriptionData]);
-        } else {
-            subDatas.push(subscriptionData);
-        }
-    }
-
-    private bulkInvoke(sub: CentrifugoSubscriptionData) {
-        if (this.bulkedActions.includes(sub)) {
+    private bulkInvoke(subs?: Iterable<SubscribedCentrifugoAction>) {
+        if (!subs) {
             return;
         }
 
-        if (this.bulkedActions.length === 0) {
+        let added = false;
+
+        for (const sub of subs) {
+            if (this.bulkedActions.includes(sub)) {
+                continue;
+            }
+            added = true;
+            this.bulkedActions.push(sub);
+        }
+        if (added) {
             this.nextBulkExecutionPromise = this.nextBulkExecutionPromise
                 .then(() => randomSleep(100, 1000))
                 .then(() => {
                     const actionsCopy = this.bulkedActions.slice();
                     this.bulkedActions = [];
-                    return Promise.allSettled(actionsCopy.map((action) => action.callback()));
+                    return this.executeCallbacks(actionsCopy);
                 });
         }
-
-        this.bulkedActions.push(sub);
     }
 
-    private onCentrifugoUpdate(subscriberId: SubscriberId) {
-        const subDatas = this.centrifugoSubscribers.get(subscriberId) ?? [];
-        subDatas.forEach((subData) => this.bulkInvoke(subData));
+    private onCentrifugoUpdate(channel: string, { data }: PublicationContext) {
+        const subscribers = this.channelSubscribers.get(channel);
+        if (subscribers) {
+            this.bulkInvoke(subscribers.get(undefined));
+
+            if (data?.pk !== undefined) {
+                this.bulkInvoke(subscribers.get(String(data.pk)));
+            }
+        }
     }
 }

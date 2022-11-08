@@ -1001,17 +1001,9 @@ img.image-field-content {
 
 /* Styles for html field */
 
-.html_content .document {
-    margin-top: -20px;
-    padding: 10px;
-}
-
 .html_content img {
     max-width: 60%;
     vertical-align: baseline;
-}
-
-.html_content .document .section {
 }
 
 .html_content h1,

@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import $ from 'jquery';
 import type { RawLocation } from 'vue-router';
 import type { Action } from '../../../views';
 import { XMenu } from '../../../AppConfiguration';

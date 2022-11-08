@@ -11,9 +11,8 @@ import {
     stringToBoolean,
     generatePassword,
     getRedirectUrlFromResponse,
-    smartTranslate,
 } from '@/vstutils/utils';
-import { i18n } from '@/vstutils/translation.js';
+import { i18n } from '@/vstutils/translation';
 import { createApp } from '../../../unittests/create-app';
 
 describe('utils', () => {
@@ -253,10 +252,10 @@ describe('utils', () => {
         });
         i18n.locale = 'ru';
 
-        expect(smartTranslate('Hello')).toBe('Привет');
-        expect(smartTranslate('World')).toBe('Мир');
-        expect(smartTranslate(undefined)).toBe('');
-        expect(smartTranslate(null)).toBe('');
-        expect(smartTranslate('VST')).toBe('VST');
+        expect(i18n.st('Hello')).toBe('Привет');
+        expect(i18n.st('World')).toBe('Мир');
+        expect(i18n.st(undefined)).toBe('');
+        expect(i18n.st(null)).toBe('');
+        expect(i18n.st('VST')).toBe('VST');
     });
 });

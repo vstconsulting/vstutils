@@ -10,36 +10,24 @@
                 <template v-if="item.link">
                     <router-link :to="item.link">
                         <i v-if="item.iconClasses" :class="item.iconClasses" />
-                        <span v-if="item.name">{{ $st(item.name) }}</span>
+                        <span v-if="item.name">{{ item.name }}</span>
                     </router-link>
                 </template>
                 <template v-else>
                     <i v-if="item.iconClasses" :class="item.iconClasses" />
-                    <span v-if="item.name">{{ $st(item.name) }}</span>
+                    <span v-if="item.name">{{ item.name }}</span>
                 </template>
             </li>
         </ol>
     </nav>
 </template>
 
-<script>
-    /**
-     * One breadcrumb item
-     * @typedef {Object} BreadcrumbItem
-     * @property {string} [name]
-     * @property {string|string[]} [iconClasses]
-     * @property {string|Object} [link]
-     */
+<script setup lang="ts">
+    import { Breadcrumb } from '@/vstutils/breadcrumbs';
 
-    /**
-     * Component that renders list of breadcrumbs
-     */
-    export default {
-        name: 'Breadcrumbs',
-        props: {
-            items: { type: Array, required: true },
-        },
-    };
+    defineProps<{
+        items: Breadcrumb[];
+    }>();
 </script>
 
 <style scoped>

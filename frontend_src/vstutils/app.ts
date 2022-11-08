@@ -1,6 +1,6 @@
 import type { Vue } from 'vue/types/vue';
 import type { ComponentOptions } from 'vue';
-import * as Centrifuge from 'centrifuge';
+import Centrifuge from 'centrifuge';
 import { defineStore } from 'pinia';
 import VueI18n from 'vue-i18n';
 import type VueRouter from 'vue-router';
@@ -408,7 +408,7 @@ export class App implements IApp {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         Vue.prototype.$u = utils;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        Vue.prototype.$st = utils.smartTranslate;
+        Vue.prototype.$st = i18n.st.bind(i18n);
 
         this.rootVm = new Vue({
             mixins: [this.appRootComponent, ...this.additionalRootMixins],

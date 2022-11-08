@@ -2,7 +2,7 @@ import $ from 'jquery';
 import VueRouter from 'vue-router';
 import moment from 'moment';
 import signals from '../signals.js';
-import { i18n } from '../translation.js';
+import { i18n } from '@/vstutils/translation';
 import { getApp } from './app-helpers';
 import { LocalSettings } from './localSettings';
 
@@ -1059,14 +1059,6 @@ export function generateBase32String(length = 32) {
     return generateRandomString(length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567');
 }
 
-export function tableColumnClasses(field) {
-    const classes = ['column', `column-${field.name}`, `column-format-${field.format}`];
-    if (field.model?.pkField === field) {
-        classes.push('pk-column');
-    }
-    return classes;
-}
-
 export function classesFromFields(fields, data) {
     return fields
         .filter((f) => f.format === 'choices' || f.type === 'boolean')
@@ -1385,27 +1377,4 @@ export function openSublink(sublink, instance = undefined) {
         ? joinPaths(router.currentRoute.path, sublink.appendFragment)
         : sublink.href;
     return router.push(formatPath(path, router.currentRoute.params, instance));
-}
-
-/**
- * @param {string} text
- * @returns {string}
- */
-export function smartTranslate(text) {
-    if (text === undefined || text === null) {
-        return '';
-    }
-
-    text = String(text);
-
-    if (i18n.te(text)) {
-        return i18n.t(text);
-    }
-
-    const lower = text.toLowerCase();
-    if (i18n.te(lower)) {
-        return capitalize(i18n.t(lower));
-    }
-
-    return text;
 }

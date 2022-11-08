@@ -29,7 +29,8 @@ describe('AutoUpdateController', () => {
         const controller = new AutoUpdateController(centrifuge);
 
         const subscribers = controller.centrifugoSubscribers;
-        const activeSubscriptions = controller.centrifugoActiveSubscriptions;
+        const channelSubscriptions = controller.channelSubscriptions;
+        const channelSubscribers = controller.channelSubscribers;
 
         const callback1 = jest.fn();
         const callback2 = jest.fn();
@@ -41,42 +42,42 @@ describe('AutoUpdateController', () => {
             type: 'centrifugo',
             callback: callback1,
             channels: ['channel1', 'channel2'],
-            pk: null,
+            pk: undefined,
         });
         controller.subscribe({
             id: '2',
             type: 'centrifugo',
             callback: callback2,
             channels: ['channel1', 'channel2'],
-            pk: null,
+            pk: 3,
         });
         controller.subscribe({
             id: '3',
             type: 'centrifugo',
             callback: callback2,
-            channels: ['channel1', 'channel2'],
+            channels: ['channel2'],
             pk: null,
         });
 
         expect(subscribers.size).toBe(3);
-        expect(activeSubscriptions.size).toBe(2);
+        expect(channelSubscriptions.size).toBe(2);
+        expect(channelSubscribers.size).toBe(2);
+        expect(channelSubscribers.get('channel1').size).toBe(2);
 
         const subDatas = subscribers.get('1');
-        expect(subDatas.length).toBe(2);
-        expect(subDatas[0].subscription.channel).toBe('channel1');
-        expect(subDatas[1].subscription.channel).toBe('channel2');
+        expect(subDatas.channels).toEqual(['channel1', 'channel2']);
 
-        subDatas[0].callback();
+        subDatas.callback();
 
         expect(callback1).toBeCalledTimes(1);
         expect(callback2).toBeCalledTimes(0);
 
         controller.unsubscribe('1');
         expect(subscribers.size).toBe(2);
-        expect(activeSubscriptions.size).toBe(2);
+        expect(channelSubscriptions.size).toBe(2);
         controller.unsubscribe('2');
         controller.unsubscribe('3');
         expect(subscribers.size).toBe(0);
-        expect(activeSubscriptions.size).toBe(0);
+        expect(channelSubscriptions.size).toBe(0);
     });
 });

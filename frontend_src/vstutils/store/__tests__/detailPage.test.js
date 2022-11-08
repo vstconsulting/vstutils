@@ -38,6 +38,7 @@ test('createDetailViewStore', async () => {
 
     // Push our path to router
     app.router.push('/some_list/15/');
+    app.store.setPage(store);
 
     expect(store.response).toBeFalsy();
 

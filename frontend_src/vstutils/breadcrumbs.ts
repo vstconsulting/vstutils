@@ -1,6 +1,7 @@
 import { computed } from 'vue';
-import type { Model } from './models';
-import { getApp } from './utils';
+import type { Model } from '@/vstutils/models';
+import { getApp } from '@/vstutils/utils';
+import { i18n } from '@/vstutils/translation';
 
 export interface Breadcrumb {
     link?: string;
@@ -19,15 +20,13 @@ export const useBreadcrumbs = () => {
         const crumbs: Breadcrumb[] = [{ iconClasses: 'fas fa-home', link: '/' }];
         for (const { view, path, state } of app.store.viewItems) {
             let link = path;
-            let name = view.title;
+            let name;
             let iconClasses = '';
 
             if (view.isNewPage()) {
-                name = '';
                 link = '';
                 iconClasses = 'fas fa-plus';
             } else if (view.isEditPage() && !view.isEditStyleOnly) {
-                name = '';
                 link = '';
                 iconClasses = 'fas fa-pen';
             } else if (view.isDetailPage() && view.useViewFieldAsTitle) {
@@ -36,6 +35,10 @@ export const useBreadcrumbs = () => {
                 if (instanceName) {
                     name = instanceName;
                 }
+            }
+
+            if (!name) {
+                name = i18n.t(view.title) as string;
             }
 
             crumbs.push({ link, name, iconClasses });

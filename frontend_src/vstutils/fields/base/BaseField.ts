@@ -4,8 +4,7 @@ import { pop_up_msg } from '../../popUp';
 import type { Model } from '../../models';
 import type { QuerySet } from '../../querySet';
 import BaseFieldMixin from './BaseFieldMixin.vue';
-import { i18n } from '../../translation.js';
-import { Component } from 'vue';
+import { i18n } from '../../translation';
 import { IApp } from '@/vstutils/app';
 import { ComponentOptions } from 'vue';
 
@@ -40,7 +39,7 @@ export type FieldOptions<XOptions extends FieldXOptions, Inner> = Omit<Schema, '
     default?: Inner;
 };
 
-export interface Field<Inner, Represent, XOptions extends FieldXOptions = FieldXOptions> {
+export interface Field<Inner = unknown, Represent = unknown, XOptions extends FieldXOptions = FieldXOptions> {
     options: FieldOptions<XOptions, Inner>;
     props: XOptions;
 
@@ -64,7 +63,7 @@ export interface Field<Inner, Represent, XOptions extends FieldXOptions = FieldX
     redirect?: RedirectOptions;
 
     validators: ((value: Represent) => void)[];
-    model?: Model;
+    model?: typeof Model;
 
     translateFieldName: string;
 
@@ -117,7 +116,7 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
     redirect?: RedirectOptions;
 
     validators: ((value: Represent) => void)[];
-    model?: Model;
+    model?: typeof Model;
 
     translateFieldName: string;
 

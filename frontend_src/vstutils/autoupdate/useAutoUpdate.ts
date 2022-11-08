@@ -1,39 +1,58 @@
 import { onBeforeUnmount, onMounted } from 'vue';
 
-import { AutoUpdateAction } from './AutoUpdateController';
-import { TimerAutoUpdateAction, CentrifugoAutoUpdateAction } from './AutoUpdateController';
-import { getApp, getUniqueId } from '../utils';
+import { getApp, getUniqueId } from '@/vstutils/utils';
+import { AutoUpdateAction, CentrifugoAutoUpdateAction, TimerAutoUpdateAction } from './AutoUpdateController';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+async function EMPTY_CALLBACK() {}
 
 export function useAutoUpdate({
-    callback,
+    callback = EMPTY_CALLBACK,
     labels,
     pk,
     startOnMount = true,
 }: {
-    callback: AutoUpdateAction['callback'];
+    callback?: AutoUpdateAction['callback'];
     labels?: string[];
-    pk?: CentrifugoAutoUpdateAction['pk'];
+    pk?: CentrifugoAutoUpdateAction['pk'] | (() => CentrifugoAutoUpdateAction['pk']);
     startOnMount?: boolean;
 }) {
     const app = getApp();
     const id = getUniqueId();
 
-    const autoUpdateAction: TimerAutoUpdateAction | CentrifugoAutoUpdateAction =
+    const autoUpdateAction: TimerAutoUpdateAction | Omit<CentrifugoAutoUpdateAction, 'pk'> =
         app.centrifugoClient?.isConnected() && labels
             ? {
                   id,
                   callback,
                   labels,
                   type: 'centrifugo',
-                  pk,
               }
             : {
                   id,
                   callback,
                   type: 'timer',
               };
-    const start = () => app.autoUpdateController.subscribe(autoUpdateAction);
-    const stop = () => app.autoUpdateController.unsubscribe(id);
+
+    function start() {
+        if (autoUpdateAction.callback === EMPTY_CALLBACK) {
+            console.warn('Auto update callback has not been set', autoUpdateAction);
+            return;
+        }
+        app.autoUpdateController.subscribe({
+            ...autoUpdateAction,
+            pk: typeof pk === 'function' ? pk() : pk,
+        } as TimerAutoUpdateAction | CentrifugoAutoUpdateAction);
+    }
+    function stop() {
+        app.autoUpdateController.unsubscribe(id);
+    }
+    function setCallback(callback: () => Promise<unknown>) {
+        autoUpdateAction.callback = callback;
+    }
+    function setPk(newPk: string) {
+        pk = newPk;
+    }
 
     if (startOnMount) {
         onMounted(start);
@@ -41,5 +60,5 @@ export function useAutoUpdate({
 
     onBeforeUnmount(stop);
 
-    return { start, stop };
+    return { start, stop, setCallback, setPk };
 }

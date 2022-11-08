@@ -7,7 +7,7 @@ import {
     RequestTypes,
     ViewTypes,
 } from '../../../utils';
-import { i18n } from '../../../translation.js';
+import { i18n } from '@/vstutils/translation';
 import { BaseField } from '../../base';
 import FKFieldMixin from './FKFieldMixin.js';
 
