@@ -71,6 +71,14 @@
         content: var(--required-error-text);
     }
 
+    .csv-table::v-deep div.item-line.unselectable {
+        background-color: transparent !important;
+    }
+
+    .csv-table::v-deep div.item-line.unselectable:hover {
+        background-color: #dadee3 !important;
+    }
+
     .table-header {
         color: #6c757d;
         position: relative;
@@ -78,7 +86,6 @@
         flex-direction: column;
         min-width: 0;
         word-wrap: break-word;
-        background-color: #fff;
         background-clip: border-box;
         border: 0 solid rgba(0, 0, 0, 0.125);
         border-radius: 0.25rem;
@@ -86,5 +93,11 @@
 
     #download-button {
         width: fit-content;
+    }
+</style>
+
+<style>
+    .dark-mode .csv-table div.item-line.unselectable:hover {
+        background-color: #3a4047 !important;
     }
 </style>
