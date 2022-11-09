@@ -286,7 +286,7 @@ export const useSelection = (instances: Ref<Model[]>) => {
 };
 
 export function filterNonEmpty(obj: Record<string, any>) {
-    return Object.fromEntries(Object.entries(obj).filter((entry) => entry[1]));
+    return Object.fromEntries(Object.entries(obj).filter(([key, value]) => value || key === '__deep_parent'));
 }
 
 export function useListFilters(qs: Ref<QuerySet>) {
