@@ -249,7 +249,7 @@ export default class ViewConstructor {
                     hasRemoveAction = true;
                 } else if (operationOptions.type === ViewTypes.ACTION) {
                     const isEmpty =
-                        !requestModel || requestModel.fields.size === 0 || requestModel === NoModel;
+                        !requestModel || requestModel.writableFields.length === 0 || requestModel === NoModel;
                     const isMultiAction =
                         (operationOptions[IS_MULTI_ACTION_PROPERTY_NAME] !== undefined &&
                             operationOptions[IS_MULTI_ACTION_PROPERTY_NAME]) ||

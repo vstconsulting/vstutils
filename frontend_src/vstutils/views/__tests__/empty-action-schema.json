@@ -1,0 +1,44 @@
+{
+    "$schema": "https://json.schemastore.org/swagger-2.0.json",
+    "paths": {
+        "/user/{id}/disable/": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "post": {
+                "description": "Empty action with non empty request model (all fields is readOnly)",
+                "operationId": "user_disable",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "data",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "some_field": {
+                                    "type": "string",
+                                    "readOnly": true
+                                },
+                                "other_field": {
+                                    "type": "number",
+                                    "readOnly": true
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}
