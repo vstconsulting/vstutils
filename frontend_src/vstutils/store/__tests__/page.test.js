@@ -24,7 +24,8 @@ test('createListViewStore', async () => {
     expect(store).not.toBeNull();
 
     // Push our path to router
-    app.router.push('/some_list/');
+    await app.router.push('/some_list/');
+    await app.store.setPage(store);
 
     expect(store.response).toBeFalsy();
 
