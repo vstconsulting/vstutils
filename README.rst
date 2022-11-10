@@ -56,11 +56,12 @@ Browser support
 Supported `browserslist <https://browserl.ist/?q=%3E+0.25%25+and+not+dead+and+not+IE+11>`_.
 
 
-Public projects
----------------
+Implemented Projects
+--------------------
 
 * Polemarch (https://polemarch.org/)
 * SkillsChecked (Nurse recruitment app).
+* Deigmata (Marketplace platform).
 
 
 License
@@ -69,4 +70,4 @@ License
 VSTUtils is licensed under the terms of the Apache License 2.0.
 See the file "LICENSE" for more information.
 
-Copyright 2018-2021 VST Consulting
+Copyright 2018-2022 VST Consulting
