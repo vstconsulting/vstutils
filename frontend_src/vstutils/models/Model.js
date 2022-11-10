@@ -209,6 +209,10 @@ export class Model {
         return data;
     }
 
+    static get writableFields() {
+        return Array.from(this.fields.values()).filter((field) => !field.readOnly);
+    }
+
     /**
      * @property @property {Array<string>} [fieldsNames]
      * @return {Record<string, unknown>}
