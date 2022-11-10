@@ -128,7 +128,9 @@ test('createEditViewStore', async () => {
     expect(store).not.toBeNull();
 
     // Push our path to router
-    app.router.push('/some_list/16/edit');
+    await app.router.push('/some_list/16/edit');
+    await app.store.setPage(store);
+
     expect(store.response).toBeFalsy();
 
     // Mock response with empty results and make sure that response is received
@@ -178,7 +180,8 @@ test('patchEditViewStore', async () => {
     const editView = app.views.get('/some_list/{id}/edit/');
 
     const store = defineStore('patch_store', editView.getStoreDefinition())();
-    app.router.push('/some_list/17/edit');
+    await app.router.push('/some_list/17/edit');
+    await app.store.setPage(store);
 
     fetchMock.mockResponseOnce(
         JSON.stringify([
@@ -231,7 +234,8 @@ test('putEditViewStore', async () => {
     const editView = app.views.get('/some_list/{id}/edit/');
 
     const store = defineStore('put_store', editView.getStoreDefinition())();
-    app.router.push('/some_list/15/edit');
+    await app.router.push('/some_list/15/edit');
+    await app.store.setPage(store);
 
     fetchMock.mockResponseOnce(
         JSON.stringify([
@@ -273,9 +277,7 @@ test('putEditViewStore', async () => {
     expect(bulk[0].method).toBe('put');
     expect(bulk[0].path).toStrictEqual(['some_list', 15]);
     expect(bulk[0].data).toStrictEqual({
-        id: 15,
         name: 'Shop',
-        active: true,
         phone: '79658964562',
     });
 });
@@ -290,7 +292,8 @@ test('createNewViewStore', async () => {
     expect(store).not.toBeNull();
     expect(store.model.name).toEqual('OneSomePage');
 
-    app.router.push('/some_list/new/');
+    await app.router.push('/some_list/new/');
+    await app.store.setPage(store);
     expect(store.response).toBeFalsy();
 
     expect(store.sandbox).toStrictEqual({});

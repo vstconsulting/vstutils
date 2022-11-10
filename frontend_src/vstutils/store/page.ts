@@ -266,7 +266,7 @@ export const createDetailViewStore = (view: PageView) => () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         if (!instance || !newInstance.isEqual(instance)) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            pageWithInstance.setInstance(newInstance);
+            (app.store.page as DetailPageStore).setInstance(newInstance);
             populateFilters();
         }
     }
@@ -323,6 +323,7 @@ export const createDetailViewStore = (view: PageView) => () => {
 };
 
 export type DetailPageStore = BaseViewStore & {
+    setInstance(instance: Model): void;
     instance: Model;
 };
 

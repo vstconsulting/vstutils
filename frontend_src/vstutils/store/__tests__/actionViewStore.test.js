@@ -31,7 +31,8 @@ test('createActionViewStore', async () => {
     });
 
     // Push our path to router
-    app.router.push('/some_action/');
+    await app.router.push('/some_action/');
+    await app.store.setPage(store);
 
     fetchMock.mockResponseOnce(
         JSON.stringify([
