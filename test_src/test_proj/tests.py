@@ -5138,7 +5138,7 @@ class WebSocketTestCase(BaseTestCase):
         from test_proj.test_notificator import messages_log
 
         # notify
-        self.assertEqual(len(messages_log[0]), 1)
+        self.assertEqual(len(messages_log[0]), 1, messages_log[0])
         self.assertEqual(messages_log[0][0]['method'], 'publish')
         self.assertDictEqual(messages_log[0][0]['params'], {
             **messages_log[0][0]['params'],
@@ -5147,7 +5147,7 @@ class WebSocketTestCase(BaseTestCase):
         })
 
         # bulk notify
-        self.assertEqual(len(messages_log[1]), 1)
+        self.assertEqual(len(messages_log[1]), 1, messages_log[1])
         self.assertEqual(messages_log[1][0]['method'], 'publish')
         self.assertDictEqual(messages_log[1][0]['params'], {
             **messages_log[1][0]['params'],
@@ -5156,7 +5156,7 @@ class WebSocketTestCase(BaseTestCase):
         })
 
         # bulk notify with channel provided
-        self.assertEqual(len(messages_log[2]), 2)
+        self.assertEqual(len(messages_log[2]), 2, messages_log[2])
         for msg in messages_log[2]:
             self.assertEqual(msg['method'], 'publish')
             self.assertDictEqual(msg['params'], {
@@ -5166,7 +5166,7 @@ class WebSocketTestCase(BaseTestCase):
             })
 
         # notify for uuid model
-        self.assertEqual(len(messages_log[3]), 1)
+        self.assertEqual(len(messages_log[3]), 1, messages_log[3])
         self.assertEqual(messages_log[3][0]['method'], 'publish')
         self.assertDictEqual(messages_log[3][0]['params'], {
             **messages_log[3][0]['params'],
@@ -5175,7 +5175,7 @@ class WebSocketTestCase(BaseTestCase):
         })
 
         # api call
-        self.assertEqual(len(messages_log[4]), 2)
+        self.assertEqual(len(messages_log[4]), 2, messages_log[4])
         self.assertEqual(messages_log[4][0]['method'], 'publish')
         self.assertDictEqual(messages_log[4][0]['params'], {
             **messages_log[4][0]['params'],
@@ -5190,12 +5190,13 @@ class WebSocketTestCase(BaseTestCase):
         })
 
         # celery
-        self.assertEqual(len(messages_log[5]), 1)
+        self.assertEqual(len(messages_log[5]), 1, messages_log[5])
         self.assertEqual(messages_log[5][0]['method'], 'publish')
         self.assertDictEqual(messages_log[5][0]['params'], {
             **messages_log[5][0]['params'],
             'channel': f'{settings.VST_PROJECT}.update.test_proj.Host',
         })
+
 
 class ThrottleTestCase(BaseTestCase):
     def throttle_requests(self):
