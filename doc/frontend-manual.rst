@@ -232,46 +232,6 @@ where name - name of route, path - template of route's path, component - compone
 
 **Description:** This signal is emitted after all routes was formed and added to routes list.
 
-GuiCustomizer.beforeInit
-~~~~~~~~~~~~~~~~~~~~~~~~
-**Signal name:** "GuiCustomizer.beforeInit".
-
-**Context argument:** obj - {object} - Instance of GuiCustomizer class.
-
-**Description:** This signal will be executed before initialization of GuiCustomizer Instance.
-
-GuiCustomizer.skins_custom_settings.reseted
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-**Signal name:** "GuiCustomizer.skins_custom_settings.reseted".
-
-**Context argument:** obj - {object} - Instance of GuiCustomizer class.
-
-**Description:** This signal will be executed after custom settings of GuiCustomizer skin were reset.
-
-GuiCustomizer.skins_custom_settings.saved
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-**Signal name:** "GuiCustomizer.skins_custom_settings.saved".
-
-**Context argument:** obj - {object} - Instance of GuiCustomizer class.
-
-**Description:** This signal will be executed after custom settings of GuiCustomizer skin were saved.
-
-GuiCustomizer.skin.name.changed
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-**Signal name:** "GuiCustomizer.skin.name.changed".
-
-**Context argument:** obj - {object} - Instance of GuiCustomizer class.
-
-**Description:** This signal will be executed after changing of current GuiCustomizer skin.
-
-GuiCustomizer.skin.settings.changed
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-**Signal name:** "GuiCustomizer.skin.settings.changed".
-
-**Context argument:** obj - {object} - Instance of GuiCustomizer class.
-
-**Description:** This signal will be executed after changing of current GuiCustomizer skin's settings.
-
 <${PATH}>filterActions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Signal name:** "<${PATH}>filterActions".
