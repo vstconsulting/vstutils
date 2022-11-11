@@ -6,7 +6,7 @@ import { FKArrayFieldMixin } from './custom/fk.js';
 import { StringField } from '../text';
 import { StringArrayFieldMixin } from './custom/string.js';
 import { ChoicesField } from '../choices';
-import { ChoicesArrayFieldMixin } from './custom/choices.js';
+import { ChoicesArrayFieldMixin } from './custom/choices';
 import { NumberField, integer } from '../numbers';
 import { NumberArrayFieldMixin, IntegerArrayFieldMixin } from './custom/number.js';
 

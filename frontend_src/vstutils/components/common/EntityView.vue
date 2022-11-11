@@ -15,7 +15,7 @@
                 <portal-target name="appendButtonsRow" />
             </div>
 
-            <SelectedFilters v-if="!error && showUsedFilters && view" :view="view" />
+            <SelectedFilters v-if="!error && !loading && showUsedFilters && view" :view="view" />
 
             <ErrorPage v-if="error" :error-data="errorData" :error="error" />
 
