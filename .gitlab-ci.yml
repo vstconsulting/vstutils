@@ -121,4 +121,8 @@ release_pypi:
   script:
     - tox -e build
     - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
+    - curl --location --output /usr/bin/release-cli "https://gitlab.com/api/v4/projects/gitlab-org%2Frelease-cli/packages/generic/release-cli/latest/release-cli-linux-amd64"
+    - chmod +x /usr/bin/release-cli
+    - release-cli -v
+    - release-cli create --name $CI_COMMIT_TAG --description $CI_COMMIT_DESCRIPTION --tag-name "v${CI_COMMIT_TAG}" --ref $CI_COMMIT_SHA --assets-link "{\"name\":\"PyPi\",\"url\":\"https://pypi.org/project/vstutils/$CI_COMMIT_TAG/\",\"link_type\":\"other\"}
   allow_failure: true
