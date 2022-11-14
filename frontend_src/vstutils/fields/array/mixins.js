@@ -1,12 +1,16 @@
-import { BaseFieldContentReadonlyMixin, BaseFieldListView, BaseFieldMixin } from '../base';
+import { set, defineComponent } from 'vue';
+import { BaseFieldContentReadonlyMixin, BaseFieldListView, BaseFieldMixin } from '@/vstutils/fields/base';
 import ArrayFieldEdit from './ArrayFieldEdit.vue';
 
 const NOT_INLINE_FIELDS = ['array', 'nested-object', 'textarea', 'uri'];
 
-/** @vue/component */
-const ReadonlyMixin = {
+const ReadonlyMixin = defineComponent({
     methods: {
-        renderItem(item, attrs = {}) {
+        setItemValue(options, idx) {
+            set(this.value, idx, options.value);
+            this.$parent.$emit('set-value', { ...options, value: this.value });
+        },
+        renderItem(item, idx, attrs = {}) {
             return this.$createElement(this.field.itemField.component, {
                 props: {
                     field: this.field.itemField,
@@ -14,13 +18,16 @@ const ReadonlyMixin = {
                     type: this.$parent.type,
                     hideTitle: true,
                 },
+                on: {
+                    'set-value': (options) => this.setItemValue(options, idx),
+                },
                 ...attrs,
             });
         },
         renderInline(items) {
             const nodes = [];
             for (let i = 0; i < items.length; i++) {
-                nodes.push(this.renderItem(items[i], { style: 'display: inline-block;' }));
+                nodes.push(this.renderItem(items[i], i, { style: 'display: inline-block;' }));
                 if (i + 1 < items.length) {
                     nodes.push(', ');
                 }
@@ -31,8 +38,8 @@ const ReadonlyMixin = {
             return this.$createElement(
                 'div',
                 { staticClass: 'row' },
-                items.map((item) =>
-                    this.$createElement('div', { staticClass: 'col-12' }, [this.renderItem(item)]),
+                items.map((item, idx) =>
+                    this.$createElement('div', { staticClass: 'col-12' }, [this.renderItem(item, idx)]),
                 ),
             );
         },
@@ -43,24 +50,21 @@ const ReadonlyMixin = {
         }
         return this.renderInline(this.value);
     },
-};
+});
 
-/** @vue/component */
-export const ArrayFieldReadonly = {
+export const ArrayFieldReadonly = defineComponent({
     mixins: [BaseFieldContentReadonlyMixin, ReadonlyMixin],
-};
+});
 
-/** @vue/component */
-export const ArrayFieldList = {
+export const ArrayFieldList = defineComponent({
     mixins: [BaseFieldListView, ReadonlyMixin],
-};
+});
 
-/** @vue/component */
-export const ArrayFieldMixin = {
+export const ArrayFieldMixin = defineComponent({
     components: {
         field_content_readonly: ArrayFieldReadonly,
         field_content_edit: ArrayFieldEdit,
         field_list_view: ArrayFieldList,
     },
     mixins: [BaseFieldMixin],
-};
+});

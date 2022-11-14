@@ -1,0 +1,157 @@
+{
+    "$schema": "https://json.schemastore.org/swagger-2.0.json",
+    "definitions": {
+        "Related": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Some": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "name": {
+                    "type": "string"
+                },
+                "related": {
+                    "type": "integer",
+                    "format": "fk",
+                    "x-options": {
+                        "usePrefetch": true,
+                        "value_field": "id",
+                        "view_field": "name",
+                        "model": {
+                            "$ref": "#/definitions/Related"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "paths": {
+        "/related/": {
+            "get": {
+                "operationId": "related_list",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "minItems": 1,
+                        "uniqueItems": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Related"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "parameters": []
+        },
+        "/some/": {
+            "parameters": [],
+            "get": {
+                "operationId": "some_list",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Some"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/some/{id}/": {
+            "parameters": [
+                {
+                    "in": "query",
+                    "name": "id",
+                    "type": "number",
+                    "required": true
+                }
+            ],
+            "get": {
+                "operationId": "some_get",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Some"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

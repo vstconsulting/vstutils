@@ -11,13 +11,13 @@ const FKFieldContentReadonly = {
          * @return {boolean}
          */
         with_link() {
-            return this.field.makeLink && (!this.fetchedValue || !this.fetchedValue.__notFound);
+            return this.field.makeLink && (!this.value || !this.value.__notFound);
         },
         /**
          * Property, that returns 'fk' value.
          */
         fk() {
-            return this.field.getValueFieldValue(this.fetchedValue);
+            return this.field.getValueFieldValue(this.value);
         },
         /**
          * Link to the page of current instance, to which this field is linked.
@@ -33,7 +33,7 @@ const FKFieldContentReadonly = {
          * Text of link.
          */
         text() {
-            return this.field.translateValue(this.fetchedValue);
+            return this.field.translateValue(this.value);
         },
     },
     methods: {

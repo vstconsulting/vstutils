@@ -50,7 +50,7 @@ export class FieldsResolver {
      *
      * @param {string|object} obj
      * @param {string} [name]
-     * @return {BaseField}
+     * @return {Field}
      */
     resolveField(obj, name = undefined) {
         if (obj instanceof BaseField) {

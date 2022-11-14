@@ -1,15 +1,10 @@
-import { formatPath } from '../../../utils';
+import { defineComponent } from 'vue';
+import { formatPath } from '@/vstutils/utils';
 
 /**
  * Mixin for content components of FK field.
- * @vue/component
  */
-export default {
-    data() {
-        return {
-            fetchedValue: null,
-        };
-    },
+export default defineComponent({
     computed: {
         /**
          * Property, that stores all querysets for current field.
@@ -27,11 +22,7 @@ export default {
     },
     watch: {
         value(value) {
-            if (value && typeof value != 'object' && this.field.fetchData) {
-                this.fetchValue(value);
-            } else {
-                this.fetchedValue = value;
-            }
+            this.fetchValue(value);
         },
 
         'field.props.querysets': function (querysets) {
@@ -43,23 +34,19 @@ export default {
         },
     },
     beforeMount() {
-        if (this.value && typeof this.value != 'object' && this.field.fetchData) {
-            this.fetchValue(this.value);
-        } else {
-            this.fetchedValue = this.value;
-        }
+        this.fetchValue(this.value);
     },
     methods: {
         /**
          * Method, that loads prefetch_value.
-         * @param {string|number} value.
+         * @param {string|number|Model} value.
          */
         async fetchValue(value) {
-            if (!this.field.fetchData) {
+            if (!value || typeof value === 'object' || !this.field.fetchData) {
                 return;
             }
             const [instance] = await this.field._fetchRelated([value], this.queryset);
-            this.fetchedValue = instance;
+            this.$emit('set-value', instance, { markChanged: false });
         },
     },
-};
+});

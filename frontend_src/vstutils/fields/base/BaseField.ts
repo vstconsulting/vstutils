@@ -71,6 +71,7 @@ export interface Field<Inner = unknown, Represent = unknown, XOptions extends Fi
 
     toInner(data: Record<string, unknown>): Inner | null | undefined;
     toRepresent(data: Record<string, unknown>): Represent | null | undefined;
+    validateValue(data: Record<string, unknown>): void;
 
     prepareFieldForView(path: string): void;
     afterInstancesFetched(instances: Model[], queryset: QuerySet): Promise<void>;
@@ -154,6 +155,10 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
     }
 
     static get app(): IApp {
+        return globalThis.__currentApp;
+    }
+
+    get app(): IApp {
         return globalThis.__currentApp;
     }
 

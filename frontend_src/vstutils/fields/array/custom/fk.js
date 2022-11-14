@@ -6,19 +6,19 @@ import { FKFieldContentEditable } from '../../fk/fk';
 /** @vue/component */
 export const FKArrayEdit = {
     mixins: [FKFieldContentEditable],
-    beforeMount() {
-        if (this.field.fetchData && this.value?.some((item) => typeof item !== 'object')) {
-            this.fetchValue(this.value);
-        } else {
-            this.fetchedValue = this.value;
-        }
-    },
     methods: {
         async fetchValue(value) {
-            if (!this.field.fetchData) {
+            if (
+                !value ||
+                typeof value !== 'object' ||
+                this.value?.every((item) => typeof item === 'object') ||
+                !this.field.fetchData
+            ) {
                 return;
             }
-            this.fetchedValue = await this.field._fetchRelated(value, this.queryset);
+            this.$emit('set-value', await this.field._fetchRelated(value, this.queryset), {
+                markChanged: false,
+            });
         },
         /**
          * Method, that mounts select2 to current field's select.
