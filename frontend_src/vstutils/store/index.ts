@@ -9,6 +9,7 @@ import {
     createNewViewStore,
     createActionViewStore,
 } from './page';
+export * from './helpers';
 
 export {
     GLOBAL_STORE,

@@ -20,7 +20,7 @@
             };
         },
         watch: {
-            fetchedValue(value) {
+            value(value) {
                 this.setValue(value, false);
             },
         },
@@ -29,8 +29,8 @@
 
             this.initSelect2();
 
-            if (this.fetchedValue) {
-                this.setValue(this.fetchedValue);
+            if (this.value) {
+                this.setValue(this.value);
             }
 
             this.pageSize = guiLocalSettings.get('page_size') || 20;

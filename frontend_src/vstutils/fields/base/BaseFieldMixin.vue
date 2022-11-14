@@ -15,7 +15,7 @@
                 :value="value"
                 :field="field"
                 :data="data"
-                @proxyEvent="proxyEvent"
+                @set-value="setValue"
             />
             <field_content_edit
                 v-else
@@ -114,13 +114,14 @@
             },
         },
         methods: {
-            setValue(value) {
-                this._emitSetValueSignal(value);
+            setValue(value, { markChanged = true } = {}) {
+                this._emitSetValueSignal(value, { markChanged });
             },
-            _emitSetValueSignal(value) {
+            _emitSetValueSignal(value, { markChanged = true } = {}) {
                 this.$emit('set-value', {
                     field: this.field.name,
                     value: value,
+                    markChanged,
                 });
             },
             /**
@@ -141,19 +142,6 @@
             hideField() {
                 this.cleanValue();
                 this.$emit('toggle-hidden', this.field.name);
-            },
-            /**
-             * Method, that calls other field's methods.
-             * It is expected to be called from inner components of field.
-             * For example, from <field_content_edit></field_content_edit> component.
-             * Buttons component, that 'field_content_edit' has inside itself,
-             * will emit 'proxyEvent' event with the name of field's method,
-             * that proxyEvent should call.
-             */
-            proxyEvent(callback_name, opt) {
-                if (this[callback_name]) {
-                    this[callback_name](opt);
-                }
             },
         },
     };

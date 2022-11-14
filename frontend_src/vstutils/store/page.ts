@@ -277,7 +277,10 @@ export const createDetailViewStore = (view: PageView) => () => {
 
         try {
             if (pageWithInstance.providedInstance.value) {
-                pageWithInstance.setInstance(pageWithInstance.providedInstance.value);
+                const instance = pageWithInstance.providedInstance.value;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+                await instance._queryset._executeAfterInstancesFetchedHooks([instance], instance.constructor);
+                pageWithInstance.setInstance(instance);
             } else {
                 await updateData(instancePk);
             }

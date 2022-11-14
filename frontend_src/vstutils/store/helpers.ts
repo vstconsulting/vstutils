@@ -391,9 +391,17 @@ export const PAGE_WITH_EDITABLE_DATA = <T extends ReturnType<typeof PAGE_WITH_IN
         }
     }
 
-    function setFieldValue({ field, value }: { field: string; value: unknown }) {
+    function setFieldValue({
+        field,
+        value,
+        markChanged = true,
+    }: {
+        field: string;
+        value: unknown;
+        markChanged: boolean;
+    }) {
         del(fieldsErrors.value, field);
-        if (!changedFields.value.includes(field)) {
+        if (markChanged && !changedFields.value.includes(field)) {
             changedFields.value.push(field);
         }
         return base.setFieldValue({ field, value });
