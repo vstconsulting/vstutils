@@ -21,6 +21,7 @@ import {
     useEntityViewClasses,
     usePageLeaveConfirmation,
     BaseViewStore,
+    usePagination,
 } from './helpers';
 
 const createRemoveInstance =
@@ -72,7 +73,8 @@ export const createListViewStore = (view: ListView) => () => {
     const base = useBasePageData(view);
     const qsStore = useQuerySet(view);
     const app = getApp();
-    const { pagination, setQuery, filters } = useListFilters(qsStore.queryset);
+    const { count, pageNumber, pageSize, setQuery, filters } = useListFilters(qsStore.queryset);
+    const paginationItems = usePagination({ count, page: pageNumber, size: pageSize });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     const model = computed(() => view.objects.getResponseModelClass(RequestTypes.LIST));
@@ -101,19 +103,16 @@ export const createListViewStore = (view: ListView) => () => {
     function setInstances(newInstances: InstancesList) {
         instances.value = newInstances;
         if (newInstances.extra?.count !== undefined) {
-            pagination.count = newInstances.extra.count;
+            count.value = newInstances.extra.count;
         }
-    }
-    function setInstancesCount(count: number) {
-        pagination.count = count;
     }
 
     async function updateData() {
         const newInstances = (await qsStore.queryset.value.items()) as InstancesList;
         if (!isInstancesEqual(instances.value, newInstances)) {
             setInstances(newInstances);
-        } else if (instances.value.extra?.count && pagination.count !== instances.value.extra.count) {
-            setInstancesCount(instances.value.extra.count);
+        } else if (instances.value.extra?.count && count.value !== instances.value.extra.count) {
+            count.value = instances.value.extra.count;
         }
     }
 
@@ -182,7 +181,10 @@ export const createListViewStore = (view: ListView) => () => {
         ...qsStore,
         ...selection,
         ...useQueryBasedFiltering(),
-        pagination,
+        count,
+        pageNumber,
+        pageSize,
+        paginationItems,
         instances,
         isEmpty,
         model,
@@ -191,7 +193,6 @@ export const createListViewStore = (view: ListView) => () => {
         multiActions,
         filters,
         setInstances,
-        setInstancesCount,
         setQuery,
         updateData,
         fetchData,

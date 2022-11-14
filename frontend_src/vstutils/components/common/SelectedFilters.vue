@@ -37,11 +37,17 @@
                 return [];
             },
             pills() {
-                return this.activeFilters.map((name) => ({
-                    name,
-                    title: this.fields[name].title,
-                    value: this.filters[name],
-                }));
+                return this.activeFilters.reduce((arr, name) => {
+                    const field = this.fields[name];
+                    if (field) {
+                        arr.push({
+                            name,
+                            title: this.fields[name].title,
+                            value: this.filters[name],
+                        });
+                    }
+                    return arr;
+                }, []);
             },
         },
         mounted() {

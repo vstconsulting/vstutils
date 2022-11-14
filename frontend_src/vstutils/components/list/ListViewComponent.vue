@@ -21,12 +21,7 @@
         </portal>
 
         <portal to="appendButtonsRow">
-            <Pagination
-                v-bind="pagination"
-                style="float: right"
-                class="d-none d-md-block"
-                @open-page="goToPage"
-            />
+            <Pagination :items="paginationItems" style="float: right" class="d-none d-md-block" />
         </portal>
 
         <div class="list-content-component" :class="`list-${model.name}`">
@@ -62,7 +57,7 @@
                             @execute-multi-action="executeMultiAction"
                         />
                     </transition>
-                    <Pagination v-bind="pagination" style="float: right" @open-page="goToPage" />
+                    <Pagination :items="paginationItems" style="float: right" />
                 </div>
             </template>
         </div>
@@ -122,7 +117,7 @@
                 'instances',
                 'isEmpty',
                 'selection',
-                'pagination',
+                'paginationItems',
                 'multiActions',
                 'instanceActions',
                 'instanceSublinks',

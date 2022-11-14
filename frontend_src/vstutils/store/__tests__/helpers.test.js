@@ -2,7 +2,7 @@ import { test, beforeAll, expect } from '@jest/globals';
 import { ref } from 'vue';
 import { createApp } from '../../../unittests/create-app';
 import { createSchema } from '../../../unittests/schema';
-import { useEntityViewClasses, useSelection } from '../helpers';
+import { useEntityViewClasses, usePagination, useSelection } from '../helpers';
 
 let app;
 
@@ -103,4 +103,40 @@ test('useSelection', () => {
 
     setSelection([1, 3]);
     expect(selection.value).toStrictEqual([1, 3]);
+});
+
+test('usePagination', () => {
+    const count = ref(0);
+    const page = ref(1);
+    const size = ref(5);
+
+    const items = usePagination({ count, page, size });
+
+    expect(items.value).toStrictEqual([]);
+
+    count.value = 3;
+    expect(items.value).toStrictEqual([{ page: 1, text: '1', disabled: true }]);
+
+    count.value = 999;
+    expect(items.value).toStrictEqual([
+        { page: 1, icon: 'fas fa-angle-double-left', disabled: true },
+        { icon: 'fas fa-angle-left', disabled: true, onClick: items.value[1].onClick },
+        { page: 1, text: '1', disabled: true },
+        { page: 2, text: '2', disabled: false },
+        { page: 3, text: '3', disabled: false },
+        { icon: 'fas fa-angle-right', disabled: false, onClick: items.value[5].onClick },
+        { page: 200, icon: 'fas fa-angle-double-right', disabled: false },
+    ]);
+
+    items.value[5].onClick();
+    expect(items.value).toStrictEqual([
+        { page: 1, icon: 'fas fa-angle-double-left', disabled: true },
+        { icon: 'fas fa-angle-left', disabled: true, onClick: items.value[1].onClick },
+        { page: 1, text: '1', disabled: true },
+        { page: 2, text: '2', disabled: false },
+        { page: 3, text: '3', disabled: false },
+        { page: 4, text: '4', disabled: false },
+        { icon: 'fas fa-angle-right', disabled: false, onClick: items.value[6].onClick },
+        { page: 200, icon: 'fas fa-angle-double-right', disabled: false },
+    ]);
 });

@@ -5100,6 +5100,10 @@ class WebSocketTestCase(BaseTestCase):
         }
 
     def test_notifications(self):
+        from test_proj.test_notificator import messages_log
+
+        messages_log.clear()
+
         Host = self.get_model_class('test_proj.models.Host')
         ModelWithUuid = self.get_model_class('test_proj.models.ModelWithUuid')
 
@@ -5134,8 +5138,6 @@ class WebSocketTestCase(BaseTestCase):
         from .tasks import CreateHostTask
         # 5
         CreateHostTask.do(name='centrifugafromtask')
-
-        from test_proj.test_notificator import messages_log
 
         # notify
         self.assertEqual(len(messages_log[0]), 1, messages_log[0])
