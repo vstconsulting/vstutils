@@ -63,6 +63,7 @@
             hasMultiActions: { type: Boolean, required: false, default: false },
             instanceActions: { type: Array, required: false, default: () => [] },
             instanceSublinks: { type: Array, required: false, default: () => [] },
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             opt: { type: Object, required: false, default: () => {} },
         },
         data() {

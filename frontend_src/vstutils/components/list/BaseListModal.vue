@@ -59,6 +59,7 @@
             title: { type: String, required: true },
             qs: { type: Object, required: true },
             applyButtonText: { type: String, required: true },
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             rowClickHandler: { type: Function, default: () => {} },
             // eslint-disable-next-line vue/require-prop-types
             model: {

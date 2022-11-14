@@ -15,8 +15,11 @@
         >
             <component :is="field.component" :field="field" :data="data" type="list" />
         </td>
-        <td v-if="hasOperations" class="column column-actions" style="text-align: center">
-            <BootstrapModal :classes="'modal-sm list-instance-operations ' + classesFromFields.join(' ')">
+        <td class="column column-actions" style="text-align: center">
+            <BootstrapModal
+                v-if="hasOperations"
+                :classes="'modal-sm list-instance-operations ' + classesFromFields.join(' ')"
+            >
                 <template #activator="{ openModal }">
                     <button class="btn btn-outline-secondary" @click="openModal">
                         <i class="fas fa-cog" />
@@ -131,7 +134,7 @@
                     data: this.data,
                     isListItem: true,
                 };
-                signals.emit(`<${this.$route.path}/>filterActions`, obj);
+                signals.emit(`<${this.$app.store.page.view.path}>filterActions`, obj);
                 return obj.actions;
             },
             availableSublinks() {
@@ -140,7 +143,7 @@
                     data: this.data,
                     isListItem: true,
                 };
-                signals.emit(`<${this.$route.path}/>filterSublinks`, obj);
+                signals.emit(`<${this.$app.store.page.view.path}>filterSublinks`, obj);
                 return obj.sublinks;
             },
             hasOperations() {

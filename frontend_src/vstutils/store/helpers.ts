@@ -11,6 +11,7 @@ import {
     set,
     shallowReadonly,
     shallowRef,
+    watch,
 } from 'vue';
 
 import { APIResponse } from '@/vstutils/api';
@@ -291,30 +292,101 @@ export function filterNonEmpty(obj: Record<string, any>) {
 
 export function useListFilters(qs: Ref<QuerySet>) {
     const app = getApp();
-    const pagination = reactive<{
-        count: number;
-        pageSize: number;
-        pageNumber: number;
-    }>({
-        count: 0,
-        pageSize: app.config.defaultPageLimit,
-        pageNumber: 1,
-    });
-
+    const count = ref(0);
+    const pageSize = ref(app.config.defaultPageLimit);
+    const pageNumber = ref(1);
     const filters = ref<Record<string, any>>({});
 
     function setQuery(query: Record<string, any>) {
         query = filterNonEmpty(query);
-        const limit = pagination.pageSize;
+        const limit = pageSize.value;
         const page = Number(query.page) || 1;
         filters.value = query;
-        pagination.pageNumber = page;
+        pageNumber.value = page;
         qs.value = qs.value.clone({
             query: mergeDeep({ limit, offset: limit * (page - 1) }, query),
         });
     }
 
-    return { pagination, filters, setQuery };
+    return { count, pageSize, pageNumber, filters, setQuery };
+}
+
+export interface PaginationItem {
+    page?: number;
+    text?: string;
+    disabled?: boolean;
+    icon?: string;
+    onClick?: () => void;
+}
+
+export function usePagination({
+    count,
+    page,
+    size,
+}: {
+    count: Ref<number>;
+    page: Ref<number>;
+    size: Ref<number>;
+}) {
+    const virtualPage = ref(0);
+    const buttonsAmount = ref(3);
+
+    watch(page, (page) => (virtualPage.value = page));
+
+    const pagesAmount = computed(() => {
+        const amount = Math.ceil(count.value / size.value);
+        return Number.isFinite(amount) ? amount : 1;
+    });
+
+    const browseBackActive = computed(() => virtualPage.value > 1);
+    const browseForwardActive = computed(() => virtualPage.value < pagesAmount.value);
+
+    function browseBack() {
+        if (browseBackActive.value) {
+            virtualPage.value -= 1;
+        }
+    }
+
+    function browseForward() {
+        if (browseForwardActive.value) {
+            virtualPage.value += 1;
+        }
+    }
+
+    const items = computed<PaginationItem[]>(() => {
+        const totalAmount = buttonsAmount.value * 2;
+
+        if (pagesAmount.value <= totalAmount) {
+            const arr: PaginationItem[] = [];
+            for (let num = 1; num <= pagesAmount.value; num++) {
+                arr.push({ page: num, text: num.toString(), disabled: page.value === num });
+            }
+            return arr;
+        }
+
+        const start = Math.max(1, virtualPage.value - buttonsAmount.value);
+        const end = Math.min(virtualPage.value + (totalAmount - buttonsAmount.value), pagesAmount.value);
+
+        const arr: PaginationItem[] = [
+            { page: 1, icon: 'fas fa-angle-double-left', disabled: page.value === 1 },
+            { icon: 'fas fa-angle-left', onClick: browseBack, disabled: !browseBackActive.value },
+        ];
+        for (let num = start; num <= end; num++) {
+            arr.push({ page: num, text: num.toString(), disabled: page.value === num });
+        }
+        arr.push(
+            { icon: 'fas fa-angle-right', onClick: browseForward, disabled: !browseForwardActive.value },
+            {
+                page: pagesAmount.value,
+                icon: 'fas fa-angle-double-right',
+                disabled: page.value === pagesAmount.value,
+            },
+        );
+
+        return arr;
+    });
+
+    return items;
 }
 
 export function useQueryBasedFiltering() {

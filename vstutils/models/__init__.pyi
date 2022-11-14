@@ -33,8 +33,8 @@ class BModel(BaseModel):
 
 
 def bulk_notify_clients(
-        channel: _t.Text = None,
-        objects: _t.Iterable[_t.Tuple[_t.Text, _t.Any]] = ()
+        objects: _t.Iterable[_t.Tuple[_t.Text, _t.Any]] = (),
+        label: _t.Text = None,
 ) -> _t.Optional[_t.List]:
     ...
 

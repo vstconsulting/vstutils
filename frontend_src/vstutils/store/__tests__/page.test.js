@@ -98,8 +98,8 @@ test('createListViewStore', async () => {
     expect(store.multiActions[0].name).toStrictEqual('remove');
 
     // Check pagination
-    expect(store.pagination.count).toBe(3);
-    expect(store.pagination.pageNumber).toBe(1);
+    expect(store.count).toBe(3);
+    expect(store.pageNumber).toBe(1);
 
     // Check query params
     app.router.push('/some_list/?page=2');
