@@ -135,6 +135,10 @@ release_job:
   needs:
     - job: release_pypi
       artifacts: true
+  rules:
+    - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
+      when: on_success
+    - when: never
   script:
     - echo "running release job for $CI_COMMIT_TAG"
   release:
