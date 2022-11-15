@@ -16,23 +16,20 @@
                     <Popover v-if="field.description" :content="field.description" />
                 </th>
 
-                <th
-                    v-if="instanceActions.length || instanceSublinks.length"
-                    style="width: 60px"
-                    class="column column-actions"
-                />
+                <th v-if="showInstanceOperations" style="width: 60px" class="column column-actions" />
             </tr>
         </thead>
         <tbody>
             <ListTableRow
-                v-for="instance in instances"
+                v-for="{ instance, actions, sublinks } in instancesWithOperations"
                 :key="instance.getPkValue()"
                 :is-selected="selection.includes(instance.getPkValue())"
                 :instance="instance"
                 :fields="fields"
                 :has-multi-actions="hasMultiActions"
-                :actions="instanceActions"
-                :sublinks="instanceSublinks"
+                :show-operations="showInstanceOperations"
+                :actions="actions"
+                :sublinks="sublinks"
                 :opt="opt"
                 @row-clicked="$emit('row-clicked', $event)"
                 @open-sublink="$emit('open-instance-sublink', $event)"
@@ -44,6 +41,7 @@
 </template>
 
 <script>
+    import { signals } from '@/vstutils/signals';
     import Popover from '../Popover.vue';
     import SelectToggleButton from './SelectToggleButton.vue';
     import ListTableRow from './ListTableRow.vue';
@@ -72,11 +70,45 @@
             };
         },
         computed: {
+            showInstanceOperations() {
+                return this.instancesWithOperations.some(
+                    ({ actions, sublinks }) => actions.length > 0 || sublinks.length > 0,
+                );
+            },
+            instancesWithOperations() {
+                return this.instances.map((instance) => {
+                    return {
+                        instance,
+                        actions: this.availableActions(instance),
+                        sublinks: this.availableSublinks(instance),
+                    };
+                });
+            },
             allSelected() {
                 return this.instances.every((instance) => this.selection.includes(instance.getPkValue()));
             },
             classes() {
                 return this.allSelected ? 'selected' : '';
+            },
+        },
+        methods: {
+            availableActions(instance) {
+                const obj = {
+                    actions: this.instanceActions,
+                    data: instance._data,
+                    isListItem: true,
+                };
+                signals.emit(`<${this.$app.store.page.view.path}>filterActions`, obj);
+                return obj.actions;
+            },
+            availableSublinks(instance) {
+                const obj = {
+                    sublinks: this.instanceSublinks,
+                    data: instance._data,
+                    isListItem: true,
+                };
+                signals.emit(`<${this.$app.store.page.view.path}>filterSublinks`, obj);
+                return obj.sublinks;
             },
         },
     };
