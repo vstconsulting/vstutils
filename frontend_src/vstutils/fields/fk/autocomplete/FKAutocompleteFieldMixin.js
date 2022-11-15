@@ -19,6 +19,7 @@ const FKAutocompleteFieldMixin = {
                 FKAutocompleteFieldContentEdit,
             ],
             methods: {
+                fetchValue() {},
                 /**
                  * Redefinition of '_renderItem' method
                  * of autocomplete_field_content_edit_mixin.

@@ -15,7 +15,7 @@
         >
             <component :is="field.component" :field="field" :data="data" type="list" />
         </td>
-        <td class="column column-actions" style="text-align: center">
+        <td v-if="showOperations" class="column column-actions" style="text-align: center">
             <BootstrapModal
                 v-if="hasOperations"
                 :classes="'modal-sm list-instance-operations ' + classesFromFields.join(' ')"
@@ -28,12 +28,12 @@
                 <template #content="{ closeModal }">
                     <div class="modal-body">
                         <ul class="list-group list-group-flush">
-                            <template v-if="availableActions.length">
+                            <template v-if="actions.length">
                                 <li class="list-group-item disabled">
                                     <b>{{ $u.capitalize($t('actions')) }}</b>
                                 </li>
                                 <li
-                                    v-for="action in availableActions"
+                                    v-for="action in actions"
                                     :key="action.name"
                                     class="list-group-item"
                                     :class="`operation__${action.name}`"
@@ -102,7 +102,6 @@
     import SelectToggleButton from './SelectToggleButton.vue';
     import BootstrapModal from '../BootstrapModal.vue';
     import { formatPath, joinPaths, tableColumnClasses, classesFromFields } from '../../utils';
-    import signals from '../../signals';
 
     /**
      * Child component of 'gui_list_table' component.
@@ -115,6 +114,7 @@
         inject: { multiActionsClasses: { default: null } },
         props: {
             isSelected: { type: Boolean, required: true },
+            showOperations: { type: Boolean, default: true },
             instance: { type: Object, required: true },
             fields: { type: Array, required: true },
             hasMultiActions: { type: Boolean, required: true },
@@ -128,26 +128,8 @@
             };
         },
         computed: {
-            availableActions() {
-                const obj = {
-                    actions: this.actions,
-                    data: this.data,
-                    isListItem: true,
-                };
-                signals.emit(`<${this.$app.store.page.view.path}>filterActions`, obj);
-                return obj.actions;
-            },
-            availableSublinks() {
-                const obj = {
-                    sublinks: this.sublinks,
-                    data: this.data,
-                    isListItem: true,
-                };
-                signals.emit(`<${this.$app.store.page.view.path}>filterSublinks`, obj);
-                return obj.sublinks;
-            },
             hasOperations() {
-                return this.availableActions.length || this.availableSublinks.length;
+                return this.actions.length || this.sublinks.length;
             },
             pk() {
                 return this.instance.getPkValue();
