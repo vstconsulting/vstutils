@@ -15,7 +15,7 @@ drf_orjson_renderer~=1.3.0;python_version<"3.7"
 drf_orjson_renderer~=1.6.0;python_version>"3.6"
 uWSGI==2.0.21
 ormsgpack~=1.1.0;python_version=="3.6"
-ormsgpack~=1.2.3;python_version>"3.6"
+ormsgpack~=1.2.4;python_version>"3.6"
 
 # Notifications
 cent~=4.1.0
