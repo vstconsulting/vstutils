@@ -38,7 +38,6 @@
 </template>
 
 <script>
-    import { trim } from '../../utils';
     import CrontabFieldComponent from './CrontabFieldComponent.vue';
     import FieldToggleCrontabButton from './FieldToggleCrontabButton.js';
 
@@ -298,11 +297,11 @@
                     this.val = string;
                 }
 
-                string = trim(this.val).split(' ');
+                string = this.val.trim().split(' ');
 
                 if (string.length != 5 || /[A-z]/.test(this.val)) {
                     this.val = '* * * * *';
-                    string = trim(this.val).split(' ');
+                    string = this.val.trim().split(' ');
                 }
 
                 for (let val of Object.values(this.crontab_elements)) {

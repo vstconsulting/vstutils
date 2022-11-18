@@ -15,6 +15,7 @@ const FKAutocompleteFieldMixin = {
             mixins: [
                 BaseFieldContentEdit,
                 AutocompleteFieldContentEditMixin,
+                // TODO remove this file after refactoring to ts
                 FKFieldContent,
                 FKAutocompleteFieldContentEdit,
             ],

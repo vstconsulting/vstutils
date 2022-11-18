@@ -19,7 +19,7 @@
 <script>
     import $ from 'jquery';
     import autoComplete from 'JavaScript-autoComplete/auto-complete';
-    import { escapeHtml, trim } from '../../utils';
+    import { escapeHtml } from '../../utils';
     import { BaseFieldContentEdit } from '../base';
 
     /**
@@ -113,7 +113,7 @@
                     return;
                 }
 
-                this._filterAutocompleteData(trim(search_input), response);
+                this._filterAutocompleteData(search_input.trim(), response);
             },
             /**
              * Method returns value of 'data-hide' attribute of autocomplete DOM element.

@@ -1,11 +1,35 @@
 import $ from 'jquery';
+import { toRef, defineComponent } from 'vue';
+import { BaseFieldContentEdit } from '@/vstutils/fields/base';
+import { createTransport, useQuerySets } from '@/vstutils/fields/fk/fk';
 import { ArrayFieldMixin } from '../mixins.js';
-import { BaseFieldContentEdit } from '../../base';
-import { FKFieldContentEditable } from '../../fk/fk';
 
-/** @vue/component */
-export const FKArrayEdit = {
-    mixins: [FKFieldContentEditable],
+export const FKArrayEdit = defineComponent({
+    props: {
+        field: { type: Object, required: true },
+        value: { default: null },
+        data: { type: Object, required: true },
+    },
+    setup(props) {
+        const { queryset, querysets } = useQuerySets(props.field, props.data);
+        return {
+            instancesCache: new Map(),
+            queryset,
+            querysets,
+            transport: createTransport(props.field, querysets.value, toRef(props, 'data')),
+        };
+    },
+    mounted() {
+        this.initSelect2();
+
+        this.$watch(
+            'value',
+            (value) => {
+                this.setValue(value);
+            },
+            { immediate: true },
+        );
+    },
     methods: {
         async fetchValue(value) {
             if (
@@ -88,10 +112,9 @@ export const FKArrayEdit = {
     render(h) {
         return h('select', { style: 'width: 100%' });
     },
-};
+});
 
-/** @vue/component */
-export const FKArrayFieldEdit = {
+export const FKArrayFieldEdit = defineComponent({
     mixins: [BaseFieldContentEdit],
     render(h) {
         return h(FKArrayEdit, {
@@ -105,12 +128,11 @@ export const FKArrayFieldEdit = {
             },
         });
     },
-};
+});
 
-/** @vue/component */
-export const FKArrayFieldMixin = {
+export const FKArrayFieldMixin = defineComponent({
     components: {
         field_content_edit: FKArrayFieldEdit,
     },
     mixins: [ArrayFieldMixin],
-};
+});

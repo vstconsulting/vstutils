@@ -123,12 +123,7 @@ describe('ViewConstructor', () => {
             expect(removeMultiAction.title).toBe('Remove');
             expect(removeMultiAction.isEmpty).toBeUndefined();
 
-            const archiveMultiAction = view.multiActions.get('archive');
-            expect(archiveMultiAction).toBeDefined();
-            expect(archiveMultiAction.name).toBe('archive');
-            expect(archiveMultiAction.title).toBe('Archive action');
-            expect(archiveMultiAction.iconClasses).toStrictEqual(['fas', 'fa-calculator']);
-            expect(archiveMultiAction.isEmpty).toBeTruthy();
+            expect(view.multiActions.has('archive')).toBeFalsy();
 
             const changeTitleMultiAction = view.multiActions.get('change_title');
             expect(changeTitleMultiAction).toBeDefined();
@@ -138,7 +133,7 @@ describe('ViewConstructor', () => {
 
             expect(view.sublinks.size).toBe(1);
             expect(view.actions.size).toBe(3);
-            expect(view.multiActions.size).toBe(3);
+            expect(view.multiActions.size).toBe(2);
         },
     );
 

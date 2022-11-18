@@ -251,9 +251,9 @@ export default class ViewConstructor {
                     const isEmpty =
                         !requestModel || requestModel.writableFields.length === 0 || requestModel === NoModel;
                     const isMultiAction =
-                        (operationOptions[IS_MULTI_ACTION_PROPERTY_NAME] !== undefined &&
-                            operationOptions[IS_MULTI_ACTION_PROPERTY_NAME]) ||
-                        isEmpty;
+                        operationOptions[IS_MULTI_ACTION_PROPERTY_NAME] !== undefined
+                            ? operationOptions[IS_MULTI_ACTION_PROPERTY_NAME]
+                            : isEmpty;
 
                     const confirmationRequired = operationOptions['x-require-confirmation'];
 
