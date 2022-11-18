@@ -13,6 +13,7 @@ declare global {
     var spa: typeof SPA;
     var App: new (...args: any[]) => IApp;
     var __currentApp: IApp;
+    var SELECT2_THEME: string;
     /* eslint-enable no-var */
 }
 

@@ -1,4 +1,6 @@
 const { defaults } = require('jest-config');
+const { pathsToModuleNameMapper } = require('ts-jest');
+const tsconfig = require('./tsconfig.json');
 
 module.exports = {
     // Stop running tests after `n` failures
@@ -31,7 +33,7 @@ module.exports = {
         '^(admin-lte|bootstrap).*(\\.(js|scss))?': '<rootDir>/__mocks__/styleMock.js',
         '^(@splidejs/vue-splide).*': '<rootDir>/__mocks__/fileMock.js',
 
-        '^@/(.*)$': '<rootDir>/$1',
+        ...pathsToModuleNameMapper(tsconfig.compilerOptions.paths, { prefix: '<rootDir>/' }),
     },
 
     // A list of paths to directories that Jest should use to search for files in
@@ -44,8 +46,8 @@ module.exports = {
 
     // A map from regular expressions to paths to transformers
     transform: {
-        '^.+\\.js$': 'babel-jest',
-        '^.+\\.ts?$': 'ts-jest',
         '.*\\.vue$': '@vue/vue2-jest',
     },
+
+    preset: 'ts-jest/presets/js-with-babel',
 };

@@ -1,6 +1,6 @@
 import { BaseField } from '../base';
 
-class StringField extends BaseField<string | undefined | null, string> {
+class StringField extends BaseField<string, string> {
     getEmptyValue(): string | null | undefined {
         return '';
     }

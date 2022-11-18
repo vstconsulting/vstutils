@@ -1,4 +1,4 @@
-import { escapeHtml, hasOwnProp, mergeDeep } from '../utils';
+import { deepEqual, escapeHtml, hasOwnProp, mergeDeep } from '../utils';
 import { ModelValidationError } from './errors';
 
 class ModelUtils {
@@ -369,18 +369,17 @@ export class Model {
 
     /**
      * Checks if this instance's data is equal to data of the provided instance
-     * @param {Model|Object} other
+     * @param {Model} other
      * @return {boolean}
      */
     isEqual(other) {
         if (this === other) return true;
-        let data = other;
-        if (other instanceof Model) {
-            if (other.constructor !== this.constructor) return false;
-            data = other._data;
-        }
+        if (!(other instanceof Model)) return false;
+        if (other.constructor !== this.constructor) return false;
         for (const field of this._fields.values()) {
-            if (!field.isSameValues(this._data, data)) return false;
+            if (!deepEqual(field._getValueFromData(this._data), field._getValueFromData(other._data))) {
+                return false;
+            }
         }
         return true;
     }

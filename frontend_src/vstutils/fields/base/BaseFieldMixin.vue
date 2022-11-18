@@ -1,6 +1,12 @@
 <template>
     <div class="field-component" :class="wrapperClasses">
-        <field_list_view v-if="type === 'list'" :value="value" :field="field" :data="data" />
+        <field_list_view
+            v-if="type === 'list'"
+            :value="value"
+            :field="field"
+            :data="data"
+            @set-value="setValue"
+        />
         <template v-else>
             <FieldLabel
                 v-if="!hideTitle"
@@ -15,6 +21,7 @@
                 :value="value"
                 :field="field"
                 :data="data"
+                :hideable="hideable"
                 @set-value="setValue"
             />
             <field_content_edit
@@ -22,6 +29,7 @@
                 :field="field"
                 :value="value"
                 :data="data"
+                :hideable="hideable"
                 @hide-field="$emit('hide-field', field)"
                 @set-value="setValue"
             />

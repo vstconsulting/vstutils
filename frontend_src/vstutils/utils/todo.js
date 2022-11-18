@@ -73,17 +73,6 @@ String.prototype.format_keys = function () {
 };
 
 /**
- * Function, that removes spaces symbols from the begging and from the end of string.
- * @param {string} s.
- */
-export function trim(s) {
-    if (s) {
-        return s.replace(/^ */g, '').replace(/ *$/g, '');
-    }
-    return '';
-}
-
-/**
  * Function returns capitalized string - first char is in UpperCase, others - in LowerCase.
  * @param {string} string String, that should be capitalized.
  * @return {string}

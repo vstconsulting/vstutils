@@ -28,18 +28,21 @@ export interface FieldXOptions {
     translateFieldName?: string;
 }
 
-export type FieldOptions<XOptions extends FieldXOptions, Inner> = Omit<Schema, 'default'> & {
+export type FieldOptions<XOptions extends FieldXOptions | undefined, Inner> = Omit<Schema, 'default'> & {
     name: string;
     title?: string;
     'x-hidden'?: boolean;
     hidden?: boolean;
     required?: boolean;
-    'x-options': XOptions;
     'x-nullable'?: boolean;
     default?: Inner;
-};
+} & (XOptions extends undefined ? { 'x-options'?: XOptions } : { 'x-options': XOptions });
 
-export interface Field<Inner = unknown, Represent = unknown, XOptions extends FieldXOptions = FieldXOptions> {
+export interface Field<
+    Inner = unknown,
+    Represent = unknown,
+    XOptions extends FieldXOptions | undefined = FieldXOptions | undefined,
+> {
     options: FieldOptions<XOptions, Inner>;
     props: XOptions;
 
@@ -88,8 +91,11 @@ export interface Field<Inner = unknown, Represent = unknown, XOptions extends Fi
     parseFieldError(errorData: unknown, instanceData: FieldsData): string | Record<string, unknown>;
 }
 
-export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldXOptions>
-    implements Field<Inner, Represent, XOptions>
+export class BaseField<
+    Inner,
+    Represent,
+    XOptions extends FieldXOptions | undefined = FieldXOptions | undefined,
+> implements Field<Inner, Represent, XOptions>
 {
     static fkLinkable = true;
 
@@ -124,7 +130,7 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
     constructor(options: FieldOptions<XOptions, Inner>) {
         this.options = options;
 
-        this.props = options[X_OPTIONS] || ({} as XOptions);
+        this.props = (options[X_OPTIONS] as unknown as XOptions) || ({} as XOptions);
         this.type = options.type ?? 'string';
         this.format = options.format;
         this.validators = [];
@@ -141,12 +147,12 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
             this.default = options.default;
         }
 
-        this.prependText = this.props.prependText;
-        this.appendText = this.props.appendText;
+        this.prependText = this.props?.prependText;
+        this.appendText = this.props?.appendText;
 
-        this.redirect = this.props.redirect;
+        this.redirect = this.props?.redirect;
 
-        this.translateFieldName = this.props.translateFieldName ?? this.name;
+        this.translateFieldName = this.props?.translateFieldName ?? this.name;
 
         this.component = {
             name: `${this.constructor.name || capitalize(this.name)}Component`,
@@ -170,8 +176,8 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
         return value;
     }
 
-    _getValueFromData(data: Record<string, unknown>) {
-        return data[this.name];
+    _getValueFromData(data: Record<string, unknown>): Inner | Represent | undefined | null {
+        return data[this.name] as Inner | Represent | undefined | null;
     }
 
     /**
@@ -214,7 +220,7 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
     /**
      * Method, that converts field value to appropriate for API form.
      */
-    toInner(data: FieldsData): Inner {
+    toInner(data: FieldsData): Inner | null | undefined {
         return this._getValueFromData(data) as Inner;
     }
 

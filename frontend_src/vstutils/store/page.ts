@@ -329,6 +329,7 @@ export const createDetailViewStore = (view: PageView) => () => {
 export type DetailPageStore = BaseViewStore & {
     setInstance(instance: Model): void;
     instance: Model;
+    getInstancePk(): string | number | undefined;
 };
 
 export const createNewViewStore = (view: PageNewView) => () => {

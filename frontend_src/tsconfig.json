@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "outDir": "./dist",
+        "baseUrl": "./",
         "allowJs": true,
         "target": "esnext",
         "strict": true,
@@ -12,10 +13,10 @@
         "esModuleInterop": true,
         "types": [
             "jquery",
-            "bootstrap",
+            "bootstrap"
         ],
         "paths": {
-            "@/*": ["./*"],
+            "@/*": ["*"]
         }
     },
     "vueCompilerOptions": {
