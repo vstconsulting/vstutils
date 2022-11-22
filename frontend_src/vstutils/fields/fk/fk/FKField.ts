@@ -77,7 +77,10 @@ interface FKFieldXOptions extends FieldXOptions {
 export type TInner = number | string;
 export type TRepresent = number | string | Model;
 
-export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> {
+export class FKField
+    extends BaseField<TInner, TRepresent, FKFieldXOptions>
+    implements Field<TInner, TRepresent, FKFieldXOptions>
+{
     static NOT_FOUND_TEXT = '[Object not found]';
 
     declare format: string;
@@ -221,7 +224,7 @@ export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> {
      * @return {Promise<Model[]>}
      */
     _fetchRelated(
-        pks: (string | number | undefined | null)[],
+        pks: (string | number | undefined | null | Model)[],
         qs: QuerySet,
     ): Promise<(Model | string | number | undefined | null)[]> {
         const executor = new AggregatedQueriesExecutor(
@@ -229,18 +232,19 @@ export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> {
             this.filterName,
             this.filterFieldName,
         );
-        const promises = pks.map((pk) =>
-            pk
-                ? (executor.query(pk).catch(() => {
-                      const notFound = new this.fkModel!({
-                          [this.valueField]: pk,
-                          [this.viewField]: i18n.t(FKField.NOT_FOUND_TEXT),
-                      });
-                      notFound.__notFound = true;
-                      return notFound;
-                  }) as Promise<Model>)
-                : Promise.resolve(pk),
-        );
+        const promises = pks.map((pk) => {
+            if (typeof pk === 'number' || typeof pk === 'string') {
+                return executor.query(pk).catch(() => {
+                    const notFound = new this.fkModel!({
+                        [this.valueField]: pk,
+                        [this.viewField]: i18n.t(FKField.NOT_FOUND_TEXT),
+                    });
+                    notFound.__notFound = true;
+                    return notFound;
+                }) as Promise<Model>;
+            }
+            return Promise.resolve(pk);
+        });
         void executor.execute();
         return Promise.all(promises);
     }

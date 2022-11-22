@@ -278,6 +278,7 @@ export class Model {
 
     /**
      * Method, that returns instance's value of PK field.
+     * @returns {string|number|undefined|null}
      */
     getPkValue() {
         return this._parentInstance?.getPkValue() || this._data[this._pkField?.name];

@@ -14,20 +14,6 @@ export function hasOwnProp(obj, prop) {
 }
 
 /**
- * Return property's value of the object or fallback if property is missing
- * @param {Object} obj
- * @param {string} prop
- * @param {any} [fallback]
- * @return {any}
- */
-export function getProp(obj, prop, fallback = undefined) {
-    if (hasOwnProp(obj, prop)) {
-        return obj[prop];
-    }
-    return fallback;
-}
-
-/**
  * Function to replace {.+?} in string to variables sended to this function,
  * array and single variable set ordered inside string
  * associative array and iterable objects set value for keys that original string have
@@ -1207,22 +1193,6 @@ export function stopEnterPropagation(element) {
 export function resumeEnterPropagation(element) {
     element.removeEventListener('keyup', stopEnterPropagationCallback);
 }
-
-export const SCHEMA_DATA_TYPE = {
-    string: 'string',
-    number: 'number',
-    integer: 'integer',
-    boolean: 'boolean',
-    object: 'object',
-    file: 'file',
-    array: 'array',
-};
-
-export const SCHEMA_DATA_TYPE_VALUES = Object.values(SCHEMA_DATA_TYPE);
-
-export const ENUM_TYPES = [SCHEMA_DATA_TYPE.string, SCHEMA_DATA_TYPE.integer, SCHEMA_DATA_TYPE.number];
-
-export const X_OPTIONS = 'x-options';
 
 export function chunkArray(array, chunkSize) {
     return array.reduce((resultArray, item, index) => {

@@ -48,17 +48,11 @@ export class DependFromFkField extends BaseField<unknown, unknown, XOptions> {
         if (this.callback) {
             callback_opt = this.callback(data);
         }
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const realField = this.app.fieldsResolver.resolveField(
             mergeDeep({ format, callback_opt }),
             this.name,
         );
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         realField.prepareFieldForView(this.app.store.page.view.path);
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return realField;
     }
 

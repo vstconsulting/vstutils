@@ -1,4 +1,4 @@
-import { FieldsResolver } from './FieldsResolver.js';
+import { FieldsResolver } from './FieldsResolver';
 export { FieldsResolver };
 
 import * as array from './array';
@@ -63,12 +63,10 @@ import { SCHEMA_DATA_TYPE } from '../utils';
 import { WYSIWYGField } from './text/WYSIWYGField.js';
 import { UUIDField } from './text/UUIDField';
 import { URIField } from './text/URIField';
+import { Field } from './base';
 export { FieldLabelIdMixin, ModalWindowAndButtonMixin, TableRowMixin };
 
-/**
- * @param {FieldsResolver} fieldsResolver
- */
-export function addDefaultFields(fieldsResolver) {
+export function addDefaultFields(fieldsResolver: FieldsResolver) {
     // Set STRING fields
     for (const [format, field] of [
         [FieldsResolver.DEFAULT_FIELD_KEY, text.StringField],
@@ -104,7 +102,7 @@ export function addDefaultFields(fieldsResolver) {
         // Support legacy field resolving only by string
         ['multiplenamedbinfile', files.multipleNamedBinaryFile.MultipleNamedBinaryFileField],
         ['multiplenamedbinimage', files.multipleNamedBinaryImage.MultipleNamedBinaryImageField],
-    ]) {
+    ] as [string | typeof FieldsResolver.DEFAULT_FIELD_KEY, new (options: any) => Field][]) {
         fieldsResolver.registerField(SCHEMA_DATA_TYPE.string, format, field);
     }
 
@@ -113,7 +111,7 @@ export function addDefaultFields(fieldsResolver) {
         [FieldsResolver.DEFAULT_FIELD_KEY, numbers.NumberField],
         ['float', numbers.FloatField],
         ['rating', numbers.rating.RatingField],
-    ]) {
+    ] as [string | typeof FieldsResolver.DEFAULT_FIELD_KEY, new (options: any) => Field][]) {
         fieldsResolver.registerField(SCHEMA_DATA_TYPE.number, format, field);
     }
 
@@ -124,7 +122,7 @@ export function addDefaultFields(fieldsResolver) {
         ['fk', fk.fk.FKField],
         ['deep_fk', fk.deepFk.DeepFKField],
         ['uptime', datetime.UptimeField],
-    ]) {
+    ] as [string | typeof FieldsResolver.DEFAULT_FIELD_KEY, new (options: any) => Field][]) {
         fieldsResolver.registerField(SCHEMA_DATA_TYPE.integer, format, field);
     }
 
@@ -141,7 +139,7 @@ export function addDefaultFields(fieldsResolver) {
         ['namedbinimage', files.multipleNamedBinaryImage.MultipleNamedBinaryImageField],
         ['string_array', text.StringArrayField], // CANT_CREATE_ON_BACKEND
         ['table', RelatedListField],
-    ]) {
+    ] as [string | typeof FieldsResolver.DEFAULT_FIELD_KEY, new (options: any) => Field][]) {
         fieldsResolver.registerField(SCHEMA_DATA_TYPE.array, format, field);
     }
 
@@ -151,7 +149,7 @@ export function addDefaultFields(fieldsResolver) {
         ['json', JSONField],
         ['namedbinfile', files.namedBinaryFile.NamedBinaryFileField],
         ['namedbinimage', files.namedBinaryImage.NamedBinaryImageField],
-    ]) {
+    ] as [string | typeof FieldsResolver.DEFAULT_FIELD_KEY, new (options: any) => Field][]) {
         fieldsResolver.registerField(SCHEMA_DATA_TYPE.object, format, field);
     }
 
@@ -162,7 +160,7 @@ export function addDefaultFields(fieldsResolver) {
         ['dynamic_fk', DependFromFkField],
         ['hidden', HiddenField],
         ['static_value', StaticValueField],
-    ]) {
+    ] as [string | typeof FieldsResolver.DEFAULT_FIELD_KEY, new (options: any) => Field][]) {
         for (const type of allTypes) {
             fieldsResolver.registerField(type, format, field);
         }

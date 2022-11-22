@@ -1,4 +1,4 @@
-import type { Schema, ParameterType } from 'swagger-schema-official';
+import type { Schema, ParameterType, ParameterCollectionFormat } from 'swagger-schema-official';
 import { _translate, capitalize, deepEqual, nameToTitle, X_OPTIONS } from '../../utils';
 import { pop_up_msg } from '../../popUp';
 import type { Model } from '../../models';
@@ -6,7 +6,7 @@ import type { QuerySet } from '../../querySet';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 import { i18n } from '../../translation';
 import { IApp } from '@/vstutils/app';
-import { ComponentOptions } from 'vue';
+import { ComponentOptions, Component } from 'vue';
 
 type ModelPropertyDescriptor<Represent> = PropertyDescriptor & {
     get(this: Model): Represent;
@@ -26,16 +26,25 @@ export interface FieldXOptions {
     appendText?: string;
     redirect?: RedirectOptions;
     translateFieldName?: string;
+    [key: string]: unknown;
 }
 
-export type FieldOptions<XOptions extends FieldXOptions | undefined, Inner> = Omit<Schema, 'default'> & {
-    name: string;
-    title?: string;
-    'x-hidden'?: boolean;
-    hidden?: boolean;
-    required?: boolean;
-    'x-nullable'?: boolean;
+export type FieldOptions<XOptions extends FieldXOptions | undefined, Inner> = Omit<
+    Schema,
+    'default' | 'items'
+> & {
+    allowEmptyValue?: boolean;
+    collectionFormat?: ParameterCollectionFormat;
     default?: Inner;
+    hidden?: boolean;
+    items?: FieldOptions<FieldXOptions | undefined, unknown>;
+    name: string;
+    required?: boolean;
+    title?: string;
+    'x-collectionFormat'?: ParameterCollectionFormat;
+    'x-format'?: string;
+    'x-hidden'?: boolean;
+    'x-nullable'?: boolean;
 } & (XOptions extends undefined ? { 'x-options'?: XOptions } : { 'x-options': XOptions });
 
 export interface Field<
@@ -70,7 +79,7 @@ export interface Field<
 
     translateFieldName: string;
 
-    getComponent(): any;
+    getComponent(): ComponentOptions<Vue>;
 
     toInner(data: Record<string, unknown>): Inner | null | undefined;
     toRepresent(data: Record<string, unknown>): Represent | null | undefined;
