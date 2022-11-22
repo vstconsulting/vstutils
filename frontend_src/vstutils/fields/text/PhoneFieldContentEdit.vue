@@ -39,8 +39,19 @@
         name: 'PhoneFieldContentEdit',
         mixins: [MaskedFieldEdit],
         data() {
+            const countryCodeField = this.$app.fieldsResolver.resolveField({
+                name: 'countryCode',
+                type: 'string',
+                enum: this.field.codes.slice().reverse(),
+            });
+            countryCodeField.customMatcher = (params, data) => {
+                if (!params.term || data.text.startsWith(params.term)) {
+                    return data;
+                }
+                return null;
+            };
             return {
-                countryCodeField: this.field.countryCodeField,
+                countryCodeField,
             };
         },
         computed: {

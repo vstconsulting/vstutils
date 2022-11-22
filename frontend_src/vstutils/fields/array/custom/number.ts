@@ -1,6 +1,8 @@
-import { StringArrayFieldEdit, StringArrayFieldMixin } from './string.js';
+import { defineComponent } from 'vue';
 
-function validateNumber(text) {
+import { StringArrayFieldEdit, StringArrayFieldMixin } from './string';
+
+function validateNumber(text: string) {
     const number = Number.parseFloat(text.trim());
     if (Number.isNaN(number)) {
         return undefined;
@@ -8,8 +10,7 @@ function validateNumber(text) {
     return number;
 }
 
-/** @vue/component */
-export const NumberArrayFieldEdit = {
+export const NumberArrayFieldEdit = defineComponent({
     name: 'NumberArrayFieldEdit',
     mixins: [StringArrayFieldEdit],
     data() {
@@ -17,17 +18,16 @@ export const NumberArrayFieldEdit = {
             itemsValidator: validateNumber,
         };
     },
-};
+});
 
-/** @vue/component */
-export const NumberArrayFieldMixin = {
+export const NumberArrayFieldMixin = defineComponent({
     components: {
         field_content_edit: NumberArrayFieldEdit,
     },
     mixins: [StringArrayFieldMixin],
-};
+});
 
-function validateInteger(text) {
+function validateInteger(text: string) {
     const number = Number.parseInt(text.trim());
     if (Number.isNaN(number)) {
         return undefined;
@@ -35,8 +35,7 @@ function validateInteger(text) {
     return number;
 }
 
-/** @vue/component */
-export const IntegerArrayFieldEdit = {
+export const IntegerArrayFieldEdit = defineComponent({
     name: 'IntegerArrayFieldEdit',
     mixins: [StringArrayFieldEdit],
     data() {
@@ -44,12 +43,11 @@ export const IntegerArrayFieldEdit = {
             itemsValidator: validateInteger,
         };
     },
-};
+});
 
-/** @vue/component */
-export const IntegerArrayFieldMixin = {
+export const IntegerArrayFieldMixin = defineComponent({
     components: {
         field_content_edit: IntegerArrayFieldEdit,
     },
     mixins: [StringArrayFieldMixin],
-};
+});

@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeAll } from '@jest/globals';
 import * as files from '../files';
-import { FieldsResolver } from '../FieldsResolver.js';
-import { addDefaultFields } from '../index.js';
+import { FieldsResolver } from '../FieldsResolver.ts';
+import { addDefaultFields } from '../index.ts';
 import { StringField } from '../text';
 import { BaseField } from '../base';
 

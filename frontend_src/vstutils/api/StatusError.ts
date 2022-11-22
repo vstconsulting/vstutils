@@ -14,9 +14,10 @@ export default class StatusError extends Error {
         super();
         this.status = status;
         this.message = '';
+        this.data = data;
         if (typeof data == 'string') {
             this.message = data;
-        } else if (data && 'detail' in data) {
+        } else if (data && typeof data === 'object' && 'detail' in data) {
             this.message = (data as ErrorDetail).detail;
         }
     }

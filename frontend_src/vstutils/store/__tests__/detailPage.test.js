@@ -164,12 +164,26 @@ test('createEditViewStore', async () => {
     expect(store.actions[2].name).toEqual('cancel');
 
     fetchMock.resetMocks();
+
+    // Change field value
+    store.setFieldValue({ field: 'name', value: 'new name' });
+
+    fetchMock.mockResponseOnce(
+        JSON.stringify([
+            {
+                data: { id: 15, name: 'NewShop', active: true, phone: '79658964562' },
+                status: 200,
+            },
+        ]),
+    );
     await store.reload();
     // eslint-disable-next-line no-unused-vars
     let [_, request] = fetchMock.mock.calls[0];
     let bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('get');
     expect(bulk[0].path).toStrictEqual(['some_list', 15]);
+    // Field must be reset after reloading
+    expect(store.sandbox.name).toBe('NewShop');
 });
 
 test('patchEditViewStore', async () => {
