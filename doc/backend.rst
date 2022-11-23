@@ -70,6 +70,22 @@ Views
     :members: nested_view,subaction
 
 
+Actions
+~~~~~~~
+
+Vstutils has the advanced system of working with actions.
+REST API works with data through verbs, which are called methods.
+However, to work with one or a list of entities, such actions may not be enough.
+
+To expand the set of actions, you need to create an action that will work with some aspect of the described model.
+For these purposes, there is a standard :func:`rest_framework.decorators.action`, which can also be extended using the scheme.
+But for the greater convenience, there is a set of decorator objects in vstutils to eliminate the routine of writing boilerplate code.
+
+
+.. automodule:: vstutils.api.actions
+    :members:
+
+
 Filtersets
 ~~~~~~~~~~
 

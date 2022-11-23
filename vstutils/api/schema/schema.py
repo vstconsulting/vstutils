@@ -194,6 +194,8 @@ class VSTAutoSchema(SwaggerAutoSchema):
         if result['operationId'].endswith('_add') and _nested_wrapped_view:
             # pylint: disable=protected-access
             result['x-allow-append'] = issubclass(_nested_wrapped_view, NestedWithAppendMixin)
+
+        params_to_override = ('x-title', 'x-icons')
         if self.method.lower() == 'get':
             subscribe_view = self.__get_nested_view_and_subaction(self.view)[0]
             queryset = getattr(subscribe_view, 'queryset', None)
@@ -207,8 +209,10 @@ class VSTAutoSchema(SwaggerAutoSchema):
                 result['x-deep-nested-view'] = deep_nested_subview
             result['x-list'] = self.is_list_view()
         else:
-            for param in ('x-multiaction', 'x-require-confirmation', 'x-icons', 'x-title'):
-                if param in self.overrides:
-                    result[param] = self.overrides[param]
+            params_to_override = params_to_override + ('x-multiaction', 'x-require-confirmation')
+
+        for param in set(params_to_override):
+            if param in self.overrides and self.overrides[param] is not None:
+                result[param] = self.overrides[param]
 
         return result
