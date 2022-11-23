@@ -69,7 +69,7 @@ functional_test:
           - py36-django32-install
         BUILD_OPTIMIZATION: 'true'
       - TOX_ENVS:
-          - py310-django32-coverage
+          - py311-django32-coverage
 
 js_tests:
   <<: *branch_tests
