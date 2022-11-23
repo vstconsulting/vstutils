@@ -2006,6 +2006,61 @@ class OpenapiEndpointTestCase(BaseTestCase):
         sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subgroups/'
         self.assertTrue(api['paths'][sub_path]['get']['x-list'])
 
+        path = '/author/{id}/empty_action/'
+        self.assertCount(api['paths'][path], 2)
+        self.assertIn('post', api['paths'][path])
+        self.assertIn('parameters', api['paths'][path])
+        self.assertEqual(api['paths'][path]['post']['responses']['201']['schema']['$ref'], '#/definitions/Empty')
+        self.assertEqual(api['paths'][path]['post']['x-title'], 'Empty Action')
+
+        path = '/author/{id}/author_profile/'
+        self.assertCount(api['paths'][path], 4)
+        self.assertIn('get', api['paths'][path])
+        self.assertIn('put', api['paths'][path])
+        self.assertIn('delete', api['paths'][path])
+        self.assertIn('parameters', api['paths'][path])
+        self.assertEqual(api['paths'][path]['get']['responses']['200']['schema']['$ref'], '#/definitions/AuthorProfile')
+        self.assertEqual(api['paths'][path]['put']['responses']['200']['schema']['$ref'], '#/definitions/AuthorProfile')
+        self.assertIn('204', api['paths'][path]['delete']['responses'])
+        self.assertFalse(api['paths'][path]['get']['x-list'])
+        self.assertFalse(api['paths'][path]['put']['x-multiaction'])
+
+        path = '/author/{id}/simple_property_action/'
+        self.assertCount(api['paths'][path], 5)
+        self.assertIn('get', api['paths'][path])
+        self.assertIn('put', api['paths'][path])
+        self.assertIn('patch', api['paths'][path])
+        self.assertIn('delete', api['paths'][path])
+        self.assertIn('parameters', api['paths'][path])
+        self.assertEqual(api['paths'][path]['get']['responses']['200']['schema']['$ref'], '#/definitions/PropertyAuthor')
+        self.assertEqual(api['paths'][path]['put']['responses']['200']['schema']['$ref'], '#/definitions/PropertyAuthor')
+        self.assertEqual(api['paths'][path]['patch']['responses']['200']['schema']['$ref'], '#/definitions/PropertyAuthor')
+        self.assertIn('204', api['paths'][path]['delete']['responses'])
+        self.assertFalse(api['paths'][path]['get']['x-list'])
+        self.assertEqual(api['paths'][path]['get']['description'], 'Simple property description')
+        self.assertNotIn('x-title', api['paths'][path]['get'])
+        self.assertEqual(len(api['paths'][path]['get']['parameters']), 0)
+
+        path = '/author/{id}/simple_property_action_with_query/'
+        self.assertCount(api['paths'][path], 2)
+        self.assertIn('get', api['paths'][path])
+        self.assertIn('parameters', api['paths'][path])
+        self.assertEqual(api['paths'][path]['get']['responses']['200']['schema']['$ref'], '#/definitions/PropertyAuthor')
+        self.assertFalse(api['paths'][path]['get']['x-list'])
+        self.assertEqual(len(api['paths'][path]['get']['parameters']), 1)
+        self.assertEqual(api['paths'][path]['get']['x-title'], 'Get query')
+        self.assertEqual(api['paths'][path]['get']['x-icons'], ['fas', 'fa-pen'])
+
+
+        path = '/author/phone_book/'
+        self.assertCount(api['paths'][path], 2)
+        self.assertIn('count', api['paths'][path]['get']['responses']['200']['schema']['properties'])
+        self.assertIn('results', api['paths'][path]['get']['responses']['200']['schema']['properties'])
+        self.assertEqual(
+            api['paths'][path]['get']['responses']['200']['schema']['properties']['results']['items']['$ref'],
+            '#/definitions/PhoneBook',
+        )
+
     def test_search_fields(self):
         self.assertEqual(
             self.get_model_class('test_proj.Variable').generated_view.search_fields,
@@ -3068,6 +3123,79 @@ class ProjectTestCase(BaseTestCase):
                 'mediaType': ''
             }
         ]
+
+    def test_make_action(self):
+        author1 = Author.objects.create(name='Author1', phone='')
+        author2 = Author.objects.create(name='Author2', phone='')
+        author3 = Author.objects.create(name='Author3', phone='88008008880')
+
+        results = self.bulk([
+            # [0] Simple empty action
+            {'method': 'post', 'path': ['author', author1.id, 'empty_action'], 'data': {}},
+            # [1] Simple method action with result
+            {'method': 'post', 'path': ['author', author1.id, 'check_named_response'], 'data': {}},
+            # [2-4] Simple action check
+            {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
+            {'method': 'put', 'path': ['author', author1.id, 'author_profile'], "data": {"phone": "88008008880"}},
+            {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
+            {'method': 'delete', 'path': ['author', author1.id, 'author_profile']},
+            {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
+            # [7-11] Simple action check
+            {'method': 'get', 'path': ['author', author2.id, 'simple_property_action']},
+            {'method': 'put', 'path': ['author', author2.id, 'simple_property_action'], "data": {"phone": "88008008880"}},
+            {'method': 'get', 'path': ['author', author2.id, 'simple_property_action']},
+            {'method': 'delete', 'path': ['author', author2.id, 'simple_property_action']},
+            {'method': 'get', 'path': ['author', author2.id, 'simple_property_action']},
+            # [12-14] Check query serializer
+            {'method': 'get', 'path': ['author', author3.id, 'simple_property_action_with_query']},
+            {'method': 'get', 'path': ['author', author3.id, 'simple_property_action_with_query'], 'query': 'phone=123'},
+            {'method': 'get', 'path': ['author', author3.id, 'simple_property_action_with_query'], 'query': 'phone=12345678'},
+            # [15] Check list page
+            {'method': 'get', 'path': ['author', 'phone_book']},
+
+        ])
+
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[0]['data'], {})
+
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[1]['data'], {"detail": "OK"})
+
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['data'], {"phone": ""})
+        self.assertEqual(results[3]['status'], 200)
+        self.assertEqual(results[3]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[4]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[5]['status'], 204)
+        self.assertEqual(results[6]['status'], 404)
+
+        self.assertEqual(results[7]['status'], 200)
+        self.assertEqual(results[7]['data'], {"phone": ""})
+        self.assertEqual(results[8]['status'], 200)
+        self.assertEqual(results[8]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[9]['status'], 200)
+        self.assertEqual(results[9]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[10]['status'], 204)
+        self.assertEqual(results[11]['status'], 200)
+        self.assertEqual(results[11]['data'], {"phone": ""})
+
+        self.assertEqual(results[12]['status'], 200)
+        self.assertEqual(results[12]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[13]['status'], 400)
+        self.assertEqual(results[13]['data'], {"phone": ['Ensure this field has at least 8 characters.']})
+        self.assertEqual(results[14]['status'], 200)
+        self.assertEqual(results[14]['data'], {"phone": None})
+
+        self.assertEqual(results[15]['status'], 200)
+        valid_results = [{"name": a.name, "phone": a.phone} for a in Author.objects.all()]
+        self.assertEqual(results[15]['data'], {"count": len(valid_results), "results": valid_results})
+
+        response = self.client.get(f'/api/v1/author/{author3.id}/get_file/', HTTP_ACCEPT_CONTENT='text/plain')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response, FileResponse)
+        self.assertEqual(response.as_attachment, True)
+        self.assertEqual(response.filename, f'{author3.id}.json')
 
     def test_crontab_field(self):
         results = self.bulk([
