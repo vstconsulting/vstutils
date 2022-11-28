@@ -562,7 +562,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
     format_exclude_sections=('uwsgi',)
 )
 
-config.parse_files(CONFIG_FILES)
+config.parse_files(tuple(reversed(CONFIG_FILES)))
 config.parse_text(os.getenv(CONFIG_ENV_DATA_NAME, ''))
 
 main: MainSection = config['main']
