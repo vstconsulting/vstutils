@@ -85,11 +85,13 @@ PROJECT_CONFIG_FILE: _t.Text = os.getenv(
     f"{ENV_NAME}_LIB_SETTINGS_FILE",
     f"/etc/{VST_PROJECT}/settings.ini"
 )
-PROJECT_DEFAULTS_CONFIG = os.path.join(VST_PROJECT_LIB_DIR, 'settings.ini')
+PROJECT_LIB_DEFAULTS_CONFIG = os.path.join(VST_PROJECT_LIB_DIR, 'settings.ini')
+PROJECT_DEFAULTS_CONFIG = os.path.join(VST_PROJECT_DIR, 'settings.ini')
 CONFIG_ENV_DATA_NAME: _t.Text = f"{ENV_NAME}_SETTINGS_DATA"
 
 CONFIG_FILES = tuple(filter(bool, (
-    PROJECT_DEFAULTS_CONFIG,
+    PROJECT_LIB_DEFAULTS_CONFIG,
+    PROJECT_DEFAULTS_CONFIG if PROJECT_DEFAULTS_CONFIG != PROJECT_LIB_DEFAULTS_CONFIG else None,
     '/etc/vstutils/settings.ini' if VST_PROJECT != 'test_proj' else None,
     '/etc/vstutils/settings.yml' if VST_PROJECT != 'test_proj' else None,
     CONFIG_FILE,
