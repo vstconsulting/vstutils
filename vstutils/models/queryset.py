@@ -4,7 +4,7 @@ import inspect
 
 from django.db import models
 from django.db.models.expressions import RawSQL
-from django.utils.functional import cached_property
+from django.utils.functional import cached_property, lazy
 from django.conf import settings
 
 from ..utils import Paginator, raise_context_decorator_with_default, is_member_descriptor
@@ -176,7 +176,7 @@ class BQuerySet(models.QuerySet):
         # get all id's from model except already accumulated
         list_id = self.exclude(id__in=accumulated).values_list("id", flat=True)
         accumulated = (accumulated | list_id)
-        kw = {related_name + "__id__in": list_id}
+        kw = {related_name + "__id__in": lazy(list_id.all, tuple)()}
         subs = self.model.objects.using(self.db).filter(**kw)
         subs_id = subs.values_list("id", flat=True)
         if subs_id:

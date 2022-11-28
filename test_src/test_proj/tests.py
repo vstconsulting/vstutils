@@ -30,7 +30,7 @@ from django.template.exceptions import TemplateDoesNotExist
 try:
     from django.middleware.csrf import _get_new_csrf_token
 except ImportError:  # nocv
-    from django.middleware.csrf import _get_new_csrf_string
+    from django.middleware.csrf import _get_new_csrf_string as _get_new_csrf_token
 from django.core.cache import cache
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
