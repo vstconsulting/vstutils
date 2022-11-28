@@ -27,7 +27,10 @@ from django.db.models import F
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.template.exceptions import TemplateDoesNotExist
-from django.middleware.csrf import _get_new_csrf_token
+try:
+    from django.middleware.csrf import _get_new_csrf_token
+except ImportError:  # nocv
+    from django.middleware.csrf import _get_new_csrf_string
 from django.core.cache import cache
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model

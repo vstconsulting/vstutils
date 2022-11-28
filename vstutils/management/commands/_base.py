@@ -27,7 +27,7 @@ logger_lib = logging.getLogger(settings.VST_PROJECT_LIB)
 
 class BaseCommand(_BaseCommand):
     interactive = False
-    requires_system_checks = False
+    requires_system_checks = ()  # type: ignore
     keep_base_opts = False
     help = "Service command for web-application"
 

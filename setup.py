@@ -429,7 +429,7 @@ kwargs = dict(
         'test': load_requirements('requirements-test.txt'),
         'rpc': requirements_rpc,
         'ldap': load_requirements('requirements-ldap.txt'),
-        'doc': ['django-docs==0.3.1'] + load_requirements('requirements-doc.txt'),
+        'doc': ['django-docs==0.3.3'] + load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
         'stubs': load_requirements('requirements-stubs.txt'),
         'pil': ['Pillow~=8.4.0;python_version<"3.7"', 'Pillow~=9.2.0;python_version>"3.6"'],

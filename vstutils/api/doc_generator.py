@@ -16,9 +16,9 @@ class _YamlOrderedLoader(yaml.SafeLoader):
     pass
 
 
-_YamlOrderedLoader.add_constructor(
+_YamlOrderedLoader.add_constructor(  # type: ignore
     yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-    lambda loader, node: collections.OrderedDict(loader.construct_pairs(node))
+    lambda loader, node: collections.OrderedDict(loader.construct_pairs(node))  # type: ignore
 )
 
 

@@ -206,7 +206,7 @@ def subaction(*args, **kwargs):
     return decorator
 
 
-def get_action_name(master_view: MasterViewType, method: _t.Text = '') -> _t.Text:
+def get_action_name(master_view: MasterViewType, method: _t.Text = '') -> _t.Optional[_t.Text]:
     method = method.lower()
     if method == 'post':
         action_name = 'create'
@@ -227,7 +227,6 @@ def get_action_name(master_view: MasterViewType, method: _t.Text = '') -> _t.Tex
 
 
 class NestedViewMixin:
-    __slots__ = ('action', 'headers')
     get_serializer: _t.Callable
     check_object_permissions: _t.Callable
     check_permissions: _t.Callable
@@ -272,7 +271,7 @@ class NestedViewMixin:
                 qs = qs_filter(self.nested_parent_object, qs)
         return qs
 
-    def get_nested_action_name(self) -> _t.Text:
+    def get_nested_action_name(self) -> _t.Optional[_t.Text]:
         return get_action_name(self.master_view, str(self.request.method))
 
     def get_serializer_context(self) -> _t.Dict:
@@ -314,7 +313,6 @@ class NestedViewMixin:
 
 
 class NestedWithoutAppendMixin(NestedViewMixin):
-    __slots__ = ()
 
     def create(self, request: drf_request.Request, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -346,7 +344,6 @@ class NestedWithoutAppendMixin(NestedViewMixin):
 
 
 class NestedWithAppendMixin(NestedWithoutAppendMixin):
-    __slots__ = ()
 
     def _data_create(self, request_data, nested_append_arg):
         # pylint: disable=import-outside-toplevel

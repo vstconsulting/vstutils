@@ -1,6 +1,5 @@
 import typing as _t
 from pathlib import Path
-from django.db.models.query import ModelIterable
 from django.db.models.fields import CharField as cf, TextField as tf, IntegerField as intf, BooleanField as bf
 from .models.queryset import BQuerySet
 from .models.model import BaseModel
@@ -39,7 +38,7 @@ class CustomQuerySet(BQuerySet):
         ...
 
 
-class CustomModelIterable(ModelIterable):
+class CustomModelIterable:
     def values_handler(self, unit: _t.Dict) -> _t.Dict:
         ...
 

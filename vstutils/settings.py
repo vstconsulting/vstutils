@@ -52,9 +52,9 @@ PROJECT_GUI_NAME: _t.Text = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME[0].upper(
 
 PY_VER: _t.SupportsInt = sys.version_info.major
 TMP_DIR: _t.Text = gettempdir() or '/tmp'  # nosec
-BASE_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
-VST_PROJECT_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_project_module.__file__))
-VST_PROJECT_LIB_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
+BASE_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))  # type: ignore
+VST_PROJECT_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_project_module.__file__))  # type: ignore
+VST_PROJECT_LIB_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))  # type: ignore
 __kwargs: _t.Dict[_t.Text, _t.Any] = dict(
     PY=PY_VER,
     PY_VER='.'.join([str(i) for i in sys.version_info[:2]]),

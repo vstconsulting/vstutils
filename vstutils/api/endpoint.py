@@ -359,7 +359,7 @@ class EndpointViewSet(views.APIView):
 
     def original_environ_data(self, request: BulkRequestType, *args) -> _t.Dict:
         get_environ = request.META.get
-        kwargs = {}
+        kwargs: _t.Dict[str, _t.Optional[_t.Any]] = {}
         for env_var in tuple(self.client_environ_keys_copy) + args:
             value = get_environ(env_var, None)
             if value:
