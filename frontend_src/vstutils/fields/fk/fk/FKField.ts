@@ -3,9 +3,10 @@ import { ComponentOptions } from 'vue';
 
 import { AggregatedQueriesExecutor } from '@/vstutils/AggregatedQueriesExecutor.js';
 import { BaseField, Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
-import { DetailPageStore } from '@/vstutils/store/page.js';
+import { onAppBeforeInit } from '@/vstutils/signals';
+import { DetailPageStore } from '@/vstutils/store/page';
 import { i18n } from '@/vstutils/translation';
-import { formatPath, getApp, getDependenceValueAsString, registerHook, RequestTypes } from '@/vstutils/utils';
+import { formatPath, getApp, getDependenceValueAsString, RequestTypes } from '@/vstutils/utils';
 import { PageView } from '@/vstutils/views';
 
 import FKFieldMixin from './FKFieldMixin';
@@ -122,7 +123,7 @@ export class FKField
         }
 
         if (!this.fkModel && this.props.model) {
-            registerHook('app.beforeInit', this.resolveModel.bind(this));
+            onAppBeforeInit(() => this.resolveModel());
         }
     }
 
@@ -139,7 +140,7 @@ export class FKField
         if (this.props.model) {
             this.fkModel = this.app.modelsResolver.bySchemaObject(this.props.model);
         } else {
-            this._error('Could not resolve Model');
+            this.error('Could not resolve Model');
         }
     }
 
@@ -180,7 +181,10 @@ export class FKField
                 this.fkModel = querysets[0]!.getResponseModelClass(RequestTypes.LIST);
             }
         } else {
-            querysets = [this.app.qsResolver!.findQuerySet(this.fkModel!.name, path)];
+            if (!this.fkModel) {
+                this.error(`FK model (${JSON.stringify(this.props.model)}) is not initialized`);
+            }
+            querysets = [this.app.qsResolver!.findQuerySet(this.fkModel.name, path)];
         }
         this.querysets.set(path, querysets as QuerySet[]);
     }
@@ -197,14 +201,14 @@ export class FKField
 
     async afterInstancesFetched(instances: Model[], qs: QuerySet) {
         if (qs.prefetchEnabled && this.usePrefetch && this.fetchData) {
-            return this.prefetchValues(instances, this.app.store.page.view.path);
+            return this.prefetchValues(instances, this.app.store.page!.view.path);
         }
     }
 
     prefetchValues(instances: Model[], path: string) {
         const qs =
             this.getAppropriateQuerySet({ path }) ||
-            (this.app.qsResolver?.findQuerySet(this.fkModel!.name, this.app.store.page.view.path) as
+            (this.app.qsResolver?.findQuerySet(this.fkModel!.name, this.app.store.page!.view.path) as
                 | QuerySet
                 | undefined);
         if (!qs) return;

@@ -49,7 +49,7 @@ class ChoicesField extends StringField {
             }
         }
 
-        this._error(`Can not handle option "${item}"`);
+        this.warn(`Can not handle option "${item}"`);
     }
 
     prepareEnumData(data = this.enum) {

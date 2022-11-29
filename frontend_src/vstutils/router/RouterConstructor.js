@@ -1,5 +1,5 @@
 import VueRouter from 'vue-router';
-import signals from '../signals.js';
+import { signals } from '@/vstutils/signals';
 import { View } from '../views';
 import { NotFound, Home } from '@/vstutils/router/customPages';
 

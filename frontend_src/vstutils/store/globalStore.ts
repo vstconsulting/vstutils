@@ -6,7 +6,7 @@ import { BaseViewStore, useParentViews } from './helpers';
 import type { Breadcrumb } from '../breadcrumbs';
 
 export const GLOBAL_STORE = (): {
-    page: ComputedRef<BaseViewStore>;
+    page: ComputedRef<BaseViewStore | null>;
     title: ComputedRef<string | undefined>;
     breadcrumbs: ComputedRef<Breadcrumb[] | undefined>;
     entityViewClasses: ComputedRef<string[]>;
@@ -44,7 +44,7 @@ export const GLOBAL_STORE = (): {
     return {
         title,
         breadcrumbs,
-        page: page as ComputedRef<BaseViewStore>,
+        page: page as ComputedRef<BaseViewStore | null>,
         entityViewClasses,
         viewItems: parentViews.items,
         viewItemsMap: parentViews.itemsMap,
@@ -58,3 +58,5 @@ export type GlobalStore = Store<
     StoreGetters<ReturnType<typeof GLOBAL_STORE>>,
     StoreActions<ReturnType<typeof GLOBAL_STORE>>
 >;
+
+export type GlobalStoreInitialized = Omit<GlobalStore, 'page'> & { page: BaseViewStore };

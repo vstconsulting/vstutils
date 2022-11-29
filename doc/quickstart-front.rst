@@ -156,6 +156,10 @@ and `toRepresent` methods.
 
 Now you have field that show seconds, but saves/receives data in milliseconds on detail view of AllFieldsModel.
 
+.. note::
+    If you need to show some warning or error to developer console you can use field `warn` and `error` methods.
+    You can pass some message and it will print it with field type, model name and field name.
+
 Change path to FkField
 ----------------------
 Sometime you may need to request different set of objects for FkField. For example to choose from only famous authors,

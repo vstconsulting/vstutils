@@ -38,7 +38,7 @@ export const useBreadcrumbs = () => {
             }
 
             if (!name) {
-                name = i18n.t(view.title) as string;
+                name = i18n.st(view.title);
             }
 
             crumbs.push({ link, name, iconClasses });

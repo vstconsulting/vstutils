@@ -1,3 +1,4 @@
+import 'core-js/actual/array/at';
 import { App } from '@/vstutils/app.ts';
 import { AppConfiguration } from '../vstutils/AppConfiguration.ts';
 import { DummyCache } from '@/cache';
