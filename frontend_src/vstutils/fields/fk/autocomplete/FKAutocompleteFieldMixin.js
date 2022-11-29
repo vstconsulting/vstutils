@@ -4,7 +4,7 @@ import { escapeHtml, getDependenceValueAsString, guiLocalSettings, RequestTypes 
 import { AutocompleteFieldContentEditMixin } from '../../autocomplete';
 import { FKFieldContent, FKFieldMixin } from '../fk';
 import FKAutocompleteFieldContentEdit from './FKAutocompleteFieldContentEdit.js';
-import signals from '../../../signals.js';
+import { signals } from '@/vstutils/signals.ts';
 
 /**
  * @vue/component

@@ -9,6 +9,8 @@ function isFieldInstance(obj: unknown): obj is Field {
     return obj instanceof BaseField;
 }
 
+export type FieldDefinition = Field | string | Partial<FieldOptions<FieldXOptions, unknown>>;
+
 /**
  * Helps with creation of fields, $ref can be used to reference schema objects
  */
@@ -65,7 +67,7 @@ export class FieldsResolver {
      *
      * Name must be provided if string mode is used or obj has no name.
      */
-    resolveField(obj: Field | string | Partial<FieldOptions<FieldXOptions, unknown>>, name?: string): Field {
+    resolveField(obj: FieldDefinition, name?: string): Field {
         if (!obj) {
             throw new Error('Obj is required');
         }

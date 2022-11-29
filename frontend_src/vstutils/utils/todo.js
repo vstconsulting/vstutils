@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import VueRouter from 'vue-router';
 import moment from 'moment';
-import signals from '../signals.js';
 import { i18n } from '@/vstutils/translation';
 import { getApp } from './app-helpers';
 import { LocalSettings } from './localSettings';
@@ -1110,30 +1109,6 @@ export function mapObjectValues(obj, f) {
     }
     return newObj;
 }
-
-/**
- * Provided function will be guaranteed called after the given signal
- * @param {string} signalName
- * @param {Function} func
- */
-export const registerHook = (() => {
-    const emittedSignals = new Map();
-
-    signals.connect('APP_CREATED', () => emittedSignals.clear());
-
-    return function (signalName, func) {
-        const isEmitted = emittedSignals.get(signalName);
-        if (isEmitted === undefined) {
-            emittedSignals.set(signalName, false);
-            signals.once(signalName, () => emittedSignals.set(signalName, true));
-            signals.once(signalName, func);
-        } else if (isEmitted) {
-            func();
-        } else if (!isEmitted) {
-            signals.once(signalName, func);
-        }
-    };
-})();
 
 /**
  * Function that returns first item from iterator for which callbackFn will return true

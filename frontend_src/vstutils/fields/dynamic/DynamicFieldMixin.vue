@@ -1,53 +1,52 @@
 <template>
     <component
-        :is="realField.component"
+        :is="realField.getComponent()"
         :field="realField"
         :data="data"
         :type="type"
         :hideable="hideable"
         :error="error"
         @toggleHidden="$emit('toggleHidden')"
-        @set-value="setValue($event.value)"
+        @set-value="setValue"
     />
 </template>
 
-<script>
-    import BaseFieldMixin from '../base/BaseFieldMixin.vue';
-    import { deepEqual } from '../../utils';
+<script lang="ts">
+    import { computed, defineComponent, ref, watch } from 'vue';
+    import { deepEqual } from '@/vstutils/utils';
+    import {
+        FieldComponentPropsType,
+        FieldComponentProps,
+        SetFieldValueOptions,
+        Field,
+    } from '@/vstutils/fields/base';
+    import type { DynamicField } from './DynamicField';
 
-    export default {
-        mixins: [BaseFieldMixin],
-        data() {
-            return {
-                realField: this.field.getRealField(this.data),
-                savedValues: new WeakMap(),
-            };
-        },
-        computed: {
-            parentValues() {
-                return this.field._getParentValues(this.data);
-            },
-        },
-        watch: {
-            parentValues(newValues, oldValues) {
+    export default defineComponent({
+        props: FieldComponentProps as FieldComponentPropsType<DynamicField>,
+        setup(props, { emit }) {
+            const savedValues = new WeakMap<Field, unknown>();
+            const parentValues = computed(() => props.field._getParentValues(props.data));
+            const realField = ref(props.field.getRealField(parentValues.value));
+
+            function setValue(obj: SetFieldValueOptions) {
+                savedValues.set(realField.value, obj.value);
+                emit('set-value', obj);
+            }
+
+            watch(parentValues, (newValues, oldValues) => {
                 if (!deepEqual(newValues, oldValues)) {
-                    this.realField = this.field.getRealField(newValues);
-                    this.setValue(
-                        this.savedValues.has(this.realField)
-                            ? this.savedValues.get(this.realField)
-                            : this.realField.getInitialValue(),
-                    );
+                    realField.value = props.field.getRealField(newValues);
+                    setValue({
+                        field: props.field.name,
+                        value: savedValues.has(realField.value)
+                            ? savedValues.get(realField.value)
+                            : realField.value.getInitialValue(),
+                    });
                 }
-            },
+            });
+
+            return { realField, setValue };
         },
-        created() {
-            this.realField = this.field.getRealField(this.data);
-        },
-        methods: {
-            setValue(value) {
-                this.savedValues.set(this.realField, value);
-                this._emitSetValueSignal(value);
-            },
-        },
-    };
+    });
 </script>

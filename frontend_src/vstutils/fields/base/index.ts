@@ -1,3 +1,4 @@
+export * from './types';
 export * from './BaseField';
 import BaseFieldContentEdit from './BaseFieldContentEdit.vue';
 import BaseFieldContentMixin from './BaseFieldContentMixin.js';

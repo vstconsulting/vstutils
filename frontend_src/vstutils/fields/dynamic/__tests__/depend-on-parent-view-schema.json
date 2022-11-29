@@ -1,0 +1,348 @@
+{
+    "$schema": "https://json.schemastore.org/swagger-2.0.json",
+    "definitions": {
+        "FieldInfo": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "readOnly": true
+                },
+                "name": {
+                    "type": "string"
+                },
+                "field_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "WithDynamic": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "readOnly": true
+                },
+                "dynamic_from_parent": {
+                    "type": "string",
+                    "format": "dynamic",
+                    "x-options": {
+                        "source_view": "<<parent>>.<<parent>>.<<parent>>",
+                        "field": "field_type"
+                    }
+                },
+                "dynamic_from_parent_with_path": {
+                    "type": "string",
+                    "format": "dynamic",
+                    "x-options": {
+                        "source_view": "/level_0/{level_0_with_value_for_dynamic_id}/",
+                        "field": "field_type",
+                        "types": {
+                            "some_phone": {
+                                "type": "string",
+                                "format": "phone"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "Some": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "readOnly": true
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "paths": {
+        "/level_0/": {
+            "parameters": [],
+            "get": {
+                "operationId": "level_0_list",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Some"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/level_0/{level_0_with_value_for_dynamic_id}/": {
+            "get": {
+                "operationId": "level_0_get",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/FieldInfo"
+                        }
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "name": "level_0_with_value_for_dynamic_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/level_0/{level_0_with_value_for_dynamic_id}/level_1/": {
+            "parameters": [
+                {
+                    "name": "level_0_with_value_for_dynamic_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "get": {
+                "operationId": "level_1_list",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Some"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/level_0/{level_0_with_value_for_dynamic_id}/level_1/{level_1_with_value_for_dynamic_id}/": {
+            "get": {
+                "operationId": "level_1_get",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/FieldInfo"
+                        }
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "name": "level_0_with_value_for_dynamic_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "level_1_with_value_for_dynamic_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/level_0/{level_0_with_value_for_dynamic_id}/level_1/{level_1_with_value_for_dynamic_id}/level_2/": {
+            "parameters": [
+                {
+                    "name": "level_0_with_value_for_dynamic_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "level_1_with_value_for_dynamic_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "get": {
+                "operationId": "level_2_list",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Some"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/level_0/{level_0_with_value_for_dynamic_id}/level_1/{level_1_with_value_for_dynamic_id}/level_2/{level_2_id}/": {
+            "get": {
+                "operationId": "level_2_get",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Some"
+                        }
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "name": "level_0_with_value_for_dynamic_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "level_1_with_value_for_dynamic_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "level_2_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/level_0/{level_0_with_value_for_dynamic_id}/level_1/{level_1_with_value_for_dynamic_id}/level_2/{level_2_id}/with_dynamic/": {
+            "parameters": [
+                {
+                    "name": "level_0_with_value_for_dynamic_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "level_1_with_value_for_dynamic_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "level_2_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "get": {
+                "operationId": "root_list",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/WithDynamic"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

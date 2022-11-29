@@ -1,6 +1,12 @@
-import { BaseField, BaseFieldContentEdit, BaseFieldContentReadonlyMixin, BaseFieldMixin } from './base';
-import { mapObjectValues, registerHook } from '../utils';
-import { ModelFields } from '../components/page';
+import {
+    BaseField,
+    BaseFieldContentEdit,
+    BaseFieldContentReadonlyMixin,
+    BaseFieldMixin,
+} from '@/vstutils/fields/base';
+import { mapObjectValues } from '@/vstutils/utils';
+import { ModelFields } from '@/vstutils/components/page';
+import { onAppBeforeInit } from '@/vstutils/signals';
 
 /**
  * @vue/component
@@ -71,7 +77,7 @@ export class NestedObjectField extends BaseField {
         super(options);
         this.nestedModel = null;
         this.hideNotRequired = Boolean(this.props.hideNotRequired);
-        registerHook('app.beforeInit', this.resolveNestedModel.bind(this));
+        onAppBeforeInit(() => this.resolveNestedModel());
     }
     getEmptyValue() {
         return {};

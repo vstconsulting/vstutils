@@ -43,6 +43,7 @@
     import BaseFieldContentReadonlyMixin from './BaseFieldContentReadonlyMixin.vue';
     import BaseFieldContentEdit from './BaseFieldContentEdit.vue';
     import BaseFieldListView from './BaseFieldListView.vue';
+    import { FieldComponentProps } from './types';
 
     export default {
         name: 'BaseFieldMixin',
@@ -64,14 +65,7 @@
              */
             field_list_view: BaseFieldListView,
         },
-        props: {
-            field: { type: Object, required: true },
-            data: { type: Object, required: true },
-            type: { type: String, required: true },
-            hideable: { type: Boolean, default: false },
-            hideTitle: { type: Boolean, default: false },
-            error: { type: [String, Object], default: null },
-        },
+        props: FieldComponentProps,
         data() {
             return {
                 wrapper_classes_list: {

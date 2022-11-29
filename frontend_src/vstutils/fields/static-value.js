@@ -1,5 +1,5 @@
-import { BaseField, BaseFieldMixin } from './base';
-import { registerHook } from '../utils';
+import { onAppBeforeInit } from '@/vstutils/signals';
+import { BaseField, BaseFieldMixin } from '@/vstutils/fields/base';
 
 /**
  * @vue/component
@@ -32,7 +32,7 @@ export class StaticValueField extends BaseField {
     constructor(options) {
         super(options);
         this.staticValue = this.props.staticValue;
-        registerHook('app.beforeInit', this.resolveRealField.bind(this));
+        onAppBeforeInit(() => this.resolveRealField());
     }
 
     resolveRealField() {

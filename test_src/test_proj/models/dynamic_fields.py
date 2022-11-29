@@ -26,8 +26,21 @@ class DynamicFields(BModel):
 
     class Meta:
         _list_fields = _detail_fields = ['id', 'field_type', 'dynamic_with_types']
-        _override_list_fields = _override_detail_fields = {
+        _override_list_fields = {
             'dynamic_with_types': fields.DynamicJsonTypeField(field='field_type', types={
+                'serializer': SomeSerializer(),
+                'many_serializers': SomeSerializer(many=True),
+                'integer': IntegerField(max_value=1337),
+                'boolean': 'boolean',
+                'image':  fields.NamedBinaryImageInJsonField(),
+                'context_depend': SomeField()
+            }),
+        }
+        _override_detail_fields = {
+            'dynamic_with_types': fields.DynamicJsonTypeField(
+                source_view='<<parent>>.<<parent>>',
+                field='field_type',
+                types={
                 'serializer': SomeSerializer(),
                 'many_serializers': SomeSerializer(many=True),
                 'integer': IntegerField(max_value=1337),

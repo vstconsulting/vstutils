@@ -1929,6 +1929,42 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 },
             },
         })
+        self.assertDictEqual(api['definitions']['OneDynamicFields']['properties']['dynamic_with_types'], {
+            'title': 'Dynamic with types',
+            'type': 'string',
+            'format': 'dynamic',
+            'x-options': {
+                'source_view': '<<parent>>.<<parent>>',
+                'choices': {},
+                'field': 'field_type',
+                'types': {
+                    'boolean': 'boolean',
+                    'many_serializers': {
+                        'type': 'array',
+                        'items': nested_model,
+                    },
+                    'integer': {
+                        'type': 'integer',
+                        'maximum': 1337,
+                    },
+                    'serializer': nested_model,
+                    'image': {
+                        'type': 'object',
+                        'properties': {
+                            'name': {'type': 'string', 'x-nullable': True},
+                            'content': {'type': 'string', 'x-nullable': True},
+                            'mediaType': {'type': 'string', 'x-nullable': True}
+                        },
+                        'x-format': 'namedbinimage',
+                        'x-validators': {}
+                    },
+                    'context_depend': {
+                        'minLength': 1,
+                        'type': 'string',
+                    }
+                },
+            },
+        })
 
         # Check public centrifugo address when absolute path is provided
         self.assertEqual(api['info']['x-centrifugo-address'], 'wss://vstutilstestserver/notify/connection/websocket')

@@ -6,7 +6,7 @@ import type { QuerySet } from '../../querySet';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 import { i18n } from '../../translation';
 import { IApp } from '@/vstutils/app';
-import { ComponentOptions, Component } from 'vue';
+import { ComponentOptions } from 'vue';
 
 type ModelPropertyDescriptor<Represent> = PropertyDescriptor & {
     get(this: Model): Represent;
@@ -189,11 +189,12 @@ export class BaseField<
         return data[this.name] as Inner | Represent | undefined | null;
     }
 
-    /**
-     * Prints error message
-     */
-    _error(msg: string) {
-        console.error(`${this.constructor.name}:${this.name}: ${msg}`);
+    warn(msg: string): void {
+        console.warn(`${this.constructor.name} ${this.model?.name ?? ''}.${this.name}: ${msg}`);
+    }
+
+    error(msg: string): never {
+        throw new Error(`${this.constructor.name} ${this.model?.name ?? ''}.${this.name}: ${msg}`);
     }
 
     /**

@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import signals from '../signals.js';
+import { signals } from '@/vstutils/signals';
 import Gravatar from './Gravatar.js';
 import TFAPage from './TFAPage.vue';
 import { IntegerField } from '../fields/numbers/integer.js';

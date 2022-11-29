@@ -6,7 +6,8 @@ import { ChoicesField } from '@/vstutils/fields/choices';
 import { FKField } from '@/vstutils/fields/fk/fk';
 import { integer, NumberField } from '@/vstutils/fields/numbers';
 import { StringField } from '@/vstutils/fields/text';
-import { createPropertyProxy, registerHook } from '@/vstutils/utils';
+import { onAppBeforeInit } from '@/vstutils/signals';
+import { createPropertyProxy } from '@/vstutils/utils';
 
 import { ChoicesArrayFieldMixin } from './custom/choices';
 import { FKArrayFieldMixin } from './custom/fk';
@@ -57,10 +58,10 @@ export class ArrayField extends BaseField<TInner, TRepresent, ArrayFieldXOptions
         this.uniqueItems = options.uniqueItems ?? false;
 
         if (!options.items) {
-            this._error('"items" attribute is required for array field');
+            this.error('"items" attribute is required for array field');
         }
 
-        registerHook('app.beforeInit', this.resolveItemField.bind(this));
+        onAppBeforeInit(() => this.resolveItemField());
     }
 
     static get mixins() {

@@ -1,10 +1,10 @@
-import { expect, test, describe, beforeAll } from '@jest/globals';
-import DynamicField from '../DynamicField';
-import { BooleanField } from '../../boolean';
-import { createApp } from '../../../../unittests/create-app';
-import { StringField } from '../../text';
-import { ChoicesField } from '../../choices';
-import { X_OPTIONS } from '../../../utils';
+import { beforeAll, describe, expect, test } from '@jest/globals';
+import { createApp } from '@/unittests/create-app';
+import { BooleanField } from '@/vstutils/fields/boolean';
+import { ChoicesField } from '@/vstutils/fields/choices';
+import { StringField } from '@/vstutils/fields/text';
+import { X_OPTIONS } from '@/vstutils/utils';
+import { DynamicField } from '../DynamicField';
 
 describe('DynamicField', () => {
     let app;
@@ -71,8 +71,6 @@ describe('DynamicField', () => {
                 },
             },
         });
-        field.resolveTypes();
-        expect(field.usedOnViews).toBeNull();
         field.prepareFieldForView('/some/path/');
     });
 });

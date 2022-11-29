@@ -2,7 +2,8 @@ import { BaseField } from '../base';
 import BaseFieldMixin from '../base/BaseFieldMixin.vue';
 import RelatedListFieldListView from './RelatedListFieldListView.vue';
 import RelatedListFieldReadonlyView from './RelatedListFieldReadonlyView.vue';
-import { addCssClassesToElement, registerHook } from '../../utils';
+import { addCssClassesToElement } from '../../utils';
+import { onSchemaModelsCreated } from '@/vstutils/signals';
 
 /**
  * @vue/component
@@ -36,7 +37,7 @@ export class RelatedListField extends BaseField {
         super(options);
         this.viewType = this.format;
         this.format = 'related_list';
-        registerHook('allModels.created', () => {
+        onSchemaModelsCreated(() => {
             this.itemsModel = this.constructor.app.modelsResolver.bySchemaObject(this.options.items);
         });
     }

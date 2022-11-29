@@ -282,16 +282,23 @@ class DynamicJsonTypeField(VSTCharField):
                     Uses mapping where key is value of subscribed field and
                     value is list with values to choice.
     :type choices: dict
+    :param source_view: Allows to to use parent views data as source for field creation.
+                        Exact view path (`/user/{id}/`) or relative parent specifier
+                        (`<<parent>>.<<parent>>.<<parent>>`) can be provided. For example if current page is
+                        `/user/1/role/2/` and `source_view` is `<<parent>>.<<parent>>` then data
+                        from `/user/1/` will be used. Only detail views if supported.
+    :type source_view: str
 
 
     .. note::
         Effective only in GUI. In API works similar to :class:`.VSTCharField` without value modifications.
     """
-    __slots__ = 'field', 'choices', 'types'
+    __slots__ = 'field', 'choices', 'types', 'source_view'
 
     field: _t.Text
     choices: _t.Dict
     types: _t.Dict
+    source_view: _t.Text
 
     def is_json(self, real_field):
         return isinstance(real_field, Serializer)
@@ -300,6 +307,7 @@ class DynamicJsonTypeField(VSTCharField):
         self.field = kwargs.pop('field')
         self.choices = kwargs.pop('choices', {})
         self.types = kwargs.pop('types', {})
+        self.source_view = kwargs.pop('source_view', None)
         super().__init__(**kwargs)
         for field in self.types.values():
             if isinstance(field, Field):

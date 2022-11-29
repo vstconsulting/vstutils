@@ -2,7 +2,7 @@
  * Class, that manages manipulations with Local Storage.
  * It is used for saving some users local settings to the one property(object) of Local Storage.
  */
-import signals from '../signals.js';
+import { signals } from '@/vstutils/signals';
 
 export class LocalSettings {
     /**

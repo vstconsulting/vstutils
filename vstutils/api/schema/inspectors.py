@@ -187,6 +187,8 @@ class DynamicJsonTypeFieldInspector(FieldInspector):
 
         else:
             field_format = FORMAT_DYN
+            if field.source_view:
+                options['source_view'] = field.source_view
             options['choices'] = field.choices
             options['types'] = {}
             for name, field_type in field.types.items():

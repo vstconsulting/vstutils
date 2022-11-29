@@ -1,9 +1,10 @@
 import type { Vue } from 'vue/types/vue';
 import type { ComponentOptions } from 'vue';
+import type VueRouter from 'vue-router';
+
 import Centrifuge from 'centrifuge';
 import { defineStore } from 'pinia';
 import VueI18n from 'vue-i18n';
-import type VueRouter from 'vue-router';
 
 import { ActionsManager } from '@/vstutils/actions';
 import { apiConnector, ApiConnector, openapi_dictionary } from '@/vstutils/api';
@@ -17,7 +18,13 @@ import { Model, ModelsResolver } from '@/vstutils/models';
 import { ErrorHandler } from '@/vstutils/popUp';
 import { QuerySetsResolver } from '@/vstutils/querySet';
 import { RouterConstructor } from '@/vstutils/router';
-import { APP_CREATED, signals } from '@/vstutils/signals';
+import {
+    APP_AFTER_INIT,
+    APP_BEFORE_INIT,
+    APP_CREATED,
+    SCHEMA_MODELS_CREATED,
+    signals,
+} from '@/vstutils/signals';
 import {
     createLocalSettingsStore,
     createUserSettingsStore,
@@ -29,9 +36,10 @@ import {
 } from '@/vstutils/store';
 import { i18n } from '@/vstutils/translation';
 import * as utils from '@/vstutils/utils';
-import { PageNewView, ListView, PageView, View, ViewConstructor, ViewsTree } from '@/vstutils/views';
+import { ListView, PageNewView, PageView, View, ViewConstructor, ViewsTree } from '@/vstutils/views';
 
 import type { Cache } from '@/cache';
+import { GlobalStoreInitialized } from './store/globalStore';
 
 export function getCentrifugoClient(address?: string, token?: string) {
     if (!address) {
@@ -99,6 +107,7 @@ export interface IAppInitialized extends IApp {
     localSettingsStore: LocalSettingsStore;
     localSettingsModel: typeof Model;
     viewsTree: ViewsTree;
+    store: GlobalStoreInitialized;
 }
 
 export class App implements IApp {
@@ -273,7 +282,7 @@ export class App implements IApp {
         for (const name of Object.keys(this.config.schema.definitions)) {
             this.modelsResolver.byReferencePath(`#/definitions/${name}`);
         }
-        signals.emit('allModels.created', { models: this.modelsResolver._definitionsModels });
+        signals.emit(SCHEMA_MODELS_CREATED, { app: this, models: this.modelsResolver._definitionsModels });
     }
 
     changeAppRootComponent(component: ComponentOptions<Vue>) {
@@ -388,7 +397,7 @@ export class App implements IApp {
      * Method, that creates store and router for an application and mounts it to DOM.
      */
     prepare() {
-        signals.emit('app.beforeInit', { app: this });
+        signals.emit(APP_BEFORE_INIT, { app: this });
 
         this.prepareViewsModelsFields();
         this.initLocalSettings();
@@ -422,7 +431,7 @@ export class App implements IApp {
             i18n: this.i18n,
         });
         this.application = this.rootVm;
-        signals.emit('app.afterInit', { app: this });
+        signals.emit(APP_AFTER_INIT, { app: this });
         utils.__setApp(this as unknown as IAppInitialized);
     }
 
