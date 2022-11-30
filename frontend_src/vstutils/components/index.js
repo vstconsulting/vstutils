@@ -6,7 +6,6 @@ import * as widgets from './widgets';
 
 export { common, items, list, page, widgets };
 
-import AddChildModal from './list/AddChildModal.vue';
 import BootstrapModal from './BootstrapModal.vue';
 import Card from './Card.vue';
 import EmptyComponent from './EmptyComponent.ts';
@@ -15,13 +14,4 @@ import { BaseViewMixin } from './BaseViewMixin.ts';
 import TagsSelector from './TagsSelector.vue';
 import ErrorPage from './ErrorPage.vue';
 
-export {
-    AddChildModal,
-    BaseViewMixin,
-    BootstrapModal,
-    Card,
-    EmptyComponent,
-    ErrorPage,
-    Popover,
-    TagsSelector,
-};
+export { BaseViewMixin, BootstrapModal, Card, EmptyComponent, ErrorPage, Popover, TagsSelector };

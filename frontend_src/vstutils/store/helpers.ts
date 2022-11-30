@@ -312,7 +312,7 @@ export interface PaginationItem {
     page?: number;
     text?: string;
     disabled?: boolean;
-    icon?: string;
+    icon?: string | string[];
     onClick?: () => void;
 }
 
