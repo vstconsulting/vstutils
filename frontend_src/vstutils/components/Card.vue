@@ -23,14 +23,15 @@
         <div class="card-body" :class="cardBodyClasses" style="display: block">
             <slot />
         </div>
-        <div v-if="loading" class="overlay dark">
-            <i class="fas fa-2x fa-spin fa-sync-alt" />
-        </div>
+        <OverlayLoader v-if="loading" />
     </div>
 </template>
 
 <script>
+    import OverlayLoader from '@/vstutils/components/OverlayLoader.vue';
+
     export default {
+        components: { OverlayLoader },
         props: {
             title: { type: String, default: '' },
             collapsable: { type: Boolean, default: false },

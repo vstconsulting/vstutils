@@ -7,11 +7,11 @@
                 class="page-item"
                 :class="{ disabled: item.disabled }"
             >
-                <router-link v-if="item.page" class="page-link" :to="location(item.page)">
+                <router-link v-if="!useEmits && item.page" class="page-link" :to="location(item.page)">
                     <span v-if="item.icon"><i :class="item.icon" /></span>
                     {{ item.text }}
                 </router-link>
-                <a v-else class="page-link" href="#" @click.prevent="item.onClick">
+                <a v-else class="page-link" href="#" @click.prevent="clickHandler(item)">
                     <span v-if="item.icon"><i :class="item.icon" /></span>
                     {{ item.text }}
                 </a>
@@ -23,10 +23,10 @@
 <script setup lang="ts">
     import type { Location } from 'vue-router';
     import { useRoute } from 'vue-router/composables';
-
-    const route = useRoute();
+    import type { PaginationItem } from '@/vstutils/store';
 
     defineProps<{
+        useEmits?: boolean;
         items?: {
             page?: number;
             text?: string;
@@ -35,6 +35,20 @@
             onClick?: () => void;
         }[];
     }>();
+    const emit = defineEmits<{
+        (e: 'open-page', page: number): void;
+    }>();
+
+    const route = useRoute();
+
+    function clickHandler(item: PaginationItem) {
+        if (item.onClick) {
+            item.onClick();
+        }
+        if (item.page) {
+            emit('open-page', item.page);
+        }
+    }
 
     function location(page: number): Location {
         return {
