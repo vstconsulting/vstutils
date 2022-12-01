@@ -53,11 +53,15 @@ export function createApp({ schema = testSchema } = {}) {
     const loadSettings = app.loadSettings;
     app.loadSettings = () => Promise.resolve({});
 
+    const bulkQuery = app.api.bulkQuery;
+    app.api.bulkQuery = () => Promise.resolve({});
+
     return app.start().then(() => {
         app.translationsManager.loadLanguages = loadLanguages;
         app.translationsManager.loadTranslations = loadTranslations;
         app.api.loadUser = loadUser;
         app.loadSettings = loadSettings;
+        app.api.bulkQuery = bulkQuery;
         return app;
     });
 }

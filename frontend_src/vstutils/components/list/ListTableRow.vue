@@ -13,7 +13,13 @@
             :class="tableColumnClasses(field)"
             @click="$emit('row-clicked', instance)"
         >
-            <component :is="field.component" :field="field" :data="data" type="list" />
+            <component
+                :is="field.component"
+                :field="field"
+                :data="sandbox"
+                type="list"
+                @set-value="setFieldValue"
+            />
         </td>
         <td v-if="showOperations" class="column column-actions" style="text-align: center">
             <BootstrapModal
@@ -125,6 +131,7 @@
             return {
                 formatPath,
                 tableColumnClasses,
+                sandbox: {},
             };
         },
         computed: {
@@ -135,7 +142,7 @@
                 return this.instance.getPkValue();
             },
             classesFromFields() {
-                return classesFromFields(this.fields, this.data);
+                return classesFromFields(this.fields, this.sandbox);
             },
             classes() {
                 const classes = this.isSelected ? ['selected'] : [];
@@ -143,9 +150,6 @@
             },
             base_url() {
                 return this.$route.path.replace(/\/$/g, '');
-            },
-            data() {
-                return this.instance._getRepresentData();
             },
             openInNewWindow() {
                 return false;
@@ -155,6 +159,12 @@
             },
         },
         watch: {
+            instance: {
+                handler(instance) {
+                    this.sandbox = instance._getRepresentData();
+                },
+                immediate: true,
+            },
             isSelected: {
                 handler(val) {
                     if (!this.multiActionsClasses) return;
@@ -165,6 +175,9 @@
             },
         },
         methods: {
+            setFieldValue({ field, value }) {
+                this.sandbox[field] = value;
+            },
             createActionClickHandler(callback, action) {
                 callback();
                 this.$nextTick(() => {

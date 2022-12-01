@@ -1,11 +1,24 @@
 import { expect, test } from '@jest/globals';
+import { makeModel, Model } from '@/vstutils/models';
+import { StringField } from '@/vstutils/fields/text';
+import { IntegerField } from '@/vstutils/fields/numbers/integer';
 import { createPinia } from 'pinia';
 import { createLocalSettingsStore } from './../localSettingsStore.ts';
 
 test('localSettings module', () => {
     const storage = window.sessionStorage;
 
-    const store = createLocalSettingsStore(storage, 'test')(createPinia());
+    const Settings = makeModel(
+        class extends Model {
+            static declaredFields = [
+                new StringField({ name: 'val1', required: false, type: 'string' }),
+                new IntegerField({ format: 'integer', name: 'val2', required: false, type: 'number' }),
+            ];
+        },
+        'Settings',
+    );
+
+    const store = createLocalSettingsStore(storage, 'test', Settings)(createPinia());
 
     storage.setItem('test', JSON.stringify({ val1: 1, val2: 2 }));
 
