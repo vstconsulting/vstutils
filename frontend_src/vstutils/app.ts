@@ -218,7 +218,13 @@ export class App implements IApp {
             this.centrifugoClient.connect();
         }
 
-        const userSettingsModel = this.modelsResolver.byReferencePath('#/definitions/_UserSettings');
+        let userSettingsModel: typeof Model;
+        try {
+            userSettingsModel = this.modelsResolver.byReferencePath('#/definitions/_UserSettings');
+        } catch (e) {
+            console.error('Cannot find user settings model', e);
+            userSettingsModel = this.modelsResolver.bySchemaObject({});
+        }
         this.userSettingsStore = createUserSettingsStore(this.api, userSettingsModel)(pinia);
 
         const [languages, translations, rawUser] = await Promise.all([

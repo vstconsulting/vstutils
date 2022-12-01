@@ -1,7 +1,7 @@
 import { Model } from '@/vstutils/models';
+import { signals } from '@/vstutils/signals';
 import { defineStore } from 'pinia';
 import type { ApiConnector } from '../api';
-import { onAppAfterInit } from '../signals';
 import { mergeDeep, HttpMethods } from './../utils';
 
 type Section = Record<string, unknown>;
@@ -70,7 +70,7 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: typeof Mo
                     method: HttpMethods.GET,
                     path: USER_SETTINGS_PATH,
                 });
-                onAppAfterInit(() => {
+                signals.once('app.afterInit', () => {
                     this.setData(data);
                 });
             },

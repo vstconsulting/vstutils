@@ -70,6 +70,7 @@
             },
 
             isSameValues(first, second) {
+                if ((typeof first === 'object') !== (typeof second === 'object')) return false;
                 return this.field.getValueFieldValue(first) === this.field.getValueFieldValue(second);
             },
 

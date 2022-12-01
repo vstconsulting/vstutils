@@ -1,6 +1,12 @@
 <template>
     <div class="field-component" :class="wrapperClasses">
-        <field_list_view v-if="type === 'list'" :value="value" :field="field" :data="data" />
+        <field_list_view
+            v-if="type === 'list'"
+            :value="value"
+            :field="field"
+            :data="data"
+            @set-value="setValue"
+        />
         <template v-else>
             <FieldLabel
                 v-if="!hideTitle"

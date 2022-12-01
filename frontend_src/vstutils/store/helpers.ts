@@ -100,24 +100,6 @@ export function useParentViews() {
     };
 }
 
-export function useModelSandbox(instance: Ref<Model | null>) {
-    const sandbox = ref<Record<string, unknown>>({});
-
-    function setFieldValue({ field, value }: { field: string; value: unknown }) {
-        set(sandbox.value, field, value);
-    }
-
-    watch(
-        instance,
-        (newInstance) => {
-            sandbox.value = newInstance ? newInstance._getRepresentData() : {};
-        },
-        { immediate: true },
-    );
-
-    return { sandbox, setFieldValue };
-}
-
 export interface InstancesList extends Array<Model> {
     extra?: {
         count?: number;
@@ -274,7 +256,7 @@ export const useSelection = (instances: Ref<Model[]>) => {
 
     const allSelected = computed(() =>
         instances.value.every((instance) =>
-            selection.value.includes(instance.getPkValue() as number | string),
+            selection.value.includes(instance.getPkValue() as string | number),
         ),
     );
 
@@ -451,13 +433,18 @@ export const PAGE_WITH_INSTANCE = () => {
     const app = getApp();
 
     const instance = shallowRef<Model | null>(null);
-    const { sandbox, setFieldValue } = useModelSandbox(instance);
+    const sandbox = ref<Record<string, any>>({});
     const providedInstance = computed<Model | undefined>(
         () => app.rootVm.$route.params.providedInstance as unknown as Model | undefined,
     );
 
     function setInstance(newInstance: Model) {
         instance.value = newInstance;
+        sandbox.value = instance.value._getRepresentData();
+    }
+
+    function setFieldValue({ field, value }: { field: string; value: unknown }) {
+        set(sandbox.value, field, value);
     }
 
     return { instance, sandbox, providedInstance, setInstance, setFieldValue };
