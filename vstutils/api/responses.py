@@ -22,8 +22,6 @@ class BaseResponseClass(response.Response):
     :vartype timings: int,None
     """
 
-    __slots__ = ('data', 'timings')
-
     def __init__(self, *args, **kwargs):
         self.timings = kwargs.pop('timings', None)
         super().__init__(*args, **kwargs)
@@ -38,6 +36,6 @@ for __status_name in filter(__status_name_filter, dir(status)):
     __globals[__response_name] = type(
         __response_name,
         (BaseResponseClass,),
-        {"status_code": __status_code, "__slots__": ()}
+        {"status_code": __status_code}
     )
     __globals[__http_response_name] = __globals[__response_name]

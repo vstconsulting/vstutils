@@ -13,6 +13,8 @@ logger = getLogger('vstutils')
 
 
 class BaseStaticObjectHandler:
+    __slots__ = ('name', 'priority')
+
     def __init__(self, name, priority=254):
         self.name = name
         self.priority = priority
@@ -31,6 +33,8 @@ class SPAStaticObjectHandler(BaseStaticObjectHandler):
 
 
 class WebpackJsonStaticObjectHandler(BaseStaticObjectHandler):
+    __slots__ = ('json_file', 'prefix', 'entrypoint_name', '__dict__')
+
     def __init__(self, *args, **kwargs):
         self.json_file = kwargs.pop('json_file', str(Path(settings.VSTUTILS_DIR)/'static/bundle/output.json'))
         self.prefix = kwargs.pop('prefix', str(Path(self.json_file.split('/static/')[-1]).parent))

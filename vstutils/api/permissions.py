@@ -6,7 +6,6 @@ from ..utils import raise_context
 
 
 class IsAuthenticatedOpenApiRequest(permissions.IsAuthenticated):
-    __slots__ = ()
 
     def is_openapi(self, request):
         return (
@@ -20,7 +19,6 @@ class IsAuthenticatedOpenApiRequest(permissions.IsAuthenticated):
 
 
 class SuperUserPermission(IsAuthenticatedOpenApiRequest):
-    __slots__ = ()
 
     def has_permission(self, request, view):
         if request.user.is_staff or request.method in permissions.SAFE_METHODS:
@@ -42,4 +40,4 @@ class SuperUserPermission(IsAuthenticatedOpenApiRequest):
 
 
 class StaffPermission(permissions.IsAdminUser):
-    __slots__ = ()
+    pass

@@ -50,7 +50,6 @@ class BQuerySet(models.QuerySet):
     (class inherited from :class:`django.db.models.sql.query.Query`).
     """
 
-    __slots__ = ('__iterable_class__',)
     use_for_related_fields = True
     custom_query_class = None
 
