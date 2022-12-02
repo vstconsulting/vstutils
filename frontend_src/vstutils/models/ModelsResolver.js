@@ -34,7 +34,7 @@ export class ModelsResolver {
     /**
      * Resolves model by reference path
      * @param {string} reference
-     * @return {Function|undefined}
+     * @return {typeof Model}
      */
     byReferencePath(reference) {
         const name = reference.split('/').pop();

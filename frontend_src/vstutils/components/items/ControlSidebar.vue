@@ -140,13 +140,13 @@
                 this.userSettings.setValue({
                     section,
                     key: field.name,
-                    value: field.toInner({ [field.name]: value }),
+                    value,
                 });
             },
             setLocalSetting(field, value) {
                 this.localSettings.setValue({
                     key: field.name,
-                    value: field.toInner({ [field.name]: value }),
+                    value,
                 });
             },
             cleanAllCache() {

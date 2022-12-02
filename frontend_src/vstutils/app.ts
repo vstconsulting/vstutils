@@ -85,7 +85,7 @@ export interface IApp {
     views: Map<string, View>;
 
     store: GlobalStore;
-    userSettingsStore: UserSettingsStore;
+    userSettingsStore?: UserSettingsStore;
 
     localSettingsStore: LocalSettingsStore | null;
     localSettingsModel: typeof Model | null;
@@ -106,6 +106,7 @@ export interface IAppInitialized extends IApp {
     rootVm: IAppRoot;
     localSettingsStore: LocalSettingsStore;
     localSettingsModel: typeof Model;
+    userSettingsStore: UserSettingsStore;
     viewsTree: ViewsTree;
     store: GlobalStoreInitialized;
 }
@@ -141,7 +142,7 @@ export class App implements IApp {
     views = new Map<string, View>();
 
     store: GlobalStore;
-    userSettingsStore: UserSettingsStore;
+    userSettingsStore?: UserSettingsStore;
 
     localSettingsStore: LocalSettingsStore | null = null;
     localSettingsModel: typeof Model | null;
@@ -207,7 +208,6 @@ export class App implements IApp {
         /** @type {QuerySetsResolver} */
         this.qsResolver = null;
 
-        this.userSettingsStore = createUserSettingsStore(this.api)(pinia);
         this.store = defineStore('global', GLOBAL_STORE)(pinia);
 
         this.autoUpdateController = new AutoUpdateController(
@@ -222,20 +222,25 @@ export class App implements IApp {
         signals.emit(APP_CREATED, this);
     }
 
-    loadSettings() {
-        return this.userSettingsStore.load();
-    }
-
     async start() {
         if (this.centrifugoClient) {
             this.centrifugoClient.connect();
         }
 
+        let userSettingsModel: typeof Model;
+        try {
+            userSettingsModel = this.modelsResolver.byReferencePath('#/definitions/_UserSettings');
+        } catch (e) {
+            console.error('Cannot find user settings model', e);
+            userSettingsModel = this.modelsResolver.bySchemaObject({});
+        }
+        this.userSettingsStore = createUserSettingsStore(this.api, userSettingsModel)(pinia);
+
         const [languages, translations, rawUser] = await Promise.all([
             this.translationsManager.getLanguages(),
             this.translationsManager.getTranslations(this.i18n.locale),
             this.api.loadUser(),
-            this.loadSettings(),
+            this.userSettingsStore.init(),
         ]);
         this.languages = languages;
         this.i18n.messages[this.i18n.locale] = translations;
@@ -253,7 +258,7 @@ export class App implements IApp {
 
         this.global_components.registerAll(this.vue);
 
-        this.prepare();
+        return this.prepare();
     }
 
     getCurrentViewPath(this: IAppInitialized) {
@@ -389,7 +394,11 @@ export class App implements IApp {
 
     initLocalSettings() {
         this.localSettingsModel = this.modelsResolver.bySchemaObject({}, '_LocalSettings');
-        this.localSettingsStore = createLocalSettingsStore(window.localStorage, 'localSettings')(pinia);
+        this.localSettingsStore = createLocalSettingsStore(
+            window.localStorage,
+            'localSettings',
+            this.localSettingsModel,
+        )(pinia);
         this.localSettingsStore.load();
     }
 
