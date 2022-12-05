@@ -18,6 +18,7 @@ from unittest.mock import patch, PropertyMock
 from collections import OrderedDict
 
 import ormsgpack
+import pytz
 from bs4 import BeautifulSoup
 from django import VERSION as django_version
 from django.conf import settings
@@ -592,6 +593,16 @@ class VSTUtilsTestCase(BaseTestCase):
                     list(map(lambda x: x.count(), result)),
                     [2, 3, 6, 7]
                 )
+
+    def test_patching_field_defaults(self):
+        User = self.get_model_class('auth.User')
+        date = datetime.datetime(2022, 8, 1).astimezone(pytz.timezone(settings.TIME_ZONE))
+
+        with self.patch_field_default(User, 'date_joined', date):
+            user = User.objects.create_superuser(username='test username', email='test@taes.cn', password='qwerty')
+
+        user.delete()
+        self.assertEqual(user.date_joined, date)
 
     def test_deep_nested_with_filters(self):
         GroupWithFK = self.get_model_class('test_proj.GroupWithFK')

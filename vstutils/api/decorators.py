@@ -580,7 +580,6 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         view_class = utils.get_if_lazy(self.view)
 
         class NestedView(mixin_class, view_class):  # type: ignore
-            __slots__ = ('nested_detail',)  # pylint: disable=class-variable-slots-conflict
             __doc__ = self.view.__doc__
             format_kwarg = None
             queryset_filters = self.queryset_filters

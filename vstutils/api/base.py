@@ -166,7 +166,6 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
 
 
 class AutoSchema(DRFAutoSchema):
-    __slots__ = ()
 
     def get_description(self, path: _t.Text, method: _t.Text) -> _t.Text:
         # pylint: disable=simplifiable-if-statement,redefined-outer-name
@@ -214,7 +213,6 @@ class QuerySetMixin(rvs.APIView):
     """
     Instance REST operations.
     """
-    __slots__ = ()
     queryset: _t.Optional[_t.Union[QuerySet, models.Manager]]
     _queryset: _t.Optional[_t.Union[QuerySet, models.Manager]] = None
     model: _t.Optional[_t.Type[models.Model]] = None
@@ -259,7 +257,6 @@ class QuerySetMixin(rvs.APIView):
 
 
 class GenericViewSetMeta(type(vsets.GenericViewSet)):  # type: ignore
-    __slots__ = ()
 
     def __new__(mcs, name, bases, attrs):
         new_class = super().__new__(mcs, name, bases, attrs)
@@ -527,7 +524,6 @@ class CachableHeadMixin(GenericViewSet):
 class CopyMixin(GenericViewSet):
     """ Mixin for viewsets which adds `copy` endpoint to view. """
 
-    __slots__ = ()
     #: Value of prefix which will be added to new instance name.
     copy_prefix = 'copy-'
     #: Name of field which will get a prefix.
@@ -572,7 +568,6 @@ class FileResponseRetrieveMixin(GenericViewSet):
         .. literalinclude:: ../test_src/test_proj/models/files.py
            :lines: 1-22,59-77
     """
-    __slots__ = ()
 
     instance_field_data: _t.Text
     instance_field_filename: _t.Text = 'filename'
@@ -654,11 +649,8 @@ class ModelViewSet(GenericViewSet, vsets.ModelViewSet):
 
     """
 
-    __slots__ = ()
-
 
 class NonModelsViewSet(GenericViewSet):
-    __slots__ = ()
     base_name = None
 
     def get_queryset(self) -> QuerySet:
@@ -667,7 +659,6 @@ class NonModelsViewSet(GenericViewSet):
 
 class ListNonModelViewSet(NonModelsViewSet, drf_mixins.ListModelMixin):
     # pylint: disable=abstract-method
-    __slots__ = ()
     schema = None  # type: ignore
 
     @property
@@ -696,7 +687,6 @@ class ReadOnlyModelViewSet(GenericViewSet, vsets.ReadOnlyModelViewSet):
     Default viewset like vstutils.api.base.ModelViewSet for readonly models.
     Inherited from :class:`.GenericViewSet`.
     """
-    __slots__ = ()
 
 
 class ListOnlyModelViewSet(GenericViewSet, drf_mixins.ListModelMixin):
@@ -704,7 +694,6 @@ class ListOnlyModelViewSet(GenericViewSet, drf_mixins.ListModelMixin):
     Default viewset like vstutils.api.base.ModelViewSet for list only models.
     Inherited from :class:`.GenericViewSet`.
     """
-    __slots__ = ()
 
 
 class HistoryModelViewSet(ReadOnlyModelViewSet, drf_mixins.DestroyModelMixin):
@@ -713,4 +702,3 @@ class HistoryModelViewSet(ReadOnlyModelViewSet, drf_mixins.DestroyModelMixin):
     (allow to delete, but can't create and update).
     Inherited from :class:`.GenericViewSet`.
     """
-    __slots__ = ()
