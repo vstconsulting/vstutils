@@ -1,4 +1,5 @@
 export * from './types';
+export * from './composables';
 export * from './BaseField';
 import BaseFieldContentEdit from './BaseFieldContentEdit.vue';
 import BaseFieldContentMixin from './BaseFieldContentMixin.js';
@@ -7,6 +8,7 @@ import BaseFieldInnerComponentMixin from './BaseFieldInnerComponentMixin.js';
 import BaseFieldLabel from './BaseFieldLabel.vue';
 import BaseFieldListView from './BaseFieldListView.vue';
 import BaseFieldMixin from './BaseFieldMixin.vue';
+import FieldReadonlyValue from './FieldReadonlyValue.vue';
 
 export {
     BaseFieldContentEdit,
@@ -16,4 +18,5 @@ export {
     BaseFieldLabel,
     BaseFieldListView,
     BaseFieldMixin,
+    FieldReadonlyValue,
 };

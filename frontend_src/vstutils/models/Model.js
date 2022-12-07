@@ -150,7 +150,7 @@ export function makeModel(cls, name) {
 export class Model {
     /** @type {Array<BaseField>} */
     static declaredFields = [];
-    /** @type {Object<string, string[]>} */
+    /** @type {Object<string, string[]>|null} */
     static fieldsGroups = null;
     /** @type {string|null} */
     static viewFieldName = null;
@@ -181,6 +181,16 @@ export class Model {
     }
 
     /**
+     * @param {Record<string, unknown>} data
+     * @return {Model}
+     */
+    static fromRepresentData(data) {
+        const instance = new this();
+        instance._validateAndSetData(data);
+        return instance;
+    }
+
+    /**
      * @param {Record<string, unknown>} representData
      * @return {Record<string, unknown>}
      */
@@ -193,6 +203,18 @@ export class Model {
             }
         }
         return data;
+    }
+
+    /**
+     * @param {Record<string, unknown>} data
+     * @return {Record<string, unknown>}
+     */
+    static innerToRepresent(data) {
+        const representData = {};
+        for (const [name, field] of this.fields) {
+            representData[name] = field.toRepresent(data);
+        }
+        return representData;
     }
 
     /**

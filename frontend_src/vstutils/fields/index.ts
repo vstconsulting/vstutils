@@ -12,7 +12,7 @@ import * as dynamic from './dynamic';
 import * as files from './files';
 import * as fk from './fk';
 import * as json from './json';
-import * as nestedObject from './nested-object.js';
+import * as nestedObject from './nested-object';
 import * as numbers from './numbers';
 import * as password from './password';
 import * as text from './text';

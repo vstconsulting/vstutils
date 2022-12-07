@@ -43,7 +43,7 @@
     import BaseFieldContentReadonlyMixin from './BaseFieldContentReadonlyMixin.vue';
     import BaseFieldContentEdit from './BaseFieldContentEdit.vue';
     import BaseFieldListView from './BaseFieldListView.vue';
-    import { FieldComponentProps } from './types';
+    import { FieldPropsDef } from './types';
 
     export default {
         name: 'BaseFieldMixin',
@@ -65,7 +65,7 @@
              */
             field_list_view: BaseFieldListView,
         },
-        props: FieldComponentProps,
+        props: FieldPropsDef,
         data() {
             return {
                 wrapper_classes_list: {
