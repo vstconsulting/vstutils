@@ -564,6 +564,8 @@ class ArrayFilterQueryInspector(CoreAPICompatInspector):
            field.name in ('id', 'id__not') and \
            isinstance(self.fields_map.get(field.name.split('__')[0]), (models.AutoField, models.IntegerField)):
             schema_type = openapi.TYPE_INTEGER
+        if field.name == 'ordering' and hasattr(schema_field, 'enum'):
+            schema_field.format = 'ordering_choices'
 
         return openapi.Parameter(
             name=field.name,

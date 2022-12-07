@@ -1728,6 +1728,11 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertTrue(api['paths']['/hosts/{id}/hosts/{hosts_id}/test/']['post']['x-require-confirmation'])
         self.assertEqual(api['paths']['/hosts/{id}/']['get']['x-subscribe-labels'], ['test_proj.HostGroup'])
 
+        self.assertEqual(api['paths']['/hosts/']['get']['parameters'][2]['name'], 'ordering')
+        self.assertEqual(api['paths']['/hosts/']['get']['parameters'][2]['type'], 'array')
+        self.assertEqual(api['paths']['/hosts/']['get']['parameters'][2]['items']['type'], 'string')
+        self.assertEqual(api['paths']['/hosts/']['get']['parameters'][2]['items']['format'], 'ordering_choices')
+
         # Test list only view
         self.assertIn('/hosts_list/', api['paths'])
         self.assertNotIn('/hosts_list/{id}/', api['paths'])

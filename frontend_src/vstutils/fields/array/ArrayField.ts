@@ -9,7 +9,7 @@ import {
     FieldOptions,
     FieldXOptions,
 } from '@/vstutils/fields/base';
-import { ChoicesField } from '@/vstutils/fields/choices';
+import { ChoicesField, OrderingChoicesField } from '@/vstutils/fields/choices';
 import { FKField } from '@/vstutils/fields/fk/fk';
 import { NestedObjectField } from '@/vstutils/fields/nested-object';
 import { integer, NumberField } from '@/vstutils/fields/numbers';
@@ -45,6 +45,7 @@ export class ArrayField<TRealField extends Field = Field> extends BaseField<
 
     static CUSTOM_COMPONENTS = new Map<new (options: any) => Field, unknown>([
         [ChoicesField as unknown as new (options: any) => Field, ChoicesArrayFieldMixin],
+        [OrderingChoicesField as unknown as new (options: any) => Field, ChoicesArrayFieldMixin],
         [FKField, FKArrayFieldMixin],
         [StringField, StringArrayFieldMixin],
         [NumberField, NumberArrayFieldMixin],

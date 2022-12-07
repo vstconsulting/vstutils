@@ -87,6 +87,7 @@ export function addDefaultFields(fieldsResolver: FieldsResolver) {
         ['html', text.HTMLField],
         ['json', JSONField],
         ['masked', text.masked.MaskedField],
+        ['ordering_choices', choices.OrderingChoicesField],
         ['password', PasswordField],
         ['phone', text.phone.PhoneField],
         ['plain_text', text.PlainTextField],

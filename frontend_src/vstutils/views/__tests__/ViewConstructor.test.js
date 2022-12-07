@@ -10,6 +10,7 @@ import { createSchema } from '../../../unittests/schema';
 import { StringField } from '../../fields/text';
 import { ArrayField } from '../../fields/array';
 import { NumberField } from '../../fields/numbers';
+import { OrderingChoicesField } from '@/vstutils/fields/choices';
 import { createApp } from '../../../unittests/create-app';
 
 describe('ViewConstructor', () => {
@@ -378,4 +379,34 @@ test('detail view filters', async () => {
     expect(model.fields.get('number_array').itemField).toBeInstanceOf(NumberField);
 
     expect(app.views.get('/without_filters/{id}/').filtersModelClass).toBeNull();
+});
+
+test('ordering filter field', async () => {
+    const schema = createSchema({
+        paths: {
+            '/some_list/': {
+                get: {
+                    operationId: 'some_list',
+                    parameters: [
+                        {
+                            name: 'ordering',
+                            in: 'query',
+                            type: 'array',
+                            collectionFormat: 'csv',
+                            items: {
+                                type: 'string',
+                                format: 'ordering_choices',
+                                enum: ['id', '-id'],
+                            },
+                        },
+                    ],
+                    responses: { 200: {} },
+                },
+            },
+        },
+    });
+    const app = await createApp({ schema });
+    const view = app.views.get('/some_list/');
+    expect(view.filters.ordering).toBeInstanceOf(ArrayField);
+    expect(view.filters.ordering.itemField).toBeInstanceOf(OrderingChoicesField);
 });
