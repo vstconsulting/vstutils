@@ -3,6 +3,7 @@ TRANSLATION = {
     'new': 'Mới',
     'Create': 'Tạo',
     'add': 'thêm',
+    'Add': 'cộng',
     'Edit': 'Chỉnh sửa',
     'edit': 'Chỉnh sửa',
     'Save': 'lưu',

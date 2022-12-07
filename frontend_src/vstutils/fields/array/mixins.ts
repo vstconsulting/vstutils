@@ -1,10 +1,20 @@
 import { set, defineComponent, PropType, h } from 'vue';
-import { BaseFieldMixin } from '@/vstutils/fields/base';
+import { BaseFieldMixin, Field } from '@/vstutils/fields/base';
 import ArrayFieldEdit from './ArrayFieldEdit.vue';
 import ArrayField from './ArrayField';
 import { VNode } from 'vue';
 
-const NOT_INLINE_FIELDS = ['array', 'nested-object', 'textarea', 'uri'];
+const NOT_INLINE_FIELDS = ['textarea', 'uri'];
+
+function isInline(field: Field) {
+    if (field.type === 'object' || field.type === 'array') {
+        return false;
+    }
+    if (field.format && NOT_INLINE_FIELDS.includes(field.format)) {
+        return false;
+    }
+    return true;
+}
 
 function createReadOnlyComponent(type: string) {
     return defineComponent({
@@ -54,12 +64,9 @@ function createReadOnlyComponent(type: string) {
                 );
             }
 
-            return () => {
-                if (NOT_INLINE_FIELDS.includes(props.field.itemField!.format!)) {
-                    return renderBlocks(props.value);
-                }
-                return renderInline(props.value);
-            };
+            return isInline(props.field.itemField!)
+                ? () => renderInline(props.value)
+                : () => renderBlocks(props.value);
         },
     });
 }

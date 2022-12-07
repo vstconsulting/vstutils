@@ -1,9 +1,17 @@
 import { ParameterCollectionFormat } from 'swagger-schema-official';
 import { ComponentOptions } from 'vue';
 
-import { BaseField, Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import {
+    BaseField,
+    ExtractInner,
+    ExtractRepresent,
+    Field,
+    FieldOptions,
+    FieldXOptions,
+} from '@/vstutils/fields/base';
 import { ChoicesField } from '@/vstutils/fields/choices';
 import { FKField } from '@/vstutils/fields/fk/fk';
+import { NestedObjectField } from '@/vstutils/fields/nested-object';
 import { integer, NumberField } from '@/vstutils/fields/numbers';
 import { StringField } from '@/vstutils/fields/text';
 import { onAppBeforeInit } from '@/vstutils/signals';
@@ -11,6 +19,7 @@ import { createPropertyProxy } from '@/vstutils/utils';
 
 import { ChoicesArrayFieldMixin } from './custom/choices';
 import { FKArrayFieldMixin } from './custom/fk';
+import { NestedObjectArrayFieldMixin } from './custom/nested-object';
 import { IntegerArrayFieldMixin, NumberArrayFieldMixin } from './custom/number';
 import { StringArrayFieldMixin } from './custom/string';
 import { ArrayFieldMixin } from './mixins';
@@ -22,10 +31,11 @@ export interface ArrayFieldXOptions extends FieldXOptions {
     'x-collectionFormat'?: ParameterCollectionFormat;
 }
 
-type TInner = string | unknown[];
-type TRepresent = unknown[];
-
-export class ArrayField extends BaseField<TInner, TRepresent, ArrayFieldXOptions> {
+export class ArrayField<TRealField extends Field = Field> extends BaseField<
+    ExtractInner<TRealField>[] | string,
+    ExtractRepresent<TRealField>[],
+    ArrayFieldXOptions
+> {
     static SEPARATORS = new Map<ParameterCollectionFormat, string>([
         ['csv', ','],
         ['ssv', ' '],
@@ -39,6 +49,7 @@ export class ArrayField extends BaseField<TInner, TRepresent, ArrayFieldXOptions
         [StringField, StringArrayFieldMixin],
         [NumberField, NumberArrayFieldMixin],
         [integer.IntegerField, IntegerArrayFieldMixin],
+        [NestedObjectField, NestedObjectArrayFieldMixin],
     ]);
 
     collectionFormat?: ParameterCollectionFormat;
@@ -47,9 +58,9 @@ export class ArrayField extends BaseField<TInner, TRepresent, ArrayFieldXOptions
     maxItems: number;
     uniqueItems: boolean;
 
-    itemField?: Field;
+    itemField?: TRealField;
 
-    constructor(options: FieldOptions<ArrayFieldXOptions, TInner>) {
+    constructor(options: FieldOptions<ArrayFieldXOptions, ExtractInner<TRealField>[]>) {
         super(options);
         this.collectionFormat = options.collectionFormat || options['x-collectionFormat'];
         this.separator = this.collectionFormat ? ArrayField.SEPARATORS.get(this.collectionFormat) : undefined;
@@ -69,7 +80,7 @@ export class ArrayField extends BaseField<TInner, TRepresent, ArrayFieldXOptions
     }
 
     getEmptyValue() {
-        return [];
+        return [] as ExtractInner<TRealField>[];
     }
 
     prepareFieldForView(path: string) {
@@ -77,7 +88,7 @@ export class ArrayField extends BaseField<TInner, TRepresent, ArrayFieldXOptions
     }
 
     resolveItemField() {
-        this.itemField = this.app.fieldsResolver.resolveField(this.options.items!, this.name);
+        this.itemField = this.app.fieldsResolver.resolveField(this.options.items!, this.name) as TRealField;
         this.itemField.model = this.model;
 
         const customComponent = ArrayField.CUSTOM_COMPONENTS.get(
@@ -88,18 +99,18 @@ export class ArrayField extends BaseField<TInner, TRepresent, ArrayFieldXOptions
         }
     }
 
-    toInner(data: Record<string, unknown>): TInner | null | undefined {
-        let value = super.toInner(data) as TRepresent | null | undefined;
+    toInner(data: Record<string, unknown>): ExtractInner<TRealField>[] | string | null | undefined {
+        const value = super._getValueFromData(data) as ExtractRepresent<TRealField>[] | null | undefined;
         if (value) {
             if (value.length === 0) {
-                return this.separator ? '' : value;
+                return this.separator ? '' : (value as ExtractInner<TRealField>[]);
             }
             const dataCopy = Object.assign({}, data);
-            value = value.map((item) => {
+            const innerValues = value.map((item) => {
                 dataCopy[this.name] = item;
-                return String(this.itemField!.toInner(dataCopy));
+                return this.itemField!.toInner(dataCopy) as ExtractInner<TRealField>;
             });
-            return this.separator ? value.join(this.separator) : value;
+            return this.separator ? innerValues.map((v) => String(v)).join(this.separator) : innerValues;
         }
         return value;
     }
@@ -116,13 +127,13 @@ export class ArrayField extends BaseField<TInner, TRepresent, ArrayFieldXOptions
         return value as unknown[];
     }
 
-    toRepresent(data: Record<string, unknown>) {
+    toRepresent(data: Record<string, unknown>): ExtractRepresent<TRealField>[] | undefined | null {
         const value = this._deserializeValue(data);
         if (value) {
             const dataCopy = Object.assign({}, data);
             return value.map((item) => {
                 dataCopy[this.name] = item;
-                return this.itemField!.toRepresent(dataCopy);
+                return this.itemField!.toRepresent(dataCopy) as ExtractRepresent<TRealField>;
             });
         }
         return value;
@@ -165,6 +176,13 @@ export class ArrayField extends BaseField<TInner, TRepresent, ArrayFieldXOptions
                 true,
             );
         }
+    }
+
+    parseFieldError(errorData: unknown, instanceData: Record<string, unknown>): unknown[] | null {
+        if (Array.isArray(errorData)) {
+            return errorData.map((error) => this.itemField!.parseFieldError(error, instanceData));
+        }
+        return null;
     }
 }
 

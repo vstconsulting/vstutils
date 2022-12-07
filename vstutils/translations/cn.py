@@ -3,6 +3,7 @@ TRANSLATION = {
     "new": '新的',
     "Create": '建立',
     "add": '增加',
+    "Add": '添加',
     "Edit": '校对',
     "edit": '校对',
     "Save": '储存',

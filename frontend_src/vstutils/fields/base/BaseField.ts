@@ -9,8 +9,8 @@ import { IApp } from '@/vstutils/app';
 import { ComponentOptions } from 'vue';
 
 type ModelPropertyDescriptor<Represent> = PropertyDescriptor & {
-    get(this: Model): Represent;
-    set(this: Model, value: Represent): void;
+    get(this: Model): Represent | null | undefined;
+    set(this: Model, value: Represent | null | undefined): void;
 };
 
 type FieldsData = Record<string, unknown>;
@@ -74,7 +74,6 @@ export interface Field<
 
     redirect?: RedirectOptions;
 
-    validators: ((value: Represent) => void)[];
     model?: typeof Model;
 
     translateFieldName: string;
@@ -97,7 +96,7 @@ export interface Field<
 
     isSameValues(data1: FieldsData, data2: FieldsData): boolean;
 
-    parseFieldError(errorData: unknown, instanceData: FieldsData): string | Record<string, unknown>;
+    parseFieldError(errorData: unknown, instanceData: FieldsData): unknown;
 }
 
 export class BaseField<
@@ -237,7 +236,7 @@ export class BaseField<
     /**
      * Method, that converts field value from API to display form
      */
-    toRepresent(data: FieldsData): Represent {
+    toRepresent(data: FieldsData): Represent | null | undefined {
         return this._getValueFromData(data) as Represent;
     }
 
@@ -345,7 +344,7 @@ export class BaseField<
     isSameValues(data1: FieldsData, data2: FieldsData) {
         return deepEqual(this.toInner(data1), this.toInner(data2));
     }
-    parseFieldError(errorData: unknown, instanceData: FieldsData): string | Record<string, unknown> {
+    parseFieldError(errorData: unknown, instanceData: FieldsData): unknown | null {
         if (!errorData) {
             return '';
         }

@@ -72,6 +72,11 @@ export interface NotEmptyAction extends Action {
 
 type ViewType = keyof typeof ViewTypes;
 
+interface ResolveStateArgs {
+    route: Route;
+    store?: BaseViewStore;
+}
+
 interface ViewParams extends SwaggerOperation {
     operationId: string;
     level: number;
@@ -209,7 +214,7 @@ export class View implements IView {
             customDefinition(originalStoreDefinitionFactory(view)());
     }
 
-    resolveState(args: { route: Route; store?: BaseViewStore }): Promise<object> {
+    resolveState(args: ResolveStateArgs): Promise<object> {
         return Promise.resolve({});
     }
     getSavedState() {
@@ -369,6 +374,14 @@ export class PageView extends View implements IView<PageViewParams, DetailPageSt
         if (store) {
             return { instance: toRef(store, 'instance') };
         }
+
+        // If currently opened page is edit page and this view is parent of that edit page
+        // then we can use instance from store to avoid making extra request
+        const currentPageStore = getApp().store.page;
+        if (currentPageStore.view.isEditPage() && currentPageStore.view.parent === this) {
+            return { instance: toRef(currentPageStore as DetailPageStore, 'instance') };
+        }
+
         return {
             instance: ref(
                 (await this.objects
@@ -416,6 +429,8 @@ export class PageNewView extends View implements IView<PageNewParams> {
 export class PageEditView extends PageView implements IView<PageViewParams> {
     static viewType: ViewType = 'PAGE_EDIT';
 
+    // @ts-expect-error TODO PageEditView should not be inherited from PageView
+    parent: PageView | null = null;
     isEditStyleOnly = false;
     isPartial: boolean;
     hideReadonlyFields = true;
@@ -433,6 +448,11 @@ export class PageEditView extends PageView implements IView<PageViewParams> {
             return joinPaths(this.parent?.getRoutePath(), pathToArray(this.path).last);
         }
         return super.getRoutePath();
+    }
+
+    // @ts-expect-error TODO PageEditView should not be inherited from PageView
+    resolveState(args: ResolveStateArgs): Promise<object> {
+        return Promise.resolve({});
     }
 }
 

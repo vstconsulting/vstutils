@@ -2,7 +2,7 @@
     <p :id="label_id" class="text-muted field-label">
         <span class="field-name">{{ label }}</span>
         <Popover v-if="field.description" :content="$t(field.description)" />
-        <Popover v-if="error" link-text="!" :content="error" class="label-error-symbol" />
+        <Popover v-if="error" link-text="!" :content="content" class="label-error-symbol" />
     </p>
 </template>
 
@@ -17,11 +17,17 @@
         mixins: [BaseFieldInnerComponentMixin, FieldLabelIdMixin],
         props: {
             type: { type: String, required: true },
-            error: { type: [String, Object], default: null },
+            error: { type: [String, Object, Array], default: null },
         },
         computed: {
             label() {
                 return this.$t(this.field.title);
+            },
+            content() {
+                if (typeof this.error === 'string') {
+                    return this.error;
+                }
+                return '';
             },
         },
     };

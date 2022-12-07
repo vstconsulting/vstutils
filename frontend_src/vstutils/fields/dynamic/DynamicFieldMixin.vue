@@ -14,16 +14,11 @@
 <script lang="ts">
     import { computed, defineComponent, ref, watch } from 'vue';
     import { deepEqual } from '@/vstutils/utils';
-    import {
-        FieldComponentPropsType,
-        FieldComponentProps,
-        SetFieldValueOptions,
-        Field,
-    } from '@/vstutils/fields/base';
+    import { FieldPropsDefType, FieldPropsDef, SetFieldValueOptions, Field } from '@/vstutils/fields/base';
     import type { DynamicField } from './DynamicField';
 
     export default defineComponent({
-        props: FieldComponentProps as FieldComponentPropsType<DynamicField>,
+        props: FieldPropsDef as FieldPropsDefType<DynamicField>,
         setup(props, { emit }) {
             const savedValues = new WeakMap<Field, unknown>();
             const parentValues = computed(() => props.field._getParentValues(props.data));

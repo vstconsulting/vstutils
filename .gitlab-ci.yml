@@ -46,6 +46,14 @@ stages:
       when: on_success
     - when: never
 
+.js_tests_template: &branch_js_tests
+  <<: *branch_tests
+  image: vstconsulting/images:node
+  before_script:
+    - yarn install
+  script:
+    - yarn test
+
 code_style:
   <<: *branch_tests
   stage: code_standarts
@@ -53,13 +61,13 @@ code_style:
     TOX_ENVS: "flake,mypy,pylint,bandit  --parallel 3"
 
 js_style:
-  <<: *branch_tests
+  <<: *branch_js_tests
   stage: code_standarts
   cache:
     <<: *global_cache
     policy: pull-push
-  variables:
-    TOX_ENVS: "js_style"
+  script:
+    - yarn lint
 
 functional_test:
   <<: *branch_tests
@@ -72,11 +80,11 @@ functional_test:
           - py311-django32-coverage
 
 js_tests:
-  <<: *branch_tests
+  <<: *branch_js_tests
   needs: ["js_style"]
   coverage: '/^Statements\s*:\s*([^%]+)/'
-  variables:
-    TOX_ENVS: "js_tests"
+  script:
+    - yarn test
 
 
 pages:
