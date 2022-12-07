@@ -59,6 +59,7 @@ TRANSLATION = {
 
     # fields
     'Id': '标识符',
+    'id': '标识符',
     'ID': '标识符',
 
     # x-menu generic

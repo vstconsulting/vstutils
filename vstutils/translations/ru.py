@@ -59,6 +59,7 @@ TRANSLATION = {
 
     # fields
     'Id': 'Идентификатор',
+    'id': 'идентификатор',
     'ID': 'Идентификатор',
 
     # x-menu generic
