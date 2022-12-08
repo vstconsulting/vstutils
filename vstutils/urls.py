@@ -12,7 +12,7 @@ from rest_framework import permissions
 
 from .api.routers import MainRouter
 from .utils import URLHandlers
-from .api.views import HealthView
+from .api.views import HealthView, MetricsView
 
 
 def get_valid_url(*args):
@@ -27,6 +27,8 @@ class AdminLoginLogoutRedirectView(RedirectView):
 router = MainRouter(perms=(permissions.IsAuthenticated,))
 router.generate_routers(settings.API)
 router.register_view('health', HealthView.as_view({'get': 'list'}), 'health')
+if settings.ENABLE_METRICS_VIEW:
+    router.register_view('metrics', MetricsView.as_view({'get': 'list'}), 'metrics')
 
 
 admin.site.site_header = 'Admin panel'

@@ -311,6 +311,13 @@ The following variables from Django settings are also supported (with the corres
 * **use_x_forwarded_host** - :django_docs:`USE_X_FORWARDED_HOST <settings/#use-x-forwarded-host>`
 * **use_x_forwarded_port** - :django_docs:`USE_X_FORWARDED_PORT <settings/#use-x-forwarded-port>`
 
+The following settings affects prometheus metrics endpoint (which can be used for monitoring application):
+
+* **metrics_throttle_rate** - Count of requests to ``/api/metrics/`` endpoint. Default: ``120``.
+* **enable_metrics** - Enable/disable ``/api/metrics/`` endpoint for app. Default: ``true``
+* **metrics_backend** - Python class path with metrics collector backend. Default: ``vstutils.api.metrics.DefaultBackend``
+  Default backend collects metrics from uwsgi workers and python version info.
+
 
 .. _centrifugo:
 

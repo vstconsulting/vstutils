@@ -2,6 +2,7 @@
 
 import gzip
 import os
+import pathlib
 import sys
 import shutil
 import re
@@ -685,6 +686,7 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(api['available_versions']['v1'], api['current_version'])
         self.assertEqual(api['endpoint'], 'https://vstutilstestserver/api/endpoint')
         self.assertEqual(api['health'], 'https://vstutilstestserver/api/health')
+        self.assertEqual(api['metrics'], 'https://vstutilstestserver/api/metrics')
         self.assertEqual(
             list(self.get_result('get', '/api/v1/').keys()).sort(),
             list(self.settings_obj.API[self.settings_obj.VST_API_VERSION].keys()).sort()
@@ -5123,6 +5125,15 @@ class CustomModelTestCase(BaseTestCase):
 
 class ToolsTestCase(BaseTestCase):
     databases = '__all__'
+
+    def test_metrics_page(self):
+        result = self.get_result('get', '/api/metrics/')
+        expected = (pathlib.Path(DIR_PATH)/'metrics.txt').read_text('utf-8')
+        expected = expected.replace(
+            '$VERSION',
+            f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}'
+        )
+        self.assertEqual(result, expected)
 
     def test_health_page(self):
         result = self.get_result('get', '/api/health/')
