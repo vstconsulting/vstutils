@@ -2,7 +2,7 @@
 import typing as _t
 
 from django.conf import settings
-from django.http import Http404
+from django.http import Http404, StreamingHttpResponse
 from rest_framework import (
     permissions as rest_permissions,
     throttling,
@@ -101,6 +101,12 @@ class HealthThrottle(throttling.AnonRateThrottle):
     }
 
 
+class MetricsThrottle(throttling.AnonRateThrottle):
+    THROTTLE_RATES = {
+        'anon': settings.METRICS_THROTTLE_RATE
+    }
+
+
 class HealthView(base.ListNonModelViewSet):
     permission_classes = (rest_permissions.AllowAny,)
     authentication_classes = ()
@@ -109,6 +115,20 @@ class HealthView(base.ListNonModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return responses.HTTP_200_OK(*self.health_backend.get())
+
+
+class MetricsView(base.ListNonModelViewSet):
+    permission_classes = (rest_permissions.AllowAny,)
+    authentication_classes = ()
+    throttle_classes = (MetricsThrottle,)
+    metrics_backend = import_class(settings.METRICS_BACKEND_CLASS)()
+
+    def list(self, request, *args, **kwargs):
+        return StreamingHttpResponse(
+            self.metrics_backend.get(),
+            content_type='text/plain',
+            status=200,
+        )
 
 
 class LangViewSet(base.CachableHeadMixin, base.ReadOnlyModelViewSet):

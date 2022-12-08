@@ -191,6 +191,7 @@ class WebSection(BaseAppendSection):
         'max_tfa_attempts': ConfigIntType,
         'etag_default_timeout': ConfigIntSecondsType,
         'allow_auto_image_resize': ConfigBoolType,
+        'enable_metrics': ConfigBoolType,
     }
 
 
@@ -440,10 +441,12 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'secure_hsts_preload': False,
             'secure_hsts_seconds': 0,
             'health_throttle_rate': 60,
+            'metrics_throttle_rate': 120,
             'bulk_threads': 3,
             'max_tfa_attempts': ConfigIntType(os.getenv(f'{ENV_NAME}_MAX_TFA_ATTEMPTS', 5)),
             'etag_default_timeout': ConfigIntSecondsType(os.getenv(f'{ENV_NAME}_ETAG_TIMEOUT', '1d')),
             'allow_auto_image_resize': True,
+            'enable_metrics': True,
         },
         'database': {
             **env.db(default=f'sqlite:///{KWARGS["PROG"]}/db.{KWARGS["PROG_NAME"]}.sqlite3'),
@@ -991,6 +994,7 @@ TERMS_URL: _t.Text = ''
 CONTACT: _t.Dict = config['contact'].all()
 SCHEMA_CACHE_TIMEOUT = web['openapi_cache_timeout']
 HEALTH_THROTTLE_RATE: _t.Text = f"{web['health_throttle_rate']}/minute"
+METRICS_THROTTLE_RATE: _t.Text = f"{web['metrics_throttle_rate']}/minute"
 OPENAPI_VIEW_CLASS: _t.Text = 'vstutils.api.schema.views.OpenApiView'
 BULK_THREADS = web['bulk_threads']
 
@@ -1021,6 +1025,8 @@ API: SIMPLE_OBJECT_SETTINGS_TYPE = {
 }
 
 HEALTH_BACKEND_CLASS: _t.Text = 'vstutils.api.health.DefaultBackend'
+METRICS_BACKEND_CLASS: _t.Text = web.get('metrics_backend', fallback='vstutils.api.metrics.DefaultBackend')
+ENABLE_METRICS_VIEW: bool = web['enable_metrics']
 
 # Rest Api settings
 # http://www.django-rest-framework.org/api-guide/settings/

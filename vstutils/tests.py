@@ -9,6 +9,7 @@ import json  # noqa: F401
 
 import ormsgpack
 from django.apps import apps
+from django.http import StreamingHttpResponse
 from django.db import transaction, models as django_models
 from django.urls import reverse
 from django.test import TestCase, override_settings  # noqa: F401
@@ -107,6 +108,8 @@ class BaseTestCase(TestCase):
     def __get_rendered(self, response):
         # pylint: disable=protected-access
         try:
+            if isinstance(response, StreamingHttpResponse):
+                return b''.join(response.streaming_content).decode('utf-8')
             media_type = f'{getattr(response, "accepted_media_type", "")}' or \
                          response._content_type_for_repr.split(";")[0].replace('"', '').replace(',', '').strip()
             rendered_content = (
@@ -286,7 +289,7 @@ class BaseTestCase(TestCase):
         """
         err_msg = "{} != {}\n{}\n{}".format(
             resp.status_code, code,
-            self.__get_rendered(resp),
+            self.__get_rendered(resp) if not isinstance(resp, StreamingHttpResponse) else '<StreamingHttpResponse>',
             self.user
         )
         if additional_info:
