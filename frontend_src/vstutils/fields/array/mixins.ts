@@ -1,8 +1,10 @@
-import { set, defineComponent, PropType, h } from 'vue';
-import { BaseFieldMixin, Field } from '@/vstutils/fields/base';
+import type { PropType } from 'vue';
+import { set, defineComponent, h } from 'vue';
+import type { Field } from '@/vstutils/fields/base';
+import { BaseFieldMixin } from '@/vstutils/fields/base';
 import ArrayFieldEdit from './ArrayFieldEdit.vue';
-import ArrayField from './ArrayField';
-import { VNode } from 'vue';
+import type ArrayField from './ArrayField';
+import type { VNode } from 'vue';
 
 const NOT_INLINE_FIELDS = ['textarea', 'uri'];
 

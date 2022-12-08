@@ -1,5 +1,5 @@
 import * as Visibility from 'visibilityjs';
-import * as Centrifuge from 'centrifuge';
+import type * as Centrifuge from 'centrifuge';
 import { guiLocalSettings, randomSleep } from '../utils';
 
 export interface AutoUpdateAction {

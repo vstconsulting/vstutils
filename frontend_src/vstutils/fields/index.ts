@@ -63,7 +63,7 @@ import { SCHEMA_DATA_TYPE } from '../utils';
 import { WYSIWYGField } from './text/WYSIWYGField.js';
 import { UUIDField } from './text/UUIDField';
 import { URIField } from './text/URIField';
-import { Field } from './base';
+import type { Field } from './base';
 export { FieldLabelIdMixin, ModalWindowAndButtonMixin, TableRowMixin };
 
 export function addDefaultFields(fieldsResolver: FieldsResolver) {

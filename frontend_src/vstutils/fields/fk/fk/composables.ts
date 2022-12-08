@@ -1,6 +1,7 @@
-import { QuerySet } from '@/vstutils/querySet';
+import type { QuerySet } from '@/vstutils/querySet';
 import { getApp } from '@/vstutils/utils';
-import { computed, Ref, getCurrentInstance, watchEffect } from 'vue';
+import type { Ref } from 'vue';
+import { computed, getCurrentInstance, watchEffect } from 'vue';
 import type { FKField, TRepresent } from './FKField';
 
 export function useQuerySets(field: FKField, data: Record<string, unknown>) {

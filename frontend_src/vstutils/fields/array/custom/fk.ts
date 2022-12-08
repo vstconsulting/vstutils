@@ -1,6 +1,8 @@
 import $ from 'jquery';
-import { toRef, defineComponent, PropType, h } from 'vue';
-import { createTransport, FKField, useQuerySets } from '@/vstutils/fields/fk/fk';
+import type { PropType } from 'vue';
+import { toRef, defineComponent, h } from 'vue';
+import type { FKField } from '@/vstutils/fields/fk/fk';
+import { createTransport, useQuerySets } from '@/vstutils/fields/fk/fk';
 import { ArrayFieldMixin } from '../mixins';
 import type { TRepresent } from '@/vstutils/fields/fk/fk/FKField';
 import type ArrayField from '../ArrayField';

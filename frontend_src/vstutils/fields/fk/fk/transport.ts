@@ -1,8 +1,8 @@
-import { Ref } from 'vue';
+import type { Ref } from 'vue';
 
 import { signals } from '@/vstutils/signals';
 
-import { FKField } from './FKField';
+import type { FKField } from './FKField';
 
 import type { InstancesList } from '@/vstutils/store';
 import type { Model } from '@/vstutils/models';

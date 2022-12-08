@@ -1,4 +1,4 @@
-import { IApp } from './vstutils/app';
+import type { IApp } from './vstutils/app';
 import type * as SPA from './app.common.js';
 
 declare global {

@@ -1,16 +1,15 @@
-import { ComponentOptions, computed, defineComponent, h } from 'vue';
+import type { ComponentOptions } from 'vue';
+import { computed, defineComponent, h } from 'vue';
 
 import { ModelFields } from '@/vstutils/components/page';
-import {
-    BaseField,
+import type {
     Field,
     FieldOptions,
-    FieldPropsDef,
     FieldPropsDefType,
     FieldXOptions,
     SetFieldValueOptions,
-    useFieldWrapperClasses,
 } from '@/vstutils/fields/base';
+import { BaseField, FieldPropsDef, useFieldWrapperClasses } from '@/vstutils/fields/base';
 import { onAppBeforeInit } from '@/vstutils/signals';
 import { getApp, mapObjectValues } from '@/vstutils/utils';
 

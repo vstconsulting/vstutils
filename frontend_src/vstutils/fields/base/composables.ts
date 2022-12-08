@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import { Field } from './BaseField';
+import type { Field } from './BaseField';
 import type { FieldProps } from './types';
 
 export function useFieldWrapperClasses(props: FieldProps<Field<any, any, any>>) {

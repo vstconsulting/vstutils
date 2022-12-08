@@ -1,5 +1,6 @@
 import type { ComponentOptions } from 'vue';
-import { BaseField, Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import { BaseField } from '@/vstutils/fields/base';
 import { mergeDeep } from '@/vstutils/utils';
 
 import DependFromFkFieldMixin from './DependFromFkFieldMixin.vue';

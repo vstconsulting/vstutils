@@ -14,7 +14,8 @@
 <script lang="ts">
     import { computed, defineComponent, ref, watch } from 'vue';
     import { deepEqual } from '@/vstutils/utils';
-    import { FieldPropsDefType, FieldPropsDef, SetFieldValueOptions, Field } from '@/vstutils/fields/base';
+    import type { FieldPropsDefType, SetFieldValueOptions, Field } from '@/vstutils/fields/base';
+    import { FieldPropsDef } from '@/vstutils/fields/base';
     import type { DynamicField } from './DynamicField';
 
     export default defineComponent({

@@ -45,8 +45,9 @@
 
 <script setup lang="ts">
     import { computed, ref, onMounted } from 'vue';
-    import { MenuItem, hideSidebar } from './utils';
-    import { RawLocation } from 'vue-router';
+    import type { MenuItem } from './utils';
+    import { hideSidebar } from './utils';
+    import type { RawLocation } from 'vue-router';
     import type { Action } from '../../../views';
     import { getApp } from '../../../utils';
 

@@ -52,7 +52,8 @@
 
     import { i18n } from '@/vstutils/translation';
     import { formatPath, getApp, RequestTypes } from '@/vstutils/utils';
-    import { InstancesList, usePagination, useSelection } from '@/vstutils/store';
+    import type { InstancesList } from '@/vstutils/store';
+    import { usePagination, useSelection } from '@/vstutils/store';
     import { guiPopUp, pop_up_msg } from '@/vstutils/popUp';
     import ListTable from '@/vstutils/components/list/ListTable.vue';
     import Pagination from '@/vstutils/components/list/Pagination.vue';

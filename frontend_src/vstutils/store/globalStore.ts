@@ -1,7 +1,9 @@
 import type { Store, StoreActions, StoreGetters, StoreState } from 'pinia';
-import { computed, ComputedRef, ref, watch } from 'vue';
+import type { ComputedRef } from 'vue';
+import { computed, ref, watch } from 'vue';
 
-import { BaseViewStore, useParentViews } from './helpers';
+import type { BaseViewStore } from './helpers';
+import { useParentViews } from './helpers';
 
 import type { Breadcrumb } from '../breadcrumbs';
 

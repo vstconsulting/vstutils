@@ -1,8 +1,9 @@
-import { ComponentOptions } from 'vue';
+import type { ComponentOptions } from 'vue';
 
-import { BaseField, Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
-import { Model } from '@/vstutils/models';
-import { QuerySet } from '@/vstutils/querySet';
+import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import { BaseField } from '@/vstutils/fields/base';
+import type { Model } from '@/vstutils/models';
+import type { QuerySet } from '@/vstutils/querySet';
 import { onAppAfterInit } from '@/vstutils/signals';
 
 import DynamicFieldMixin from './DynamicFieldMixin.vue';
