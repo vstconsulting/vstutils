@@ -321,7 +321,9 @@ class RPCSection(BaseAppendSection):
         'heartbeat': ConfigIntType,
         'results_expiry_days': ConfigIntType,
         'create_instance_attempts': ConfigIntType,
-        'enable_worker': ConfigBoolType
+        'enable_worker': ConfigBoolType,
+        'task_send_sent_event': ConfigBoolType,
+        'worker_send_task_events': ConfigBoolType,
     }
 
 
@@ -504,7 +506,9 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'create_instance_attempts': 10,
             'default_delivery_mode': "persistent",
             'broker_transport_options': {},
-            'enable_worker': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_WORKER', 'True'))
+            'enable_worker': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_WORKER', 'True')),
+            'task_send_sent_event': True,
+            'worker_send_task_events': True,
         },
         'worker': {
             'app': os.getenv('VST_CELERY_APP', '{PROG_NAME}.wapp:app'),
@@ -1200,6 +1204,8 @@ if RPC_ENABLED:
     CELERY_ACCEPT_CONTENT = ['pickle', 'json']
     CELERY_TASK_SERIALIZER = 'pickle'
     CELERY_RESULT_EXPIRES = rpc["results_expiry_days"]
+    CELERY_SEND_SENT_EVENT = rpc["task_send_sent_event"]
+    CELERY_SEND_EVENTS = rpc["worker_send_task_events"]
     CELERY_DEFAULT_DELIVERY_MODE = rpc["default_delivery_mode"]
     CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
     CELERY_TASK_CREATE_MISSING_QUEUES = True

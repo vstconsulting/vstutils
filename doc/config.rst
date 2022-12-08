@@ -225,6 +225,8 @@ are also supported (with the corresponding types):
 * **max_tasks_per_child** - :celery_docs:`CELERYD_MAX_TASKS_PER_CHILD <userguide/configuration.html#std-setting-worker_max_tasks_per_child>`
 * **results_expiry_days** - :celery_docs:`CELERY_RESULT_EXPIRES <userguide/configuration.html#std-setting-result_expires>`
 * **default_delivery_mode** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE <userguide/configuration.html#task-default-delivery-mode>`
+* **task_send_sent_event** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE <userguide/configuration.html#task_send_sent_event>`
+* **worker_send_task_events** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE <userguide/configuration.html#worker_send_task_events>`
 
 
 .. _worker:
