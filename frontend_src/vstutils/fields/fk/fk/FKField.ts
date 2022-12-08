@@ -1,13 +1,14 @@
-import { Schema } from 'swagger-schema-official';
-import { ComponentOptions } from 'vue';
+import type { Schema } from 'swagger-schema-official';
+import type { ComponentOptions } from 'vue';
 
 import { AggregatedQueriesExecutor } from '@/vstutils/AggregatedQueriesExecutor.js';
-import { BaseField, Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import { BaseField } from '@/vstutils/fields/base';
 import { onAppBeforeInit } from '@/vstutils/signals';
-import { DetailPageStore } from '@/vstutils/store/page';
+import type { DetailPageStore } from '@/vstutils/store/page';
 import { i18n } from '@/vstutils/translation';
 import { formatPath, getApp, getDependenceValueAsString, RequestTypes } from '@/vstutils/utils';
-import { PageView } from '@/vstutils/views';
+import type { PageView } from '@/vstutils/views';
 
 import FKFieldMixin from './FKFieldMixin';
 

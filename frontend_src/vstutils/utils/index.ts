@@ -1,4 +1,4 @@
-import { ParameterType } from 'swagger-schema-official';
+import type { ParameterType } from 'swagger-schema-official';
 import type { Field } from '../fields/base/';
 
 export * from './todo.js';

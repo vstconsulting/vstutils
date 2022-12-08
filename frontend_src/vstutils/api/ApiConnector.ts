@@ -1,4 +1,4 @@
-import { AppConfiguration, AppSchema } from '../AppConfiguration';
+import type { AppConfiguration, AppSchema } from '../AppConfiguration';
 import { guiLocalSettings, getCookie, makeQueryString, BulkType, HttpMethods } from '../utils';
 import StatusError from './StatusError';
 

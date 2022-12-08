@@ -100,6 +100,7 @@
                 },
                 isControlSidebarOpen: false,
                 userSettings: this.$app.userSettingsStore,
+                localSettings: this.$app.localSettingsStore,
             };
         },
         computed: {
@@ -234,7 +235,7 @@
             },
             closeControlSidebar() {
                 document.body.classList.remove('control-sidebar-slide-open');
-                if (this.userSettings.changed) {
+                if (this.userSettings.changed || this.localSettings.changed) {
                     this.$refs.saveSettingsModal.openModal();
                 }
                 this.isControlSidebarOpen = false;
@@ -262,12 +263,18 @@
                 }
             },
             async saveSettings() {
-                await this.userSettings.save();
+                if (this.userSettings.changed) {
+                    await this.userSettings.save();
+                }
+                if (this.localSettings.changed) {
+                    await this.localSettings.save();
+                }
                 window.location.reload();
             },
             rollbackSettings() {
                 this.$refs.saveSettingsModal.closeModal();
                 this.userSettings.rollback();
+                this.localSettings.rollback();
             },
         },
     };

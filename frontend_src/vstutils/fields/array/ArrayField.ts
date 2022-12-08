@@ -1,14 +1,14 @@
-import { ParameterCollectionFormat } from 'swagger-schema-official';
-import { ComponentOptions } from 'vue';
+import type { ParameterCollectionFormat } from 'swagger-schema-official';
+import type { ComponentOptions } from 'vue';
 
-import {
-    BaseField,
+import type {
     ExtractInner,
     ExtractRepresent,
     Field,
     FieldOptions,
     FieldXOptions,
 } from '@/vstutils/fields/base';
+import { BaseField } from '@/vstutils/fields/base';
 import { ChoicesField, OrderingChoicesField } from '@/vstutils/fields/choices';
 import { FKField } from '@/vstutils/fields/fk/fk';
 import { NestedObjectField } from '@/vstutils/fields/nested-object';

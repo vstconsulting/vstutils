@@ -27,6 +27,7 @@ module.exports = {
         'vue/no-useless-v-bind': 'error',
         'vue/one-component-per-file': 'off',
         'vue/v-on-function-call': 'error',
+        '@typescript-eslint/consistent-type-imports': 'error',
     },
     globals: {
         globalThis: 'readonly',

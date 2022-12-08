@@ -1,10 +1,11 @@
-import { StoreState } from 'pinia';
-import { ComponentOptions, ref, Ref, toRef } from 'vue';
+import type { StoreState } from 'pinia';
+import type { ComponentOptions, Ref } from 'vue';
+import { ref, toRef } from 'vue';
 
-import { IAppInitialized } from '../app';
+import type { IAppInitialized } from '../app';
 import { ListViewComponent } from '../components/list/';
 import { OneEntity } from '../components/page';
-import { Model } from '../models';
+import type { Model } from '../models';
 import {
     createActionViewStore,
     createDetailViewStore,
@@ -12,8 +13,9 @@ import {
     createListViewStore,
     createNewViewStore,
 } from '../store';
-import { BaseViewStore, useBasePageData } from '../store/helpers';
-import { DetailPageStore } from '../store/page';
+import type { BaseViewStore } from '../store/helpers';
+import { useBasePageData } from '../store/helpers';
+import type { DetailPageStore } from '../store/page';
 import { formatPath, getApp, HttpMethods, joinPaths, pathToArray, ViewTypes } from '../utils';
 
 import type { Vue } from 'vue/types/vue';

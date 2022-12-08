@@ -1,7 +1,11 @@
 import { onBeforeUnmount, onMounted } from 'vue';
 
 import { getApp, getUniqueId } from '@/vstutils/utils';
-import { AutoUpdateAction, CentrifugoAutoUpdateAction, TimerAutoUpdateAction } from './AutoUpdateController';
+import type {
+    AutoUpdateAction,
+    CentrifugoAutoUpdateAction,
+    TimerAutoUpdateAction,
+} from './AutoUpdateController';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 async function EMPTY_CALLBACK() {}

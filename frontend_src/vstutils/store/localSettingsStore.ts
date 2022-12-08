@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { mergeDeep } from '@/vstutils/utils';
 import type { Model } from '@/vstutils/models';
+import type { SetFieldValueOptions } from '@/vstutils/fields/base';
 
 type Settings = Record<string, unknown>;
 
@@ -16,15 +17,18 @@ export const createLocalSettingsStore = (storage: Storage, itemName: string, mod
             settings.value = newSettings;
             changed.value = false;
         }
-        function setValue({ key, value }: { key: string; value: unknown }) {
-            settings.value[key] = value;
-            changed.value = true;
+        function setValue({ field, value, markChanged = true }: SetFieldValueOptions) {
+            settings.value[field] = value;
+            if (markChanged) {
+                changed.value = true;
+            }
         }
         function setOriginalSettings(settings: Settings) {
             originalSettings.value = mergeDeep({}, settings) as Settings;
         }
         function rollback() {
             settings.value = mergeDeep({}, originalSettings.value) as Settings;
+            changed.value = false;
         }
         function load() {
             const instance = new modelClass(JSON.parse(storage.getItem(itemName) ?? '{}') as Settings);

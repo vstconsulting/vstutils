@@ -1,16 +1,17 @@
 import { ref, computed } from 'vue';
-import { Model, ModelValidationError } from '../models';
+import type { Model } from '../models';
+import { ModelValidationError } from '../models';
 import type { PageEditView, PageNewView, PageView, ActionView, Action, ListView } from '../views';
 import { isInstancesEqual, RequestTypes, openPage, getApp } from '../utils';
 import { i18n } from '../translation';
 import { guiPopUp, pop_up_msg } from '../popUp';
-import { Route } from 'vue-router';
+import type { Route } from 'vue-router';
+import type { InstancesList, BaseViewStore } from './helpers';
 import {
     useBasePageData,
     useQuerySet,
     useListFilters,
     useSelection,
-    InstancesList,
     PAGE_WITH_INSTANCE,
     useInstanceTitle,
     useOperations,
@@ -20,7 +21,6 @@ import {
     useQueryBasedFiltering,
     useEntityViewClasses,
     usePageLeaveConfirmation,
-    BaseViewStore,
     usePagination,
 } from './helpers';
 

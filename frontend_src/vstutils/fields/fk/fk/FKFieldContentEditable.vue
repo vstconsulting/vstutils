@@ -7,7 +7,8 @@
 
 <script lang="ts">
     import $ from 'jquery';
-    import { PropType, toRef, ref, defineComponent } from 'vue';
+    import type { PropType } from 'vue';
+    import { toRef, ref, defineComponent } from 'vue';
     import { createTransport } from './transport';
     import type { FKField, TRepresent } from './FKField';
     import { ensureValueFetched, useQuerySets } from './composables';

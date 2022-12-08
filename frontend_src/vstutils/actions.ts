@@ -1,5 +1,6 @@
-import { IApp, IAppInitialized } from '@/vstutils/app';
+import type { IApp, IAppInitialized } from '@/vstutils/app';
 import { guiPopUp, pop_up_msg } from './popUp';
+import type { HttpMethods } from './utils';
 import {
     formatPath,
     parseResponseMessage,
@@ -7,13 +8,12 @@ import {
     joinPaths,
     ViewTypes,
     openPage,
-    HttpMethods,
 } from './utils';
 import type { Action, IView, NotEmptyAction } from './views';
 import { i18n } from './translation';
-import { Model } from './models';
-import { Route } from 'vue-router';
-import { APIResponse } from './api';
+import type { Model } from './models';
+import type { Route } from 'vue-router';
+import type { APIResponse } from './api';
 
 export class ActionsManager {
     app: IAppInitialized;

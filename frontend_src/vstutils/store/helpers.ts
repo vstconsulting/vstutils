@@ -1,4 +1,6 @@
-import { defineStore, StoreGeneric } from 'pinia';
+import type { StoreGeneric } from 'pinia';
+import { defineStore } from 'pinia';
+import type { Ref } from 'vue';
 import {
     computed,
     del,
@@ -6,17 +8,17 @@ import {
     onMounted,
     onUnmounted,
     ref,
-    Ref,
     set,
     shallowReadonly,
     shallowRef,
     watch,
 } from 'vue';
 
-import { APIResponse } from '@/vstutils/api';
+import type { APIResponse } from '@/vstutils/api';
 import { useAutoUpdate } from '@/vstutils/autoupdate';
 import { useBreadcrumbs } from '@/vstutils/breadcrumbs';
-import { Model, ModelValidationError } from '@/vstutils/models';
+import type { Model } from '@/vstutils/models';
+import { ModelValidationError } from '@/vstutils/models';
 import { signals } from '@/vstutils/signals';
 import { i18n } from '@/vstutils/translation';
 import {

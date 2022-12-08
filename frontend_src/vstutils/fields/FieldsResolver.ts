@@ -1,7 +1,8 @@
-import { BaseField, Field, FieldOptions, FieldXOptions } from './base';
+import type { Field, FieldOptions, FieldXOptions } from './base';
+import { BaseField } from './base';
 import { ENUM_TYPES, hasOwnProp, SCHEMA_DATA_TYPE, SCHEMA_DATA_TYPE_VALUES } from '../utils';
-import { AppSchema } from '../AppConfiguration';
-import { ParameterType } from 'swagger-schema-official';
+import type { AppSchema } from '../AppConfiguration';
+import type { ParameterType } from 'swagger-schema-official';
 
 const X_FORMAT = 'x-format';
 

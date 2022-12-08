@@ -4,17 +4,21 @@ import type VueRouter from 'vue-router';
 
 import Centrifuge from 'centrifuge';
 import { defineStore } from 'pinia';
-import VueI18n from 'vue-i18n';
+import type VueI18n from 'vue-i18n';
 
 import { ActionsManager } from '@/vstutils/actions';
-import { apiConnector, ApiConnector, openapi_dictionary } from '@/vstutils/api';
-import { Language, TranslationsManager } from '@/vstutils/api/TranslationsManager';
-import { AppConfiguration } from '@/vstutils/AppConfiguration';
+import type { ApiConnector } from '@/vstutils/api';
+import { apiConnector, openapi_dictionary } from '@/vstutils/api';
+import type { Language } from '@/vstutils/api/TranslationsManager';
+import { TranslationsManager } from '@/vstutils/api/TranslationsManager';
+import type { AppConfiguration } from '@/vstutils/AppConfiguration';
 import AppRoot from '@/vstutils/AppRoot.vue';
 import { AutoUpdateController } from '@/vstutils/autoupdate';
-import { ComponentsRegistrator, globalComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
+import type { ComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
+import { globalComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
 import { addDefaultFields, FieldsResolver } from '@/vstutils/fields';
-import { Model, ModelsResolver } from '@/vstutils/models';
+import type { Model } from '@/vstutils/models';
+import { ModelsResolver } from '@/vstutils/models';
 import { ErrorHandler } from '@/vstutils/popUp';
 import { QuerySetsResolver } from '@/vstutils/querySet';
 import { RouterConstructor } from '@/vstutils/router';
@@ -25,21 +29,15 @@ import {
     SCHEMA_MODELS_CREATED,
     signals,
 } from '@/vstutils/signals';
-import {
-    createLocalSettingsStore,
-    createUserSettingsStore,
-    GLOBAL_STORE,
-    GlobalStore,
-    LocalSettingsStore,
-    pinia,
-    UserSettingsStore,
-} from '@/vstutils/store';
+import type { GlobalStore, LocalSettingsStore, UserSettingsStore } from '@/vstutils/store';
+import { createLocalSettingsStore, createUserSettingsStore, GLOBAL_STORE, pinia } from '@/vstutils/store';
 import { i18n } from '@/vstutils/translation';
 import * as utils from '@/vstutils/utils';
-import { ListView, PageNewView, PageView, View, ViewConstructor, ViewsTree } from '@/vstutils/views';
+import type { View } from '@/vstutils/views';
+import { ListView, PageNewView, PageView, ViewConstructor, ViewsTree } from '@/vstutils/views';
 
 import type { Cache } from '@/cache';
-import { GlobalStoreInitialized } from './store/globalStore';
+import type { GlobalStoreInitialized } from './store/globalStore';
 
 export function getCentrifugoClient(address?: string, token?: string) {
     if (!address) {

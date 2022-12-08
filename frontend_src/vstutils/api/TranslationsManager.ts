@@ -1,5 +1,5 @@
 import type { Cache } from '@/cache';
-import { LocaleMessageObject } from 'vue-i18n';
+import type { LocaleMessageObject } from 'vue-i18n';
 import { HttpMethods } from '../utils';
 
 export interface Language {
@@ -7,7 +7,7 @@ export interface Language {
     name: string;
 }
 
-import { ApiConnector } from './ApiConnector';
+import type { ApiConnector } from './ApiConnector';
 
 /**
  * Class for requesting translations related data

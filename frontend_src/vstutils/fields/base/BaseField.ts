@@ -5,8 +5,8 @@ import type { Model } from '../../models';
 import type { QuerySet } from '../../querySet';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 import { i18n } from '../../translation';
-import { IApp } from '@/vstutils/app';
-import { ComponentOptions } from 'vue';
+import type { IApp } from '@/vstutils/app';
+import type { ComponentOptions } from 'vue';
 
 type ModelPropertyDescriptor<Represent> = PropertyDescriptor & {
     get(this: Model): Represent | null | undefined;
