@@ -1,13 +1,36 @@
+import type { Model } from '@/vstutils/models';
+import type { CustomMatcher, TemplateResult, TemplateSelection } from '@/vstutils/select2';
+import { i18n } from '@/vstutils/translation';
+import type { FieldOptions, FieldXOptions } from '../base';
 import { StringField } from '../text';
 import ChoicesFieldMixin from './ChoicesFieldMixin.js';
 
-/**
- * Choices guiField class.
- */
-class ChoicesField extends StringField {
-    constructor(options) {
+export type RawEnumItem = string | [string, string] | { value: string; prefetch_value: string } | Model;
+
+export interface EnumItem {
+    id: string;
+    text: string;
+}
+
+interface ChoicesFieldXOptions extends FieldXOptions {
+    fieldForEnum?: string;
+
+    templateResult?: TemplateResult;
+    templateSelection?: TemplateSelection;
+    customMatcher?: CustomMatcher;
+}
+
+export class ChoicesField extends StringField<ChoicesFieldXOptions> {
+    enum: string[] | null = null;
+    fieldForEnum?: string;
+
+    templateResult?: TemplateResult;
+    templateSelection?: TemplateSelection;
+    customMatcher?: CustomMatcher;
+
+    constructor(options: FieldOptions<ChoicesFieldXOptions, string>) {
         super(options);
-        this.enum = options.enum || null;
+        this.enum = options.enum ?? null;
         this.fieldForEnum = this.props.fieldForEnum;
 
         this.templateResult = this.props.templateResult;
@@ -15,10 +38,10 @@ class ChoicesField extends StringField {
         this.customMatcher = this.props.customMatcher;
     }
 
-    translateValue(value) {
+    translateValue(value: string) {
         const key = `:model:${this.model?.translateModel || ''}:${this.translateFieldName}:${value}`;
-        if (this.constructor.app.i18n.te(key)) {
-            return this.constructor.app.i18n.t(key);
+        if (i18n.te(key)) {
+            return i18n.t(key) as string;
         }
         return value;
     }
@@ -30,7 +53,7 @@ class ChoicesField extends StringField {
         return null;
     }
 
-    prepareEnumItem(item) {
+    prepareEnumItem(item?: RawEnumItem): EnumItem | undefined {
         if (typeof item === 'string') {
             return { id: item, text: item };
         }
@@ -39,9 +62,12 @@ class ChoicesField extends StringField {
             return { id: item[0], text: item[1] };
         }
         if (typeof item === 'object') {
-            if (typeof item.getViewFieldString === 'function') {
+            if ('getViewFieldString' in item) {
                 const val = item.getViewFieldString();
-                return { id: val, text: val };
+                if (val) {
+                    return { id: val, text: val };
+                }
+                return;
             }
             if (item.value && item.prefetch_value) {
                 // Legacy object format (value and prefetchValue properties)
@@ -49,16 +75,17 @@ class ChoicesField extends StringField {
             }
         }
 
-        this.warn(`Can not handle option "${item}"`);
+        this.warn(`Can not handle option "${JSON.stringify(item)}"`);
+        return undefined;
     }
 
-    prepareEnumData(data = this.enum) {
+    prepareEnumData(data: RawEnumItem[] | string | null = this.enum): EnumItem[] {
         if (typeof data === 'string' && data.length > 0) {
             // Example: 'val1,val2'
             return data.split(',').map((val) => ({ id: val, text: val }));
         }
         if (Array.isArray(data)) {
-            return data.map((item) => this.prepareEnumItem(item)).filter(Boolean);
+            return data.map((item) => this.prepareEnumItem(item)).filter(Boolean) as EnumItem[];
         }
         return [];
     }
@@ -70,5 +97,3 @@ class ChoicesField extends StringField {
         return [ChoicesFieldMixin];
     }
 }
-
-export default ChoicesField;

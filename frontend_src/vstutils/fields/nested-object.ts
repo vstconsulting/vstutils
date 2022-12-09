@@ -11,7 +11,7 @@ import type {
 } from '@/vstutils/fields/base';
 import { BaseField, FieldPropsDef, useFieldWrapperClasses } from '@/vstutils/fields/base';
 import { onAppBeforeInit } from '@/vstutils/signals';
-import { getApp, mapObjectValues } from '@/vstutils/utils';
+import { mapObjectValues } from '@/vstutils/utils';
 
 import type { Model } from '@/vstutils/models';
 

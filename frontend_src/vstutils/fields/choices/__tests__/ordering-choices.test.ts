@@ -3,7 +3,7 @@ import OrderingChoicesField from '../OrderingChoicesField';
 
 describe('OrderingChoicesField', () => {
     test('prepareEnumItem', () => {
-        const field = new OrderingChoicesField({ 'x-options': {} });
+        const field = new OrderingChoicesField({ name: 'test', 'x-options': {} });
         expect(field.prepareEnumItem(undefined)).toBeUndefined();
         // @ts-expect-error text must be defined
         expect(field.prepareEnumItem('example1').text).toBe('⬆ example1');

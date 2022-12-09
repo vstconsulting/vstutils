@@ -94,7 +94,7 @@ test('createDetailViewStore', async () => {
     await store.applyFilters();
     await store.fetchData();
 
-    let [_, request] = fetchMock.mock.calls[0];
+    let [, request] = fetchMock.mock.calls[0];
     let bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('get');
     expect(bulk[0].path).toStrictEqual(['some_list', 15]);
@@ -110,8 +110,7 @@ test('createDetailViewStore', async () => {
     fetchMock.resetMocks();
     fetchMock.mockResponseOnce('{}', { status: 204 });
     await store.removeInstance({ instance: store.instance, fromList: false, purge: false });
-    // eslint-disable-next-line no-unused-vars
-    [_, request] = fetchMock.mock.calls[0];
+    [, request] = fetchMock.mock.calls[0];
     bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('delete');
     expect(bulk[0].path).toStrictEqual(['some_list', 15]);
@@ -177,8 +176,7 @@ test('createEditViewStore', async () => {
         ]),
     );
     await store.reload();
-    // eslint-disable-next-line no-unused-vars
-    let [_, request] = fetchMock.mock.calls[0];
+    let [, request] = fetchMock.mock.calls[0];
     let bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('get');
     expect(bulk[0].path).toStrictEqual(['some_list', 15]);
@@ -232,8 +230,7 @@ test('patchEditViewStore', async () => {
     await store.save();
 
     // Check request
-    // eslint-disable-next-line no-unused-vars
-    let [_, request] = fetchMock.mock.calls[0];
+    let [, request] = fetchMock.mock.calls[0];
     let bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('patch');
     expect(bulk[0].path).toStrictEqual(['some_list', 15]);
@@ -285,8 +282,7 @@ test('putEditViewStore', async () => {
     expect(store.sandbox.name).toEqual('Shop');
     await store.save();
 
-    // eslint-disable-next-line no-unused-vars
-    let [_, request] = fetchMock.mock.calls[0];
+    let [, request] = fetchMock.mock.calls[0];
     let bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('put');
     expect(bulk[0].path).toStrictEqual(['some_list', 15]);
@@ -341,8 +337,7 @@ test('createNewViewStore', async () => {
     expect(store.sandbox.phone).toEqual('79586545544');
     await store.save();
 
-    // eslint-disable-next-line no-unused-vars
-    let [_, request] = fetchMock.mock.calls[0];
+    let [, request] = fetchMock.mock.calls[0];
     let bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('post');
     expect(bulk[0].path).toStrictEqual(['some_list']);

@@ -14,6 +14,17 @@ export type FieldPropsDefType<T> = Omit<typeof FieldPropsDef, 'field'> & {
     field: { type: PropType<T>; required: true };
 };
 
+export const FieldEditPropsDef = {
+    field: { type: Object as PropType<Field>, required: true as const },
+    data: { type: Object as PropType<Record<string, unknown>>, required: true as const },
+    value: { required: true as const },
+    hideable: { type: Boolean, default: false },
+};
+
+export type FieldEditPropsDefType<T> = Omit<typeof FieldEditPropsDef, 'field'> & {
+    field: { type: PropType<T>; required: true };
+};
+
 export type FieldProps<TField extends Field = Field> = ExtractPropTypes<FieldPropsDefType<TField>>;
 
 export type ExtractInner<T> = T extends Field<infer Inner> ? Inner : never;

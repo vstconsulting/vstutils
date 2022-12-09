@@ -206,12 +206,23 @@ export class FKField
         }
     }
 
+    protected getQuerySetForPrefetch(path: string) {
+        let qs = this.getAppropriateQuerySet({ path });
+        if (qs) {
+            return qs;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        qs = this.app.qsResolver?.findQuerySet(this.fkModel!.name, this.app.store.page!.view.path);
+        if (qs) {
+            return this._formatQuerysetPath(qs);
+        }
+
+        return;
+    }
+
     prefetchValues(instances: Model[], path: string) {
-        const qs =
-            this.getAppropriateQuerySet({ path }) ||
-            (this.app.qsResolver?.findQuerySet(this.fkModel!.name, this.app.store.page!.view.path) as
-                | QuerySet
-                | undefined);
+        const qs = this.getQuerySetForPrefetch(path);
         if (!qs) return;
         return this._fetchRelated(
             instances.map((instance) => this._getValueFromData(instance._data) as TInner),

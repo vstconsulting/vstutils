@@ -9,8 +9,7 @@ import { onAppAfterInit } from '@/vstutils/signals';
 import DynamicFieldMixin from './DynamicFieldMixin.vue';
 
 import type { FieldDefinition } from '@/vstutils/fields/FieldsResolver';
-import type { IView, PageView, View } from '@/vstutils/views';
-import { RequestTypes } from '@/vstutils/utils';
+import type { PageView, View } from '@/vstutils/views';
 
 interface DynamicFieldXOptions extends FieldXOptions {
     source_view?: string;

@@ -301,8 +301,7 @@ describe('ViewConstructor', () => {
         for (const view of views.values()) {
             const routeAlreadyExists = routes.includes(view.path);
             if (routeAlreadyExists) {
-                // eslint-disable-next-line no-unused-vars
-                const samePathViews = Array.from(views).filter(([path, v]) => v.path === view.path);
+                const samePathViews = Array.from(views).filter(([, v]) => v.path === view.path);
                 throw new Error(`${samePathViews.length} views have same path (${view.path})`);
             }
             routes.push(view.path);

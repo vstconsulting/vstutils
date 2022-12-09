@@ -1,5 +1,5 @@
 import { i18n } from '@/vstutils/translation';
-import { ChoicesField } from './';
+import { type RawEnumItem, ChoicesField } from './ChoicesField';
 
 class OrderingChoicesField extends ChoicesField {
     translateValue(value: string): string {
@@ -10,8 +10,8 @@ class OrderingChoicesField extends ChoicesField {
         return translated;
     }
 
-    prepareEnumItem(item: unknown) {
-        const preparedItem = super.prepareEnumItem(item) as { id: unknown; text: string } | undefined;
+    prepareEnumItem(item?: RawEnumItem) {
+        const preparedItem = super.prepareEnumItem(item);
         if (preparedItem) {
             const hasMinus = preparedItem.text.startsWith('-');
             const text = hasMinus ? preparedItem.text.slice(1) : preparedItem.text;

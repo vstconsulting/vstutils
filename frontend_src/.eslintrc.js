@@ -28,6 +28,8 @@ module.exports = {
         'vue/one-component-per-file': 'off',
         'vue/v-on-function-call': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
+        'no-unused-vars': 'off',
+        '@typescript-eslint/no-unused-vars': ['error', { args: 'none' }],
     },
     globals: {
         globalThis: 'readonly',
@@ -53,6 +55,10 @@ module.exports = {
                 'plugin:@typescript-eslint/strict',
                 'plugin:prettier/recommended',
             ],
+            rules: {
+                'no-unused-vars': 'off',
+                '@typescript-eslint/no-unused-vars': ['error', { args: 'none' }],
+            },
         },
         {
             files: ['**/*.vue'],

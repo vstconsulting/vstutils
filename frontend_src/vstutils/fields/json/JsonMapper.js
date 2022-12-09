@@ -7,7 +7,6 @@ export default class JsonMapper {
     COMPONENT_STRING_ARRAY = 'StringJsonArray';
     COMPONENT_OBJECT = 'JsonObject';
 
-    // eslint-disable-next-line no-unused-vars
     getComponent(value, name = undefined) {
         const type = typeof value;
 
