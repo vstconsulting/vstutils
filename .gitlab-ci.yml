@@ -1,5 +1,5 @@
 default:
-  image: vstconsulting/images:ubuntu
+  image: registry.gitlab.com/vstconsulting/images:ubuntu
   cache: &global_cache
     paths:
       - node_modules/
@@ -24,7 +24,7 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: vstconsulting/images:ubuntu
+  image: registry.gitlab.com/vstconsulting/images:ubuntu
   coverage: '/\d+\%\s*$/'
   variables:
     TOX_ENVS: ""
@@ -48,7 +48,7 @@ stages:
 
 .js_tests_template: &branch_js_tests
   <<: *branch_tests
-  image: vstconsulting/images:node
+  image: registry.gitlab.com/vstconsulting/images:node-tests
   before_script:
     - yarn install
   script:
@@ -122,7 +122,7 @@ release:
 
 release_pypi:
   stage: release
-  image: vstconsulting/images:ubuntu
+  image: registry.gitlab.com/vstconsulting/images:ubuntu
   artifacts:
     reports:
       dotenv: variables.env
