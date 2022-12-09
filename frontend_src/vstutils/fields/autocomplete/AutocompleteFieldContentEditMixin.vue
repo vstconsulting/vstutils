@@ -1,6 +1,7 @@
 <template>
     <div class="input-group">
         <input
+            ref="inputEl"
             type="text"
             :class="classes"
             :style="styles"
@@ -8,6 +9,7 @@
             :aria-labelledby="label_id"
             :aria-label="aria_label"
             @blur="$emit('set-value', $event.target.value)"
+            @input="setValueByHandsInStore($event.target.value)"
         />
 
         <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
