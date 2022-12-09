@@ -5,7 +5,7 @@ class OrderingChoicesField extends ChoicesField {
     translateValue(value: string): string {
         const translated = i18n.t(value) as string;
         if (translated === value) {
-            return translated.replace('_', ' ');
+            return translated.replace(/_/g, ' ');
         }
         return translated;
     }

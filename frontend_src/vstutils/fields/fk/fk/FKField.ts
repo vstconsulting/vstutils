@@ -61,7 +61,7 @@ const dependenceTemplates = new Map<string, (data: Record<string, unknown>) => s
 
 const validAttrs = Array.from(dependenceTemplates.keys());
 
-interface FKFieldXOptions extends FieldXOptions {
+export interface FKFieldXOptions extends FieldXOptions {
     value_field: string;
     view_field: string;
     usePrefetch: boolean;

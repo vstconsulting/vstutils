@@ -9,5 +9,7 @@ describe('OrderingChoicesField', () => {
         expect(field.prepareEnumItem('example1').text).toBe('⬆ example1');
         // @ts-expect-error text must be defined
         expect(field.prepareEnumItem('-example2').text).toBe('⬇ example2');
+        // @ts-expect-error text must be defined
+        expect(field.prepareEnumItem('2_under_scores').text).toBe('⬆ 2 under scores');
     });
 });

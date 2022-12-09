@@ -34,7 +34,7 @@
         },
         computed: {
             fields() {
-                return this.view.filters;
+                return this.view?.filters || [];
             },
             filters() {
                 if (this.isMounted) {
