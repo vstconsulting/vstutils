@@ -1,135 +1,103 @@
 <template>
-    <select
-        :class="classes"
-        :style="styles"
-        :value="value"
-        :aria-labelledby="label_id"
-        :aria-label="aria_label"
-    />
+    <select ref="selectEl" class="form-control select2 select2-field-select" :value="value" />
 </template>
 
-<script>
-    import $ from 'jquery';
-    import { BaseFieldContentEdit } from '../base';
+<script lang="ts">
+    import { computed, defineComponent, onMounted, ref, toRef, watch } from 'vue';
+    import { useSelect2 } from '@/vstutils/select2';
+    import { FieldEditPropsDef } from '@/vstutils/fields/base';
+    import type { FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import type { SelectedData } from '@/vstutils/select2';
+    import type { ChoicesField, EnumItem, RawEnumItem } from './ChoicesField';
 
-    export default {
-        mixins: [BaseFieldContentEdit],
-        data() {
-            return {
-                /**
-                 * Property, that stores select2 DOM element.
-                 */
-                s2: undefined,
-                class_list: ['form-control', 'select2', 'select2-field-select'],
-                enum: [],
-                validIds: [],
-            };
-        },
-        computed: {
-            disableIfEmpty() {
-                if (this.field.fieldForEnum !== undefined) {
-                    return this.field.fieldForEnum;
+    export default defineComponent({
+        props: FieldEditPropsDef as FieldEditPropsDefType<ChoicesField>,
+        emits: ['set-value'],
+        setup(props, { emit }) {
+            const selectEl = ref<HTMLSelectElement | null>(null);
+
+            let enumItems: EnumItem[] = [];
+            let validIds: string[] = [];
+
+            const disableIfEmpty = computed(() => {
+                if (props.field.fieldForEnum !== undefined) {
+                    return props.field.fieldForEnum;
                 }
                 return false;
-            },
-        },
-        watch: {
-            value(value) {
-                this.setValue(value);
-            },
-        },
-        mounted() {
-            this.s2 = $(this.$el);
+            });
 
-            if (this.field.fieldForEnum) {
-                this.setEnum(this.data[this.field.fieldForEnum]);
-                this.$watch(
-                    function () {
-                        return this.data[this.field.fieldForEnum];
-                    },
-                    function (newVal) {
-                        this.setEnum(newVal);
-                        this.initSelect2();
-                    },
-                );
-            } else {
-                this.setEnum(this.field.enum);
-                this.$watch(
-                    function () {
-                        return this.field.enum;
-                    },
-                    function (newVal) {
-                        this.setEnum(newVal);
-                        this.initSelect2();
-                    },
-                );
+            function setEnum(newEnum: RawEnumItem[]) {
+                enumItems = props.field.prepareEnumData(newEnum);
+                for (const item of enumItems) {
+                    item.text = props.field.translateValue(item.text);
+                }
+                validIds = enumItems.map((value) => value.id);
             }
 
-            this.initSelect2();
-        },
-        beforeDestroy() {
-            $(this.$el).off().select2('destroy');
-        },
-        methods: {
-            setEnum(newEnum) {
-                this.enum = this.field.prepareEnumData(newEnum);
-                for (const item of this.enum) {
-                    item.text = this.field.translateValue(item.text);
+            // eslint-disable-next-line no-undef
+            function handleChange(data: SelectedData[], event: JQuery.ChangeEvent) {
+                let value;
+                const selected = data[0];
+
+                if (selected && selected.id) {
+                    value = selected.id;
+                } else {
+                    value = event.target.value || null;
                 }
-                this.validIds = this.enum.map((value) => value.id);
-            },
-            /**
-             * Method, that mounts select2 to current field's select.
-             */
-            initSelect2() {
-                $(this.s2)
-                    .empty() // Remove all children (options)
-                    .select2({
-                        theme: window.SELECT2_THEME,
-                        width: '100%',
-                        data: this.enum,
-                        disabled: this.field.disabled || (this.disableIfEmpty && this.enum.length === 0),
-                        allowClear: this.field.nullable,
-                        placeholder: { id: undefined, text: '' },
-                        templateResult: this.field.templateResult,
-                        templateSelection: this.field.templateSelection,
-                        matcher: this.field.customMatcher,
-                    })
-                    .on('change', (event) => {
-                        let value;
-                        let data = $(this.s2).select2('data')[0];
 
-                        if (data && data.id) {
-                            value = data.id;
-                        } else {
-                            value = event.target.value || null;
-                        }
+                if (!validIds.includes(value) && value) {
+                    setValue(validIds[0] || null);
+                    return;
+                }
+                if (props.value !== value) {
+                    emit('set-value', value);
+                }
+            }
 
-                        if (!this.validIds.includes(value) && value) {
-                            this.setValue(this.validIds[0] || null);
+            const { init: initSelect2, setValue } = useSelect2(selectEl, handleChange);
+
+            watch(toRef(props, 'value'), (value) => {
+                setValue(value);
+            });
+
+            onMounted(() => {
+                const fieldForEnum = props.field.fieldForEnum;
+                const enumGetter =
+                    fieldForEnum !== undefined
+                        ? () => props.data[fieldForEnum] as string[]
+                        : () => props.field.enum;
+
+                watch(
+                    enumGetter,
+                    (newVal) => {
+                        if (!newVal) {
                             return;
                         }
-                        if (this.value !== value) {
-                            this.$emit('set-value', value);
-                        }
-                    });
+                        setEnum(newVal);
+                        initSelect2({
+                            width: '100%',
+                            data: enumItems,
+                            disabled: disableIfEmpty.value && enumItems.length === 0,
+                            allowClear: props.field.nullable,
+                            placeholder: { id: undefined, text: '' },
+                            templateResult: props.field.templateResult,
+                            templateSelection: props.field.templateSelection,
+                            matcher: props.field.customMatcher,
+                        });
 
-                // Set initial value
-                if (this.value) {
-                    this.setValue(this.value);
-                } else if (this.field.hasDefault) {
-                    this.setValue(this.field.default);
-                } else {
-                    this.setValue(this.enum[0] || null);
-                }
-            },
-            /**
-             * Method, that sets value to select2 DOM element.
-             * @param {string} value.
-             */
-            setValue(value) {
-                $(this.s2).val(value).trigger('change');
-            },
+                        if (props.value) {
+                            setValue(props.value);
+                        } else if (props.field.hasDefault) {
+                            setValue(props.field.default);
+                        } else {
+                            setValue(enumItems[0] || null);
+                        }
+                    },
+                    { immediate: true },
+                );
+            });
+
+            return { selectEl };
         },
-    };
+    });
 </script>

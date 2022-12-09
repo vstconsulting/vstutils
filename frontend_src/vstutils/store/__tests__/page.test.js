@@ -132,7 +132,7 @@ test('createListViewStore', async () => {
     expect(store.error).toBeFalsy();
     expect(store.instances.length).toBe(1);
 
-    let [_, request] = fetchMock.mock.calls[0];
+    let [, request] = fetchMock.mock.calls[0];
     let bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('get');
     expect(bulk[0].path).toStrictEqual(['some_list']);
@@ -142,7 +142,7 @@ test('createListViewStore', async () => {
     fetchMock.resetMocks();
     fetchMock.mockResponseOnce('{}', { status: 204 });
     await store.removeInstance({ instance: store.instances[0], fromList: true, purge: true });
-    [_, request] = fetchMock.mock.calls[0];
+    [, request] = fetchMock.mock.calls[0];
     bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('delete');
     expect(bulk[0].path).toStrictEqual(['some_list', 3]);
@@ -160,8 +160,7 @@ test('createListViewStore', async () => {
         ]),
     );
     await store.removeInstances({ instances: [store.instances[0], store.instances[1]], purge: true });
-    // eslint-disable-next-line no-unused-vars
-    [_, request] = fetchMock.mock.calls[0];
+    [, request] = fetchMock.mock.calls[0];
     bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('delete');
     expect(bulk[0].path).toStrictEqual(['some_list', 5]);

@@ -51,8 +51,7 @@ test('createActionViewStore', async () => {
     expect(store.sandbox.city).toEqual('Mshvill');
     await store.execute();
 
-    // eslint-disable-next-line no-unused-vars
-    let [_, request] = fetchMock.mock.calls[0];
+    let [, request] = fetchMock.mock.calls[0];
     let bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('post');
     expect(bulk[0].path).toStrictEqual('/some_action/');

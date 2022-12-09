@@ -53,7 +53,9 @@ export class DependFromFkField extends BaseField<unknown, unknown, XOptions> {
             mergeDeep({ format, callback_opt }),
             this.name,
         );
-        realField.prepareFieldForView(this.app.store.page!.view.path);
+        if (this.app.store.page) {
+            realField.prepareFieldForView(this.app.store.page.view.path);
+        }
         return realField;
     }
 

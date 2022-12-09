@@ -29,15 +29,14 @@ export interface FieldXOptions {
     [key: string]: unknown;
 }
 
-export type FieldOptions<XOptions extends FieldXOptions | undefined, Inner> = Omit<
-    Schema,
-    'default' | 'items'
-> & {
+export type DefaultXOptions = FieldXOptions | undefined;
+
+export type FieldOptions<XOptions extends DefaultXOptions, Inner> = Omit<Schema, 'default' | 'items'> & {
     allowEmptyValue?: boolean;
     collectionFormat?: ParameterCollectionFormat;
     default?: Inner;
     hidden?: boolean;
-    items?: FieldOptions<FieldXOptions | undefined, unknown>;
+    items?: FieldOptions<DefaultXOptions, unknown>;
     name: string;
     required?: boolean;
     title?: string;
@@ -50,7 +49,7 @@ export type FieldOptions<XOptions extends FieldXOptions | undefined, Inner> = Om
 export interface Field<
     Inner = unknown,
     Represent = unknown,
-    XOptions extends FieldXOptions | undefined = FieldXOptions | undefined,
+    XOptions extends DefaultXOptions = DefaultXOptions,
 > {
     options: FieldOptions<XOptions, Inner>;
     props: XOptions;
@@ -99,11 +98,8 @@ export interface Field<
     parseFieldError(errorData: unknown, instanceData: FieldsData): unknown;
 }
 
-export class BaseField<
-    Inner,
-    Represent,
-    XOptions extends FieldXOptions | undefined = FieldXOptions | undefined,
-> implements Field<Inner, Represent, XOptions>
+export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = DefaultXOptions>
+    implements Field<Inner, Represent, XOptions>
 {
     static fkLinkable = true;
 
@@ -200,13 +196,13 @@ export class BaseField<
      * Method, that prepares instance of field for usage. Method is called after models and views are
      * created, for every field instance that is part of view.
      */
-    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     prepareFieldForView(path: string): void {}
 
     /**
      * Method that will be called after every fetch of instances from api (QuerySet#items, QuerySet#get)
      */
-    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     async afterInstancesFetched(instances: Model[], queryset: QuerySet) {}
 
     /**
@@ -244,7 +240,6 @@ export class BaseField<
      * Method that validates value.
      * @param {RepresentData} data - Object with all values.
      */
-    // eslint-disable-next-line no-unused-vars
     validateValue(data: FieldsData) {
         const value = this._getValueFromData(data);
         let value_length = 0;

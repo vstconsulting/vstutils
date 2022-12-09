@@ -477,7 +477,6 @@ export class ObjectPropertyRetriever {
      * @returns {boolean}
      * @private
      */
-    // eslint-disable-next-line no-unused-vars
     _enumerableAndNotEnumerable(obj, prop) {
         return true;
     }
