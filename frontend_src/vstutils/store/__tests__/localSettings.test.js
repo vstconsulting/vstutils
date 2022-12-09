@@ -25,7 +25,7 @@ test('localSettings module', () => {
     store.load();
     expect(store.settings).toMatchObject({ val1: 1, val2: 2 });
 
-    store.setValue({ key: 'val1', value: 'testValue' });
+    store.setValue({ field: 'val1', value: 'testValue' });
     expect(store.settings.val1).toBe('testValue');
     expect(store.changed).toBeTruthy();
 

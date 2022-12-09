@@ -20,7 +20,8 @@
 <script setup lang="ts">
     import * as $ from 'jquery';
     import SidebarItem from './SidebarItem.vue';
-    import { hideSidebar, MenuItem, openSidebar } from './utils';
+    import type { MenuItem } from './utils';
+    import { hideSidebar, openSidebar } from './utils';
     import { onMounted } from 'vue';
 
     defineProps<{

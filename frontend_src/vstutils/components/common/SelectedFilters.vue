@@ -1,9 +1,20 @@
 <template>
     <div class="selected-filters">
-        <span v-for="pill in pills" :key="pill.name" class="badge rounded-pill pill">
-            <span class="pill__text">{{ $t(pill.title) }}: {{ $t(pill.value) }}</span>
-            <i class="fa fa-times" @click="clearFilter(pill.name)" />
-        </span>
+        <div v-for="pill in pills" :key="pill.name" class="badge rounded-pill pill mr-1 mb-1">
+            <div class="d-flex align-items-center">
+                <div class="mr-1">{{ $t(pill.title) }}:</div>
+                <component
+                    :is="pill.field.getComponent()"
+                    :field="pill.field"
+                    :data="sandbox"
+                    type="readonly"
+                    hide-title
+                    class="mr-1"
+                    @set-value="({ field, value }) => $set(sandbox, field, value)"
+                />
+                <i class="fa fa-times remove-icon" @click="clearFilter(pill.name)" />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -18,15 +29,16 @@
         data() {
             return {
                 isMounted: false,
+                sandbox: {},
             };
         },
         computed: {
             fields() {
-                return this.view.filters;
+                return this.view?.filters || [];
             },
             filters() {
                 if (this.isMounted) {
-                    return this.$root.$refs.currentViewComponent.filters || {};
+                    return this.$app.store.page.filters || {};
                 }
                 return {};
             },
@@ -36,18 +48,32 @@
                 }
                 return [];
             },
+            representFields() {
+                return Object.values(this.fields).reduce((obj, field) => {
+                    obj[field.name] = field.toRepresent(this.filters);
+                    return obj;
+                }, {});
+            },
             pills() {
                 return this.activeFilters.reduce((arr, name) => {
                     const field = this.fields[name];
                     if (field) {
                         arr.push({
                             name,
+                            field,
                             title: this.fields[name].title,
-                            value: this.filters[name],
                         });
                     }
                     return arr;
                 }, []);
+            },
+        },
+        watch: {
+            representFields: {
+                handler(value) {
+                    this.sandbox = value;
+                },
+                immediate: true,
             },
         },
         mounted() {
@@ -66,23 +92,23 @@
 <style scoped>
     .pill {
         padding: 5px 7px 5px 10px;
-        margin-right: 5px;
         background-color: var(--btn-selected-bg-color);
         color: var(--btn-selected-color);
-        margin-bottom: 0.5rem;
     }
-    .pill i {
+
+    .pill .remove-icon {
         padding: 2px 3px;
         cursor: pointer;
     }
-    .pill__text {
-        display: inline-block;
-        max-width: 200px;
-        padding: 0 0 2px 0;
-        margin: auto;
-        white-space: nowrap;
-        overflow: hidden;
-        vertical-align: middle;
-        text-overflow: ellipsis;
+</style>
+
+<style lang="scss">
+    .pill .boolean-select {
+        padding: 0 2px;
+        margin-bottom: -6px;
+        margin-top: -6px;
+        .fa {
+            padding: 0;
+        }
     }
 </style>

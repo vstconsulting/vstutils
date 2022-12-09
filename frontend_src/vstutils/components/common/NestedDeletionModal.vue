@@ -73,7 +73,6 @@
                     instances: this.instances,
                     purge,
                 });
-                this.$app.store.page.toggleAllSelection();
             },
         },
     };

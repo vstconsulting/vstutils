@@ -1,4 +1,4 @@
-import { escapeHtml, hasOwnProp, mergeDeep } from '../utils';
+import { deepEqual, escapeHtml, hasOwnProp, mergeDeep } from '../utils';
 import { ModelValidationError } from './errors';
 
 class ModelUtils {
@@ -150,7 +150,7 @@ export function makeModel(cls, name) {
 export class Model {
     /** @type {Array<BaseField>} */
     static declaredFields = [];
-    /** @type {Object<string, string[]>} */
+    /** @type {Object<string, string[]>|null} */
     static fieldsGroups = null;
     /** @type {string|null} */
     static viewFieldName = null;
@@ -181,6 +181,16 @@ export class Model {
     }
 
     /**
+     * @param {Record<string, unknown>} data
+     * @return {Model}
+     */
+    static fromRepresentData(data) {
+        const instance = new this();
+        instance._validateAndSetData(data);
+        return instance;
+    }
+
+    /**
      * @param {Record<string, unknown>} representData
      * @return {Record<string, unknown>}
      */
@@ -193,6 +203,18 @@ export class Model {
             }
         }
         return data;
+    }
+
+    /**
+     * @param {Record<string, unknown>} data
+     * @return {Record<string, unknown>}
+     */
+    static innerToRepresent(data) {
+        const representData = {};
+        for (const [name, field] of this.fields) {
+            representData[name] = field.toRepresent(data);
+        }
+        return representData;
     }
 
     /**
@@ -278,6 +300,7 @@ export class Model {
 
     /**
      * Method, that returns instance's value of PK field.
+     * @returns {string|number|undefined|null}
      */
     getPkValue() {
         return this._parentInstance?.getPkValue() || this._data[this._pkField?.name];
@@ -369,18 +392,17 @@ export class Model {
 
     /**
      * Checks if this instance's data is equal to data of the provided instance
-     * @param {Model|Object} other
+     * @param {Model} other
      * @return {boolean}
      */
     isEqual(other) {
         if (this === other) return true;
-        let data = other;
-        if (other instanceof Model) {
-            if (other.constructor !== this.constructor) return false;
-            data = other._data;
-        }
+        if (!(other instanceof Model)) return false;
+        if (other.constructor !== this.constructor) return false;
         for (const field of this._fields.values()) {
-            if (!field.isSameValues(this._data, data)) return false;
+            if (!deepEqual(field._getValueFromData(this._data), field._getValueFromData(other._data))) {
+                return false;
+            }
         }
         return true;
     }

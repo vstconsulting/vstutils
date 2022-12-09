@@ -1,6 +1,9 @@
-from django.db import models
+import io
 
-from vstutils.api import fields, filters
+from django.db import models
+from django.http.response import FileResponse
+
+from vstutils.api import fields, filters, actions
 from vstutils.models import BModel
 from vstutils.api.serializers import VSTSerializer, BaseSerializer
 from vstutils.api.fields import (
@@ -28,6 +31,74 @@ class UpdateAuthorSerializer(VSTSerializer):
 
 class RelatedPostSerializer(BaseSerializer):
     title = fields.CharField(default='Title', help_text='Some description')
+
+
+class CheckNamedResponseSerializer(BaseSerializer):
+    detail = fields.CharField(read_only=True)
+
+
+def check_named_response(view, request, *args, **kwargs):
+    serializer = view.get_serializer()
+    assert isinstance(serializer, CheckNamedResponseSerializer), f"{serializer}"
+    return {"detail": "OK"}
+
+
+class AuthorProfileSerializer(BaseSerializer):
+    phone = PhoneField(allow_null=True, required=False)
+
+    def update(self, instance, validated_data):
+        result = super().update(instance, validated_data)
+        result.save()
+        return result
+
+
+class PhoneBookSerializer(AuthorProfileSerializer):
+    name = CharField(read_only=True)
+
+
+class PropertyAuthorSerializer(BaseSerializer):
+    phone = PhoneField(allow_null=True, required=False)
+
+
+@actions.SimpleAction(serializer_class=PropertyAuthorSerializer)
+def simple_property_action(self, request, *args, **kwargs):
+    """
+    Simple property description
+    """
+    return self.get_object()
+
+
+@simple_property_action.setter
+def simple_property_action(self, instance, request, serializer, *args, **kwargs):
+    instance.save(update_fields=['phone'])
+
+
+@simple_property_action.deleter
+def simple_property_action(self, instance, request, *args, **kwargs):
+    instance.phone = ''
+    instance.save(update_fields=['phone'])
+
+
+@actions.SimpleAction(
+    serializer_class=PropertyAuthorSerializer,
+    query_serializer=PropertyAuthorSerializer,
+    title='Get query',
+    icons='fas fa-pen',
+)
+def simple_property_action_with_query(self, request, query_data, *args, **kwargs):
+    instance = self.get_object()
+    if query_data.get('phone', instance.phone) == instance.phone:
+        return {'phone': instance.phone}
+    return {}
+
+
+@actions.EmptyAction(methods=['get'], result_serializer_class=FileResponse)
+def get_file(self, request, *args, **kwargs):
+    return FileResponse(
+        streaming_content=io.BytesIO(b'{}'),
+        as_attachment=True,
+        filename=f'{self.get_object().id}.json'
+    )
 
 
 class Author(BModel):
@@ -70,6 +141,25 @@ class Author(BModel):
                 'model': 'test_proj.models.fields_testing.ExtraPost',
                 'arg': 'id'
             }
+        }
+        _extra_view_attributes = {
+            "empty_action": actions.EmptyAction(name='empty_action')(lambda v, r, *a, **k: None),
+            "check_named_response": actions.Action(serializer_class=CheckNamedResponseSerializer)(check_named_response),
+            "author_profile": actions.SimpleAction(
+                name='author_profile',
+                methods=["get", "put", "delete"],
+                serializer_class=AuthorProfileSerializer
+            )(),
+            "simple_property_action": simple_property_action,
+            "simple_property_action_with_query": simple_property_action_with_query,
+            "get_file": get_file,
+            "phone_book": actions.SimpleAction(
+                name='phone_book',
+                methods=["get"],
+                detail=False,
+                is_list=True,
+                serializer_class=PhoneBookSerializer
+            )(),
         }
 
 

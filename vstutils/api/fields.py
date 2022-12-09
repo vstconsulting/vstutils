@@ -35,8 +35,6 @@ class VSTCharField(CharField):
     This field translate any json type to string for model.
     """
 
-    __slots__ = ()
-
     def to_internal_value(self, data) -> _t.Text:
         with raise_context():
             if not isinstance(data, str):
@@ -59,8 +57,6 @@ class FileInStringField(VSTCharField):
         Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
     """
 
-    __slots__ = ('media_types',)
-
     def __init__(self, **kwargs):
         self.media_types = kwargs.pop('media_types', ('*/*',))
         super().__init__(**kwargs)
@@ -80,8 +76,6 @@ class SecretFileInString(FileInStringField):
         Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
     """
 
-    __slots__ = ()
-
     def __init__(self, **kwargs):
         kwargs['style'] = {'input_type': 'password'}
         super().__init__(**kwargs)
@@ -98,8 +92,6 @@ class BinFileInStringField(FileInStringField):
     .. note::
         Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
     """
-
-    __slots__ = ()
 
 
 class CSVFileField(FileInStringField):
@@ -138,7 +130,6 @@ class CSVFileField(FileInStringField):
                         Supported syntax using ``*``. Default: ``['text/csv']``
     :type media_types: tuple,list
     """
-    __slots__ = ('min_column_width', 'items', 'parser_config')
 
     items: Serializer
     min_column_width: int
@@ -186,7 +177,6 @@ class AutoCompletionField(VSTCharField):
     .. note::
         Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
     """
-    __slots__ = 'autocomplete', 'autocomplete_property', 'autocomplete_represent', 'use_prefetch'
 
     autocomplete: _t.Text
     autocomplete_property: _t.Text
@@ -228,16 +218,6 @@ class CommaMultiSelect(VSTCharField):
     .. note::
         Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
     """
-
-    __slots__ = (
-        'select_model',
-        'select_separator',
-        'select_property',
-        'select_represent',
-        'use_prefetch',
-        'make_link',
-        'dependence'
-    )
 
     select_model: _t.Text
     select_separator: _t.Text
@@ -282,16 +262,22 @@ class DynamicJsonTypeField(VSTCharField):
                     Uses mapping where key is value of subscribed field and
                     value is list with values to choice.
     :type choices: dict
+    :param source_view: Allows to to use parent views data as source for field creation.
+                        Exact view path (`/user/{id}/`) or relative parent specifier
+                        (`<<parent>>.<<parent>>.<<parent>>`) can be provided. For example if current page is
+                        `/user/1/role/2/` and `source_view` is `<<parent>>.<<parent>>` then data
+                        from `/user/1/` will be used. Only detail views if supported.
+    :type source_view: str
 
 
     .. note::
         Effective only in GUI. In API works similar to :class:`.VSTCharField` without value modifications.
     """
-    __slots__ = 'field', 'choices', 'types'
 
     field: _t.Text
     choices: _t.Dict
     types: _t.Dict
+    source_view: _t.Text
 
     def is_json(self, real_field):
         return isinstance(real_field, Serializer)
@@ -300,6 +286,7 @@ class DynamicJsonTypeField(VSTCharField):
         self.field = kwargs.pop('field')
         self.choices = kwargs.pop('choices', {})
         self.types = kwargs.pop('types', {})
+        self.source_view = kwargs.pop('source_view', None)
         super().__init__(**kwargs)
         for field in self.types.values():
             if isinstance(field, Field):
@@ -361,7 +348,6 @@ class DependEnumField(DynamicJsonTypeField):
     .. note::
         Effective only in GUI. In API works similar to :class:`.VSTCharField` without value modification.
     """
-    __slots__ = ()
 
     def is_json(self, real_field):
         return False
@@ -387,7 +373,6 @@ class DependFromFkField(DynamicJsonTypeField):
         GUI will show field as simple text.
 
     """
-    __slots__ = ('field', 'field_attribute')
 
     default_related_field = VSTCharField(allow_null=True, allow_blank=True, default='')
 
@@ -444,8 +429,6 @@ class TextareaField(VSTCharField):
         Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
     """
 
-    __slots__ = ()
-
 
 class HtmlField(VSTCharField):
     """
@@ -457,8 +440,6 @@ class HtmlField(VSTCharField):
     .. note::
         Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
     """
-
-    __slots__ = ()
 
 
 class FkField(IntegerField):
@@ -518,14 +499,6 @@ class FkField(IntegerField):
     .. note::
         Effective only in GUI. Works similar to :class:`rest_framework.IntegerField` in API.
     """
-    __slots__ = (
-        'select_model',
-        'autocomplete_property',
-        'autocomplete_represent',
-        'use_prefetch',
-        'make_link',
-        'dependence'
-    )
 
     select_model: _t.Text
     autocomplete_property: _t.Text
@@ -579,8 +552,6 @@ class FkModelField(FkField):
         You should check it manually in signals or validators.
 
     """
-
-    __slots__ = ('model_class',)
 
     model_class: _t.Type[models.Model]
 
@@ -670,8 +641,6 @@ class UptimeField(IntegerField):
 
     """
 
-    __slots__ = ()
-
 
 class RedirectFieldMixin:
     """
@@ -686,8 +655,6 @@ class RedirectFieldMixin:
     :type concat_field_name: bool
     """
     redirect: bool = True
-
-    __slots__ = ('operation_name', 'depend_field', 'concat_field_name')
 
     def __init__(self, **kwargs):
         self.operation_name = kwargs.pop('operation_name', None)
@@ -705,8 +672,6 @@ class RedirectIntegerField(RedirectFieldMixin, IntegerField):
 
     """
 
-    __slots__ = ()
-
 
 class RedirectCharField(RedirectFieldMixin, CharField):
     """
@@ -716,8 +681,6 @@ class RedirectCharField(RedirectFieldMixin, CharField):
         Effective only in GUI. Works similar to :class:`rest_framework.IntegerField` in API.
 
     """
-
-    __slots__ = ()
 
 
 class NamedBinaryFileInJsonField(VSTCharField):
@@ -742,8 +705,6 @@ class NamedBinaryFileInJsonField(VSTCharField):
         Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
 
     """
-
-    __slots__ = ('file', 'post_handlers', 'pre_handlers')
 
     __valid_keys = ('name', 'content', 'mediaType')
     default_error_messages = {
@@ -842,8 +803,6 @@ class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
     :class:`vstutils.api.validators.ImageValidator`.
     """
 
-    __slots__ = ()
-
 
 class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
     """
@@ -855,7 +814,6 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
     input. Default: False.
     """
 
-    __slots__ = ()
     default_error_messages = {
         'not a list': lazy_translate('value is not a valid list'),
     }
@@ -903,8 +861,6 @@ class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):
     Extends :class:`.MultipleNamedBinaryFileInJsonField` but uses list of JSONs.
     Used for operating with multiple images and works as list of :class:`NamedBinaryImageInJsonField`.
     """
-
-    __slots__ = ()
 
 
 class PasswordField(CharField):

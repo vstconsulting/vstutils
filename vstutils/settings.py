@@ -52,9 +52,9 @@ PROJECT_GUI_NAME: _t.Text = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME[0].upper(
 
 PY_VER: _t.SupportsInt = sys.version_info.major
 TMP_DIR: _t.Text = gettempdir() or '/tmp'  # nosec
-BASE_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
-VST_PROJECT_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_project_module.__file__))
-VST_PROJECT_LIB_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
+BASE_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))  # type: ignore
+VST_PROJECT_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_project_module.__file__))  # type: ignore
+VST_PROJECT_LIB_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))  # type: ignore
 __kwargs: _t.Dict[_t.Text, _t.Any] = dict(
     PY=PY_VER,
     PY_VER='.'.join([str(i) for i in sys.version_info[:2]]),
@@ -191,6 +191,7 @@ class WebSection(BaseAppendSection):
         'max_tfa_attempts': ConfigIntType,
         'etag_default_timeout': ConfigIntSecondsType,
         'allow_auto_image_resize': ConfigBoolType,
+        'enable_metrics': ConfigBoolType,
     }
 
 
@@ -320,7 +321,9 @@ class RPCSection(BaseAppendSection):
         'heartbeat': ConfigIntType,
         'results_expiry_days': ConfigIntType,
         'create_instance_attempts': ConfigIntType,
-        'enable_worker': ConfigBoolType
+        'enable_worker': ConfigBoolType,
+        'task_send_sent_event': ConfigBoolType,
+        'worker_send_task_events': ConfigBoolType,
     }
 
 
@@ -440,10 +443,12 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'secure_hsts_preload': False,
             'secure_hsts_seconds': 0,
             'health_throttle_rate': 60,
+            'metrics_throttle_rate': 120,
             'bulk_threads': 3,
             'max_tfa_attempts': ConfigIntType(os.getenv(f'{ENV_NAME}_MAX_TFA_ATTEMPTS', 5)),
             'etag_default_timeout': ConfigIntSecondsType(os.getenv(f'{ENV_NAME}_ETAG_TIMEOUT', '1d')),
             'allow_auto_image_resize': True,
+            'enable_metrics': True,
         },
         'database': {
             **env.db(default=f'sqlite:///{KWARGS["PROG"]}/db.{KWARGS["PROG_NAME"]}.sqlite3'),
@@ -501,7 +506,9 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'create_instance_attempts': 10,
             'default_delivery_mode': "persistent",
             'broker_transport_options': {},
-            'enable_worker': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_WORKER', 'True'))
+            'enable_worker': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_WORKER', 'True')),
+            'task_send_sent_event': True,
+            'worker_send_task_events': True,
         },
         'worker': {
             'app': os.getenv('VST_CELERY_APP', '{PROG_NAME}.wapp:app'),
@@ -991,6 +998,7 @@ TERMS_URL: _t.Text = ''
 CONTACT: _t.Dict = config['contact'].all()
 SCHEMA_CACHE_TIMEOUT = web['openapi_cache_timeout']
 HEALTH_THROTTLE_RATE: _t.Text = f"{web['health_throttle_rate']}/minute"
+METRICS_THROTTLE_RATE: _t.Text = f"{web['metrics_throttle_rate']}/minute"
 OPENAPI_VIEW_CLASS: _t.Text = 'vstutils.api.schema.views.OpenApiView'
 BULK_THREADS = web['bulk_threads']
 
@@ -1021,6 +1029,8 @@ API: SIMPLE_OBJECT_SETTINGS_TYPE = {
 }
 
 HEALTH_BACKEND_CLASS: _t.Text = 'vstutils.api.health.DefaultBackend'
+METRICS_BACKEND_CLASS: _t.Text = web.get('metrics_backend', fallback='vstutils.api.metrics.DefaultBackend')
+ENABLE_METRICS_VIEW: bool = web['enable_metrics']
 
 # Rest Api settings
 # http://www.django-rest-framework.org/api-guide/settings/
@@ -1194,6 +1204,8 @@ if RPC_ENABLED:
     CELERY_ACCEPT_CONTENT = ['pickle', 'json']
     CELERY_TASK_SERIALIZER = 'pickle'
     CELERY_RESULT_EXPIRES = rpc["results_expiry_days"]
+    CELERY_SEND_SENT_EVENT = rpc["task_send_sent_event"]
+    CELERY_SEND_EVENTS = rpc["worker_send_task_events"]
     CELERY_DEFAULT_DELIVERY_MODE = rpc["default_delivery_mode"]
     CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
     CELERY_TASK_CREATE_MISSING_QUEUES = True

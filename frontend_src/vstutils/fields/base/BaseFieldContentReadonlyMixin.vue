@@ -1,38 +1,30 @@
 <template>
-    <p :aria-label="aria_label" :aria-labelledby="label_id">
-        <span v-if="prependText" v-text="$t(prependText) + ' '" />
-        {{ preparedValue }}
-        <span v-if="appendText" v-text="' ' + $t(appendText)" />
-    </p>
+    <FieldReadonlyValue :field="field" :value="preparedValue" />
 </template>
 
-<script>
-    import BaseFieldContentMixin from './BaseFieldContentMixin.js';
-    import BaseFieldInnerComponentMixin from './BaseFieldInnerComponentMixin.js';
-    import FieldLabelIdMixin from '../FieldLabelIdMixin.js';
+<script lang="ts">
+    import type { PropType } from 'vue';
+    import { defineComponent } from 'vue';
+    import type { Field } from './BaseField';
+    import FieldLabelIdMixin from '../FieldLabelIdMixin';
+    import BaseFieldContentMixin from './BaseFieldContentMixin';
+    import BaseFieldInnerComponentMixin from './BaseFieldInnerComponentMixin';
+    import FieldReadonlyValue from './FieldReadonlyValue.vue';
 
-    export default {
+    export default defineComponent({
         name: 'BaseFieldContentReadonlyMixin',
+        components: { FieldReadonlyValue },
         mixins: [BaseFieldContentMixin, BaseFieldInnerComponentMixin, FieldLabelIdMixin],
         props: {
-            field: { type: Object, required: true },
+            field: { type: Object as PropType<Field>, required: true },
             // eslint-disable-next-line vue/require-prop-types
-            value: { default: null },
+            value: { default: undefined },
             data: { type: Object, required: true },
         },
         computed: {
-            preparedValue() {
-                if (this.value === undefined || this.value === null) {
-                    return '';
-                }
-                return this.value;
+            preparedValue(): string | number {
+                return this.value as unknown as string | number;
             },
         },
-    };
+    });
 </script>
-
-<style scoped>
-    p {
-        margin: 0;
-    }
-</style>

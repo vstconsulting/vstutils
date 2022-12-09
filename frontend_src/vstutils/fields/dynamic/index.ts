@@ -1,5 +1,5 @@
-import DynamicField from './DynamicField.js';
 import DynamicFieldMixin from './DynamicFieldMixin.vue';
+export * from './DynamicField';
 export * from './DependFromFkField';
 
-export { DynamicField, DynamicFieldMixin };
+export { DynamicFieldMixin };

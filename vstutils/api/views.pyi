@@ -9,3 +9,7 @@ class BulkViewSet(base.rvs.APIView):
 
 class HealthView(base.ListNonModelViewSet):
     ...
+
+
+class MetricsView(base.ListNonModelViewSet):
+    ...

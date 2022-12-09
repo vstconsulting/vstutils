@@ -225,6 +225,8 @@ are also supported (with the corresponding types):
 * **max_tasks_per_child** - :celery_docs:`CELERYD_MAX_TASKS_PER_CHILD <userguide/configuration.html#std-setting-worker_max_tasks_per_child>`
 * **results_expiry_days** - :celery_docs:`CELERY_RESULT_EXPIRES <userguide/configuration.html#std-setting-result_expires>`
 * **default_delivery_mode** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE <userguide/configuration.html#task-default-delivery-mode>`
+* **task_send_sent_event** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE <userguide/configuration.html#task_send_sent_event>`
+* **worker_send_task_events** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE <userguide/configuration.html#worker_send_task_events>`
 
 
 .. _worker:
@@ -310,6 +312,13 @@ The following variables from Django settings are also supported (with the corres
 * **x_frame_options** - :django_docs:`X_FRAME_OPTIONS <settings/#x-frame-options>`
 * **use_x_forwarded_host** - :django_docs:`USE_X_FORWARDED_HOST <settings/#use-x-forwarded-host>`
 * **use_x_forwarded_port** - :django_docs:`USE_X_FORWARDED_PORT <settings/#use-x-forwarded-port>`
+
+The following settings affects prometheus metrics endpoint (which can be used for monitoring application):
+
+* **metrics_throttle_rate** - Count of requests to ``/api/metrics/`` endpoint. Default: ``120``.
+* **enable_metrics** - Enable/disable ``/api/metrics/`` endpoint for app. Default: ``true``
+* **metrics_backend** - Python class path with metrics collector backend. Default: ``vstutils.api.metrics.DefaultBackend``
+  Default backend collects metrics from uwsgi workers and python version info.
 
 
 .. _centrifugo:

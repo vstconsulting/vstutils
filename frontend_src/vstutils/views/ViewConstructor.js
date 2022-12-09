@@ -8,7 +8,7 @@ import {
     RequestTypes,
     ViewTypes,
 } from '../utils';
-import signals from '../signals.js';
+import { signals } from '@/vstutils/signals';
 import { QuerySet, SingleEntityQueryset } from '../querySet';
 import { NoModel } from '../models';
 import { ActionView, ListView, PageEditView, PageNewView, PageView } from './View.ts';
@@ -174,13 +174,13 @@ export default class ViewConstructor {
                 pathSchema[EDIT_STYLE_PROPERTY_NAME] !== undefined
                     ? pathSchema[EDIT_STYLE_PROPERTY_NAME]
                     : editStyleViewDefault;
-            const pathParameters = path
-                .format_keys()
-                .map((paramName) =>
-                    this.fieldsResolver.resolveField(
-                        pathSchema.parameters.find((param) => param.name === paramName),
-                    ),
-                );
+            const pathParameters = path.format_keys().map((paramName) => {
+                const paramSchema = pathSchema.parameters.find((param) => param.name === paramName);
+                if (!paramSchema) {
+                    throw new Error(`Cannot find schema for param "${paramName}" on view "${path}"`);
+                }
+                return this.fieldsResolver.resolveField(paramSchema);
+            });
 
             const deepNestedOn = deepNestedParents.find((deepParentView) =>
                 path.startsWith(deepParentView.path),
@@ -251,9 +251,9 @@ export default class ViewConstructor {
                     const isEmpty =
                         !requestModel || requestModel.writableFields.length === 0 || requestModel === NoModel;
                     const isMultiAction =
-                        (operationOptions[IS_MULTI_ACTION_PROPERTY_NAME] !== undefined &&
-                            operationOptions[IS_MULTI_ACTION_PROPERTY_NAME]) ||
-                        isEmpty;
+                        operationOptions[IS_MULTI_ACTION_PROPERTY_NAME] !== undefined
+                            ? operationOptions[IS_MULTI_ACTION_PROPERTY_NAME]
+                            : isEmpty;
 
                     const confirmationRequired = operationOptions['x-require-confirmation'];
 

@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import VueRouter from 'vue-router';
 import moment from 'moment';
-import signals from '../signals.js';
 import { i18n } from '@/vstutils/translation';
 import { getApp } from './app-helpers';
 import { LocalSettings } from './localSettings';
@@ -11,20 +10,6 @@ export const guiLocalSettings = new LocalSettings('guiLocalSettings');
 
 export function hasOwnProp(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-
-/**
- * Return property's value of the object or fallback if property is missing
- * @param {Object} obj
- * @param {string} prop
- * @param {any} [fallback]
- * @return {any}
- */
-export function getProp(obj, prop, fallback = undefined) {
-    if (hasOwnProp(obj, prop)) {
-        return obj[prop];
-    }
-    return fallback;
 }
 
 /**
@@ -71,17 +56,6 @@ String.prototype.format_keys = function () {
         return item.slice(1, item.length - 1);
     });
 };
-
-/**
- * Function, that removes spaces symbols from the begging and from the end of string.
- * @param {string} s.
- */
-export function trim(s) {
-    if (s) {
-        return s.replace(/^ */g, '').replace(/ *$/g, '');
-    }
-    return '';
-}
 
 /**
  * Function returns capitalized string - first char is in UpperCase, others - in LowerCase.
@@ -503,7 +477,6 @@ export class ObjectPropertyRetriever {
      * @returns {boolean}
      * @private
      */
-    // eslint-disable-next-line no-unused-vars
     _enumerableAndNotEnumerable(obj, prop) {
         return true;
     }
@@ -1137,30 +1110,6 @@ export function mapObjectValues(obj, f) {
 }
 
 /**
- * Provided function will be guaranteed called after the given signal
- * @param {string} signalName
- * @param {Function} func
- */
-export const registerHook = (() => {
-    const emittedSignals = new Map();
-
-    signals.connect('APP_CREATED', () => emittedSignals.clear());
-
-    return function (signalName, func) {
-        const isEmitted = emittedSignals.get(signalName);
-        if (isEmitted === undefined) {
-            emittedSignals.set(signalName, false);
-            signals.once(signalName, () => emittedSignals.set(signalName, true));
-            signals.once(signalName, func);
-        } else if (isEmitted) {
-            func();
-        } else if (!isEmitted) {
-            signals.once(signalName, func);
-        }
-    };
-})();
-
-/**
  * Function that returns first item from iterator for which callbackFn will return true
  * @param {Iterator<T>} iterator
  * @param {Function} callbackFn
@@ -1218,22 +1167,6 @@ export function stopEnterPropagation(element) {
 export function resumeEnterPropagation(element) {
     element.removeEventListener('keyup', stopEnterPropagationCallback);
 }
-
-export const SCHEMA_DATA_TYPE = {
-    string: 'string',
-    number: 'number',
-    integer: 'integer',
-    boolean: 'boolean',
-    object: 'object',
-    file: 'file',
-    array: 'array',
-};
-
-export const SCHEMA_DATA_TYPE_VALUES = Object.values(SCHEMA_DATA_TYPE);
-
-export const ENUM_TYPES = [SCHEMA_DATA_TYPE.string, SCHEMA_DATA_TYPE.integer, SCHEMA_DATA_TYPE.number];
-
-export const X_OPTIONS = 'x-options';
 
 export function chunkArray(array, chunkSize) {
     return array.reduce((resultArray, item, index) => {

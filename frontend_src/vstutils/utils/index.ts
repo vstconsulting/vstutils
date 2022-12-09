@@ -1,3 +1,4 @@
+import type { ParameterType } from 'swagger-schema-official';
 import type { Field } from '../fields/base/';
 
 export * from './todo.js';
@@ -34,3 +35,19 @@ export function tableColumnClasses(field: Field) {
     }
     return classes;
 }
+
+export const SCHEMA_DATA_TYPE: Record<ParameterType, ParameterType> = {
+    string: 'string',
+    number: 'number',
+    integer: 'integer',
+    boolean: 'boolean',
+    object: 'object',
+    file: 'file',
+    array: 'array',
+};
+
+export const SCHEMA_DATA_TYPE_VALUES = Object.values(SCHEMA_DATA_TYPE);
+
+export const ENUM_TYPES = [SCHEMA_DATA_TYPE.string, SCHEMA_DATA_TYPE.integer, SCHEMA_DATA_TYPE.number];
+
+export const X_OPTIONS = 'x-options';

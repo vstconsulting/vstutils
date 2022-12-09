@@ -10,6 +10,7 @@ import { createSchema } from '../../../unittests/schema';
 import { StringField } from '../../fields/text';
 import { ArrayField } from '../../fields/array';
 import { NumberField } from '../../fields/numbers';
+import { OrderingChoicesField } from '@/vstutils/fields/choices';
 import { createApp } from '../../../unittests/create-app';
 
 describe('ViewConstructor', () => {
@@ -123,12 +124,7 @@ describe('ViewConstructor', () => {
             expect(removeMultiAction.title).toBe('Remove');
             expect(removeMultiAction.isEmpty).toBeUndefined();
 
-            const archiveMultiAction = view.multiActions.get('archive');
-            expect(archiveMultiAction).toBeDefined();
-            expect(archiveMultiAction.name).toBe('archive');
-            expect(archiveMultiAction.title).toBe('Archive action');
-            expect(archiveMultiAction.iconClasses).toStrictEqual(['fas', 'fa-calculator']);
-            expect(archiveMultiAction.isEmpty).toBeTruthy();
+            expect(view.multiActions.has('archive')).toBeFalsy();
 
             const changeTitleMultiAction = view.multiActions.get('change_title');
             expect(changeTitleMultiAction).toBeDefined();
@@ -138,7 +134,7 @@ describe('ViewConstructor', () => {
 
             expect(view.sublinks.size).toBe(1);
             expect(view.actions.size).toBe(3);
-            expect(view.multiActions.size).toBe(3);
+            expect(view.multiActions.size).toBe(2);
         },
     );
 
@@ -305,8 +301,7 @@ describe('ViewConstructor', () => {
         for (const view of views.values()) {
             const routeAlreadyExists = routes.includes(view.path);
             if (routeAlreadyExists) {
-                // eslint-disable-next-line no-unused-vars
-                const samePathViews = Array.from(views).filter(([path, v]) => v.path === view.path);
+                const samePathViews = Array.from(views).filter(([, v]) => v.path === view.path);
                 throw new Error(`${samePathViews.length} views have same path (${view.path})`);
             }
             routes.push(view.path);
@@ -383,4 +378,34 @@ test('detail view filters', async () => {
     expect(model.fields.get('number_array').itemField).toBeInstanceOf(NumberField);
 
     expect(app.views.get('/without_filters/{id}/').filtersModelClass).toBeNull();
+});
+
+test('ordering filter field', async () => {
+    const schema = createSchema({
+        paths: {
+            '/some_list/': {
+                get: {
+                    operationId: 'some_list',
+                    parameters: [
+                        {
+                            name: 'ordering',
+                            in: 'query',
+                            type: 'array',
+                            collectionFormat: 'csv',
+                            items: {
+                                type: 'string',
+                                format: 'ordering_choices',
+                                enum: ['id', '-id'],
+                            },
+                        },
+                    ],
+                    responses: { 200: {} },
+                },
+            },
+        },
+    });
+    const app = await createApp({ schema });
+    const view = app.views.get('/some_list/');
+    expect(view.filters.ordering).toBeInstanceOf(ArrayField);
+    expect(view.filters.ordering.itemField).toBeInstanceOf(OrderingChoicesField);
 });

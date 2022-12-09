@@ -96,7 +96,7 @@ def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
     :return: -- rendered string
     :rtype: str
     """
-    cur_language = translation.get_language()
+    cur_language: str = translation.get_language()  # type: ignore
     try:
         if trans != cur_language:
             translation.activate(trans)

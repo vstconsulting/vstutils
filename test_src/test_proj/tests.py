@@ -2,6 +2,7 @@
 
 import gzip
 import os
+import pathlib
 import sys
 import shutil
 import re
@@ -18,6 +19,7 @@ from unittest.mock import patch, PropertyMock
 from collections import OrderedDict
 
 import ormsgpack
+import pytz
 from bs4 import BeautifulSoup
 from django import VERSION as django_version
 from django.conf import settings
@@ -27,7 +29,10 @@ from django.db.models import F
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.template.exceptions import TemplateDoesNotExist
-from django.middleware.csrf import _get_new_csrf_token
+try:
+    from django.middleware.csrf import _get_new_csrf_token
+except ImportError:  # nocv
+    from django.middleware.csrf import _get_new_csrf_string as _get_new_csrf_token
 from django.core.cache import cache
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
@@ -590,6 +595,16 @@ class VSTUtilsTestCase(BaseTestCase):
                     [2, 3, 6, 7]
                 )
 
+    def test_patching_field_defaults(self):
+        User = self.get_model_class('auth.User')
+        date = datetime.datetime(2022, 8, 1).astimezone(pytz.timezone(settings.TIME_ZONE))
+
+        with self.patch_field_default(User, 'date_joined', date):
+            user = User.objects.create_superuser(username='test username', email='test@taes.cn', password='qwerty')
+
+        user.delete()
+        self.assertEqual(user.date_joined, date)
+
     def test_deep_nested_with_filters(self):
         GroupWithFK = self.get_model_class('test_proj.GroupWithFK')
         ModelWithNestedModels = self.get_model_class('test_proj.ModelWithNestedModels')
@@ -671,6 +686,7 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(api['available_versions']['v1'], api['current_version'])
         self.assertEqual(api['endpoint'], 'https://vstutilstestserver/api/endpoint')
         self.assertEqual(api['health'], 'https://vstutilstestserver/api/health')
+        self.assertEqual(api['metrics'], 'https://vstutilstestserver/api/metrics')
         self.assertEqual(
             list(self.get_result('get', '/api/v1/').keys()).sort(),
             list(self.settings_obj.API[self.settings_obj.VST_API_VERSION].keys()).sort()
@@ -1714,6 +1730,11 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertTrue(api['paths']['/hosts/{id}/hosts/{hosts_id}/test/']['post']['x-require-confirmation'])
         self.assertEqual(api['paths']['/hosts/{id}/']['get']['x-subscribe-labels'], ['test_proj.HostGroup'])
 
+        self.assertEqual(api['paths']['/hosts/']['get']['parameters'][2]['name'], 'ordering')
+        self.assertEqual(api['paths']['/hosts/']['get']['parameters'][2]['type'], 'array')
+        self.assertEqual(api['paths']['/hosts/']['get']['parameters'][2]['items']['type'], 'string')
+        self.assertEqual(api['paths']['/hosts/']['get']['parameters'][2]['items']['format'], 'ordering_choices')
+
         # Test list only view
         self.assertIn('/hosts_list/', api['paths'])
         self.assertNotIn('/hosts_list/{id}/', api['paths'])
@@ -1926,6 +1947,42 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 },
             },
         })
+        self.assertDictEqual(api['definitions']['OneDynamicFields']['properties']['dynamic_with_types'], {
+            'title': 'Dynamic with types',
+            'type': 'string',
+            'format': 'dynamic',
+            'x-options': {
+                'source_view': '<<parent>>.<<parent>>',
+                'choices': {},
+                'field': 'field_type',
+                'types': {
+                    'boolean': 'boolean',
+                    'many_serializers': {
+                        'type': 'array',
+                        'items': nested_model,
+                    },
+                    'integer': {
+                        'type': 'integer',
+                        'maximum': 1337,
+                    },
+                    'serializer': nested_model,
+                    'image': {
+                        'type': 'object',
+                        'properties': {
+                            'name': {'type': 'string', 'x-nullable': True},
+                            'content': {'type': 'string', 'x-nullable': True},
+                            'mediaType': {'type': 'string', 'x-nullable': True}
+                        },
+                        'x-format': 'namedbinimage',
+                        'x-validators': {}
+                    },
+                    'context_depend': {
+                        'minLength': 1,
+                        'type': 'string',
+                    }
+                },
+            },
+        })
 
         # Check public centrifugo address when absolute path is provided
         self.assertEqual(api['info']['x-centrifugo-address'], 'wss://vstutilstestserver/notify/connection/websocket')
@@ -2005,6 +2062,61 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertTrue(api['paths'][sub_path]['get']['x-list'])
         sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subgroups/'
         self.assertTrue(api['paths'][sub_path]['get']['x-list'])
+
+        path = '/author/{id}/empty_action/'
+        self.assertCount(api['paths'][path], 2)
+        self.assertIn('post', api['paths'][path])
+        self.assertIn('parameters', api['paths'][path])
+        self.assertEqual(api['paths'][path]['post']['responses']['201']['schema']['$ref'], '#/definitions/Empty')
+        self.assertEqual(api['paths'][path]['post']['x-title'], 'Empty Action')
+
+        path = '/author/{id}/author_profile/'
+        self.assertCount(api['paths'][path], 4)
+        self.assertIn('get', api['paths'][path])
+        self.assertIn('put', api['paths'][path])
+        self.assertIn('delete', api['paths'][path])
+        self.assertIn('parameters', api['paths'][path])
+        self.assertEqual(api['paths'][path]['get']['responses']['200']['schema']['$ref'], '#/definitions/AuthorProfile')
+        self.assertEqual(api['paths'][path]['put']['responses']['200']['schema']['$ref'], '#/definitions/AuthorProfile')
+        self.assertIn('204', api['paths'][path]['delete']['responses'])
+        self.assertFalse(api['paths'][path]['get']['x-list'])
+        self.assertFalse(api['paths'][path]['put']['x-multiaction'])
+
+        path = '/author/{id}/simple_property_action/'
+        self.assertCount(api['paths'][path], 5)
+        self.assertIn('get', api['paths'][path])
+        self.assertIn('put', api['paths'][path])
+        self.assertIn('patch', api['paths'][path])
+        self.assertIn('delete', api['paths'][path])
+        self.assertIn('parameters', api['paths'][path])
+        self.assertEqual(api['paths'][path]['get']['responses']['200']['schema']['$ref'], '#/definitions/PropertyAuthor')
+        self.assertEqual(api['paths'][path]['put']['responses']['200']['schema']['$ref'], '#/definitions/PropertyAuthor')
+        self.assertEqual(api['paths'][path]['patch']['responses']['200']['schema']['$ref'], '#/definitions/PropertyAuthor')
+        self.assertIn('204', api['paths'][path]['delete']['responses'])
+        self.assertFalse(api['paths'][path]['get']['x-list'])
+        self.assertEqual(api['paths'][path]['get']['description'], 'Simple property description')
+        self.assertNotIn('x-title', api['paths'][path]['get'])
+        self.assertEqual(len(api['paths'][path]['get']['parameters']), 0)
+
+        path = '/author/{id}/simple_property_action_with_query/'
+        self.assertCount(api['paths'][path], 2)
+        self.assertIn('get', api['paths'][path])
+        self.assertIn('parameters', api['paths'][path])
+        self.assertEqual(api['paths'][path]['get']['responses']['200']['schema']['$ref'], '#/definitions/PropertyAuthor')
+        self.assertFalse(api['paths'][path]['get']['x-list'])
+        self.assertEqual(len(api['paths'][path]['get']['parameters']), 1)
+        self.assertEqual(api['paths'][path]['get']['x-title'], 'Get query')
+        self.assertEqual(api['paths'][path]['get']['x-icons'], ['fas', 'fa-pen'])
+
+
+        path = '/author/phone_book/'
+        self.assertCount(api['paths'][path], 2)
+        self.assertIn('count', api['paths'][path]['get']['responses']['200']['schema']['properties'])
+        self.assertIn('results', api['paths'][path]['get']['responses']['200']['schema']['properties'])
+        self.assertEqual(
+            api['paths'][path]['get']['responses']['200']['schema']['properties']['results']['items']['$ref'],
+            '#/definitions/PhoneBook',
+        )
 
     def test_search_fields(self):
         self.assertEqual(
@@ -3068,6 +3180,79 @@ class ProjectTestCase(BaseTestCase):
                 'mediaType': ''
             }
         ]
+
+    def test_make_action(self):
+        author1 = Author.objects.create(name='Author1', phone='')
+        author2 = Author.objects.create(name='Author2', phone='')
+        author3 = Author.objects.create(name='Author3', phone='88008008880')
+
+        results = self.bulk([
+            # [0] Simple empty action
+            {'method': 'post', 'path': ['author', author1.id, 'empty_action'], 'data': {}},
+            # [1] Simple method action with result
+            {'method': 'post', 'path': ['author', author1.id, 'check_named_response'], 'data': {}},
+            # [2-4] Simple action check
+            {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
+            {'method': 'put', 'path': ['author', author1.id, 'author_profile'], "data": {"phone": "88008008880"}},
+            {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
+            {'method': 'delete', 'path': ['author', author1.id, 'author_profile']},
+            {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
+            # [7-11] Simple action check
+            {'method': 'get', 'path': ['author', author2.id, 'simple_property_action']},
+            {'method': 'put', 'path': ['author', author2.id, 'simple_property_action'], "data": {"phone": "88008008880"}},
+            {'method': 'get', 'path': ['author', author2.id, 'simple_property_action']},
+            {'method': 'delete', 'path': ['author', author2.id, 'simple_property_action']},
+            {'method': 'get', 'path': ['author', author2.id, 'simple_property_action']},
+            # [12-14] Check query serializer
+            {'method': 'get', 'path': ['author', author3.id, 'simple_property_action_with_query']},
+            {'method': 'get', 'path': ['author', author3.id, 'simple_property_action_with_query'], 'query': 'phone=123'},
+            {'method': 'get', 'path': ['author', author3.id, 'simple_property_action_with_query'], 'query': 'phone=12345678'},
+            # [15] Check list page
+            {'method': 'get', 'path': ['author', 'phone_book']},
+
+        ])
+
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[0]['data'], {})
+
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[1]['data'], {"detail": "OK"})
+
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['data'], {"phone": ""})
+        self.assertEqual(results[3]['status'], 200)
+        self.assertEqual(results[3]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[4]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[5]['status'], 204)
+        self.assertEqual(results[6]['status'], 404)
+
+        self.assertEqual(results[7]['status'], 200)
+        self.assertEqual(results[7]['data'], {"phone": ""})
+        self.assertEqual(results[8]['status'], 200)
+        self.assertEqual(results[8]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[9]['status'], 200)
+        self.assertEqual(results[9]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[10]['status'], 204)
+        self.assertEqual(results[11]['status'], 200)
+        self.assertEqual(results[11]['data'], {"phone": ""})
+
+        self.assertEqual(results[12]['status'], 200)
+        self.assertEqual(results[12]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[13]['status'], 400)
+        self.assertEqual(results[13]['data'], {"phone": ['Ensure this field has at least 8 characters.']})
+        self.assertEqual(results[14]['status'], 200)
+        self.assertEqual(results[14]['data'], {"phone": None})
+
+        self.assertEqual(results[15]['status'], 200)
+        valid_results = [{"name": a.name, "phone": a.phone} for a in Author.objects.all()]
+        self.assertEqual(results[15]['data'], {"count": len(valid_results), "results": valid_results})
+
+        response = self.client.get(f'/api/v1/author/{author3.id}/get_file/', HTTP_ACCEPT_CONTENT='text/plain')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response, FileResponse)
+        self.assertEqual(response.as_attachment, True)
+        self.assertEqual(response.filename, f'{author3.id}.json')
 
     def test_crontab_field(self):
         results = self.bulk([
@@ -4940,6 +5125,15 @@ class CustomModelTestCase(BaseTestCase):
 
 class ToolsTestCase(BaseTestCase):
     databases = '__all__'
+
+    def test_metrics_page(self):
+        result = self.get_result('get', '/api/metrics/')
+        expected = (pathlib.Path(DIR_PATH)/'metrics.txt').read_text('utf-8')
+        expected = expected.replace(
+            '$VERSION',
+            f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}'
+        )
+        self.assertEqual(result, expected)
 
     def test_health_page(self):
         result = self.get_result('get', '/api/health/')

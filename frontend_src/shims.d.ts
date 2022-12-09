@@ -1,4 +1,4 @@
-import { IApp } from './vstutils/app';
+import type { IApp } from './vstutils/app';
 import type * as SPA from './app.common.js';
 
 declare global {
@@ -13,6 +13,7 @@ declare global {
     var spa: typeof SPA;
     var App: new (...args: any[]) => IApp;
     var __currentApp: IApp;
+    var SELECT2_THEME: string;
     /* eslint-enable no-var */
 }
 

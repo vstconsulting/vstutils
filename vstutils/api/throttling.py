@@ -5,7 +5,6 @@ from rest_framework.throttling import SimpleRateThrottle
 
 
 class ActionBasedThrottle(SimpleRateThrottle):
-    __slots__ = ('scope', 'rate', 'actions')
     url_regex = re.compile(r'/(?P<scope>[a-zA-Z0-9?=&_.%]+)/([a-zA-Z0-9?=&_.%]+)?/?$')
     throttle_rates = settings.THROTTLE
 

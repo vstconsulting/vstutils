@@ -1,9 +1,9 @@
-from django.conf.urls import url
+from django.urls.conf import re_path
 from django.contrib import admin
 
 app_name = 'suburls_app'
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^', admin.site.urls),
+    re_path(r'^admin/', admin.site.urls),
+    re_path(r'^', admin.site.urls),
 ]

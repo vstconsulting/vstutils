@@ -31,16 +31,14 @@
                             </div>
                             <div class="modal-body">
                                 <slot name="body" />
-                                <slot />
+                                <slot :open-modal="open" :close-modal="close" />
                             </div>
                             <div v-show="$slots.footer" class="modal-footer">
                                 <slot name="footer" />
                             </div>
                         </slot>
                     </div>
-                    <div v-if="loading" class="overlay dark">
-                        <i class="fas fa-2x fa-spin fa-sync-alt" />
-                    </div>
+                    <OverlayLoader v-if="loading" />
                 </div>
             </div>
         </portal>
@@ -49,9 +47,11 @@
 
 <script>
     import $ from 'jquery';
+    import OverlayLoader from '@/vstutils/components/OverlayLoader.vue';
 
     export default {
         name: 'BootstrapModal',
+        components: { OverlayLoader },
         props: {
             title: { type: String, default: '' },
             wrapperClasses: { type: [Array, String], default: null },

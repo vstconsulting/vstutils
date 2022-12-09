@@ -21,7 +21,7 @@ from django.db.models.query import QuerySet
 from django.db import transaction, models
 from django.utils.functional import cached_property, lazy
 from rest_framework.reverse import reverse
-from rest_framework import viewsets as vsets, views as rvs, exceptions, status
+from rest_framework import viewsets as vsets, views as rvs, mixins as drf_mixins, exceptions, status
 from rest_framework.serializers import BaseSerializer
 from rest_framework.response import Response as RestResponse
 from rest_framework.request import Request
@@ -166,7 +166,6 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
 
 
 class AutoSchema(DRFAutoSchema):
-    __slots__ = ()
 
     def get_description(self, path: _t.Text, method: _t.Text) -> _t.Text:
         # pylint: disable=simplifiable-if-statement,redefined-outer-name
@@ -214,9 +213,8 @@ class QuerySetMixin(rvs.APIView):
     """
     Instance REST operations.
     """
-    __slots__ = ()
-    queryset: _t.Optional[QuerySet]
-    _queryset: _t.Optional[QuerySet] = None
+    queryset: _t.Optional[_t.Union[QuerySet, models.Manager]]
+    _queryset: _t.Optional[_t.Union[QuerySet, models.Manager]] = None
     model: _t.Optional[_t.Type[models.Model]] = None
 
     @classproperty  # type: ignore
@@ -238,13 +236,13 @@ class QuerySetMixin(rvs.APIView):
         )
 
         queryset = self.queryset
-        if isinstance(queryset, QuerySet):
+        if isinstance(queryset, QuerySet):  # type: ignore
             # Ensure queryset is re-evaluated on each request.
             queryset = queryset.all()
-        return queryset
+        return queryset  # type: ignore
 
-    def get_extra_queryset(self) -> _t.Optional[QuerySet]:
-        return self.queryset
+    def get_extra_queryset(self) -> QuerySet:
+        return self.queryset  # type: ignore
 
     def get_queryset(self) -> QuerySet:
         if self.queryset is None:  # nocv
@@ -259,7 +257,6 @@ class QuerySetMixin(rvs.APIView):
 
 
 class GenericViewSetMeta(type(vsets.GenericViewSet)):  # type: ignore
-    __slots__ = ()
 
     def __new__(mcs, name, bases, attrs):
         new_class = super().__new__(mcs, name, bases, attrs)
@@ -283,7 +280,6 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
     - Optimizes the database query for GET requests, if possible,
       by selecting only the fields necessary for the serializer.
     """
-    __slots__ = ()
     optimize_get_by_values = settings.OPTIMIZE_GET_BY_VALUES
     optimize_get_by_values_actions = ()
     select_related = False
@@ -418,7 +414,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         Get request query data and serialize values if `query_serializer_class` attribute exists
         or attribute was send.
         """
-        serializer_class: _t.Type[BaseSerializer] = (
+        serializer_class: _t.Optional[_t.Type[BaseSerializer]] = (
                 query_serializer or getattr(self, 'query_serializer', None)
         )
         assert serializer_class is not None, "You must setup 'query_serializer_class' in arguments or view attribute."
@@ -528,7 +524,6 @@ class CachableHeadMixin(GenericViewSet):
 class CopyMixin(GenericViewSet):
     """ Mixin for viewsets which adds `copy` endpoint to view. """
 
-    __slots__ = ()
     #: Value of prefix which will be added to new instance name.
     copy_prefix = 'copy-'
     #: Name of field which will get a prefix.
@@ -573,7 +568,6 @@ class FileResponseRetrieveMixin(GenericViewSet):
         .. literalinclude:: ../test_src/test_proj/models/files.py
            :lines: 1-22,59-77
     """
-    __slots__ = ()
 
     instance_field_data: _t.Text
     instance_field_filename: _t.Text = 'filename'
@@ -599,7 +593,7 @@ class FileResponseRetrieveMixin(GenericViewSet):
 
         instance_edit_timestamp = None
         if self.instance_field_timestamp:
-            instance_edit: datetime.datetime = getattr(instance, self.instance_field_timestamp, None)
+            instance_edit: datetime.datetime = getattr(instance, self.instance_field_timestamp, None)  # type: ignore
             instance_edit_timestamp = instance_edit.timestamp() if instance_edit else None
 
         if instance_edit_timestamp and instance_edit_timestamp == float(request.META.get('HTTP_IF_NONE_MATCH', '0.0')):
@@ -655,20 +649,16 @@ class ModelViewSet(GenericViewSet, vsets.ModelViewSet):
 
     """
 
-    __slots__ = ()
-
 
 class NonModelsViewSet(GenericViewSet):
-    __slots__ = ()
     base_name = None
 
     def get_queryset(self) -> QuerySet:
         return QuerySet()  # nocv
 
 
-class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
+class ListNonModelViewSet(NonModelsViewSet, drf_mixins.ListModelMixin):
     # pylint: disable=abstract-method
-    __slots__ = ()
     schema = None  # type: ignore
 
     @property
@@ -697,21 +687,18 @@ class ReadOnlyModelViewSet(GenericViewSet, vsets.ReadOnlyModelViewSet):
     Default viewset like vstutils.api.base.ModelViewSet for readonly models.
     Inherited from :class:`.GenericViewSet`.
     """
-    __slots__ = ()
 
 
-class ListOnlyModelViewSet(GenericViewSet, vsets.mixins.ListModelMixin):
+class ListOnlyModelViewSet(GenericViewSet, drf_mixins.ListModelMixin):
     """
     Default viewset like vstutils.api.base.ModelViewSet for list only models.
     Inherited from :class:`.GenericViewSet`.
     """
-    __slots__ = ()
 
 
-class HistoryModelViewSet(ReadOnlyModelViewSet, vsets.mixins.DestroyModelMixin):
+class HistoryModelViewSet(ReadOnlyModelViewSet, drf_mixins.DestroyModelMixin):
     """
     Default viewset like ReadOnlyModelViewSet but for historical data
     (allow to delete, but can't create and update).
     Inherited from :class:`.GenericViewSet`.
     """
-    __slots__ = ()

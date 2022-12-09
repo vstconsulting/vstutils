@@ -1,37 +1,43 @@
 import type { Vue } from 'vue/types/vue';
 import type { ComponentOptions } from 'vue';
-import Centrifuge from 'centrifuge';
-import { defineStore } from 'pinia';
-import VueI18n from 'vue-i18n';
 import type VueRouter from 'vue-router';
 
+import Centrifuge from 'centrifuge';
+import { defineStore } from 'pinia';
+import type VueI18n from 'vue-i18n';
+
 import { ActionsManager } from '@/vstutils/actions';
-import { apiConnector, ApiConnector, openapi_dictionary } from '@/vstutils/api';
-import { Language, TranslationsManager } from '@/vstutils/api/TranslationsManager';
-import { AppConfiguration } from '@/vstutils/AppConfiguration';
+import type { ApiConnector } from '@/vstutils/api';
+import { apiConnector, openapi_dictionary } from '@/vstutils/api';
+import type { Language } from '@/vstutils/api/TranslationsManager';
+import { TranslationsManager } from '@/vstutils/api/TranslationsManager';
+import type { AppConfiguration } from '@/vstutils/AppConfiguration';
 import AppRoot from '@/vstutils/AppRoot.vue';
 import { AutoUpdateController } from '@/vstutils/autoupdate';
-import { ComponentsRegistrator, globalComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
+import type { ComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
+import { globalComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
 import { addDefaultFields, FieldsResolver } from '@/vstutils/fields';
-import { Model, ModelsResolver } from '@/vstutils/models';
+import type { Model } from '@/vstutils/models';
+import { ModelsResolver } from '@/vstutils/models';
 import { ErrorHandler } from '@/vstutils/popUp';
 import { QuerySetsResolver } from '@/vstutils/querySet';
 import { RouterConstructor } from '@/vstutils/router';
-import { APP_CREATED, signals } from '@/vstutils/signals';
 import {
-    createLocalSettingsStore,
-    createUserSettingsStore,
-    GLOBAL_STORE,
-    GlobalStore,
-    LocalSettingsStore,
-    pinia,
-    UserSettingsStore,
-} from '@/vstutils/store';
+    APP_AFTER_INIT,
+    APP_BEFORE_INIT,
+    APP_CREATED,
+    SCHEMA_MODELS_CREATED,
+    signals,
+} from '@/vstutils/signals';
+import type { GlobalStore, LocalSettingsStore, UserSettingsStore } from '@/vstutils/store';
+import { createLocalSettingsStore, createUserSettingsStore, GLOBAL_STORE, pinia } from '@/vstutils/store';
 import { i18n } from '@/vstutils/translation';
 import * as utils from '@/vstutils/utils';
-import { PageNewView, ListView, PageView, View, ViewConstructor, ViewsTree } from '@/vstutils/views';
+import type { View } from '@/vstutils/views';
+import { ListView, PageNewView, PageView, ViewConstructor, ViewsTree } from '@/vstutils/views';
 
 import type { Cache } from '@/cache';
+import type { GlobalStoreInitialized } from './store/globalStore';
 
 export function getCentrifugoClient(address?: string, token?: string) {
     if (!address) {
@@ -100,6 +106,7 @@ export interface IAppInitialized extends IApp {
     localSettingsModel: typeof Model;
     userSettingsStore: UserSettingsStore;
     viewsTree: ViewsTree;
+    store: GlobalStoreInitialized;
 }
 
 export class App implements IApp {
@@ -278,7 +285,7 @@ export class App implements IApp {
         for (const name of Object.keys(this.config.schema.definitions)) {
             this.modelsResolver.byReferencePath(`#/definitions/${name}`);
         }
-        signals.emit('allModels.created', { models: this.modelsResolver._definitionsModels });
+        signals.emit(SCHEMA_MODELS_CREATED, { app: this, models: this.modelsResolver._definitionsModels });
     }
 
     changeAppRootComponent(component: ComponentOptions<Vue>) {
@@ -397,7 +404,7 @@ export class App implements IApp {
      * Method, that creates store and router for an application and mounts it to DOM.
      */
     prepare() {
-        signals.emit('app.beforeInit', { app: this });
+        signals.emit(APP_BEFORE_INIT, { app: this });
 
         this.prepareViewsModelsFields();
         this.initLocalSettings();
@@ -431,7 +438,7 @@ export class App implements IApp {
             i18n: this.i18n,
         });
         this.application = this.rootVm;
-        signals.emit('app.afterInit', { app: this });
+        signals.emit(APP_AFTER_INIT, { app: this });
         utils.__setApp(this as unknown as IAppInitialized);
     }
 

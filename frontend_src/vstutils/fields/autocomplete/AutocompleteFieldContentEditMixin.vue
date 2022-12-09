@@ -1,6 +1,7 @@
 <template>
     <div class="input-group">
         <input
+            ref="inputEl"
             type="text"
             :class="classes"
             :style="styles"
@@ -8,6 +9,7 @@
             :aria-labelledby="label_id"
             :aria-label="aria_label"
             @blur="$emit('set-value', $event.target.value)"
+            @input="setValueByHandsInStore($event.target.value)"
         />
 
         <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
@@ -19,7 +21,7 @@
 <script>
     import $ from 'jquery';
     import autoComplete from 'JavaScript-autoComplete/auto-complete';
-    import { escapeHtml, trim } from '../../utils';
+    import { escapeHtml } from '../../utils';
     import { BaseFieldContentEdit } from '../base';
 
     /**
@@ -113,7 +115,7 @@
                     return;
                 }
 
-                this._filterAutocompleteData(trim(search_input), response);
+                this._filterAutocompleteData(search_input.trim(), response);
             },
             /**
              * Method returns value of 'data-hide' attribute of autocomplete DOM element.

@@ -21,6 +21,11 @@ export class QuerySetsResolver {
         throw new Error(`Cannot find model ${modelName} for path ${path}`);
     }
 
+    /**
+     * @param {string} modelName
+     * @param {string?} path
+     * @returns
+     */
     findQuerySet(modelName, path = null) {
         const matcher = this._getMatcher(modelName);
 

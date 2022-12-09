@@ -3,16 +3,16 @@
 import re
 import os
 import sys
+import subprocess
 import fnmatch
 import codecs
 import gzip
-import glob
 import shutil
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-from setuptools import find_packages, setup, Command
+from setuptools import find_packages, setup, errors, Command
 from setuptools.extension import Extension
 from setuptools.command.sdist import sdist as _sdist
 from setuptools.command.build_py import build_py as build_py_orig
@@ -121,8 +121,10 @@ def make_extensions(extensions_list, packages):
         '-g0', '-ggdb1',
         "-fno-strict-aliasing",
         "-fno-var-tracking-assignments",
-        "-pipe", "-std=c99", '-Werror=sign-compare'
+        "-pipe", "-std=c99", '-Werror=sign-compare',
     ]
+    if 'compile' in sys.argv:
+        extra_compile_args.append("-DBUILD_FROM_SOURCE")
     ext_modules = list(
         make_extention(m, f, extra_compile_args)
         for m, f in extensions_dict.items()
@@ -371,12 +373,11 @@ def make_setup(**opts):
 
     webpack_path = os.path.join(os.getcwd(), 'webpack.config.js')
     if os.path.exists(webpack_path) and is_build and os.environ.get('DONT_YARN', "") != 'true':
-        yarn_build_command = 'devBuild' if is_develop else 'build'
         try:
-            os.system('yarn install --pure-lockfile')
-            os.system('yarn ' + yarn_build_command)
-        except Extension as err:
-            print(err)
+            subprocess.check_call(['yarn', 'install', '--pure-lockfile'], stdout=sys.stdout, stderr=sys.stderr)
+            subprocess.check_call(['yarn', 'devBuild' if is_develop else 'build'], stdout=sys.stdout, stderr=sys.stderr)
+        except Exception as err:
+            raise errors.CompileError(str(err))
 
     setup(**opts)
 
@@ -428,7 +429,7 @@ kwargs = dict(
         'test': load_requirements('requirements-test.txt'),
         'rpc': requirements_rpc,
         'ldap': load_requirements('requirements-ldap.txt'),
-        'doc': ['django-docs==0.3.1'] + load_requirements('requirements-doc.txt'),
+        'doc': ['django-docs==0.3.3'] + load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
         'stubs': load_requirements('requirements-stubs.txt'),
         'pil': ['Pillow~=8.4.0;python_version<"3.7"', 'Pillow~=9.2.0;python_version>"3.6"'],

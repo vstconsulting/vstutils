@@ -1,0 +1,12 @@
+python_info{version="$VERSION"} 1
+test_database_connections 6
+test_cache_connections 4
+test_multiple_metrics 1 2 3
+test_data_values{int=1,str="text"} 1
+test_simple_metric 1
+test_generated_data_tuple 1 2 3
+test_generated_data_dict{int=1,str="text"} 1
+test_generated_data_simple 1
+test_generated_data_tuple 1 2 3
+test_generated_data_dict{int=1,str="text"} 1
+test_generated_data_simple 1

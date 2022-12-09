@@ -1,6 +1,6 @@
 <template>
     <component
-        :is="fieldComponent"
+        :is="realField.getComponent()"
         :field="realField"
         :data="data"
         :type="type"
@@ -8,36 +8,37 @@
     />
 </template>
 
-<script>
-    import BaseFieldMixin from '../base/BaseFieldMixin.vue';
-    import { StringField } from '../text';
+<script setup lang="ts">
+    import { watch, ref } from 'vue';
+    import { getApp } from '@/vstutils/utils';
+    import {
+        type Field,
+        type FieldPropsDefType,
+        type SetFieldValueOptions,
+        FieldPropsDef,
+    } from '@/vstutils/fields/base';
+    import type { DependFromFkField } from './DependFromFkField';
 
-    export default {
-        mixins: [BaseFieldMixin],
-        data() {
-            return {
-                realField: new StringField({ name: this.field.name }),
-            };
-        },
-        computed: {
-            fieldComponent() {
-                return this.realField.component;
-            },
-        },
-        created() {
-            this.$watch(`data.${this.field.dependField}`, () => {
-                this.updateRealField();
-                if (this.type === 'edit') {
-                    this.setValue(this.realField.getInitialValue());
-                }
-            });
+    const props = defineProps(FieldPropsDef as FieldPropsDefType<DependFromFkField>);
+    const emit = defineEmits<{
+        (e: 'set-value', payload: SetFieldValueOptions<DependFromFkField>): void;
+    }>();
 
-            this.updateRealField();
+    const app = getApp();
+    const realField = ref<Field>(app.fieldsResolver.resolveField({ type: 'string', name: props.field.name }));
+
+    watch(
+        () => props.data[props.field.dependField],
+        () => {
+            realField.value = props.field.getRealField(props.data);
+            if (props.type === 'edit') {
+                emit('set-value', {
+                    field: props.field.name,
+                    value: realField.value.getInitialValue(),
+                    markChanged: false,
+                });
+            }
         },
-        methods: {
-            updateRealField() {
-                this.realField = this.field.getRealField(this.data);
-            },
-        },
-    };
+        { immediate: true },
+    );
 </script>

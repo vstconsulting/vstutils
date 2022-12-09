@@ -21,6 +21,7 @@
                 :value="value"
                 :field="field"
                 :data="data"
+                :hideable="hideable"
                 @set-value="setValue"
             />
             <field_content_edit
@@ -28,6 +29,7 @@
                 :field="field"
                 :value="value"
                 :data="data"
+                :hideable="hideable"
                 @hide-field="$emit('hide-field', field)"
                 @set-value="setValue"
             />
@@ -41,6 +43,7 @@
     import BaseFieldContentReadonlyMixin from './BaseFieldContentReadonlyMixin.vue';
     import BaseFieldContentEdit from './BaseFieldContentEdit.vue';
     import BaseFieldListView from './BaseFieldListView.vue';
+    import { FieldPropsDef } from './types';
 
     export default {
         name: 'BaseFieldMixin',
@@ -62,14 +65,7 @@
              */
             field_list_view: BaseFieldListView,
         },
-        props: {
-            field: { type: Object, required: true },
-            data: { type: Object, required: true },
-            type: { type: String, required: true },
-            hideable: { type: Boolean, default: false },
-            hideTitle: { type: Boolean, default: false },
-            error: { type: [String, Object], default: null },
-        },
+        props: FieldPropsDef,
         data() {
             return {
                 wrapper_classes_list: {

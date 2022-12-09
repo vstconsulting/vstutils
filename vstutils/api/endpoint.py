@@ -153,8 +153,6 @@ class BulkMiddleware(BaseMiddleware):
 
 
 class BulkClientHandler(ClientHandler):
-    __slots__ = ()
-
     @modify_settings(MIDDLEWARE=settings.MIDDLEWARE_ENDPOINT_CONTROL)
     def __init__(self, *args, **kwargs):
         super().__init__(enforce_csrf_checks=False, *args, **kwargs)
@@ -246,7 +244,6 @@ class RequestDataField(FormatDataFieldMixin, DataSerializer):
 
 class MethodChoicesField(serializers.ChoiceField):
     """Field for HTTP method"""
-    __slots__ = ()
 
     def __init__(self, choices: _t.List = None, **kwargs):
         super().__init__(choices or REST_METHODS, **kwargs)
@@ -256,7 +253,6 @@ class MethodChoicesField(serializers.ChoiceField):
 
 
 class PathField(TemplateStringField):
-    __slots__ = ()
 
     def to_internal_value(self, data):
 
@@ -271,7 +267,6 @@ class PathField(TemplateStringField):
 
 class OperationSerializer(serializers.Serializer):
     # pylint: disable=abstract-method
-    __slots__ = ()
     renderer = ORJSONRenderer()
 
     path = PathField(required=True)
@@ -328,7 +323,6 @@ class EndpointViewSet(views.APIView):
     """
     Default API-endpoint viewset.
     """
-    __slots__ = ('results',)
 
     throttle_classes = []  # type: ignore
     schema = None  # type: ignore
@@ -359,7 +353,7 @@ class EndpointViewSet(views.APIView):
 
     def original_environ_data(self, request: BulkRequestType, *args) -> _t.Dict:
         get_environ = request.META.get
-        kwargs = {}
+        kwargs: _t.Dict[str, _t.Optional[_t.Any]] = {}
         for env_var in tuple(self.client_environ_keys_copy) + args:
             value = get_environ(env_var, None)
             if value:

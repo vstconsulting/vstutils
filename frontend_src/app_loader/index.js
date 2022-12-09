@@ -89,7 +89,6 @@ async function startApp(cache) {
         alert('Oops! It looks like version of current page has become outdated. Please, reload the page.');
     });
 
-    // eslint-disable-next-line no-unused-vars
     window.addEventListener('storage', function (e) {
         if (window.gui_version !== localStorage.getItem('gui_version')) {
             window.spa.signals.emit('app.version.updated');

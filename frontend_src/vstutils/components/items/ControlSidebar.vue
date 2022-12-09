@@ -19,7 +19,7 @@
                     :field="field"
                     :data="userSettings.settings[section.name]"
                     type="edit"
-                    @set-value="setUserSetting(section.name, field, $event.value)"
+                    @set-value="setUserSetting(section.name, $event)"
                 />
             </template>
             <component
@@ -29,7 +29,7 @@
                 :field="field"
                 :data="localSettings.settings"
                 type="edit"
-                @set-value="setLocalSetting(field, $event.value)"
+                @set-value="setLocalSetting"
             />
             <button class="btn btn-success btn-block" :disabled="disableSaveButton" @click="saveSettings">
                 <i class="fas fa-save" />
@@ -136,18 +136,11 @@
             reloadPage() {
                 window.location.reload();
             },
-            setUserSetting(section, field, value) {
-                this.userSettings.setValue({
-                    section,
-                    key: field.name,
-                    value,
-                });
+            setUserSetting(section, options) {
+                this.userSettings.setValue(section, options);
             },
-            setLocalSetting(field, value) {
-                this.localSettings.setValue({
-                    key: field.name,
-                    value,
-                });
+            setLocalSetting(options) {
+                this.localSettings.setValue(options);
             },
             cleanAllCache() {
                 window.cleanAllCacheAndReloadPage();

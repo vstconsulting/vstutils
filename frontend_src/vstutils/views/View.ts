@@ -1,23 +1,29 @@
-import { ComponentOptions, ref, Ref, toRef } from 'vue';
+import type { StoreState } from 'pinia';
+import type { ComponentOptions, Ref } from 'vue';
+import { ref, toRef } from 'vue';
+
+import type { IAppInitialized } from '../app';
+import { ListViewComponent } from '../components/list/';
+import { OneEntity } from '../components/page';
+import type { Model } from '../models';
+import {
+    createActionViewStore,
+    createDetailViewStore,
+    createEditViewStore,
+    createListViewStore,
+    createNewViewStore,
+} from '../store';
+import type { BaseViewStore } from '../store/helpers';
+import { useBasePageData } from '../store/helpers';
+import type { DetailPageStore } from '../store/page';
+import { formatPath, getApp, HttpMethods, joinPaths, pathToArray, ViewTypes } from '../utils';
+
 import type { Vue } from 'vue/types/vue';
 import type { Route, RouteConfig } from 'vue-router';
 import type { Operation as SwaggerOperation } from 'swagger-schema-official';
-import {
-    createActionViewStore,
-    createListViewStore,
-    createEditViewStore,
-    createNewViewStore,
-    createDetailViewStore,
-} from '../store';
-import { ListViewComponent } from '../components/list/';
-import { OneEntity } from '../components/page';
-import { formatPath, HttpMethods, joinPaths, pathToArray, ViewTypes } from '../utils';
 import type { QuerySet } from '../querySet';
-import { Model } from '../models';
 import type { BaseField } from '../fields/base';
-import { BaseViewStore, useBasePageData } from '../store/helpers';
-import { IAppInitialized } from '../app';
-import { DetailPageStore } from '../store/page';
+
 export { ViewTypes };
 
 export interface Operation {
@@ -68,6 +74,11 @@ export interface NotEmptyAction extends Action {
 
 type ViewType = keyof typeof ViewTypes;
 
+interface ResolveStateArgs {
+    route: Route;
+    store?: BaseViewStore;
+}
+
 interface ViewParams extends SwaggerOperation {
     operationId: string;
     level: number;
@@ -91,7 +102,7 @@ type ViewStoreOptions = () => Record<string, unknown>;
 export interface IView<
     TParams extends ViewParams = ViewParams,
     TStore extends BaseViewStore = BaseViewStore,
-    TSavedState = unknown,
+    TStateToSave = object,
 > {
     type: ViewType;
     path: string;
@@ -119,7 +130,8 @@ export interface IView<
     showOperationButtons: boolean;
     showBackButton: boolean;
 
-    resolveState(args: { route: Route; store?: TStore }): Promise<TSavedState>;
+    resolveState(args: { route: Route; store?: TStore }): Promise<TStateToSave>;
+    getSavedState(): StoreState<TStateToSave> | undefined;
 
     getStoreDefinition(): ViewStoreOptions;
 
@@ -204,8 +216,11 @@ export class View implements IView {
             customDefinition(originalStoreDefinitionFactory(view)());
     }
 
-    resolveState({ route, store }: { route: Route; store?: BaseViewStore }): Promise<unknown> {
-        return Promise.resolve(undefined);
+    resolveState(args: ResolveStateArgs): Promise<object> {
+        return Promise.resolve({});
+    }
+    getSavedState() {
+        return getApp().store.viewItemsMap.get(this.path)?.state as object | undefined;
     }
 
     /**
@@ -317,11 +332,11 @@ interface PageViewParams extends ViewParams {
     isFileResponse?: boolean;
 }
 
-interface PageViewSavedState {
+export interface PageViewStateToSave {
     instance: Ref<Model>;
 }
 
-export class PageView extends View implements IView<PageViewParams, DetailPageStore, PageViewSavedState> {
+export class PageView extends View implements IView<PageViewParams, DetailPageStore, PageViewStateToSave> {
     static viewType: ViewType = 'PAGE';
 
     declare params: PageViewParams;
@@ -356,11 +371,19 @@ export class PageView extends View implements IView<PageViewParams, DetailPageSt
         return super.getRoutePath();
     }
 
-    async resolveState(args: { route: Route; store?: DetailPageStore }): Promise<PageViewSavedState> {
+    async resolveState(args: { route: Route; store?: DetailPageStore }): Promise<PageViewStateToSave> {
         const { route, store } = args;
         if (store) {
             return { instance: toRef(store, 'instance') };
         }
+
+        // If currently opened page is edit page and this view is parent of that edit page
+        // then we can use instance from store to avoid making extra request
+        const currentPageStore = getApp().store.page;
+        if (currentPageStore.view.isEditPage() && currentPageStore.view.parent === this) {
+            return { instance: toRef(currentPageStore as DetailPageStore, 'instance') };
+        }
+
         return {
             instance: ref(
                 (await this.objects
@@ -368,6 +391,11 @@ export class PageView extends View implements IView<PageViewParams, DetailPageSt
                     .get(this.pkParamName ? route.params[this.pkParamName] : undefined)) as Model,
             ),
         };
+    }
+    getSavedState() {
+        return getApp().store.viewItemsMap.get(this.path)?.state as
+            | StoreState<PageViewStateToSave>
+            | undefined;
     }
 }
 
@@ -403,6 +431,8 @@ export class PageNewView extends View implements IView<PageNewParams> {
 export class PageEditView extends PageView implements IView<PageViewParams> {
     static viewType: ViewType = 'PAGE_EDIT';
 
+    // @ts-expect-error TODO PageEditView should not be inherited from PageView
+    parent: PageView | null = null;
     isEditStyleOnly = false;
     isPartial: boolean;
     hideReadonlyFields = true;
@@ -420,6 +450,11 @@ export class PageEditView extends PageView implements IView<PageViewParams> {
             return joinPaths(this.parent?.getRoutePath(), pathToArray(this.path).last);
         }
         return super.getRoutePath();
+    }
+
+    // @ts-expect-error TODO PageEditView should not be inherited from PageView
+    resolveState(args: ResolveStateArgs): Promise<object> {
+        return Promise.resolve({});
     }
 }
 

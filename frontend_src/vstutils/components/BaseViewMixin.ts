@@ -1,4 +1,5 @@
-import { defineComponent, provide, PropType } from 'vue';
+import type { PropType } from 'vue';
+import { defineComponent, provide } from 'vue';
 import type { View } from '../views';
 import { mapStoreActions, mapStoreState } from '../utils';
 import { useViewStore } from '../store/helpers';

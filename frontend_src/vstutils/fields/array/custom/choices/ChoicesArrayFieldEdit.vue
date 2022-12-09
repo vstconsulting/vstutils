@@ -1,17 +1,16 @@
 <template>
-    <select ref="select" multiple style="width: 100%">
-        <option v-for="item in items" :key="item.id" :value="item.id" :selected="value.includes(item.id)">
-            {{ item.text }}
-        </option>
-    </select>
+    <select ref="select" multiple style="width: 100%" />
 </template>
 
-<script setup>
-    import $ from 'jquery';
-    import { ref, computed, onMounted } from 'vue';
+<script setup lang="ts">
+    import { type PropType, ref, computed, onMounted, toRef, watch } from 'vue';
+    import type { ChoicesField } from '@/vstutils/fields/choices';
+    import { useSelect2 } from '@/vstutils/select2';
+    import { deepEqual } from '@/vstutils/utils';
+    import type { ArrayField } from '@/vstutils/fields/array';
 
     const props = defineProps({
-        field: { type: Object, required: true },
+        field: { type: Object as PropType<ArrayField<ChoicesField>>, required: true },
         data: { type: Object, required: true },
         value: { type: Array, default: () => [] },
     });
@@ -21,18 +20,22 @@
     const select = ref(null);
 
     const items = computed(() => {
-        return props.field.itemField.prepareEnumData();
+        return props.field.itemField!.prepareEnumData();
     });
 
-    function handleChange() {
-        const value = $(select.value).select2('data');
-        emit(
-            'set-value',
-            value.map((item) => item.id),
-        );
-    }
+    const { init, setValue } = useSelect2(select, (data) => {
+        const newValue = data.map((item) => item.id);
+        if (!deepEqual(newValue, props.value)) {
+            emit('set-value', newValue);
+        }
+    });
+
+    watch(toRef(props, 'value'), (value) => {
+        setValue(value);
+    });
 
     onMounted(() => {
-        $(select.value).select2({ theme: window.SELECT2_THEME }).on('change', handleChange);
+        init({ data: items.value });
+        setValue(props.value);
     });
 </script>

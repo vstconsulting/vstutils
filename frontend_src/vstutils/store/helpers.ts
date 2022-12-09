@@ -1,24 +1,25 @@
-import { defineStore, StoreGeneric } from 'pinia';
+import type { StoreGeneric } from 'pinia';
+import { defineStore } from 'pinia';
+import type { Ref } from 'vue';
 import {
     computed,
     del,
     onBeforeUnmount,
     onMounted,
     onUnmounted,
-    reactive,
     ref,
-    Ref,
     set,
     shallowReadonly,
     shallowRef,
     watch,
 } from 'vue';
 
-import { APIResponse } from '@/vstutils/api';
+import type { APIResponse } from '@/vstutils/api';
 import { useAutoUpdate } from '@/vstutils/autoupdate';
 import { useBreadcrumbs } from '@/vstutils/breadcrumbs';
-import { Model, ModelValidationError } from '@/vstutils/models';
-import signals from '@/vstutils/signals';
+import type { Model } from '@/vstutils/models';
+import { ModelValidationError } from '@/vstutils/models';
+import { signals } from '@/vstutils/signals';
 import { i18n } from '@/vstutils/translation';
 import {
     classesFromFields,
@@ -255,9 +256,7 @@ export const useSelection = (instances: Ref<Model[]>) => {
     const selection = ref<(number | string)[]>([]);
 
     const allSelected = computed(() =>
-        instances.value.every((instance) =>
-            selection.value.includes(instance.getPkValue() as string | number),
-        ),
+        instances.value.every((instance) => selection.value.includes(instance.getPkValue()!)),
     );
 
     function setSelection(newSelection?: string[] | number[]) {
@@ -315,7 +314,7 @@ export interface PaginationItem {
     page?: number;
     text?: string;
     disabled?: boolean;
-    icon?: string;
+    icon?: string | string[];
     onClick?: () => void;
 }
 

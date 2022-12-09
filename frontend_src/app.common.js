@@ -1,7 +1,6 @@
 // Global libraries
 import TabSignal from '@vstconsulting/tabsignal';
-import signals from './vstutils/signals.js';
-export * from './vstutils/signals.js';
+export * from './vstutils/signals';
 
 import './libs/jquery.js';
 
@@ -43,7 +42,7 @@ window.autoComplete = autoComplete;
 import './libs/bootstrap-adminlte.js';
 import './libs/fontawesome.js';
 
-export { TabSignal, signals };
+export { TabSignal };
 
 import * as colors from './libs/colors.js';
 export { colors };

@@ -1,16 +1,17 @@
 import { ref, computed } from 'vue';
-import { Model, ModelValidationError } from '../models';
+import type { Model } from '../models';
+import { ModelValidationError } from '../models';
 import type { PageEditView, PageNewView, PageView, ActionView, Action, ListView } from '../views';
 import { isInstancesEqual, RequestTypes, openPage, getApp } from '../utils';
 import { i18n } from '../translation';
 import { guiPopUp, pop_up_msg } from '../popUp';
-import { Route } from 'vue-router';
+import type { Route } from 'vue-router';
+import type { InstancesList, BaseViewStore } from './helpers';
 import {
     useBasePageData,
     useQuerySet,
     useListFilters,
     useSelection,
-    InstancesList,
     PAGE_WITH_INSTANCE,
     useInstanceTitle,
     useOperations,
@@ -20,7 +21,6 @@ import {
     useQueryBasedFiltering,
     useEntityViewClasses,
     usePageLeaveConfirmation,
-    BaseViewStore,
     usePagination,
 } from './helpers';
 
@@ -50,8 +50,12 @@ const createRemoveInstance =
                 ]) as string,
             );
             if (fromList) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                unselect?.(instance.getPkValue());
+                if (unselect) {
+                    const pk = instance.getPkValue();
+                    if (pk) {
+                        unselect(pk);
+                    }
+                }
             } else {
                 const route = app.router.currentRoute;
                 return openPage(route.path.replace(/[^/]+\/?$/, ''));
@@ -162,7 +166,7 @@ export const createListViewStore = (view: ListView) => () => {
             await Promise.all(
                 instances.map((instance) =>
                     instance.delete(purge).then(() => {
-                        removedInstancesIds.push(instance.getPkValue() as string | number);
+                        removedInstancesIds.push(instance.getPkValue()!);
                     }),
                 ),
             );
@@ -222,7 +226,7 @@ export const createDetailViewStore = (view: PageView) => () => {
 
     function getInstancePk(): string | number {
         if (pageWithInstance.instance.value) {
-            return pageWithInstance.instance.value.getPkValue() as number | string;
+            return pageWithInstance.instance.value.getPkValue()!;
         }
         return app.router.currentRoute.params[view.pkParamName!];
     }
@@ -254,7 +258,7 @@ export const createDetailViewStore = (view: PageView) => () => {
         }
     }
 
-    async function updateData(instancePk?: string | number) {
+    async function updateData(instancePk?: string | number, { forceSet = false } = {}) {
         const qs = qsStore.queryset.value;
 
         if (!instancePk) {
@@ -265,14 +269,14 @@ export const createDetailViewStore = (view: PageView) => () => {
 
         const instance = pageWithInstance.instance.value;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-        if (!instance || !newInstance.isEqual(instance)) {
+        if (forceSet || !instance || !newInstance.isEqual(instance)) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             (app.store.page as DetailPageStore).setInstance(newInstance);
             populateFilters();
         }
     }
 
-    async function fetchData(instancePk?: string | number) {
+    async function fetchData(instancePk?: string | number, { forceSet = false } = {}) {
         base.initLoading();
         setFilters(app.router.currentRoute.query);
 
@@ -283,7 +287,7 @@ export const createDetailViewStore = (view: PageView) => () => {
                 await instance._queryset._executeAfterInstancesFetchedHooks([instance], instance.constructor);
                 pageWithInstance.setInstance(instance);
             } else {
-                await updateData(instancePk);
+                await updateData(instancePk, { forceSet });
             }
 
             base.setLoadingSuccessful();
@@ -329,6 +333,7 @@ export const createDetailViewStore = (view: PageView) => () => {
 export type DetailPageStore = BaseViewStore & {
     setInstance(instance: Model): void;
     instance: Model;
+    getInstancePk(): string | number | undefined;
 };
 
 export const createNewViewStore = (view: PageNewView) => () => {
@@ -472,7 +477,7 @@ export const createEditViewStore = (view: PageEditView) => () => {
     }
 
     function reload() {
-        return pageViewStore.fetchData();
+        return pageViewStore.fetchData(undefined, { forceSet: true });
     }
     function cancel() {
         pageViewStore.changedFields.value = [];

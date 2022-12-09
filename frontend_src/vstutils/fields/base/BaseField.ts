@@ -1,16 +1,16 @@
-import type { Schema, ParameterType } from 'swagger-schema-official';
+import type { Schema, ParameterType, ParameterCollectionFormat } from 'swagger-schema-official';
 import { _translate, capitalize, deepEqual, nameToTitle, X_OPTIONS } from '../../utils';
 import { pop_up_msg } from '../../popUp';
 import type { Model } from '../../models';
 import type { QuerySet } from '../../querySet';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 import { i18n } from '../../translation';
-import { IApp } from '@/vstutils/app';
-import { ComponentOptions } from 'vue';
+import type { IApp } from '@/vstutils/app';
+import type { ComponentOptions } from 'vue';
 
 type ModelPropertyDescriptor<Represent> = PropertyDescriptor & {
-    get(this: Model): Represent;
-    set(this: Model, value: Represent): void;
+    get(this: Model): Represent | null | undefined;
+    set(this: Model, value: Represent | null | undefined): void;
 };
 
 type FieldsData = Record<string, unknown>;
@@ -26,20 +26,31 @@ export interface FieldXOptions {
     appendText?: string;
     redirect?: RedirectOptions;
     translateFieldName?: string;
+    [key: string]: unknown;
 }
 
-export type FieldOptions<XOptions extends FieldXOptions, Inner> = Omit<Schema, 'default'> & {
-    name: string;
-    title?: string;
-    'x-hidden'?: boolean;
-    hidden?: boolean;
-    required?: boolean;
-    'x-options': XOptions;
-    'x-nullable'?: boolean;
-    default?: Inner;
-};
+export type DefaultXOptions = FieldXOptions | undefined;
 
-export interface Field<Inner = unknown, Represent = unknown, XOptions extends FieldXOptions = FieldXOptions> {
+export type FieldOptions<XOptions extends DefaultXOptions, Inner> = Omit<Schema, 'default' | 'items'> & {
+    allowEmptyValue?: boolean;
+    collectionFormat?: ParameterCollectionFormat;
+    default?: Inner;
+    hidden?: boolean;
+    items?: FieldOptions<DefaultXOptions, unknown>;
+    name: string;
+    required?: boolean;
+    title?: string;
+    'x-collectionFormat'?: ParameterCollectionFormat;
+    'x-format'?: string;
+    'x-hidden'?: boolean;
+    'x-nullable'?: boolean;
+} & (XOptions extends undefined ? { 'x-options'?: XOptions } : { 'x-options': XOptions });
+
+export interface Field<
+    Inner = unknown,
+    Represent = unknown,
+    XOptions extends DefaultXOptions = DefaultXOptions,
+> {
     options: FieldOptions<XOptions, Inner>;
     props: XOptions;
 
@@ -62,12 +73,11 @@ export interface Field<Inner = unknown, Represent = unknown, XOptions extends Fi
 
     redirect?: RedirectOptions;
 
-    validators: ((value: Represent) => void)[];
     model?: typeof Model;
 
     translateFieldName: string;
 
-    getComponent(): any;
+    getComponent(): ComponentOptions<Vue>;
 
     toInner(data: Record<string, unknown>): Inner | null | undefined;
     toRepresent(data: Record<string, unknown>): Represent | null | undefined;
@@ -85,10 +95,10 @@ export interface Field<Inner = unknown, Represent = unknown, XOptions extends Fi
 
     isSameValues(data1: FieldsData, data2: FieldsData): boolean;
 
-    parseFieldError(errorData: unknown, instanceData: FieldsData): string | Record<string, unknown>;
+    parseFieldError(errorData: unknown, instanceData: FieldsData): unknown;
 }
 
-export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldXOptions>
+export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = DefaultXOptions>
     implements Field<Inner, Represent, XOptions>
 {
     static fkLinkable = true;
@@ -124,7 +134,7 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
     constructor(options: FieldOptions<XOptions, Inner>) {
         this.options = options;
 
-        this.props = options[X_OPTIONS] || ({} as XOptions);
+        this.props = (options[X_OPTIONS] as unknown as XOptions) || ({} as XOptions);
         this.type = options.type ?? 'string';
         this.format = options.format;
         this.validators = [];
@@ -141,12 +151,12 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
             this.default = options.default;
         }
 
-        this.prependText = this.props.prependText;
-        this.appendText = this.props.appendText;
+        this.prependText = this.props?.prependText;
+        this.appendText = this.props?.appendText;
 
-        this.redirect = this.props.redirect;
+        this.redirect = this.props?.redirect;
 
-        this.translateFieldName = this.props.translateFieldName ?? this.name;
+        this.translateFieldName = this.props?.translateFieldName ?? this.name;
 
         this.component = {
             name: `${this.constructor.name || capitalize(this.name)}Component`,
@@ -170,28 +180,29 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
         return value;
     }
 
-    _getValueFromData(data: Record<string, unknown>) {
-        return data[this.name];
+    _getValueFromData(data: Record<string, unknown>): Inner | Represent | undefined | null {
+        return data[this.name] as Inner | Represent | undefined | null;
     }
 
-    /**
-     * Prints error message
-     */
-    _error(msg: string) {
-        console.error(`${this.constructor.name}:${this.name}: ${msg}`);
+    warn(msg: string): void {
+        console.warn(`${this.constructor.name} ${this.model?.name ?? ''}.${this.name}: ${msg}`);
+    }
+
+    error(msg: string): never {
+        throw new Error(`${this.constructor.name} ${this.model?.name ?? ''}.${this.name}: ${msg}`);
     }
 
     /**
      * Method, that prepares instance of field for usage. Method is called after models and views are
      * created, for every field instance that is part of view.
      */
-    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     prepareFieldForView(path: string): void {}
 
     /**
      * Method that will be called after every fetch of instances from api (QuerySet#items, QuerySet#get)
      */
-    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     async afterInstancesFetched(instances: Model[], queryset: QuerySet) {}
 
     /**
@@ -214,14 +225,14 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
     /**
      * Method, that converts field value to appropriate for API form.
      */
-    toInner(data: FieldsData): Inner {
+    toInner(data: FieldsData): Inner | null | undefined {
         return this._getValueFromData(data) as Inner;
     }
 
     /**
      * Method, that converts field value from API to display form
      */
-    toRepresent(data: FieldsData): Represent {
+    toRepresent(data: FieldsData): Represent | null | undefined {
         return this._getValueFromData(data) as Represent;
     }
 
@@ -229,7 +240,6 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
      * Method that validates value.
      * @param {RepresentData} data - Object with all values.
      */
-    // eslint-disable-next-line no-unused-vars
     validateValue(data: FieldsData) {
         const value = this._getValueFromData(data);
         let value_length = 0;
@@ -329,7 +339,7 @@ export class BaseField<Inner, Represent, XOptions extends FieldXOptions = FieldX
     isSameValues(data1: FieldsData, data2: FieldsData) {
         return deepEqual(this.toInner(data1), this.toInner(data2));
     }
-    parseFieldError(errorData: unknown, instanceData: FieldsData): string | Record<string, unknown> {
+    parseFieldError(errorData: unknown, instanceData: FieldsData): unknown | null {
         if (!errorData) {
             return '';
         }

@@ -108,7 +108,8 @@ default_extra_metadata: dict = {
     # key-value mapping with nested views (key - nested name, kwargs for nested decorator)
     "nested": None,
     # additional view's settings
-    **dict(reduce(operator.add, [((f'pre_{i}', None), (i, None), (f'override_{i}', False)) for i in view_settings]))
+    **dict(reduce(operator.add, [((f'pre_{i}', None), (i, None), (f'override_{i}', False)) for i in view_settings])),
+    "extra_view_attributes": None,
 }
 
 
@@ -537,7 +538,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         list_fields = _ensure_pk_in_fields(cls, metadata['list_fields'])
         detail_fields = _ensure_pk_in_fields(cls, metadata['detail_fields'] or list_fields)
 
-        view_attributes = {'model': cls, **metadata.get('extra_view_attributes', {})}
+        view_attributes = {'model': cls, **(metadata['extra_view_attributes'] or {})}
 
         serializer_class = metadata['serializer_class']
         serializers = {

@@ -6,5 +6,5 @@ export class FieldValidator {
      * @param {RepresentData} data
      * @throws {ValidationError}
      */
-    validate(value, data) {} // eslint-disable-line no-unused-vars
+    validate(value, data) {}
 }

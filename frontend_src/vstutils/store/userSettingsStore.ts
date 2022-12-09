@@ -1,8 +1,9 @@
-import { Model } from '@/vstutils/models';
+import type { Model } from '@/vstutils/models';
 import { signals } from '@/vstutils/signals';
 import { defineStore } from 'pinia';
 import type { ApiConnector } from '../api';
 import { mergeDeep, HttpMethods } from './../utils';
+import type { SetFieldValueOptions } from '@/vstutils/fields/base';
 
 type Section = Record<string, unknown>;
 type Settings = Record<string, Section>;
@@ -28,15 +29,18 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: typeof Mo
                 this.settings = settings;
                 this.changed = false;
             },
-            setValue({ section, key, value }: { section: string; key: string; value: unknown }) {
-                this.settings[section][key] = value;
-                this.changed = true;
+            setValue(section: string, { field, value, markChanged = true }: SetFieldValueOptions) {
+                this.settings[section][field] = value;
+                if (markChanged) {
+                    this.changed = true;
+                }
             },
             setOriginalSettings(settings: Settings) {
                 this.originalSettings = mergeDeep({}, settings) as Settings;
             },
             rollback() {
                 this.settings = mergeDeep({}, this.originalSettings) as Settings;
+                this.changed = false;
             },
             setData(data: Settings) {
                 const instance = new modelClass(data);
@@ -61,8 +65,8 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: typeof Mo
                 })) as { data: Settings };
                 this.setSettings(data);
             },
-            setAndSave(obj: { section: string; key: string; value: unknown }) {
-                this.setValue(obj);
+            setAndSave(section: string, options: { field: string; value: unknown; markChanged: boolean }) {
+                this.setValue(section, options);
                 return this.save();
             },
             async init() {

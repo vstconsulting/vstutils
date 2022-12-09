@@ -1,4 +1,4 @@
-import signals from '../signals.js';
+import { signals } from '@/vstutils/signals';
 import BaseField from '../fields/base/BaseField.ts';
 import { makeModel, Model } from './Model.js';
 

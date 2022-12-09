@@ -9,7 +9,8 @@ import json  # noqa: F401
 
 import ormsgpack
 from django.apps import apps
-from django.db import transaction
+from django.http import StreamingHttpResponse
+from django.db import transaction, models as django_models
 from django.urls import reverse
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
@@ -107,6 +108,8 @@ class BaseTestCase(TestCase):
     def __get_rendered(self, response):
         # pylint: disable=protected-access
         try:
+            if isinstance(response, StreamingHttpResponse):
+                return b''.join(response.streaming_content).decode('utf-8')
             media_type = f'{getattr(response, "accepted_media_type", "")}' or \
                          response._content_type_for_repr.split(";")[0].replace('"', '').replace(',', '').strip()
             rendered_content = (
@@ -186,7 +189,15 @@ class BaseTestCase(TestCase):
         """
         return patch(*args, **kwargs)  # type: ignore
 
-    def get_model_class(self, model):
+    @classmethod
+    def patch_field_default(cls, model: django_models.Model, field_name: str, value: _t.Any) -> _t.ContextManager[Mock]:
+        """
+        This method helps to path default value in the model's field.
+        It's very useful for DateTime fields where :func:`django.utils.timezone.now` is used in defaults.
+        """
+        return patch.object(model._meta.get_field(field_name), 'get_default', new=lambda: value)
+
+    def get_model_class(self, model) -> django_models.Model:
         """
         Getting model class by string or return model arg.
 
@@ -205,7 +216,7 @@ class BaseTestCase(TestCase):
         )
 
         if isinstance(model, str):
-            for handler in map(raise_context_decorator_with_default(default=None), handlers):
+            for handler in map(raise_context_decorator_with_default(default=None), handlers):  # type: ignore
                 result = handler(model)
                 if result:
                     model = result
@@ -278,7 +289,7 @@ class BaseTestCase(TestCase):
         """
         err_msg = "{} != {}\n{}\n{}".format(
             resp.status_code, code,
-            self.__get_rendered(resp),
+            self.__get_rendered(resp) if not isinstance(resp, StreamingHttpResponse) else '<StreamingHttpResponse>',
             self.user
         )
         if additional_info:
