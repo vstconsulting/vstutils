@@ -23,7 +23,7 @@ def get_python_info():
 
 def get_metrics_from_workers():  # nocv
     if uwsgi is None:
-        yield
+        raise StopIteration
 
     workers = uwsgi.workers()
 
