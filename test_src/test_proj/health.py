@@ -1,5 +1,5 @@
 from vstutils.api.health import DefaultBackend
-from vstutils.api.metrics import BaseBackend as MetricsBaseBackend
+from vstutils.api.metrics import DefaultBackend as MetricsBaseBackend
 
 
 def metrics_generator():
