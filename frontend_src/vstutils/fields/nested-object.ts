@@ -9,6 +9,7 @@ import type {
     FieldXOptions,
     SetFieldValueOptions,
 } from '@/vstutils/fields/base';
+import { BaseFieldLabel } from '@/vstutils/fields/base';
 import { BaseField, FieldPropsDef, useFieldWrapperClasses } from '@/vstutils/fields/base';
 import { onAppBeforeInit } from '@/vstutils/signals';
 import { mapObjectValues } from '@/vstutils/utils';
@@ -36,7 +37,8 @@ export const NestedObjectFieldMixin = defineComponent({
         const wrapperClasses = useFieldWrapperClasses(props);
 
         function renderList() {
-            return h('div', [value.value ? new modelClass(value.value).getViewFieldString() : '']);
+            const val = value.value ? new modelClass(value.value).getViewFieldString() : '';
+            return [h('div', val)];
         }
 
         function setFieldValue({ field, value: newVal, ...options }: SetFieldValueOptions) {
@@ -48,22 +50,29 @@ export const NestedObjectFieldMixin = defineComponent({
         }
 
         function renderDetail() {
-            return h(ModelFields, {
-                props: {
-                    editable: props.type === 'edit' && !props.field.readOnly,
-                    data: sandbox,
-                    model: props.field.nestedModel,
-                    fieldsErrors: props.error,
-                    hideNotRequired: props.field.hideNotRequired,
-                },
-                on: { 'set-value': setFieldValue },
-            });
+            return [
+                h(BaseFieldLabel, {
+                    props: { field: props.field, error: props.error, type: 'edit' },
+                }),
+                h(ModelFields, {
+                    props: {
+                        editable: props.type === 'edit' && !props.field.readOnly,
+                        data: sandbox,
+                        model: props.field.nestedModel,
+                        fieldsErrors: props.error,
+                        hideNotRequired: props.field.hideNotRequired,
+                    },
+                    on: { 'set-value': setFieldValue },
+                }),
+            ];
         }
 
         return () =>
-            h('div', { staticClass: 'field-component', class: wrapperClasses }, [
+            h(
+                'div',
+                { staticClass: 'field-component', class: wrapperClasses },
                 props.type === 'list' ? renderList() : renderDetail(),
-            ]);
+            );
     },
 });
 
