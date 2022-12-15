@@ -32,7 +32,7 @@
     "bootstrap": "4.6.0",
     "centrifuge": "^2.8.0",
     "core-js": "^3.20.3",
-    "cropperjs": "^1.5.12",
+    "cropperjs": "^1.5.13",
     "imask": "^6.1.0",
     "izitoast": "1.4.0",
     "jquery": "^3.4.1",
