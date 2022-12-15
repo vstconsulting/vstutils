@@ -1,5 +1,17 @@
+interface Options {
+    'x-validators'?: {
+        min_width?: number;
+        max_width?: number;
+        min_height?: number;
+        max_height?: number;
+    };
+}
+
 export default class ResolutionValidatorConfig {
-    constructor(minWidth, maxWidth, minHeight, maxHeight) {
+    width: { min: number; max: number };
+    height: { min: number; max: number };
+
+    constructor(minWidth: number, maxWidth: number, minHeight: number, maxHeight: number) {
         this.width = {
             min: minWidth,
             max: maxWidth,
@@ -9,8 +21,8 @@ export default class ResolutionValidatorConfig {
             max: maxHeight,
         };
     }
-    static createIfNeeded(options) {
-        const { min_width, max_width, min_height, max_height } = options?.['x-validators'] || {};
+    static createIfNeeded(options: Options) {
+        const { min_width, max_width, min_height, max_height } = options['x-validators'] || {};
         if ([min_width, max_width, min_height, max_height].some((param) => typeof param === 'number')) {
             return new ResolutionValidatorConfig(
                 min_width || Number.NEGATIVE_INFINITY,

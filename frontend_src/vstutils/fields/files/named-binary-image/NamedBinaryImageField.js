@@ -1,6 +1,6 @@
 import { NamedBinaryFileField } from '../named-binary-file';
 import NamedBinaryImageFieldMixin from './NamedBinaryImageFieldMixin.js';
-import ResolutionValidatorConfig from './ResolutionValidatorConfig.js';
+import ResolutionValidatorConfig from './ResolutionValidatorConfig.ts';
 
 /**
  * NamedBinImage guiField class.
