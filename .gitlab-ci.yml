@@ -3,6 +3,7 @@ default:
   cache: &global_cache
     paths:
       - node_modules/
+      - yarn/
     policy: pull
 
 
@@ -28,6 +29,7 @@ stages:
   coverage: '/\d+\%\s*$/'
   variables:
     TOX_ENVS: ""
+    YARN_CACHE_FOLDER: "${CI_PROJECT_DIR}/yarn"
   before_script:
     - >
       if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then
