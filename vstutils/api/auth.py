@@ -1,4 +1,5 @@
 import typing as _t
+from copy import deepcopy
 
 import pyotp
 from django.contrib.auth import get_user_model, update_session_auth_hash
@@ -32,7 +33,7 @@ class ChangePasswordPermission(permissions.IsAuthenticatedOpenApiRequest):
 
 class UserSerializer(VSTSerializer):
     is_active = serializers.BooleanField(default=True)
-    is_staff = serializers.BooleanField(default=False)
+    is_staff = serializers.BooleanField(default=False, read_only=True)
     email = serializers.EmailField(required=False)
 
     class UserExist(exceptions.ValidationError):
@@ -49,6 +50,14 @@ class UserSerializer(VSTSerializer):
         )
         read_only_fields = ('is_superuser',)
         ref_name = 'User'
+
+    def get_fields(self):
+        serializer_fields = super().get_fields()
+        request = self.context.get('request')
+        if 'is_staff' in serializer_fields and request is not None and request.user.is_superuser:
+            serializer_fields = deepcopy(serializer_fields)
+            serializer_fields['is_staff'].read_only = False
+        return serializer_fields
 
     @cached_property
     @raise_context_decorator_with_default(default=False)

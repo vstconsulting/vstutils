@@ -1376,6 +1376,29 @@ class ViewsTestCase(BaseTestCase):
             response = self.get_result('get', '/api/v1/user/profile/_settings/?lang=ru', relogin=True)
         self.assertEqual(response['main']['language'], 'ru')
 
+    def test_non_superuser_cannot_change_is_staff_status(self):
+        nonstaff_user = self._create_user(is_super_user=False, is_staff=True)
+
+        # as superuser
+        results = self.bulk([
+            {'method': 'patch', 'path': ['user', 'profile'], 'data': {'is_staff': False}},
+            {'method': 'patch', 'path': ['user', self.user.id], 'data': {'is_staff': False}},
+            {'method': 'patch', 'path': ['user', nonstaff_user.id], 'data': {'is_staff': False}},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertFalse(results[2]['data']['is_staff'])
+
+        nonstaff_user.refresh_from_db()
+        with self.user_as(self, nonstaff_user):
+            results = self.bulk_transactional([
+                {'method': 'patch', 'path': ['user', 'profile'], 'data': {'is_staff': True}},
+                {'method': 'patch', 'path': ['user', nonstaff_user.id], 'data': {'is_staff': True}},
+            ])
+        for result in results:
+            self.assertEqual(result['status'], 200)
+            self.assertFalse(nonstaff_user.is_staff)
+
 
 class DefaultBulkTestCase(BaseTestCase):
     use_msgpack = True
@@ -2117,6 +2140,11 @@ class OpenapiEndpointTestCase(BaseTestCase):
             api['paths'][path]['get']['responses']['200']['schema']['properties']['results']['items']['$ref'],
             '#/definitions/PhoneBook',
         )
+
+        user = self._create_user(is_super_user=False, is_staff=False)
+        with self.user_as(self, user):
+            schema = self.endpoint_schema()
+            self.assertTrue(schema['definitions']['User']['properties']['is_staff']['readOnly'])
 
     def test_search_fields(self):
         self.assertEqual(
