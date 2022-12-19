@@ -125,7 +125,7 @@ class Action:
             **self.action_kwargs
         )(func)
 
-        name = func.__name__.replace('_', ' ').title()
+        name = func.__name__.replace('_', ' ').capitalize()
         swagger_kwargs = {
             'operation_description': (func.__doc__ or name).strip(),
             'methods': self.methods,

@@ -2091,7 +2091,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertIn('post', api['paths'][path])
         self.assertIn('parameters', api['paths'][path])
         self.assertEqual(api['paths'][path]['post']['responses']['201']['schema']['$ref'], '#/definitions/Empty')
-        self.assertEqual(api['paths'][path]['post']['x-title'], 'Empty Action')
+        self.assertEqual(api['paths'][path]['post']['x-title'], 'Empty action')
 
         path = '/author/{id}/author_profile/'
         self.assertCount(api['paths'][path], 4)
