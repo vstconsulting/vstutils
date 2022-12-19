@@ -37,7 +37,6 @@ stages:
         unset BUILD_OPTIMIZATION;
       fi
     - if [ "${TOX_ENVS}" ]; then export TOX_ARGS="${TOX_ARGS} -e ${TOX_ENVS}"; fi
-    - yarn config set -- --mutex network
   script:
    - tox $TOX_ARGS
   rules:
@@ -53,8 +52,7 @@ stages:
   <<: *branch_tests
   image: registry.gitlab.com/vstconsulting/images:node-tests
   before_script:
-    - yarn config set -- --mutex network
-    - yarn install
+    - yarn install --pure-lockfile --mutex network
   script:
     - yarn test
 
