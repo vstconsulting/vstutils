@@ -5,6 +5,7 @@ from rest_framework import serializers, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.utils.serializer_helpers import ReturnDict, ReturnList
 from drf_yasg.utils import swagger_auto_schema
 
 from .responses import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
@@ -153,13 +154,23 @@ class Action:
                 **kwargs,
         ) -> _t.Union[Response, FileResponse]:
 
-            result_serializer_class = self.result_serializer_class or view.get_serializer_class()
+            result_serializer_class: _t.Type[serializers.Serializer] = self.result_serializer_class  # type: ignore
+            identical = False
+            if result_serializer_class is None:
+                result_serializer_class = view.get_serializer_class()  # type: ignore
+                identical = True
+
             result = method(view, request, *args, **kwargs)
             response_class = self.method_response_mapping[_t.cast(_t.Text, request.method)]
 
             if issubclass(result_serializer_class, serializers.Serializer):
-                serializer = result_serializer_class(result, many=self.is_list, context=view.get_serializer_context())
-                result = serializer.data
+                if not (isinstance(result, (ReturnDict, ReturnList)) and identical):
+                    serializer = result_serializer_class(
+                        result,
+                        many=self.is_list,
+                        context=view.get_serializer_context()
+                    )
+                    result = serializer.data
             elif isinstance(result, FileResponse):
                 return result
 
