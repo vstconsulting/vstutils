@@ -22,6 +22,7 @@ export function useSelect2(
             // @ts-expect-error Select2
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             $(el.value).select2('destroy');
+            el.value.innerHTML = '';
             initialized = false;
         }
     }

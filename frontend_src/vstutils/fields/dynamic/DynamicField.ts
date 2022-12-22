@@ -1,5 +1,3 @@
-import type { ComponentOptions } from 'vue';
-
 import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
 import { BaseField } from '@/vstutils/fields/base';
 import type { Model } from '@/vstutils/models';
@@ -58,12 +56,9 @@ export class DynamicField
         if (this.props.types) {
             const types: Record<string, Field> = {};
             for (const [value, fieldDefinition] of Object.entries(this.props.types)) {
-                const field = this.app.fieldsResolver.resolveField(fieldDefinition, this.name);
+                const field = this.getFieldByDefinition(fieldDefinition);
                 if (this.required) {
                     field.required = this.required;
-                }
-                if (!field.title) {
-                    field.title = this.title;
                 }
                 types[value] = field;
             }
@@ -80,8 +75,8 @@ export class DynamicField
         this.usedOnViews.add(path);
     }
 
-    static get mixins(): ComponentOptions<Vue>[] {
-        return [DynamicFieldMixin as ComponentOptions<Vue>];
+    static get mixins() {
+        return [DynamicFieldMixin];
     }
 
     toInner(data = {}) {
@@ -205,7 +200,7 @@ export class DynamicField
             const value = data[this.props.field] as string | Record<string, unknown> | undefined | null;
             if (value) {
                 try {
-                    return this.app.fieldsResolver.resolveField(value, this.name);
+                    return this.getFieldByDefinition(value);
                 } catch {
                     return undefined;
                 }
@@ -230,9 +225,8 @@ export class DynamicField
             const item = parentChoices[parentValues[key] as string];
             if (Array.isArray(item)) {
                 const isBoolean = item.some((val) => typeof val === 'boolean');
-                return this.app.fieldsResolver.resolveField(
+                return this.getFieldByDefinition(
                     isBoolean ? { type: 'boolean' } : { format: 'choices', enum: item },
-                    this.name,
                 );
             }
         }
@@ -243,13 +237,21 @@ export class DynamicField
         if (this.props.callback) {
             const callbackResult = this.props.callback(parentValues);
             if (callbackResult) {
-                return this.app.fieldsResolver.resolveField(callbackResult, this.name);
+                return this.getFieldByDefinition(callbackResult);
             }
         }
         return;
     }
 
     _getDefault(): Field {
-        return this.app.fieldsResolver.resolveField('string', this.name);
+        return this.getFieldByDefinition({ type: 'string' });
+    }
+
+    protected getFieldByDefinition(obj: FieldDefinition) {
+        const field = this.app.fieldsResolver.resolveField(obj, this.name);
+        if (typeof obj === 'object' && !obj.title) {
+            field.title = this.title;
+        }
+        return field;
     }
 }

@@ -1,60 +1,61 @@
 <template>
-    <BootstrapModal classes="modal-lg" :title="$t(field.title)" @exit="shown = false" @shown="shown = true">
+    <BootstrapModal
+        v-if="value && value.length > 0"
+        classes="modal-lg"
+        :title="$t(field.title)"
+        @exit="shown = false"
+        @shown="shown = true"
+    >
         <template #body>
             <Splide v-if="shown" :options="options">
                 <SplideSlide v-for="(item, idx) in preparedItems" :key="idx">
-                    <img :src="item.imgSrc" :alt="$t(item.name)" class="slide-image" />
+                    <img :src="item.imgSrc" :alt="item.name" class="slide-image" />
                 </SplideSlide>
             </Splide>
         </template>
 
         <template #activator="{ openModal }">
-            <i :class="classes" @click.stop="openModal" />
-            <p v-if="!value || value.length === 0">{{ title_for_empty_value }}</p>
+            <button type="button" class="btn" @click.stop="openModal">
+                <i class="fas fa-eye" />
+            </button>
         </template>
     </BootstrapModal>
 </template>
 
-<script>
+<script setup lang="ts">
+    import { computed, ref } from 'vue';
     import { Splide, SplideSlide } from '@splidejs/vue-splide';
-    import { BaseFieldContentReadonlyMixin } from '../../base';
-    import { MultipleNamedBinaryFileFieldContentReadonly } from '../multiple-named-binary-file';
-    import BootstrapModal from '../../../components/BootstrapModal.vue';
-    import { makeDataImageUrl } from '../../../utils';
 
-    export default {
-        components: { BootstrapModal, Splide, SplideSlide },
-        mixins: [BaseFieldContentReadonlyMixin, MultipleNamedBinaryFileFieldContentReadonly],
-        data() {
-            return {
-                shown: false,
-                options: {
-                    heightRatio: 1,
-                    perPage: 1,
-                    perMove: 1,
-                    rewind: true,
-                    rewindByDrag: true,
-                },
-            };
-        },
-        computed: {
-            preparedItems() {
-                return this.value.map((i) => {
-                    return { ...i, imgSrc: makeDataImageUrl(i) };
-                });
-            },
-            classes() {
-                if (this.value && this.value?.length > 0) {
-                    return 'fas fa-eye';
-                }
-                return '';
-            },
-        },
+    import { makeDataImageUrl } from '@/vstutils/utils';
+    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
+
+    import type MultipleNamedBinaryImageField from './MultipleNamedBinaryImageField';
+    import type { ExtractRepresent } from '@/vstutils/fields/base';
+
+    const props = defineProps<{
+        field: MultipleNamedBinaryImageField;
+        value: ExtractRepresent<MultipleNamedBinaryImageField> | null | undefined;
+    }>();
+
+    const options = {
+        heightRatio: 1,
+        perPage: 1,
+        perMove: 1,
+        rewind: true,
+        rewindByDrag: true,
     };
+
+    const shown = ref(false);
+
+    const preparedItems = computed(() => {
+        return (props.value ?? []).map((i) => {
+            return { ...i, imgSrc: makeDataImageUrl(i) };
+        });
+    });
 </script>
 
 <style scoped>
-    i {
+    .btn {
         font-size: 1.5rem;
     }
     .slide-image {

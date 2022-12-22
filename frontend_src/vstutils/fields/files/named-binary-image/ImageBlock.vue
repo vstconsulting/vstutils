@@ -1,46 +1,62 @@
 <template>
-    <div class="image-field-content-wrapper">
-        <BootstrapModal :title="$t(img_alt)">
-            <img style="max-height: 80vh" :src="img_src" :alt="img_alt" class="image-field-content" />
-            <template #activator="{ openModal }">
-                <img
-                    :src="img_src"
-                    :alt="img_alt"
-                    class="image-field-content"
-                    style="cursor: pointer"
-                    @click="openModal"
-                />
-            </template>
-        </BootstrapModal>
-    </div>
+    <BootstrapModal :title="imageAlt">
+        <img style="max-height: 80vh" :src="src" :alt="imageAlt" class="image-field-content" />
+        <template #activator="{ openModal }">
+            <div
+                class="preview-img"
+                :style="{ backgroundImage: cssSrc, ...previewStyle }"
+                @click.stop="openModal"
+            />
+        </template>
+    </BootstrapModal>
 </template>
 
-<script>
-    import { BaseFieldInnerComponentMixin } from '../../base';
-    import BootstrapModal from '../../../components/BootstrapModal';
-    import { makeDataImageUrl } from '../../../utils';
-    export default {
-        components: { BootstrapModal },
-        mixins: [BaseFieldInnerComponentMixin],
-        data() {
-            return {
-                show_modal: false,
-                modal_opt: {
-                    footer: false,
-                },
-            };
-        },
-        computed: {
-            img_src() {
-                if (this.value && this.value.content) {
-                    return makeDataImageUrl(this.value);
-                } else {
-                    return undefined;
-                }
-            },
-            img_alt() {
-                return this.field.title;
-            },
-        },
-    };
+<script setup lang="ts">
+    import { computed } from 'vue';
+    import { i18n } from '@/vstutils/translation';
+    import { makeDataImageUrl } from '@/vstutils/utils';
+    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
+    import type { CSSProperties } from 'vue/types/jsx';
+    import type { Field } from '@/vstutils/fields/base';
+    import type { NamedFile } from '../named-binary-file';
+
+    const props = defineProps<{
+        value?: NamedFile | null;
+        field: Field;
+        previewStyle?: CSSProperties;
+    }>();
+
+    const src = computed(() => {
+        if (props.value?.content) {
+            return makeDataImageUrl(props.value);
+        }
+        return undefined;
+    });
+
+    const cssSrc = computed(() => {
+        if (src.value) {
+            return `url("${src.value}")`;
+        }
+        return undefined;
+    });
+
+    const imageAlt = computed(() => {
+        return i18n.t(props.field.title) as string;
+    });
 </script>
+
+<style scoped>
+    .preview-img {
+        width: 100%;
+        height: 100%;
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center;
+        min-height: 47px;
+        cursor: pointer;
+    }
+
+    :is(.type-readonly, .type-edit) .preview-img::v-deep {
+        height: 150px;
+    }
+</style>

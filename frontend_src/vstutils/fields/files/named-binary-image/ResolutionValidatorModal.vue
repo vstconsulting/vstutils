@@ -14,24 +14,23 @@
     import { ref, computed, onMounted } from 'vue';
     import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
     import ResolutionValidatorImage from './ResolutionValidatorImage.vue';
-    import type { NamedBinaryFileField } from '@/vstutils/fields/files/named-binary-file';
-
-    type Image = { content: string; mediaType: string; name: string };
+    import type { NamedFile } from '@/vstutils/fields/files/named-binary-file';
+    import type { IImageField } from './NamedBinaryImageField';
 
     const props = defineProps<{
-        field: NamedBinaryFileField;
-        images: Image[];
+        field: IImageField;
+        images: NamedFile[];
     }>();
 
     const emit = defineEmits<{
         (e: 'cancel'): void;
-        (e: 'validated', data: Image[]): void;
+        (e: 'validated', data: NamedFile[]): void;
     }>();
 
     const currentImageIdx = ref(0);
     const isOpen = ref(false);
     const modalRef = ref<any | null>(null);
-    const resized: Image[] = [];
+    const resized: NamedFile[] = [];
 
     const image = computed(() => {
         return props.images[currentImageIdx.value];
@@ -50,6 +49,7 @@
 
         if (currentImageIdx.value === props.images.length) {
             emit('validated', resized);
+            emit('cancel');
         }
     }
 </script>

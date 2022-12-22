@@ -1,6 +1,11 @@
 <template>
     <div>
-        <image_block v-if="showPreview" :field="field" :data="data" :value="value" />
+        <ImageBlock
+            v-if="showPreview"
+            :field="field"
+            :value="value"
+            :preview-style="{ marginBottom: '1rem' }"
+        />
         <ResolutionValidatorModal
             v-if="imagesForValidation"
             :field="field"
@@ -9,61 +14,56 @@
             @validated="onImageValidated"
         />
 
-        <div ref="dragZone" style="transition: all 300ms" class="input-group">
-            <p
-                class="p-as-input"
-                :class="classes"
-                :style="styles"
-                :aria-labelledby="label_id"
-                :aria-label="aria_label"
-            >
-                {{ val }}
-            </p>
-
-            <ReadFileButton :media-types="field.allowedMediaTypes" @read-file="readFiles" />
-            <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
-            <ClearButton @click.native="clearValue" />
-        </div>
+        <FileSelector
+            :show-hide-button="hideable"
+            :has-value="!!value"
+            :media-types="field.allowedMediaTypes"
+            :text="name"
+            @read-file="readFiles"
+            @clear="emit('clear')"
+            @hide="emit('hide-field')"
+        />
     </div>
 </template>
 
-<script>
-    import { BinaryFileFieldContentEdit, BinaryFileFieldReadFileButton } from '../binary-file';
-    import { NamedBinaryFileFieldContentEdit } from '../named-binary-file';
-    import NamedBinaryImageFieldContent from './NamedBinaryImageFieldContent.js';
+<script setup lang="ts">
+    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import { computed, ref, toRef } from 'vue';
+    import type { NamedFile } from '../named-binary-file';
+    import { useNamedFileText } from '../named-binary-file';
+    import { useDragAndDrop } from '../useDragAndDrop';
+    import ImageBlock from './ImageBlock.vue';
+    import type NamedBinaryImageField from './NamedBinaryImageField';
+    import { useResolutionValidator } from './useResolutionValidator';
     import ResolutionValidatorModal from './ResolutionValidatorModal.vue';
-    import ResolutionValidatorMixin from './ResolutionValidatorMixin.js';
+    import FileSelector from '../FileSelector.vue';
 
-    const ReadFileButton = {
-        data() {
-            return {
-                helpText: 'Open image',
-            };
-        },
-        mixins: [BinaryFileFieldReadFileButton],
-    };
+    const props = defineProps<{
+        field: NamedBinaryImageField;
+        value: ExtractRepresent<NamedBinaryImageField> | null | undefined;
+        hideable: boolean;
+    }>();
 
-    export default {
-        components: { ResolutionValidatorModal, ReadFileButton },
-        mixins: [
-            BinaryFileFieldContentEdit,
-            NamedBinaryFileFieldContentEdit,
-            NamedBinaryImageFieldContent,
-            ResolutionValidatorMixin,
-        ],
-        computed: {
-            showPreview() {
-                return this.value?.content;
-            },
-        },
-        methods: {
-            onImageValidated([validatedImage]) {
-                this.$emit('set-value', validatedImage);
-                this.cancelValidation();
-            },
-            dragFinished(e) {
-                this.readFiles(e.dataTransfer.files);
-            },
-        },
-    };
+    const emit = defineEmits<{
+        (event: 'set-value', value: ExtractRepresent<NamedBinaryImageField> | null | undefined): void;
+        (event: 'hide-field'): void;
+        (event: 'clear'): void;
+    }>();
+
+    const showPreview = computed(() => props.value?.content);
+
+    function onImageValidated(images: NamedFile[]) {
+        if (images.length > 0) {
+            emit('set-value', images[0]);
+        } else {
+            emit('set-value', null);
+        }
+    }
+
+    const name = useNamedFileText(toRef(props, 'value'));
+
+    const { imagesForValidation, cancelValidation, readFiles } = useResolutionValidator(
+        props.field,
+        onImageValidated,
+    );
 </script>

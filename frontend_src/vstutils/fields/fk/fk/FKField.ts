@@ -1,19 +1,19 @@
 import type { Schema } from 'swagger-schema-official';
-import type { ComponentOptions } from 'vue';
 
 import { AggregatedQueriesExecutor } from '@/vstutils/AggregatedQueriesExecutor.js';
-import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
 import { BaseField } from '@/vstutils/fields/base';
 import { onAppBeforeInit } from '@/vstutils/signals';
-import type { DetailPageStore } from '@/vstutils/store/page';
 import { i18n } from '@/vstutils/translation';
 import { formatPath, getApp, getDependenceValueAsString, RequestTypes } from '@/vstutils/utils';
-import type { PageView } from '@/vstutils/views';
 
 import FKFieldMixin from './FKFieldMixin';
 
+import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import type { DetailPageStore } from '@/vstutils/store/page';
+import type { PageView } from '@/vstutils/views';
 import type { Model } from '@/vstutils/models';
 import type { QuerySet } from '@/vstutils/querySet';
+import type { ComponentOptions } from 'vue';
 
 const dependenceTemplateRegexp = /<<\w+>>/g;
 

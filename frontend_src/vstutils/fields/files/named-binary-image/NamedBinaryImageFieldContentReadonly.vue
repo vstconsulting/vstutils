@@ -1,20 +1,14 @@
 <template>
-    <div>
-        <template v-if="value && value.content">
-            <image_block :field="field" :wrapper_opt="wrapper_opt" :data="data" :value="value" />
-        </template>
-        <template v-else>
-            {{ val }}
-        </template>
-    </div>
+    <ImageBlock v-if="value && value.content" :field="field" :value="value" @click.native.stop />
 </template>
 
-<script>
-    import { BaseFieldContentReadonlyMixin } from '../../base';
-    import { NamedBinaryFileFieldContent } from '../named-binary-file';
-    import NamedBinaryImageFieldContent from './NamedBinaryImageFieldContent.js';
+<script setup lang="ts">
+    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type NamedBinaryImageField from './NamedBinaryImageField';
+    import ImageBlock from './ImageBlock.vue';
 
-    export default {
-        mixins: [BaseFieldContentReadonlyMixin, NamedBinaryFileFieldContent, NamedBinaryImageFieldContent],
-    };
+    defineProps<{
+        field: NamedBinaryImageField;
+        value: ExtractRepresent<NamedBinaryImageField> | null | undefined;
+    }>();
 </script>

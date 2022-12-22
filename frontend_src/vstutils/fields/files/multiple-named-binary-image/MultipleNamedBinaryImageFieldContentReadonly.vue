@@ -1,21 +1,26 @@
 <template>
     <div>
-        <div class="input-group">
-            {{ val }}
+        <div>
+            {{ text }}
         </div>
-        <Carousel v-if="value && value.length" :items="value" :name="$t(field.title)" />
+        <Carousel v-if="value && value.length" :items="value" :name="$t(field.title)" readonly />
     </div>
 </template>
 
-<script>
-    import { BaseFieldContentReadonlyMixin } from '../../base';
-    import { MultipleNamedBinaryFileFieldContentReadonly } from '../multiple-named-binary-file';
-    import Carousel from './Carousel';
+<script setup lang="ts">
+    import { computed } from 'vue';
+    import { i18n } from '@/vstutils/translation';
+    import Carousel from './Carousel.vue';
 
-    export default {
-        components: {
-            Carousel,
-        },
-        mixins: [BaseFieldContentReadonlyMixin, MultipleNamedBinaryFileFieldContentReadonly],
-    };
+    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type MultipleNamedBinaryImageField from './MultipleNamedBinaryImageField';
+
+    const props = defineProps<{
+        field: MultipleNamedBinaryImageField;
+        value: ExtractRepresent<MultipleNamedBinaryImageField> | null | undefined;
+    }>();
+
+    const text = computed(() => {
+        return i18n.tc('image n selected', props.value?.length ?? 0);
+    });
 </script>

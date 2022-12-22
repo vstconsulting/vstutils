@@ -1,5 +1,4 @@
 import type { ParameterCollectionFormat } from 'swagger-schema-official';
-import type { ComponentOptions } from 'vue';
 
 import type {
     ExtractInner,
@@ -77,7 +76,7 @@ export class ArrayField<TRealField extends Field = Field> extends BaseField<
     }
 
     static get mixins() {
-        return [ArrayFieldMixin as ComponentOptions<Vue>];
+        return [ArrayFieldMixin];
     }
 
     getEmptyValue() {
