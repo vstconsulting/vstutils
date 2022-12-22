@@ -280,23 +280,6 @@ export function allPropertiesIsObjects(obj) {
 }
 
 /**
- * Function, that converts instance of ArrayBuffer to Base64.
- * @param {ArrayBuffer} buffer Instance of ArrayBuffer.
- * @return {string}
- */
-export function arrayBufferToBase64(buffer) {
-    let binary = '';
-    let bytes = new Uint8Array(buffer);
-    let len = bytes.byteLength;
-
-    for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-
-    return window.btoa(binary);
-}
-
-/**
  * Function, that forms random string and returns it.
  * @param {number} length String's length.
  * @param {string} abc String with chars, that can be used in random string.
@@ -922,32 +905,6 @@ export function randomSleep(min, max) {
 }
 
 /**
- * @param url
- * @return {Promise<Image>}
- */
-export async function loadImage(url) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.addEventListener('load', () => resolve(img));
-        img.addEventListener('error', reject);
-        img.src = url;
-    });
-}
-
-/**
- * @param {File|Blob} file
- * @return {Promise<string>}
- */
-export function readFileAsDataUrl(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.addEventListener('load', (loadEvent) => resolve(loadEvent.target.result));
-        reader.addEventListener('error', reject);
-        reader.readAsDataURL(file);
-    });
-}
-
-/**
  * Escape string so it can be safe used in html
  * @param {string} unsafe
  * @return {string}
@@ -962,30 +919,8 @@ export function escapeHtml(unsafe) {
 }
 
 /**
- * Removes base64 prefix from content of the file
- * @param {string} content
- * @return {string}
- */
-export function removeBase64Prefix(content) {
-    return content.slice(content.indexOf(',') + 1);
-}
-
-/**
- * Function that reads file to vstutils named binary files format
- * @param {File} file
- * @return {Promise<Object>}
- */
-export async function readFileAsObject(file) {
-    return {
-        name: file.name || null,
-        content: removeBase64Prefix(await readFileAsDataUrl(file)),
-        mediaType: file.type || null,
-    };
-}
-
-/**
  * @param file {object}
- * @return {{url: string}}
+ * @return {string}
  */
 
 export function makeDataImageUrl(file) {

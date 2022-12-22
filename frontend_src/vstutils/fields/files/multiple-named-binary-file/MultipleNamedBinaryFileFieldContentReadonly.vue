@@ -1,42 +1,25 @@
 <template>
     <div>
         <div>
-            {{ val }}
+            {{ text }}
         </div>
-        <div>
-            <ul class="multiple-files-list">
-                <li
-                    v-for="(file, idx) in value"
-                    :key="idx"
-                    :title="$t('Download file')"
-                    @click="fileClickHandler(file)"
-                >
-                    <div>
-                        <span class="break-word">{{ file.name }}</span>
-                    </div>
-                </li>
-            </ul>
-        </div>
+        <FilesList v-if="value && value.length > 0" :files="value" readonly />
     </div>
 </template>
 
-<script>
-    import { BaseFieldContentReadonlyMixin } from '../../base';
-    import MultipleNamedBinaryFileFieldContent from './MultipleNamedBinaryFileFieldContent.js';
-    import { downloadBase64File } from '../../../utils';
+<script setup lang="ts">
+    import { computed } from 'vue';
+    import { i18n } from '@/vstutils/translation';
+    import FilesList from './FilesList.vue';
 
-    export default {
-        mixins: [BaseFieldContentReadonlyMixin, MultipleNamedBinaryFileFieldContent],
-        methods: {
-            fileClickHandler(file) {
-                downloadBase64File(file);
-            },
-        },
-    };
+    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type MultipleNamedBinaryFileField from './MultipleNamedBinaryFileField';
+
+    const props = defineProps<{
+        value: ExtractRepresent<MultipleNamedBinaryFileField> | null | undefined;
+    }>();
+
+    const text = computed(() => {
+        return i18n.tc('file n selected', props.value?.length ?? 0);
+    });
 </script>
-
-<style scoped>
-    li {
-        cursor: pointer;
-    }
-</style>

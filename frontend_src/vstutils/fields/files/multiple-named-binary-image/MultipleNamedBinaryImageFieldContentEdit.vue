@@ -5,24 +5,18 @@
             :field="field"
             :images="imagesForValidation"
             @cancel="cancelValidation"
-            @validated="onImageValidated"
+            @validated="onImagesValidated"
         />
-
-        <div ref="dragZone" style="transition: all 300ms" class="input-group">
-            <p
-                class="p-as-input"
-                :class="classes"
-                :style="styles"
-                :aria-labelledby="label_id"
-                :aria-label="aria_label"
-            >
-                {{ val }}
-            </p>
-
-            <ReadFileButton :media-types="field.allowedMediaTypes" @read-file="readFiles" />
-            <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
-            <ClearButton @click.native="clearValue" />
-        </div>
+        <FileSelector
+            :show-hide-button="hideable"
+            :has-value="value && value.length > 0"
+            :media-types="field.allowedMediaTypes"
+            :text="text"
+            multiple
+            @read-file="readFiles"
+            @clear="emit('clear')"
+            @hide="emit('hide-field')"
+        />
         <Carousel
             v-if="value && value.length"
             :items="value"
@@ -32,35 +26,44 @@
     </div>
 </template>
 
-<script>
-    import { BinaryFileFieldContentEdit, BinaryFileFieldReadFileButton } from '../binary-file';
-    import { ResolutionValidatorMixin, ResolutionValidatorModal } from '../named-binary-image';
-    import { MultipleNamedBinaryFileFieldContentEdit } from '../multiple-named-binary-file';
-    import MultipleNamedBinaryImageFieldContent from './MultipleNamedBinaryImageFieldContent';
-    import Carousel from './Carousel';
+<script setup lang="ts">
+    import { ResolutionValidatorModal, useResolutionValidator } from '../named-binary-image';
+    import Carousel from './Carousel.vue';
+    import { computed } from 'vue';
+    import { i18n } from '@/vstutils/translation';
+    import FileSelector from '../FileSelector.vue';
+    import type MultipleNamedBinaryImageField from './MultipleNamedBinaryImageField';
+    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type { NamedFile } from '../named-binary-file';
 
-    const ReadFileButton = {
-        data() {
-            return {
-                helpText: 'Open images',
-                multiple: true,
-            };
-        },
-        mixins: [BinaryFileFieldReadFileButton],
-    };
+    const props = defineProps<{
+        field: MultipleNamedBinaryImageField;
+        value: ExtractRepresent<MultipleNamedBinaryImageField> | null | undefined;
+        hideable: boolean;
+    }>();
 
-    export default {
-        components: { ReadFileButton, ResolutionValidatorModal, Carousel },
-        mixins: [
-            BinaryFileFieldContentEdit,
-            MultipleNamedBinaryImageFieldContent,
-            MultipleNamedBinaryFileFieldContentEdit,
-            ResolutionValidatorMixin,
-        ],
-        methods: {
-            dragFinished(e) {
-                this.readFiles(e.dataTransfer.files);
-            },
-        },
-    };
+    const emit = defineEmits<{
+        (event: 'set-value', value: ExtractRepresent<MultipleNamedBinaryImageField> | null | undefined): void;
+        (event: 'hide-field'): void;
+        (event: 'clear'): void;
+    }>();
+
+    const text = computed(() => {
+        return i18n.tc('image n selected', props.value?.length ?? 0);
+    });
+
+    function onImagesValidated(images: NamedFile[]) {
+        emit('set-value', [...(props.value ?? []), ...images]);
+    }
+
+    function removeFile(index: number) {
+        let v = props.value ? [...props.value] : [];
+        v.splice(index, 1);
+        emit('set-value', v);
+    }
+
+    const { imagesForValidation, cancelValidation, readFiles } = useResolutionValidator(
+        props.field,
+        onImagesValidated,
+    );
 </script>

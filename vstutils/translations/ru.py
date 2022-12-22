@@ -158,6 +158,8 @@ TRANSLATION = {
     'To continue, need to accept the terms agreement.': 'Чтобы продолжить, необходимо принять условия соглашения.',
     'Clear all cache with settings': 'Очистить весь кеш вместе с настройками',
     'Generate password': 'Сгенерировать пароль',
+    'Height should be more then {height}px.': 'Высота должна быть больше чем {height}px.',
+    'Width should be more then {width}px.': 'Ширина должна быть больше чем {width}px.',
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста, обновите страницу.',

@@ -15,20 +15,22 @@
             :maxlength="attrs['maxlength']"
             :aria-labelledby="label_id"
             :aria-label="aria_label"
-            @input="$emit('set-value', $event.target.value)"
+            @input="onInput"
         />
     </div>
 </template>
 
-<script>
-    import { BaseFieldContentEdit } from '../../base';
+<script lang="ts">
+    import { defineComponent } from 'vue';
+    import { BaseFieldContentEdit } from '@/vstutils/fields/base';
     import FileFieldReadFileButton from './FileFieldReadFileButton.vue';
 
-    export default {
+    export default defineComponent({
         components: {
             ReadFileButton: FileFieldReadFileButton,
         },
-        mixins: [BaseFieldContentEdit],
+        extends: BaseFieldContentEdit,
+        emits: ['set-value', 'hide-field'],
         data() {
             return {
                 styles_dict: { resize: 'vertical' },
@@ -39,7 +41,12 @@
                 return this.$u.capitalize(this.$tc('file n selected', this.value ? 1 : 0));
             },
         },
-    };
+        methods: {
+            onInput(e: Event) {
+                this.$emit('set-value', (e.target as HTMLTextAreaElement).value);
+            },
+        },
+    });
 </script>
 
 <style scoped>

@@ -32,6 +32,7 @@
                 :hideable="hideable"
                 @hide-field="$emit('hide-field', field)"
                 @set-value="setValue"
+                @clear="clearValue"
             />
         </template>
     </div>
@@ -64,6 +65,12 @@
              * Component for list_view of field.
              */
             field_list_view: BaseFieldListView,
+        },
+        inject: {
+            requireValueOnClear: {
+                from: 'requireValueOnClear',
+                default: false,
+            },
         },
         props: FieldPropsDef,
         data() {
@@ -116,6 +123,9 @@
             },
         },
         methods: {
+            clearValue() {
+                this.setValue(this.field.getInitialValue({ requireValue: this.requireValueOnClear }));
+            },
             setValue(value, { markChanged = true } = {}) {
                 this._emitSetValueSignal(value, { markChanged });
             },

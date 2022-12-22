@@ -1,73 +1,56 @@
 <template>
     <div>
-        <div ref="dragZone" style="transition: all 300ms" class="input-group">
-            <p
-                class="p-as-input"
-                :class="classes"
-                :style="styles"
-                :aria-labelledby="label_id"
-                :aria-label="aria_label"
-            >
-                {{ val }}
-            </p>
-
-            <ReadFileButton :media-types="field.allowedMediaTypes" @read-file="$parent.readFile($event)" />
-            <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
-            <ClearButton @click.native="clearValue" />
-        </div>
-        <div>
-            <ul class="multiple-files-list">
-                <template v-for="(file, idx) in value">
-                    <li :key="idx">
-                        <div>
-                            <span
-                                title="Download file"
-                                class="cursor-pointer break-word"
-                                @click="fileClickHandler(file)"
-                                v-text="file.name"
-                            />
-                            <span class="cursor-pointer fa fa-times" @click="removeFile(idx)" />
-                        </div>
-                    </li>
-                </template>
-            </ul>
-        </div>
+        <FileSelector
+            :show-hide-button="hideable"
+            :has-value="value && value.length > 0"
+            :media-types="field.allowedMediaTypes"
+            :text="text"
+            multiple
+            @read-file="readFiles"
+            @clear="emit('clear')"
+            @hide="emit('hide-field')"
+        />
+        <FilesList v-if="value && value.length > 0" :files="value" @remove="removeFile" />
     </div>
 </template>
 
-<script>
-    import { BinaryFileFieldReadFileButton, BinaryFileFieldContentEdit } from '../binary-file';
-    import MultipleNamedBinaryFileFieldContent from './MultipleNamedBinaryFileFieldContent';
-    import { downloadBase64File } from '../../../utils';
+<script setup lang="ts">
+    import { computed } from 'vue';
+    import { i18n } from '@/vstutils/translation';
+    import { readFileAsObject } from '@/vstutils/utils';
+    import FileSelector from '../FileSelector.vue';
+    import FilesList from './FilesList.vue';
 
-    /**
-     * Mixin for editable multiplenamedbinfile field.
-     */
-    export default {
-        components: {
-            ReadFileButton: {
-                mixins: [BinaryFileFieldReadFileButton],
-                data() {
-                    return {
-                        helpText: 'Open files',
-                        multiple: true,
-                    };
-                },
-            },
-        },
-        mixins: [BinaryFileFieldContentEdit, MultipleNamedBinaryFileFieldContent],
-        methods: {
-            fileClickHandler(file) {
-                downloadBase64File(file);
-            },
-            removeFile(index) {
-                let v = this.value ? [...this.value] : [];
-                v.splice(index, 1);
-                this.$emit('set-value', v);
-            },
-            dragFinished(e) {
-                this.$parent.readFile(e.dataTransfer.files);
-            },
-        },
-    };
+    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type MultipleNamedBinaryFileField from './MultipleNamedBinaryFileField';
+
+    const props = defineProps<{
+        field: MultipleNamedBinaryFileField;
+        value: ExtractRepresent<MultipleNamedBinaryFileField> | null | undefined;
+        hideable: boolean;
+    }>();
+
+    const emit = defineEmits<{
+        (event: 'set-value', value: ExtractRepresent<MultipleNamedBinaryFileField> | null | undefined): void;
+        (event: 'hide-field'): void;
+        (event: 'clear'): void;
+    }>();
+
+    const text = computed(() => {
+        return i18n.tc('file n selected', props.value?.length ?? 0);
+    });
+
+    function removeFile(index: number) {
+        let v = props.value ? [...props.value] : [];
+        v.splice(index, 1);
+        emit('set-value', v);
+    }
+
+    async function readFiles(files: File[]) {
+        const filesObj = [];
+        for (const file of files) {
+            filesObj.push(await readFileAsObject(file));
+        }
+        emit('set-value', [...(props.value ?? []), ...filesObj]);
+    }
 </script>

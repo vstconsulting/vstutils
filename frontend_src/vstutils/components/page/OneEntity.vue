@@ -31,7 +31,7 @@
                 :fields-errors="fieldsErrors"
                 :hide-read-only="hideReadOnly"
                 :hide-not-required="hideNotRequired"
-                :require-value-on-clear="view.type === $u.ViewTypes.PAGE_NEW"
+                :require-value-on-clear="requireValueOnClear"
                 @set-value="setFieldValue"
             />
         </div>
@@ -58,6 +58,12 @@
             };
         },
         computed: {
+            requireValueOnClear() {
+                if (this.view.isEditPage() && this.view.isPartial) {
+                    return true;
+                }
+                return false;
+            },
             self() {
                 return this;
             },

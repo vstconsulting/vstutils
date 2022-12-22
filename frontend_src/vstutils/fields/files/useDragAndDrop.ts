@@ -1,3 +1,4 @@
+import type { Ref } from 'vue';
 import { watch, onBeforeUnmount } from 'vue';
 
 const isAdvancedUploadAvailable = (function () {
@@ -9,7 +10,7 @@ const isAdvancedUploadAvailable = (function () {
     );
 })();
 
-function preventAndStopHandler(e) {
+function preventAndStopHandler(e: Event) {
     e.preventDefault();
     e.stopPropagation();
 }
@@ -18,27 +19,38 @@ const dragOverEvents = ['dragover', 'dragenter'];
 const dragLeaveEvents = ['dragleave', 'dragend', 'drop'];
 const allDragRelated = ['drag', 'dragstart', ...dragOverEvents, ...dragLeaveEvents];
 
-export function useDragAndDrop({ dragZoneRef, onDragOver, onDragLeave, onDragFinished }) {
+export function useDragAndDrop({
+    dragZoneRef,
+    onDragOver,
+    onDragLeave,
+    onDragFinished,
+}: {
+    dragZoneRef: Ref<HTMLElement | null>;
+    onDragOver?: (e: DragEvent) => void;
+    onDragLeave?: (e: DragEvent) => void;
+    onDragFinished?: (e: DragEvent) => void;
+}) {
     if (!isAdvancedUploadAvailable) {
         return;
     }
 
-    function setupListeners(method) {
+    function setupListeners(method: 'addEventListener' | 'removeEventListener') {
+        const el = dragZoneRef.value!;
         for (const eventName of allDragRelated) {
-            dragZoneRef.value[method](eventName, preventAndStopHandler);
+            el[method](eventName, preventAndStopHandler);
         }
         if (onDragOver) {
             for (const eventName of dragOverEvents) {
-                dragZoneRef.value[method](eventName, onDragOver);
+                el[method](eventName, onDragOver as EventListener);
             }
         }
         if (onDragLeave) {
             for (const eventName of dragLeaveEvents) {
-                dragZoneRef.value[method](eventName, onDragLeave);
+                el[method](eventName, onDragLeave as EventListener);
             }
         }
         if (onDragFinished) {
-            dragZoneRef.value[method]('drop', onDragFinished);
+            el[method]('drop', onDragFinished as EventListener);
         }
     }
 

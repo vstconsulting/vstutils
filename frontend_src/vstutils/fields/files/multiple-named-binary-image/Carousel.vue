@@ -1,6 +1,6 @@
 <template>
     <div class="container text-center my-3">
-        <splide ref="splide" :options="options" @splide:mounted="updateOptions">
+        <splide ref="splideRef" :options="options" @splide:mounted="updateOptions">
             <splide-slide
                 v-for="(item, idx) in preparedItems"
                 :key="idx"
@@ -12,11 +12,11 @@
                         <span
                             v-if="$listeners['remove-file']"
                             class="fa fa-times btn-default remove-file"
-                            @click.stop="$emit('remove-file', idx)"
+                            @click.stop="emit('remove-file', idx)"
                         />
                         <img
                             :src="item.imgSrc"
-                            :alt="item.name"
+                            :alt="item.name ?? ''"
                             style="margin: 4px auto 16px auto; width: 90%; height: auto"
                         />
                         <div class="item-title">
@@ -26,76 +26,84 @@
                 </div>
             </splide-slide>
         </splide>
-        <BootstrapModal ref="modal" :title="$t(name)">
+        <BootstrapModal ref="modalRef" :title="$t(name)">
             <img
+                v-if="activeItem"
                 style="max-height: 80vh"
                 :src="activeItem.imgSrc"
-                :alt="activeItem.name"
+                :alt="activeItem.name ?? ''"
                 class="image-field-content"
             />
         </BootstrapModal>
     </div>
 </template>
 
-<script>
+<script setup lang="ts">
     import { Splide, SplideSlide } from '@splidejs/vue-splide';
     import '@splidejs/splide/dist/css/splide.min.css';
-    import { makeDataImageUrl } from '../../../utils';
-    import BootstrapModal from '../../../components/BootstrapModal';
+    import { makeDataImageUrl } from '@/vstutils/utils';
+    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
+    import type { NamedFile } from '../named-binary-file';
+    import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
-    export default {
-        components: { Splide, SplideSlide, BootstrapModal },
-        props: {
-            items: { type: Array, required: true },
-            name: { type: String, default: '' },
-        },
-        data() {
-            return {
-                options: {
-                    rewind: true,
-                    focus: 'center',
-                    perPage: 2,
-                    pagination: false,
-                    width: '90vw',
-                },
-                activeItem: {},
-            };
-        },
-        computed: {
-            preparedItems() {
-                return this.items.map((i) => {
-                    return { ...i, imgSrc: makeDataImageUrl(i) };
-                });
-            },
-        },
-        watch: {
-            preparedItems() {
-                this.$nextTick().then(() => {
-                    this.$refs.splide.splide.refresh();
-                });
-            },
-        },
-        mounted() {
-            window.addEventListener('resize', this.updateOptions);
-        },
-        beforeDestroy() {
-            window.removeEventListener('resize', this.updateOptions);
-        },
-        methods: {
-            updateOptions() {
-                const width = this.$refs.splide.$el.clientWidth;
-                const perPage = Math.floor(width / 150);
-                if (this.options.perPage !== perPage) {
-                    this.options.perPage = perPage;
-                    this.$refs.splide.splide.options = this.options;
-                }
-            },
-            onClick(item) {
-                this.activeItem = { imgSrc: item.imgSrc, name: item.name };
-                this.$refs.modal.open();
-            },
-        },
+    type InternalItem = NamedFile & { imgSrc: string };
+
+    const props = defineProps<{
+        items: NamedFile[];
+        name: string;
+        readonly?: boolean;
+    }>();
+    const emit = defineEmits<{
+        (e: 'remove-file', index: number): void;
+    }>();
+
+    const splideRef = ref<any>(null);
+    const modalRef = ref<any>(null);
+
+    const preparedItems = computed(() => {
+        return props.items.map((i) => {
+            return { ...i, imgSrc: makeDataImageUrl(i) };
+        });
+    });
+
+    watch(preparedItems, () => {
+        nextTick().then(() => {
+            splideRef.value?.splide.refresh();
+        });
+    });
+
+    const options = {
+        rewind: true,
+        focus: 'center',
+        perPage: 2,
+        pagination: false,
+        width: '90vw',
     };
+
+    let activeItem = ref<{ imgSrc: string; name?: string | null } | null>(null);
+
+    function onClick(item: InternalItem) {
+        activeItem.value = { imgSrc: item.imgSrc, name: item.name };
+        modalRef.value.open();
+    }
+
+    function updateOptions() {
+        const width = splideRef.value?.$el.clientWidth;
+        const perPage = Math.floor(width / 150);
+        if (options.perPage !== perPage) {
+            options.perPage = perPage;
+            if (splideRef.value) {
+                splideRef.value.splide.options = options;
+            }
+        }
+    }
+
+    onMounted(() => {
+        window.addEventListener('resize', updateOptions);
+    });
+    onBeforeUnmount(() => {
+        window.removeEventListener('resize', updateOptions);
+    });
 </script>
 
 <style scoped lang="scss">

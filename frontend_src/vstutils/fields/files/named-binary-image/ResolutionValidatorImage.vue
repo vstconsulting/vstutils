@@ -53,11 +53,12 @@
 </template>
 
 <script setup lang="ts">
-    import { makeDataImageUrl } from '@/vstutils/utils';
     import { ref, computed, reactive, onMounted } from 'vue';
-    import type { NamedBinaryFileField } from '@/vstutils/fields/files/named-binary-file';
-    import type ResolutionValidatorConfig from './ResolutionValidatorConfig';
     import { i18n } from '@/vstutils/translation';
+    import { makeDataImageUrl } from '@/vstutils/utils';
+    import type { NamedFile } from '@/vstutils/fields/files/named-binary-file';
+    import type ResolutionValidatorConfig from './ResolutionValidatorConfig';
+    import type { IImageField } from './NamedBinaryImageField';
     import Cropper from 'cropperjs';
 
     const allowedExtensions = ['jpeg', 'png', 'webp'];
@@ -65,11 +66,9 @@
     const checkParams = ['width', 'height'] as const;
     type CheckParam = 'width' | 'height';
 
-    type Image = { content: string; mediaType: string; name: string };
-
     const props = defineProps<{
-        field: NamedBinaryFileField;
-        image: Image;
+        field: IImageField;
+        image: NamedFile;
     }>();
     const emit = defineEmits<{
         (e: 'crop', img: string): void;
@@ -87,7 +86,6 @@
         height: 0,
     });
 
-    // @ts-expect-error NamedBinaryFileField has no types yet
     const config = props.field.resolutionConfig as ResolutionValidatorConfig;
 
     const format = computed(() => {

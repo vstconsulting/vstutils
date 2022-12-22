@@ -73,4 +73,24 @@ describe('DynamicField', () => {
         });
         field.prepareFieldForView('/some/path/');
     });
+
+    test('real field title', () => {
+        const dynamicField = new DynamicField({
+            name: 'dynamic_field',
+            title: 'Custom title',
+            [X_OPTIONS]: {
+                field: 'real_field',
+            },
+        });
+
+        const withoutTitle = dynamicField.getRealField({
+            real_field: { type: 'boolean' },
+        });
+        expect(withoutTitle.title).toBe('Custom title');
+
+        const withTitle = dynamicField.getRealField({
+            real_field: { type: 'boolean', title: 'Override custom' },
+        });
+        expect(withTitle.title).toBe('Override custom');
+    });
 });

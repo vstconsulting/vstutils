@@ -2,11 +2,10 @@
     <div>
         <div class="csv-table" :style="requiredErrorTextVar">
             <FileSelector
-                :show-hide-button="hasHideButton"
+                :show-hide-button="hideable"
                 :has-value="value && value.length"
-                :media-types="field.allowedMediaTypes"
-                :text="selectorText"
-                @read-file="$parent.readFile($event)"
+                :text="text"
+                @read-file="updateFile($event[0])"
                 @clear="clear"
                 @hide="$emit('hide-field', field)"
             />
@@ -15,85 +14,100 @@
                     :config="tableConfig"
                     :min-column-width="field.minColumnWidth"
                     :rows="rows"
-                    @change="setValue"
+                    @change="emit('set-value', $event)"
                 />
             </div>
         </div>
         <ConfirmModal
-            ref="modal"
+            ref="confirmationModalRef"
             :message="$t('Your changes will be deleted. Are you sure?')"
-            @confirm="clearModal"
-            @reject="close"
+            @confirm="confirmClear"
+            @reject="rejectClear"
         />
     </div>
 </template>
-<script>
-    import { guiPopUp } from '../../../popUp';
-    import { FileFieldContentEdit } from '../file';
-    import DataTable from './DataTable';
-    import FileSelector from '../FileSelector.vue';
-    import ConfirmModal from '../../../components/common/ConfirmModal';
+<script setup lang="ts">
+    import { computed, ref } from 'vue';
 
-    export default {
-        components: {
-            DataTable,
-            FileSelector,
-            ConfirmModal,
-        },
-        mixins: [FileFieldContentEdit],
-        data() {
-            return {
-                parsed: {
-                    data: [],
-                    errors: [],
-                    meta: null,
-                },
-                tableConfig: this.field.getTableConfig(),
-            };
-        },
-        computed: {
-            rows() {
-                return this.value || [];
-            },
-            requiredErrorTextVar() {
-                return `--required-error-text: "${this.$tc('Column is required!')}"`;
-            },
-        },
-        watch: {
-            '$parent.fileData': 'updateFile',
-        },
-        methods: {
-            clear() {
-                this.$refs.modal.openModal();
-            },
-            clearModal() {
-                this.$parent.fileData = null;
-                this.$emit('set-value', this.field.getInitialValue());
-                this.$refs.modal.closeModal();
-            },
-            close() {
-                this.$refs.modal.closeModal();
-            },
-            updateFile(file) {
-                if (!file) {
-                    this.setValue(null);
-                    return;
-                }
-                const columnsNames = this.tableConfig.slice(1).map((column) => column.prop);
-                const parsed = this.field.parseFile(file);
-                if (parsed.errors.length > 0) {
-                    guiPopUp.error();
-                    console.error(parsed);
-                    return;
-                }
-                const value = parsed.data.map((el) => {
-                    return el.reduce((acc, n, i) => ((acc[columnsNames[i]] = n), acc), {});
-                });
-                this.setValue(value);
-                this.editing = {};
-            },
+    import { guiPopUp } from '@/vstutils/popUp';
+    import { i18n } from '@/vstutils/translation';
+    import { readFileAsText } from '@/vstutils/utils';
+    import ConfirmModal from '@/vstutils/components/common/ConfirmModal.vue';
+    import DataTable from './DataTable.vue';
+    import FileSelector from '../FileSelector.vue';
+
+    import type { ParseResult } from 'papaparse';
+    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type { CsvFileField } from './index';
+
+    const props = defineProps<{
+        field: CsvFileField;
+        value: ExtractRepresent<CsvFileField> | null | undefined;
+        hideable: boolean;
+    }>();
+
+    const emit = defineEmits<{
+        (event: 'set-value', value: ExtractRepresent<CsvFileField> | null | undefined): void;
+        (event: 'hide-field'): void;
+        (event: 'clear'): void;
+    }>();
+
+    const confirmationModalRef = ref<any>(null);
+
+    let parsed: ParseResult<unknown[]> = {
+        data: [],
+        errors: [],
+        meta: {
+            delimiter: '',
+            linebreak: '',
+            aborted: false,
+            truncated: false,
+            cursor: 0,
         },
     };
+    const tableConfig = props.field.getTableConfig();
+
+    const rows = computed(() => {
+        return props.value || [];
+    });
+    const requiredErrorTextVar = computed(() => {
+        return `--required-error-text: "${i18n.tc('Column is required!')}"`;
+    });
+    const text = computed(() => {
+        return i18n.tc('file n selected', props.value ? 1 : 0);
+    });
+
+    function clear() {
+        confirmationModalRef.value.openModal();
+    }
+    function confirmClear() {
+        emit('clear');
+        confirmationModalRef.value.closeModal();
+    }
+    function rejectClear() {
+        confirmationModalRef.value.closeModal();
+    }
+    async function updateFile(file: File) {
+        if (!file) {
+            emit('set-value', null);
+            return;
+        }
+        const content = await readFileAsText(file);
+        const columnsNames = tableConfig.slice(1).map((column) => column.prop);
+        parsed = props.field.parseFile(content);
+        if (parsed.errors.length > 0) {
+            guiPopUp.error();
+            console.error(parsed);
+            return;
+        }
+        const value = parsed.data.map((el) => {
+            return el.reduce((acc: Record<string, unknown>, n, i) => {
+                acc[columnsNames[i]] = n;
+                return acc;
+            }, {});
+        });
+        emit('set-value', value);
+    }
 </script>
 
 <style scoped>

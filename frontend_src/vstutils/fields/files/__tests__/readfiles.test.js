@@ -1,5 +1,5 @@
 import { expect, test, describe, jest } from '@jest/globals';
-import ResolutionValidatorMixin from '../named-binary-image/ResolutionValidatorMixin';
+import { useResolutionValidator } from '../named-binary-image/useResolutionValidator';
 import { NamedBinaryImageField } from '../named-binary-image';
 import { X_OPTIONS } from '../../../utils';
 
@@ -14,14 +14,9 @@ describe('File fields', () => {
 
         const validatedCallback = jest.fn();
 
-        await ResolutionValidatorMixin.methods.readFiles.call(
-            {
-                $parent: { field },
-                field,
-                onImageValidated: validatedCallback,
-            },
-            [],
-        );
+        const { readFiles } = useResolutionValidator(field, validatedCallback);
+
+        await readFiles([]);
 
         expect(validatedCallback).toBeCalledTimes(1);
         expect(validatedCallback.mock.calls[0][0].length).toBe(0);

@@ -90,14 +90,18 @@ export const createListViewStore = (view: ListView) => () => {
 
     const instanceSublinks = computed(() => {
         if (view.pageView) {
-            return Array.from(view.pageView.sublinks.values()).filter((sublink) => !sublink.hidden);
+            return Array.from(view.pageView.sublinks.values()).filter(
+                (sublink) => !sublink.hidden && !sublink.doNotShowOnList,
+            );
         }
         return [];
     });
 
     const instanceActions = computed(() => {
         if (view.pageView) {
-            return Array.from(view.pageView.actions.values()).filter((action) => !action.hidden);
+            return Array.from(view.pageView.actions.values()).filter(
+                (action) => !action.hidden && !action.doNotShowOnList,
+            );
         }
         return [];
     });

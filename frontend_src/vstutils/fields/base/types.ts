@@ -39,5 +39,11 @@ export interface SetFieldValueOptions<T extends Field = Field> {
 
 export interface FieldComponentEmits<T extends Field> {
     (e: 'set-value', obj: SetFieldValueOptions<T>): void;
-    (e: 'hide-field', field: T): void;
+    (e: 'hide-field'): void;
+}
+
+export interface FieldEditEmits<T extends Field> {
+    (event: 'set-value', value: ExtractRepresent<T> | null | undefined): void;
+    (event: 'hide-field'): void;
+    (event: 'clear'): void;
 }

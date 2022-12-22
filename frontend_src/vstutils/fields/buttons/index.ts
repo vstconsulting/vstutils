@@ -1,9 +1,7 @@
+import { defineComponent } from 'vue';
 import FieldButtonTemplate from './FieldButtonTemplate.vue';
 
-/**
- * @vue/component
- */
-export const BaseFieldButton = {
+export const BaseFieldButton = defineComponent({
     mixins: [FieldButtonTemplate],
     data() {
         return {
@@ -16,12 +14,9 @@ export const BaseFieldButton = {
             iconStyles: {},
         };
     },
-};
+});
 
-/**
- * @vue/component
- */
-export const FieldButton = {
+export const FieldButton = defineComponent({
     mixins: [FieldButtonTemplate],
     props: {
         iconClasses: { type: Array, required: true },
@@ -32,37 +27,28 @@ export const FieldButton = {
         spanStyles: { type: Object, required: false, default: () => ({}) },
         iconStyles: { type: Object, required: false, default: () => ({}) },
     },
-};
+});
 
-/**
- * @vue/component
- */
-export const ClearButton = {
+export const ClearButton = defineComponent({
     name: 'ClearButton',
     mixins: [BaseFieldButton],
     data() {
         return { helpText: 'Clean value', iconClasses: ['fa', 'fa-times'] };
     },
-};
+});
 
-/**
- * @vue/component
- */
-export const HideButton = {
+export const HideButton = defineComponent({
     name: 'HideButton',
     mixins: [BaseFieldButton],
     data() {
         return { helpText: 'Hide field', iconClasses: ['fa', 'fa-minus'] };
     },
-};
+});
 
-/**
- * @vue/component
- */
-export const SetDefaultButton = {
+export const SetDefaultButton = defineComponent({
     name: 'SetDefaultButton',
     mixins: [BaseFieldButton],
     data() {
         return { helpText: 'Set default value', iconClasses: ['fas', 'fa-redo'] };
     },
-};
+});

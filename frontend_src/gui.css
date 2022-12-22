@@ -982,19 +982,6 @@ img.image-field-content {
     cursor: pointer;
 }
 
-.multiple-files-list {
-    padding-left: 30px;
-}
-
-.multiple-files-list li div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-right: 13px;
-}
-
 .guifield-multiplenamedbinimage .image-field-content-wrapper {
     height: 30px;
 }

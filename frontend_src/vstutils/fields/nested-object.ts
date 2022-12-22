@@ -1,4 +1,3 @@
-import type { ComponentOptions } from 'vue';
 import { computed, defineComponent, h } from 'vue';
 
 import { ModelFields } from '@/vstutils/components/page';
@@ -113,7 +112,7 @@ export class NestedObjectField
         return value;
     }
     static get mixins() {
-        return [NestedObjectFieldMixin as ComponentOptions<Vue>];
+        return [NestedObjectFieldMixin];
     }
     parseFieldError(data: unknown, instanceData: Record<string, unknown>) {
         if (data && typeof data === 'object' && !Array.isArray(data)) {

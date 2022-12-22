@@ -13,53 +13,49 @@
     </div>
 </template>
 
-<script>
-    import { BaseFieldContentReadonlyMixin } from '../../base';
-    import DataTable from './DataTable';
+<script setup lang="ts">
+    import { computed, ref } from 'vue';
+    import type { CsvFileField } from './index';
+    import type { ExtractRepresent } from '../../base';
+    import DataTable from './DataTable.vue';
 
-    export default {
-        components: { DataTable },
-        mixins: [BaseFieldContentReadonlyMixin],
-        data() {
-            return {
-                tableConfig: this.field.getTableConfig(),
-                parsed: {
-                    data: [],
-                    errors: [],
-                    meta: null,
-                },
-                withHeader: false,
-            };
-        },
-        computed: {
-            rows() {
-                const columnsNames = this.tableConfig.slice(1).map((column) => column.prop);
-                const parsed = this.field.parseFile(this.value);
-                const value = parsed.data.map((el) => {
-                    return el.reduce((acc, n, i) => ((acc[columnsNames[i]] = n), acc), {});
-                });
-                return value;
-            },
-        },
-        methods: {
-            download() {
-                let data = this.value;
+    const props = defineProps<{
+        field: CsvFileField;
+        value: ExtractRepresent<CsvFileField> | null | undefined;
+    }>();
 
-                if (this.withHeader) {
-                    const header = this.tableConfig
-                        .slice(1)
-                        .map((el) => el.name)
-                        .join(this.field.delimiter);
-                    data = `${header}\n${data}`;
-                }
+    const withHeader = ref(false);
+    const tableConfig = props.field.getTableConfig();
 
-                const blob = new Blob([data], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                window.open(url);
-                window.URL.revokeObjectURL(url);
-            },
-        },
-    };
+    const rows = computed(() => {
+        if (!props.value) return [];
+        const columnsNames = tableConfig.slice(1).map((column) => column.prop);
+        const parsed = props.field.parseFile(props.value as string);
+        const value = parsed.data.map((el) => {
+            return el.reduce((acc: Record<string, unknown>, n, i) => {
+                acc[columnsNames[i]] = n;
+                return acc;
+            }, {});
+        });
+        return value;
+    });
+
+    function download() {
+        let data = props.value;
+
+        if (withHeader.value) {
+            const header = tableConfig
+                .slice(1)
+                .map((el) => el.name)
+                .join(props.field.delimiter as string);
+            data = `${header}\n${data}`;
+        }
+
+        const blob = new Blob([data as string], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        window.open(url);
+        window.URL.revokeObjectURL(url);
+    }
 </script>
 
 <style scoped>

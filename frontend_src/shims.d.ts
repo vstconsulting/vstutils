@@ -3,7 +3,9 @@ import type * as SPA from './app.common.js';
 
 declare global {
     interface String {
+        format(args: Record<string, unknown>): string;
         format(args: any[]): string;
+        format(...args: any[]): string;
     }
     interface Array<T> {
         get last(): T;

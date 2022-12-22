@@ -1,5 +1,5 @@
 <template>
-    <label :class="wrapperClasses" :style="wrapperStyles" data-toggle="tooltip" :title="$t(helpText)">
+    <label :class="wrapperClasses" :style="wrapperStyles" data-toggle="tooltip" :title="$tc(helpText)">
         <span :class="spanClasses" :style="spanStyles" @change="onChange">
             <input
                 type="file"
@@ -13,15 +13,15 @@
     </label>
 </template>
 
-<script>
-    import FileFieldButtonMixin from './FileFieldButtonMixin.js';
-    import { BaseFieldButton } from '../../buttons';
+<script lang="ts">
+    import { defineComponent } from 'vue';
+    import FileFieldButtonMixin from './FileFieldButtonMixin';
 
     /**
      * Component for 'open file' button.
      */
-    export default {
-        mixins: [BaseFieldButton, FileFieldButtonMixin],
+    export default defineComponent({
+        extends: FileFieldButtonMixin,
         props: {
             mediaTypes: { type: Array, default: () => ['*'] },
         },
@@ -41,9 +41,9 @@
             },
         },
         methods: {
-            onChange(event) {
+            onChange(event: Event) {
                 this.$emit('read-file', event);
             },
         },
-    };
+    });
 </script>

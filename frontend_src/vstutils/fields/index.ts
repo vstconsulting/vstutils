@@ -18,7 +18,7 @@ import * as password from './password';
 import * as text from './text';
 import * as color from './color.js';
 import * as email from './email.js';
-import * as hidden from './hidden.js';
+import * as hidden from './hidden';
 import * as staticValue from './static-value.js';
 
 export {
@@ -51,7 +51,7 @@ import { CrontabField } from './crontab';
 import { ChoicesField } from './choices';
 import { AutocompleteField } from './autocomplete';
 import { DependFromFkField, DynamicField } from './dynamic';
-import { HiddenField } from './hidden.js';
+import { HiddenField } from './hidden';
 import { StaticValueField } from './static-value.js';
 import { JSONField } from './json';
 import { RelatedListField } from './related-list';

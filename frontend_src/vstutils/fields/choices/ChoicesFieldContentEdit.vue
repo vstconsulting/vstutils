@@ -8,16 +8,13 @@
     import { FieldEditPropsDef } from '@/vstutils/fields/base';
     import type { FieldEditPropsDefType } from '@/vstutils/fields/base';
     import type { SelectedData } from '@/vstutils/select2';
-    import type { ChoicesField, EnumItem, RawEnumItem } from './ChoicesField';
+    import type { ChoicesField } from './ChoicesField';
 
     export default defineComponent({
         props: FieldEditPropsDef as FieldEditPropsDefType<ChoicesField>,
         emits: ['set-value'],
         setup(props, { emit }) {
             const selectEl = ref<HTMLSelectElement | null>(null);
-
-            let enumItems: EnumItem[] = [];
-            let validIds: string[] = [];
 
             const disableIfEmpty = computed(() => {
                 if (props.field.fieldForEnum !== undefined) {
@@ -26,13 +23,20 @@
                 return false;
             });
 
-            function setEnum(newEnum: RawEnumItem[]) {
-                enumItems = props.field.prepareEnumData(newEnum);
-                for (const item of enumItems) {
+            const enumItems = computed(() => {
+                const enumItems =
+                    props.field.fieldForEnum !== undefined
+                        ? (props.data[props.field.fieldForEnum] as string[])
+                        : props.field.enum;
+
+                const enumData = props.field.prepareEnumData(enumItems);
+                for (const item of enumData) {
                     item.text = props.field.translateValue(item.text);
                 }
-                validIds = enumItems.map((value) => value.id);
-            }
+                return enumData;
+            });
+
+            const validIds = computed(() => enumItems.value.map((value) => value.id));
 
             // eslint-disable-next-line no-undef
             function handleChange(data: SelectedData[], event: JQuery.ChangeEvent) {
@@ -45,8 +49,8 @@
                     value = event.target.value || null;
                 }
 
-                if (!validIds.includes(value) && value) {
-                    setValue(validIds[0] || null);
+                if (!validIds.value.includes(value) && value) {
+                    setValue(validIds.value[0] || null);
                     return;
                 }
                 if (props.value !== value) {
@@ -61,23 +65,16 @@
             });
 
             onMounted(() => {
-                const fieldForEnum = props.field.fieldForEnum;
-                const enumGetter =
-                    fieldForEnum !== undefined
-                        ? () => props.data[fieldForEnum] as string[]
-                        : () => props.field.enum;
-
                 watch(
-                    enumGetter,
+                    enumItems,
                     (newVal) => {
                         if (!newVal) {
                             return;
                         }
-                        setEnum(newVal);
                         initSelect2({
                             width: '100%',
-                            data: enumItems,
-                            disabled: disableIfEmpty.value && enumItems.length === 0,
+                            data: newVal,
+                            disabled: disableIfEmpty.value && newVal.length === 0,
                             allowClear: props.field.nullable,
                             placeholder: { id: undefined, text: '' },
                             templateResult: props.field.templateResult,
@@ -90,7 +87,7 @@
                         } else if (props.field.hasDefault) {
                             setValue(props.field.default);
                         } else {
-                            setValue(enumItems[0] || null);
+                            setValue(enumItems.value[0] || null);
                         }
                     },
                     { immediate: true },

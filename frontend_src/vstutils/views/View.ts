@@ -34,6 +34,7 @@ export interface Operation {
     iconClasses?: string[];
     appendFragment?: string;
     hidden?: boolean;
+    doNotShowOnList?: boolean;
 }
 
 export interface Sublink extends Operation {
@@ -52,7 +53,6 @@ export interface Action extends Operation {
     path?: string;
     href?: string;
     method?: HttpMethods;
-    doNotShowOnList?: boolean;
     confirmationRequired?: boolean;
     view?: View;
     responseModel?: typeof Model;

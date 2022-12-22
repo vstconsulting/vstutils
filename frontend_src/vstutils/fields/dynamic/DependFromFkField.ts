@@ -1,4 +1,3 @@
-import type { ComponentOptions } from 'vue';
 import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
 import { BaseField } from '@/vstutils/fields/base';
 import { mergeDeep } from '@/vstutils/utils';
@@ -29,7 +28,7 @@ export class DependFromFkField extends BaseField<unknown, unknown, XOptions> {
     }
 
     static get mixins() {
-        return [DependFromFkFieldMixin as ComponentOptions<Vue>];
+        return [DependFromFkFieldMixin];
     }
 
     toInner(data: Record<string, unknown>) {

@@ -39,12 +39,6 @@
         name: 'BaseFieldContentEdit',
         components: { ClearButton, SetDefaultButton, HideButton },
         mixins: [BaseFieldContentMixin, BaseFieldInnerComponentMixin, FieldLabelIdMixin],
-        inject: {
-            requireValueOnClear: {
-                from: 'requireValueOnClear',
-                default: false,
-            },
-        },
         props: {
             field: { type: Object, required: true },
             // eslint-disable-next-line vue/require-prop-types
@@ -74,10 +68,7 @@
                 this.$emit('set-value', value);
             },
             clearValue() {
-                this.$emit(
-                    'set-value',
-                    this.field.getInitialValue({ requireValue: !this.requireValueOnClear }),
-                );
+                this.$emit('clear');
             },
         },
     };

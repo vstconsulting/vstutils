@@ -6,7 +6,9 @@ import type { QuerySet } from '../../querySet';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 import { i18n } from '../../translation';
 import type { IApp } from '@/vstutils/app';
-import type { ComponentOptions } from 'vue';
+import type { Component, ComponentOptions } from 'vue';
+import type Vue from 'vue';
+import type { ComponentOptionsMixin } from 'vue/types/v3-component-options';
 
 type ModelPropertyDescriptor<Represent> = PropertyDescriptor & {
     get(this: Model): Represent | null | undefined;
@@ -44,6 +46,13 @@ export type FieldOptions<XOptions extends DefaultXOptions, Inner> = Omit<Schema,
     'x-format'?: string;
     'x-hidden'?: boolean;
     'x-nullable'?: boolean;
+    'x-validators'?: {
+        extensions?: string[];
+        min_width?: number;
+        max_width?: number;
+        min_height?: number;
+        max_height?: number;
+    };
 } & (XOptions extends undefined ? { 'x-options'?: XOptions } : { 'x-options': XOptions });
 
 export interface Field<
@@ -77,11 +86,14 @@ export interface Field<
 
     translateFieldName: string;
 
-    getComponent(): ComponentOptions<Vue>;
+    getComponent(): Component;
 
     toInner(data: Record<string, unknown>): Inner | null | undefined;
     toRepresent(data: Record<string, unknown>): Represent | null | undefined;
     validateValue(data: Record<string, unknown>): void;
+
+    getDataInnerValue(data: Record<string, unknown>): Inner | null | undefined;
+    getDataRepresentValue(data: Record<string, unknown>): Represent | null | undefined;
 
     prepareFieldForView(path: string): void;
     afterInstancesFetched(instances: Model[], queryset: QuerySet): Promise<void>;
@@ -172,12 +184,20 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
         return globalThis.__currentApp;
     }
 
-    getComponent(): ComponentOptions<Vue> {
+    getComponent(): Component {
         return this.component;
     }
 
     translateValue(value: Represent) {
         return value;
+    }
+
+    getDataInnerValue(data: Record<string, unknown>): Inner | null | undefined {
+        return data[this.name] as Inner | null | undefined;
+    }
+
+    getDataRepresentValue(data: Record<string, unknown>): Represent | null | undefined {
+        return data[this.name] as Represent | null | undefined;
     }
 
     _getValueFromData(data: Record<string, unknown>): Inner | Represent | undefined | null {
@@ -309,8 +329,8 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
     /**
      * Static property for storing field mixins.
      */
-    static get mixins(): ComponentOptions<Vue>[] {
-        return [BaseFieldMixin as ComponentOptions<Vue>];
+    static get mixins(): (ComponentOptionsMixin | ComponentOptions<Vue> | typeof Vue)[] {
+        return [BaseFieldMixin];
     }
 
     /**

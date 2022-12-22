@@ -12,7 +12,7 @@ import { ValidationError } from '../validation';
 const MaskedValueMixin = {
     computed: {
         preparedValue() {
-            return IMask.pipe(this.value, this.field.mask);
+            return IMask.pipe(this.value ?? '', this.field.mask);
         },
     },
 };

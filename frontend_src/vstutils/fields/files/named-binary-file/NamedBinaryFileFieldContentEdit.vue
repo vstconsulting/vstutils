@@ -1,30 +1,41 @@
 <template>
     <FileSelector
-        :show-hide-button="hasHideButton"
-        :has-value="value"
+        :show-hide-button="hideable"
+        :has-value="!!value"
         :media-types="field.allowedMediaTypes"
-        :text="val"
+        :text="name"
         @read-file="readFile"
-        @clear="clearValue"
-        @hide="$emit('hide-field', field)"
+        @clear="emit('clear')"
+        @hide="emit('hide-field')"
     />
 </template>
 
-<script>
-    import { BinaryFileFieldContentEdit } from '../binary-file';
-    import NamedBinaryFileFieldContent from './NamedBinaryFileFieldContent.js';
-    import { readFileAsObject } from '../../../utils';
+<script setup lang="ts">
+    import { toRef } from 'vue';
+    import { readFileAsObject } from '@/vstutils/utils';
+    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import { validateFileSize } from '../file';
     import FileSelector from '../FileSelector.vue';
+    import type NamedBinaryFileField from './NamedBinaryFileField';
+    import { useNamedFileText } from './utils';
 
-    export default {
-        components: { FileSelector },
-        mixins: [BinaryFileFieldContentEdit, NamedBinaryFileFieldContent],
-        methods: {
-            async readFile(files) {
-                const file = files[0];
-                if (!file || !this.$parent.validateFileSize(file.size)) return;
-                this.$emit('set-value', await readFileAsObject(file));
-            },
-        },
-    };
+    const props = defineProps<{
+        field: NamedBinaryFileField;
+        value: ExtractRepresent<NamedBinaryFileField> | null | undefined;
+        hideable?: boolean;
+    }>();
+
+    const emit = defineEmits<{
+        (event: 'set-value', value: ExtractRepresent<NamedBinaryFileField> | null | undefined): void;
+        (event: 'hide-field'): void;
+        (event: 'clear'): void;
+    }>();
+
+    const name = useNamedFileText(toRef(props, 'value'));
+
+    async function readFile(files: File[]) {
+        const file = files[0];
+        if (!file || !validateFileSize(props.field, file.size)) return;
+        emit('set-value', await readFileAsObject(file));
+    }
 </script>
