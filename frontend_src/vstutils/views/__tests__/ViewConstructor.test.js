@@ -292,7 +292,7 @@ describe('ViewConstructor', () => {
             expect(removeAction.title).toBe('Remove');
 
             expect(subView.sublinks.size).toBe(1);
-            expect(subView.actions.size).toBe(1);
+            expect(subView.actions.size).toBe(2);
         },
     );
 

@@ -1,25 +1,5 @@
 <template>
     <div class="row">
-        <div v-if="view.filtersModelClass" class="col-12">
-            <Card :title="$t('Filters')">
-                <ModelFields
-                    :data="filters"
-                    :model="view.filtersModelClass"
-                    editable
-                    flat-if-possible
-                    flat-fields-classes="col-12 col-md-6"
-                    @set-value="setFilterValue"
-                />
-                <button
-                    type="button"
-                    class="btn btn-block bg-gradient-primary"
-                    style="width: auto"
-                    @click="applyFilters"
-                >
-                    {{ $t('Apply filters') }}
-                </button>
-            </Card>
-        </div>
         <component :is="beforeFieldsGroupsComponent" v-if="beforeFieldsGroupsComponent" :page="self" />
         <div :class="modelsFieldsWrapperClasses">
             <ModelFields
@@ -82,13 +62,13 @@
             data() {
                 return this.store.sandbox;
             },
-            ...mapStoreState(['fieldsErrors', 'model', 'instance', 'filters']),
+            ...mapStoreState(['fieldsErrors', 'model', 'instance']),
         },
         methods: {
             fieldsGroupClasses(name) {
                 return ['col-md-6', 'fields-group', `fields-group-${name.replace(/ /g, '_')}`];
             },
-            ...mapStoreActions(['setFieldValue', 'setFilterValue', 'applyFilters']),
+            ...mapStoreActions(['setFieldValue']),
         },
     };
 </script>

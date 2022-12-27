@@ -47,9 +47,8 @@
 
 <script>
     import Vue from 'vue';
-    import { IGNORED_FILTERS, mapObjectValues } from '../../utils';
+    import { mapObjectValues } from '../../utils';
     import ModalWindowAndButtonMixin from '../../fields/ModalWindowAndButtonMixin.js';
-    import OperationButton from '../common/OperationButton.vue';
     import BootstrapModal from '../BootstrapModal.vue';
 
     /**
@@ -57,7 +56,7 @@
      */
     export default {
         name: 'FiltersModal',
-        components: { BootstrapModal, OperationButton },
+        components: { BootstrapModal },
         mixins: [ModalWindowAndButtonMixin],
         props: {
             view: { type: Object, required: true },
@@ -65,7 +64,6 @@
         data() {
             return {
                 filtersData: {},
-                isMounted: false,
             };
         },
         computed: {
@@ -75,14 +73,6 @@
             filters() {
                 return this.$app.store.page.filters;
             },
-            hasActiveFilters() {
-                return (
-                    Object.keys(this.filters).filter((filter) => !IGNORED_FILTERS.includes(filter)).length > 0
-                );
-            },
-        },
-        mounted() {
-            this.isMounted = true;
         },
         methods: {
             openModal() {
@@ -105,14 +95,3 @@
         },
     };
 </script>
-
-<style>
-    .btn-open-filters-modal.active {
-        background-color: var(--btn-selected-bg-color);
-        color: var(--btn-selected-color);
-        border-color: var(--btn-selected-border-color);
-    }
-    .btn-open-filters-modal.active:hover {
-        background-color: var(--btn-selected-hover-bg-color);
-    }
-</style>
