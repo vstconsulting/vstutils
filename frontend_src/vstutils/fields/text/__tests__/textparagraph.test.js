@@ -1,5 +1,5 @@
 import { expect, test, describe } from '@jest/globals';
-import TextParagraphField from '../TextParagraphField';
+import { TextParagraphField } from '../TextParagraphField';
 
 describe('TextParagraphField', () => {
     test('check represent field', () => {

@@ -10,7 +10,7 @@
     <!--eslint-enable-->
 </template>
 
-<script>
+<script lang="ts">
     import { BaseFieldContentReadonlyMixin } from '../base';
     export default {
         mixins: [BaseFieldContentReadonlyMixin],

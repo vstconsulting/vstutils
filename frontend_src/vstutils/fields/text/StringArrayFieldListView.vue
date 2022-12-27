@@ -6,8 +6,8 @@
     </ul>
 </template>
 
-<script>
-    import { BaseFieldListView } from '../base';
+<script lang="ts">
+    import { BaseFieldListView } from '@/vstutils/fields/base';
 
     export default {
         mixins: [BaseFieldListView],

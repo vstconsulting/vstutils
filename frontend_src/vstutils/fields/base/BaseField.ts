@@ -92,8 +92,8 @@ export interface Field<
     toRepresent(data: Record<string, unknown>): Represent | null | undefined;
     validateValue(data: Record<string, unknown>): void;
 
-    getDataInnerValue(data: Record<string, unknown>): Inner | null | undefined;
-    getDataRepresentValue(data: Record<string, unknown>): Represent | null | undefined;
+    getDataInnerValue(data?: Record<string, unknown>): Inner | null | undefined;
+    getDataRepresentValue(data?: Record<string, unknown>): Represent | null | undefined;
 
     prepareFieldForView(path: string): void;
     afterInstancesFetched(instances: Model[], queryset: QuerySet): Promise<void>;
@@ -109,6 +109,8 @@ export interface Field<
 
     parseFieldError(errorData: unknown, instanceData: FieldsData): unknown;
 }
+
+export type FieldMixin = ComponentOptionsMixin | ComponentOptions<Vue> | typeof Vue;
 
 export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = DefaultXOptions>
     implements Field<Inner, Represent, XOptions>
@@ -192,12 +194,12 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
         return value;
     }
 
-    getDataInnerValue(data: Record<string, unknown>): Inner | null | undefined {
-        return data[this.name] as Inner | null | undefined;
+    getDataInnerValue(data?: Record<string, unknown>): Inner | null | undefined {
+        return data?.[this.name] as Inner | null | undefined;
     }
 
-    getDataRepresentValue(data: Record<string, unknown>): Represent | null | undefined {
-        return data[this.name] as Represent | null | undefined;
+    getDataRepresentValue(data?: Record<string, unknown>): Represent | null | undefined {
+        return data?.[this.name] as Represent | null | undefined;
     }
 
     _getValueFromData(data: Record<string, unknown>): Inner | Represent | undefined | null {
@@ -329,7 +331,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
     /**
      * Static property for storing field mixins.
      */
-    static get mixins(): (ComponentOptionsMixin | ComponentOptions<Vue> | typeof Vue)[] {
+    static get mixins(): FieldMixin[] {
         return [BaseFieldMixin];
     }
 

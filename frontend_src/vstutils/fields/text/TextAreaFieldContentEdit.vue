@@ -1,29 +1,23 @@
 <template>
-    <div class="input-group">
-        <textarea
-            :value="value"
-            :required="attrs['required']"
-            rows="3"
-            cols="50"
-            :class="classes"
-            :style="styles"
-            :minlength="attrs['minlength']"
-            :maxlength="attrs['maxlength']"
-            :aria-labelledby="label_id"
-            :aria-label="aria_label"
-            @input="$emit('set-value', $event.target.value)"
-        />
-    </div>
+    <FieldTextarea :value="value || ''" :field="field" @input="$emit('set-value', $event)" />
 </template>
 
-<script>
-    import { BaseFieldContentEdit } from '../base';
-    export default {
-        mixins: [BaseFieldContentEdit],
-        data() {
-            return {
-                styles_dict: { resize: 'vertical' },
-            };
+<script lang="ts">
+    import { defineComponent } from 'vue';
+    import {
+        FieldEditPropsDef,
+        FieldEditEmitsDef,
+        type FieldEditEmitsDefType,
+        type FieldEditPropsDefType,
+    } from '@/vstutils/fields/base';
+    import FieldTextarea from './FieldTextarea.vue';
+    import type { TextAreaField } from './TextAreaField';
+
+    export default defineComponent({
+        components: {
+            FieldTextarea,
         },
-    };
+        props: FieldEditPropsDef as FieldEditPropsDefType<TextAreaField>,
+        emits: FieldEditEmitsDef as FieldEditEmitsDefType<TextAreaField>,
+    });
 </script>
