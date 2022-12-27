@@ -6,6 +6,7 @@ import { isInstancesEqual, RequestTypes, openPage, getApp } from '../utils';
 import { i18n } from '../translation';
 import { guiPopUp, pop_up_msg } from '../popUp';
 import type { Route } from 'vue-router';
+import type { Field } from '@/vstutils/fields/base';
 import type { InstancesList, BaseViewStore } from './helpers';
 import {
     useBasePageData,
@@ -243,11 +244,13 @@ export const createDetailViewStore = (view: PageView) => () => {
         if (view.filtersModelClass) {
             const data = pageWithInstance.instance.value?._data;
             if (data) {
-                const fields = view.filtersModelClass.fields;
-                for (const key of Object.keys(data)) {
-                    if (fields.has(key)) {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-                        filters.value[key] = fields.get(key).toRepresent(data);
+                const filtersFields = view.filtersModelClass.fields as Map<string, Field>;
+                const fields = model.value.fields as Map<string, Field>;
+
+                for (const filterField of filtersFields.values()) {
+                    const field = fields.get(filterField.name);
+                    if (field && field.constructor === filterField.constructor) {
+                        filters.value[field.name] = filterField.toRepresent(data);
                     }
                 }
             }
@@ -304,8 +307,11 @@ export const createDetailViewStore = (view: PageView) => () => {
         filters.value[field] = value;
     }
 
-    function applyFilters() {
+    function applyFilters(newFiltersRepresentData?: Record<string, unknown>) {
         if (view.filtersModelClass) {
+            if (newFiltersRepresentData) {
+                filters.value = newFiltersRepresentData;
+            }
             const query = view.filtersModelClass.representToInner(filters.value);
             return openPage({
                 path: app.router.currentRoute.path,
@@ -324,6 +330,7 @@ export const createDetailViewStore = (view: PageView) => () => {
         model,
         title,
         filters,
+        filtersQuery,
         getInstancePk,
         getAutoUpdatePk,
         updateData,
@@ -338,6 +345,8 @@ export type DetailPageStore = BaseViewStore & {
     setInstance(instance: Model): void;
     instance: Model;
     getInstancePk(): string | number | undefined;
+    filters: Record<string, unknown>;
+    applyFilters(filters: Record<string, unknown>): Promise<Route | void> | undefined;
 };
 
 export const createNewViewStore = (view: PageNewView) => () => {

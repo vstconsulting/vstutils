@@ -238,6 +238,9 @@ export default class ViewConstructor {
                     operationOptions.isFileResponse = responseSchemaType === 'file';
                     pageView = new PageView(operationOptions, null);
                     pageView.filtersModelClass = this.getDetailFiltersModelClass(operationOptions.parameters);
+                    if (pageView.filtersModelClass) {
+                        pageView.actions.set('filter', { ...this.dictionary.paths.operations.page.filters });
+                    }
                     views.set(pageView.path, pageView);
                 } else if (operationOptions.type === ViewTypes.PAGE_NEW) {
                     newView = new PageNewView(operationOptions, null);

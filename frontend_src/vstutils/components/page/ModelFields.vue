@@ -168,16 +168,6 @@
                     !this.hiddenFields.includes(field)
                 );
             },
-            /**
-             * Updates field value in store
-             * @param {Object} obj
-             * @param {string} obj.field
-             * @param {any} obj.value
-             */
-            setFieldValue(obj) {
-                this.$delete(this.fieldsErrors, obj.field);
-                this.commitMutation('setFieldValue', obj);
-            },
             fieldsGroupClasses({ title, wrapperClasses }) {
                 return [
                     wrapperClasses || 'col-md-6',

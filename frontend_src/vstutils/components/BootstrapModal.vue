@@ -33,8 +33,8 @@
                                 <slot name="body" />
                                 <slot :open-modal="open" :close-modal="close" />
                             </div>
-                            <div v-show="$slots.footer" class="modal-footer">
-                                <slot name="footer" />
+                            <div v-show="$scopedSlots.footer" class="modal-footer">
+                                <slot name="footer" :close-modal="close" />
                             </div>
                         </slot>
                     </div>

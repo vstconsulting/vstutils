@@ -2,6 +2,7 @@ import { getApp, ViewTypes } from '../utils';
 import FiltersModal from '../components/list/FiltersModal.vue';
 import AddChildModal from '../components/list/AddChildModal.vue';
 import NestedDeletionModal from '../components/common/NestedDeletionModal.vue';
+import FiltersModalDetail from '@/vstutils/components/page/FiltersModalDetail';
 
 /**
  * Dictionary, that contains names of openapi schema attributes.
@@ -72,6 +73,14 @@ const openapi_dictionary = {
                     appendFragment: 'edit',
                     iconClasses: ['fas', 'fa-edit'],
                     style: { order: -8 },
+                    doNotGroup: true,
+                },
+                filters: {
+                    name: 'filters',
+                    title: '',
+                    iconClasses: ['fas', 'fa-filter'],
+                    component: FiltersModalDetail,
+                    style: { order: -5 },
                     doNotGroup: true,
                 },
             },
