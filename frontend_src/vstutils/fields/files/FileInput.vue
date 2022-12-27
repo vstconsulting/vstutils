@@ -1,6 +1,6 @@
 <template>
     <div ref="dragZone" class="file-input input-group" :class="{ 'is-dragover': isDragOver }">
-        <div class="form-control">{{ text }}</div>
+        <div class="form-control file-selector-text">{{ text }}</div>
         <input
             :id="inputId"
             type="file"
@@ -11,7 +11,8 @@
         />
         <div class="input-group-append">
             <label :for="inputId" :title="helpText" class="btn input-group-text">
-                <i class="far fa-file-alt" />
+                <i aria-hidden="true" class="far fa-file-alt" />
+                <span class="sr-only">{{ helpText }}</span>
             </label>
             <slot name="append" />
         </div>
@@ -68,6 +69,11 @@
 </script>
 
 <style scoped>
+    .file-selector-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     .file-input {
         transition: box-shadow 0.3s ease-in-out, border-radius 0.3s ease-in-out;
     }

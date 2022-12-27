@@ -1,5 +1,7 @@
-export default (ToastUIEditor) =>
-    ToastUIEditor.setLanguage(['vi'], {
+import type { Editor } from '@toast-ui/editor';
+
+export default (ToastUIEditor: typeof Editor) =>
+    ToastUIEditor.setLanguage('vi', {
         Markdown: 'Markdown',
         WYSIWYG: 'WYSIWYG',
         Write: 'Biên tập viên',

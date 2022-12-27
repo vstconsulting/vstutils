@@ -6,14 +6,13 @@
     </div>
 </template>
 
-<script>
-    import { BaseFieldContentReadonlyMixin } from '../base';
+<script lang="ts">
+    import { BaseFieldContentReadonlyMixin } from '@/vstutils/fields/base';
 
     export default {
         mixins: [BaseFieldContentReadonlyMixin],
         data() {
             return {
-                class_list: [],
                 styles_dict: {},
             };
         },

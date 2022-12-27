@@ -19,7 +19,7 @@ import * as text from './text';
 import * as color from './color.js';
 import * as email from './email.js';
 import * as hidden from './hidden';
-import * as staticValue from './static-value.js';
+import * as staticValue from './static-value';
 
 export {
     array,
@@ -44,7 +44,7 @@ export {
 };
 
 import { PasswordField } from './password';
-import { QRCodeField } from './qr.js';
+import { QRCodeField } from './qr';
 import { EmailField } from './email.js';
 import { ColorField } from './color.js';
 import { CrontabField } from './crontab';
@@ -52,7 +52,6 @@ import { ChoicesField } from './choices';
 import { AutocompleteField } from './autocomplete';
 import { DependFromFkField, DynamicField } from './dynamic';
 import { HiddenField } from './hidden';
-import { StaticValueField } from './static-value.js';
 import { JSONField } from './json';
 import { RelatedListField } from './related-list';
 
@@ -60,7 +59,7 @@ import FieldLabelIdMixin from './FieldLabelIdMixin.js';
 import ModalWindowAndButtonMixin from './ModalWindowAndButtonMixin.js';
 import TableRowMixin from './TableRowMixin.js';
 import { SCHEMA_DATA_TYPE } from '../utils';
-import { WYSIWYGField } from './text/WYSIWYGField.js';
+import { WYSIWYGField } from './text/WYSIWYGField';
 import { UUIDField } from './text/UUIDField';
 import { URIField } from './text/URIField';
 import type { Field } from './base';
@@ -160,7 +159,7 @@ export function addDefaultFields(fieldsResolver: FieldsResolver) {
         ['dynamic', DynamicField],
         ['dynamic_fk', DependFromFkField],
         ['hidden', HiddenField],
-        ['static_value', StaticValueField],
+        ['static_value', staticValue.StaticValueField],
     ] as [string | typeof FieldsResolver.DEFAULT_FIELD_KEY, new (options: any) => Field][]) {
         for (const type of allTypes) {
             fieldsResolver.registerField(type, format, field);

@@ -2,7 +2,6 @@ import { BaseField } from '../base';
 import BaseFieldMixin from '../base/BaseFieldMixin.vue';
 import RelatedListFieldListView from './RelatedListFieldListView.vue';
 import RelatedListFieldReadonlyView from './RelatedListFieldReadonlyView.vue';
-import { addCssClassesToElement } from '../../utils';
 import { onSchemaModelsCreated } from '@/vstutils/signals';
 
 /**
@@ -15,16 +14,6 @@ export const RelatedListFieldMixin = {
         field_list_view: RelatedListFieldListView,
     },
     mixins: [BaseFieldMixin],
-    data() {
-        return {
-            wrapper_classes_list: {
-                base:
-                    'form-group ' +
-                    addCssClassesToElement('guiField', this.field.name, this.field.format || this.field.type),
-                grid: 'col-lg-12 col-xs-12 col-sm-12 col-md-12',
-            },
-        };
-    },
 };
 
 /**

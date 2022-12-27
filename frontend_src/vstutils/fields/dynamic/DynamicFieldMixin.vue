@@ -6,7 +6,7 @@
         :type="type"
         :hideable="hideable"
         :error="error"
-        @toggleHidden="$emit('toggleHidden')"
+        @hide-field="$emit('hide-field')"
         @set-value="setValue"
     />
 </template>
@@ -14,12 +14,19 @@
 <script lang="ts">
     import { computed, defineComponent, ref, watch } from 'vue';
     import { deepEqual } from '@/vstutils/utils';
-    import type { FieldPropsDefType, SetFieldValueOptions, Field } from '@/vstutils/fields/base';
+    import type {
+        FieldPropsDefType,
+        SetFieldValueOptions,
+        Field,
+        FieldEmitsDefType,
+    } from '@/vstutils/fields/base';
+    import { FieldEmitsDef } from '@/vstutils/fields/base';
     import { FieldPropsDef } from '@/vstutils/fields/base';
     import type { DynamicField } from './DynamicField';
 
     export default defineComponent({
         props: FieldPropsDef as FieldPropsDefType<DynamicField>,
+        emits: FieldEmitsDef as FieldEmitsDefType<DynamicField>,
         setup(props, { emit }) {
             const savedValues = new WeakMap<Field, unknown>();
             const parentValues = computed(() => props.field._getParentValues(props.data));

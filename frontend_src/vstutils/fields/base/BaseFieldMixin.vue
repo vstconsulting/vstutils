@@ -1,5 +1,5 @@
 <template>
-    <div class="field-component" :class="wrapperClasses">
+    <div :class="wrapperClasses">
         <field_list_view
             v-if="type === 'list'"
             :value="value"
@@ -39,12 +39,12 @@
 </template>
 
 <script>
-    import { addCssClassesToElement } from '../../utils';
     import BaseFieldLabel from './BaseFieldLabel.vue';
     import BaseFieldContentReadonlyMixin from './BaseFieldContentReadonlyMixin.vue';
     import BaseFieldContentEdit from './BaseFieldContentEdit.vue';
     import BaseFieldListView from './BaseFieldListView.vue';
-    import { FieldPropsDef } from './types';
+    import { FieldPropsDef } from './props';
+    import { getFieldWrapperClasses } from './composables';
 
     export default {
         name: 'BaseFieldMixin',
@@ -75,44 +75,16 @@
         props: FieldPropsDef,
         data() {
             return {
-                wrapper_classes_list: {
-                    base:
-                        'form-group ' +
-                        addCssClassesToElement(
-                            'guiField',
-                            this.field.name,
-                            this.field.format || this.field.type,
-                        ),
-                    grid: 'col-lg-6 col-xs-12 col-sm-6 col-md-6',
-                },
                 wrapper_styles_list: {},
                 hidden: this.field.hidden || false,
             };
         },
         computed: {
             wrapperClasses() {
-                const classes = [
-                    'field-component',
-                    `name-${this.field.name}`,
-                    `format-${this.field.format}`,
-                    `type-${this.type}`,
-                ];
-
-                if (this.field.model) {
-                    classes.push(`model-${this.field.model.name}`);
-                }
-
-                return classes;
+                return getFieldWrapperClasses(this.$props);
             },
             value() {
                 return this.data[this.field.name];
-            },
-            /**
-             * Property, that returns string with classes of field wrapper.
-             * @return {string}
-             */
-            wrapper_classes() {
-                return Object.values(this.wrapper_classes_list).join(' ') + ' ';
             },
             /**
              * Property, that returns string with styles of field wrapper.
@@ -135,25 +107,6 @@
                     value: value,
                     markChanged,
                 });
-            },
-            /**
-             * Method, that cleans field's value (sets field value to undefined).
-             */
-            cleanValue(opt) {
-                this.setValueInStore(opt);
-            },
-            /**
-             * Method, that sets field's value equal to default.
-             */
-            valueToDefault() {
-                this.setValueInStore(this.field.options.default);
-            },
-            /**
-             * Method, that sets field property 'hidden' equal to true.
-             */
-            hideField() {
-                this.cleanValue();
-                this.$emit('toggle-hidden', this.field.name);
             },
         },
     };
