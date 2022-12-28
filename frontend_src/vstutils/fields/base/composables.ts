@@ -6,14 +6,19 @@ import type { Field } from './BaseField';
 import type { FieldProps } from './props';
 
 export function getFieldWrapperClasses(props: FieldProps) {
-    const classes = ['field-component', `name-${props.field.name}`, `type-${props.type}`];
+    const field = props.field;
+    const classes = ['field-component', `name-${field.name}`, `type-${props.type}`];
 
-    if (props.field.format) {
-        classes.push(`format-${props.field.format}`);
+    if (field.format) {
+        classes.push(`format-${field.format}`);
     }
 
-    if (props.field.model) {
-        classes.push(`model-${props.field.model.name}`);
+    if (field.required) {
+        classes.push('required');
+    }
+
+    if (field.model) {
+        classes.push(`model-${field.model.name}`);
     }
 
     return classes;

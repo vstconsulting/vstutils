@@ -45,11 +45,39 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
     import $ from 'jquery';
+    import { defineComponent } from 'vue';
     import OverlayLoader from '@/vstutils/components/OverlayLoader.vue';
 
-    export default {
+    // When at least one modal window is open we ensure that 'modal-open' css class is applied to body
+    const [onModalOpened, onModalClosed] = (() => {
+        let counter = 0;
+        const className = 'modal-open';
+        const el = document.body;
+        function check() {
+            if (counter <= 0) {
+                el.classList.remove(className);
+                for (const backdrop of document.querySelectorAll('body > .modal-backdrop')) {
+                    backdrop.remove();
+                }
+            } else if (counter > 0) {
+                el.classList.add(className);
+            }
+        }
+        return [
+            function onModalOpened() {
+                counter++;
+                check();
+            },
+            function onModalClosed() {
+                counter--;
+                check();
+            },
+        ];
+    })();
+
+    export default defineComponent({
         name: 'BootstrapModal',
         components: { OverlayLoader },
         props: {
@@ -58,30 +86,29 @@
             classes: { type: [Array, String], default: null },
             loading: { type: Boolean, default: false },
         },
+        emits: ['shown', 'exit'],
         data() {
             return {
                 isOpen: false,
             };
         },
         beforeDestroy() {
-            if (this.$refs.modal) {
-                for (const el of Array.from(document.getElementsByClassName('modal-backdrop'))) el.remove();
-                document.body.classList.remove('modal-open');
+            if (this.isOpen) {
+                this.close();
             }
         },
         methods: {
-            callCloseCallback() {
-                this.isOpen = false;
-                this.$emit('exit');
-            },
-            onModalCreated(el) {
+            onModalCreated(el: HTMLElement) {
                 $(el)
                     .modal({ show: true })
-                    .on('hide.bs.modal', () => {
-                        this.callCloseCallback();
+                    .on('hidden.bs.modal', () => {
+                        this.isOpen = false;
+                        this.$emit('exit');
+                        onModalClosed();
                     })
                     .on('shown.bs.modal', () => {
                         this.$emit('shown');
+                        onModalOpened();
                     });
             },
             open() {
@@ -89,16 +116,11 @@
             },
             close() {
                 if (this.$refs.modal) {
-                    $(this.$refs.modal)
-                        .modal('hide')
-                        .on('hide.bs.modal', () => {
-                            this.callCloseCallback();
-                        });
+                    $(this.$refs.modal).modal('hide');
                 }
-                document.body.classList.remove('modal-open');
             },
         },
-    };
+    });
 </script>
 
 <style scoped>

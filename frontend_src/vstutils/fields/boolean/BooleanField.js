@@ -41,6 +41,10 @@ class BooleanField extends BaseField {
         return this._toBoolean(super.toRepresent(data));
     }
 
+    getInitialValue() {
+        return super.getInitialValue({ requireValue: true });
+    }
+
     /**
      * @return {boolean}
      */
