@@ -20,6 +20,7 @@ from django.http.response import Http404, FileResponse, HttpResponseNotModified
 from django.db.models.query import QuerySet
 from django.db import transaction, models
 from django.utils.functional import cached_property, lazy
+from django.utils.http import urlencode
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, mixins as drf_mixins, exceptions, status
 from rest_framework.serializers import BaseSerializer
@@ -421,6 +422,8 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
 
         serializer: BaseSerializer = serializer_class(data=request.query_params, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=raise_exception)
+        if serializer.validated_data:
+            self.headers['X-Query-Data'] = urlencode(serializer.validated_data, doseq=True)
         return serializer.validated_data
 
     def get_serializer(self, *args: _t.Any, **kwargs: _t.Any) -> BaseSerializer:
