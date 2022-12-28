@@ -54,6 +54,9 @@
                     return;
                 }
                 if (props.value !== value) {
+                    if (value === undefined || value === null) {
+                        value = props.field.getInitialValue();
+                    }
                     emit('set-value', value);
                 }
             }
@@ -71,23 +74,31 @@
                         if (!newVal) {
                             return;
                         }
+                        const clearable = props.field.nullable || !props.field.required;
+
+                        if (clearable) {
+                            enumItems.value.unshift({ id: '', text: ' ' });
+                        }
+
                         initSelect2({
                             width: '100%',
                             data: newVal,
                             disabled: disableIfEmpty.value && newVal.length === 0,
-                            allowClear: props.field.nullable,
+                            allowClear: clearable,
                             placeholder: { id: undefined, text: '' },
                             templateResult: props.field.templateResult,
                             templateSelection: props.field.templateSelection,
                             matcher: props.field.customMatcher,
                         });
 
-                        if (props.value) {
+                        if (props.value !== undefined) {
                             setValue(props.value);
-                        } else if (props.field.hasDefault) {
-                            setValue(props.field.default);
-                        } else {
-                            setValue(enumItems.value[0] || null);
+                        } else if (props.field.required) {
+                            if (props.field.hasDefault) {
+                                setValue(props.field.default);
+                            } else {
+                                setValue(enumItems.value[0] ?? null);
+                            }
                         }
                     },
                     { immediate: true },

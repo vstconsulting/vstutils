@@ -314,7 +314,7 @@ test('createNewViewStore', async () => {
     expect(store.sandbox).toStrictEqual({});
     await store.fetchData();
     expect(store.sandbox).toStrictEqual({
-        active: undefined,
+        active: false,
         id: undefined,
         name: undefined,
         start_date: undefined,
