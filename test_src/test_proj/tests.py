@@ -5137,8 +5137,9 @@ class CustomModelTestCase(BaseTestCase):
         self.assertIn('results', results[3]['data'])
         self.assertCount(results[3]['data']['results'], 1)
 
-        self.assertEqual(results[-1]['status'], 200)
+        self.assertEqual(results[-1]['status'], 200, results[-1]['data'])
         self.assertEqual(results[-1]['data']['test_value'], 'TEST1')
+        self.assertEqual(results[-1]['headers']['X-Query-Data'], 'test_value=TEST1')
 
     def test_additional_urls(self):
         response = self.client.get('/suburls/admin/login/')

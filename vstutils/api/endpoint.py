@@ -50,6 +50,7 @@ response_headers_to_pass = (
     "ETag",
     "Location",
     "Pagination-Identifiers",
+    "X-Query-Data",
 )
 
 
