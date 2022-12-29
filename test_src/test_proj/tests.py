@@ -1025,13 +1025,19 @@ class ViewsTestCase(BaseTestCase):
         )
 
         client = self.client_class()
-        response = self.call_registration(data=user)
+        response = self.call_registration(data=user, HTTP_ACCEPT_LANGUAGE='ru-RU')
         self.assertRedirects(response, self.confirmation_redirect_url)
         response = client.get(self.confirmation_redirect_url)
         self.assertIn('Confirm your email before logging in', str(response.content))
+
         self.assertCount(mail.outbox, 1)
+        confirmation_message = str(mail.outbox[-1].message())
+
+        self.assertIn('Подтвердите свой аккаунт', confirmation_message)
+        self.assertIn('Пожалуйста, подтвердите свой Example Project аккаунт', confirmation_message)
+
         regex = r"http(s)?:\/\/.*\/registration\/(\?.*?(?=\")){0,1}"
-        match = re.search(regex, mail.outbox[-1].alternatives[-1][0], re.MULTILINE)
+        match = re.search(regex, confirmation_message, re.MULTILINE)
         href = match.group(0)
         correct_uid = href.split('uid=')[-1]
         response = client.post(self.login_url, data={'username': user['username'], 'password': user['password1']})

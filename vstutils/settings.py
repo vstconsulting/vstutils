@@ -984,6 +984,10 @@ REGISTRATION_HASHERS: tuple = mail.getlist(
     'django.contrib.auth.hashers.MD5PasswordHasher'
 )
 
+EMAIL_CONFIRMATION_MESSAGE: _t.Text = (
+    'Please confirm your {application_name} account by verifying your email address. '
+    'Simply click the link below, and you activate your account.'
+)
 
 # API settings
 ##############################################################

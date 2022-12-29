@@ -280,6 +280,12 @@ SERVER_TRANSLATION = {
     'reset my Password': 'сбросить пароль',
     'Invalid authentication code': 'Неверный код авторизации',
     'Secret string must be provided': 'Секретная строка должна быть заполнена',
+    'Confirm your account': 'Подтвердите свой аккаунт',
+    'Please confirm your {application_name} account by verifying your email address. Simply click the link below, and you activate your account.': 'Пожалуйста, подтвердите свой {application_name} аккаунт, проверив адрес электронной почты. Просто нажмите на ссылку ниже, и вы активируете свой аккаунт.',
+    'If you received this email by mistake, please delete it.': 'Если вы получили это письмо по ошибке, пожалуйста, удалите его.',
+    'Set up account': 'Завершить регистрацию',
+    'If you’re having trouble with the button above, copy and paste the URL below into your web browser.': 'Если у вас возникли проблемы с кнопкой выше, скопируйте и вставьте URL-адрес ниже в свой веб-браузер.',
+    'Registration Confirmation.': 'Подтверждение Регистрации.',
 
     # filters help text
     'A unique integer value (or comma separated list) identifying this instance.': 'Уникальное числовое значение (или их последовательность разделенная запятой) идентифицирующая данный объект.',

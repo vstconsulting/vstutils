@@ -282,6 +282,12 @@ SERVER_TRANSLATION = {
     'reset my Password': 'đặt lại mật khẩu của tôi',
     'Invalid authentication code': 'Mã xác thực không hợp lệ',
     'Secret string must be provided': 'Chuỗi bí mật phải được cung cấp',
+    'Confirm your account': 'Xác nhận tài khoản của bạn',
+    'Please confirm your {application_name} account by verifying your email address. Simply click the link below, and you activate your account.': 'Vui lòng xác nhận tài khoản {application_name} của bạn bằng cách xác minh địa chỉ email của bạn. Chỉ cần nhấp vào liên kết bên dưới và bạn kích hoạt tài khoản của mình.',
+    'If you received this email by mistake, please delete it.': 'Nếu bạn nhận được email này do nhầm lẫn, vui lòng xóa nó.',
+    'Set up account': 'Thiết lập tài khoản',
+    'If you’re having trouble with the button above, copy and paste the URL below into your web browser.': 'Nếu bạn gặp sự cố với nút ở trên, hãy sao chép và dán URL bên dưới vào trình duyệt web của bạn.',
+    'Registration Confirmation.': 'Xác nhận đăng ký.',
 
     # filters help text
     'A unique integer value (or comma separated list) identifying this instance.': 'Giá trị số duy nhất',
