@@ -114,6 +114,19 @@ class RegistrationForm(UserCreationForm):
     def get_email_context(self):
         return {}
 
+    def get_confirmation_email_context(self, key: str):
+        context = self.get_email_context()
+
+        context['action_url'] = self.build_confirmation_url(key)
+
+        if context.get('application_name', None) is None:
+            context['application_name'] = settings.PROJECT_GUI_NAME
+
+        context['title'] = _('Confirm your account')
+        context['text'] = _(settings.EMAIL_CONFIRMATION_MESSAGE).format(application_name=context['application_name'])
+
+        return context
+
     def register_with_confirmation(self, commit):
         cache_key = self.cleaned_data.get('uid', None)
 
@@ -123,16 +136,12 @@ class RegistrationForm(UserCreationForm):
 
             secured_data = secure_pickle.dumps(self.cleaned_data)
             cache.set(cache_key, secured_data)
-            context_data = self.get_email_context()
-            context_data['action_url'] = self.build_confirmation_url(cache_key)
-            if context_data.get('application_name', None) is None:
-                context_data['application_name'] = settings.PROJECT_GUI_NAME
 
             send_template_email(
-                subject='Registration Confirmation.',
+                subject=_('Registration Confirmation.'),
                 template_name='registration/confirm_email.html',
                 email=self.cleaned_data['email'],
-                context_data=context_data
+                context_data=self.get_confirmation_email_context(cache_key),
             )
             return super().save(commit=False)
 

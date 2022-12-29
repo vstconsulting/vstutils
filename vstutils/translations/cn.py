@@ -282,6 +282,12 @@ SERVER_TRANSLATION = {
     'reset my Password': '问密码',
     'Invalid authentication code': '无效的授权码',
     'Secret string must be provided': '必须提供秘密字符串',
+    'Confirm your account': '确认您的帐户',
+    'Please confirm your {application_name} account by verifying your email address. Simply click the link below, and you activate your account.': '请通过验证您的电子邮件地址来确认您的 {application_name} 帐户。 只需单击下面的链接，即可激活您的帐户。',
+    'If you received this email by mistake, please delete it.': '如果您误收到此邮件，请将其删除。',
+    'Set up account': '设置帐户',
+    'If you’re having trouble with the button above, copy and paste the URL below into your web browser.': '如果您在使用上面的按钮时遇到问题，请将下面的 URL 复制并粘贴到您的网络浏览器中。',
+    'Registration Confirmation.': '注册确认。',
 
     # filters help text
     'A unique integer value (or comma separated list) identifying this instance.': '标识此对象的唯一数值（或用逗号分隔的序列）识别此对象',
