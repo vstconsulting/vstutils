@@ -5,7 +5,8 @@ export class ApiConnector extends OriginalApiConnector {
     constructor() {
         super();
         this._bulkHandler = (requests) => requests.map(() => ({ status: 200, data: {} }));
-        this._requestHandler = () => new APIResponse(200, {});
+        this._requestHandler = () =>
+            new APIResponse({ status: 200, data: {}, path: '__mock__', method: 'get' });
     }
 
     async sendBulk(requests) {

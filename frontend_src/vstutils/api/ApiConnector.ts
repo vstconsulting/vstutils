@@ -4,20 +4,70 @@ import StatusError from './StatusError';
 
 const isNativeCacheAvailable = 'caches' in window;
 
-class APIResponse<T = { detail?: string } | string> {
+export interface BulkResponseHeaders {
+    'X-Query-Data'?: string;
+    'Content-Type'?: string;
+    ETag?: string;
+    [key: string]: string | undefined;
+}
+
+interface BulkResponse {
+    method: HttpMethods;
+    path: string | string[];
+    data: Record<string, unknown> | string;
+    status: number;
+    headers: BulkResponseHeaders;
+}
+
+export class APIResponse<T extends BulkResponse['data'] = { detail?: string }> implements BulkResponse {
     status: number;
     data: T;
+    method: HttpMethods;
+    path: string | string[];
+    headers: BulkResponseHeaders;
 
-    constructor(status: number, data: T) {
+    constructor({
+        status,
+        data,
+        method,
+        path,
+        headers,
+    }: {
+        status: BulkResponse['status'];
+        data: T;
+        method: BulkResponse['method'];
+        path: BulkResponse['path'];
+        headers?: BulkResponseHeaders;
+    }) {
         APIResponse.checkStatus(status, data);
         this.status = status;
         this.data = data;
+        this.method = method;
+        this.path = path;
+        this.headers = headers ?? {};
     }
 
     static checkStatus(status: number, data: unknown) {
         if (!(status >= 200 && status < 400)) {
-            throw new StatusError(status, data);
+            APIResponse.throwStatusError(status, data);
         }
+    }
+
+    static throwStatusError(status: number, data: unknown) {
+        throw new StatusError(status, data);
+    }
+
+    static async fromFetchResponse<T extends BulkResponse['data'] = { detail?: string }>(
+        response: Response,
+        method: HttpMethods,
+        path: string,
+    ) {
+        let json = {};
+        try {
+            json = (await response.json()) as BulkResponse['data'];
+            // eslint-disable-next-line no-empty
+        } catch (e) {}
+        return new APIResponse<T>({ status: response.status, data: json as T, path, method });
     }
 }
 
@@ -26,7 +76,7 @@ class APIResponse<T = { detail?: string } | string> {
  * @param {Object[]} bulks
  * @param {any=} value
  */
-function rejectAll(bulks: CollectedBulkRequest<unknown>[], value: unknown) {
+function rejectAll(bulks: CollectedBulkRequest[], value: unknown) {
     for (const bulk of bulks) {
         bulk.callbacks.reject(value);
     }
@@ -45,21 +95,13 @@ interface AnyRequest extends BulkRequest {
     useBulk: boolean;
 }
 
-interface BulkResponse {
-    method: HttpMethods;
-    path: string | string[];
-    data: Record<string, unknown>;
-    status: number;
-    headers: Record<string, unknown>;
-}
-
-interface CollectedBulkRequest<T = { detail?: string } | string> {
+interface CollectedBulkRequest<T extends string | Record<string, unknown> = { detail?: string } | string> {
     data: BulkRequest;
     promise: Promise<APIResponse<T>>;
     callbacks: Record<string, CallableFunction>;
 }
 
-interface BulkCollector<T = { detail?: string } | string> {
+interface BulkCollector<T extends string | Record<string, unknown> = { detail?: string } | string> {
     timeoutId?: ReturnType<typeof setTimeout>;
     bulkParts: CollectedBulkRequest<T>[];
 }
@@ -67,13 +109,13 @@ interface BulkCollector<T = { detail?: string } | string> {
 /**
  * Class, that sends API requests.
  */
-class ApiConnector {
+export class ApiConnector {
     appConfig: AppConfiguration | null = null;
     openapi: AppSchema | null = null;
     defaultVersion: string | null = null;
     endpointURL: string | null = null;
     headers: Record<string, string | null>;
-    bulkCollector: BulkCollector<unknown> = { bulkParts: [] };
+    bulkCollector: BulkCollector = { bulkParts: [] };
     baseURL: string | null = null;
     private _etagsCachePrefix: string | null = null;
     private _etagsCacheName: string | null = null;
@@ -136,7 +178,7 @@ class ApiConnector {
                 data,
                 headers,
             });
-            return new APIResponse(response.status, response.data);
+            return new APIResponse(response);
         } else {
             let pathStr = Array.isArray(path) ? path.join('/') : path;
             if (pathStr.startsWith('/')) pathStr = pathStr.substring(1);
@@ -153,19 +195,10 @@ class ApiConnector {
                 body: strData as string,
             };
 
-            const response = await fetch(
-                `${this.baseURL!}/${version}/${pathStr}/${makeQueryString(query)}`,
-                fetchConfig,
-            );
+            const pathToSend = `${this.baseURL!}/${version}/${pathStr}/${makeQueryString(query)}`;
+            const response = await fetch(pathToSend, fetchConfig);
 
-            let json;
-            try {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                json = await response.json();
-                // eslint-disable-next-line no-empty
-            } catch (e) {}
-
-            return new APIResponse(response.status, json);
+            return await APIResponse.fromFetchResponse(response, method, pathToSend);
         }
     }
 
@@ -197,8 +230,16 @@ class ApiConnector {
             if (cached) {
                 cachedValues.set(
                     i,
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    cached.json().then((data) => ({ status: cached.status, data })),
+                    cached.json().then((data) => ({
+                        status: cached.status,
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                        data,
+                        headers: new Proxy(cached.headers, {
+                            get(target, name: string) {
+                                return target.get(name);
+                            },
+                        }),
+                    })),
                 );
                 if (!item.headers) item.headers = {};
                 item.headers.HTTP_IF_NONE_MATCH = cached.headers.get('ETag');
@@ -239,7 +280,9 @@ class ApiConnector {
     /**
      * Method, that collects several bulk requests into one.
      */
-    bulkQuery<T = Record<string, unknown>>(data: BulkRequest): Promise<APIResponse<T>> {
+    bulkQuery<T extends string | Record<string, unknown> = Record<string, unknown>>(
+        data: BulkRequest,
+    ): Promise<APIResponse<T>> {
         if (this.bulkCollector.timeoutId) {
             clearTimeout(this.bulkCollector.timeoutId);
         }
@@ -328,11 +371,4 @@ class ApiConnector {
     }
 }
 
-/**
- * ApiConnector instance
- *
- * @type {ApiConnector}
- */
-const apiConnector = new ApiConnector();
-
-export { ApiConnector, apiConnector, APIResponse };
+export const apiConnector = new ApiConnector();

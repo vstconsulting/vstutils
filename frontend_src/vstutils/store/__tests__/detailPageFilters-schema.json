@@ -1,0 +1,101 @@
+{
+    "definitions": {
+        "OnePage": {
+            "properties": {
+                "id": {
+                    "title": "Id",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 1
+                }
+            }
+        }
+    },
+    "paths": {
+        "/page/": {
+            "get": {
+                "operationId": "page_list",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/OnePage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/page/{id}/": {
+            "get": {
+                "operationId": "page_get",
+                "parameters": [
+                    {
+                        "name": "date_filter",
+                        "type": "string",
+                        "format": "date",
+                        "in": "query",
+                        "required": false
+                    },
+                    {
+                        "name": "boolean_filter",
+                        "type": "boolean",
+                        "in": "query",
+                        "required": false
+                    },
+                    {
+                        "name": "string_filter",
+                        "type": "string",
+                        "in": "query",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/OnePage"
+                        }
+                    }
+                }
+            },
+            "parameters": [{
+                "name": "id",
+                "in": "path",
+                "description": "",
+                "required": true,
+                "type": "integer"
+            }]
+        }
+    }
+}

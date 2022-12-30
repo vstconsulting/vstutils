@@ -26,16 +26,6 @@
                     "type": "string",
                     "format": "phone",
                     "default": "78005553535"
-                },
-                "start_date": {
-                    "title": "Start Date",
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "end_date": {
-                    "title": "End Date",
-                    "type": "string",
-                    "format": "date-time"
                 }
             }
         },
@@ -158,27 +148,7 @@
         "/some_list/{id}/": {
             "get": {
                 "operationId": "some_list_get",
-                "parameters": [
-                    {
-                        "name": "start_date",
-                        "in": "query",
-                        "required": false,
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    {
-                        "name": "some_number",
-                        "in": "query",
-                        "required": false,
-                        "type": "number"
-                    },
-                    {
-                        "name": "end_date",
-                        "in": "query",
-                        "required": false,
-                        "type": "number"
-                    }
-                ],
+                "parameters": [],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -186,10 +156,7 @@
                             "$ref": "#/definitions/OneSomePage"
                         }
                     }
-                },
-                "x-subscribe-labels": [
-                    "deigmata.Store"
-                ]
+                }
             },
             "parameters": [
                 {

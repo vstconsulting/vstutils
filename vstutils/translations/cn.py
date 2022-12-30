@@ -107,7 +107,8 @@ TRANSLATION = {
     'file n selected': '未选择文件| 已选择1个文件| 已选择{n}个文件| 已选择{n}个文件',
     'image n selected': '未选择图像 已选择1张图片| 已选择{n}张图片| 已选择{n}张图片',
 
-    # filters
+    #
+    'default': '默认',
     'Ordering': '排列顺序',
     'is_active': '活跃度',
     'Username': '使用名',

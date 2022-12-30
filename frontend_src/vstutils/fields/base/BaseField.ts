@@ -203,7 +203,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
     }
 
     _getValueFromData(data: Record<string, unknown>): Inner | Represent | undefined | null {
-        return data[this.name] as Inner | Represent | undefined | null;
+        return data?.[this.name] as Inner | Represent | undefined | null;
     }
 
     warn(msg: string): void {

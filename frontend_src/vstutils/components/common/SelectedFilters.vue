@@ -12,14 +12,15 @@
                     class="mr-1"
                     @set-value="({ field, value }) => $set(sandbox, field, value)"
                 />
-                <i class="fa fa-times remove-icon" @click="clearFilter(pill.name)" />
+                <i v-if="pill.clearable" class="icon remove-icon" @click="clearFilter(pill.name)">&times;</i>
+                <span v-else>({{ $t('default') }})</span>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-    import { IGNORED_FILTERS, ViewTypes } from '../../utils';
+    import { IGNORED_FILTERS } from '../../utils';
 
     export default {
         name: 'SelectedFilters',
@@ -28,26 +29,38 @@
         },
         data() {
             return {
-                isMounted: false,
                 sandbox: {},
             };
         },
         computed: {
             fields() {
-                return this.view?.filters || [];
-            },
-            filters() {
-                if (this.isMounted) {
-                    return this.$app.store.page.filters || {};
+                if (this.view.isListPage()) {
+                    return this.view.filters || {};
+                }
+                if (this.view.isDetailPage() && this.view.filtersModelClass) {
+                    return Object.fromEntries(this.view.filtersModelClass.fields);
                 }
                 return {};
             },
+            filters() {
+                return this.$app.store.page.filters || {};
+            },
+            appliedDefaults() {
+                if (this.view.isDetailPage() && this.view.filtersModelClass) {
+                    return this.$app.store.page.appliedDefaultFilterNames || [];
+                }
+                return [];
+            },
             activeFilters() {
-                if (this.view.type === ViewTypes.LIST) {
+                if (this.view.isListPage()) {
+                    return Object.keys(this.filters).filter((filter) => !IGNORED_FILTERS.includes(filter));
+                }
+                if (this.view.isDetailPage()) {
                     return Object.keys(this.filters).filter((filter) => !IGNORED_FILTERS.includes(filter));
                 }
                 return [];
             },
+
             representFields() {
                 return Object.values(this.fields).reduce((obj, field) => {
                     obj[field.name] = field.toRepresent(this.filters);
@@ -62,6 +75,7 @@
                             name,
                             field,
                             title: this.fields[name].title,
+                            clearable: !this.appliedDefaults.includes(name),
                         });
                     }
                     return arr;
@@ -76,13 +90,14 @@
                 immediate: true,
             },
         },
-        mounted() {
-            this.isMounted = true;
-        },
         methods: {
             clearFilter(name) {
                 this.$app.store.page.applyFilters(
-                    Object.fromEntries(Object.entries(this.filters).filter((entry) => entry[0] !== name)),
+                    Object.fromEntries(
+                        Object.entries(this.filters).filter(
+                            (entry) => entry[0] !== name && !this.appliedDefaults.includes(entry[0]),
+                        ),
+                    ),
                 );
             },
         },
@@ -96,8 +111,12 @@
         color: var(--btn-selected-color);
     }
 
+    .pill .icon {
+        font-size: 1rem;
+    }
+
     .pill .remove-icon {
-        padding: 2px 3px;
+        padding: 0 3px;
         cursor: pointer;
     }
 </style>
