@@ -6,8 +6,6 @@ import { createSchema } from '@/unittests/schema';
 import detailPageSchema from './detailPage-schema.json';
 import putDetailPageSchema from './putDetailPage-schema.json';
 import { defineStore } from 'pinia';
-import { DateTimeField } from '../../fields/datetime';
-import { NumberField } from '../../fields/numbers';
 
 beforeAll(() => {
     fetchMock.enableMocks();
@@ -25,12 +23,6 @@ test('createDetailViewStore', async () => {
     });
 
     const detailView = app.views.get('/some_list/{id}/');
-
-    // Check filtersModelClass has been initiated
-    expect(detailView.filtersModelClass).toBeTruthy();
-    expect(detailView.filtersModelClass.fields.size).toBe(3);
-    expect(detailView.filtersModelClass.fields.get('start_date')).toBeInstanceOf(DateTimeField);
-    expect(detailView.filtersModelClass.fields.get('some_number')).toBeInstanceOf(NumberField);
 
     // Create store for detailView
     const store = defineStore('detail_store', detailView.getStoreDefinition())();
@@ -51,8 +43,6 @@ test('createDetailViewStore', async () => {
                     name: 'NewShop',
                     active: true,
                     phone: '79658964562',
-                    start_date: '2022-10-19',
-                    end_date: '2023-01-01',
                 },
                 status: 200,
             },
@@ -67,15 +57,7 @@ test('createDetailViewStore', async () => {
         name: 'NewShop',
         active: true,
         phone: '79658964562',
-        start_date: '2022-10-19',
-        end_date: '2023-01-01',
     });
-
-    // Check initial filters
-    expect(store.filters.start_date).toBeInstanceOf(moment);
-    expect(store.filters.start_date.isSame(moment.tz('2022-10-19', 'UTC'))).toBeTruthy();
-    expect(store.filters.end_date).toBeUndefined();
-    expect(store.filters.some_number).toBeUndefined();
 
     fetchMock.resetMocks();
     fetchMock.mockResponseOnce(
@@ -92,22 +74,17 @@ test('createDetailViewStore', async () => {
             },
         ]),
     );
-    // Check add new value to filter
-    store.setFilterValue({ field: 'some_number', value: 18 });
-    expect(store.filters.some_number).toBe(18);
-    await store.applyFilters();
     await store.fetchData();
 
     let [, request] = fetchMock.mock.calls[0];
     let bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('get');
     expect(bulk[0].path).toStrictEqual(['some_list', 15]);
-    expect(bulk[0].query).toStrictEqual('start_date=2022-10-19T00%3A00%3A00Z&some_number=18');
+    expect(bulk[0].query).toStrictEqual('');
 
     // Check actions and sublinks
-    expect(store.actions.length).toBe(2);
-    expect(store.actions[0].name).toEqual('filters');
-    expect(store.actions[1].name).toEqual('remove');
+    expect(store.actions.length).toBe(1);
+    expect(store.actions[0].name).toEqual('remove');
 
     expect(store.sublinks.length).toBe(1);
     expect(store.sublinks[0].name).toEqual('edit');
@@ -317,8 +294,6 @@ test('createNewViewStore', async () => {
         active: false,
         id: undefined,
         name: undefined,
-        start_date: undefined,
-        end_date: undefined,
         phone: '78005553535',
     });
 

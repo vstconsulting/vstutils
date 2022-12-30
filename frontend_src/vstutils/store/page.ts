@@ -6,7 +6,6 @@ import { isInstancesEqual, RequestTypes, openPage, getApp } from '../utils';
 import { i18n } from '../translation';
 import { guiPopUp, pop_up_msg } from '../popUp';
 import type { Route } from 'vue-router';
-import type { Field } from '@/vstutils/fields/base';
 import type { InstancesList, BaseViewStore } from './helpers';
 import {
     useBasePageData,
@@ -23,6 +22,7 @@ import {
     useEntityViewClasses,
     usePageLeaveConfirmation,
     usePagination,
+    filterNonEmpty,
 } from './helpers';
 
 const createRemoveInstance =
@@ -220,10 +220,6 @@ export const createDetailViewStore = (view: PageView) => () => {
     const app = getApp();
 
     const title = useInstanceTitle({ view, instance: pageWithInstance.instance });
-    /**
-     * Contains toRepresent filters data
-     */
-    const filters = ref<Record<string, unknown>>({});
     const filtersQuery = ref<Record<string, unknown>>({});
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -240,27 +236,37 @@ export const createDetailViewStore = (view: PageView) => () => {
         return getInstancePk();
     }
 
-    function populateFilters() {
-        if (view.filtersModelClass) {
-            const data = pageWithInstance.instance.value?._data;
-            if (data) {
-                const filtersFields = view.filtersModelClass.fields as Map<string, Field>;
-                const fields = model.value.fields as Map<string, Field>;
-
-                for (const filterField of filtersFields.values()) {
-                    const field = fields.get(filterField.name);
-                    if (field && field.constructor === filterField.constructor) {
-                        filters.value[field.name] = filterField.toRepresent(data);
-                    }
-                }
-            }
+    /**
+     * Returns filter names and their default values got from backend.
+     */
+    const filtersDefaults = computed(() => {
+        if (!view.filtersModelClass) {
+            return {};
         }
-    }
+        const rawQuery = pageWithInstance.instance.value?._response?.headers['X-Query-Data'] ?? '';
+        return Object.fromEntries(new URLSearchParams(rawQuery).entries());
+    });
+
+    const filters = computed(() => {
+        if (!view.filtersModelClass) {
+            return undefined;
+        }
+        return {
+            ...filtersDefaults.value,
+            ...filtersQuery.value,
+        };
+    });
+
+    const appliedDefaultFilterNames = computed(() => {
+        if (!view.filtersModelClass) {
+            return [];
+        }
+        return Object.keys(filtersDefaults.value).filter((name) => filtersQuery.value[name] === undefined);
+    });
 
     function setFilters(query: Record<string, unknown>) {
         if (view.filtersModelClass) {
             const instance = new view.filtersModelClass(query);
-            filters.value = instance._getRepresentData();
             filtersQuery.value = instance._getInnerData();
         }
     }
@@ -279,7 +285,6 @@ export const createDetailViewStore = (view: PageView) => () => {
         if (forceSet || !instance || !newInstance.isEqual(instance)) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             (app.store.page as DetailPageStore).setInstance(newInstance);
-            populateFilters();
         }
     }
 
@@ -303,19 +308,12 @@ export const createDetailViewStore = (view: PageView) => () => {
         }
     }
 
-    function setFilterValue({ field, value }: { field: string; value: unknown }) {
-        filters.value[field] = value;
-    }
-
-    function applyFilters(newFiltersRepresentData?: Record<string, unknown>) {
+    function applyFilters(newFiltersRepresentData: Record<string, unknown>) {
         if (view.filtersModelClass) {
-            if (newFiltersRepresentData) {
-                filters.value = newFiltersRepresentData;
-            }
-            const query = view.filtersModelClass.representToInner(filters.value);
+            const query = filterNonEmpty(view.filtersModelClass.representToInner(newFiltersRepresentData));
             return openPage({
                 path: app.router.currentRoute.path,
-                query: { ...app.router.currentRoute.query, ...query },
+                query,
             });
         }
         return undefined;
@@ -329,14 +327,14 @@ export const createDetailViewStore = (view: PageView) => () => {
         entityViewClasses: useEntityViewClasses(model, pageWithInstance.sandbox),
         model,
         title,
-        filters,
         filtersQuery,
+        filters,
+        appliedDefaultFilterNames,
         getInstancePk,
         getAutoUpdatePk,
         updateData,
         fetchData,
         removeInstance: createRemoveInstance({ pageView: view }),
-        setFilterValue,
         applyFilters,
     };
 };
@@ -345,7 +343,6 @@ export type DetailPageStore = BaseViewStore & {
     setInstance(instance: Model): void;
     instance: Model;
     getInstancePk(): string | number | undefined;
-    filters: Record<string, unknown>;
     applyFilters(filters: Record<string, unknown>): Promise<Route | void> | undefined;
 };
 

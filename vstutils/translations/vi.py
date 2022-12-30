@@ -108,6 +108,7 @@ TRANSLATION = {
     'image n selected': 'Hình ảnh chưa được chọn',
 
     # filters
+    'default': 'mặc định',
     'Ordering': 'Thứ tự phân loại',
     'is_active': 'Hoạt động',
     'Username': 'Tên đăng nhập',

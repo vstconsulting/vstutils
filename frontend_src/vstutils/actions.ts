@@ -166,7 +166,7 @@ export class ActionsManager {
         }
     }
 
-    async executeWithData<T>({
+    async executeWithData<T extends string | Record<string, unknown>>({
         action,
         data,
         model,
@@ -219,7 +219,7 @@ export class ActionsManager {
             if (action.onAfter) {
                 action.onAfter({ app: this.app, action, instance, response });
             }
-            return response;
+            return response as APIResponse<T>;
         } catch (error) {
             const modelValidationError = instance.parseModelError((error as APIResponse).data);
             this.app.error_handler.showError(

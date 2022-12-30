@@ -220,6 +220,7 @@ export default class QuerySet {
                 useBulk: model.shouldUseBulk(HttpMethods.GET),
             });
             instance = new model(response.data, this);
+            instance._response = response;
         }
 
         await this._executeAfterInstancesFetchedHooks([instance], model);
@@ -249,7 +250,9 @@ export default class QuerySet {
             if (results[0].data.count > 1) {
                 throw new Error('More then one entity found');
             } else if (results[0].data.count === 0) {
-                return new APIResponse(404, { detail: `No ${retrieveModel.name} matches the given query.` });
+                APIResponse.throwStatusError(404, {
+                    detail: `No ${retrieveModel.name} matches the given query.`,
+                });
             }
             const instance = new retrieveModel(results[1].data, this);
 
@@ -399,7 +402,7 @@ export default class QuerySet {
             });
 
             return (await apiConnector.sendBulk(requests, BulkType.TRANSACTIONAL))
-                .map((response) => new APIResponse(response.status, response.data))
+                .map((response) => new APIResponse(response))
                 .filter((_, idx) => idx % 2 !== 0)
                 .map((response) => new modelRetrieve(response.data, this));
         } else {

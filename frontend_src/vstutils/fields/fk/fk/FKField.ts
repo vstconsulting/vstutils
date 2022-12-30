@@ -17,12 +17,6 @@ import type { ComponentOptions } from 'vue';
 
 const dependenceTemplateRegexp = /<<\w+>>/g;
 
-declare module '@/vstutils/models' {
-    export class Model {
-        __notFound?: true;
-    }
-}
-
 function getPk() {
     const app = getApp();
     const store = app.store.page as DetailPageStore;

@@ -42,10 +42,6 @@
     const app = getApp();
     const store = app.store.page as DetailPageStore;
 
-    const currentValues = computed(() => {
-        return store.filters;
-    });
-
     const model = computed(() => {
         return props.view.filtersModelClass!;
     });
@@ -53,10 +49,7 @@
     function openModal() {
         modalRef.value.open();
         sandboxData.value = new model.value(
-            mergeDeep({}, model.value.fromRepresentData(currentValues.value)._getInnerData()) as Record<
-                string,
-                unknown
-            >,
+            mergeDeep({}, store.filters) as Record<string, unknown>,
         )._getRepresentData();
     }
 
