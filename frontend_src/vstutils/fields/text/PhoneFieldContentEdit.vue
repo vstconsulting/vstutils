@@ -43,6 +43,7 @@
                 name: 'countryCode',
                 type: 'string',
                 enum: this.field.codes.slice().reverse(),
+                required: true,
             });
             countryCodeField.customMatcher = (params, data) => {
                 if (!params.term || data.text.startsWith(params.term)) {

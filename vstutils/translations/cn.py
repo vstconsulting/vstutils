@@ -161,6 +161,7 @@ TRANSLATION = {
     'Generate password': '生成密码',
     'Height should be more then {height}px.': '高度应该大于{height}px。',
     'Width should be more then {width}px.': '宽度应大于{width}px。',
+    'Required field': '必填字段',
 
 
     # Проверить
