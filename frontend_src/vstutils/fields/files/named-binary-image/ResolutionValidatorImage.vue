@@ -37,8 +37,8 @@
                 <button
                     type="button"
                     class="btn btn-primary button-small"
-                    @click="scale(-0.1)"
                     :disabled="zoomOutDisabled"
+                    @click="scale(-0.1)"
                 >
                     <span class="fa fa-search-minus" />
                 </button>
@@ -259,13 +259,17 @@
         return;
     }
     function crop() {
-        const canvasData = cropper!.getCanvasData();
         const data = cropper!.getData(true);
         const canvas = cropper!.getCroppedCanvas({
-            width: data.width,
-            height: data.height,
-            maxWidth: canvasData.naturalWidth,
-            maxHeight: canvasData.naturalHeight,
+            /*
+             * TODO: save ratio for image
+             * This hack can be a problem in some cases.
+             * In the future, we need to solve this somehow differently.
+             */
+            width: config.width.max || data.width,
+            height: config.height.max || data.height,
+            maxWidth: 4096,
+            maxHeight: 4096,
         });
         let img = canvas.toDataURL(props.image.mediaType || `image/${format.value}`);
         img = img.replace(/data:\w*\/?\w*;?(base64)?,/, ''); // Remove data url info (data:image/png;base64,)
