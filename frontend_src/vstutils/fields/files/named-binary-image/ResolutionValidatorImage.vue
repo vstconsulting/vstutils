@@ -1,52 +1,69 @@
 <template>
     <div>
-        <div>
-            <img ref="imageRef" :src="makeDataImageUrl(image)" class="hidden modal-img" alt="" />
+        <div class="img-wrapper">
+            <img
+                v-if="preparedImage"
+                ref="imageRef"
+                :src="preparedImage"
+                class="hidden modal-img"
+                alt=""
+                @load="initCropper"
+            />
         </div>
-        <div class="mb-3 mt-3">
+        <div class="button-margin">
             <div class="btn-group mb-2">
-                <button type="button" class="btn btn-primary" @click="zoom(0.1)">
+                <button type="button" class="btn btn-primary button-small" @click="zoom(0.1)">
                     <span class="fa fa-search-plus" />
                 </button>
-                <button type="button" class="btn btn-primary btn-title" disabled>
+                <button type="button" class="btn btn-primary btn-title button-small" disabled>
                     {{ $t('Zoom') }}
                 </button>
-                <button type="button" class="btn btn-primary" @click="zoom(-0.1)">
+                <button type="button" class="btn btn-primary button-small" @click="zoom(-0.1)">
                     <span class="fa fa-search-minus" />
                 </button>
             </div>
             <div class="btn-group mb-2">
-                <button type="button" class="btn btn-primary" @click="scale(0.1)">
+                <button
+                    type="button"
+                    class="btn btn-primary button-small"
+                    :disabled="!isScale"
+                    @click="scale(0.1)"
+                >
                     <span class="fa fa-search-plus" />
                 </button>
-                <button type="button" class="btn btn-primary btn-title" disabled>
+                <button type="button" class="btn btn-primary btn-title button-small" disabled>
                     {{ $t('Scale') }}
                 </button>
-                <button type="button" class="btn btn-primary" @click="scale(-0.1)">
+                <button
+                    type="button"
+                    class="btn btn-primary button-small"
+                    @click="scale(-0.1)"
+                    :disabled="zoomOutDisabled"
+                >
                     <span class="fa fa-search-minus" />
                 </button>
             </div>
             <div class="btn-group mb-2">
-                <button type="button" class="btn btn-primary" @click="rotate(-90)">
+                <button type="button" class="btn btn-primary button-small" @click="rotate(-90)">
                     <span class="fa fa-undo" />
                 </button>
-                <button type="button" class="btn btn-primary btn-title" disabled>
+                <button type="button" class="btn btn-primary btn-title button-small" disabled>
                     {{ $t('Rotate') }}
                 </button>
-                <button type="button" class="btn btn-primary" @click="rotate(90)">
+                <button type="button" class="btn btn-primary button-small" @click="rotate(90)">
                     <span class="fa fa-redo" />
                 </button>
             </div>
         </div>
         <template v-if="ready">
-            <p v-for="param in checkParams" :key="param">
+            <p v-for="param in checkParams" :key="param" class="validator-params">
                 {{ $u.capitalize($t(param)) }}: {{ paramsValues[param] }}px.
                 <span v-if="!isValidSizeParam(param)" class="error">
                     {{ getErrorMessage(param) }}
                 </span>
             </p>
         </template>
-        <button :disabled="!isValid" class="btn btn-primary" @click="crop">
+        <button :disabled="!isValid" class="btn btn-primary button-small" @click="crop">
             {{ $t('Crop') }}
         </button>
     </div>
@@ -55,11 +72,12 @@
 <script setup lang="ts">
     import { ref, computed, reactive, onMounted } from 'vue';
     import { i18n } from '@/vstutils/translation';
-    import { makeDataImageUrl } from '@/vstutils/utils';
+    import { makeDataImageUrl, readFileAsDataUrl } from '@/vstutils/utils';
     import type { NamedFile } from '@/vstutils/fields/files/named-binary-file';
     import type ResolutionValidatorConfig from './ResolutionValidatorConfig';
     import type { IImageField } from './NamedBinaryImageField';
     import Cropper from 'cropperjs';
+    import Compressor from 'compressorjs';
 
     const allowedExtensions = ['jpeg', 'png', 'webp'];
 
@@ -76,10 +94,14 @@
 
     const ready = ref(false);
     const readyToCrop = ref(false);
+    const RESOLUTION = 4096;
+    const isScale = ref(true);
     let cropper: Cropper | null = null;
     const imageRef = ref<HTMLImageElement | null>(null);
     let scaleX = 1;
     let scaleY = 1;
+    const preparedImage = ref<string | null>(null);
+    const zoomOutDisabled = ref(false);
 
     const paramsValues = reactive({
         width: 0,
@@ -100,9 +122,34 @@
         return checkParams.filter((param) => !isValidSizeParam(param)).length === 0;
     });
 
-    onMounted(() => {
-        initCropper();
-    });
+    function getNormalizedFile(img: File) {
+        return new Promise<File>((resolve, reject) => {
+            new Compressor(img, {
+                quality: 0.8,
+                maxWidth: RESOLUTION,
+                maxHeight: RESOLUTION,
+                success(result) {
+                    return resolve(result as File);
+                },
+                error(error: Error) {
+                    return reject(error);
+                },
+            });
+        });
+    }
+
+    async function namedFileToFile(namedFile: NamedFile): Promise<File> {
+        const res: Response = await fetch(makeDataImageUrl(namedFile));
+        const blob: Blob = await res.blob();
+        return new File([blob], namedFile.name || '', { type: namedFile.mediaType! });
+    }
+
+    namedFileToFile(props.image)
+        .then((file) => getNormalizedFile(file))
+        .then((file) => readFileAsDataUrl(file))
+        .then((dataUrl) => {
+            preparedImage.value = dataUrl;
+        });
 
     function initCropper() {
         if (cropper) {
@@ -212,12 +259,39 @@
         return;
     }
     function crop() {
-        let img = cropper!.getCroppedCanvas().toDataURL(props.image.mediaType || `image/${format.value}`);
+        const canvasData = cropper!.getCanvasData();
+        const data = cropper!.getData(true);
+        const canvas = cropper!.getCroppedCanvas({
+            width: data.width,
+            height: data.height,
+            maxWidth: canvasData.naturalWidth,
+            maxHeight: canvasData.naturalHeight,
+        });
+        let img = canvas.toDataURL(props.image.mediaType || `image/${format.value}`);
         img = img.replace(/data:\w*\/?\w*;?(base64)?,/, ''); // Remove data url info (data:image/png;base64,)
         emit('crop', img);
     }
     function scale(change: number) {
-        cropper!.scale((scaleX || 1) + change, (scaleY || 1) + change);
+        const newXScale = (scaleX || 1) + change;
+        const newYScale = (scaleY || 1) + change;
+        if (newXScale < 0.1 || newYScale < 0.1) {
+            zoomOutDisabled.value = true;
+            return;
+        }
+        zoomOutDisabled.value = false;
+        if (change > 0) {
+            const canvasData = cropper!.getCanvasData();
+            if (canvasData.naturalHeight * newYScale > RESOLUTION) {
+                isScale.value = false;
+                return;
+            }
+            if (canvasData.naturalWidth * newXScale > RESOLUTION) {
+                isScale.value = false;
+                return;
+            }
+        }
+        isScale.value = true;
+        cropper!.scale(newXScale, newYScale);
     }
     function zoom(change: number) {
         cropper!.zoom(change);
@@ -228,7 +302,12 @@
 </script>
 
 <style scoped>
-    .validator-modal .btn-title {
+    button {
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    .btn-title {
         cursor: default;
     }
     .error {
@@ -242,9 +321,28 @@
         max-width: 100%;
         aspect-ratio: 3/2;
     }
+    .button-margin {
+        margin: 1rem 0;
+    }
     @media (max-width: 991px) {
+        .img-wrapper {
+            max-height: 50vh;
+        }
         .modal-img {
             aspect-ratio: 1;
+        }
+        .button-margin {
+            margin: 0.5rem 0;
+        }
+        .button-small {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            border-radius: 0.2rem;
+        }
+        .validator-params {
+            font-size: 14px;
+            margin-bottom: 0.5rem;
         }
     }
 </style>
