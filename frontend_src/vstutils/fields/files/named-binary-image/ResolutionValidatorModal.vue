@@ -1,5 +1,11 @@
 <template>
-    <BootstrapModal ref="modalRef" classes="modal-lg" @exit="onModalClosed" @shown="isOpen = true">
+    <BootstrapModal
+        ref="modalRef"
+        wrapper-classes="validator-modal"
+        classes="modal-lg"
+        @exit="onModalClosed"
+        @shown="isOpen = true"
+    >
         <ResolutionValidatorImage
             v-if="isOpen"
             :key="currentImageIdx"
@@ -53,3 +59,18 @@
         }
     }
 </script>
+
+<style scoped>
+    .validator-modal .modal-body {
+        max-height: 90vh;
+        overflow-y: auto;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    @media (max-width: 991px) {
+        .validator-modal .modal-header {
+            padding: 0.5rem;
+        }
+    }
+</style>
