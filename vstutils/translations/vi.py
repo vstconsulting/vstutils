@@ -161,6 +161,7 @@ TRANSLATION = {
     'Generate password': 'Tạo mật khẩu',
     'Height should be more then {height}px.': 'Chiều cao phải lớn hơn {height}px.',
     'Width should be more then {width}px.': 'Chiều rộng phải lớn hơn {width}px.',
+    'Required field': 'Trường bắt buộc',
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Các thay đổi trong cài đặt đã được lưu thành công. Vui lòng làm mới trang.',

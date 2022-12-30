@@ -51,7 +51,7 @@ export const NestedObjectFieldMixin = defineComponent({
         function renderDetail() {
             return [
                 h(BaseFieldLabel, {
-                    props: { field: props.field, error: props.error, type: 'edit' },
+                    props: { field: props.field, error: props.error, type: props.type },
                 }),
                 h(ModelFields, {
                     props: {

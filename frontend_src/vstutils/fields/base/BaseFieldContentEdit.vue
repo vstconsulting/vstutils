@@ -6,7 +6,6 @@
         <input
             ref="input"
             :aria-label="aria_label"
-            :aria-labelledby="label_id"
             :class="classes"
             :max="attrs['max']"
             :maxlength="attrs['maxlength']"
@@ -32,6 +31,7 @@
     import BaseFieldInnerComponentMixin from './BaseFieldInnerComponentMixin.js';
     import FieldLabelIdMixin from '../FieldLabelIdMixin.js';
     import { ClearButton, HideButton, SetDefaultButton } from '../buttons';
+    import { FieldEditPropsDef } from './props';
     /**
      * Mixin for editable gui_fields' content(input value area).
      */
@@ -39,12 +39,7 @@
         name: 'BaseFieldContentEdit',
         components: { ClearButton, SetDefaultButton, HideButton },
         mixins: [BaseFieldContentMixin, BaseFieldInnerComponentMixin, FieldLabelIdMixin],
-        props: {
-            field: { type: Object, required: true },
-            // eslint-disable-next-line vue/require-prop-types
-            value: { default: null },
-            data: { type: Object, required: true },
-        },
+        props: FieldEditPropsDef,
         data() {
             return {
                 inputValueName: 'value',

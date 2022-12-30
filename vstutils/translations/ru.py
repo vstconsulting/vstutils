@@ -161,6 +161,7 @@ TRANSLATION = {
     'Generate password': 'Сгенерировать пароль',
     'Height should be more then {height}px.': 'Высота должна быть больше чем {height}px.',
     'Width should be more then {width}px.': 'Ширина должна быть больше чем {width}px.',
+    'Required field': 'Обязательное поле',
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста, обновите страницу.',

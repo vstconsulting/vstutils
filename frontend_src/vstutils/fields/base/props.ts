@@ -4,10 +4,12 @@ import type { ExtractRepresent } from './types';
 
 // --- Component props ---
 
+export type FieldComponentType = 'edit' | 'list' | 'readonly';
+
 export const FieldPropsDef = {
     field: { type: Object as PropType<Field>, required: true as const },
     data: { type: Object as PropType<Record<string, unknown>>, required: true as const },
-    type: { type: String as PropType<'edit' | 'list' | 'readonly'>, required: true as const },
+    type: { type: String as PropType<FieldComponentType>, required: true as const },
     hideable: { type: Boolean, default: false },
     hideTitle: { type: Boolean, default: false },
     error: { type: [String, Object, Array], default: null },

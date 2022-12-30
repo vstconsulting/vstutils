@@ -79,7 +79,7 @@ interface ResolveStateArgs {
     store?: BaseViewStore;
 }
 
-interface ViewParams extends SwaggerOperation {
+export interface ViewParams extends SwaggerOperation {
     operationId: string;
     level: number;
     name: string;
