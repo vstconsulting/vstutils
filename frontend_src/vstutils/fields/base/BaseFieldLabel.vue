@@ -17,7 +17,7 @@
     const props = defineProps<{
         id?: string;
         field: Field;
-        value: unknown;
+        value?: unknown;
         type: FieldComponentType;
         data?: Record<string, unknown>;
         error?: string | object | unknown[];
@@ -50,6 +50,7 @@
     }
 
     .field-component .field-label {
+        display: block;
         margin-bottom: 0.2rem;
     }
 

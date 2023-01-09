@@ -235,7 +235,10 @@ export class ApiConnector {
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                         data,
                         headers: new Proxy(cached.headers, {
-                            get(target, name: string) {
+                            get(target, name: string | symbol, receiver) {
+                                if (name in target || typeof name === 'symbol') {
+                                    return Reflect.get(target, name, receiver) as unknown;
+                                }
                                 return target.get(name);
                             },
                         }),

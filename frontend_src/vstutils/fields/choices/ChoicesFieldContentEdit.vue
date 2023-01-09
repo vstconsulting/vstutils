@@ -93,10 +93,10 @@
 
                         if (props.value !== undefined) {
                             setValue(props.value);
-                        } else if (props.field.required) {
+                        } else {
                             if (props.field.hasDefault) {
                                 setValue(props.field.default);
-                            } else {
+                            } else if (props.field.required) {
                                 setValue(enumItems.value[0] ?? null);
                             }
                         }
