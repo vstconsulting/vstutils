@@ -151,7 +151,7 @@
             if (this.hideNotRequired) {
                 this.hiddenFields = this.filteredFieldsInstancesGroups
                     .flatMap((group) => group.fields)
-                    .filter((field) => !field.required && this.data[field.name] === undefined);
+                    .filter((field) => !field.required && !this.data[field.name]);
             }
         },
         methods: {
