@@ -94,6 +94,8 @@ export interface IApp {
 
     rootVm: IAppRoot | null;
 
+    darkModeEnabled: boolean;
+
     start(): void;
     mount(target: HTMLElement | string): void;
 }
@@ -440,6 +442,10 @@ export class App implements IApp {
         this.application = this.rootVm;
         signals.emit(APP_AFTER_INIT, { app: this });
         utils.__setApp(this as unknown as IAppInitialized);
+    }
+
+    get darkModeEnabled() {
+        return (this.userSettingsStore?.settings.main.dark_mode as boolean | undefined) ?? false;
     }
 
     mount(target: HTMLElement | string = '#RealBody') {

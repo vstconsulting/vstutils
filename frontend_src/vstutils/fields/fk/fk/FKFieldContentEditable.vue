@@ -1,12 +1,17 @@
 <template>
-    <div class="input-group" style="flex-wrap: nowrap">
+    <div class="input-group" style="flex-wrap: nowrap" :aria-busy="loading">
         <select ref="selectEl" class="form-control" />
         <HideButton v-if="hideable" @click.native="$emit('hide-field', field)" />
+        <div v-if="loading" class="loader field-button input-group-append">
+            <span class="input-group-text">
+                <i class="fa-spin fas fa-sync-alt" />
+            </span>
+        </div>
     </div>
 </template>
 
 <script lang="ts">
-    import $ from 'jquery';
+    import $ from '@/libs/jquery';
     import type { PropType } from 'vue';
     import { toRef, ref, defineComponent } from 'vue';
     import { createTransport } from './transport';
@@ -30,9 +35,9 @@
 
             const selectEl = ref<HTMLSelectElement | null>(null);
 
-            ensureValueFetched(props.field, queryset.value!, toRef(props, 'value'));
+            const { loading } = ensureValueFetched(props.field, queryset.value!, toRef(props, 'value'));
 
-            return { selectEl, instancesCache, querysets, queryset, transport };
+            return { selectEl, instancesCache, querysets, queryset, transport, loading };
         },
         watch: {
             value(value) {
