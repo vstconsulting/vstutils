@@ -68,6 +68,7 @@ export interface FKFieldXOptions extends FieldXOptions {
     querysets?: Map<string | undefined, QuerySet[]> | Record<string, QuerySet[]>;
     model?: Schema;
     list_paths?: string[];
+    showLoader?: boolean;
 }
 
 export type TInner = number | string;
@@ -90,6 +91,7 @@ export class FKField
     filters?: Record<string, string | number>;
     filterName: string;
     filterFieldName: string;
+    showLoader: boolean;
 
     querysets: Map<string | undefined, QuerySet[]>;
     fkModel?: typeof Model;
@@ -104,6 +106,7 @@ export class FKField
         this.filters = this.props.filters;
         this.filterName = this.props.filter_name || this.valueField;
         this.filterFieldName = this.props.filter_field_name || this.valueField;
+        this.showLoader = this.props.showLoader ?? true;
 
         if (this.props.fetchData !== undefined) {
             this.fetchData = this.props.fetchData;

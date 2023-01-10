@@ -1,5 +1,8 @@
 <template>
-    <div>
+    <div v-if="field.showLoader && loading" class="loader">
+        <i class="fa-spin fas fa-sync-alt" />
+    </div>
+    <div v-else>
         <template v-if="!representField.constructor.fkLinkable">
             <component
                 :is="representField.component"
@@ -60,12 +63,16 @@
         return '';
     });
 
-    ensureValueFetched(props.field, queryset.value!, toRef(props, 'value'));
+    const { loading } = ensureValueFetched(props.field, queryset.value!, toRef(props, 'value'));
 </script>
 
 <style scoped>
     .object-link {
         margin-top: 5px;
+        text-align: center;
+    }
+
+    .field-component.type-list .loader::v-deep {
         text-align: center;
     }
 </style>

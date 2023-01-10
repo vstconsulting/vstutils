@@ -2,6 +2,7 @@ import type { Editor as VueEditor } from '@toast-ui/vue-editor';
 import type { Editor } from '@toast-ui/editor';
 import { i18n } from '@/vstutils/translation';
 import { computed, defineAsyncComponent, defineComponent, h } from 'vue';
+import { getApp } from '@/vstutils/utils';
 
 interface LangInfo {
     code: string;
@@ -30,6 +31,10 @@ const realComponent = (readOnly: boolean, lang?: LangInfo) =>
             import('@toast-ui/vue-editor'),
             // @ts-expect-error Styles are not typed
             import('@toast-ui/editor/dist/toastui-editor.css'),
+            getApp().darkModeEnabled
+                ? // @ts-expect-error Styles are not typed
+                  import('@toast-ui/editor/dist/theme/toastui-editor-dark.css')
+                : Promise.resolve(),
         ]);
         if (lang) {
             await lang.load(ToastUIEditor.default);
@@ -61,6 +66,7 @@ export const WYSIWYGEditor = defineComponent({
                 ['ul', 'ol', 'task', 'indent', 'outdent'],
                 ['table', 'link'],
             ],
+            theme: getApp().darkModeEnabled ? 'dark' : 'light',
         };
 
         const component = computed(() => realComponent(props.readOnly, langs.get(i18n.locale)));

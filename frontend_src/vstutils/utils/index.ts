@@ -111,3 +111,11 @@ export async function loadImage(url: string): Promise<HTMLImageElement> {
         img.src = url;
     });
 }
+
+export function deferredPromise<T>() {
+    let resolve, reject;
+    const promise = new Promise<T>((res, rej) => {
+        [resolve, reject] = [res, rej];
+    });
+    return { promise, reject, resolve };
+}
