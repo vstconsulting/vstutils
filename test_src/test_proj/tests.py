@@ -842,7 +842,11 @@ class ViewsTestCase(BaseTestCase):
             }
             for i in range(10)
         ]
-        users_id = self.mass_create('/api/v1/user/', data, 'username')
+        results = self.bulk([
+            {'method': 'post', 'path': 'user', 'data': i}
+            for i in data
+        ])
+        users_id = tuple(r['data']['id'] for r in results)
         self.assertEqual(self.get_count('django.contrib.auth.models.User'), 13)
         comma_id_list = ",".join([str(i) for i in users_id])
         result = self.get_result('get', '/api/v1/user/?id={}'.format(comma_id_list))
@@ -1417,7 +1421,11 @@ class DefaultBulkTestCase(BaseTestCase):
             dict(username="USER{}".format(i), password="123", password2='123')
             for i in range(10)
         ]
-        users_id = self.mass_create('/api/v1/user/', data, 'username')
+        results = self.bulk([
+            {'method': 'post', 'path': ['user'], 'data': i}
+            for i in data
+        ])
+        users_id = tuple(r['data']['id'] for r in results)
         test_user = dict(username=self.random_name(), password='123', password2='123')
         userself_data = dict(first_name='me')
         bulk_request_data = [
@@ -3162,24 +3170,6 @@ class LangTestCase(BaseTestCase):
         self.assertEqual(ru_lang_obj.translate('Some shared translation'), 'Серверный перевод имеет более высокий приоритет')
 
 
-class CoreApiTestCase(BaseTestCase):
-
-    def test_coreapi(self):
-        client = CoreAPIClient()
-        client.session.auth = HTTPBasicAuth(
-            self.user.data['username'], self.user.data['password']
-        )
-        client.session.headers.update({'x-test': 'true'})
-        schema = client.get('http://testserver/api/v1/schema/')
-        result = client.action(schema, ['v1', 'user', 'list'])
-        self.assertEqual(result['count'], 1)
-        create_data = dict(username='test', password='123', password2='123')
-        result = client.action(schema, ['v1', 'user', 'add'], create_data)
-        self.assertEqual(result['username'], create_data['username'])
-        self.assertFalse(result['is_staff'])
-        self.assertTrue(result['is_active'])
-
-
 class ProjectTestCase(BaseTestCase):
     use_msgpack = True
 
@@ -3717,9 +3707,6 @@ class ProjectTestCase(BaseTestCase):
             '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subgroups/',
             '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subgroups/{subgroups_id}/',
             '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/',
-            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test/',
-            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test2/',
-            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test3/',
             '/deephosts/{id}/subsubhosts/',
             '/deephosts/{id}/subsubhosts/{subsubhosts_id}/',
             '/deephosts/{id}/subsubhosts/{subsubhosts_id}/copy/',
@@ -3740,9 +3727,6 @@ class ProjectTestCase(BaseTestCase):
             '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subgroups/',
             '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subgroups/{subgroups_id}/',
             '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/',
-            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test/',
-            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test2/',
-            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test3/',
             '/hosts/',
             '/hosts/{id}/',
             '/hosts/{id}/copy/',
@@ -3760,9 +3744,6 @@ class ProjectTestCase(BaseTestCase):
             '/hosts/{id}/subgroups/',
             '/hosts/{id}/subgroups/{subgroups_id}/',
             '/hosts/{id}/subhosts/',
-            '/hosts/{id}/subhosts/test/',
-            '/hosts/{id}/subhosts/test2/',
-            '/hosts/{id}/subhosts/test3/',
             '/subhosts/',
             '/subhosts/{id}/',
             '/subhosts/{id}/test/',
@@ -3777,8 +3758,24 @@ class ProjectTestCase(BaseTestCase):
             '/user/{id}/change_password/'
         ]
 
+        should_not_be = [
+            # this actions shouldnot be in schema
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test2/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test3/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test2/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test3/',
+            '/hosts/{id}/subhosts/test/',
+            '/hosts/{id}/subhosts/test2/',
+            '/hosts/{id}/subhosts/test3/',
+        ]
+
         for url in urls:
             self.assertIn(url, data['paths'])
+
+        for url in should_not_be:
+            self.assertNotIn(url, data['paths'])
 
         self.assertNotIn('/testbinaryfiles2/', data['paths'])
 

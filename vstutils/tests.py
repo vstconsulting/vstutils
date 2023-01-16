@@ -15,7 +15,7 @@ from django.urls import reverse
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
 
-from .utils import import_class, raise_context_decorator_with_default, deprecated
+from .utils import import_class, raise_context_decorator_with_default
 
 User = get_user_model()
 
@@ -365,39 +365,6 @@ class BaseTestCase(TestCase):
             self._logout(client)
 
         return result
-
-    @deprecated
-    def mass_create(self, url, data, *fields, **kwargs):
-        """
-        Mass creation objects in api-abstration. Uses :meth:`.get_result` method.
-
-        :param url: url to abstract layer like argument in :meth:`.get_result`. For example: ``/api/v1/project/``.
-        :param data: list with data to send on creation and feature checks.
-        :params fields: list of fields to check after creation.
-        :param kwargs: extra-kwargs for request method.
-        :return: list of id from all resulted objects.
-        :rtype: list
-
-        .. note::
-            The method does not use endpoint requests. That mean if you want
-            send some extra headers or data you can do it by additional kwargs.
-
-        """
-
-        results_id = []
-        counter = 0
-        for dt in data:
-            result = self.get_result("post", url, 201, data=json.dumps(dt), **kwargs)
-            self.assertTrue(isinstance(result, dict))
-            for field in fields:
-                st = "[~~ENCRYPTED~~]"
-                if field == "vars" and st in result['vars'].values():
-                    pass  # nocv
-                else:
-                    self.assertEqual(result[field], data[counter][field])
-            results_id.append(result["id"])
-            counter += 1
-        return results_id
 
     def list_test(self, url, count):
         """

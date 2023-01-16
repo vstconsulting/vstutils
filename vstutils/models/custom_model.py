@@ -11,14 +11,13 @@ except ImportError:  # nocv
 from django.db.models.query import ModelIterable
 from django.db.models.fields import CharField, TextField, IntegerField, BooleanField, AutoField    # noqa: F401
 
-from .models import BQuerySet, BaseModel
-from .models.base import ModelBaseClass
-from .utils import raise_context
-from .tools import get_file_value, multikeysort  # pylint: disable=import-error
+from . import BQuerySet, BaseModel
+from .base import ModelBaseClass
+from ..utils import raise_context
+from ..tools import get_file_value, multikeysort  # pylint: disable=import-error
 
 
 class Query(dict):
-    __slots__ = 'queryset', 'combinator', 'is_sliced', 'select_for_update', 'select_related', 'empty'
     distinct_fields = False
 
     def __init__(self, queryset, *args, **kwargs):
@@ -121,8 +120,6 @@ class Query(dict):
 
 
 class CustomModelIterable(ModelIterable):
-    __slots__ = ()
-
     def values_handler(self, unit, fields, pk_name):
         # pylint: disable=no-member
         return {f: unit.get(f) if f != 'pk' else unit.get(pk_name) for f in fields}
@@ -185,7 +182,6 @@ class CustomModelIterable(ModelIterable):
 
 
 class CustomQuerySet(BQuerySet):
-    __slots__ = ()
     custom_iterable_class = CustomModelIterable
     custom_query_class = Query
 

@@ -1,4 +1,4 @@
-from typing import Any, Text, Dict, List, ClassVar, NoReturn, Tuple, Union, Type
+from typing import Any, Text, Dict, List, ClassVar, Tuple, Union
 from rest_framework import routers, views, request
 from rest_framework.schemas import views as drf_views
 
@@ -19,7 +19,7 @@ class _AbstractRouter(routers.DefaultRouter):
     permission_classes: List
     create_schema: bool
 
-    def register_view(self, prefix: PrefixType, view: views.APIView, name: Text = None) -> None:
+    def register_view(self, prefix: PrefixType, view: Union[views.APIView, views.AsView], name: Text = None) -> None:
         ...
 
     def unregister_view(self, prefix: PrefixType) -> None:

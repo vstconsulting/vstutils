@@ -1,5 +1,4 @@
-import json
-
+import orjson
 from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
@@ -39,7 +38,7 @@ class LanguageAdmin(_BaseViewAdmin):
     def translations(self, instance):
         return format_html(
             '<pre>{}</pre>',
-            json.dumps(instance.translations, indent=4)
+            orjson.dumps(instance.translations, option=orjson.OPT_INDENT_2).decode('utf-8')
         )
 
 

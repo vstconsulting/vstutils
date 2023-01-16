@@ -7,7 +7,7 @@ from django.utils.module_loading import import_string as import_class
 from django.utils.functional import cached_property
 
 from ..models import BaseModel
-from ..custom_model import ListModel, CharField
+from ..models.custom_model import ListModel, CharField
 
 
 lib_names = []

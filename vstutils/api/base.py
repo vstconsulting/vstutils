@@ -289,9 +289,6 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
     query_serializer: _t.Optional[_t.Type[serializers.Serializer]] = None
     model: _t.Optional[_t.Type[models.Model]] = None
     action_serializers: _t.Dict[_t.Text, serializers.Serializer] = {}
-    _nested_args: _t.Dict[_t.Text, _t.Any]
-    _nested_view: _t.ClassVar[_t.Union[QuerySetMixin, vsets.GenericViewSet]]
-    nested_detail: bool
 
     def create_action_serializer(self, *args, **kwargs):
         """
@@ -389,7 +386,6 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
                     return serializer_class
 
         is_detail = (
-            hasattr(self, 'serializer_class_one') and
             self.request and
             (
                 action_name in detail_actions or
@@ -401,7 +397,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         )
 
         # Get 'serializer_class_one' for detail operations
-        if is_detail:
+        if hasattr(self, 'serializer_class_one') and is_detail:
             return self.serializer_class_one  # pylint: disable=no-member
         return super().get_serializer_class()
 

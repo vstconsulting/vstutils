@@ -2,24 +2,21 @@
 import typing as _t
 from collections import OrderedDict
 from inspect import getmembers
-import json
 
-from django.db import transaction, models
+import orjson
+from django.db import transaction
 from rest_framework.decorators import action
-from rest_framework import response, request as drf_request, status, views, serializers
+from rest_framework import response, status
 from drf_yasg.utils import swagger_auto_schema
 
-from . import base
 from .filter_backends import DeepViewFilterBackend
 from ..exceptions import VSTUtilsException
 from .. import utils
 
-MasterViewType = _t.Type[base.GenericViewSet]
-
 
 def ensure_is_object(obj):
-    if isinstance(obj, str):
-        return json.loads(obj)
+    if isinstance(obj, (str, bytes)):
+        return orjson.loads(obj)
     return obj
 
 
@@ -53,10 +50,10 @@ def _create_with_iteration(view, get_serializer_func, nested_manager, data):
 
 
 def __get_nested_path(
-        name: _t.Text,
-        arg: _t.Text = None,
-        arg_regexp: _t.Text = '[0-9]',
-        empty_arg: bool = True) -> _t.Text:
+        name,
+        arg=None,
+        arg_regexp='[0-9]',
+        empty_arg=True):
     path = name
     if not arg:
         return path
@@ -66,7 +63,7 @@ def __get_nested_path(
     return path
 
 
-def __get_nested_subpath(*args, **kwargs) -> _t.Text:
+def _get_nested_subpath(*args, **kwargs):
     sub_path = kwargs.pop('sub_path', None)
     path = __get_nested_path(*args, **kwargs)
     if sub_path:
@@ -75,85 +72,22 @@ def __get_nested_subpath(*args, **kwargs) -> _t.Text:
     return path
 
 
-def nested_action(
-        name: _t.Text,
-        arg: _t.Text = None,
-        methods=None,
-        manager_name=None,
-        *args, **kwargs) -> _t.Callable:
-    # pylint: disable=too-many-locals
-    list_methods: _t.List[_t.Text] = ['get', 'head', 'options', 'post']
-    detail_methods: _t.List[_t.Text] = ['get', 'head', 'options', 'put', 'patch', 'delete']
-    methods = list(methods or (detail_methods if arg else list_methods))
-    arg_regexp: _t.Text = kwargs.pop('arg_regexp', '[0-9]')
-    empty_arg: bool = kwargs.pop('empty_arg', True)
-    request_arg = kwargs.pop('request_arg', f'{name}_{arg}')
-    request_arg = request_arg if arg else None
-    append_arg = kwargs.pop('append_arg', arg)
-    sub_options = kwargs.pop('sub_opts', {})
-    path = __get_nested_subpath(name, request_arg, arg_regexp, empty_arg, **sub_options)
-    allow_append = bool(kwargs.pop('allow_append', False))
-    manager_name = manager_name or name
-    _nested_args = kwargs.pop('_nested_args', OrderedDict())
-    _nested_filter_class = kwargs.pop('filterset_class', None)
-
-    def decorator(func: _t.Callable):
-        # pylint: disable=used-before-assignment
-        def wrapper(view: NestedViewMixin, request: drf_request.Request, *args, **kwargs):
-            # Nested name
-            view.nested_name = name
-            # Allow append to nested or only create
-            view.nested_allow_append = allow_append
-            # ID name of nested object
-            view.nested_arg = request_arg
-            view.nested_append_arg = append_arg
-            view.nested_id = kwargs.get(view.nested_arg, None)
-            view.nested_view_object = None
-            view._nested_filter_class = _nested_filter_class
-            return func(view, request, *args)
-
-        wrapper.__name__ = func.__name__
-        kwargs['methods'] = methods
-        kwargs['detail'] = True
-        kwargs['url_path'] = path
-        kwargs['url_name'] = kwargs.pop('url_name', name)
-        view: NestedViewMixin = action(*args, **kwargs)(wrapper)  # type: ignore
-        view._nested_args = _nested_args
-        view._nested_manager = manager_name or name
-        view._nested_filter_class = _nested_filter_class
-        if arg:
-            view._nested_args[name] = request_arg
-        return view
-
-    return decorator
-
-
 def subaction(*args, **kwargs):
     """
     Decorator which wrap object method to subaction of viewset.
 
     :param methods: List of allowed HTTP-request methods. Default is ``["post"]``.
-    :type methods: list
     :param detail: Flag to set method execution to one instance.
-    :type detail: bool
     :param serializer_class: Serializer for this action.
-    :type serializer_class: vstutils.api.serializers.VSTSerializer
     :param permission_classes: Tuple or list permission classes.
     :param url_path: API-path name for this action.
-    :type url_path: str
     :param description: Description for this action in OpenAPI.
-    :type description: str
     :param multiaction: Allow to use this action in multiactions.
                         Works only with :class:`vstutils.api.serializers.EmptySerializer` as response.
-    :type multiaction: bool
     :param require_confirmation: Sets whether the action must be confirmed before being executed.
-    :type require_confirmation: bool
     :param is_list: Mark this action as paginated list with all rules and parameters.
-    :type is_list: bool
     :param title: Override action title.
-    :type title: str
     :param icons: Setup action icon classes.
-    :type icons: tuple,list
     """
 
     operation_description = kwargs.pop('description', None)
@@ -206,7 +140,7 @@ def subaction(*args, **kwargs):
     return decorator
 
 
-def get_action_name(master_view: MasterViewType, method: _t.Text = '') -> _t.Optional[_t.Text]:
+def get_action_name(master_view, method=''):
     method = method.lower()
     if method == 'post':
         action_name = 'create'
@@ -221,45 +155,17 @@ def get_action_name(master_view: MasterViewType, method: _t.Text = '') -> _t.Opt
     elif method == 'delete':
         action_name = 'destroy'
     else:  # nocv
-        action_name = None  # type: ignore
+        action_name = None
 
     return action_name
 
 
 class NestedViewMixin:
-    get_serializer: _t.Callable
-    check_object_permissions: _t.Callable
-    check_permissions: _t.Callable
-    check_throttles: _t.Callable
-    lookup_field: _t.Text
-    request: drf_request.Request
-    nested_name: _t.Text
-    nested_append_arg: _t.Text
-    nested_allow_append: bool
-    nested_arg: _t.Text
-    nested_id: _t.Union[_t.Text, int]
-    nested_view_object: _t.Optional[models.Model]
-    nested_parent_object: _t.Optional[models.Model]
-    nested_detail: bool
-    _nested_filter_class: _t.Any
-    _nested_args: _t.Dict[_t.Text, _t.Any]
-    _nested_manager: _t.Union[models.QuerySet, _t.Text]
-    nested_manager: _t.Union[models.Manager, models.QuerySet]
-    queryset_filters: _t.List
-    master_view: MasterViewType
-    kwargs: _t.Dict
-    get_view_methods: _t.ClassVar[_t.Callable]
-    headers: _t.Dict
-    default_response_headers: _t.Dict
-    finalize_response: _t.ClassVar[_t.Callable]
-    check_etag: _t.ClassVar[_t.Callable]
-    is_main_action: bool
-
-    def _check_permission_obj(self, objects: _t.Iterable):
+    def _check_permission_obj(self, objects):
         for obj in objects:
             self.check_object_permissions(self.request, obj)
 
-    def get_queryset(self) -> models.QuerySet:
+    def get_queryset(self):
         qs = self.nested_manager.all()
         if any(
             DeepViewFilterBackend in getattr(self, attr, [])
@@ -271,11 +177,11 @@ class NestedViewMixin:
                 qs = qs_filter(self.nested_parent_object, qs)
         return qs
 
-    def get_nested_action_name(self) -> _t.Optional[_t.Text]:
-        return get_action_name(self.master_view, str(self.request.method))
+    def get_nested_action_name(self):
+        return get_action_name(self.master_view, self.request.method)
 
-    def get_serializer_context(self) -> _t.Dict:
-        context = super().get_serializer_context()  # type: ignore
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
         return context
 
     def perform_destroy(self, instance):
@@ -293,7 +199,7 @@ class NestedViewMixin:
             instance.delete()
 
     @transaction.atomic()
-    def dispatch_route(self, nested_sub=None) -> base.RestResponse:
+    def dispatch_route(self, nested_sub=None):
         kwargs = {}
         if nested_sub:
             self.action = nested_sub
@@ -314,7 +220,7 @@ class NestedViewMixin:
 
 class NestedWithoutAppendMixin(NestedViewMixin):
 
-    def create(self, request: drf_request.Request, *args, **kwargs):
+    def create(self, request, *_, **__):
         # pylint: disable=unused-argument
         many = isinstance(request.data, (list, tuple))
         return self.perform_create_nested(request.data, self.lookup_field, many)
@@ -329,7 +235,7 @@ class NestedWithoutAppendMixin(NestedViewMixin):
             for d in request_data
         ]
 
-    def perform_create_nested(self, request_data, nested_append_arg, many) -> base.RestResponse:
+    def perform_create_nested(self, request_data, nested_append_arg, many):
         id_list = self._data_create(
             self.prepare_request_data(request_data, many), nested_append_arg
         )
@@ -380,31 +286,22 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
         return id_list
 
 
-def nested_view_function(
-        master_view: _t.Union[base.GenericViewSet, NestedViewMixin],
-        view: _t.Type[_t.Union[NestedViewMixin, base.GenericViewSet, views.APIView]],
-        view_request: drf_request.Request,
-        *args, **kw) -> base.RestResponse:
-    # pylint: disable=unused-argument,unnecessary-lambda
+def nested_view_function(master_view, view, view_request, *_, **kw):
     nested_sub = kw.get('nested_sub', None)
-    view_obj: _t.Union[NestedViewMixin, base.GenericViewSet, views.APIView] = view(  # type: ignore
+    view_obj = view(  # type: ignore
         request=view_request,
-        kwargs=view_request.parser_context['kwargs'],  # type: ignore
+        kwargs=view_request.parser_context['kwargs'],
         headers=master_view.headers,
     )
-    master_view.nested_view_object = view_obj  # type: ignore
-    master_view.nested_detail = view_obj.nested_detail  # type: ignore
-    return view_obj.dispatch_route(nested_sub)  # type: ignore
+    master_view.nested_view_object = view_obj
+    master_view.nested_detail = view_obj.nested_detail
+    return view_obj.dispatch_route(nested_sub)
 
 
 class BaseClassDecorator:
     __slots__ = 'name', 'arg', 'request_arg', 'args', 'kwargs'
-    name: _t.Text
-    request_arg: _t.Text
-    args: _t.Tuple
-    kwargs: _t.Dict[str, _t.Any]
 
-    def __init__(self, name: _t.Text, arg: _t.Text, *args, **kwargs):
+    def __init__(self, name, arg, *args, **kwargs):
         self.name = name
         self.arg = arg
         self.request_arg = kwargs.pop('request_arg', f'{self.name}_{self.arg}')
@@ -423,7 +320,7 @@ class BaseClassDecorator:
 
 class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     """
-    By default DRF does not support nested views.
+    By default, DRF does not support nested views.
     This decorator solves this problem.
 
     You need two or more models with nested relationship (Many-to-Many or Many-to-One)
@@ -442,17 +339,18 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     :param allow_append: -- Flag for allowing to append existed instances.
     :type allow_append: bool
     :param manager_name: -- Name of model-object attr which contains nested queryset.
-    :type manager_name: str
+    :type manager_name: str,typing.Callable
     :param methods: -- List of allowed methods to nested view endpoints.
     :type methods: list
     :param subs: -- List of allowed subviews or actions to nested view endpoints.
     :type subs: list,None
+    :param queryset_filters: List of callable objects which returns filtered queryset of main.
 
 
     .. note::
-        Some view methods will not calling for performance reasons.
+        Some view methods will not call for performance reasons.
         This also applies to some of the class attributes that are usually initialized in the methods.
-        For example, ``.initial()`` will never called.
+        For example, ``.initial()`` will never call.
         Each viewset wrapped by nested class with additional logic.
 
     Example:
@@ -487,83 +385,63 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         'view',
         'allowed_subs',
         '_subs',
-        'serializers',
         'methods',
-        'queryset_filters'
+        'queryset_filters',
+        'empty_arg',
+        'append_arg',
+        'allow_append',
+        'manager_name',
     )
-    view: _t.Optional[_t.Type[_t.Union[NestedViewMixin, base.GenericViewSet]]]
-    allowed_subs: _t.Optional[_t.Union[_t.List[_t.Text], _t.Tuple]]
-    serializers: _t.Tuple[serializers.Serializer, serializers.Serializer]
-    methods: _t.Optional[_t.List[_t.Text]]
-    queryset_filters: _t.List
 
-    filter_subs = ['filter']
+    filter_subs = ('filter',)
 
     class NoView(VSTUtilsException):
         msg = 'Argument "view" must be installed for `nested_view` decorator.'
 
     def __init__(self, name, arg=None, methods=None, *args, **kwargs):
-        self.view = kwargs.pop('view', None)
+        if 'view' not in kwargs:
+            raise self.NoView()
+        self.view = kwargs.pop('view')
         self.allowed_subs = kwargs.pop('subs', ())
         self.queryset_filters = kwargs.pop('queryset_filters', [])
+        self.empty_arg = kwargs.pop('empty_arg', False)
+        self.allow_append = bool(kwargs.pop('allow_append', False))
+        self.manager_name = kwargs.pop('manager_name', name)
+
         super().__init__(name, arg, *args, **kwargs)
-        self._subs = set(self.get_subs())
 
-        if self.view is None:
-            raise self.NoView()
-
-        self.serializers = self.__get_serializers(kwargs)
+        self._subs = self.get_subs()
+        self.append_arg = self.kwargs.pop('append_arg', self.arg)
         self.methods = methods
 
         if self.arg is None:
             self.methods = methods or ['get']
 
-        self.kwargs['empty_arg'] = self.kwargs.pop('empty_arg', False)
-        self.kwargs['append_arg'] = self.arg
-        self.kwargs['request_arg'] = self.request_arg
-
-    def __get_serializers(self, kwargs):
-        serializer_class = kwargs.pop('serializer_class', self.view.serializer_class)
-
-        if 'serializer_class_one' in kwargs:
-            serializer_class_one = kwargs.pop('serializer_class_one')
-        elif hasattr(self.view, 'serializer_class_one'):
-            serializer_class_one = self.view.serializer_class_one
-        else:
-            # This option is deprecated because all viewsets return `serializer_class_one`
-            serializer_class_one = serializer_class  # nocv
-
-        return (serializer_class, serializer_class_one)
-
-    def _get_subs_from_view(self) -> _t.Iterable:
+    def _get_subs_from_view(self):
         # pylint: disable=protected-access
-        extra_acts = map(lambda x: x[0], getmembers(self.view, _is_extra_action))
+        actions = getmembers(self.view, _is_extra_action)
+        if self.arg is None:
+            actions = filter(lambda x: not x[1].detail, actions)
+        extra_acts = map(lambda x: x[0], actions)
         filter_subs = self.filter_subs
         return filter(lambda name: name not in filter_subs, extra_acts)
 
-    def get_subs(self) -> _t.Iterable:
-        subs = self._get_subs_from_view()
+    def get_subs(self):
+        subs = set(self._get_subs_from_view())
 
         if self.allowed_subs is None:
-            return []
+            return set()
         elif self.allowed_subs:
             return set(self.allowed_subs).intersection(subs)
 
         return subs
 
-    @property
-    def serializer(self):
-        return self.serializers[0]
-
-    @property
-    def serializer_one(self):
-        return self.serializers[-1]
-
-    def get_view(self, name: _t.Text, **options):
+    def get_view(self, name, **options):
         # pylint: disable=redefined-outer-name,too-many-statements
-        mixin_class: _t.Type[NestedViewMixin] = NestedViewMixin
+        mixin_class = NestedViewMixin
+
         if hasattr(self.view, 'create'):
-            if self.kwargs.get('allow_append', False):
+            if self.allow_append:
                 mixin_class = NestedWithAppendMixin
             else:
                 mixin_class = NestedWithoutAppendMixin
@@ -576,10 +454,10 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         else:
             detail = getattr(self.view, options['nested_sub']).detail
 
-        manager_name = self.kwargs.get('manager_name', self.name)
+        manager_name = self.manager_name or self.name
         view_class = utils.get_if_lazy(self.view)
 
-        class NestedView(mixin_class, view_class):  # type: ignore
+        class NestedView(mixin_class, view_class):
             __doc__ = self.view.__doc__
             format_kwarg = None
             queryset_filters = self.queryset_filters
@@ -589,10 +467,15 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
         def nested_view_function_wrapper(view_obj, request, *args, **kwargs):
             kwargs.update(options)
-            view_obj.nested_parent_object = view_obj.get_object()
-            nested_append_arg = view_obj.nested_append_arg
-            nested_request_arg = view_obj.nested_arg
-            nested_parent_object = view_obj.nested_parent_object
+            # Nested name
+            view_obj.nested_name = name
+            # Allow to append to nested or only create
+            view_obj.nested_allow_append = self.allow_append
+            # ID name of nested object
+            nested_request_arg = view_obj.nested_arg = self.request_arg
+            nested_append_arg = view_obj.nested_append_arg = self.append_arg
+            view_obj.nested_id = kwargs.get(view_obj.nested_arg, None)
+            nested_parent_object = view_obj.nested_parent_object = view_obj.get_object()
 
             if nested_append_arg:
                 nested_id = getattr(nested_parent_object, nested_append_arg, None)
@@ -614,23 +497,23 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             NestedView.lookup_field = nested_append_arg
             NestedView.lookup_url_kwarg = nested_request_arg
             NestedView.nested_detail = detail
-            NestedView.nested_allow_append = view_obj.nested_allow_append
+            NestedView.nested_allow_append = self.allow_append
             NestedView.nested_append_arg = nested_append_arg
             NestedView.nested_request_arg = nested_request_arg
             NestedView.nested_parent_object = nested_parent_object
             NestedView.nested_id = nested_id
             NestedView.nested_manager = nested_manager
 
-            getattr(view_obj, 'nested_allow_check', lambda *args, **kwargs: None)()
+            getattr(view_obj, 'nested_allow_check', lambda *_, **__: None)()
             return nested_view_function(view_obj, NestedView, request, *args, **kwargs)
 
         nested_view_function_wrapper.__name__ = name
         nested_view_function_wrapper.__doc__ = self.view.__doc__
-        nested_view_function_wrapper._nested_view = self.view  # type: ignore
-        nested_view_function_wrapper._nested_wrapped_view = NestedView  # type: ignore
+        nested_view_function_wrapper._nested_view = self.view
+        nested_view_function_wrapper._nested_wrapped_view = NestedView
         return name, nested_view_function_wrapper
 
-    def get_view_type(self, type_name: _t.Text, **options):
+    def get_view_type(self, type_name, **options):
         return self.get_view(f'{self.name}_{type_name}', **options)
 
     def get_list_view(self, **options):
@@ -639,28 +522,29 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     def get_detail_view(self, **options):
         return self.get_view_type('detail', **options)
 
-    def get_sub_view(self, sub: _t.Text, **options):
+    def get_sub_view(self, sub, **options):
         return self.get_view_type(sub, nested_sub=sub, **options)
 
-    def get_decorator(self, detail=False, **options) -> _t.Callable:
-        args = [self.name]
-        args += [self.arg] if detail else []
-        args += self.args
-        kwargs = dict(self.kwargs)
-        kwargs['methods'] = self.methods
-        kwargs['serializer_class'] = self.serializer_one if detail else self.serializer
-        kwargs['filterset_class'] = getattr(self.view, 'filterset_class', []) or getattr(self.view, 'filter_class', [])
-        kwargs.update(options)
-        return nested_action(*args, **kwargs)
+    def get_decorator(self, detail=False, **options):
+        return action(
+            detail=True,
+            url_path=_get_nested_subpath(
+                self.name,
+                self.request_arg if detail else '',
+                arg_regexp=self.kwargs.get('arg_regexp', '[0-9]') if detail else None,
+                empty_arg=self.empty_arg if detail else None,
+                sub_path=options.pop('sub_path', None)
+            ),
+            **options
+        )
 
     def _filter_methods(self, methods, detail=False):
         allowed_methods = set(self.view.get_view_methods(detail))
         return allowed_methods.intersection(methods)
 
-    def decorated(self, detail) -> _t.Tuple[_t.Text, _t.Type[_t.Union[NestedViewMixin, base.GenericViewSet]]]:
+    def decorated(self, detail):
         name, view = self.get_detail_view() if detail else self.get_list_view()
-        kwargs = {'detail': detail}
-        kwargs['url_name'] = f'{self.name}-{"detail" if detail else "list"}'
+        kwargs = {'url_name': f'{self.name}-{"detail" if detail else "list"}', 'detail': detail}
         if not detail:
             kwargs['suffix'] = 'List'
         if self.methods:
@@ -668,10 +552,14 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         else:
             kwargs['methods'] = self.view.get_view_methods(detail)  # type: ignore
         view_class = self.get_decorator(**kwargs)(view)
+        view_class._nested_args = getattr(self.view, '_nested_args', OrderedDict())
+        view_class._nested_manager = self.kwargs.get('manager_name', self.name)
         view_class._nested_view = self.view
         view_class._nested_name = self.name
         view_class._nested_subname = self.name
         view_class._nested_wrapped_view = view._nested_wrapped_view
+        if self.arg:
+            view_class._nested_args[self.name] = self.arg
         return name, view_class
 
     def decorated_list(self):
@@ -683,31 +571,32 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     def _get_decorated_sub(self, sub):
         name, subaction_view = self.get_sub_view(sub)
         sub_view = getattr(self.view, sub)
-        sub_path = sub_view.url_path
         decorator = self.get_decorator(
             detail=sub_view.detail,
-            sub_opts={'sub_path': sub_path},
+            sub_path=sub_view.url_path,
             methods=sub_view.mapping or self.methods,
-            serializer_class=sub_view.kwargs.get('serializer_class', self.serializer),
             url_name=f'{self.name}-{sub_view.url_name}',
             _nested_args=getattr(sub_view, '_nested_args', OrderedDict())
         )
-        view = decorator(subaction_view)
-        existing_swagger_auto_schema = getattr(view, '_swagger_auto_schema', {})
-        view._swagger_auto_schema = getattr(
+        view_class = decorator(subaction_view)
+        existing_swagger_auto_schema = getattr(view_class, '_swagger_auto_schema', {})
+        view_class._swagger_auto_schema = getattr(
             sub_view, '_swagger_auto_schema', existing_swagger_auto_schema
         )
-        view._nested_view = getattr(sub_view, '_nested_view', self.view)
-        view._nested_name = sub
-        view._nested_subname = getattr(sub_view, '_nested_subname', self.name)
-        view._nested_wrapped_view = getattr(sub_view, '_nested_wrapped_view', None)
-        return name, view
+        view_class._nested_view = getattr(sub_view, '_nested_view', self.view)
+        view_class._nested_name = sub
+        view_class._nested_subname = getattr(sub_view, '_nested_subname', self.name)
+        view_class._nested_wrapped_view = getattr(sub_view, '_nested_wrapped_view', None)
+        view_class._nested_args = getattr(sub_view, '_nested_args', OrderedDict())
+        if self.arg:
+            view_class._nested_args[self.name] = self.arg
+        return name, view_class
 
     def generate_decorated_subs(self):
         for sub in self._subs:
             yield self._get_decorated_sub(sub)
 
-    def setup(self, view_class: _t.Type[base.GenericViewSet]) -> _t.Type[base.GenericViewSet]:
+    def setup(self, view_class):
         if self.arg:
             setattr(view_class, *self.decorated_detail())
             view_class._nested_args = getattr(view_class, '_nested_args', OrderedDict())
@@ -719,26 +608,28 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         return view_class
 
 
-def extend_viewset_attribute(name: _t.Text, override: bool = False, data: _t.Optional[_t.Any] = None) -> _t.Callable:
-    def wrapper(view_class: _t.Type[base.GenericViewSet]):
+def extend_viewset_attribute(name, override=False, data=None):
+    def wrapper(view_class):
         if not override:
             attr_data = tuple(list(getattr(view_class, name, ())) + list(data or ()))
         else:
-            attr_data = data  # type: ignore
+            attr_data = data
         setattr(view_class, name, attr_data)
         return view_class
 
     return wrapper
 
 
-def extend_filterbackends(backends: _t.Iterable, override: bool = False) -> _t.Callable:
+def extend_filterbackends(backends, override=False):
     return extend_viewset_attribute('filter_backends', override, backends)
 
 
-def cache_method_result(func: _t.Callable) -> _t.Callable:
-    """Decorator that caches return value of method based on args and kwargs,
-    cache value stored in the object instance"""
-    name: _t.Text = f'__cache_{func.__name__}'
+def cache_method_result(func):
+    """
+    Decorator that caches return value of method based on args and kwargs,
+    cache value stored in the object instance
+    """
+    name = f'__cache_{func.__name__}'
 
     def wrapper(self, *args, **kwargs):
         result = getattr(self, name, None)

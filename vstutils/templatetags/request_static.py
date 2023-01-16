@@ -1,7 +1,7 @@
-import json
-
 from django import template
 from django.templatetags.static import StaticNode
+
+from ..api.renderers import ORJSONRenderer
 
 register = template.Library()
 
@@ -54,5 +54,5 @@ def do_static_origin(parser, token):
 
 
 @register.filter(is_safe=True)
-def jsonify(object):
-    return json.dumps(object)  # nocv
+def jsonify(obj):
+    return ORJSONRenderer().render(obj, media_type=ORJSONRenderer.media_type)  # nocv

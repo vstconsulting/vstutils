@@ -81,6 +81,9 @@ To expand the set of actions, you need to create an action that will work with s
 For these purposes, there is a standard :func:`rest_framework.decorators.action`, which can also be extended using the scheme.
 But for the greater convenience, there is a set of decorator objects in vstutils to eliminate the routine of writing boilerplate code.
 
+The main philosophy for these wrappers is that the developer writes business logic without being distracted by the boilerplate code.
+Often, most of the errors in the code appear precisely because of the blurry look from the routine writing of the code.
+
 
 .. automodule:: vstutils.api.actions
     :members:

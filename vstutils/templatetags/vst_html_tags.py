@@ -1,5 +1,4 @@
-import json
-
+import orjson
 from django import template, forms
 from django.core.exceptions import NON_FIELD_ERRORS
 
@@ -15,7 +14,7 @@ def img_from_json(json_string, **kwargs):
     content_attribute = kwargs.get('content_attribute', 'content')
 
     try:
-        content = json.loads(json_string)[content_attribute]
+        content = orjson.loads(json_string)[content_attribute]
     except Exception:
         content = ''
     return {

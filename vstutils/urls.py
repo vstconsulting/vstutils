@@ -2,7 +2,7 @@
 import os
 
 from django.conf import settings
-from django.urls.conf import include, re_path
+from django.urls.conf import include, re_path, path
 from django.contrib import admin
 from django.conf.urls.static import static
 from django.views.static import serve
@@ -46,11 +46,11 @@ doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 urlpatterns = list(URLHandlers())
 
 urlpatterns += [
-    re_path(settings.ACCOUNT_URL, include(list(URLHandlers('ACCOUNT_URLS'))))
+    path(settings.ACCOUNT_URL, include(list(URLHandlers('ACCOUNT_URLS'))))
 ]
 
 urlpatterns += [
-    re_path(r'^admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
 ] if getattr(settings, 'ENABLE_ADMIN_PANEL', False) else []
 
 urlpatterns += [re_path(rf'^{settings.API_URL}/', include(router.urls))]
@@ -59,4 +59,4 @@ if settings.STATIC_URL.startswith('/'):  # pragma: no branch
 if settings.MEDIA_URL.startswith('/') and settings.MEDIA_ROOT:
     urlpatterns += static(settings.MEDIA_URL, view=serve, document_root=settings.MEDIA_ROOT)  # nocv
 if 'docs' in settings.INSTALLED_APPS:  # nocv
-    urlpatterns += [re_path(rf'^{doc_url}', include(('docs.urls', settings.VST_PROJECT), namespace='docs'))]
+    urlpatterns += [path(f'{doc_url}', include(('docs.urls', settings.VST_PROJECT), namespace='docs'))]

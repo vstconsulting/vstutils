@@ -5,7 +5,6 @@ Additional serializer fields for generating OpenAPI and GUI.
 import logging
 import typing as _t
 import copy
-import json
 import functools
 import base64
 from urllib.parse import quote
@@ -22,11 +21,13 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.fields.files import FieldFile
 
+from .renderers import ORJSONRenderer
 from ..models import fields as vst_model_fields
 from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default, translate, lazy_translate
 
 DependenceType = _t.Optional[_t.Dict[_t.Text, _t.Text]]
 DEFAULT_NAMED_FILE_DATA = {"name": None, "content": None, 'mediaType': None}
+renderer: _t.Callable[..., bytes] = functools.partial(ORJSONRenderer().render, media_type=ORJSONRenderer.media_type)
 
 
 class VSTCharField(CharField):
@@ -38,7 +39,7 @@ class VSTCharField(CharField):
     def to_internal_value(self, data) -> _t.Text:
         with raise_context():
             if not isinstance(data, str):
-                data = json.dumps(data)
+                data = renderer(data).decode('utf-8')
         data = str(data)
         return super().to_internal_value(data)
 
@@ -323,7 +324,7 @@ class DynamicJsonTypeField(VSTCharField):
         value = super().get_attribute(value)
         if self.is_json(real_field):
             with raise_context():
-                value = json.loads(value)
+                value = orjson.loads(value)
         if real_field:
             return real_field.to_representation(value)
         return value
@@ -741,7 +742,9 @@ class NamedBinaryFileInJsonField(VSTCharField):
         if self.file:
             return {'content': value.url, 'name': value.name, 'mediaType': ''}
         else:
-            result = json.loads(value)
+            if not value:
+                return DEFAULT_NAMED_FILE_DATA
+            result = orjson.loads(value)
             if not result.get('mediaType'):
                 result['mediaType'] = None
             return result
@@ -853,7 +856,9 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
                 {'content': file.url, 'name': file.name, 'mediaType': ''}
                 for file in value
             ]
-        return json.loads(value)
+        if not value:
+            return []
+        return orjson.loads(value)
 
 
 class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):

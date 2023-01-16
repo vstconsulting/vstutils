@@ -15,6 +15,8 @@ from .serializers import EmptySerializer, DataSerializer
 class Action:
     """
     Base class of actions. Has minimal of required functionality to create an action and write only business logic.
+    This decorator is suitable in cases where it is not possible to implement the logic using :class:`.SimpleAction`
+    or the algorithm is much more complicated than standard CRUD.
 
     Examples:
 
@@ -256,6 +258,14 @@ class EmptyAction(Action):
 
 class SimpleAction(Action):
     """
+    The idea of this decorator is to get the full CRUD for the instance in a minimum of steps.
+    The instance is the object that was returned from the method being decorated.
+    The whole mechanism is very similar to the standard property decorator,
+    with a description of a getter, setter, and deleter.
+
+    If you're going to create an entry point for working with a single object, then you do not need to define methods.
+    The presence of a getter, setter, and deleter will determine which methods will be available.
+
     In the official documentation of Django, an example is given with moving data
     that is not important for authorization to the Profile model.
     To work with such data that is outside the main model, there is this action object,

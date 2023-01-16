@@ -100,7 +100,6 @@ class _DummyExecutor(Executor):
 
 
 class ParseResponseDict(dict):
-    __slots__ = ('timing',)
     timing: _t.SupportsFloat
 
     def __init__(self, path: _t.Text, method: _t.Text, response: HttpResponse):
@@ -191,7 +190,6 @@ class FormatDataFieldMixin:
     """
     Mixin for fields that can format "<< >>" templates inside strings
     """
-    __slots__ = ()
     requires_context: bool = True
     context: _t.Dict
 
@@ -217,7 +215,6 @@ class TemplateStringField(FormatDataFieldMixin, serializers.CharField):
     """
     Field that can format "<< >>" templates inside strings
     """
-    __slots__ = ()
 
 
 class RequestDataField(FormatDataFieldMixin, DataSerializer):
@@ -225,7 +222,6 @@ class RequestDataField(FormatDataFieldMixin, DataSerializer):
     Field that can handle basic data types and recursise
     format template strings inside them
     """
-    __slots__ = ()
 
     def to_internal_value(self, data):
         if isinstance(data, str):
