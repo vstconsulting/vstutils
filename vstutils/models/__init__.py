@@ -20,6 +20,7 @@ from .fields import (
     FkModelField
 )
 from ..utils import raise_context
+from .custom_model import ListModel, FileModel, CustomQuerySet
 
 
 logger = logging.getLogger('vstutils')

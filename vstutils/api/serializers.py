@@ -6,8 +6,8 @@ Read more in Django REST Framework documentation for
 """
 
 import typing as _t
-import json
 
+import orjson
 from django.db import models
 from django.http.request import QueryDict
 from rest_framework import serializers
@@ -152,7 +152,7 @@ class DataSerializer(EmptySerializer):
 
     def to_representation(self, instance):
         if not isinstance(instance, (dict, list)):
-            result = json.loads(instance)
+            result = orjson.loads(instance)
             if isinstance(result, dict):
                 result = utils.Dict(result)
             return result

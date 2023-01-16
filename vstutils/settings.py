@@ -23,8 +23,6 @@ SIMPLE_OBJECT_SETTINGS_TYPE = _t.Dict[_t.Text, _t.Dict[_t.Text, _t.Any]]
 
 
 class Env(dict):
-    __slots__ = ()
-
     def __getitem__(self, item):
         if item in self:
             return super().__getitem__(item)
@@ -132,19 +130,15 @@ class LocationsType(cconfig.ListType):
 
 
 class BackendSection(cconfig.Section):
-    __slots__ = ()
-
     def key_handler_to_all(self, key):
         return super().key_handler_to_all(key).upper()
 
 
 class BaseAppendSection(cconfig.AppendSection):
-    __slots__ = ()
     get: _t.Callable[..., _t.Any]
 
 
 class MainSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'debug': ConfigBoolType,
         'enable_admin_panel': ConfigBoolType,
@@ -160,7 +154,6 @@ class MainSection(BaseAppendSection):
 
 
 class WebSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'allow_cors': ConfigBoolType,
         'cors_allowed_origins': cconfig.ListType(),
@@ -196,15 +189,12 @@ class WebSection(BaseAppendSection):
 
 
 class DatabasesSection(BaseAppendSection):
-    __slots__ = ()
-
     types_map = {
         'databases_without_cte_support': cconfig.ListType(),
     }
 
 
 class DBSection(BackendSection):
-    __slots__ = ()
     types_map = {
         'conn_max_age': ConfigIntSecondsType,
         'atomic_requests': ConfigBoolType,
@@ -214,7 +204,6 @@ class DBSection(BackendSection):
 
 
 class DBTestSection(DBSection):
-    __slots__ = ()
     type_serialize = ConfigBoolType
     type_create_db = ConfigBoolType
     type_create_user = ConfigBoolType
@@ -222,7 +211,6 @@ class DBTestSection(DBSection):
 
 
 class DBOptionsSection(cconfig.Section):
-    __slots__ = ()
     types_map = {
         'timeout': ConfigIntSecondsType,
         'connect_timeout': ConfigIntSecondsType,
@@ -233,7 +221,6 @@ class DBOptionsSection(cconfig.Section):
 
 
 class CacheSection(BackendSection):
-    __slots__ = ()
     types_map = {
         'timeout': ConfigIntSecondsType,
         'location': LocationsType(),
@@ -296,7 +283,6 @@ class CacheBehaviorsSection(cconfig.Section):
 
 
 class MailSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'port': ConfigIntType,
         'tls': ConfigBoolType,
@@ -308,12 +294,10 @@ class MailSection(BaseAppendSection):
 
 
 class UWSGISection(cconfig.Section):
-    __slots__ = ()
     type_daemon = ConfigBoolType
 
 
 class RPCSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'concurrency': ConfigIntType,
         'prefetch_multiplier': ConfigIntType,
@@ -328,7 +312,6 @@ class RPCSection(BaseAppendSection):
 
 
 class RPCBrokerSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'visibility_timeout': ConfigIntSecondsType,
         'wait_time_seconds': ConfigIntSecondsType,
@@ -338,7 +321,6 @@ class RPCBrokerSection(BaseAppendSection):
 
 
 class WorkerSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'beat': ConfigBoolType,
         'events': ConfigBoolType,
@@ -352,7 +334,6 @@ class WorkerSection(BaseAppendSection):
 
 
 class CentrifugoSection(cconfig.Section):
-    __slots__ = ()
     type_address = cconfig.StrType()
     type_public_address = cconfig.StrType()
     type_api_key = cconfig.StrType()
@@ -362,7 +343,6 @@ class CentrifugoSection(cconfig.Section):
 
 
 class ThrottleSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'rate': ConfigStringType,
         'actions': ConfigListType,
@@ -1313,19 +1293,19 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
 }
 
 GUI_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
-    r'^$': 'GUI',
-    r'^manifest.json$': 'MANIFEST',
-    r'^service-worker.js$': 'SERVICE_WORKER',
-    r'^offline.html$': 'OFFLINE',
+    r'': 'GUI',
+    'manifest.json': 'MANIFEST',
+    'service-worker.js': 'SERVICE_WORKER',
+    'offline.html': 'OFFLINE',
 }
 
 ACCOUNT_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
     'LOGIN_URL': 'LOGIN',
     'LOGOUT_URL': 'LOGOUT',
-    r'^password_reset/$': 'PASSWORD_RESET',
-    r'^password_reset_done/$': 'PASSWORD_RESET_DONE',
-    r'^password_reset_complete/$': 'PASSWORD_RESET_COMPLETE',
-    r'^password_reset_confirm/(?P<uidb64>.*)/(?P<token>.*)/$': 'PASSWORD_RESET_CONFIRM',
+    'password_reset/': 'PASSWORD_RESET',
+    'password_reset_done/': 'PASSWORD_RESET_DONE',
+    'password_reset_complete/': 'PASSWORD_RESET_COMPLETE',
+    'password_reset_confirm/<uidb64>/<token>/': 'PASSWORD_RESET_CONFIRM',
 }
 
 
@@ -1346,16 +1326,16 @@ def get_accounts_views_mapping():
 
 URLS = lazy(lambda: {**GUI_VIEWS}, dict)()
 ACCOUNT_URLS = lazy(get_accounts_views_mapping, dict)()
-ACCOUNT_URL = '^account/'
+ACCOUNT_URL = 'account/'
 
-REGISTRATION_URL = r'^registration/$'
+REGISTRATION_URL = 'registration/'
 REGISTRATION_ENABLED = main['enable_registration']
 
-AGREEMENT_TEMRS_URL = r'^terms/$'
+AGREEMENT_TEMRS_URL = 'terms/'
 ENABLE_AGREEMENT_TERMS: bool = main.getboolean('enable_agreement_terms', fallback=REGISTRATION_ENABLED)
 AGREEMENT_TERMS_PATH: str = main['agreement_terms_path']
 
-CONSENT_TO_PROCESSING_URL = r'^consent_to_processing/$'
+CONSENT_TO_PROCESSING_URL = 'consent_to_processing/'
 ENABLE_CONSENT_TO_PROCESSING: bool = main.getboolean('enable_consent_to_processing', fallback=REGISTRATION_ENABLED)
 CONSENT_TO_PROCESSING_PATH: str = main['consent_to_processing_path']
 

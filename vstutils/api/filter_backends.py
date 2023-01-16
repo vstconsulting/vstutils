@@ -43,10 +43,7 @@ class OrderingFilterBackend(OrderingFilter):
             yield f'-{field[0]}'
 
     def get_schema_fields(self, view):
-        try:
-            fields = tuple(self._get_fields_for_schema(view))
-        except:
-            return super().get_schema_fields(view)
+        fields = tuple(self._get_fields_for_schema(view))
         return [
             compat.coreapi.Field(
                 name=self.ordering_param,
@@ -121,7 +118,6 @@ class VSTFilterBackend(BaseFilterBackend):
         In this example Filter Backend annotates time in current timezone to any connected
         model's queryset with field name from query `constant`.
     """
-    __slots__ = ()
     required = False
 
     def filter_queryset(self, request, queryset, view):
@@ -138,7 +134,6 @@ class VSTFilterBackend(BaseFilterBackend):
 
 class HideHiddenFilterBackend(VSTFilterBackend):
     """Filter Backend that hides all objects with hidden=True from the queryset"""
-    __slots__ = ()
     required = True
 
     def filter_queryset(self, request, queryset, view):
@@ -153,7 +148,6 @@ class SelectRelatedFilterBackend(VSTFilterBackend):
     """
     Filter Backend that will automatically call prefetch_related and select_related on all relations in queryset.
     """
-    __slots__ = ()
     required = True
     fields_fetch_map = {
         'select': (models.ForeignKey,),

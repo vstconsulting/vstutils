@@ -1,8 +1,8 @@
 import typing as _t
 from pathlib import Path
 from django.db.models.fields import CharField as cf, TextField as tf, IntegerField as intf, BooleanField as bf
-from .models.queryset import BQuerySet
-from .models.model import BaseModel
+from .queryset import BQuerySet
+from .model import BaseModel
 
 
 class CharField(cf):

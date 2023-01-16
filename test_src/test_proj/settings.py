@@ -98,10 +98,10 @@ API[VST_API_VERSION][r'cachable'] = dict(
 API[VST_API_VERSION][r'dynamic_fields'] = dict(
     model='test_proj.models.dynamic_fields.DynamicFields'
 )
-API['v2'][r'testbinaryfiles2'] = dict(
+API['v2']['testbinaryfiles2'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )
-API['v2'][r'request_info'] = dict(
+API['v2']['request_info'] = dict(
     view='test_proj.views.RequestInfoTestView'
 )
 API['v2'][r'settings'] = dict(
@@ -112,7 +112,7 @@ API['v2'][r'settings'] = dict(
 API['v3'][r'testbinaryfiles'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )
-API['v4'][r'user'] = dict(
+API['v4']['user'] = dict(
     view='test_proj.views.TestUserViewSet'
 )
 
@@ -120,7 +120,7 @@ API[VST_API_VERSION][r'test_changed_fk'] = dict(
     model='test_proj.models.ModelWithChangedFk'
 )
 
-GUI_VIEWS[r'^gui/$'] = r'^$'
+GUI_VIEWS[r'^gui/$'] = ''
 GUI_VIEWS[r'^csrf_disable_gui/$'] = {
     'BACKEND': 'vstutils.gui.views.GUIView',
     'CSRF_ENABLE': False

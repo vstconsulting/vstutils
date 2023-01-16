@@ -23,7 +23,7 @@ from enum import Enum, EnumMeta
 
 from django.conf import settings
 from django.middleware.gzip import GZipMiddleware
-from django.urls import re_path, include
+from django.urls import re_path, path, include
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
@@ -1042,7 +1042,6 @@ class Paginator(BasePaginator):
     """
     Class for fragmenting the query for small queries.
     """
-    __slots__ = ()
 
     def __init__(self, qs, chunk_size=None):
         """
@@ -1301,15 +1300,21 @@ class URLHandlers(ObjectHandlers):
         view_kwargs = options.pop('view_kwargs', {})
         csrf_enable = self.get_backend_data(regexp).get('CSRF_ENABLE', True)
         if regexp in self.settings_urls:
-            regexp = rf'^{self.get_django_settings(regexp)[1:]}'
+            regexp = f'{self.get_django_settings(regexp)[1:]}'
         view_class = self[name]
         namespace = view_kwargs.pop('namespace', self.default_namespace)
         result: tp.Union[tp.Tuple, types.ModuleType]
+
+        if any(s in regexp for s in (r'^', r'$', r'(', r'?')):
+            path_handler = re_path
+        else:
+            path_handler = path
+
         if isinstance(view_class, View) or hasattr(view_class, 'as_view'):
             view = view_class.as_view(**view_kwargs)
             if not csrf_enable:
                 view = csrf_exempt(view)
-            return re_path(regexp, view, *args, **options)
+            return path_handler(regexp, view, *args, **options)
         elif (isinstance(view_class, types.ModuleType) and
               hasattr(view_class, 'urlpatterns') and
               hasattr(view_class, 'app_name')):
@@ -1317,7 +1322,7 @@ class URLHandlers(ObjectHandlers):
             namespace = None
         else:
             result = (view_class, 'gui')
-        return re_path(regexp, include(result, namespace=namespace), *args, **view_kwargs)
+        return path_handler(regexp, include(result, namespace=namespace), *args, **view_kwargs)
 
     def urls(self) -> tp.Iterable:
         for regexp in self.list():

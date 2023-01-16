@@ -99,7 +99,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
             if self._update_param_model(param, model, model_field):
                 continue
             elif self._update_param_view(param, model, view_cls):
-                continue
+                continue  # nocv
         return parameters
 
     def get_operation_keys(self, subpath, method, view):
