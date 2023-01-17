@@ -122,6 +122,17 @@ class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer):
             }
             field_kwargs['select'] = relation_info.related_model
 
+            autocomplete_property = field_kwargs.get('autocomplete_property', 'id')
+            autocomplete_field = next(
+                (f for f in relation_info.related_model._meta.fields if f.attname == autocomplete_property),
+                relation_info.related_model._meta.pk
+            )
+
+            if isinstance(autocomplete_field, models.IntegerField):
+                field_kwargs['field_type'] = int
+            else:
+                field_kwargs['field_type'] = str
+
             return fields.FkModelField, field_kwargs
         # if DRF ForeignField in model or related_model is not BModel, perform default DRF logic
         return super().build_relational_field(field_name, relation_info)

@@ -16,6 +16,12 @@ API['v4'] = {}
 API[VST_API_VERSION][r'test_json_file_image_fields_model'] = dict(
     model='test_proj.models.ModelForCheckFileAndImageField'
 )
+API[VST_API_VERSION][r'uuid_as_pk'] = dict(
+    model='test_proj.models.ModelWithUuidPk'
+)
+API[VST_API_VERSION][r'uuid_as_fk'] = dict(
+    model='test_proj.models.ModelWithUuidFK'
+)
 API[VST_API_VERSION][r'deep_nested_model'] = dict(
     model='test_proj.models.DeepNestedModel'
 )

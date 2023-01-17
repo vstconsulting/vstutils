@@ -41,8 +41,6 @@ from django.http import FileResponse, HttpResponseNotModified
 from django.test.client import RequestFactory
 from django.urls import reverse
 from fakeldap import MockLDAP
-from requests.auth import HTTPBasicAuth
-from rest_framework.test import CoreAPIClient
 
 from vstutils import utils
 from vstutils.api.models import Language
@@ -82,6 +80,7 @@ from .models import (
     ModelForCheckFileAndImageField,
     ModelWithNestedModels,
     ProtectedBySignal,
+    ModelWithUuidFK,
 )
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
@@ -1739,6 +1738,13 @@ class OpenapiEndpointTestCase(BaseTestCase):
             api['definitions']['ModelWithBinaryFiles']['properties']['some_validatedmultiplenamedbinimage']['items']['x-validators'],
             img_res_validator_data
         )
+
+        # Check fields with uuid as fk
+        self.assertEqual(api['definitions']['ModelWithUuidPk']['properties']['id']['type'], 'string')
+        self.assertEqual(api['definitions']['ModelWithUuidPk']['properties']['id']['format'], 'uuid')
+        self.assertEqual(api['definitions']['ModelWithUuidFK']['properties']['fk']['type'], 'string')
+        self.assertEqual(api['definitions']['ModelWithUuidFK']['properties']['fk']['format'], 'fk')
+
         # Check default fields grouping
         self.assertEqual(api['definitions']['ExtraPost']['x-properties-groups'], {"": ['id', 'author', 'title']})
 
@@ -3205,6 +3211,20 @@ class ProjectTestCase(BaseTestCase):
             }
         ]
 
+    def test_model_with_fk_uuid(self):
+        results = self.bulk([
+            {'method': "post", 'path': ['uuid_as_pk']}
+            for _ in range(3)
+        ] + [
+            {'method': "post", 'path': ['uuid_as_fk'], 'data': {'fk': f'<<{i}[data][id]>>'}}
+            for i in range(3)
+        ] + [{'method': "get", 'path': ['uuid_as_fk']}])
+        for result in results[:-1]:
+            self.assertEqual(result['status'], 201)
+
+        self.assertEqual(results[-1]['status'], 200)
+        self.assertEqual(results[-1]['data']['count'], 3)
+
     def test_make_action(self):
         author1 = Author.objects.create(name='Author1', phone='')
         author2 = Author.objects.create(name='Author2', phone='')
@@ -3830,7 +3850,7 @@ class ProjectTestCase(BaseTestCase):
         changed_pk = self.get_model_class('test_proj.ChangedPkField')
         value = changed_pk.objects.create(reg_number='TW23', name='test')
         value2 = changed_pk.objects.create(reg_number='TW24', name='test')
-        field = fields.FkModelField(select=changed_pk, autocomplete_property='reg_number')
+        field = fields.FkModelField(select=changed_pk, autocomplete_property='reg_number', field_type=str)
         self.assertEqual(field.to_representation(value), value.reg_number)
         results = self.bulk([
             {

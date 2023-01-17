@@ -13,6 +13,7 @@ from rest_framework.fields import Field, JSONField, DecimalField, empty
 
 from .. import fields, serializers, validators
 from ...models.base import get_first_match_name
+from ...utils import raise_context_decorator_with_default
 
 
 # Extra types
@@ -90,6 +91,13 @@ basic_type_info[fields.CrontabField] = {
     'type': openapi.TYPE_STRING,
     'format': FORMAT_CRONTAB,
 }
+
+
+@raise_context_decorator_with_default(verbose=False, default=None)
+def get_fk_component_field_type(field, components):
+    return components.get(
+        field.select_model, openapi.SCHEMA_DEFINITIONS
+    )['properties'][field.autocomplete_property]['type']
 
 
 def field_have_redirect(field, **kwargs):
@@ -238,8 +246,19 @@ class FkFieldInspector(FieldInspector):
             }
             del options['dependence']
 
+        field_type = openapi.TYPE_STRING
+        if field.field_type.__name__ == '<lambda>':
+            field_type = get_fk_component_field_type(field, self.components)
+            if field_type is None:
+                if field.autocomplete_property in {'id', 'pk'}:
+                    field_type = openapi.TYPE_INTEGER
+                else:
+                    field_type = openapi.TYPE_STRING
+        elif field.field_type is int:
+            field_type = openapi.TYPE_INTEGER
+
         kwargs = {
-            'type': openapi.TYPE_INTEGER,
+            'type': field_type,
             'format': field_format,
             X_OPTIONS: options,
         }

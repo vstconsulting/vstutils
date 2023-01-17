@@ -7,6 +7,7 @@ import typing as _t
 import copy
 import functools
 import base64
+import uuid
 from urllib.parse import quote
 
 import orjson
@@ -457,6 +458,9 @@ class FkField(IntegerField):
     :param autocomplete_represent: this argument indicates which attribute will be
                                    get from OpenApi schema definition model as represent value.
                                    Default is ``name``.
+    :param field_type: defines the autocomplete_property type for further definition in the schema
+                       and casting to the type from the api. Default is passthroughs but require `int` or `str` objects.
+    :type field_type: type
     :param use_prefetch: prefetch values on frontend at list-view. Default is ``True``.
     :type use_prefetch: bool
     :param make_link: show value as link to model. Default is ``True``.
@@ -519,6 +523,7 @@ class FkField(IntegerField):
         self.make_link = kwargs.pop('make_link', True)
         self.dependence = kwargs.pop('dependence', None)
         self.filters = kwargs.pop('filters', None)
+        self.field_type = kwargs.pop('field_type', lambda x: x)
         super().__init__(**kwargs)
         if self.filters and self.dependence and set(self.dependence.values()) & set(self.filters.keys()):
             self.fail('ambiguous_filter')
@@ -589,7 +594,7 @@ class FkModelField(FkField):
         self.model_class = get_if_lazy(self.model_class)
         if isinstance(value, self.model_class):
             return value  # nocv
-        return self.model_class.objects.get(**{self.autocomplete_property: value})
+        return self.model_class.objects.get(**{self.autocomplete_property: self.field_type(value)})
 
     def get_value(self, dictionary: _t.Any) -> _t.Any:
         value = super().get_value(dictionary)
@@ -600,7 +605,7 @@ class FkModelField(FkField):
     def to_internal_value(self, data: _t.Union[models.Model, int]) -> _t.Union[models.Model]:  # type: ignore[override]
         if isinstance(data, self.model_class):
             return data
-        elif isinstance(data, (int, str)):  # nocv
+        elif isinstance(data, (int, str, uuid.UUID)):  # nocv
             # deprecated
             return self._get_data_from_model(data)
         self.fail('Unknown datatype')  # nocv
@@ -608,7 +613,7 @@ class FkModelField(FkField):
     def to_representation(self, value: _t.Union[int, models.Model]) -> _t.Any:
         self.model_class = get_if_lazy(self.model_class)
         if self.model_class is not None and isinstance(value, self.model_class._meta.pk.model):  # type: ignore
-            return getattr(value, self.autocomplete_property)
+            return self.field_type(getattr(value, self.autocomplete_property))
         else:  # nocv
             # Uses only if value got from `.values()`
             return value  # type: ignore

@@ -596,15 +596,6 @@ except ImportError:  # nocv
     pass
 RPC_ENABLED: bool = has_django_celery_beat
 
-# :docs:
-HAS_DOCS: bool = False
-try:
-    import docs
-    HAS_DOCS = True
-except ImportError:  # nocv
-    pass
-
-
 # Applications definition
 ##############################################################
 INSTALLED_APPS: _t.List[_t.Text] = [
@@ -626,9 +617,6 @@ INSTALLED_APPS += [
     'rest_framework.authtoken',
     'django_filters',
 ]
-
-if HAS_DOCS:
-    INSTALLED_APPS.append('docs')
 
 INSTALLED_APPS += ['drf_yasg']
 
@@ -859,8 +847,10 @@ if not LOCALRUN:
 # http://django-docs.readthedocs.io/en/latest/#docs-access-optional
 ##############################################################
 DOCS_ROOT: _t.Text = os.path.join(BASE_DIR, 'doc/html')
-DOCS_ACCESS: _t.Text = 'public'
 DOC_URL: _t.Text = "/docs/"
+
+# :docs:
+HAS_DOCS: bool = os.path.exists(DOCS_ROOT)
 
 if HAS_DOCS:
     EXCLUDE_FROM_MINIFYING.append(DOC_URL.lstrip('/'))

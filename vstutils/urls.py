@@ -58,5 +58,11 @@ if settings.STATIC_URL.startswith('/'):  # pragma: no branch
     urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
 if settings.MEDIA_URL.startswith('/') and settings.MEDIA_ROOT:
     urlpatterns += static(settings.MEDIA_URL, view=serve, document_root=settings.MEDIA_ROOT)  # nocv
-if 'docs' in settings.INSTALLED_APPS:  # nocv
-    urlpatterns += [path(f'{doc_url}', include(('docs.urls', settings.VST_PROJECT), namespace='docs'))]
+if settings.HAS_DOCS:  # nocv
+    urlpatterns +=  [
+        path(
+            f'{settings.DOC_URL[1:]}',
+            view=serve,
+            kwargs={'path': 'index.html', 'document_root': settings.DOCS_ROOT}
+        ),
+    ] + static(settings.DOC_URL, view=serve, document_root=settings.DOCS_ROOT)

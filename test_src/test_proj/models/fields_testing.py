@@ -1,10 +1,12 @@
 import io
+import uuid
 
 from django.db import models
 from django.http.response import FileResponse
 
 from vstutils.api import fields, filters, actions
-from vstutils.models import BModel
+from vstutils.models import BModel, BaseModel
+from vstutils.models import fields as model_fields
 from vstutils.api.serializers import VSTSerializer, BaseSerializer
 from vstutils.api.fields import (
     FkModelField,
@@ -259,3 +261,11 @@ class ModelWithCrontabField(BModel):
         _override_detail_fields = _override_list_fields = {
             'cron': CrontabField()
         }
+
+
+class ModelWithUuidPk(BaseModel):
+    id = models.UUIDField(primary_key=True, db_index=True, default=uuid.uuid4)
+
+
+class ModelWithUuidFK(BModel):
+    fk = model_fields.FkModelField(ModelWithUuidPk, on_delete=models.CASCADE)
