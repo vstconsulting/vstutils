@@ -1,6 +1,10 @@
 # pylint: disable=django-not-available,import-outside-toplevel
 import os
 import sys
+import functools
+
+import orjson
+
 
 _default_settings = {
     # vstutils settings for generate settings
@@ -31,7 +35,7 @@ def prepare_environment(default_settings=None, **kwargs):
 def cmd_execution(*args, **kwargs):
     # pylint: disable=unused-variable
     """
-    Main function to executes from cmd. Emulates django-admin.py execution.
+    Main function to execute from cmd. Emulates django-admin.py execution.
     :param kwargs: overrided env-settings
     :rtype: None
     """
@@ -51,8 +55,20 @@ def get_celery_app(name=None, **kwargs):  # nocv
     :return: Celery-app object
     """
     from celery import Celery
+    from kombu.serialization import register as serialize_registrator
+    from .api.renderers import ORJSONRenderer
     prepare_environment(**kwargs)
     name = name or os.getenv("VST_PROJECT")
+
+    # Override json encoder/decoder for tasks
+    json_encoder = functools.partial(ORJSONRenderer().render, media_type=ORJSONRenderer.media_type)
+    serialize_registrator(
+        'json',
+        encoder=lambda x: json_encoder(x).decode('utf-8'),
+        decoder=orjson.loads,
+        content_type=ORJSONRenderer.media_type
+    )
+
     celery_app = Celery(name)
     celery_app.config_from_object('django.conf:settings', namespace='CELERY')
     celery_app.autodiscover_tasks()

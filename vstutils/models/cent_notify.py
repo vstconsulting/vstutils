@@ -1,6 +1,7 @@
 # cython: binding=True
 import typing as _t
 import logging
+import json
 
 import orjson
 from django.db.models import signals
@@ -14,6 +15,11 @@ from .model import BaseModel
 from ..api.renderers import ORJSONRenderer
 
 logger = logging.getLogger('vstutils')
+
+
+class JsonEncoder(json.JSONEncoder):
+    def default(self, o):
+        return str(o)  # nocv
 
 
 class Notificator:
@@ -51,6 +57,8 @@ class Notificator:
     def get_client(self):
         centrifugo_client_kwargs = {**settings.CENTRIFUGO_CLIENT_KWARGS}
         centrifugo_client_kwargs.pop('token_hmac_secret_key', None)
+        if 'json_encoder' not in centrifugo_client_kwargs:
+            centrifugo_client_kwargs['json_encoder'] = JsonEncoder
         logger.debug(f"Getting Centrifugo client with kwargs: {centrifugo_client_kwargs}")
         return self.client_class(**centrifugo_client_kwargs)
 

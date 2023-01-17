@@ -9,7 +9,7 @@ class BaseCreateHostTask(TaskClass):
 
 
 class CreateHostTask(BaseCreateHostTask, uniq=True):
-    pass
+    serializer = 'json'
 
 
 class InheritCreateHostTask(CreateHostTask):

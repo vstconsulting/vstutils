@@ -164,7 +164,7 @@ class Command(BaseCommand):
         if settings.MEDIA_URL.startswith('/') and settings.MEDIA_ROOT:
             cmd += ['--static-map', f"{settings.MEDIA_URL}={settings.MEDIA_ROOT}"]
 
-        if 'docs' in settings.INSTALLED_APPS and getattr(settings, 'DOCS_ACCESS', 'public') == 'public':
+        if settings.HAS_DOCS:
             cmd += ['--static-map', f"{settings.DOC_URL}={settings.DOCS_ROOT}"]
 
         # Append uwsgi configs.

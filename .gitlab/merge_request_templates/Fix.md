@@ -1,10 +1,10 @@
 # FIX: description
 
 ### BREAKING CHANGES:
-*  What you should do for fix it in your projects?
+* What you should do for fix it in your projects?
 
 ### Changelog:
-*  What was done?
+* What was done?
 
 Parsed bundle size: 0.00 MB. (not changed)
 
