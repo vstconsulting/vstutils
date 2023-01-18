@@ -1,16 +1,31 @@
 import $ from 'jquery';
-import { BulkType, HttpMethods, makeQueryString, objectToFormData, RequestTypes } from '../utils';
-import { StatusError, apiConnector, APIResponse } from '../api';
+
+import { apiConnector, APIResponse, StatusError } from '@/vstutils/api';
+import { createInstancesList } from '@/vstutils/models';
+import { BulkType, HttpMethods, makeQueryString, objectToFormData, RequestTypes } from '@/vstutils/utils';
+
+import type { RequestType, HttpMethod, InnerData, RepresentData } from '@/vstutils/utils';
+import type { InstancesList, Model } from '@/vstutils/models';
+import type { Field } from '@/vstutils/fields/base';
+import type { ListResponseData } from './types';
+import { fetchInstances } from '@/vstutils/fetch-values';
+
+const REQUEST_MODEL = 0;
+const RESPONSE_MODEL = 1;
+
+type ModelType = typeof REQUEST_MODEL | typeof RESPONSE_MODEL;
 
 /**
  * Error that will be thrown if given instance has not appropriate model.
  */
 export class WrongModelError extends Error {
-    constructor(expectedModel, actualInstance) {
+    constructor(expectedModel: typeof Model, actualInstance: typeof Model) {
+        // @ts-expect-error Model has no types
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         super(`Wrong model used. Expected: ${expectedModel.name}. Actual: ${actualInstance._name}.`);
     }
 
-    static checkModel(model, instance) {
+    static checkModel(model: typeof Model, instance: Model) {
         if (!(instance instanceof model)) {
             throw new WrongModelError(model, instance);
         }
@@ -19,21 +34,29 @@ export class WrongModelError extends Error {
 
 const NOT_PUT_IN_EXTRA = ['results'];
 
-/**
- * @typedef {Object.<RequestType, (Function|Function[])>} ModelsConfiguration
- */
+type ModelsConfiguration = Record<RequestType, typeof Model | [typeof Model, typeof Model] | undefined>;
 
-/**
- * Base QuerySet class.
- */
-export default class QuerySet {
-    /**
-     * @param {string} pattern - Must be without leading and ending slashes
-     * @param {ModelsConfiguration} models - Models classes
-     * @param {Object} query - Object with query parameters
-     * @param {Array<BaseField>} pathParams - Object that describes path parameters
-     */
-    constructor(pattern, models, query = {}, pathParams = []) {
+export class QuerySet {
+    _url: string | null;
+    pattern: string;
+    models: ModelsConfiguration;
+
+    pathParams: Field[];
+    pathParamsValues: Record<string, unknown>;
+
+    query: Record<string, unknown>;
+
+    cache: unknown;
+
+    listSubscriptionLabels: string[];
+    prefetchEnabled: boolean;
+
+    constructor(
+        pattern: string,
+        models: ModelsConfiguration,
+        query: Record<string, unknown> = {},
+        pathParams: Field[] = [],
+    ) {
         this._url = null;
         this.pattern = pattern;
         this.pathParams = pathParams;
@@ -55,9 +78,12 @@ export default class QuerySet {
         }
         let url = this.pattern;
         for (const param of this.pathParams) {
-            let value = param.toInner(this.pathParamsValues);
+            const value = param.toInner(this.pathParamsValues as RepresentData);
             if (value !== undefined && value !== null) {
-                url = url.replace(`{${param.name}}`, param.toInner(this.pathParamsValues));
+                url = url.replace(
+                    `{${param.name}}`,
+                    param.toInner(this.pathParamsValues as RepresentData) as string,
+                );
             }
         }
         return url;
@@ -72,7 +98,7 @@ export default class QuerySet {
         }
     }
 
-    formatPath(pathParamsValues) {
+    formatPath(pathParamsValues: Record<string, unknown>) {
         return this.clone({ pathParamsValues });
     }
 
@@ -83,17 +109,15 @@ export default class QuerySet {
      *
      * Order used to determine model class:
      * `PARTIAL_UPDATE` / `UPDATE` -> `CREATE` -> `RETRIEVE` -> `LIST`
-     *
-     * @param {RequestType} operation
-     * @param {number} modelType - 0 for request and 1 for response
-     * @return {typeof Model|null}
      */
-    getModelClass(operation, modelType = 1) {
-        if (this.models[operation]) {
-            if (Array.isArray(this.models[operation])) {
-                return this.models[operation][modelType];
+    getModelClass(operation: RequestType, modelType: ModelType = RESPONSE_MODEL): typeof Model | null {
+        const models = this.models[operation];
+
+        if (models) {
+            if (Array.isArray(models)) {
+                return models[modelType];
             }
-            return this.models[operation];
+            return models;
         }
 
         switch (operation) {
@@ -111,26 +135,31 @@ export default class QuerySet {
     }
 
     /**
-     * Method that returns request model for given operation
-     * @param {RequestType} operation
-     * @return {Function|null}
+     * Method that returns request model for given operation.
+     * Throws error if no model found.
      */
-    getRequestModelClass(operation) {
-        return this.getModelClass(operation, 0);
+    getRequestModelClass(operation: RequestType): typeof Model {
+        const model = this.getModelClass(operation, REQUEST_MODEL);
+        if (!model) {
+            throw new Error(`No request model for operation ${operation} on path ${this.url}`);
+        }
+        return model;
     }
 
     /**
-     * Method that returns response model for given operation
-     * @param {RequestType} operation
-     * @return {typeof Model|null}
+     * Method that returns response model for given operation.
+     * Throws error if no model found.
      */
-    getResponseModelClass(operation) {
-        return this.getModelClass(operation, 1);
+    getResponseModelClass(operation: RequestType): typeof Model {
+        const model = this.getModelClass(operation, RESPONSE_MODEL);
+        if (!model) {
+            throw new Error(`No request model for operation ${operation} on path ${this.url}`);
+        }
+        return model;
     }
 
     /**
      * Getter that returns queryset urls as string array
-     * @return {string[]}
      */
     getDataType() {
         return this.url.replace(/^\/|\/$/g, '').split('/');
@@ -138,12 +167,11 @@ export default class QuerySet {
 
     /**
      * Method, that returns clone (new QuerySet instance) of current QuerySet.
-     * @param {object} props Object with properties, that should be rewritten in clone.
-     * @param {boolean} save_cache If true, cache of current QuerySet will be saved in clone.
-     * @return {QuerySet} Clone - new QuerySet instance.
+     * @param props Object with properties, that should be rewritten in clone.
+     * @param save_cache If true, cache of current QuerySet will be saved in clone.
      */
-    clone(props = {}, save_cache = false) {
-        const clone = Object.create(Object.getPrototypeOf(this));
+    clone(props: Partial<{ [K in keyof QuerySet]: QuerySet[K] }> = {}, save_cache = false): QuerySet {
+        const clone = Object.create(Object.getPrototypeOf(this) as object) as QuerySet;
 
         $.extend(true, clone, this);
         Object.assign(clone, props);
@@ -156,8 +184,7 @@ export default class QuerySet {
     /**
      * Method, that returns copy (new QuerySet instance) of current QuerySet,
      * with cache of current QuerySet.
-     * @param {object} props Object with properties, that should be rewritten in copy instance.
-     * @return {object} Copy - new QuerySet instance.
+     * @param props Object with properties, that should be rewritten in copy instance.
      */
     copy(props = {}) {
         return this.clone(props, true);
@@ -176,7 +203,7 @@ export default class QuerySet {
      * according to which Model instances list should be sorted.
      * @return {QuerySet}
      */
-    filter(filters) {
+    filter(filters: Record<string, unknown>) {
         return this.clone({ query: $.extend(true, {}, this.query, filters) });
     }
 
@@ -185,25 +212,23 @@ export default class QuerySet {
      * @param {object} filters Object with filters(key, value),
      * according to which some instances should be excluded from Model instances list.
      */
-    exclude(filters) {
-        let ecd_filters = {};
-        for (let [key, value] of Object.entries(filters)) {
-            let ecd_key = key.indexOf('__not') === -1 ? key + '__not' : key;
+    exclude(filters: Record<string, unknown>) {
+        const ecd_filters: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(filters)) {
+            const ecd_key = !key.includes('__not') ? key + '__not' : key;
             ecd_filters[ecd_key] = value;
         }
         return this.clone({ query: $.extend(true, {}, this.query, ecd_filters) });
     }
 
-    _getDetailPath(id) {
+    _getDetailPath(id: string | number) {
         return [...this.getDataType(), id];
     }
 
-    /**
-     * Method, that returns promise with Model instance.
-     * @param {string | number | undefined} id
-     * @return {Promise.<Model>}
-     */
-    async get(id, pathParamsValues = null) {
+    async get(
+        id: string | number | undefined,
+        pathParamsValues: Record<string, unknown> | null = null,
+    ): Promise<Model> {
         if (pathParamsValues) {
             return this.clone({ pathParamsValues }).get(id);
         }
@@ -213,7 +238,7 @@ export default class QuerySet {
         if (id === undefined) {
             instance = await this.getOne();
         } else {
-            const response = await this.execute({
+            const response = await this.execute<InnerData>({
                 method: HttpMethods.GET,
                 path: this._getDetailPath(id),
                 query: this.query,
@@ -223,16 +248,17 @@ export default class QuerySet {
             instance._response = response;
         }
 
-        await this._executeAfterInstancesFetchedHooks([instance], model);
+        if (this.prefetchEnabled) {
+            await fetchInstances([instance], { isPrefetch: true });
+        }
 
         return instance;
     }
 
     /**
      * Method returns one instance, if more than one instance found error is thrown
-     * @return {Promise<Model>}
      */
-    async getOne(pathParamsValues = null) {
+    async getOne(pathParamsValues?: Record<string, unknown>): Promise<Model> {
         if (pathParamsValues) {
             return this.clone({ pathParamsValues }).getOne();
         }
@@ -241,9 +267,9 @@ export default class QuerySet {
         const useBulk = retrieveModel.shouldUseBulk(HttpMethods.GET);
 
         if (useBulk && !listModelSameAsRetrieve) {
-            const pkFieldName = retrieveModel.pkField.name;
+            const pkFieldName = retrieveModel.pkField!.name;
             const path = this.getDataType();
-            const results = await apiConnector.sendBulk([
+            const results = await apiConnector.sendBulk<[ListResponseData, InnerData]>([
                 { method: HttpMethods.GET, path, query: makeQueryString({ ...this.query, limit: 1 }, true) },
                 { method: HttpMethods.GET, path: [...path, `<<0[data][results][0][${pkFieldName}]>>`] },
             ]);
@@ -256,12 +282,14 @@ export default class QuerySet {
             }
             const instance = new retrieveModel(results[1].data, this);
 
-            await this._executeAfterInstancesFetchedHooks([instance], retrieveModel);
+            if (this.prefetchEnabled) {
+                await fetchInstances([instance], { isPrefetch: true });
+            }
 
             return instance;
         } else {
             const items = await this.filter({ limit: 1 }).items();
-            if (items.extra.count > 1) {
+            if (items.extra.count && items.extra.count > 1) {
                 throw new Error('More then one entity found');
             }
             if (!items.length) {
@@ -270,7 +298,7 @@ export default class QuerySet {
             if (listModelSameAsRetrieve) {
                 return items[0];
             }
-            return this.get(items[0].getPkValue());
+            return this.get(items[0].getPkValue()!);
         }
     }
 
@@ -279,59 +307,49 @@ export default class QuerySet {
      * appropriate for filters from 'this.query' property.
      * Method, returns promise, that returns list of Model instances,
      * if api request was successful.
-     *
-     * @returns {Promise<Model[]>}
      */
-    async items(invalidateCache = true, pathParamsValues = null) {
+    async items(invalidateCache = true, pathParamsValues?: Record<string, unknown>): Promise<InstancesList> {
         if (pathParamsValues) {
             return this.clone({ pathParamsValues }).items(invalidateCache);
         }
-        if (!invalidateCache && this.cache) return this.cache;
+        if (!invalidateCache && this.cache) return this.cache as InstancesList;
 
         const model = this.getResponseModelClass(RequestTypes.LIST);
 
-        const response = await this.execute({
+        const response = await this.execute<ListResponseData<InnerData>>({
             method: HttpMethods.GET,
             path: this.getDataType(),
             query: this.query,
             useBulk: model.shouldUseBulk(HttpMethods.GET),
         });
 
-        const instances = response.data.results.map((item) => new model(item, this.clone()));
+        const instances: InstancesList = createInstancesList(
+            response.data.results.map((item) => new model(item, this.clone())),
+        );
 
-        await this._executeAfterInstancesFetchedHooks(instances, model);
-
-        instances.extra = {};
-        for (let key of Object.keys(response.data)) {
+        for (const key of Object.keys(response.data)) {
             if (!NOT_PUT_IN_EXTRA.includes(key)) {
                 instances.extra[key] = response.data[key];
             }
         }
+        instances.total = instances.extra.count;
 
-        instances.total = response.data.count;
+        if (this.prefetchEnabled) {
+            await fetchInstances(instances, { isPrefetch: true });
+        }
+
         return instances;
     }
 
-    _executeAfterInstancesFetchedHooks(instances, model) {
-        const fields = Array.from(model.fields.values());
-
-        // Execute fields hooks
-        return Promise.all(fields.map((field) => field.afterInstancesFetched(instances, this)));
-    }
-
-    _getCreateBulkPath(pkFieldName) {
+    _getCreateBulkPath(pkFieldName: string) {
         return [...this.getDataType(), `<<0[data][${pkFieldName}]>>`];
     }
 
     /**
      * Method, that sends query to API for creation of new Model instance
      * and returns promise, that returns Model instance, if query response was successful.
-     *
-     * @param {Model} instance - new model data.
-     * @param {string} method - Http method.
-     * @returns {Promise.<Model>}
      */
-    async create(instance, method = HttpMethods.POST) {
+    async create(instance: Model, method: HttpMethod = HttpMethods.POST) {
         const createModel = this.getRequestModelClass(RequestTypes.CREATE);
         WrongModelError.checkModel(createModel, instance);
         const retrieveModel = this.getResponseModelClass(RequestTypes.RETRIEVE);
@@ -343,15 +361,15 @@ export default class QuerySet {
             createModel.shouldUseBulk(method) &&
             retrieveModel.shouldUseBulk(HttpMethods.GET)
         ) {
-            const pkFieldName = retrieveModel.pkField.name;
-            const results = await apiConnector.sendBulk([
+            const pkFieldName = retrieveModel.pkField!.name;
+            const results = await apiConnector.sendBulk<[Record<string, unknown>, InnerData]>([
                 { method, path: dataType, data: instance._getInnerData() },
                 { method: HttpMethods.GET, path: this._getCreateBulkPath(pkFieldName) },
             ]);
             APIResponse.checkStatus(results[0].status, results[0].data);
             return new retrieveModel(results[1].data, this);
         } else {
-            const response = await this.execute({
+            const response = await this.execute<InnerData>({
                 method,
                 data: instance,
                 path: dataType,
@@ -362,20 +380,19 @@ export default class QuerySet {
             if (createModelSameAsRetrieve) {
                 return createdInstance;
             }
-            return this.get(createdInstance.getPkValue());
+            return this.get(createdInstance.getPkValue()!);
         }
     }
 
     /**
      * Method, that sends api request for model update
-     *
-     * @param {Model} updatedInstance
-     * @param {Model[]} [instances] - Model instances to update.
-     * @param {HttpMethod} [method] - Http method, PATCH by default.
-     * @param {null | string[]} fields
-     * @returns {Array.<Promise<Model>>}
      */
-    async update(updatedInstance, instances, method = HttpMethods.PATCH, fields = null) {
+    async update(
+        updatedInstance: Model,
+        instances?: Model[],
+        method: HttpMethod = HttpMethods.PATCH,
+        fields?: string[],
+    ) {
         if (instances === undefined) instances = await this.items();
 
         const requestType = method === HttpMethods.PATCH ? RequestTypes.PARTIAL_UPDATE : RequestTypes.UPDATE;
@@ -394,7 +411,7 @@ export default class QuerySet {
             modelRetrieve.shouldUseBulk(HttpMethods.GET)
         ) {
             const requests = instances.flatMap((instance) => {
-                const path = this._getDetailPath(instance.getPkValue());
+                const path = this._getDetailPath(instance.getPkValue()!);
                 return [
                     { method, path, data },
                     { method: HttpMethods.GET, path },
@@ -404,14 +421,14 @@ export default class QuerySet {
             return (await apiConnector.sendBulk(requests, BulkType.TRANSACTIONAL))
                 .map((response) => new APIResponse(response))
                 .filter((_, idx) => idx % 2 !== 0)
-                .map((response) => new modelRetrieve(response.data, this));
+                .map((response) => new modelRetrieve(response.data as InnerData, this));
         } else {
             return Promise.all(
                 instances.map(async (instance) => {
-                    const response = await this.execute({
+                    const response = await this.execute<InnerData>({
                         method,
                         data,
-                        path: this._getDetailPath(instance.getPkValue()),
+                        path: this._getDetailPath(instance.getPkValue()!),
                         query: this.query,
                         useBulk: modelUpdate.shouldUseBulk(method),
                     });
@@ -424,27 +441,23 @@ export default class QuerySet {
     /**
      * Method, that deletes provided instances or all instances that match current queryset items().
      * This method is expected to be called after instance filtering.
-     *
-     * @param {Model[]} instances
-     * @param {boolean} purge
-     * @returns {Promise}
      */
-    async delete(instances = undefined, purge = false) {
+    async delete(instances?: Model[], purge = false) {
         if (instances === undefined) instances = await this.items();
 
-        const retrieveModel = this.getResponseModelClass(RequestTypes.RETRIEVE);
+        const retrieveModel = this.getModelClass(RequestTypes.RETRIEVE, RESPONSE_MODEL);
         const useBulk = retrieveModel ? retrieveModel.shouldUseBulk(HttpMethods.DELETE) : true;
 
-        const headers = {};
+        const headers: Record<string, unknown> = {};
         if (purge) {
-            headers['HTTP_X_Purge_Nested'] = String(purge);
+            headers.HTTP_X_Purge_Nested = String(purge);
         }
 
         return Promise.all(
             instances.map((instance) => {
                 return this.execute({
                     method: HttpMethods.DELETE,
-                    path: this._getDetailPath(instance.getPkValue()),
+                    path: this._getDetailPath(instance.getPkValue()!),
                     headers,
                     useBulk,
                 });
@@ -454,42 +467,39 @@ export default class QuerySet {
 
     /**
      * Function that checks if given object is instance of Model
-     * @param {*} obj
-     * @return {boolean}
      */
-    _isModelInstance(obj) {
-        return obj && typeof obj._getInnerData === 'function';
+    _isModelInstance(obj?: object): obj is Model {
+        return Boolean(obj && '_getInnerData' in obj && typeof obj._getInnerData === 'function');
     }
 
     /**
      * Method, that sends API request to ApiConnector.
-     *
-     * @param {Object} req - Request parameters.
-     * @param {string} req.method - Http method.
-     * @param {string=} req.version - API version.
-     * @param {(string|string[])} req.path
-     * @param {(string|Object|URLSearchParams)=} req.query - URL query params.
-     * @param {Model=} req.data
-     * @param {(string|Object)=} req.headers
-     * @param {boolean=} req.useBulk
-     * @returns {Promise.<APIResponse>}
      */
-    async execute(req) {
+    async execute<T>(req: InternalRequest) {
         const dataIsModel = this._isModelInstance(req.data);
 
-        if (req.useBulk === undefined) {
-            req.useBulk = dataIsModel ? req.data.constructor.shouldUseBulk(req.method) : true;
-        }
+        const preparedReq: Parameters<typeof apiConnector.makeRequest>[0] = {
+            // @ts-expect-error Model has no types
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+            useBulk: req.useBulk ?? (dataIsModel ? req.data.constructor.shouldUseBulk(req.method) : true),
+            method: req.method,
+            path: req.path,
+            query: req.query,
+            headers: req.headers,
+            version: req.version,
+        };
 
         if (req.data !== undefined) {
-            const rawData = dataIsModel ? req.data._getInnerData() : req.data;
+            const rawData = dataIsModel
+                ? (req.data as Model)._getInnerData()
+                : (req.data as Record<string, unknown>);
             if (req.useBulk) {
-                req.data = rawData;
+                preparedReq.data = rawData;
             } else {
-                req.data = objectToFormData(rawData);
+                preparedReq.data = objectToFormData(rawData);
             }
         }
-        return apiConnector.makeRequest(req);
+        return apiConnector.makeRequest<T>(preparedReq);
     }
 
     /**
@@ -499,3 +509,15 @@ export default class QuerySet {
         this.cache = undefined;
     }
 }
+
+interface InternalRequest {
+    method: HttpMethod;
+    path: string | (string | number)[];
+    query?: string | Record<string, unknown> | URLSearchParams;
+    data?: Model | Record<string, unknown>;
+    headers?: Record<string, unknown>;
+    useBulk?: boolean;
+    version?: string;
+}
+
+export default QuerySet;

@@ -10,6 +10,7 @@ import type { NamedFile } from '../named-binary-file';
 import { ensureMediaTypeExists } from '../named-binary-file';
 import type { FileFieldXOptions, IFileField } from '../file';
 import { parseAllowedMediaTypes } from '../file';
+import type { InnerData } from '@/vstutils/utils';
 
 class MultipleNamedBinaryFileField
     extends BaseField<NamedFile[] | string, NamedFile[], FileFieldXOptions | undefined>
@@ -61,8 +62,8 @@ class MultipleNamedBinaryFileField
         return value;
     }
 
-    toRepresent(data: Record<string, unknown>) {
-        let value = this.getDataInnerValue(data);
+    toRepresent(data: InnerData) {
+        let value = this.getValue(data);
         if (typeof value === 'string') {
             value = JSON.parse(value) as NamedFile[];
         }

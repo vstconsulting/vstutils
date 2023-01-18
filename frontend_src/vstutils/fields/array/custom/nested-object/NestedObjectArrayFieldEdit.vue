@@ -38,6 +38,7 @@
     import { computed, ref } from 'vue';
     import { Card } from '@/vstutils/components';
     import { ModelFields } from '@/vstutils/components/page';
+    import { emptyRepresentData } from '@/vstutils/utils';
     import type { NestedObjectField } from '@/vstutils/fields/nested-object';
     import type ArrayField from '../../ArrayField';
     import type { ExtractRepresent } from '@/vstutils/fields/base';
@@ -54,7 +55,7 @@
         (e: 'set-value', value?: Value): void;
     }>();
 
-    const newItemData = ref<Record<string, unknown>>({});
+    const newItemData = ref(emptyRepresentData());
     const items = computed(() => {
         return (props.value ?? []).map((data) => {
             return {
@@ -68,7 +69,7 @@
     function addItem() {
         try {
             emit('set-value', [newItemData.value, ...(props.value ?? [])]);
-            newItemData.value = {};
+            newItemData.value = emptyRepresentData();
         } catch (e) {
             console.error(e);
         }

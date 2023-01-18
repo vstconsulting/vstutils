@@ -11,6 +11,7 @@ import type {
     FieldXOptions,
 } from '@/vstutils/fields/base';
 import type { FieldDefinition } from './FieldsResolver';
+import type { InnerData } from '../utils';
 
 const StaticValueFieldMixin = defineFieldComponent<StaticValueField>((props, { listeners }) => {
     const staticValue = computed<ExtractRepresent<StaticValueField> | null | undefined>(() => {
@@ -62,7 +63,7 @@ export class StaticValueField<TField extends Field = Field> extends BaseField<
         return [StaticValueFieldMixin];
     }
 
-    toRepresent(data: Record<string, unknown>): ExtractRepresent<TField> | null | undefined {
+    toRepresent(data: InnerData): ExtractRepresent<TField> | null | undefined {
         return this.realField!.toRepresent({ ...data, [this.name]: this.staticValue }) as
             | ExtractRepresent<TField>
             | null

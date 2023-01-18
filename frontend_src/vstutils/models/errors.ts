@@ -2,8 +2,8 @@ import type { Field } from '@/vstutils/fields/base/BaseField';
 import { i18n } from '@/vstutils/translation';
 import { escapeHtml } from '@/vstutils/utils';
 
-interface FieldValidationErrorInfo {
-    field: Field<any, any>;
+export interface FieldValidationErrorInfo {
+    field: Field;
     message: string | Record<string, unknown>;
 }
 

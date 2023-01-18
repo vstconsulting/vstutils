@@ -1,13 +1,12 @@
 import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
 import { BaseField } from '@/vstutils/fields/base';
-import type { Model } from '@/vstutils/models';
-import type { QuerySet } from '@/vstutils/querySet';
 import { onAppAfterInit } from '@/vstutils/signals';
 
 import DynamicFieldMixin from './DynamicFieldMixin.vue';
 
 import type { FieldDefinition } from '@/vstutils/fields/FieldsResolver';
 import type { PageView, View } from '@/vstutils/views';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
 
 interface DynamicFieldXOptions extends FieldXOptions {
     source_view?: string;
@@ -79,34 +78,14 @@ export class DynamicField
         return [DynamicFieldMixin];
     }
 
-    toInner(data = {}) {
+    toInner(data: RepresentData) {
         return this.getRealField(data).toInner(data);
     }
-    toRepresent(data = {}) {
+    toRepresent(data: InnerData) {
         return this.getRealField(data).toRepresent(data);
     }
     validateValue(data: Record<string, unknown>) {
         return this.getRealField(data).validateValue(data);
-    }
-    afterInstancesFetched(instances: Model[], queryset: QuerySet): Promise<void> {
-        const fields = new Map<Field, Model[]>();
-
-        for (const instance of instances) {
-            const realField = this.getRealField(instance._data);
-            const sameField = Array.from(fields.keys()).find((field) => realField.isEqual(field));
-
-            if (sameField) {
-                fields.get(sameField)!.push(instance);
-            } else {
-                fields.set(realField, [instance]);
-            }
-        }
-
-        return Promise.all(
-            Array.from(fields.entries()).map(([field, instances]) =>
-                field.afterInstancesFetched(instances, queryset),
-            ),
-        ) as unknown as Promise<void>;
     }
     /**
      * Method, that returns Array with names of parent fields -
@@ -191,7 +170,7 @@ export class DynamicField
         return field;
     }
 
-    parseFieldError(data: Record<string, unknown>, instanceData: Record<string, unknown> = {}) {
+    parseFieldError(data: Record<string, unknown>, instanceData: InnerData) {
         return this.getRealField(instanceData).parseFieldError(data, instanceData);
     }
 

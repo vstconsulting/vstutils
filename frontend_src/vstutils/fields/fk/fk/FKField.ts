@@ -1,19 +1,19 @@
-import type { Schema } from 'swagger-schema-official';
-
-import { AggregatedQueriesExecutor } from '@/vstutils/AggregatedQueriesExecutor.js';
 import { BaseField } from '@/vstutils/fields/base';
 import { onAppBeforeInit } from '@/vstutils/signals';
 import { i18n } from '@/vstutils/translation';
+import type { RepresentData } from '@/vstutils/utils';
 import { formatPath, getApp, getDependenceValueAsString, RequestTypes } from '@/vstutils/utils';
 
 import FKFieldMixin from './FKFieldMixin';
 
-import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import type { ComponentOptions } from 'vue';
+import type { ModelDefinition } from '@/vstutils/AppConfiguration';
+import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
 import type { DetailPageStore } from '@/vstutils/store/page';
 import type { PageView } from '@/vstutils/views';
 import type { Model } from '@/vstutils/models';
 import type { QuerySet } from '@/vstutils/querySet';
-import type { ComponentOptions } from 'vue';
+import type { IFetchableField } from '@/vstutils/fetch-values';
 
 const dependenceTemplateRegexp = /<<\w+>>/g;
 
@@ -66,7 +66,7 @@ export interface FKFieldXOptions extends FieldXOptions {
     filter_name?: string;
     filter_field_name?: string;
     querysets?: Map<string | undefined, QuerySet[]> | Record<string, QuerySet[]>;
-    model?: Schema;
+    model?: ModelDefinition;
     list_paths?: string[];
     showLoader?: boolean;
 }
@@ -74,11 +74,9 @@ export interface FKFieldXOptions extends FieldXOptions {
 export type TInner = number | string;
 export type TRepresent = number | string | Model;
 
-export class FKField
-    extends BaseField<TInner, TRepresent, FKFieldXOptions>
-    implements Field<TInner, TRepresent, FKFieldXOptions>
-{
+export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> implements IFetchableField {
     static NOT_FOUND_TEXT = '[Object not found]';
+    readonly _canBeFetched = true;
 
     declare format: string;
 
@@ -150,11 +148,11 @@ export class FKField
         return null;
     }
 
-    toInner(data: Record<string, unknown>): TInner | undefined | null {
+    toInner(data: RepresentData): TInner | undefined | null {
         return this.getValueFieldValue(super.toInner(data)) as TInner | undefined | null;
     }
 
-    isSameValues(data1: Record<string, unknown>, data2: Record<string, unknown>) {
+    isSameValues(data1: RepresentData, data2: RepresentData) {
         let val1 = this.toInner(data1);
         if (val1 && typeof val1 === 'object') {
             val1 = val1[this.valueField];
@@ -173,7 +171,7 @@ export class FKField
         const { list_paths } = this.props;
 
         if (list_paths) {
-            querysets = list_paths.map((listPath) => this.app.views.get(listPath)!.objects.clone());
+            querysets = list_paths.map((listPath) => this.app.views.get(listPath)!.objects!.clone());
             if (!this.fkModel) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 this.fkModel = querysets[0]!.getResponseModelClass(RequestTypes.LIST);
@@ -197,13 +195,7 @@ export class FKField
         return queryset.clone({ url: formatPath(queryset.url, params) });
     }
 
-    async afterInstancesFetched(instances: Model[], qs: QuerySet) {
-        if (qs.prefetchEnabled && this.usePrefetch && this.fetchData) {
-            return this.prefetchValues(instances, this.app.store.page!.view.path);
-        }
-    }
-
-    protected getQuerySetForPrefetch(path: string) {
+    getValueFetchQs(path: string) {
         let qs = this.getAppropriateQuerySet({ path });
         if (qs) {
             return qs;
@@ -216,50 +208,6 @@ export class FKField
         }
 
         return;
-    }
-
-    prefetchValues(instances: Model[], path: string) {
-        const qs = this.getQuerySetForPrefetch(path);
-        if (!qs) return;
-        return this._fetchRelated(
-            instances.map((instance) => this._getValueFromData(instance._data) as TInner),
-            qs,
-        ).then((fetchedInstances) => {
-            for (let i = 0; i < fetchedInstances.length; i++) {
-                instances[i]._setFieldValue(this.name, fetchedInstances[i], true);
-            }
-        });
-    }
-
-    /**
-     * @param {Array<Object|number>} pks
-     * @param {QuerySet} qs
-     * @return {Promise<Model[]>}
-     */
-    _fetchRelated(
-        pks: (string | number | undefined | null | Model)[],
-        qs: QuerySet,
-    ): Promise<(Model | string | number | undefined | null)[]> {
-        const executor = new AggregatedQueriesExecutor(
-            qs.clone({ prefetchEnabled: false }),
-            this.filterName,
-            this.filterFieldName,
-        );
-        const promises = pks.map((pk) => {
-            if (typeof pk === 'number' || typeof pk === 'string') {
-                return executor.query(pk).catch(() => {
-                    const notFound = new this.fkModel!({
-                        [this.valueField]: pk,
-                        [this.viewField]: i18n.t(FKField.NOT_FOUND_TEXT),
-                    });
-                    notFound.__notFound = true;
-                    return notFound;
-                }) as Promise<Model>;
-            }
-            return Promise.resolve(pk);
-        });
-        void executor.execute();
-        return Promise.all(promises);
     }
 
     _resolveDependenceValue(key: string, data: Record<string, unknown>) {
@@ -288,7 +236,7 @@ export class FKField
      * Method that returns dependence filters. If null is returned it means that at least one of required
      * and non nullable fields is empty and field should be disabled.
      */
-    getDependenceFilters(data: Record<string, unknown>) {
+    getDependenceFilters(data: RepresentData) {
         const filters: Record<string, string | number> = {};
         for (const [fieldName, filter] of Object.entries(this.dependence)) {
             let dependenceValue = this._resolveDependenceValue(fieldName, data);
@@ -296,7 +244,7 @@ export class FKField
                 filters[filter] = dependenceValue;
                 continue;
             }
-            const field = this.model!.fields.get(fieldName) as Field;
+            const field = this.model!.fields.get(fieldName)!;
             dependenceValue = getDependenceValueAsString(field.toInner(data));
             if (dependenceValue) {
                 filters[filter] = dependenceValue;

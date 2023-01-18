@@ -1,4 +1,6 @@
 import type { Spec, Info, Schema } from 'swagger-schema-official';
+import type { FieldDefinition } from './fields/FieldsResolver';
+import type { HttpMethod } from './utils';
 
 declare global {
     interface Window {
@@ -43,9 +45,17 @@ export interface AppInfo extends Info {
     [key: string]: any;
 }
 
+export type ModelDefinition = Schema & {
+    properties?: Record<string, FieldDefinition>;
+    'x-properties-groups'?: Record<string, string[]>;
+    'x-view-field-name'?: string;
+    'x-non-bulk-methods'?: HttpMethod[];
+    'x-translate-model'?: string;
+};
+
 export interface AppSchema extends Spec {
     info: AppInfo;
-    definitions: Record<string, Schema>;
+    definitions: Record<string, ModelDefinition>;
     [key: string]: any;
 }
 

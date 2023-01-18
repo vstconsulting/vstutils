@@ -1,6 +1,5 @@
 import { computed, getCurrentInstance, readonly, ref, watch } from 'vue';
-import type { QuerySet } from '@/vstutils/querySet';
-
+import { fetchPKs } from '@/vstutils/fetch-values';
 import { getApp } from '@/vstutils/utils';
 
 import type { Ref } from 'vue';
@@ -18,11 +17,7 @@ export function useQuerySets(field: FKField, data: Record<string, unknown>) {
     return { querysets, queryset };
 }
 
-export function ensureValueFetched(
-    field: FKField,
-    queryset: QuerySet,
-    value: Ref<TRepresent | null | undefined>,
-) {
+export function ensureValueFetched(field: FKField, value: Ref<TRepresent | null | undefined>) {
     const vm = getCurrentInstance();
     const loading = ref(false);
 
@@ -34,7 +29,7 @@ export function ensureValueFetched(
             }
             loading.value = true;
             try {
-                const [instance] = await field._fetchRelated([value], queryset);
+                const [instance] = await fetchPKs([value], field);
                 if (instance && typeof instance === 'object') {
                     vm?.proxy.$emit('set-value', instance, { markChanged: false });
                 }

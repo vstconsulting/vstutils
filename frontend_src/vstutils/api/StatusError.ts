@@ -5,7 +5,7 @@ interface ErrorDetail {
 /**
  * Class for Errors connected with API requests.
  */
-export default class StatusError extends Error {
+export class StatusError extends Error {
     status: number;
     data: unknown;
     message: string;

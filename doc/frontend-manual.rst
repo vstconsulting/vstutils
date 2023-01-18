@@ -14,9 +14,8 @@ This flowchart shows how data goes though application from and to API.
       SMFetchData:::StoreModule --> SMUpdate(Store module action '.updateData'):::StoreModule --> QuerySet.get
       subgraph Queryset
       QuerySet.get -- HTTP Request to API --> NewModel(new Model)
-      NewModel -- Fk Field in Model --> QuerySet.executeAfterInstancesFetchedHooks --> Field.afterInstancesFetched(Field.afterInstancesFetched/FkField.prefetchValues)
+      NewModel -- Fk Field in Model --> fetchInstances --> AggregatedQueriesExecutor.execute --> QuerySet.get
       NewModel --> StoreSetInstance
-      Field.afterInstancesFetched --> AggregatedQueriesExecutor.execute --> QuerySet.get
       end
       StoreSetInstance -- Field.toRepresent --> FieldComponent.value
       FieldComponent.value:::Component --> Rendered(Resuslts rendered to page)

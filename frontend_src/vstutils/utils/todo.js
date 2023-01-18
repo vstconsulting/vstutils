@@ -5,7 +5,6 @@ import { i18n } from '@/vstutils/translation';
 import { getApp } from './app-helpers';
 import { LocalSettings } from './localSettings';
 
-export const EMPTY = Symbol('EMPTY');
 export const guiLocalSettings = new LocalSettings('guiLocalSettings');
 
 export function hasOwnProp(obj, prop) {
@@ -767,23 +766,6 @@ export function template(strings, ...keys) {
 }
 
 /**
- * @typedef {string} RequestType
- */
-
-/**
- * Enum for request types
- * @enum {RequestType}
- */
-export const RequestTypes = {
-    LIST: 'list',
-    RETRIEVE: 'retrieve',
-    CREATE: 'create',
-    UPDATE: 'update',
-    PARTIAL_UPDATE: 'partialUpdate',
-    REMOVE: 'remove',
-};
-
-/**
  * Enum for HTTP methods
  */
 export const FieldViews = {
@@ -809,28 +791,6 @@ export function formatPath(path, params, instance = null) {
     }
 
     return path;
-}
-
-/**
- * Method, that converts query object into string
- *
- * @param {(string|object|URLSearchParams)=} query
- * @param {boolean} useBulk - If false adds question mark (?) in front of string
- * @returns {string}
- */
-export function makeQueryString(query = undefined, useBulk = false) {
-    let queryStr = '';
-    if (typeof query === 'string') {
-        queryStr = new URLSearchParams(query).toString();
-    } else if (typeof query === 'object') {
-        queryStr = new URLSearchParams(Object.entries(query)).toString();
-    } else if (query instanceof URLSearchParams) {
-        queryStr = query.toString();
-    }
-
-    if (!useBulk && queryStr !== '') queryStr = `?${queryStr}`;
-
-    return queryStr;
 }
 
 export function copyToClipboard(value) {
@@ -1057,33 +1017,6 @@ export function iterFind(iterator, callbackFn) {
             return item;
         }
     }
-}
-
-/**
- * Function that wraps object in Proxy
- * @param {object} target
- * @param {string|symbol} propertyToProxy
- * @param {*} newValue
- * @return {any|boolean|symbol}
- */
-export function createPropertyProxy(target, propertyToProxy, newValue = EMPTY) {
-    let value = newValue === EMPTY ? Reflect.get(target, propertyToProxy) : newValue;
-
-    return new Proxy(target, {
-        get(target, property, receiver) {
-            if (property === propertyToProxy) {
-                return value;
-            }
-            return Reflect.get(target, property, receiver);
-        },
-        set(target, property, updatedValue, receiver) {
-            if (property === propertyToProxy) {
-                value = updatedValue;
-                return true;
-            }
-            return Reflect.set(target, property, updatedValue, receiver);
-        },
-    });
 }
 
 /**

@@ -63,7 +63,7 @@
         return '';
     });
 
-    const { loading } = ensureValueFetched(props.field, queryset.value!, toRef(props, 'value'));
+    const { loading } = ensureValueFetched(props.field, toRef(props, 'value'));
 </script>
 
 <style scoped>

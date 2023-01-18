@@ -26,11 +26,12 @@
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import { getApp, mergeDeep } from '@/vstutils/utils';
+    import { emptyRepresentData, getApp, mergeDeep } from '@/vstutils/utils';
     import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
     import ModelFields from '@/vstutils/components/page/ModelFields.vue';
     import type { PageView } from '@/vstutils/views';
     import type { DetailPageStore } from '@/vstutils/store/page';
+    import type { InnerData } from '@/vstutils/utils';
 
     const props = defineProps<{
         view: PageView;
@@ -38,7 +39,7 @@
 
     const modalRef = ref<any | null>(null);
 
-    let sandboxData = ref<Record<string, unknown>>({});
+    let sandboxData = ref(emptyRepresentData());
     const app = getApp();
     const store = app.store.page as DetailPageStore;
 
@@ -48,9 +49,7 @@
 
     function openModal() {
         modalRef.value.open();
-        sandboxData.value = new model.value(
-            mergeDeep({}, store.filters) as Record<string, unknown>,
-        )._getRepresentData();
+        sandboxData.value = new model.value(mergeDeep({}, store.filters) as InnerData)._getRepresentData();
     }
 
     function filter() {

@@ -1,15 +1,17 @@
-import type { Model } from '@/vstutils/models';
-import { signals } from '@/vstutils/signals';
 import { defineStore } from 'pinia';
-import type { ApiConnector } from '../api';
-import { mergeDeep, HttpMethods } from './../utils';
+import { signals } from '@/vstutils/signals';
+import { emptyRepresentData, HttpMethods, mergeDeep } from '@/vstutils/utils';
+
+import type { ApiConnector } from '@/vstutils/api';
+import type { Model } from '@/vstutils/models';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
 import type { SetFieldValueOptions } from '@/vstutils/fields/base';
 
 type Section = Record<string, unknown>;
 type Settings = Record<string, Section>;
 interface State {
     instance: Model;
-    settings: Settings;
+    settings: RepresentData<Settings>;
     originalSettings: Settings;
     changed: boolean;
 }
@@ -20,12 +22,12 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: typeof Mo
     defineStore('userSettings', {
         state: (): State => ({
             instance: new modelClass(),
-            settings: {},
-            originalSettings: {},
+            settings: emptyRepresentData<Settings>(),
+            originalSettings: emptyRepresentData<Settings>(),
             changed: false,
         }),
         actions: {
-            setSettings(settings: Settings) {
+            setSettings(settings: RepresentData<Settings>) {
                 this.settings = settings;
                 this.changed = false;
             },
@@ -39,17 +41,17 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: typeof Mo
                 this.originalSettings = mergeDeep({}, settings) as Settings;
             },
             rollback() {
-                this.settings = mergeDeep({}, this.originalSettings) as Settings;
+                this.settings = mergeDeep({}, this.originalSettings) as RepresentData<Settings>;
                 this.changed = false;
             },
-            setData(data: Settings) {
+            setData(data: InnerData<Settings>) {
                 const instance = new modelClass(data);
-                const representData = instance._getRepresentData() as Settings;
+                const representData = instance._getRepresentData() as RepresentData<Settings>;
                 this.setSettings(representData);
                 this.setOriginalSettings(representData);
             },
             async load() {
-                const { data } = await api.bulkQuery<Settings>({
+                const { data } = await api.bulkQuery<InnerData<Settings>>({
                     method: HttpMethods.GET,
                     path: USER_SETTINGS_PATH,
                 });
@@ -58,19 +60,19 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: typeof Mo
             async save() {
                 this.instance._validateAndSetData(this.settings);
                 const dataToSave = this.instance._getInnerData();
-                const { data } = (await api.bulkQuery({
+                const { data } = await api.bulkQuery<InnerData<Settings>>({
                     method: HttpMethods.PUT,
                     path: USER_SETTINGS_PATH,
                     data: dataToSave,
-                })) as { data: Settings };
-                this.setSettings(data);
+                });
+                this.setData(data);
             },
             setAndSave(section: string, options: { field: string; value: unknown; markChanged: boolean }) {
                 this.setValue(section, options);
                 return this.save();
             },
             async init() {
-                const { data } = await api.bulkQuery<Settings>({
+                const { data } = await api.bulkQuery<InnerData<Settings>>({
                     method: HttpMethods.GET,
                     path: USER_SETTINGS_PATH,
                 });

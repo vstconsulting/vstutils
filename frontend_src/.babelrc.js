@@ -5,7 +5,7 @@ if (process.env.APP_ENV === 'prod') {
                 '@babel/preset-env',
                 {
                     useBuiltIns: 'usage',
-                    corejs: { version: '3.20.3', proposals: true },
+                    corejs: { version: '3.27.1', proposals: true },
                 },
             ],
         ],

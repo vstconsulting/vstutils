@@ -1,29 +1,34 @@
-import { ref, computed } from 'vue';
-import type { Model } from '../models';
-import { ModelValidationError } from '../models';
-import type { PageEditView, PageNewView, PageView, ActionView, Action, ListView } from '../views';
-import { isInstancesEqual, RequestTypes, openPage, getApp } from '../utils';
-import { i18n } from '../translation';
-import { guiPopUp, pop_up_msg } from '../popUp';
-import type { Route } from 'vue-router';
-import type { InstancesList, BaseViewStore } from './helpers';
+import { computed, ref } from 'vue';
+
+import { createInstancesList, ModelValidationError } from '@/vstutils/models';
+import { guiPopUp, pop_up_msg } from '@/vstutils/popUp';
+import { i18n } from '@/vstutils/translation';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
+import { emptyInnerData } from '@/vstutils/utils';
+import { getApp, isInstancesEqual, openPage, RequestTypes } from '@/vstutils/utils';
+import { fetchInstances } from '@/vstutils/fetch-values';
 import {
-    useBasePageData,
-    useQuerySet,
-    useListFilters,
-    useSelection,
-    PAGE_WITH_INSTANCE,
-    useInstanceTitle,
-    useOperations,
-    PAGE_WITH_EDITABLE_DATA,
-    getRedirectUrl,
     createActionStore,
-    useQueryBasedFiltering,
+    filterNonEmpty,
+    getRedirectUrl,
+    PAGE_WITH_EDITABLE_DATA,
+    PAGE_WITH_INSTANCE,
+    useBasePageData,
     useEntityViewClasses,
+    useInstanceTitle,
+    useListFilters,
+    useOperations,
     usePageLeaveConfirmation,
     usePagination,
-    filterNonEmpty,
+    useQueryBasedFiltering,
+    useQuerySet,
+    useSelection,
 } from './helpers';
+
+import type { Route } from 'vue-router';
+import type { Model, InstancesList } from '@/vstutils/models';
+import type { PageEditView, PageNewView, PageView, ActionView, Action, ListView } from '@/vstutils/views';
+import type { BaseViewStore } from './helpers';
 
 const createRemoveInstance =
     ({ pageView, unselect }: { pageView?: PageView | null; unselect?: (id: string | number) => void }) =>
@@ -84,7 +89,7 @@ export const createListViewStore = (view: ListView) => () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     const model = computed(() => view.objects.getResponseModelClass(RequestTypes.LIST));
 
-    const instances = ref<InstancesList>([]);
+    const instances = ref<InstancesList>(createInstancesList([]));
 
     const selection = useSelection(instances);
     const isEmpty = computed(() => !instances.value.length);
@@ -111,16 +116,16 @@ export const createListViewStore = (view: ListView) => () => {
 
     function setInstances(newInstances: InstancesList) {
         instances.value = newInstances;
-        if (newInstances.extra?.count !== undefined) {
+        if (newInstances.extra.count !== undefined) {
             count.value = newInstances.extra.count;
         }
     }
 
     async function updateData() {
-        const newInstances = (await qsStore.queryset.value.items()) as InstancesList;
+        const newInstances = await qsStore.queryset.value.items();
         if (!isInstancesEqual(instances.value, newInstances)) {
             setInstances(newInstances);
-        } else if (instances.value.extra?.count && count.value !== instances.value.extra.count) {
+        } else if (instances.value.extra.count && count.value !== instances.value.extra.count) {
             count.value = instances.value.extra.count;
         }
     }
@@ -220,9 +225,8 @@ export const createDetailViewStore = (view: PageView) => () => {
     const app = getApp();
 
     const title = useInstanceTitle({ view, instance: pageWithInstance.instance });
-    const filtersQuery = ref<Record<string, unknown>>({});
+    const filtersQuery = ref(emptyInnerData());
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const model = ref<typeof Model>(view.objects.getResponseModelClass(RequestTypes.RETRIEVE));
 
     function getInstancePk(): string | number {
@@ -266,7 +270,7 @@ export const createDetailViewStore = (view: PageView) => () => {
 
     function setFilters(query: Record<string, unknown>) {
         if (view.filtersModelClass) {
-            const instance = new view.filtersModelClass(query);
+            const instance = new view.filtersModelClass(query as InnerData);
             filtersQuery.value = instance._getInnerData();
         }
     }
@@ -296,7 +300,7 @@ export const createDetailViewStore = (view: PageView) => () => {
             if (pageWithInstance.providedInstance.value) {
                 const instance = pageWithInstance.providedInstance.value;
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-                await instance._queryset._executeAfterInstancesFetchedHooks([instance], instance.constructor);
+                await fetchInstances([instance]);
                 pageWithInstance.setInstance(instance);
             } else {
                 await updateData(instancePk, { forceSet });
@@ -308,9 +312,9 @@ export const createDetailViewStore = (view: PageView) => () => {
         }
     }
 
-    function applyFilters(newFiltersRepresentData: Record<string, unknown>) {
+    function applyFilters(newFilters: RepresentData) {
         if (view.filtersModelClass) {
-            const query = filterNonEmpty(view.filtersModelClass.representToInner(newFiltersRepresentData));
+            const query = filterNonEmpty(view.filtersModelClass.representToInner(newFilters));
             return openPage({
                 path: app.router.currentRoute.path,
                 query,
@@ -342,8 +346,9 @@ export const createDetailViewStore = (view: PageView) => () => {
 export type DetailPageStore = BaseViewStore & {
     setInstance(instance: Model): void;
     instance: Model;
+    filters: InnerData;
     getInstancePk(): string | number | undefined;
-    applyFilters(filters: Record<string, unknown>): Promise<Route | void> | undefined;
+    applyFilters(filters: RepresentData): Promise<Route | void> | undefined;
 };
 
 export const createNewViewStore = (view: PageNewView) => () => {
@@ -354,9 +359,9 @@ export const createNewViewStore = (view: PageNewView) => () => {
 
     usePageLeaveConfirmation({ askIf: pageWithEditableData.isPageChanged });
 
-    const model = ref(view.objects.getResponseModelClass(RequestTypes.CREATE) as typeof Model);
+    const model = ref(view.objects.getResponseModelClass(RequestTypes.CREATE));
 
-    function fetchData({ data }: { data?: Record<string, any> } = { data: undefined }) {
+    function fetchData({ data }: { data?: InnerData } = { data: undefined }) {
         const queryset = qsStore.queryset.value;
         pageWithEditableData.setInstance(new model.value(model.value.getInitialData(data), queryset));
         base.setLoadingSuccessful();
@@ -426,9 +431,7 @@ export const createEditViewStore = (view: PageEditView) => () => {
     const app = getApp();
 
     const model = ref(
-        view.objects.getRequestModelClass(
-            view.isPartial ? RequestTypes.PARTIAL_UPDATE : RequestTypes.UPDATE,
-        ) as typeof Model,
+        view.objects.getRequestModelClass(view.isPartial ? RequestTypes.PARTIAL_UPDATE : RequestTypes.UPDATE),
     );
 
     function setInstance(instance: Model) {
@@ -459,7 +462,7 @@ export const createEditViewStore = (view: PageEditView) => () => {
 
             const providedInstance = await instance.update(
                 method,
-                (view as unknown as PageEditView).isPartial ? pageViewStore.changedFields.value : null,
+                (view as unknown as PageEditView).isPartial ? pageViewStore.changedFields.value : undefined,
             );
 
             pageViewStore.changedFields.value = [];

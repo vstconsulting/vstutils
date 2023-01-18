@@ -33,11 +33,12 @@ import type { GlobalStore, LocalSettingsStore, UserSettingsStore } from '@/vstut
 import { createLocalSettingsStore, createUserSettingsStore, GLOBAL_STORE, pinia } from '@/vstutils/store';
 import { i18n } from '@/vstutils/translation';
 import * as utils from '@/vstutils/utils';
-import type { View } from '@/vstutils/views';
+import type { IView, View } from '@/vstutils/views';
 import { ListView, PageNewView, PageView, ViewConstructor, ViewsTree } from '@/vstutils/views';
 
 import type { Cache } from '@/cache';
-import type { GlobalStoreInitialized } from './store/globalStore';
+import type { InnerData } from '@/vstutils/utils';
+import type { GlobalStoreInitialized } from '@/vstutils/store/globalStore';
 
 export function getCentrifugoClient(address?: string, token?: string) {
     if (!address) {
@@ -80,7 +81,7 @@ export interface IApp {
 
     additionalRootMixins: any[];
 
-    views: Map<string, View>;
+    views: Map<string, IView>;
 
     store: GlobalStore;
     userSettingsStore?: UserSettingsStore;
@@ -133,13 +134,13 @@ export class App implements IApp {
 
     api: ApiConnector;
     languages: Language[] | null;
-    rawUser: Record<string, any> | null;
+    rawUser: InnerData | null;
     user: Model | null;
 
     appRootComponent: ComponentOptions<Vue>;
     additionalRootMixins: ComponentOptions<Vue>[];
 
-    views = new Map<string, View>();
+    views = new Map<string, IView>();
 
     store: GlobalStore;
     userSettingsStore?: UserSettingsStore;
@@ -184,7 +185,6 @@ export class App implements IApp {
         this.languages = null;
         /**
          * Property that stores raw user response
-         * @type {Object|null}
          */
         this.rawUser = null;
         /**
@@ -251,10 +251,8 @@ export class App implements IApp {
         this.afterInitialDataBeforeMount();
 
         const usersQs = this.views.get('/user/')?.objects;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const UserModel = usersQs?.getModelClass(utils.RequestTypes.RETRIEVE);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-        this.user = new UserModel(this.rawUser, usersQs);
+        const UserModel = usersQs?.getResponseModelClass(utils.RequestTypes.RETRIEVE);
+        this.user = new UserModel!(this.rawUser, usersQs);
 
         this.global_components.registerAll(this.vue);
 
@@ -309,7 +307,7 @@ export class App implements IApp {
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                         for (const model of m) models.add(model);
                     } else {
-                        models.add(m as typeof Model);
+                        models.add(m!);
                     }
                 }
             }
@@ -349,8 +347,7 @@ export class App implements IApp {
         for (const view of this.views.values()) {
             if (view instanceof PageNewView && view.nestedAllowAppend) {
                 const listView = view.listView!;
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                const modelName = listView.objects.getResponseModelClass(utils.RequestTypes.LIST).name;
+                const modelName = listView.objects.getResponseModelClass(utils.RequestTypes.LIST)!.name;
                 try {
                     // @ts-expect-error TODO refactor qs resolver to ts
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -397,7 +394,8 @@ export class App implements IApp {
         this.localSettingsStore = createLocalSettingsStore(
             window.localStorage,
             'localSettings',
-            this.localSettingsModel,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            this.localSettingsModel as typeof Model,
         )(pinia);
         this.localSettingsStore.load();
     }

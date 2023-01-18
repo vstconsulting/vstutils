@@ -1,19 +1,20 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { mergeDeep } from '@/vstutils/utils';
+import { emptyRepresentData, mergeDeep } from '@/vstutils/utils';
 import type { Model } from '@/vstutils/models';
 import type { SetFieldValueOptions } from '@/vstutils/fields/base';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
 
 type Settings = Record<string, unknown>;
 
 export const createLocalSettingsStore = (storage: Storage, itemName: string, modelClass: typeof Model) =>
     defineStore('localSettings', () => {
         const instance = new modelClass();
-        const settings = ref<Settings>({});
-        const originalSettings = ref<Settings>({});
+        const settings = ref(emptyRepresentData<Settings>());
+        const originalSettings = ref(emptyRepresentData<Settings>());
         const changed = ref(false);
 
-        function setSettings(newSettings: Settings) {
+        function setSettings(newSettings: RepresentData<Settings>) {
             settings.value = newSettings;
             changed.value = false;
         }
@@ -23,15 +24,17 @@ export const createLocalSettingsStore = (storage: Storage, itemName: string, mod
                 changed.value = true;
             }
         }
-        function setOriginalSettings(settings: Settings) {
-            originalSettings.value = mergeDeep({}, settings) as Settings;
+        function setOriginalSettings(settings: RepresentData<Settings>) {
+            originalSettings.value = mergeDeep({}, settings) as RepresentData<Settings>;
         }
         function rollback() {
-            settings.value = mergeDeep({}, originalSettings.value) as Settings;
+            settings.value = mergeDeep({}, originalSettings.value) as RepresentData<Settings>;
             changed.value = false;
         }
         function load() {
-            const instance = new modelClass(JSON.parse(storage.getItem(itemName) ?? '{}') as Settings);
+            const instance = new modelClass(
+                JSON.parse(storage.getItem(itemName) ?? '{}') as InnerData<Settings>,
+            );
             const data = instance._getRepresentData();
             setSettings(data);
             setOriginalSettings(data);

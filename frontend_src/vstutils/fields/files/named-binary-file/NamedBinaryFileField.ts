@@ -9,6 +9,7 @@ import NamedBinaryFileFieldMixin from './NamedBinaryFileFieldMixin';
 import type { FileFieldXOptions, IFileField } from '../file';
 import type { NamedFile } from './utils';
 import { ensureMediaTypeExists } from './utils';
+import type { InnerData } from '@/vstutils/utils';
 
 /**
  * This field takes and returns JSON with 3 properties:
@@ -52,8 +53,8 @@ export class NamedBinaryFileField
         return value;
     }
 
-    toRepresent(data: Record<string, unknown>) {
-        return ensureMediaTypeExists(this.getDataInnerValue(data));
+    toRepresent(data: InnerData) {
+        return ensureMediaTypeExists(this.getValue(data));
     }
 
     getEmptyValue() {

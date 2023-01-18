@@ -1,4 +1,4 @@
-import { onBeforeUnmount, onMounted } from 'vue';
+import { onBeforeUnmount, onMounted, getCurrentInstance, onScopeDispose } from 'vue';
 
 import { getApp, getUniqueId } from '@/vstutils/utils';
 import type {
@@ -58,11 +58,15 @@ export function useAutoUpdate({
         pk = newPk;
     }
 
-    if (startOnMount) {
-        onMounted(start);
+    // If composable called inside component then use vue hooks
+    if (getCurrentInstance() !== null) {
+        if (startOnMount) {
+            onMounted(start);
+        }
+        onBeforeUnmount(stop);
+    } else {
+        onScopeDispose(stop);
     }
-
-    onBeforeUnmount(stop);
 
     return { start, stop, setCallback, setPk };
 }

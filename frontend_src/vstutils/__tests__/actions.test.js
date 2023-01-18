@@ -33,9 +33,7 @@ describe('Actions', () => {
         expect(fetchMock.mock.calls).toHaveLength(1);
         const [url, req] = fetchMock.mock.calls[0];
         expect(url).toBe('http://localhost/api/endpoint/');
-        expect(JSON.parse(req.body)).toEqual([
-            { method: 'put', version: 'v1', path: '/test/path/', query: '', headers: {} },
-        ]);
+        expect(JSON.parse(req.body)).toEqual([{ method: 'put', path: '/test/path/' }]);
 
         expect(callback).toBeCalledTimes(1);
         const arg = callback.mock.calls[0][0];
@@ -69,6 +67,7 @@ describe('Actions', () => {
             name: 'test_action',
             method: 'patch',
             requestModel: ReqModel,
+            path: 'execute',
         };
         const data = { testField: 'some val' };
 
@@ -78,8 +77,6 @@ describe('Actions', () => {
         expect(fetchMock).toBeCalledTimes(1);
         const [url, req] = fetchMock.mock.calls[0];
         expect(url).toBe('http://localhost/api/endpoint/');
-        expect(JSON.parse(req.body)).toEqual([
-            { method: 'patch', version: 'v1', query: '', data, headers: {} },
-        ]);
+        expect(JSON.parse(req.body)).toEqual([{ method: 'patch', data, path: 'execute' }]);
     });
 });

@@ -2,22 +2,24 @@ import type { StoreState } from 'pinia';
 import type { ComponentOptions, Ref } from 'vue';
 import { ref, toRef } from 'vue';
 
-import type { IAppInitialized } from '../app';
-import { ListViewComponent } from '../components/list/';
-import { OneEntity } from '../components/page';
-import type { Model } from '../models';
+import { formatPath, getApp, HttpMethods, joinPaths, pathToArray, ViewTypes } from '@/vstutils/utils';
+
+import { ListViewComponent } from '@/vstutils/components/list/';
+import { OneEntity } from '@/vstutils/components/page';
 import {
     createActionViewStore,
     createDetailViewStore,
     createEditViewStore,
     createListViewStore,
     createNewViewStore,
-} from '../store';
-import type { BaseViewStore } from '../store/helpers';
-import { useBasePageData } from '../store/helpers';
-import type { DetailPageStore } from '../store/page';
-import { formatPath, getApp, HttpMethods, joinPaths, pathToArray, ViewTypes } from '../utils';
+    useBasePageData,
+} from '@/vstutils/store';
 
+import type { IAppInitialized } from '@/vstutils/app';
+import type { Model } from '@/vstutils/models';
+import type { BaseViewStore } from '@/vstutils/store';
+import type { DetailPageStore } from '../store/page';
+import type { HttpMethod } from '@/vstutils/utils';
 import type { Vue } from 'vue/types/vue';
 import type { Route, RouteConfig } from 'vue-router';
 import type { Operation as SwaggerOperation } from 'swagger-schema-official';
@@ -52,7 +54,7 @@ export interface Action extends Operation {
     component?: any;
     path?: string;
     href?: string;
-    method?: HttpMethods;
+    method?: HttpMethod;
     confirmationRequired?: boolean;
     view?: View;
     responseModel?: typeof Model;
@@ -84,7 +86,7 @@ export interface ViewParams extends SwaggerOperation {
     level: number;
     name: string;
     path: string;
-    method: HttpMethods;
+    method: HttpMethod;
     type?: ViewType;
     title?: string;
     isDeepNested?: boolean;
@@ -386,9 +388,9 @@ export class PageView extends View implements IView<PageViewParams, DetailPageSt
 
         return {
             instance: ref(
-                (await this.objects
+                await this.objects
                     .formatPath(route.params)
-                    .get(this.pkParamName ? route.params[this.pkParamName] : undefined)) as Model,
+                    .get(this.pkParamName ? route.params[this.pkParamName] : undefined),
             ),
         };
     }
@@ -466,7 +468,7 @@ export class ActionView extends View implements IView<ActionViewParams> {
     static viewType: ViewType = 'ACTION';
     declare params: ActionViewParams;
     hideReadonlyFields = true;
-    method: HttpMethods;
+    method: HttpMethod;
     action: NotEmptyAction;
 
     storeDefinitionFactory: (view: any) => any = createActionViewStore;
