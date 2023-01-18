@@ -1,7 +1,8 @@
-import QuerySet from './QuerySet.js';
+export * from './QuerySet';
 import { SingleEntityQueryset } from './SingleEntityQueryset.js';
 import { QuerySetsResolver } from './QuerySetsResolver.js';
 import { mapToObjectProxy } from '../utils';
+import { QuerySet } from './QuerySet';
 
 /**
  * Object, that contains QuerySet classes.
@@ -15,4 +16,4 @@ const globalQuerySets = new Map([['QuerySet', QuerySet]]);
  */
 const guiQuerySets = mapToObjectProxy(globalQuerySets);
 
-export { guiQuerySets, QuerySet, SingleEntityQueryset, QuerySetsResolver, globalQuerySets };
+export { guiQuerySets, SingleEntityQueryset, QuerySetsResolver, globalQuerySets };

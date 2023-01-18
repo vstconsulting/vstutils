@@ -1,6 +1,6 @@
 import type { IApp, IAppInitialized } from '@/vstutils/app';
 import { guiPopUp, pop_up_msg } from './popUp';
-import type { HttpMethods } from './utils';
+import type { HttpMethod } from './utils';
 import {
     formatPath,
     parseResponseMessage,
@@ -178,8 +178,8 @@ export class ActionsManager {
         action: NotEmptyAction;
         data?: Record<string, unknown>;
         model?: typeof Model;
-        method?: HttpMethods;
-        path: string;
+        method?: HttpMethod;
+        path?: string;
         throwError?: boolean;
         disablePopUp?: boolean;
     }): Promise<void | APIResponse<T>> {
@@ -204,7 +204,7 @@ export class ActionsManager {
         try {
             const response = await this.app.api.makeRequest({
                 method,
-                path,
+                path: path ?? formatPath(action.path!, this.app.router.currentRoute.params),
                 data: instance._getInnerData(),
                 useBulk: model.shouldUseBulk(method),
             });

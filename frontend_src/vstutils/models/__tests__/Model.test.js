@@ -1,5 +1,5 @@
 import { expect, jest, test, describe, it } from '@jest/globals';
-import { makeModel, Model } from '../Model.js';
+import { Model, makeModel } from '../index.ts';
 import { StringField } from '../../fields/text';
 import { IntegerField } from '../../fields/numbers/integer.js';
 import JSONField from '../../fields/json/JSONField.js';

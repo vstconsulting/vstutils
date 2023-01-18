@@ -37,7 +37,7 @@ test('createListViewStore', async () => {
 
     expect(store.response).toBeTruthy();
     expect(store.loading).toBeFalsy();
-    expect(store.instances).toStrictEqual([]);
+    expect(store.instances.length).toBe(0);
 
     const data = JSON.stringify([
         {

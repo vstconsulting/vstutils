@@ -2,7 +2,7 @@ import { beforeAll, beforeEach, describe, expect, test } from '@jest/globals';
 import fetchMock from 'jest-fetch-mock';
 import { apiConnector } from '../../api';
 import { Model, makeModel } from '../../models';
-import QuerySet from '../QuerySet.js';
+import { QuerySet } from '../QuerySet.ts';
 import { RequestTypes } from '../../utils';
 import { IntegerField } from '../../fields/numbers/integer.js';
 

@@ -1,6 +1,6 @@
 import { expect, test, describe } from '@jest/globals';
 import { DeepFKField } from '../deep-fk';
-import { makeModel, Model } from '../../../models/Model';
+import { Model, makeModel } from '../../../models';
 import { NumberField } from '../../numbers';
 import { StringField } from '../../text';
 

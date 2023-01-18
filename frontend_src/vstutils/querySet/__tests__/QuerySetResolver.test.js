@@ -2,7 +2,7 @@ import { describe, expect, test } from '@jest/globals';
 import { IntegerField } from '../../fields/numbers/integer.js';
 import { Model, makeModel } from '../../models';
 import { RequestTypes } from '../../utils';
-import QuerySet from '../QuerySet.js';
+import { QuerySet } from '../QuerySet.ts';
 import { ListView, PageView, ViewsTree } from '../../views';
 import { QuerySetsResolver } from '../QuerySetsResolver.js';
 

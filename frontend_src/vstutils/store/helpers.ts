@@ -32,12 +32,14 @@ import {
     mergeDeep,
     openPage,
     pathToArray,
+    emptyRepresentData,
 } from '@/vstutils/utils';
 
 import type { QuerySet } from '../querySet';
 import type { IView, ActionView, NotEmptyAction } from '../views';
 import type { NavigationGuard, Route } from 'vue-router';
 import type { IApp } from '@/vstutils/app';
+import type { RepresentData } from '@/vstutils/utils';
 
 export function useParentViews() {
     interface Item {
@@ -98,13 +100,6 @@ export function useParentViews() {
         items: shallowReadonly(items),
         itemsMap,
         push,
-    };
-}
-
-export interface InstancesList extends Array<Model> {
-    extra?: {
-        count?: number;
-        [key: string]: any;
     };
 }
 
@@ -303,7 +298,7 @@ export function useListFilters(qs: Ref<QuerySet>) {
         filters.value = query;
         pageNumber.value = page;
         qs.value = qs.value.clone({
-            query: mergeDeep({ limit, offset: limit * (page - 1) }, query),
+            query: mergeDeep({ limit, offset: limit * (page - 1) }, query) as Record<string, unknown>,
         });
     }
 
@@ -432,7 +427,7 @@ export const PAGE_WITH_INSTANCE = () => {
     const app = getApp();
 
     const instance = shallowRef<Model | null>(null);
-    const sandbox = ref<Record<string, any>>({});
+    const sandbox = ref(emptyRepresentData());
     const providedInstance = computed<Model | undefined>(
         () => app.rootVm.$route.params.providedInstance as unknown as Model | undefined,
     );
@@ -454,7 +449,7 @@ export const PAGE_WITH_EDITABLE_DATA = <T extends ReturnType<typeof PAGE_WITH_IN
     const changedFields = ref<string[]>([]);
     const isPageChanged = computed<boolean>(() => changedFields.value.length > 0);
 
-    function validateAndSetInstanceData(params?: { instance?: Model | null; data?: Record<string, any> }) {
+    function validateAndSetInstanceData(params?: { instance?: Model | null; data?: RepresentData }) {
         const instance = params?.instance ?? base.instance.value;
         const data = params?.data ?? base.sandbox.value;
         if (instance) {

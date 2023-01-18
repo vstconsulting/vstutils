@@ -80,7 +80,7 @@ test('createDetailViewStore', async () => {
     let bulk = JSON.parse(request.body);
     expect(bulk[0].method).toBe('get');
     expect(bulk[0].path).toStrictEqual(['some_list', 15]);
-    expect(bulk[0].query).toStrictEqual('');
+    expect(bulk[0].query).toBeUndefined();
 
     // Check actions and sublinks
     expect(store.actions.length).toBe(1);

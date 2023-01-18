@@ -1,3 +1,4 @@
+import type { RepresentData } from '@/vstutils/utils';
 import type { ExtractPropTypes, PropType } from 'vue';
 import type { Field } from './BaseField';
 import type { ExtractRepresent } from './types';
@@ -8,7 +9,7 @@ export type FieldComponentType = 'edit' | 'list' | 'readonly';
 
 export const FieldPropsDef = {
     field: { type: Object as PropType<Field>, required: true as const },
-    data: { type: Object as PropType<Record<string, unknown>>, required: true as const },
+    data: { type: Object as PropType<RepresentData>, required: true as const },
     type: { type: String as PropType<FieldComponentType>, required: true as const },
     hideable: { type: Boolean, default: false },
     hideTitle: { type: Boolean, default: false },
@@ -25,7 +26,7 @@ export type FieldProps<TField extends Field = Field> = ExtractPropTypes<FieldPro
 
 export const FieldReadonlyPropsDef = {
     field: { type: Object as PropType<Field>, required: true as const },
-    data: { type: Object as PropType<Record<string, unknown>>, required: true as const },
+    data: { type: Object as PropType<RepresentData>, required: true as const },
     value: {},
 };
 
@@ -40,7 +41,7 @@ export type FieldReadonlyProps<T> = ExtractPropTypes<FieldReadonlyPropsDefType<T
 
 export const FieldEditPropsDef = {
     field: { type: Object as PropType<Field>, required: true as const },
-    data: { type: Object as PropType<Record<string, unknown>>, required: true as const },
+    data: { type: Object as PropType<RepresentData>, required: true as const },
     value: {},
     hideable: { type: Boolean, default: false },
 };

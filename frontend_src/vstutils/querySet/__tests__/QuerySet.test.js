@@ -4,7 +4,7 @@ import { apiConnector, APIResponse } from '../../api';
 import fetchMock from 'jest-fetch-mock';
 import { makeModel, Model } from '../../models';
 import StringField from '../../fields/text/StringField';
-import QuerySet from '../QuerySet';
+import { QuerySet } from '../QuerySet';
 import { HttpMethods, RequestTypes } from '../../utils';
 
 describe('QuerySet', () => {

@@ -52,9 +52,9 @@
 
     import { i18n } from '@/vstutils/translation';
     import { formatPath, getApp, RequestTypes } from '@/vstutils/utils';
-    import type { InstancesList } from '@/vstutils/store';
     import { usePagination, useSelection } from '@/vstutils/store';
     import { guiPopUp, pop_up_msg } from '@/vstutils/popUp';
+    import { createInstancesList } from '@/vstutils/models';
     import ListTable from '@/vstutils/components/list/ListTable.vue';
     import Pagination from '@/vstutils/components/list/Pagination.vue';
     import OverlayLoader from '@/vstutils/components/OverlayLoader.vue';
@@ -75,7 +75,7 @@
     const loading = ref(true);
     const page = ref(1);
     const filterInput = ref<HTMLInputElement | null>(null);
-    const instances = ref<InstancesList>([]);
+    const instances = ref(createInstancesList([]));
 
     const { toggleAllSelection, toggleSelection, selection, setSelection } = useSelection(instances);
     const paginationItems = usePagination({
@@ -88,14 +88,14 @@
     const modelClass = queryset.getResponseModelClass(RequestTypes.LIST);
     const filterField = modelClass.viewField;
     const fields = Array.from(modelClass.fields.values()).filter(
-        (field) => !modelClass.hidden && field !== modelClass.pkField,
+        (field) => !field.hidden && field !== modelClass.pkField,
     );
 
     async function loadInstances() {
         loading.value = true;
         const filters: Record<string, unknown> = { limit, offset: limit * (page.value - 1) };
         if (filterInput.value) {
-            filters[filterField.name] = filterInput.value.value;
+            filters[filterField!.name] = filterInput.value.value;
         }
         try {
             const loaded = await queryset.filter(filters).items();

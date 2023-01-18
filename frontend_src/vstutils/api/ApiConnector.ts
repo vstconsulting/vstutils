@@ -1,6 +1,8 @@
-import type { AppConfiguration, AppSchema } from '../AppConfiguration';
-import { guiLocalSettings, getCookie, makeQueryString, BulkType, HttpMethods } from '../utils';
-import StatusError from './StatusError';
+import { BulkType, getCookie, guiLocalSettings, makeQueryString } from '@/vstutils/utils';
+import { StatusError } from './StatusError';
+
+import type { AppConfiguration, AppSchema } from '@/vstutils/AppConfiguration';
+import type { HttpMethod, InnerData } from '@/vstutils/utils';
 
 const isNativeCacheAvailable = 'caches' in window;
 
@@ -11,10 +13,10 @@ export interface BulkResponseHeaders {
     [key: string]: string | undefined;
 }
 
-interface BulkResponse {
-    method: HttpMethods;
+interface BulkResponse<D = unknown> {
+    method: HttpMethod;
     path: string | string[];
-    data: Record<string, unknown> | string;
+    data: D;
     status: number;
     headers: BulkResponseHeaders;
 }
@@ -22,7 +24,7 @@ interface BulkResponse {
 export class APIResponse<T extends BulkResponse['data'] = { detail?: string }> implements BulkResponse {
     status: number;
     data: T;
-    method: HttpMethods;
+    method: HttpMethod;
     path: string | string[];
     headers: BulkResponseHeaders;
 
@@ -57,17 +59,13 @@ export class APIResponse<T extends BulkResponse['data'] = { detail?: string }> i
         throw new StatusError(status, data);
     }
 
-    static async fromFetchResponse<T extends BulkResponse['data'] = { detail?: string }>(
-        response: Response,
-        method: HttpMethods,
-        path: string,
-    ) {
-        let json = {};
+    static async fromFetchResponse<T>(response: Response, method: HttpMethod, path: string) {
+        let json = {} as T;
         try {
-            json = (await response.json()) as BulkResponse['data'];
+            json = (await response.json()) as T;
             // eslint-disable-next-line no-empty
         } catch (e) {}
-        return new APIResponse<T>({ status: response.status, data: json as T, path, method });
+        return new APIResponse<T>({ status: response.status, data: json, path, method });
     }
 }
 
@@ -82,29 +80,47 @@ function rejectAll(bulks: CollectedBulkRequest[], value: unknown) {
     }
 }
 
-interface BulkRequest {
-    method: HttpMethods;
+// bulk types
+
+interface RealBulkRequest {
+    method: HttpMethod;
     path: string | (string | number)[];
     version?: string;
-    data?: Record<string, unknown>;
-    query?: Record<string, string> | string;
+    query?: string;
     headers?: Record<string, unknown>;
+    data?: Record<string, unknown>;
 }
 
-interface AnyRequest extends BulkRequest {
-    useBulk: boolean;
-}
-
-interface CollectedBulkRequest<T extends string | Record<string, unknown> = { detail?: string } | string> {
-    data: BulkRequest;
+interface CollectedBulkRequest<T = unknown> {
+    data: RealBulkRequest;
     promise: Promise<APIResponse<T>>;
     callbacks: Record<string, CallableFunction>;
 }
 
-interface BulkCollector<T extends string | Record<string, unknown> = { detail?: string } | string> {
+interface BulkCollector {
     timeoutId?: ReturnType<typeof setTimeout>;
-    bulkParts: CollectedBulkRequest<T>[];
+    bulkParts: CollectedBulkRequest[];
 }
+
+// makeRequest types
+
+interface BaseRequest {
+    method: HttpMethod;
+    path: string | (string | number)[];
+    version?: string;
+    query?: Record<string, unknown> | string | URLSearchParams;
+    headers?: Record<string, unknown>;
+}
+
+interface BulkRequest extends BaseRequest {
+    data?: Record<string, unknown>;
+}
+
+interface FetchRequest extends BaseRequest {
+    data?: Record<string, unknown> | FormData;
+}
+
+export type MakeRequestParams = ({ useBulk: true } & BulkRequest) | ({ useBulk?: false } & FetchRequest);
 
 /**
  * Class, that sends API requests.
@@ -125,7 +141,7 @@ export class ApiConnector {
      */
     constructor() {
         this.headers = {
-            'X-CSRFToken': getCookie('csrftoken'),
+            'X-CSRFToken': getCookie('csrftoken') ?? '',
         };
     }
 
@@ -159,46 +175,56 @@ export class ApiConnector {
         }
     }
 
-    async makeRequest({
-        method,
-        version = this.defaultVersion!,
-        path,
-        query = undefined,
-        data = undefined,
-        headers = {},
-        useBulk = false,
-    }: AnyRequest) {
-        if (useBulk) {
-            // TODO make fetch and bulk throw same things
-            const response = await this.bulkQuery({
-                method,
-                version,
-                path,
-                query: makeQueryString(query, useBulk),
-                data,
-                headers,
-            });
+    async makeRequest<T = unknown>(req: MakeRequestParams): Promise<APIResponse<T>> {
+        if (req.useBulk) {
+            const realBulk: RealBulkRequest = {
+                method: req.method,
+                path: req.path,
+            };
+            if (req.version) {
+                realBulk.version = req.version;
+            }
+            const query = makeQueryString(req.query, true);
+            if (query) {
+                realBulk.query = query;
+            }
+            if (req.headers) {
+                realBulk.headers = req.headers;
+            }
+            if (req.data) {
+                realBulk.data = req.data;
+            }
+            const response = await this.bulkQuery<T>(realBulk);
             return new APIResponse(response);
         } else {
-            let pathStr = Array.isArray(path) ? path.join('/') : path;
-            if (pathStr.startsWith('/')) pathStr = pathStr.substring(1);
-            if (pathStr.endsWith('/')) pathStr = pathStr.substring(0, pathStr.length - 1);
+            const pathStr = Array.isArray(req.path) ? req.path.join('/') : req.path.replace(/^\/|\/$/g, '');
 
-            let strData = data as unknown;
-            if (typeof data !== 'string') {
-                strData = JSON.stringify(data);
+            const headers = { ...this.headers, ...req.headers } as Record<string, string>;
+            let preparedData: RequestInit['body'];
+
+            if (req.data !== undefined) {
+                if (req.data instanceof FormData) {
+                    preparedData = req.data;
+                } else {
+                    preparedData = JSON.stringify(req.data);
+                    headers['Content-Type'] = 'application/json';
+                }
             }
 
-            const fetchConfig: RequestInit = {
-                method: method,
-                headers: { ...this.headers, ...headers } as Record<string, string>,
-                body: strData as string,
-            };
+            const pathToSend = [
+                this.baseURL!,
+                req.version ?? this.defaultVersion!,
+                pathStr,
+                makeQueryString(req.query),
+            ].join('/');
 
-            const pathToSend = `${this.baseURL!}/${version}/${pathStr}/${makeQueryString(query)}`;
-            const response = await fetch(pathToSend, fetchConfig);
+            const response = await fetch(pathToSend, {
+                method: req.method,
+                headers,
+                body: preparedData,
+            });
 
-            return await APIResponse.fromFetchResponse(response, method, pathToSend);
+            return await APIResponse.fromFetchResponse(response, req.method, pathToSend);
         }
     }
 
@@ -220,7 +246,7 @@ export class ApiConnector {
         });
     }
 
-    async sendCachedBulk(requests: BulkRequest[], type = BulkType.SIMPLE) {
+    async sendCachedBulk(requests: RealBulkRequest[], type = BulkType.SIMPLE) {
         const cachedValues = new Map();
         const cache = await window.caches.open(this._etagsCacheName!);
         for (let i = 0; i < requests.length; i++) {
@@ -272,20 +298,26 @@ export class ApiConnector {
         return responses;
     }
 
-    sendBulk(requests: BulkRequest[], type = BulkType.SIMPLE): Promise<BulkResponse[]> {
-        return fetch(this.endpointURL!, {
+    async sendBulk<Responses = undefined>(requests: RealBulkRequest[], type = BulkType.SIMPLE) {
+        const response = await fetch(this.endpointURL!, {
             method: type,
             headers: { ...this.headers, 'Content-Type': 'application/json' },
             body: JSON.stringify(requests),
-        }).then((response) => response.json()) as Promise<BulkResponse[]>;
+        });
+
+        const data = (await response.json()) as unknown;
+
+        return data as Promise<
+            Responses extends unknown[]
+                ? { [Idx in keyof Responses]: BulkResponse<Responses[Idx]> }
+                : BulkResponse[]
+        >;
     }
 
     /**
      * Method, that collects several bulk requests into one.
      */
-    bulkQuery<T extends string | Record<string, unknown> = Record<string, unknown>>(
-        data: BulkRequest,
-    ): Promise<APIResponse<T>> {
+    bulkQuery<T = Record<string, unknown>>(data: RealBulkRequest): Promise<APIResponse<T>> {
         if (this.bulkCollector.timeoutId) {
             clearTimeout(this.bulkCollector.timeoutId);
         }
@@ -365,9 +397,9 @@ export class ApiConnector {
      * Method, that loads data of authorized user.
      */
     loadUser() {
-        return this.bulkQuery({
+        return this.bulkQuery<InnerData>({
             path: ['user', this.getUserId()],
-            method: HttpMethods.GET,
+            method: 'get',
         }).then((response) => {
             return response.data;
         });

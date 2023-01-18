@@ -4,13 +4,17 @@ import type { Field } from '../fields/base/';
 export * from './todo.js';
 export * from './app-helpers';
 
-export enum HttpMethods {
-    GET = 'get',
-    POST = 'post',
-    PUT = 'put',
-    PATCH = 'patch',
-    DELETE = 'delete',
-}
+export const EMPTY: unique symbol = Symbol('EMPTY');
+
+export const HttpMethods = {
+    GET: 'get',
+    POST: 'post',
+    PUT: 'put',
+    PATCH: 'patch',
+    DELETE: 'delete',
+} as const;
+
+export type HttpMethod = typeof HttpMethods[keyof typeof HttpMethods];
 
 export enum BulkType {
     SIMPLE = 'put',
@@ -118,4 +122,80 @@ export function deferredPromise<T>() {
         [resolve, reject] = [res, rej];
     });
     return { promise, reject, resolve };
+}
+
+export const RequestTypes = {
+    LIST: 'list',
+    RETRIEVE: 'retrieve',
+    CREATE: 'create',
+    UPDATE: 'update',
+    PARTIAL_UPDATE: 'partialUpdate',
+    REMOVE: 'remove',
+} as const;
+
+export type RequestType = typeof RequestTypes[keyof typeof RequestTypes];
+
+/**
+ * Method, that converts query object into string
+ *
+ * @param query
+ * @param useBulk - If false adds question mark (?) in front of string
+ */
+export function makeQueryString(
+    query: string | Record<string, unknown> | URLSearchParams | undefined,
+    useBulk = false,
+): string {
+    let queryStr = '';
+    if (typeof query === 'string') {
+        queryStr = new URLSearchParams(query).toString();
+    } else if (query instanceof URLSearchParams) {
+        queryStr = query.toString();
+    } else if (typeof query === 'object') {
+        queryStr = new URLSearchParams(Object.entries(query) as [string, string][]).toString();
+    }
+
+    if (!useBulk && queryStr !== '') queryStr = `?${queryStr}`;
+
+    return queryStr;
+}
+
+export function createPropertyProxy<Obj extends object, Prop extends keyof Obj>(
+    target: Obj,
+    propertyToProxy: Prop,
+    newValue: Obj[Prop] | typeof EMPTY = EMPTY,
+) {
+    let value = newValue === EMPTY ? (Reflect.get(target, propertyToProxy) as Obj[Prop]) : newValue;
+
+    return new Proxy(target, {
+        get(target, property, receiver): unknown {
+            if (property === propertyToProxy) {
+                return value;
+            }
+            return Reflect.get(target, property, receiver);
+        },
+        set(target, property, updatedValue, receiver) {
+            if (property === propertyToProxy) {
+                value = updatedValue as Obj[Prop];
+                return true;
+            }
+            return Reflect.set(target, property, updatedValue, receiver);
+        },
+    });
+}
+
+declare const innerDataMarker: unique symbol;
+declare const representDataMarker: unique symbol;
+
+export type InnerData<T extends object = Record<string, unknown>> = T & { readonly [innerDataMarker]: true };
+
+export type RepresentData<T extends object = Record<string, unknown>> = T & {
+    readonly [representDataMarker]: true;
+};
+
+export function emptyInnerData<T extends object = Record<string, unknown>>() {
+    return {} as InnerData<T>;
+}
+
+export function emptyRepresentData<T extends object = Record<string, unknown>>() {
+    return {} as RepresentData<T>;
 }

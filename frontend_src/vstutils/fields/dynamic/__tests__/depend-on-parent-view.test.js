@@ -58,31 +58,20 @@ test('DynamicField depending on value from parent view', async () => {
     expect(body).toStrictEqual([
         {
             method: 'get',
-            version: 'v1',
             path: ['level_0', '0'],
-            query: '',
-            headers: {},
         },
         {
             method: 'get',
-            version: 'v1',
             path: ['level_0', '0', 'level_1', '1'],
-            query: '',
-            headers: {},
         },
         {
             method: 'get',
-            version: 'v1',
             path: ['level_0', '0', 'level_1', '1', 'level_2', '2'],
-            query: '',
-            headers: {},
         },
         {
             method: 'get',
-            version: 'v1',
             path: ['level_0', '0', 'level_1', '1', 'level_2', '2', 'with_dynamic'],
             query: 'limit=20&offset=0',
-            headers: {},
         },
     ]);
 

@@ -12,32 +12,25 @@
 
 <script lang="ts">
     import $ from '@/libs/jquery';
-    import type { PropType } from 'vue';
     import { toRef, ref, defineComponent } from 'vue';
     import { createTransport } from './transport';
-    import type { FKField, TRepresent } from './FKField';
     import { ensureValueFetched, useQuerySets } from './composables';
+    import { FieldEditPropsDef } from '@/vstutils/fields/base';
+    import type { FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import type { FKField, TRepresent } from './FKField';
 
     export default defineComponent({
-        props: {
-            field: { type: Object as PropType<FKField>, required: true },
-            value: {
-                type: [Object, Number, String] as PropType<TRepresent | null | undefined>,
-                default: null,
-            },
-            data: { type: Object as PropType<Record<string, unknown>>, required: true },
-            hideable: { type: Boolean, default: false },
-        },
+        props: FieldEditPropsDef as FieldEditPropsDefType<FKField>,
         setup(props) {
-            const { querysets, queryset } = useQuerySets(props.field, props.data);
+            const { querysets } = useQuerySets(props.field, props.data);
             const instancesCache = new Map();
             const transport = createTransport(props.field, querysets.value, toRef(props, 'data'));
 
             const selectEl = ref<HTMLSelectElement | null>(null);
 
-            const { loading } = ensureValueFetched(props.field, queryset.value!, toRef(props, 'value'));
+            const { loading } = ensureValueFetched(props.field, toRef(props, 'value'));
 
-            return { selectEl, instancesCache, querysets, queryset, transport, loading };
+            return { selectEl, instancesCache, transport, loading };
         },
         watch: {
             value(value) {

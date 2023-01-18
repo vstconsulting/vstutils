@@ -1,6 +1,5 @@
 import type { IApp } from './vstutils/app';
 import type * as SPA from './app.common.js';
-import type { APIResponse } from '@/vstutils/api/ApiConnector';
 
 declare global {
     interface String {
@@ -18,13 +17,6 @@ declare global {
     var __currentApp: IApp;
     var SELECT2_THEME: string;
     /* eslint-enable no-var */
-}
-
-declare module '@/vstutils/models' {
-    export class Model {
-        __notFound?: true;
-        _response?: APIResponse;
-    }
 }
 
 export {};

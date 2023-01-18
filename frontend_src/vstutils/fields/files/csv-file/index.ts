@@ -10,6 +10,7 @@ import CsvFileFieldReadonly from './CsvFileFieldReadonly.vue';
 
 import type { Schema } from 'swagger-schema-official';
 import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import type { RepresentData } from '@/vstutils/utils';
 
 export { CsvFileFieldEdit, CsvFileFieldReadonly };
 
@@ -55,13 +56,15 @@ export class CsvFileField extends BaseField<
         return [CsvFileFieldMixin];
     }
 
-    toInner(data: Record<string, unknown>) {
-        const value = this.getDataRepresentValue(data);
+    toInner(data: RepresentData) {
+        const value = this.getValue(data);
         if (typeof value == 'string') {
             return value;
         }
-        // @ts-expect-error kek
-        return Papa.unparse(value, this.parserConfig);
+        if (value) {
+            return Papa.unparse(value as string[][], this.parserConfig as Papa.UnparseConfig);
+        }
+        return value;
     }
 
     get delimiter() {

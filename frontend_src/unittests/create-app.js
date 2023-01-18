@@ -6,6 +6,7 @@ import { createLocalVue } from '@vue/test-utils';
 import VueI18n from 'vue-i18n';
 
 import testSchema from '../__mocks__/testSchema.json';
+import { openPage } from './open-page';
 
 export function createAppConfig({ schema = testSchema } = {}) {
     return new AppConfiguration({
@@ -18,7 +19,7 @@ export function createAppConfig({ schema = testSchema } = {}) {
     });
 }
 
-export function createApp({ schema = testSchema } = {}) {
+export async function createApp({ schema = testSchema } = {}) {
     const config = createAppConfig({ schema });
     const cache = new DummyCache();
     const vue = createLocalVue();
@@ -57,12 +58,14 @@ export function createApp({ schema = testSchema } = {}) {
     const bulkQuery = app.api.bulkQuery;
     app.api.bulkQuery = () => Promise.resolve({});
 
-    return app.start().then(() => {
-        app.translationsManager.loadLanguages = loadLanguages;
-        app.translationsManager.loadTranslations = loadTranslations;
-        app.api.loadUser = loadUser;
-        app.loadSettings = loadSettings;
-        app.api.bulkQuery = bulkQuery;
-        return app;
-    });
+    await app.start();
+    app.translationsManager.loadLanguages = loadLanguages;
+    app.translationsManager.loadTranslations = loadTranslations;
+    app.api.loadUser = loadUser;
+    app.loadSettings = loadSettings;
+    app.api.bulkQuery = bulkQuery;
+
+    await openPage('/');
+
+    return app;
 }

@@ -2,6 +2,7 @@ import { defineComponent } from 'vue';
 import { BaseField } from '@/vstutils/fields/base';
 import TextParagraphFieldContentReadonly from './TextParagraphFieldContentReadonly.vue';
 import TextAreaFieldContentEdit from './TextAreaFieldContentEdit.vue';
+import type { InnerData } from '@/vstutils/utils';
 
 const TextParagraphFieldMixin = defineComponent({
     components: {
@@ -11,8 +12,8 @@ const TextParagraphFieldMixin = defineComponent({
 });
 
 export class TextParagraphField extends BaseField<string | string[] | Record<string, unknown>, string> {
-    toRepresent(data: Record<string, unknown>) {
-        let value = this.getDataInnerValue(data);
+    toRepresent(data: InnerData) {
+        let value = this.getValue(data);
 
         if (value === undefined) {
             value = this.options.default;

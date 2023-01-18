@@ -1,25 +1,24 @@
 import $ from 'jquery';
-import type { PropType } from 'vue';
 import { toRef, defineComponent, h } from 'vue';
-import type { FKField } from '@/vstutils/fields/fk/fk';
+import { fetchPKs } from '@/vstutils/fetch-values';
+import { FieldEditPropsDef } from '@/vstutils/fields/base';
 import { createTransport, useQuerySets } from '@/vstutils/fields/fk/fk';
 import { ArrayFieldMixin } from '../mixins';
-import type { TRepresent } from '@/vstutils/fields/fk/fk/FKField';
-import type ArrayField from '../ArrayField';
+
+import type { PropType } from 'vue';
+import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
+import type { FKField } from '@/vstutils/fields/fk/fk';
+import type { ArrayField } from '../ArrayField';
 import type { Model } from '@/vstutils/models';
 
+type TRepresent = ExtractRepresent<FKField>;
+
 export const FKArrayEdit = defineComponent({
-    props: {
-        field: { type: Object as PropType<FKField>, required: true },
-        value: { default: null },
-        data: { type: Object, required: true },
-    },
+    props: FieldEditPropsDef as FieldEditPropsDefType<FKField>,
     setup(props) {
-        const { queryset, querysets } = useQuerySets(props.field, props.data);
+        const { querysets } = useQuerySets(props.field, props.data);
         return {
             instancesCache: new Map<string, Model>(),
-            queryset,
-            querysets,
             transport: createTransport(props.field, querysets.value, toRef(props, 'data')),
         };
     },
@@ -44,7 +43,7 @@ export const FKArrayEdit = defineComponent({
             ) {
                 return;
             }
-            this.$emit('set-value', await this.field._fetchRelated(value, this.queryset!), {
+            this.$emit('set-value', await fetchPKs(value, this.field), {
                 markChanged: false,
             });
         },
