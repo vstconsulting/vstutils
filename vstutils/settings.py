@@ -16,11 +16,11 @@ import ormsgpack
 from configparserc import config as cconfig
 from .tools import get_file_value
 
-from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
+from . import __version__, __file__ as vstutils_file
 
 
 SIMPLE_OBJECT_SETTINGS_TYPE = _t.Dict[_t.Text, _t.Dict[_t.Text, _t.Any]]
-
+VSTUTILS_VERSION = __version__
 
 class Env(dict):
     def __getitem__(self, item):
@@ -897,7 +897,7 @@ if 'django.db.backends.mysql' in USED_ENGINES:  # nocv
 for db in filter(lambda x: x.get('ENGINE', None) == 'django.db.backends.sqlite3', DATABASES.values()):
     try:
         db['OPTIONS'].setdefault('timeout', 20)
-    except:  # nocv
+    except Exception:  # nocv
         pass
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -927,13 +927,14 @@ if any([True for c in CACHES.values() if 'OPTIONS' in c and c['OPTIONS'].get('SE
 # E-Mail settings
 # https://docs.djangoproject.com/en/3.2/ref/settings/#email-host
 ##############################################################
+mail = config['mail']
+EMAIL_HOST_USER = mail["user"]
+
 if 'EMAIL_URL' in os.environ:
     vars().update(env.email('EMAIL_URL'))  # nocv
 else:
-    mail = config['mail']
     EMAIL_BACKEND: _t.Text = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_PORT = mail["port"]
-    EMAIL_HOST_USER = mail["user"]
     EMAIL_HOST_PASSWORD = mail["password"]
     if mail.get('tls', None) is not None:
         EMAIL_USE_TLS = mail['tls']  # nocv

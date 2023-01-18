@@ -89,7 +89,7 @@ class ModelWithBinaryFiles(BModel):
         _view_field_name = 'some_namedbinfile'
         default_related_name = 'rel_model'
         _override_list_fields = dict(
-            some_binfile=fields.BinFileInStringField(required=False),
+            some_binfile=fields.BinFileInStringField(required=False, max_length=2*1024*1024, min_length=1),
             some_validatednamedbinimage=fields.NamedBinaryImageInJsonField(required=False, validators=validators),
             some_validatedmultiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(
                 required=False,
@@ -150,7 +150,7 @@ class OverridenModelWithBinaryFiles(ModelWithBinaryFiles):
         proxy = True
         _view_field_name = 'some_namedbinfile'
         _override_list_fields = dict(
-            some_binfile=fields.BinFileInStringField(required=False),
+            some_binfile=fields.BinFileInStringField(required=False, max_length=2*1024*1024, min_length=1),
             some_namedbinfile=fields.NamedBinaryFileInJsonField(required=False, validators=files_validators),
             some_validatednamedbinimage=fields.NamedBinaryImageInJsonField(required=False, validators=validators),
             some_namedbinimage=fields.NamedBinaryImageInJsonField(required=False),
@@ -160,8 +160,8 @@ class OverridenModelWithBinaryFiles(ModelWithBinaryFiles):
                 required=False,
                 validators=validators,
             ),
-            some_filefield=fields.NamedBinaryFileInJsonField(required=False, file=True, allow_null=True),
-            some_imagefield=fields.NamedBinaryImageInJsonField(required=False, file=True, allow_null=True)
+            some_filefield=fields.NamedBinaryFileInJsonField(required=False, file=True, allow_null=True, max_length=100),
+            some_imagefield=fields.NamedBinaryImageInJsonField(required=False, file=True, allow_null=True, max_length=100)
         )
         _filterset_fields = {
             'some_binfile': CharFilter(label='Some label for binfile')
