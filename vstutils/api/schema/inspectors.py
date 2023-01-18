@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, Type, Text, Any
+from typing import Dict, Type, Text, Any, Union
 from collections import OrderedDict
 
 from django.http import FileResponse
@@ -354,7 +354,7 @@ class RatingFieldInspector(FieldInspector):
 
 
 class NamedBinaryImageInJsonFieldInspector(FieldInspector):
-    default_schema_data = {
+    default_schema_data: Dict[str, Union[str, Dict[str, openapi.Schema], int]] = {
         'type': openapi.TYPE_OBJECT,
         'x-format': FORMAT_NAMED_BIN_FILE,
         'properties': {
@@ -373,12 +373,21 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
     }
 
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
-        # pylint: disable=unused-variable,invalid-name,too-many-nested-blocks
+        # pylint: disable=unused-variable,invalid-name,too-many-nested-blocks,too-many-branches
         if isinstance(field, fields.MultipleNamedBinaryFileInJsonField):
             kwargs = deepcopy(self.default_multiple_schema_data)
             items = kwargs['items']
         elif isinstance(field, fields.NamedBinaryFileInJsonField):
             kwargs = items = deepcopy(self.default_schema_data)
+            if field.file:
+                store_size = kwargs['properties']['name']
+            else:
+                store_size = kwargs
+
+            if field.max_length:
+                store_size['maxLength'] = field.max_length
+            if field.min_length:
+                store_size['minLength'] = field.min_length  # nocv
         else:
             return NotHandled
 
@@ -461,6 +470,11 @@ class FileInStringInspector(FieldInspector):
             }
         }
 
+        if field.max_length:
+            kwargs['maxLength'] = field.max_length
+        if field.min_length:
+            kwargs['minLength'] = field.min_length
+
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
@@ -487,6 +501,11 @@ class CSVFileFieldInspector(FieldInspector):
                 'items': self.probe_field_inspectors(field.items, swagger_object_type, False)
             }
         }
+
+        if field.max_length:
+            kwargs['maxLength'] = field.max_length
+        if field.min_length:
+            kwargs['minLength'] = field.min_length
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
@@ -625,6 +644,7 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
         translate_model = getattr(serializer_class, '_translate_model', None)
 
         view_field_name = getattr(serializer_class, '_view_field_name', None)
+        hide_not_required = getattr(serializer_class, '_hide_not_required', None)
 
         if view_field_name is None and schema_properties:
             view_field_name = get_first_match_name(schema_properties, schema_properties[0])
@@ -646,6 +666,9 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
 
         if translate_model:
             schema['x-translate-model'] = translate_model
+
+        if hide_not_required:
+            schema['x-hide-not-required'] = bool(hide_not_required)
 
         schema._handled = True  # pylint: disable=protected-access
 

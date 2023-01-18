@@ -48,6 +48,8 @@ class Variable(BModel):
 
 
 class SubVariablesSerializer(BaseSerializer):
+    _hide_not_required = True
+
     key = drf_fields.CharField(read_only=True)
     value = drf_fields.CharField(read_only=True)
 

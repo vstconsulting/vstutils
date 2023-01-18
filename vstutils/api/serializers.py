@@ -109,6 +109,10 @@ class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer):
         field_class, field_kwargs = super().build_standard_field(field_name, model_field)
         if isinstance(model_field, models.FileField) and issubclass(field_class, fields.NamedBinaryFileInJsonField):
             field_kwargs['file'] = True
+            if model_field.max_length:
+                field_kwargs['max_length'] = model_field.max_length
+                if isinstance(model_field.upload_to, str):
+                    field_kwargs['max_length'] -= len(model_field.upload_to)
         return field_class, field_kwargs
 
     def build_relational_field(self, field_name, relation_info):

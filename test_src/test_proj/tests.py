@@ -2027,6 +2027,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
             },
         })
 
+        # Check hide non required fields option
+        self.assertTrue(api['definitions']['SubVariables']['x-hide-not-required'])
+
         # Check public centrifugo address when absolute path is provided
         self.assertEqual(api['info']['x-centrifugo-address'], 'wss://vstutilstestserver/notify/connection/websocket')
 
@@ -2037,6 +2040,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'type': 'string',
                 'format': 'csvfile',
                 'title': 'Some data',
+                'maxLength': 1024,
+                'minLength': 1,
                 X_OPTIONS: {
                     'media_types': ['text/csv',],
                     'parserConfig': {
