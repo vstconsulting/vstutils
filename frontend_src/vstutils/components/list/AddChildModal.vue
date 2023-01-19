@@ -24,7 +24,7 @@
 
     defineProps<{ view: ListView }>();
 
-    const title = capitalize(i18n.t('add') as string);
+    const title = capitalize(i18n.ts('add'));
 </script>
 
 <style scoped>

@@ -18,7 +18,7 @@
         },
         computed: {
             ariaLabel(): string {
-                return this.$t(this.field.title) as string;
+                return this.$ts(this.field.title);
             },
             valueAsStr() {
                 if (this.value === undefined || this.value === null) {

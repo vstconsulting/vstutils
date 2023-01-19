@@ -85,6 +85,7 @@ export interface Field<
     model?: typeof Model;
 
     translateFieldName: string;
+    fkLinkable: boolean;
 
     getComponent(): Component;
 
@@ -185,6 +186,10 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
 
     get app(): IApp {
         return globalThis.__currentApp;
+    }
+
+    get fkLinkable(): boolean {
+        return (this.constructor as typeof BaseField).fkLinkable;
     }
 
     getComponent(): Component {
@@ -365,7 +370,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
             return '';
         }
         if (typeof errorData === 'string') {
-            return i18n.t(errorData) as string;
+            return i18n.ts(errorData);
         }
         if (Array.isArray(errorData)) {
             return errorData

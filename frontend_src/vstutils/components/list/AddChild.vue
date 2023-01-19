@@ -132,11 +132,11 @@
 
         for (const result of results) {
             if (result.status === 'fulfilled') {
-                guiPopUp.success(i18n.t(pop_up_msg.instance.success.add, [i18n.t(view.title)]) as string);
+                guiPopUp.success(i18n.ts(pop_up_msg.instance.success.add, [i18n.t(view.title)]));
             } else {
                 const str = app.error_handler.errorToString(result.reason);
-                const srt_to_show = i18n.t(pop_up_msg.instance.error.add, [i18n.t(view.title), str]);
-                app.error_handler.showError(srt_to_show as string, str);
+                const srt_to_show = i18n.ts(pop_up_msg.instance.error.add, [i18n.t(view.title), str]);
+                app.error_handler.showError(srt_to_show, str);
             }
         }
 

@@ -49,9 +49,9 @@
 
     const helpText = computed(() => {
         if (props.multiple) {
-            return i18n.t('Select files') as string;
+            return i18n.ts('Select files');
         }
-        return i18n.t('Select file') as string;
+        return i18n.ts('Select file');
     });
 
     function handleInput(event: Event) {

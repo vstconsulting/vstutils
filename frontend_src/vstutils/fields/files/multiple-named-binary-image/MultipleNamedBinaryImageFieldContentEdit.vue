@@ -20,7 +20,7 @@
         <Carousel
             v-if="value && value.length"
             :items="value"
-            :name="$t(field.title)"
+            :name="$ts(field.title)"
             @remove-file="removeFile"
         />
     </div>

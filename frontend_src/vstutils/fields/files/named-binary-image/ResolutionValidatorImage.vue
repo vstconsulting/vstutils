@@ -57,7 +57,7 @@
         </div>
         <template v-if="ready">
             <p v-for="param in checkParams" :key="param" class="validator-params">
-                {{ $u.capitalize($t(param)) }}: {{ paramsValues[param] }}px.
+                {{ $u.capitalize($ts(param)) }}: {{ paramsValues[param] }}px.
                 <span v-if="!isValidSizeParam(param)" class="error">
                     {{ getErrorMessage(param) }}
                 </span>
@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, reactive, onMounted } from 'vue';
+    import { ref, computed, reactive } from 'vue';
     import { i18n } from '@/vstutils/translation';
     import { makeDataImageUrl, readFileAsDataUrl } from '@/vstutils/utils';
     import type { NamedFile } from '@/vstutils/fields/files/named-binary-file';

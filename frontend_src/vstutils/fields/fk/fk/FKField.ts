@@ -127,7 +127,7 @@ export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> impl
         const val = this.getViewFieldValue(value);
         const key = `:model:${this.fkModel!.translateModel || ''}:${this.viewField}:${val as string}`;
         if (i18n.te(key)) {
-            return i18n.t(key) as string;
+            return i18n.ts(key);
         }
         return val as TRepresent;
     }
