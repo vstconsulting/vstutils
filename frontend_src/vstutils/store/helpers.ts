@@ -596,7 +596,7 @@ export function usePageLeaveConfirmation({
 
     function askForLeaveConfirmation() {
         if (askIf.value) {
-            return window.confirm(i18n.t(message) as string);
+            return window.confirm(i18n.ts(message));
         }
         return true;
     }

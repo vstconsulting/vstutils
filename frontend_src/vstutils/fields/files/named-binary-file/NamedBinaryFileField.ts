@@ -46,7 +46,7 @@ export class NamedBinaryFileField
         if (value && this.required && value.name === null && value.content === null) {
             throw {
                 error: 'validation',
-                message: i18n.t(pop_up_msg.field.error.empty) as string,
+                message: i18n.ts(pop_up_msg.field.error.empty),
             };
         }
 

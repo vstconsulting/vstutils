@@ -26,7 +26,7 @@
                 </div>
             </splide-slide>
         </splide>
-        <BootstrapModal ref="modalRef" :title="$t(name)">
+        <BootstrapModal ref="modalRef" :title="$ts(name)">
             <img
                 v-if="activeItem"
                 style="max-height: 80vh"

@@ -15,6 +15,7 @@ import {
     useBasePageData,
 } from '@/vstutils/store';
 
+import type { ComponentOptionsMixin } from 'vue/types/v3-component-options';
 import type { IAppInitialized } from '@/vstutils/app';
 import type { Model } from '@/vstutils/models';
 import type { BaseViewStore } from '@/vstutils/store';
@@ -42,6 +43,8 @@ export interface Operation {
 export interface Sublink extends Operation {
     href?: string;
 }
+
+type ViewMixin = unknown;
 
 /**
  * Object that describes one action.
@@ -117,7 +120,7 @@ export interface IView<
     isDeepNested: boolean;
     hidden: boolean;
     routeName: string;
-    mixins: typeof Vue[];
+    mixins: ViewMixin[];
 
     sublinks: Map<string, Sublink>;
     actions: Map<string, Action>;
@@ -166,11 +169,11 @@ export class View implements IView {
     routeName: string;
     autoupdate: boolean;
     subscriptionLabels: string[] | null;
-    mixins: typeof Vue[];
+    mixins: ViewMixin[];
 
     sublinks = new Map<string, Sublink>();
     actions = new Map<string, Action>();
-    parent: IView | null = null;
+    parent?: IView | null;
 
     showOperationButtons = true;
     showBackButton = true;
@@ -179,7 +182,7 @@ export class View implements IView {
     storeDefinitionFactory: (view: IView) => () => Record<string, unknown> = (view) => () =>
         useBasePageData(view);
 
-    constructor(params: ViewParams, objects: QuerySet, mixins: typeof Vue[] = []) {
+    constructor(params: ViewParams, objects: QuerySet, mixins: ViewMixin[] = []) {
         this.params = params;
         this.objects = objects;
         this.type = params.type ?? (this.constructor as typeof View).viewType;
@@ -253,7 +256,7 @@ export class View implements IView {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const thisView = this;
         return {
-            mixins: this.mixins,
+            mixins: this.mixins as ComponentOptionsMixin[],
             provide() {
                 return {
                     view: thisView,

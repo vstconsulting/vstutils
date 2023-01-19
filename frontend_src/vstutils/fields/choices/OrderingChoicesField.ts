@@ -3,7 +3,7 @@ import { type RawEnumItem, ChoicesField } from './ChoicesField';
 
 class OrderingChoicesField extends ChoicesField {
     translateValue(value: string): string {
-        const translated = i18n.t(value) as string;
+        const translated = i18n.ts(value);
         if (translated === value) {
             return translated.replace(/_/g, ' ');
         }

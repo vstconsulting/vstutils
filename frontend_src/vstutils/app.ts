@@ -419,12 +419,12 @@ export class App implements IApp {
         //                  in tests, so use router.constructor instead.
         Vue.use(this.router.constructor);
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        /* eslint-disable */
         Vue.prototype.$app = this;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         Vue.prototype.$u = utils;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         Vue.prototype.$st = i18n.st.bind(i18n);
+        Vue.prototype.$ts = i18n.ts.bind(i18n);
+        /* eslint-enable */
 
         this.rootVm = new Vue({
             mixins: [this.appRootComponent, ...this.additionalRootMixins],

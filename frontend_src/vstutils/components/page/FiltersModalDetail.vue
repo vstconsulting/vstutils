@@ -1,5 +1,5 @@
 <template>
-    <BootstrapModal v-if="model" ref="modalRef" :title="$u.capitalize($t('filters'))">
+    <BootstrapModal v-if="model" ref="modalRef" :title="$u.capitalize($ts('filters'))">
         <template #default>
             <ModelFields
                 :model="model"
@@ -12,10 +12,10 @@
         </template>
         <template #footer="{ closeModal }">
             <button class="btn btn-default btn-close-filters-modal" aria-label="Cancel" @click="closeModal">
-                {{ $u.capitalize($t('cancel')) }}
+                {{ $u.capitalize($ts('cancel')) }}
             </button>
             <button class="btn btn-primary btn-apply-filters" aria-label="Filter" @click="filter">
-                {{ $u.capitalize($t('apply')) }}
+                {{ $u.capitalize($ts('apply')) }}
             </button>
         </template>
         <template #activator>

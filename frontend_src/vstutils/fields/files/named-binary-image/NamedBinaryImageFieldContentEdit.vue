@@ -28,10 +28,9 @@
 
 <script setup lang="ts">
     import type { ExtractRepresent } from '@/vstutils/fields/base';
-    import { computed, ref, toRef } from 'vue';
+    import { computed, toRef } from 'vue';
     import type { NamedFile } from '../named-binary-file';
     import { useNamedFileText } from '../named-binary-file';
-    import { useDragAndDrop } from '../useDragAndDrop';
     import ImageBlock from './ImageBlock.vue';
     import type NamedBinaryImageField from './NamedBinaryImageField';
     import { useResolutionValidator } from './useResolutionValidator';

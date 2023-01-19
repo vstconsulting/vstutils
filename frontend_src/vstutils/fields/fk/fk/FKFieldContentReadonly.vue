@@ -3,13 +3,12 @@
         <i class="fa-spin fas fa-sync-alt" />
     </div>
     <div v-else>
-        <template v-if="!representField.constructor.fkLinkable">
+        <template v-if="!linkable && representField">
             <component
-                :is="representField.component"
+                :is="representField.getComponent()"
                 :field="representField"
                 :data="{ [representField.name]: field.getViewFieldValue(value) }"
-                :type="$parent.type"
-                :hideable="$parent.hideable"
+                type="readonly"
                 hide-title
             />
             <div v-if="withLink" class="object-link">
@@ -42,6 +41,10 @@
     const { queryset } = useQuerySets(props.field, props.data);
 
     const representField = props.field.fkModel!.fields.get(props.field.viewField);
+
+    const linkable = computed(() => {
+        return representField?.fkLinkable;
+    });
 
     const withLink = computed<boolean>(
         () => props.field.makeLink && (!props.value || !(props.value as Model).__notFound),

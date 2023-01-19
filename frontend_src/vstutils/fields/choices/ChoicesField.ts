@@ -41,7 +41,7 @@ export class ChoicesField extends StringField<ChoicesFieldXOptions> {
     translateValue(value: string) {
         const key = `:model:${this.model?.translateModel || ''}:${this.translateFieldName}:${value}`;
         if (i18n.te(key)) {
-            return i18n.t(key) as string;
+            return i18n.ts(key);
         }
         return value;
     }

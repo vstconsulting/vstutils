@@ -55,7 +55,7 @@ class MultipleNamedBinaryFileField
 
             throw {
                 error: 'validation',
-                message: (i18n.t(pop_up_msg.field.error.empty) as string).format(i18n.t(title) as string),
+                message: i18n.ts(pop_up_msg.field.error.empty).format(i18n.ts(title)),
             };
         }
 

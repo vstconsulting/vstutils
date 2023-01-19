@@ -17,7 +17,9 @@
   "scripts": {
     "build": "APP_ENV=prod webpack --json vstutils/static/bundle/output.json",
     "devBuild": "webpack --json vstutils/static/bundle/output.json",
-    "lint": "eslint --ext .js,.vue,.ts frontend_src/",
+    "lint:code": "eslint --ext .js,.vue,.ts frontend_src/",
+    "lint:types": "vue-tsc --noEmit -p ./frontend_src/tsconfig.json",
+    "lint": "conc --group --timings npm:lint:*",
     "test": "jest --config frontend_src/jest.config.js"
   },
   "dependencies": {
@@ -81,6 +83,7 @@
     "@vue/vue2-jest": "^29.0.0",
     "babel-jest": "^29.0.0",
     "babel-loader": "^8.2.3",
+    "concurrently": "^7.6.0",
     "css-loader": "^6.5.1",
     "dotenv": "^11.0.0",
     "eslint": "^8.6.0",
@@ -98,6 +101,7 @@
     "ts-loader": "^9.3.1",
     "typescript": "^4.9.0",
     "vue-loader": "^15.10.0",
+    "vue-tsc": "^1.0.24",
     "webpack": "^5.65.0",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^4.9.1"

@@ -20,7 +20,7 @@
         </div>
         <ConfirmModal
             ref="confirmationModalRef"
-            :message="$t('Your changes will be deleted. Are you sure?')"
+            :message="$ts('Your changes will be deleted. Are you sure?')"
             @confirm="confirmClear"
             @reject="rejectClear"
         />
@@ -68,7 +68,7 @@
     const tableConfig = props.field.getTableConfig();
 
     const rows = computed(() => {
-        return props.value || [];
+        return (props.value || []) as Record<string, unknown>[];
     });
     const requiredErrorTextVar = computed(() => {
         return `--required-error-text: "${i18n.tc('Column is required!')}"`;

@@ -73,7 +73,7 @@ export class CsvFileField extends BaseField<
 
     getTableConfig() {
         const obj = this.props.items;
-        const tableConfig: ColumnConfig[] = [{ prop: '_index', name: i18n.t('Index') as string }];
+        const tableConfig: ColumnConfig[] = [{ prop: '_index', name: i18n.ts('Index') }];
         for (const [name, property] of Object.entries(obj.properties ?? {})) {
             const column: ColumnConfig = {
                 prop: name,
