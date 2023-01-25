@@ -18,48 +18,48 @@
     </BootstrapModal>
 </template>
 
-<script>
-    import BootstrapModal from '../BootstrapModal';
+<script setup lang="ts">
+    import { ref } from 'vue';
+    import BootstrapModal from '../BootstrapModal.vue';
 
-    export default {
-        name: 'ConfirmModal',
-        components: { BootstrapModal },
-        props: {
-            title: { type: String, default: 'Confirm action' },
-            message: { type: String, default: '' },
-            confirmTitle: { type: String, default: 'Yes' },
-            rejectTitle: { type: String, default: 'No' },
-        },
-        data() {
-            return {
-                isActioned: false,
-            };
-        },
-        methods: {
-            callConfirm() {
-                this.isActioned = true;
-                this.$emit('confirm');
-            },
-            callReject() {
-                this.isActioned = true;
-                this.$emit('reject');
-            },
-            closeCallback() {
-                if (!this.isActioned) {
-                    this.callReject();
-                }
-            },
-            closeModal() {
-                if (this.$refs.modal.isOpen) {
-                    this.$refs.modal.close();
-                }
-            },
-            openModal() {
-                this.isActioned = false;
-                if (!this.$refs.modal.isOpen) {
-                    this.$refs.modal.open();
-                }
-            },
-        },
-    };
+    defineProps({
+        title: { type: String, default: 'Confirm action' },
+        message: { type: String, default: '' },
+        confirmTitle: { type: String, default: 'Yes' },
+        rejectTitle: { type: String, default: 'No' },
+    });
+
+    const emit = defineEmits<{
+        (e: 'confirm'): void;
+        (e: 'reject'): void;
+    }>();
+
+    // TODO Replace 'any' with 'InstanceType<typeof BootstrapModal>' in vstutils 5.3
+    const modal = ref<any | null>(null);
+
+    let isActioned = false;
+
+    function callConfirm() {
+        modal.value!.close();
+        isActioned = true;
+        emit('confirm');
+    }
+    function callReject() {
+        modal.value!.close();
+        isActioned = true;
+        emit('reject');
+    }
+    function closeCallback() {
+        if (!isActioned) {
+            callReject();
+        }
+    }
+    function openModal() {
+        isActioned = false;
+        if (!modal.value!.isOpen) {
+            modal.value!.open();
+        }
+    }
+
+    defineExpose({ openModal });
 </script>
