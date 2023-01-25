@@ -179,9 +179,8 @@
                 this.sandbox[field] = value;
             },
             createActionClickHandler(callback, action) {
-                callback();
-                this.$nextTick(() => {
-                    this.$emit('execute-action', { action, instance: this.instance });
+                callback({
+                    onHidden: () => this.$emit('execute-action', { action, instance: this.instance }),
                 });
             },
             getSublinkPath(sublink, instance) {

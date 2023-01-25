@@ -63,7 +63,7 @@
 <script>
     import ControlSidebar from './components/items/ControlSidebar.vue';
     import { Logo, MainFooter, Sidebar, TopNavigation, convertXMenuToSidebar } from './components/items';
-    import ConfirmModal from './components/common/ConfirmModal';
+    import ConfirmModal from './components/common/ConfirmModal.vue';
     import EntityView from './components/common/EntityView.vue';
 
     const DARK_MODE_CLASS = 'dark-mode';
@@ -222,12 +222,9 @@
             confirm() {
                 this.confirmation.callback();
                 this.confirmation.callback = null;
-                this.$refs.confirmationModal.closeModal();
             },
             reject() {
                 this.confirmation.callback = null;
-                this.$refs.confirmationModal.closeModal();
-                this.$refs.confirmationModal.$emit('closeCallback');
             },
             openControlSidebar() {
                 this.isControlSidebarOpen = true;
@@ -272,7 +269,6 @@
                 window.location.reload();
             },
             rollbackSettings() {
-                this.$refs.saveSettingsModal.closeModal();
                 this.userSettings.rollback();
                 this.localSettings.rollback();
             },

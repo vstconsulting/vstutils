@@ -47,6 +47,7 @@
 
 <script lang="ts">
     import $ from 'jquery';
+    import type JQuery from 'jquery';
     import { defineComponent } from 'vue';
     import OverlayLoader from '@/vstutils/components/OverlayLoader.vue';
 
@@ -87,9 +88,10 @@
             loading: { type: Boolean, default: false },
         },
         emits: ['shown', 'exit'],
-        data() {
+        data(): { isOpen: boolean; jEl: JQuery<HTMLElement> | null } {
             return {
                 isOpen: false,
+                jEl: null,
             };
         },
         beforeDestroy() {
@@ -99,10 +101,12 @@
         },
         methods: {
             onModalCreated(el: HTMLElement) {
-                $(el)
+                this.jEl = $(el);
+                this.jEl
                     .modal({ show: true })
                     .on('hidden.bs.modal', () => {
                         this.isOpen = false;
+                        this.jEl = null;
                         this.$emit('exit');
                         onModalClosed();
                     })
@@ -114,9 +118,12 @@
             open() {
                 this.isOpen = true;
             },
-            close() {
-                if (this.$refs.modal) {
-                    $(this.$refs.modal).modal('hide');
+            close({ onHidden }: { onHidden?: () => void } = {}) {
+                if (this.jEl) {
+                    if (onHidden) {
+                        this.jEl.on('hidden.bs.modal', onHidden);
+                    }
+                    this.jEl.modal('hide');
                 }
             },
         },
