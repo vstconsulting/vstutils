@@ -56,6 +56,12 @@ class PhoneBookSerializer(AuthorProfileSerializer):
     name = CharField(read_only=True)
 
 
+def check_named_response_as_result_serializer(view, request, *args, **kwargs):
+    serializer = view.get_serializer()
+    assert isinstance(serializer, PhoneBookSerializer), f"{serializer}"
+    return {"detail": "OK"}
+
+
 class PropertyAuthorSerializer(BaseSerializer):
     phone = PhoneField(allow_null=True, required=False)
 
@@ -150,6 +156,10 @@ class Author(BModel):
                 methods=["get", "put", "delete"],
                 serializer_class=AuthorProfileSerializer
             )(),
+            "check_named_response_as_result_serializer": actions.Action(
+                serializer_class=PhoneBookSerializer,
+                result_serializer_class=CheckNamedResponseSerializer
+            )(check_named_response_as_result_serializer),
             "simple_property_action": simple_property_action,
             "simple_property_action_with_query": simple_property_action_with_query,
             "get_file": get_file,

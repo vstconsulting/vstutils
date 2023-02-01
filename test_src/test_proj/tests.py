@@ -2092,6 +2092,18 @@ class OpenapiEndpointTestCase(BaseTestCase):
         sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subgroups/'
         self.assertTrue(api['paths'][sub_path]['get']['x-list'])
 
+        path = '/author/{id}/check_named_response/'
+        self.assertEqual(
+            api['paths'][path]['post']['responses']['201']['schema']['$ref'],
+            '#/definitions/CheckNamedResponse',
+        )
+
+        path = '/author/{id}/check_named_response_as_result_serializer/'
+        self.assertEqual(
+            api['paths'][path]['post']['responses']['201']['schema']['$ref'],
+            '#/definitions/CheckNamedResponse',
+        )
+
         path = '/author/{id}/empty_action/'
         self.assertCount(api['paths'][path], 2)
         self.assertIn('post', api['paths'][path])
@@ -3243,6 +3255,8 @@ class ProjectTestCase(BaseTestCase):
             {'method': 'get', 'path': ['author', author3.id, 'simple_property_action_with_query'], 'query': 'phone=12345678'},
             # [15] Check list page
             {'method': 'get', 'path': ['author', 'phone_book']},
+            # [16] Simple method action with result_serializer_class
+            {'method': 'post', 'path': ['author', author1.id, 'check_named_response_as_result_serializer'], 'data': {}},
 
         ])
 
@@ -3281,6 +3295,9 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[15]['status'], 200)
         valid_results = [{"name": a.name, "phone": a.phone} for a in Author.objects.all()]
         self.assertEqual(results[15]['data'], {"count": len(valid_results), "results": valid_results})
+
+        self.assertEqual(results[16]['status'], 201)
+        self.assertEqual(results[16]['data'], {"detail": "OK"})
 
         response = self.client.get(f'/api/v1/author/{author3.id}/get_file/', HTTP_ACCEPT_CONTENT='text/plain')
         self.assertEqual(response.status_code, 200)
