@@ -31,7 +31,7 @@
         <template v-if="totalOperations > 2 && shouldGroupSublinks">
             <CompactOperations
                 v-if="groupedSublinks.length"
-                :title="$u.capitalize($t('sublinks'))"
+                :title="$u.capitalize($ts('sublinks'))"
                 icon="fas fa-link"
                 :view="view"
                 :operations="groupedSublinks"
@@ -51,7 +51,7 @@
         <template v-if="totalOperations > 2 && shouldGroupActions">
             <CompactOperations
                 v-if="groupedActions"
-                :title="$u.capitalize($t('actions'))"
+                :title="$u.capitalize($ts('actions'))"
                 icon="fas fa-ellipsis-v"
                 :view="view"
                 :operations="groupedActions"
@@ -80,17 +80,19 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
     import OperationButton from './OperationButton.vue';
     import CompactOperations from './CompactOperations.vue';
+    import type { PropType } from 'vue';
+    import type { Action, IView, Sublink } from '@/vstutils/views';
 
     export default {
         name: 'ButtonsRow',
         components: { CompactOperations, OperationButton },
         props: {
-            view: { type: Object, required: true },
-            actions: { type: Array, default: () => [] },
-            sublinks: { type: Array, default: () => [] },
+            view: { type: Object as PropType<IView>, required: true },
+            actions: { type: Array as PropType<Array<Action>>, default: () => [] },
+            sublinks: { type: Array as PropType<Array<Sublink>>, default: () => [] },
         },
         computed: {
             totalOperations() {

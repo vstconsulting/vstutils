@@ -36,8 +36,8 @@
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import { Card } from '@/vstutils/components';
-    import { ModelFields } from '@/vstutils/components/page';
+    import Card from '@/vstutils/components/Card.vue';
+    import ModelFields from '@/vstutils/components/page/ModelFields.vue';
     import { emptyRepresentData } from '@/vstutils/utils';
     import type { NestedObjectField } from '@/vstutils/fields/nested-object';
     import type ArrayField from '../../ArrayField';

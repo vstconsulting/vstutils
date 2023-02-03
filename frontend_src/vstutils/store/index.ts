@@ -4,6 +4,7 @@ import { createLocalSettingsStore, LocalSettingsStore } from './localSettingsSto
 import { createUserSettingsStore, UserSettingsStore } from './userSettingsStore';
 
 export * from './page';
+export * from './page-types';
 export * from './helpers';
 
 export {

@@ -14,6 +14,7 @@ import { NoModel } from '../models';
 import { ActionView, ListView, PageEditView, PageNewView, PageView } from './View.ts';
 import DetailWithoutListPageMixin from '../components/page/DetailWithoutListPageMixin.js';
 import NotEmptyMultiactionModal from '../components/list/NotEmptyMultiactionModal.vue';
+import { openapi_dictionary } from './openapi';
 
 /**
  * Function that checks if status code if OK
@@ -41,13 +42,13 @@ const IS_MULTI_ACTION_PROPERTY_NAME = 'x-multiaction';
 export default class ViewConstructor {
     /**
      * Constructor of ViewConstructor class.
-     * @param {object} openapi_dictionary Dict, that has info about properties names in OpenApi Schema
+     * @param {object|undefined} dictionary Dict, that has info about properties names in OpenApi Schema
      * and some settings for views of different types.
      * @param {ModelsResolver} modelsResolver
      * @param {FieldsResolver} fieldsResolver
      */
-    constructor(openapi_dictionary, modelsResolver, fieldsResolver) {
-        this.dictionary = openapi_dictionary;
+    constructor(dictionary, modelsResolver, fieldsResolver) {
+        this.dictionary = dictionary ?? openapi_dictionary;
         this.modelsResolver = modelsResolver;
         this.fieldsResolver = fieldsResolver;
     }

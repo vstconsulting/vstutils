@@ -2,7 +2,7 @@ import { beforeAll, beforeEach, describe, expect, test } from '@jest/globals';
 import { IntegerField } from '../../fields/numbers/integer';
 import { apiConnector, APIResponse } from '../../api';
 import fetchMock from 'jest-fetch-mock';
-import { makeModel, Model } from '../../models';
+import { makeModel, BaseModel } from '../../models';
 import StringField from '../../fields/text/StringField';
 import { QuerySet } from '../QuerySet';
 import { HttpMethods, RequestTypes } from '../../utils';
@@ -31,7 +31,7 @@ describe('QuerySet', () => {
     });
 
     const User = makeModel(
-        class extends Model {
+        class extends BaseModel {
             static declaredFields = [idField, emailField, nameField];
             static nonBulkMethods = ['get', 'post'];
         },
@@ -39,7 +39,7 @@ describe('QuerySet', () => {
     );
 
     const OneUser = makeModel(
-        class extends Model {
+        class extends BaseModel {
             static declaredFields = [idField, emailField, nameField];
             static nonBulkMethods = ['get', 'patch', 'put', 'delete'];
         },
@@ -47,7 +47,7 @@ describe('QuerySet', () => {
     );
 
     const CreateUser = makeModel(
-        class extends Model {
+        class extends BaseModel {
             static declaredFields = [idField, emailField, nameField];
             static nonBulkMethods = ['post'];
         },
@@ -313,17 +313,17 @@ describe('QuerySet', () => {
 
     describe('bulk requests', () => {
         const User = makeModel(
-            class extends Model {
+            class extends BaseModel {
                 static declaredFields = [idField, nameField];
             },
         );
         const OneUser = makeModel(
-            class extends Model {
+            class extends BaseModel {
                 static declaredFields = [idField, emailField, nameField];
             },
         );
         const CreateUser = makeModel(
-            class extends Model {
+            class extends BaseModel {
                 static declaredFields = [idField, nameField];
             },
         );

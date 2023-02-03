@@ -1,21 +1,10 @@
-import type { Store, StoreActions, StoreGetters, StoreState } from 'pinia';
-import type { ComputedRef } from 'vue';
 import { computed, ref, watch } from 'vue';
-
-import type { BaseViewStore } from './helpers';
 import { useParentViews } from './helpers';
 
-import type { Breadcrumb } from '../breadcrumbs';
+import type { StoreInstance } from '@/vstutils/utils';
+import type { BaseViewStore } from './page-types';
 
-export const GLOBAL_STORE = (): {
-    page: ComputedRef<BaseViewStore | null>;
-    title: ComputedRef<string | undefined>;
-    breadcrumbs: ComputedRef<Breadcrumb[] | undefined>;
-    entityViewClasses: ComputedRef<string[]>;
-    viewItems: ReturnType<typeof useParentViews>['items'];
-    viewItemsMap: ReturnType<typeof useParentViews>['itemsMap'];
-    setPage(store: BaseViewStore): Promise<void>;
-} => {
+export const GLOBAL_STORE = () => {
     const page = ref<BaseViewStore | null>(null);
 
     const title = computed(() => {
@@ -23,7 +12,7 @@ export const GLOBAL_STORE = (): {
     });
 
     const breadcrumbs = computed(() => {
-        return page.value?.breadcrumbs as Breadcrumb[] | undefined;
+        return page.value?.breadcrumbs;
     });
 
     const entityViewClasses = computed(() => {
@@ -46,7 +35,7 @@ export const GLOBAL_STORE = (): {
     return {
         title,
         breadcrumbs,
-        page: page as ComputedRef<BaseViewStore | null>,
+        page,
         entityViewClasses,
         viewItems: parentViews.items,
         viewItemsMap: parentViews.itemsMap,
@@ -54,11 +43,8 @@ export const GLOBAL_STORE = (): {
     };
 };
 
-export type GlobalStore = Store<
-    'global',
-    StoreState<ReturnType<typeof GLOBAL_STORE>>,
-    StoreGetters<ReturnType<typeof GLOBAL_STORE>>,
-    StoreActions<ReturnType<typeof GLOBAL_STORE>>
->;
+export type GlobalStore = StoreInstance<ReturnType<typeof GLOBAL_STORE>>;
 
-export type GlobalStoreInitialized = Omit<GlobalStore, 'page'> & { page: BaseViewStore };
+export type GlobalStoreInitialized = Omit<GlobalStore, 'page'> & {
+    page: BaseViewStore;
+};

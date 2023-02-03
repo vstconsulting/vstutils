@@ -51,10 +51,10 @@ export function useAutoUpdate({
     function stop() {
         app.autoUpdateController.unsubscribe(id);
     }
-    function setCallback(callback: () => Promise<unknown>) {
+    function setCallback(callback: () => Promise<void>) {
         autoUpdateAction.callback = callback;
     }
-    function setPk(newPk: string) {
+    function setPk(newPk: CentrifugoAutoUpdateAction['pk']) {
         pk = newPk;
     }
 

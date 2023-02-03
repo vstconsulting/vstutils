@@ -2,12 +2,13 @@
     <BootstrapModal v-if="model" ref="modalRef" :title="$u.capitalize($ts('filters'))">
         <template #default>
             <ModelFields
+                v-if="instance"
                 :model="model"
-                :data="sandboxData"
+                :data="instance.sandbox.value"
                 editable
                 flat-if-possible
                 flat-fields-classes="col-12"
-                @set-value="({ field, value }) => $set(sandboxData, field, value)"
+                @set-value="(options) => instance?.sandbox.set(options)"
             />
         </template>
         <template #footer="{ closeModal }">
@@ -26,12 +27,12 @@
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import { emptyRepresentData, getApp, mergeDeep } from '@/vstutils/utils';
+    import { getApp, mergeDeep } from '@/vstutils/utils';
     import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
     import ModelFields from '@/vstutils/components/page/ModelFields.vue';
-    import type { PageView } from '@/vstutils/views';
-    import type { DetailPageStore } from '@/vstutils/store/page';
+    import type { PageView, ViewStore } from '@/vstutils/views';
     import type { InnerData } from '@/vstutils/utils';
+    import type { Model } from '@/vstutils/models';
 
     const props = defineProps<{
         view: PageView;
@@ -39,21 +40,22 @@
 
     const modalRef = ref<any | null>(null);
 
-    let sandboxData = ref(emptyRepresentData());
     const app = getApp();
-    const store = app.store.page as DetailPageStore;
+    const store = app.store.page as ViewStore<PageView>;
 
     const model = computed(() => {
         return props.view.filtersModelClass!;
     });
 
+    const instance = ref<Model>();
+
     function openModal() {
         modalRef.value.open();
-        sandboxData.value = new model.value(mergeDeep({}, store.filters) as InnerData)._getRepresentData();
+        instance.value = new model.value(mergeDeep({}, store.filters ?? {}) as InnerData);
     }
 
     function filter() {
-        store.applyFilters(sandboxData.value);
+        store.applyFilters(instance.value!.sandbox.value);
         modalRef.value.close();
     }
 </script>

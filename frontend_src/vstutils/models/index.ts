@@ -1,6 +1,7 @@
 import { StringField } from '@/vstutils/fields/text';
 import { makeModel } from './utils';
-import { Model } from './Model';
+import { BaseModel } from './Model';
+import type { Model } from './Model';
 
 export * from './errors';
 export * from './Model';
@@ -8,7 +9,7 @@ export * from './ModelsResolver';
 export * from './utils';
 
 export const NoModel = makeModel(
-    class extends Model {
+    class extends BaseModel {
         static declaredFields = [
             new StringField({
                 format: 'string',
@@ -22,7 +23,7 @@ export const NoModel = makeModel(
 );
 
 export interface InstancesList extends Array<Model> {
-    extra: {
+    extra?: {
         count?: number;
         [key: string]: any;
     };
@@ -30,8 +31,15 @@ export interface InstancesList extends Array<Model> {
     total?: number;
 }
 
-export function createInstancesList(instances: Model[], extra: Record<string, unknown> = {}) {
+type RequiredInstancesList = Omit<InstancesList, 'extra'> & {
+    extra: Exclude<InstancesList['extra'], undefined>;
+};
+
+export function createInstancesList(
+    instances: Model[],
+    extra: Record<string, unknown> = {},
+): RequiredInstancesList {
     const list = instances as InstancesList;
     list.extra = extra;
-    return list;
+    return list as RequiredInstancesList;
 }

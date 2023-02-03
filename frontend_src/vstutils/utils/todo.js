@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import VueRouter from 'vue-router';
 import moment from 'moment';
 import { i18n } from '@/vstutils/translation';
 import { getApp } from './app-helpers';
@@ -1122,31 +1121,6 @@ export function generatePassword() {
     return result.sort(() => Math.random() - 0.5).join('');
 }
 
-/**
- * @param {Record<string,any>|string} options
- */
-export function openPage(options) {
-    const router = getApp().router;
-
-    if (typeof options === 'object') {
-        // Get name by path so additional params can be passed
-        if (options.path && options.params) {
-            const route = router.resolve(options)?.route;
-            if (route.name !== '404' && !route.meta?.view?.isDeepNested) {
-                options.name = route.name;
-                delete options['path'];
-            }
-        }
-    } else {
-        options = { path: options };
-    }
-    return router.push(options).catch((error) => {
-        if (!VueRouter.isNavigationFailure(error)) {
-            throw error;
-        }
-    });
-}
-
 export function mapStoreState(names) {
     const mapped = {};
     for (const name of names) {
@@ -1166,11 +1140,6 @@ export function mapStoreActions(names) {
     }
     return mapped;
 }
-
-export const getUniqueId = (() => {
-    let id = 0;
-    return () => String(++id);
-})();
 
 export function openSublink(sublink, instance = undefined) {
     const router = getApp().router;

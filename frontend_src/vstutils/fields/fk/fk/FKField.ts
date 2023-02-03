@@ -9,9 +9,8 @@ import FKFieldMixin from './FKFieldMixin';
 import type { ComponentOptions } from 'vue';
 import type { ModelDefinition } from '@/vstutils/AppConfiguration';
 import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
-import type { DetailPageStore } from '@/vstutils/store/page';
-import type { PageView } from '@/vstutils/views';
-import type { Model } from '@/vstutils/models';
+import type { PageView, ViewStore } from '@/vstutils/views';
+import type { Model, ModelConstructor } from '@/vstutils/models';
 import type { QuerySet } from '@/vstutils/querySet';
 import type { IFetchableField } from '@/vstutils/fetch-values';
 
@@ -19,7 +18,7 @@ const dependenceTemplateRegexp = /<<\w+>>/g;
 
 function getPk() {
     const app = getApp();
-    const store = app.store.page as DetailPageStore;
+    const store = app.store.page as ViewStore<PageView>;
     if (typeof store.getInstancePk === 'function') {
         const pk = store.getInstancePk();
         if (pk !== undefined) {
@@ -43,7 +42,10 @@ function getParentPk() {
     return app.router.currentRoute.params[(parentView as PageView).pkParamName!] || '';
 }
 
-const dependenceTemplates = new Map<string, (data: Record<string, unknown>) => string | number>([
+const dependenceTemplates = new Map<
+    string,
+    (data: Record<string, unknown>) => string | number | null | undefined
+>([
     ['pk', getPk],
     ['parent_pk', getParentPk],
     ['view_name', () => getApp().store.page.view.name],
@@ -92,7 +94,7 @@ export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> impl
     showLoader: boolean;
 
     querysets: Map<string | undefined, QuerySet[]>;
-    fkModel?: typeof Model;
+    fkModel?: ModelConstructor;
 
     constructor(options: FieldOptions<FKFieldXOptions, TInner>) {
         super(options);

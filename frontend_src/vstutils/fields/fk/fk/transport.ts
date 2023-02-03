@@ -73,7 +73,7 @@ export function createTransport(field: FKField, querysets: QuerySet[], data: Ref
                 items.push(field.default);
             }
         }
-        const total = instances.extra.count !== undefined ? instances.extra.count : items.length;
+        const total = instances.extra?.count !== undefined ? instances.extra.count : items.length;
         return { items, total };
     }
 

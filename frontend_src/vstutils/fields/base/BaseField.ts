@@ -1,8 +1,9 @@
 import type { Schema, ParameterType, ParameterCollectionFormat } from 'swagger-schema-official';
+import { toRaw } from 'vue';
 import type { InnerData, RepresentData } from '../../utils';
 import { _translate, capitalize, deepEqual, nameToTitle, X_OPTIONS } from '../../utils';
 import { pop_up_msg } from '../../popUp';
-import type { Model } from '../../models';
+import type { Model, ModelConstructor } from '../../models';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 import { i18n } from '../../translation';
 import type { IApp } from '@/vstutils/app';
@@ -10,10 +11,10 @@ import type { Component, ComponentOptions } from 'vue';
 import type Vue from 'vue';
 import type { ComponentOptionsMixin } from 'vue/types/v3-component-options';
 
-type ModelPropertyDescriptor<Represent> = PropertyDescriptor & {
+interface ModelPropertyDescriptor<Represent> extends PropertyDescriptor {
     get(this: Model): Represent | null | undefined;
     set(this: Model, value: Represent | null | undefined): void;
-};
+}
 
 type FieldsData = Record<string, unknown>;
 
@@ -82,7 +83,7 @@ export interface Field<
 
     redirect?: RedirectOptions;
 
-    model?: typeof Model;
+    model?: ModelConstructor;
 
     translateFieldName: string;
     fkLinkable: boolean;
@@ -143,7 +144,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
     redirect?: RedirectOptions;
 
     validators: ((value: Represent) => void)[];
-    model?: typeof Model;
+    model?: ModelConstructor;
 
     translateFieldName: string;
 
@@ -345,14 +346,11 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
 
         return {
             get() {
-                return fieldThis.toRepresent(this._data);
+                return toRaw(this).sandbox.value[fieldThis.name] as Represent | null | undefined;
             },
             set(value: Represent) {
-                fieldThis.validateValue(this._data);
-                this._data[fieldThis.name] = fieldThis.toInner({
-                    ...this._getRepresentData(),
-                    [fieldThis.name]: value,
-                });
+                fieldThis.validateValue({ ...this.sandbox.value, [fieldThis.name]: value });
+                this.sandbox.set({ field: fieldThis.name, value });
             },
         };
     }

@@ -1,17 +1,6 @@
-/**
- * Creates an ID generator function. Every execution returns a prefix text
- * concatenated with an incremented number.
- * @param {string} [prefix] A text to be concatenated with an incremented number.
- */
-export const createGenerator = (prefix = '') => {
-    let count = 0;
-    return () => prefix + (++count).toString(10);
-};
+import { createUniqueIdGenerator } from '@/vstutils/utils';
 
-/**
- * Default generator function.
- */
-const DEFAULT_GENERATOR = createGenerator();
+const DEFAULT_GENERATOR = createUniqueIdGenerator();
 
 /**
  * Mixin to generate unique id for components

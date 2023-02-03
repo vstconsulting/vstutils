@@ -1,7 +1,6 @@
 import { isNavigationFailure, NavigationFailureType } from 'vue-router';
-import { getApp, getUniqueId } from '@/vstutils/utils';
+import { getApp } from '@/vstutils/utils';
 import type { IView } from '@/vstutils/views';
-import { defineStore } from 'pinia';
 import type { RawLocation } from 'vue-router';
 
 export async function openPage(to: RawLocation) {
@@ -14,7 +13,6 @@ export async function openPage(to: RawLocation) {
         }
     }
     const view = app.router.currentRoute.meta!.view as IView;
-    const useStore = defineStore(`${getUniqueId()}-store`, view.getStoreDefinition());
-    const store = useStore();
+    const store = view._createStore();
     await app.store.setPage(store);
 }

@@ -2,7 +2,6 @@ import { test, expect, beforeAll } from '@jest/globals';
 import { createApp } from '../../../unittests/create-app';
 import { createSchema } from '../../../unittests/schema';
 import detailPageSchema from './detailPage-schema.json';
-import { defineStore } from 'pinia';
 import { ActionView } from '../../views';
 import fetchMock from 'jest-fetch-mock';
 
@@ -20,7 +19,7 @@ test('createActionViewStore', async () => {
     expect(actionView).toBeInstanceOf(ActionView);
 
     // Create store for detailView
-    const store = defineStore('action_store', actionView.getStoreDefinition())();
+    const store = actionView._createStore();
     expect(store).not.toBeNull();
 
     expect(store.response).toBeTruthy();

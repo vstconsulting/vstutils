@@ -8,7 +8,7 @@ import type VueI18n from 'vue-i18n';
 
 import { ActionsManager } from '@/vstutils/actions';
 import type { ApiConnector } from '@/vstutils/api';
-import { apiConnector, openapi_dictionary } from '@/vstutils/api';
+import { apiConnector } from '@/vstutils/api';
 import type { Language } from '@/vstutils/api/TranslationsManager';
 import { TranslationsManager } from '@/vstutils/api/TranslationsManager';
 import type { AppConfiguration } from '@/vstutils/AppConfiguration';
@@ -17,7 +17,7 @@ import { AutoUpdateController } from '@/vstutils/autoupdate';
 import type { ComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
 import { globalComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
 import { addDefaultFields, FieldsResolver } from '@/vstutils/fields';
-import type { Model } from '@/vstutils/models';
+import type { Model, ModelConstructor } from '@/vstutils/models';
 import { ModelsResolver } from '@/vstutils/models';
 import { ErrorHandler } from '@/vstutils/popUp';
 import { QuerySetsResolver } from '@/vstutils/querySet';
@@ -33,8 +33,9 @@ import type { GlobalStore, LocalSettingsStore, UserSettingsStore } from '@/vstut
 import { createLocalSettingsStore, createUserSettingsStore, GLOBAL_STORE, pinia } from '@/vstutils/store';
 import { i18n } from '@/vstutils/translation';
 import * as utils from '@/vstutils/utils';
-import type { IView, View } from '@/vstutils/views';
-import { ListView, PageNewView, PageView, ViewConstructor, ViewsTree } from '@/vstutils/views';
+import type { IView, BaseView } from '@/vstutils/views';
+import { ListView, PageNewView, PageView, ViewsTree } from '@/vstutils/views';
+import ViewConstructor from '@/vstutils/views/ViewConstructor.js';
 
 import type { Cache } from '@/cache';
 import type { InnerData } from '@/vstutils/utils';
@@ -87,7 +88,7 @@ export interface IApp {
     userSettingsStore?: UserSettingsStore;
 
     localSettingsStore: LocalSettingsStore | null;
-    localSettingsModel: typeof Model | null;
+    localSettingsModel: ModelConstructor | null;
 
     autoUpdateController: AutoUpdateController;
 
@@ -106,7 +107,7 @@ export interface IAppInitialized extends IApp {
     user: Model;
     rootVm: IAppRoot;
     localSettingsStore: LocalSettingsStore;
-    localSettingsModel: typeof Model;
+    localSettingsModel: ModelConstructor;
     userSettingsStore: UserSettingsStore;
     viewsTree: ViewsTree;
     store: GlobalStoreInitialized;
@@ -146,7 +147,7 @@ export class App implements IApp {
     userSettingsStore?: UserSettingsStore;
 
     localSettingsStore: LocalSettingsStore | null = null;
-    localSettingsModel: typeof Model | null;
+    localSettingsModel: ModelConstructor | null;
 
     autoUpdateController: AutoUpdateController;
 
@@ -227,7 +228,7 @@ export class App implements IApp {
             this.centrifugoClient.connect();
         }
 
-        let userSettingsModel: typeof Model;
+        let userSettingsModel: ModelConstructor;
         try {
             userSettingsModel = this.modelsResolver.byReferencePath('#/definitions/_UserSettings');
         } catch (e) {
@@ -261,7 +262,7 @@ export class App implements IApp {
 
     getCurrentViewPath(this: IAppInitialized) {
         const route = this.router.currentRoute;
-        const view = route.meta?.view as View | undefined;
+        const view = route.meta?.view as BaseView | undefined;
         return view?.path;
     }
 
@@ -269,11 +270,9 @@ export class App implements IApp {
         this.generateDefinitionsModels();
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        this.views = new ViewConstructor(
-            openapi_dictionary,
-            this.modelsResolver,
-            this.fieldsResolver,
-        ).generateViews(this.config.schema);
+        this.views = new ViewConstructor(undefined, this.modelsResolver, this.fieldsResolver).generateViews(
+            this.config.schema,
+        );
 
         this.viewsTree = new ViewsTree(this.views);
         this.qsResolver = new QuerySetsResolver(this.viewsTree);
@@ -298,7 +297,7 @@ export class App implements IApp {
 
     prepareViewsModelsFields() {
         for (const [path, view] of this.views) {
-            const models = new Set<typeof Model>();
+            const models = new Set<ModelConstructor>();
 
             if (view.objects) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -395,7 +394,7 @@ export class App implements IApp {
             window.localStorage,
             'localSettings',
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-            this.localSettingsModel as typeof Model,
+            this.localSettingsModel as ModelConstructor,
         )(pinia);
         this.localSettingsStore.load();
     }

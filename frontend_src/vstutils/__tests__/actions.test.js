@@ -69,14 +69,16 @@ describe('Actions', () => {
             requestModel: ReqModel,
             path: 'execute',
         };
-        const data = { testField: 'some val' };
+        const instance = ReqModel.fromRepresentData({ testField: 'some val' });
 
         fetchMock.mockOnce(JSON.stringify([{ status: 200, data: { some: 'return val' } }]));
-        const result = await app.actions.executeWithData({ action, data, throwError: true });
+        const result = await app.actions.executeWithData({ action, instance, throwError: true });
         expect(result.data).toEqual({ some: 'return val' });
         expect(fetchMock).toBeCalledTimes(1);
         const [url, req] = fetchMock.mock.calls[0];
         expect(url).toBe('http://localhost/api/endpoint/');
-        expect(JSON.parse(req.body)).toEqual([{ method: 'patch', data, path: 'execute' }]);
+        expect(JSON.parse(req.body)).toEqual([
+            { method: 'patch', data: { testField: 'some val' }, path: 'execute' },
+        ]);
     });
 });

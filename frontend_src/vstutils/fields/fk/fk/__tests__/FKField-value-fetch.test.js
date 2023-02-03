@@ -1,6 +1,5 @@
 import { test, describe, beforeAll, expect } from '@jest/globals';
 import { createApp, mount } from '@/unittests';
-import { defineStore } from 'pinia';
 import fetchMock from 'jest-fetch-mock';
 import { deferredPromise } from '@/vstutils/utils';
 
@@ -12,7 +11,7 @@ describe('FKField value loader indicator', () => {
     beforeAll(async () => {
         app = await createApp();
         app.router.push('/user/');
-        app.store.setPage(defineStore('store', app.views.get('/user/').getStoreDefinition())());
+        app.store.setPage(app.views.get('/user/')._createStore());
         User = app.modelsResolver.byReferencePath('#/definitions/User');
         User.nonBulkMethods = ['get', 'GET'];
         field = app.fieldsResolver.resolveField({

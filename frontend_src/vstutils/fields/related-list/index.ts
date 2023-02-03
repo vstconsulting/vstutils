@@ -5,7 +5,7 @@ import RelatedListFieldReadonlyView from './RelatedListFieldReadonlyView.vue';
 
 import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
 import type { ModelDefinition } from '@/vstutils/AppConfiguration';
-import type { Model } from '@/vstutils/models';
+import type { ModelConstructor } from '@/vstutils/models';
 import type { InnerData } from '@/vstutils/utils';
 
 export const RelatedListFieldMixin = {
@@ -32,7 +32,7 @@ export class RelatedListField extends BaseField<Inner, Represent> {
     static fkLinkable = false;
 
     viewType: ViewType;
-    itemsModel?: typeof Model;
+    itemsModel?: ModelConstructor;
 
     constructor(options: RelatedListFieldOptions) {
         super(options);

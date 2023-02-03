@@ -90,6 +90,37 @@
             },
             "x-view-field-name": "username",
             "x-translate-model": "User"
+        },
+        "_MainSettings": {
+            "type": "object",
+            "properties": {
+                "language": {
+                    "title": "Language",
+                    "type": "string",
+                    "enum": ["en","ru"],
+                    "default": "ru"
+                },
+                "dark_mode": {
+                    "title": "Dark mode",
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+        },
+        "_UserSettings": {
+            "type": "object",
+            "properties": {
+                "main": {
+                    "$ref": "#/definitions/_MainSettings",
+                    "title": "Main settings"
+                },
+                "custom": {
+                    "title": "Custom settings",
+                    "type": "string",
+                    "format": "json",
+                    "default": {}
+                }
+            }
         }
     },
     "paths": {

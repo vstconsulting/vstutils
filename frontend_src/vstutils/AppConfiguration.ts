@@ -51,6 +51,7 @@ export type ModelDefinition = Schema & {
     'x-view-field-name'?: string;
     'x-non-bulk-methods'?: HttpMethod[];
     'x-translate-model'?: string;
+    'x-hide-not-required'?: boolean;
 };
 
 export interface AppSchema extends Spec {
