@@ -5,7 +5,7 @@ import { onAppAfterInit } from '@/vstutils/signals';
 import DynamicFieldMixin from './DynamicFieldMixin.vue';
 
 import type { FieldDefinition } from '@/vstutils/fields/FieldsResolver';
-import type { PageView, View } from '@/vstutils/views';
+import type { PageView, BaseView } from '@/vstutils/views';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
 
 interface DynamicFieldXOptions extends FieldXOptions {
@@ -161,7 +161,7 @@ export class DynamicField
             this._getFromValue(parentValues) ??
             this._getDefault();
 
-        field.prepareFieldForView((this.app.router!.currentRoute.meta!.view as View).path);
+        field.prepareFieldForView((this.app.router!.currentRoute.meta!.view as BaseView).path);
 
         if (!field.model && this.model) {
             field.model = this.model;

@@ -13,7 +13,7 @@
                     {{ $t(section.title) }}
                 </h6>
                 <component
-                    :is="field.component"
+                    :is="field.getComponent()"
                     v-for="field in section.fields"
                     :key="field.name"
                     :field="field"
@@ -23,7 +23,7 @@
                 />
             </template>
             <component
-                :is="field.component"
+                :is="field.getComponent()"
                 v-for="field in localSettingsFields"
                 :key="field.name"
                 :field="field"
@@ -51,17 +51,32 @@
     </aside>
 </template>
 
-<script>
+<script lang="ts">
+    import { ref } from 'vue';
     import { HelpModal } from './modal';
     import ControlSidebarButton from './ControlSidebarButton.vue';
-    import ConfirmModal from '../common/ConfirmModal';
+    import ConfirmModal from '../common/ConfirmModal.vue';
+    import type { Field, SetFieldValueOptions } from '@/vstutils/fields/base';
+    import type { NestedObjectField } from '@/vstutils/fields/nested-object';
+    import type AppRoot from '@/vstutils/AppRoot.vue';
+
+    type AppRootEl = InstanceType<typeof AppRoot>;
 
     export default {
         name: 'ControlSidebar',
         components: { HelpModal, ConfirmModal },
+        setup() {
+            const reloadPageModal = ref<InstanceType<typeof ConfirmModal>>();
+
+            return {
+                reloadPageModal,
+            };
+        },
         data() {
             return {
                 isSaving: false,
+                UserSettings: this.$app.modelsResolver.byReferencePath('#/definitions/_UserSettings'),
+
                 localSettings: this.$app.localSettingsStore,
                 userSettings: this.$app.userSettingsStore,
             };
@@ -75,7 +90,8 @@
             },
             sections() {
                 const sectionsFields = Array.from(this.UserSettings.fields.values()).filter(
-                    (f) => f.nestedModel,
+                    (f: Field | NestedObjectField): f is NestedObjectField =>
+                        'nestedModel' in f && f.nestedModel !== undefined,
                 );
 
                 return sectionsFields
@@ -83,7 +99,7 @@
                     .map((field) => ({
                         name: field.name,
                         title: field.title,
-                        fields: Array.from(field.nestedModel.fields.values()),
+                        fields: Array.from(field.nestedModel!.fields.values()),
                     }));
             },
             buttons() {
@@ -109,9 +125,6 @@
                 this.isSaving = false;
             },
         },
-        created() {
-            this.UserSettings = this.$app.modelsResolver.byReferencePath('#/definitions/_UserSettings');
-        },
         mounted() {
             document.addEventListener('keydown', this.closeControlSidebar);
             document.addEventListener('click', this.closeControlSidebar);
@@ -131,31 +144,31 @@
                 if (this.localSettings.changed) {
                     this.localSettings.save();
                 }
-                this.$refs.reloadPageModal.openModal();
+                this.reloadPageModal!.openModal();
             },
             reloadPage() {
                 window.location.reload();
             },
-            setUserSetting(section, options) {
+            setUserSetting(section: string, options: SetFieldValueOptions) {
                 this.userSettings.setValue(section, options);
             },
-            setLocalSetting(options) {
+            setLocalSetting(options: SetFieldValueOptions) {
                 this.localSettings.setValue(options);
             },
             cleanAllCache() {
                 window.cleanAllCacheAndReloadPage();
             },
-            closeControlSidebar(ev) {
-                if (ev.key === 'Escape') {
-                    this.$root.closeControlSidebar();
-                } else if (ev.type === 'click' && !this.$el.contains(ev.target)) {
-                    this.$root.closeControlSidebar();
+            closeControlSidebar(ev: Event) {
+                if ((ev as KeyboardEvent).key === 'Escape') {
+                    (this.$root as AppRootEl).closeControlSidebar();
+                } else if (ev.type === 'click' && !this.$el.contains(ev.target as HTMLElement)) {
+                    (this.$root as AppRootEl).closeControlSidebar();
                 } else if (ev.type === 'scroll' && document.body.getBoundingClientRect().top <= 0) {
-                    this.$root.closeControlSidebar();
+                    (this.$root as AppRootEl).closeControlSidebar();
                 }
             },
             close() {
-                this.$refs.reloadPageModal.closeModal();
+                this.reloadPageModal!.closeModal();
             },
         },
     };

@@ -1,30 +1,17 @@
-import type { PropType } from 'vue';
-import { defineComponent, provide } from 'vue';
-import type { View } from '../views';
+import { defineComponent } from 'vue';
 import { mapStoreActions, mapStoreState } from '../utils';
 import { useViewStore } from '../store/helpers';
+import { ViewPropsDef } from '../views/props';
 
 export const BaseViewMixin = defineComponent({
     inject: ['requestConfirmation'],
-    props: {
-        view: { type: Object as PropType<View>, required: true },
-        query: { type: Object, default: () => ({}) },
-        params: { type: Object, default: () => ({}) },
-    },
+    props: ViewPropsDef,
     setup(props) {
-        // eslint-disable-next-line vue/no-setup-props-destructure
-        const view = props.view;
-        const store = useViewStore(view);
-
-        provide('view', view);
-
+        const store = useViewStore(props.view, { watchQuery: true });
         return { store };
     },
     computed: {
         ...mapStoreState(['loading', 'error', 'response', 'actions', 'sublinks', 'breadcrumbs', 'title']),
-    },
-    watch: {
-        '$route.query': 'fetchData',
     },
     methods: {
         ...mapStoreActions(['initLoading', 'setLoadingError', 'setLoadingSuccessful', 'fetchData']),

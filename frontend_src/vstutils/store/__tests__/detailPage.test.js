@@ -5,7 +5,6 @@ import { createApp } from '@/unittests/create-app';
 import { createSchema } from '@/unittests/schema';
 import detailPageSchema from './detailPage-schema.json';
 import putDetailPageSchema from './putDetailPage-schema.json';
-import { defineStore } from 'pinia';
 
 beforeAll(() => {
     fetchMock.enableMocks();
@@ -25,7 +24,7 @@ test('createDetailViewStore', async () => {
     const detailView = app.views.get('/some_list/{id}/');
 
     // Create store for detailView
-    const store = defineStore('detail_store', detailView.getStoreDefinition())();
+    const store = detailView._createStore();
     expect(store).not.toBeNull();
 
     // Push our path to router
@@ -105,7 +104,7 @@ test('createEditViewStore', async () => {
 
     const editView = app.views.get('/some_list/{id}/edit/');
 
-    const store = defineStore('edit_store', editView.getStoreDefinition())();
+    const store = editView._createStore();
     expect(store).not.toBeNull();
 
     // Push our path to router
@@ -173,7 +172,7 @@ test('patchEditViewStore', async () => {
 
     const editView = app.views.get('/some_list/{id}/edit/');
 
-    const store = defineStore('patch_store', editView.getStoreDefinition())();
+    const store = editView._createStore();
     await app.router.push('/some_list/17/edit');
     await app.store.setPage(store);
 
@@ -226,7 +225,7 @@ test('putEditViewStore', async () => {
 
     const editView = app.views.get('/some_list/{id}/edit/');
 
-    const store = defineStore('put_store', editView.getStoreDefinition())();
+    const store = editView._createStore();
     await app.router.push('/some_list/15/edit');
     await app.store.setPage(store);
 
@@ -280,7 +279,7 @@ test('createNewViewStore', async () => {
     });
 
     const newView = app.views.get('/some_list/new/');
-    const store = defineStore('new_store', newView.getStoreDefinition())();
+    const store = newView._createStore();
     expect(store).not.toBeNull();
     expect(store.model.name).toEqual('OneSomePage');
 

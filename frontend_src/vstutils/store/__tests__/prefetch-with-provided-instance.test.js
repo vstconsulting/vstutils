@@ -1,6 +1,5 @@
 import { beforeAll, expect, test } from '@jest/globals';
 import fetchMock from 'jest-fetch-mock';
-import { defineStore } from 'pinia';
 import { createApp } from '@/unittests/create-app';
 import { createSchema } from '@/unittests/schema';
 import schema from './prefetch-with-provided-instance-schema.json';
@@ -14,7 +13,7 @@ beforeAll(async () => {
 
 test('prefetch with provided instance', async () => {
     const view = app.views.get('/some/{id}/');
-    const store = defineStore('detail_store', view.getStoreDefinition())();
+    const store = view._createStore();
 
     const Some = app.modelsResolver.get('Some');
     const providedInstance = new Some({ id: 123, name: 'test', related: 456 }, view.objects);

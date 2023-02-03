@@ -1,12 +1,12 @@
 <template>
     <div>
-        <portal v-if="showSearch && searchField" to="topNavigation">
+        <portal v-if="view.enableSearch && searchField" to="topNavigation">
             <form class="search-form" @submit.prevent="store.applySearchFilter(searchFieldValue)">
                 <input
                     v-model="searchFieldValue"
                     class="form-control form-control-sm form-control-border search-input"
                     type="text"
-                    :placeholder="$t('Search')"
+                    :placeholder="$ts('Search')"
                 />
                 <button class="search-button" type="submit">
                     <i class="fas fa-search" />
@@ -14,7 +14,7 @@
             </form>
         </portal>
 
-        <portal v-if="isInstanceCounterActive && !error && totalNumberOfInstances >= 0" to="titleAppend">
+        <portal v-if="!error && totalNumberOfInstances >= 0" to="titleAppend">
             <span class="badge bg-info">
                 {{ totalNumberOfInstances }}
             </span>
@@ -38,20 +38,20 @@
                     :has-multi-actions="view.multiActions.size > 0"
                     :instance-actions="instanceActions"
                     :instance-sublinks="instanceSublinks"
-                    @row-clicked="openPageView"
+                    @row-clicked="(instance) => view.openPageView(instance)"
                     @execute-instance-action="
                         ({ action, instance }) => $app.actions.execute({ action, instance, fromList: true })
                     "
                     @open-instance-sublink="({ sublink, instance }) => $u.openSublink(sublink, instance)"
-                    @toggle-selection="toggleSelection"
-                    @toggle-all-selection="toggleAllSelection"
+                    @toggle-selection="store.toggleSelection"
+                    @toggle-all-selection="store.toggleAllSelection"
                 />
                 <div class="list-footer-btns-wrapper">
                     <transition name="slide-from-left">
                         <MultiActions
                             v-if="multiActions.length && selection.length"
                             :multi-actions="multiActions"
-                            :class="uniqMultiActionsClasses"
+                            :class="multiActionsClasses.uniq.value"
                             :selected="selection"
                             :instances="instances"
                             @execute-multi-action="executeMultiAction"
@@ -64,143 +64,86 @@
     </div>
 </template>
 
-<script>
-    import { guiPopUp, pop_up_msg } from '../../popUp';
+<script setup lang="ts">
+    import { computed, provide, ref } from 'vue';
+    import { storeToRefs } from 'pinia';
+
+    import { getApp } from '@/vstutils/utils';
+    import { ViewPropsDef } from '@/vstutils/views/props';
+    import { useViewStore } from '@/vstutils/store';
+
     import ListTable from './ListTable.vue';
     import MultiActions from './MultiActions.vue';
     import Pagination from './Pagination.vue';
-    import { formatPath, joinPaths, mapStoreState, mapStoreActions } from '../../utils';
-    import { BaseViewMixin } from '../BaseViewMixin.ts';
 
-    export default {
-        components: { Pagination, MultiActions, ListTable },
-        mixins: [BaseViewMixin],
-        provide() {
-            return {
-                multiActionsClasses: {
-                    add: this.addMultiActionsClasses,
-                    remove: this.removeMultiActionsClasses,
-                },
-            };
-        },
-        inject: ['requestConfirmation'],
-        data() {
-            return {
-                isInstanceCounterActive: true,
-                showSearch: true,
-                searchFieldValue: '',
-                multiActionsClasses: [],
-            };
-        },
-        computed: {
-            searchField() {
-                return this.view?.filters?.['__search'];
-            },
-            /**
-             * Property that returns total number total number of instances, or -1 if
-             * instances has no count
-             * @returns {number}
-             */
-            totalNumberOfInstances() {
-                const count = this.instances?.extra?.count;
-                return count === undefined ? -1 : count;
-            },
-            fields() {
-                return Array.from(this.model.fields.values()).filter((field) => !field.hidden);
-            },
-            uniqMultiActionsClasses() {
-                return Array.from(new Set(this.multiActionsClasses));
-            },
-            ...mapStoreState([
-                'model',
-                'filters',
-                'instances',
-                'isEmpty',
-                'selection',
-                'paginationItems',
-                'multiActions',
-                'instanceActions',
-                'instanceSublinks',
-                'filters',
-            ]),
-        },
-        methods: {
-            /**
-             * Method, that adds child instance to parent list.
-             * @param {object} opt
-             */
-            async addChildInstance(opt) {
-                let qs = this.getQuerySet(this.view, this.qs_url);
-                try {
-                    await qs.execute({ method: 'post', path: qs.getDataType(), data: opt.data });
-                    guiPopUp.success(
-                        this.$t(pop_up_msg.instance.success.add).format([this.$t(this.view.name)]),
-                    );
-                } catch (error) {
-                    let str = window.app.error_handler.errorToString(error);
-                    let srt_to_show = this.$t(pop_up_msg.instance.error.add).format([
-                        this.$t(this.view.name),
-                        str,
-                    ]);
-                    window.app.error_handler.showError(srt_to_show, str);
-                }
-            },
+    import type { Action, ListView, ViewPropsDefType } from '@/vstutils/views';
 
-            // Pagination
+    const props = defineProps(ViewPropsDef as ViewPropsDefType<ListView>);
 
-            goToPage(pageNumber) {
-                this.$router.push({
-                    path: this.$route.path,
-                    query: { ...this.$route.query, page: pageNumber },
-                });
-            },
+    const app = getApp();
+    const store = useViewStore(props.view, { watchQuery: true });
 
-            // Page view
+    const multiActionsClasses = useUniqueCssClasses('selected__');
+    provide('multiActionsClasses', multiActionsClasses);
 
-            openPageView(instance) {
-                if (this.view.pageView.hidden) {
-                    return;
-                }
-                if (this.view.isDeepNested) {
-                    return this.$router.push(joinPaths(this.$route.path, instance.getPkValue()));
-                }
-                const pageView = this.view.pageView;
-                if (pageView) {
-                    const link = formatPath(pageView.path, this.$route.params, instance);
-                    if (pageView.isFileResponse) {
-                        window.open(`${this.$app.api.baseURL}/${this.$app.api.defaultVersion}${link}`);
-                    } else {
-                        this.$router.push(link);
-                    }
-                }
-            },
+    const searchField = computed(() => props.view?.filters?.['__search']);
 
-            // Multi actions
+    /**
+     * Returns total number of instances, or -1 if instances has no count
+     */
+    const totalNumberOfInstances = computed(() => {
+        return store.instances?.extra?.count ?? -1;
+    });
 
-            async executeMultiAction(action) {
-                const instances = this.instances.filter((instance) =>
-                    this.selection.includes(instance.getPkValue()),
-                );
+    const fields = computed(() => Array.from(store.model.fields.values()).filter((field) => !field.hidden));
 
-                return this.$app.actions.execute({ action, instances });
-            },
+    const searchFieldValue = ref('');
 
-            addMultiActionsClasses(classes) {
-                if (typeof classes === 'string') classes = [classes];
-                classes.forEach((cls) => {
-                    this.multiActionsClasses.push(`selected__${cls}`);
-                });
-            },
-            removeMultiActionsClasses(classes) {
-                if (typeof classes === 'string') classes = [classes];
-                classes.forEach((c) => {
-                    const idx = this.multiActionsClasses.indexOf(`selected__${c}`);
-                    if (idx !== -1) this.multiActionsClasses.splice(idx, 1);
-                });
-            },
-            ...mapStoreActions(['fetchData', 'toggleSelection', 'toggleAllSelection']),
-        },
-    };
+    async function executeMultiAction(action: Action) {
+        const instances = store.instances.filter((instance) =>
+            store.selection.includes(instance.getPkValue()!),
+        );
+
+        return app.actions.execute({ action, instances });
+    }
+
+    const {
+        error,
+        instanceActions,
+        instances,
+        instanceSublinks,
+        isEmpty,
+        model,
+        multiActions,
+        paginationItems,
+        selection,
+    } = storeToRefs(store);
+</script>
+
+<script lang="ts">
+    function useUniqueCssClasses(prefix = '') {
+        const multiActionsClasses = ref<string[]>([]);
+
+        function add(classes: string | string[]) {
+            if (typeof classes === 'string') classes = [classes];
+            for (const cls of classes) {
+                multiActionsClasses.value.push(`${prefix}${cls}`);
+            }
+        }
+        function remove(classes: string | string[]) {
+            if (typeof classes === 'string') classes = [classes];
+            for (const cls of classes) {
+                const idx = multiActionsClasses.value.indexOf(`${prefix}${cls}`);
+                if (idx !== -1) multiActionsClasses.value.splice(idx, 1);
+            }
+        }
+
+        const uniq = computed(() => {
+            return Array.from(new Set(multiActionsClasses.value));
+        });
+
+        return { add, remove, uniq };
+    }
 </script>
 
 <style scoped>

@@ -10,59 +10,134 @@ import {
     emptyInnerData,
     emptyRepresentData,
 } from '@/vstutils/utils';
-import type { FieldValidationErrorInfo } from './errors';
+import { createModelSandbox, type ModelSandbox } from './sandbox';
 import { ModelValidationError } from './errors';
 
-export type ModelConstructor<T extends typeof Model = typeof Model> = new (
-    data?: InnerData,
-    queryset?: QuerySet | null,
-    parentInstance?: Model,
-) => InstanceType<T>;
+export interface FieldsGroup {
+    title: string;
+    fields: (string | Field)[];
+    wrapperClasses?: string;
+}
 
-export class Model {
-    static fieldsGroups: Record<string, string[]> | null = null;
+type RawFieldsGroups = Record<string, string[]>;
+
+export interface FieldsInstancesGroup extends FieldsGroup {
+    fields: Field[];
+}
+
+export interface Model {
+    _name: string;
+    _response?: APIResponse<InnerData>;
+    __notFound?: true;
+
+    _fields: Map<string, Field>;
+    _pkField?: Field;
+    _viewField?: Field;
+    _queryset?: QuerySet;
+    _parentInstance?: Model;
+
+    _data: InnerData;
+    readonly sandbox: ModelSandbox;
+
+    getPkValue(): string | number | undefined | null;
+    getViewFieldString(escapeResult?: boolean): string | undefined;
+    getViewFieldValue(defaultValue?: unknown): unknown;
+    clone(options?: { data?: InnerData }): Model;
+
+    _getInnerData(fieldsNames?: string[]): InnerData;
+    _getRepresentData(): RepresentData;
+    _validateAndSetData(data?: RepresentData): void;
+
+    shouldUseBulk(method: HttpMethod): boolean;
+    isEqual(model: Model): boolean;
+    parseModelError(data: unknown): ModelValidationError | undefined;
+
+    create(method?: HttpMethod): Promise<Model>;
+    update(method?: HttpMethod, fields?: string[]): Promise<Model>;
+    delete(purge?: boolean): Promise<APIResponse<unknown>>;
+}
+
+export type ModelConstructor = typeof BaseModel;
+
+export class BaseModel implements Model {
+    static fieldsGroups?: RawFieldsGroups | ((args: { data: RepresentData }) => FieldsGroup[]);
     static nonBulkMethods: HttpMethod[] | null = null;
     static translateModel: string | null = null;
     static fields = new Map<string, Field>();
     static pkField?: Field;
     static viewField?: Field;
+    static hideNotRequired?: boolean;
 
     _queryset?: QuerySet;
     _parentInstance?: Model;
 
-    _data: InnerData;
+    protected __data: InnerData;
+    protected _sandbox?: ModelSandbox;
 
     _response?: APIResponse<InnerData>;
     __notFound?: true;
 
     constructor(data?: InnerData, queryset?: QuerySet | null, parentInstance?: Model) {
         if (!data) {
-            data = parentInstance?._data ?? (this.constructor as typeof Model).getInitialData();
+            data = parentInstance?._getInnerData() ?? this._c.getInitialData();
         }
         if (!queryset && parentInstance) {
             queryset = parentInstance._queryset;
         }
         this._parentInstance = parentInstance;
-        this._data = data;
+        this.__data = data;
         this._queryset = queryset ?? undefined;
     }
 
+    protected get _c() {
+        return this.constructor as ModelConstructor;
+    }
+
+    get _name() {
+        return this._c.name;
+    }
+
     get _fields() {
-        return (this.constructor as typeof Model).fields;
+        return this._c.fields;
     }
 
     get _pkField() {
-        return (this.constructor as typeof Model).pkField;
+        return this._c.pkField;
     }
 
     get _viewField() {
-        return (this.constructor as typeof Model).viewField;
+        return this._c.viewField;
+    }
+
+    get _data() {
+        return this.__data;
+    }
+
+    set _data(data: InnerData) {
+        this.__data = data;
+        this.sandbox.reset();
+    }
+
+    get sandbox() {
+        if (this._sandbox) {
+            return this._sandbox;
+        }
+        this._sandbox = createModelSandbox(this);
+        return this._sandbox;
     }
 
     static fromRepresentData(data: RepresentData) {
-        const instance = new this();
-        instance._validateAndSetData(data);
-        return instance;
+        return new this(this.representToInner(data));
+    }
+
+    static getFieldsGroups({ data }: { data: RepresentData }): FieldsGroup[] {
+        if (this.fieldsGroups) {
+            if (typeof this.fieldsGroups === 'function') {
+                return this.fieldsGroups({ data });
+            }
+            return Object.entries(this.fieldsGroups).map(([title, fields]) => ({ title, fields }));
+        }
+        return [{ title: '', fields: Array.from(this.fields.keys()) }];
     }
 
     static representToInner(representData: RepresentData): InnerData {
@@ -114,43 +189,18 @@ export class Model {
     }
 
     _getRepresentData(): RepresentData {
-        const data = emptyRepresentData();
-        for (const [name, field] of this._fields) {
-            data[name] = field.toRepresent(this._data);
-        }
-        return data;
+        return this.sandbox.value;
     }
 
     /**
-     * @param {RepresentData} data
      * @throws {ModelValidationError}
      */
-    _validateAndSetData(data: RepresentData) {
-        // Validate data
-        const errors: FieldValidationErrorInfo[] = [];
-        for (const field of this._fields.values()) {
-            try {
-                field.validateValue(data);
-            } catch (e) {
-                errors.push({ field, message: (e as Error).message });
-            }
+    _validateAndSetData(data?: RepresentData) {
+        if (data) {
+            this._data = this._c.fromRepresentData(data).sandbox.validate();
+            return;
         }
-        if (errors.length) throw new ModelValidationError(errors);
-
-        // Set validated data
-        const newData = emptyInnerData();
-        for (const field of this._fields.values()) {
-            newData[field.name] = field.toInner(data);
-        }
-        this._data = newData;
-    }
-
-    _setFieldValue(fieldName: string, value: unknown, isRaw = false) {
-        if (isRaw) {
-            this._data[fieldName] = value;
-        } else {
-            this._data[fieldName] = this._fields.get(fieldName)!.toDescriptor().set.call(this, value);
-        }
+        this.__data = this.sandbox.validate();
     }
 
     getRepresentValue(fieldName: string) {
@@ -198,7 +248,7 @@ export class Model {
     getViewFieldString(escapeResult = true): string | undefined {
         if (this._viewField) {
             let value = this.getRepresentValue(this._viewField.name);
-            if (value instanceof Model) {
+            if (value instanceof BaseModel) {
                 return value.getViewFieldString();
             }
             if (value && typeof value === 'object') {
@@ -221,15 +271,20 @@ export class Model {
         return !this.nonBulkMethods.includes(method);
     }
 
-    async update(method?: HttpMethod, fields?: string[]) {
+    shouldUseBulk(method: HttpMethod) {
+        return this._c.shouldUseBulk(method);
+    }
+
+    async update(method?: HttpMethod, fields?: string[]): Promise<Model> {
         return (await this._queryset!.update(this, [this], method, fields))[0];
     }
 
     async delete(purge = false) {
-        return (await this._queryset!.delete([this], purge))[0];
+        const responses = await this._queryset!.delete([this], purge);
+        return responses[0];
     }
 
-    async create(method: HttpMethod = 'post') {
+    async create(method: HttpMethod = 'post'): Promise<Model> {
         return this._queryset!.create(this, method);
     }
 
@@ -245,7 +300,7 @@ export class Model {
      */
     isEqual(other: Model) {
         if (this === other) return true;
-        if (!(other instanceof Model)) return false;
+        if (!(other instanceof BaseModel)) return false;
         if (other.constructor !== this.constructor) return false;
         for (const field of this._fields.values()) {
             if (!deepEqual(field.getValue(this._data), field.getValue(other._data))) {
@@ -283,11 +338,7 @@ export class Model {
         if (!data) {
             data = mergeDeep({}, this._data) as InnerData;
         }
-        const instance = new (this.constructor as ModelConstructor)(
-            data,
-            this._queryset,
-            this._parentInstance,
-        );
+        const instance = new this._c(data, this._queryset, this._parentInstance);
         return instance as this;
     }
 }

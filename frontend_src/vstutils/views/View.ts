@@ -1,11 +1,20 @@
 import type { StoreState } from 'pinia';
-import type { ComponentOptions, Ref } from 'vue';
+import { defineStore } from 'pinia';
+import type { Component, ComponentOptions, Ref } from 'vue';
 import { ref, toRef } from 'vue';
 
-import { formatPath, getApp, HttpMethods, joinPaths, pathToArray, ViewTypes } from '@/vstutils/utils';
+import {
+    createUniqueIdGenerator,
+    formatPath,
+    getApp,
+    HttpMethods,
+    joinPaths,
+    pathToArray,
+    ViewTypes,
+} from '@/vstutils/utils';
 
-import { ListViewComponent } from '@/vstutils/components/list/';
-import { OneEntity } from '@/vstutils/components/page';
+import ListViewComponent from '@/vstutils/components/list/ListViewComponent.vue';
+import OneEntity from '@/vstutils/components/page/OneEntity.vue';
 import {
     createActionViewStore,
     createDetailViewStore,
@@ -17,27 +26,38 @@ import {
 
 import type { ComponentOptionsMixin } from 'vue/types/v3-component-options';
 import type { IAppInitialized } from '@/vstutils/app';
-import type { Model } from '@/vstutils/models';
-import type { BaseViewStore } from '@/vstutils/store';
-import type { DetailPageStore } from '../store/page';
+import type { Model, ModelConstructor } from '@/vstutils/models';
+import type {
+    BaseViewStore,
+    ListViewStore,
+    PageViewStore,
+    PageNewStore,
+    ActionStore,
+    PageEditStore,
+    DetailViewStore,
+} from '@/vstutils/store';
+
+import type { StyleValue } from 'vue/types/jsx';
 import type { HttpMethod } from '@/vstutils/utils';
 import type { Vue } from 'vue/types/vue';
 import type { Route, RouteConfig } from 'vue-router';
 import type { Operation as SwaggerOperation } from 'swagger-schema-official';
 import type { QuerySet } from '../querySet';
-import type { BaseField } from '../fields/base';
+import type { BaseField, Field } from '../fields/base';
+import type { ViewProps } from './props';
 
 export { ViewTypes };
 
 export interface Operation {
     name: string;
     title: string;
-    styles?: Record<string, string>;
+    style?: StyleValue;
     classes?: string[];
     iconClasses?: string[];
     appendFragment?: string;
     hidden?: boolean;
     doNotShowOnList?: boolean;
+    doNotGroup?: boolean;
 }
 
 export interface Sublink extends Operation {
@@ -46,43 +66,44 @@ export interface Sublink extends Operation {
 
 type ViewMixin = unknown;
 
+const getViewStoreId = createUniqueIdGenerator();
+
 /**
  * Object that describes one action.
  * For empty action path and method are required.
  * For non empty action component or href must me provided.
  */
 export interface Action extends Operation {
-    isEmpty: boolean;
-    isMultiAction: boolean;
+    isEmpty?: boolean;
+    isMultiAction?: boolean;
     component?: any;
     path?: string;
     href?: string;
     method?: HttpMethod;
     confirmationRequired?: boolean;
-    view?: View;
-    responseModel?: typeof Model;
+    view?: ActionView;
+    responseModel?: ModelConstructor;
     handler?: (args: {
         action: Action;
         instance?: Model;
         fromList?: boolean;
         disablePopUp?: boolean;
-    }) => Promise<void>;
-    handlerMany?: (args: { action: Action; instances: Model[]; disablePopUp?: boolean }) => Promise<void>;
+    }) => Promise<any> | any;
+    handlerMany?: (args: {
+        action: Action;
+        instances: Model[];
+        disablePopUp?: boolean;
+    }) => Promise<any> | any;
     redirectPath?: string | (() => string);
     onAfter?: (args: { app: IAppInitialized; action: Action; response: unknown; instance?: Model }) => void;
 }
 
 export interface NotEmptyAction extends Action {
     isEmpty: false;
-    requestModel: typeof Model;
+    requestModel: ModelConstructor;
 }
 
 type ViewType = keyof typeof ViewTypes;
-
-interface ResolveStateArgs {
-    route: Route;
-    store?: BaseViewStore;
-}
 
 export interface ViewParams extends SwaggerOperation {
     operationId: string;
@@ -95,19 +116,24 @@ export interface ViewParams extends SwaggerOperation {
     isDeepNested?: boolean;
     'x-hidden'?: boolean;
     'x-subscribe-labels'?: string[];
-    requestModel?: typeof Model;
-    responseModel?: typeof Model;
+    requestModel?: ModelConstructor;
+    responseModel?: ModelConstructor;
     autoupdate?: boolean;
     routeName?: string;
     [key: string]: any;
 }
 
-type ViewStoreOptions = () => Record<string, unknown>;
+export type ViewStore<T extends IView> = ReturnType<T['_createStore']>;
+
+interface ResolveStateArg<S> {
+    route: Route;
+    store?: S;
+}
 
 export interface IView<
-    TParams extends ViewParams = ViewParams,
     TStore extends BaseViewStore = BaseViewStore,
-    TStateToSave = object,
+    TParams extends ViewParams = ViewParams,
+    TStateToSave = unknown,
 > {
     type: ViewType;
     path: string;
@@ -130,15 +156,19 @@ export interface IView<
 
     objects?: QuerySet;
 
-    modelsList: [typeof Model | null, typeof Model | null];
+    modelsList: [ModelConstructor | null, ModelConstructor | null];
 
     showOperationButtons: boolean;
     showBackButton: boolean;
 
-    resolveState(args: { route: Route; store?: TStore }): Promise<TStateToSave>;
+    resolveState(args: ResolveStateArg<TStore>): Promise<TStateToSave>;
     getSavedState(): StoreState<TStateToSave> | undefined;
 
-    getStoreDefinition(): ViewStoreOptions;
+    /**
+     * Creates new store instance for currently opened page
+     * @internal
+     * */
+    _createStore(): TStore;
 
     getRoutePath(): string;
     toRoute(): RouteConfig;
@@ -153,10 +183,15 @@ export interface IView<
 /**
  * View class - constructor, that returns view object.
  */
-export class View implements IView {
+export abstract class BaseView<
+    TStore extends BaseViewStore = BaseViewStore,
+    TParams extends ViewParams = ViewParams,
+    TStateToSave = object,
+> implements IView<TStore, TParams, TStateToSave>
+{
     static viewType: ViewType = 'PAGE';
 
-    params: ViewParams;
+    params: TParams;
     objects: QuerySet;
     type: ViewType;
     operationId: string;
@@ -178,14 +213,12 @@ export class View implements IView {
     showOperationButtons = true;
     showBackButton = true;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    storeDefinitionFactory: (view: IView) => () => Record<string, unknown> = (view) => () =>
-        useBasePageData(view);
+    protected extendStoreHook = <T>(def: T): T => def;
 
-    constructor(params: ViewParams, objects: QuerySet, mixins: ViewMixin[] = []) {
+    constructor(params: TParams, objects: QuerySet, mixins: ViewMixin[] = []) {
         this.params = params;
         this.objects = objects;
-        this.type = params.type ?? (this.constructor as typeof View).viewType;
+        this.type = params.type ?? (this.constructor as typeof BaseView).viewType;
         this.operationId = params.operationId;
         this.level = params.level;
         this.name = params.name;
@@ -215,28 +248,30 @@ export class View implements IView {
         return this instanceof ActionView;
     }
 
-    extendStore(customDefinition: (originalStore: unknown) => Record<string, unknown>) {
-        const originalStoreDefinitionFactory = this.storeDefinitionFactory;
-        this.storeDefinitionFactory = (view: IView) => () =>
-            customDefinition(originalStoreDefinitionFactory(view)());
+    extendStore(hook: <T>(originalStore: T) => T) {
+        const currentHook = this.extendStoreHook;
+        this.extendStoreHook = (def) => hook(currentHook(def));
     }
 
-    resolveState(args: ResolveStateArgs): Promise<object> {
-        return Promise.resolve({});
+    protected createStoreWithHook<T>(definition: T) {
+        const useStore = defineStore(`page_${getViewStoreId()}`, () => this.extendStoreHook(definition));
+        return useStore();
+    }
+
+    abstract _createStore(): TStore;
+
+    resolveState(args: ResolveStateArg<TStore>): Promise<TStateToSave> {
+        return Promise.resolve({} as TStateToSave);
     }
     getSavedState() {
-        return getApp().store.viewItemsMap.get(this.path)?.state as object | undefined;
+        return getApp().store.viewItemsMap.get(this.path)?.state as StoreState<TStateToSave>;
     }
 
     /**
      * Property that returns array with request and response model
      */
-    get modelsList(): [typeof Model | null, typeof Model | null] {
+    get modelsList(): [ModelConstructor | null, ModelConstructor | null] {
         return [this.params.requestModel || null, this.params.responseModel || null];
-    }
-
-    getStoreDefinition(): ViewStoreOptions {
-        return this.storeDefinitionFactory(this);
     }
 
     /**
@@ -266,9 +301,9 @@ export class View implements IView {
         };
     }
 
-    _propsFunc(route: Route): Record<string, any> {
+    _propsFunc(route: Route): ViewProps {
         const props = {
-            view: this,
+            view: this as IView,
             query: { ...route.query },
             params: { ...route.params },
         };
@@ -288,25 +323,29 @@ export class View implements IView {
     }
 }
 
+export class View extends BaseView {
+    _createStore(): BaseViewStore {
+        return this.createStoreWithHook(useBasePageData(this));
+    }
+}
+
 interface ListViewParams extends ViewParams {
     filters: Record<string, BaseField<any, any>>;
     'x-deep-nested-view'?: string;
 }
-
-export class ListView extends View implements IView<ListViewParams> {
+export class ListView extends BaseView<ListViewStore, ListViewParams> {
     static viewType: ViewType = 'LIST';
 
     declare params: ListViewParams;
     multiActions = new Map<string, Action>();
     pageView: PageView | null = null;
     nestedQueryset: QuerySet | null = null;
-    filters: Record<string, BaseField<any, any>>;
+    filters: Record<string, Field>;
+    enableSearch = true;
 
     deepNestedViewFragment: string | null;
     deepNestedView: ListView | null;
     deepNestedParentView: ListView | null;
-
-    storeDefinitionFactory: (view: any) => any = createListViewStore;
 
     constructor(params: ListViewParams, objects: QuerySet, mixins = [ListViewComponent]) {
         super(params, objects, mixins);
@@ -316,6 +355,10 @@ export class ListView extends View implements IView<ListViewParams> {
         this.deepNestedViewFragment = params['x-deep-nested-view'] || null;
         this.deepNestedView = null;
         this.deepNestedParentView = null;
+    }
+
+    _createStore(): ListViewStore {
+        return this.createStoreWithHook(createListViewStore(this));
     }
 
     getRoutePath(): string {
@@ -331,6 +374,31 @@ export class ListView extends View implements IView<ListViewParams> {
         }
         return super.getRoutePath();
     }
+
+    openPageView(instance: Model) {
+        if (this.pageView?.hidden) {
+            return;
+        }
+
+        const app = getApp();
+        const router = getApp().router;
+        const route = router.currentRoute;
+
+        if (this.isDeepNested) {
+            return router.push(joinPaths(route.path, instance.getPkValue()));
+        }
+        const pageView = this.pageView;
+        if (pageView) {
+            const link = formatPath(pageView.path, route.params, instance);
+            if (pageView.isFileResponse) {
+                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                window.open(`${app.api.baseURL}/${app.api.defaultVersion}${link}`);
+            } else {
+                void router.push(link);
+            }
+        }
+        return;
+    }
 }
 
 interface PageViewParams extends ViewParams {
@@ -338,26 +406,40 @@ interface PageViewParams extends ViewParams {
 }
 
 export interface PageViewStateToSave {
-    instance: Ref<Model>;
+    instance: Ref<Model | null>;
 }
 
-export class PageView extends View implements IView<PageViewParams, DetailPageStore, PageViewStateToSave> {
+export abstract class DetailView<
+    TStore extends DetailViewStore = DetailViewStore,
+    TParams extends ViewParams = ViewParams,
+    TStateToSave = object,
+> extends BaseView<TStore, TParams, TStateToSave> {
+    hideReadonlyFields = false;
+    wrapperClasses = 'col-12';
+
+    beforeFieldsGroups?: () => Component;
+    afterFieldsGroups?: () => Component;
+}
+
+export class PageView extends DetailView<PageViewStore, PageViewParams, PageViewStateToSave> {
     static viewType: ViewType = 'PAGE';
 
     declare params: PageViewParams;
+
     parent: ListView | null = null;
     listView: ListView | null = null;
     pkParamName: string | null = null;
     isFileResponse: boolean;
-    hideReadonlyFields = false;
-    filtersModelClass: typeof Model | null = null;
+    filtersModelClass: ModelConstructor | null = null;
     useViewFieldAsTitle = true;
-
-    storeDefinitionFactory: (view: any) => any = createDetailViewStore;
 
     constructor(params: PageViewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);
         this.isFileResponse = params.isFileResponse ?? false;
+    }
+
+    _createStore(): PageViewStore {
+        return this.createStoreWithHook(createDetailViewStore(this));
     }
 
     getRoutePath(): string {
@@ -376,7 +458,7 @@ export class PageView extends View implements IView<PageViewParams, DetailPageSt
         return super.getRoutePath();
     }
 
-    async resolveState(args: { route: Route; store?: DetailPageStore }): Promise<PageViewStateToSave> {
+    async resolveState(args: ResolveStateArg<PageViewStore>): Promise<PageViewStateToSave> {
         const { route, store } = args;
         if (store) {
             return { instance: toRef(store, 'instance') };
@@ -386,7 +468,7 @@ export class PageView extends View implements IView<PageViewParams, DetailPageSt
         // then we can use instance from store to avoid making extra request
         const currentPageStore = getApp().store.page;
         if (currentPageStore.view.isEditPage() && currentPageStore.view.parent === this) {
-            return { instance: toRef(currentPageStore as DetailPageStore, 'instance') };
+            return { instance: toRef(currentPageStore as ViewStore<PageEditView>, 'instance') };
         }
 
         return {
@@ -397,18 +479,13 @@ export class PageView extends View implements IView<PageViewParams, DetailPageSt
             ),
         };
     }
-    getSavedState() {
-        return getApp().store.viewItemsMap.get(this.path)?.state as
-            | StoreState<PageViewStateToSave>
-            | undefined;
-    }
 }
 
 interface PageNewParams extends ViewParams {
     'x-allow-append'?: boolean;
 }
 
-export class PageNewView extends View implements IView<PageNewParams> {
+export class PageNewView extends DetailView<PageNewStore, PageNewParams> {
     static viewType: ViewType = 'PAGE_NEW';
 
     declare params: PageNewParams;
@@ -416,8 +493,6 @@ export class PageNewView extends View implements IView<PageNewParams> {
     multiActions = new Map<string, Action>();
     listView: ListView | null = null;
     hideReadonlyFields = true;
-
-    storeDefinitionFactory: (view: any) => any = createNewViewStore;
 
     constructor(params: PageNewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);
@@ -428,26 +503,31 @@ export class PageNewView extends View implements IView<PageNewParams> {
         this.nestedAllowAppend = params['x-allow-append'] ?? false;
     }
 
+    _createStore(): PageNewStore {
+        return this.createStoreWithHook(createNewViewStore(this));
+    }
+
     getRoutePath() {
         return joinPaths(this.parent?.getRoutePath(), pathToArray(this.path).last);
     }
 }
 
-export class PageEditView extends PageView implements IView<PageViewParams> {
+export class PageEditView extends DetailView<PageEditStore> {
     static viewType: ViewType = 'PAGE_EDIT';
 
-    // @ts-expect-error TODO PageEditView should not be inherited from PageView
     parent: PageView | null = null;
     isEditStyleOnly = false;
     isPartial: boolean;
     hideReadonlyFields = true;
 
-    storeDefinitionFactory: (view: any) => any = createEditViewStore;
-
     constructor(params: PageViewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);
 
         this.isPartial = params.method === HttpMethods.PATCH;
+    }
+
+    _createStore(): PageEditStore {
+        return this.createStoreWithHook(createEditViewStore(this));
     }
 
     getRoutePath() {
@@ -456,31 +536,28 @@ export class PageEditView extends PageView implements IView<PageViewParams> {
         }
         return super.getRoutePath();
     }
-
-    // @ts-expect-error TODO PageEditView should not be inherited from PageView
-    resolveState(args: ResolveStateArgs): Promise<object> {
-        return Promise.resolve({});
-    }
 }
 
 interface ActionViewParams extends PageViewParams {
     action: NotEmptyAction;
 }
 
-export class ActionView extends View implements IView<ActionViewParams> {
+export class ActionView extends DetailView<ActionStore, ActionViewParams> {
     static viewType: ViewType = 'ACTION';
     declare params: ActionViewParams;
     hideReadonlyFields = true;
     method: HttpMethod;
     action: NotEmptyAction;
 
-    storeDefinitionFactory: (view: any) => any = createActionViewStore;
-
     constructor(params: ActionViewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);
 
         this.method = params.method;
         this.action = params.action;
+    }
+
+    _createStore(): ActionStore {
+        return this.createStoreWithHook(createActionViewStore(this));
     }
 
     getRoutePath() {

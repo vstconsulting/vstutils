@@ -26,28 +26,27 @@ describe('NestedObject field', () => {
             },
             'TestModel',
         );
-
-        const instance = new TestModel();
         const field = TestModel.fields.get('field');
 
-        instance._validateAndSetData({
-            field: {
-                someArray: ['value1', 'value2'],
-            },
-        });
-        expect(instance._getInnerData()).toEqual({
+        expect(
+            TestModel.representToInner({
+                field: {
+                    someArray: ['value1', 'value2'],
+                },
+            }),
+        ).toStrictEqual({
             field: {
                 someArray: 'value1,value2',
             },
         });
 
-        instance._validateAndSetData({ field: null });
-        expect(instance._getInnerData()).toEqual({ field: null });
+        expect(TestModel.fromRepresentData({ field: null })._getInnerData()).toStrictEqual({ field: null });
 
-        instance._validateAndSetData({
-            field: new field.nestedModel({ someArray: 'value2,value1' }),
-        });
-        expect(instance._getInnerData()).toEqual({
+        expect(
+            TestModel.representToInner({
+                field: new field.nestedModel({ someArray: 'value2,value1' }),
+            }),
+        ).toStrictEqual({
             field: {
                 someArray: 'value2,value1',
             },

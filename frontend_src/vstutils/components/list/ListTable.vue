@@ -41,7 +41,7 @@
 </template>
 
 <script>
-    import { signals } from '@/vstutils/signals';
+    import { filterOperations } from '@/vstutils/signals';
     import Popover from '../Popover.vue';
     import SelectToggleButton from './SelectToggleButton.vue';
     import ListTableRow from './ListTableRow.vue';
@@ -93,22 +93,10 @@
         },
         methods: {
             availableActions(instance) {
-                const obj = {
-                    actions: this.instanceActions,
-                    data: instance._data,
-                    isListItem: true,
-                };
-                signals.emit(`<${this.$app.store.page.view.path}>filterActions`, obj);
-                return obj.actions;
+                return filterOperations('actions', this.instanceActions, instance.sandbox.value, true);
             },
             availableSublinks(instance) {
-                const obj = {
-                    sublinks: this.instanceSublinks,
-                    data: instance._data,
-                    isListItem: true,
-                };
-                signals.emit(`<${this.$app.store.page.view.path}>filterSublinks`, obj);
-                return obj.sublinks;
+                return filterOperations('sublinks', this.instanceSublinks, instance.sandbox.value, true);
             },
         },
     };

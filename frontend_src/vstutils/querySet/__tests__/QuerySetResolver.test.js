@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 import { IntegerField } from '../../fields/numbers/integer.js';
-import { Model, makeModel } from '../../models';
+import { BaseModel, makeModel } from '../../models';
 import { RequestTypes } from '../../utils';
 import { QuerySet } from '../QuerySet.ts';
 import { ListView, PageView, ViewsTree } from '../../views';
@@ -9,19 +9,19 @@ import { QuerySetsResolver } from '../QuerySetsResolver.js';
 describe('QuerySetResolver test', () => {
     const idField = new IntegerField({ name: 'id', readOnly: true });
     const Model1 = makeModel(
-        class extends Model {
+        class extends BaseModel {
             static declaredFields = [idField];
         },
         'Model1',
     );
     const Model2 = makeModel(
-        class extends Model {
+        class extends BaseModel {
             static declaredFields = [idField];
         },
         'Model2',
     );
     const Model3 = makeModel(
-        class extends Model {
+        class extends BaseModel {
             static declaredFields = [idField];
         },
         'Model3',

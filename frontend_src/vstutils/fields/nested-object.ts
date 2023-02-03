@@ -13,7 +13,7 @@ import { BaseField, FieldPropsDef, useFieldWrapperClasses } from '@/vstutils/fie
 import { onAppBeforeInit } from '@/vstutils/signals';
 import { emptyInnerData, mapObjectValues } from '@/vstutils/utils';
 
-import type { Model } from '@/vstutils/models';
+import type { ModelConstructor } from '@/vstutils/models';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
 import type { ModelDefinition } from '../AppConfiguration';
 
@@ -61,7 +61,8 @@ export const NestedObjectFieldMixin = defineComponent({
                         data: sandbox,
                         model: props.field.nestedModel,
                         fieldsErrors: props.error,
-                        hideNotRequired: props.field.hideNotRequired,
+                        hideNotRequired:
+                            props.field.hideNotRequired ?? props.field.nestedModel?.hideNotRequired,
                     },
                     on: { 'set-value': setFieldValue },
                 }),
@@ -85,7 +86,7 @@ export class NestedObjectField
     extends BaseField<TInner, TRepresent, NestedObjectFieldXOptions>
     implements Field<TInner, TRepresent, NestedObjectFieldXOptions>
 {
-    nestedModel: typeof Model | null = null;
+    nestedModel: ModelConstructor | null = null;
     hideNotRequired?: boolean;
 
     constructor(options: FieldOptions<NestedObjectFieldXOptions, TInner>) {

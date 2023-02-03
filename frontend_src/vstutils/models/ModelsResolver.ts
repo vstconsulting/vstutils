@@ -1,21 +1,22 @@
 import { signals } from '@/vstutils/signals';
 import { BaseField } from '@/vstutils/fields/base';
 
-import { Model } from './Model';
+import type { ModelConstructor } from './Model';
+import { BaseModel } from './Model';
 import { makeModel } from './utils';
 
-import type { FieldsResolver } from '@/vstutils/fields';
 import type { AppSchema, ModelDefinition } from '@/vstutils/AppConfiguration';
+import type { FieldsResolver } from '@/vstutils/fields';
 
 const REF_PROPERTY = '$ref';
 
 export class ModelsResolver {
-    _definitionsModels = new Map<string, typeof Model>();
+    _definitionsModels = new Map<string, ModelConstructor>();
     protected _modelNameSeq = 1;
 
     constructor(protected fieldsResolver: FieldsResolver, protected schema: AppSchema) {}
 
-    get(value: string | ModelDefinition): typeof Model {
+    get(value: string | ModelDefinition): ModelConstructor {
         if (typeof value === 'string') {
             if (this._definitionsModels.has(value)) {
                 return this._definitionsModels.get(value)!;
@@ -29,7 +30,7 @@ export class ModelsResolver {
     /**
      * Resolves model by reference path
      */
-    byReferencePath(reference: string): typeof Model {
+    byReferencePath(reference: string): ModelConstructor {
         const name = reference.split('/').pop();
         if (name) {
             let model = this._definitionsModels.get(name);
@@ -51,7 +52,7 @@ export class ModelsResolver {
      * Resolves model by schema object. Schema object or $ref is supported.
      * @see {@link https://swagger.io/specification/v2/#schemaObject}
      */
-    bySchemaObject(modelSchema: ModelDefinition, modelName?: string): typeof Model {
+    bySchemaObject(modelSchema: ModelDefinition, modelName?: string): ModelConstructor {
         if (modelSchema[REF_PROPERTY]) {
             return this.byReferencePath(modelSchema[REF_PROPERTY]);
         }
@@ -62,7 +63,7 @@ export class ModelsResolver {
         return `NoNameModel${this._modelNameSeq++}`;
     }
 
-    protected createModel(modelSchema: ModelDefinition, modelName: string): typeof Model {
+    protected createModel(modelSchema: ModelDefinition, modelName: string): ModelConstructor {
         const properties = modelSchema.properties ?? {};
 
         // Set required
@@ -82,12 +83,13 @@ export class ModelsResolver {
         });
 
         const model = makeModel(
-            class extends Model {
+            class extends BaseModel {
                 static declaredFields = fields;
-                static fieldsGroups = modelSchema['x-properties-groups'] || null;
+                static fieldsGroups = modelSchema['x-properties-groups'];
                 static viewFieldName = modelSchema['x-view-field-name'] || null;
                 static nonBulkMethods = modelSchema['x-non-bulk-methods'] || null;
                 static translateModel = modelSchema['x-translate-model'] || null;
+                static hideNotRequired = modelSchema['x-hide-not-required'];
             },
             modelName,
         );

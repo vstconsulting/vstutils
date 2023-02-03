@@ -3,7 +3,6 @@ import fetchMock from 'jest-fetch-mock';
 import { createApp } from '@/unittests/create-app';
 import { createSchema } from '@/unittests/schema';
 import schema from './detailPageFilters-schema.json';
-import { defineStore } from 'pinia';
 
 beforeAll(() => {
     fetchMock.enableMocks();
@@ -16,7 +15,7 @@ beforeEach(() => {
 test('detail page filters', async () => {
     const app = await createApp({ schema: createSchema(schema) });
     const view = app.views.get('/page/{id}/');
-    const store = defineStore('some_store', view.getStoreDefinition())();
+    const store = view._createStore();
 
     app.router.push('/page/1/');
     app.store.setPage(store);

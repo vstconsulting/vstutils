@@ -5,7 +5,7 @@ import { createInstancesList } from '@/vstutils/models';
 import { BulkType, HttpMethods, makeQueryString, objectToFormData, RequestTypes } from '@/vstutils/utils';
 
 import type { RequestType, HttpMethod, InnerData, RepresentData } from '@/vstutils/utils';
-import type { InstancesList, Model } from '@/vstutils/models';
+import type { InstancesList, Model, ModelConstructor } from '@/vstutils/models';
 import type { Field } from '@/vstutils/fields/base';
 import type { ListResponseData } from './types';
 import { fetchInstances } from '@/vstutils/fetch-values';
@@ -19,13 +19,11 @@ type ModelType = typeof REQUEST_MODEL | typeof RESPONSE_MODEL;
  * Error that will be thrown if given instance has not appropriate model.
  */
 export class WrongModelError extends Error {
-    constructor(expectedModel: typeof Model, actualInstance: typeof Model) {
-        // @ts-expect-error Model has no types
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    constructor(expectedModel: ModelConstructor, actualInstance: Model) {
         super(`Wrong model used. Expected: ${expectedModel.name}. Actual: ${actualInstance._name}.`);
     }
 
-    static checkModel(model: typeof Model, instance: Model) {
+    static checkModel(model: ModelConstructor, instance: Model) {
         if (!(instance instanceof model)) {
             throw new WrongModelError(model, instance);
         }
@@ -34,7 +32,10 @@ export class WrongModelError extends Error {
 
 const NOT_PUT_IN_EXTRA = ['results'];
 
-type ModelsConfiguration = Record<RequestType, typeof Model | [typeof Model, typeof Model] | undefined>;
+type ModelsConfiguration = Record<
+    RequestType,
+    ModelConstructor | [ModelConstructor, ModelConstructor] | undefined
+>;
 
 export class QuerySet {
     _url: string | null;
@@ -110,7 +111,7 @@ export class QuerySet {
      * Order used to determine model class:
      * `PARTIAL_UPDATE` / `UPDATE` -> `CREATE` -> `RETRIEVE` -> `LIST`
      */
-    getModelClass(operation: RequestType, modelType: ModelType = RESPONSE_MODEL): typeof Model | null {
+    getModelClass(operation: RequestType, modelType: ModelType = RESPONSE_MODEL): ModelConstructor | null {
         const models = this.models[operation];
 
         if (models) {
@@ -138,7 +139,7 @@ export class QuerySet {
      * Method that returns request model for given operation.
      * Throws error if no model found.
      */
-    getRequestModelClass(operation: RequestType): typeof Model {
+    getRequestModelClass(operation: RequestType): ModelConstructor {
         const model = this.getModelClass(operation, REQUEST_MODEL);
         if (!model) {
             throw new Error(`No request model for operation ${operation} on path ${this.url}`);
@@ -150,10 +151,10 @@ export class QuerySet {
      * Method that returns response model for given operation.
      * Throws error if no model found.
      */
-    getResponseModelClass(operation: RequestType): typeof Model {
+    getResponseModelClass(operation: RequestType): ModelConstructor {
         const model = this.getModelClass(operation, RESPONSE_MODEL);
         if (!model) {
-            throw new Error(`No request model for operation ${operation} on path ${this.url}`);
+            throw new Error(`No response model for operation ${operation} on path ${this.url}`);
         }
         return model;
     }
@@ -289,7 +290,7 @@ export class QuerySet {
             return instance;
         } else {
             const items = await this.filter({ limit: 1 }).items();
-            if (items.extra.count && items.extra.count > 1) {
+            if (items.extra?.count && items.extra.count > 1) {
                 throw new Error('More then one entity found');
             }
             if (!items.length) {
@@ -323,7 +324,7 @@ export class QuerySet {
             useBulk: model.shouldUseBulk(HttpMethods.GET),
         });
 
-        const instances: InstancesList = createInstancesList(
+        const instances = createInstancesList(
             response.data.results.map((item) => new model(item, this.clone())),
         );
 
@@ -476,12 +477,11 @@ export class QuerySet {
      * Method, that sends API request to ApiConnector.
      */
     async execute<T>(req: InternalRequest) {
-        const dataIsModel = this._isModelInstance(req.data);
+        const data = req.data;
+        const dataIsModel = this._isModelInstance(data);
 
         const preparedReq: Parameters<typeof apiConnector.makeRequest>[0] = {
-            // @ts-expect-error Model has no types
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-            useBulk: req.useBulk ?? (dataIsModel ? req.data.constructor.shouldUseBulk(req.method) : true),
+            useBulk: req.useBulk ?? (dataIsModel ? data.shouldUseBulk(req.method) : true),
             method: req.method,
             path: req.path,
             query: req.query,
@@ -489,11 +489,9 @@ export class QuerySet {
             version: req.version,
         };
 
-        if (req.data !== undefined) {
-            const rawData = dataIsModel
-                ? (req.data as Model)._getInnerData()
-                : (req.data as Record<string, unknown>);
-            if (req.useBulk) {
+        if (data !== undefined) {
+            const rawData = dataIsModel ? data._getInnerData() : data;
+            if (preparedReq.useBulk) {
                 preparedReq.data = rawData;
             } else {
                 preparedReq.data = objectToFormData(rawData);

@@ -19,7 +19,6 @@ export class ActionsManager {
     app: IAppInitialized;
 
     constructor(app: IApp) {
-        /** @type {App} */
         this.app = app as IAppInitialized;
     }
 
@@ -44,7 +43,7 @@ export class ActionsManager {
         instances?: Model[];
         skipConfirmation?: boolean;
         fromList?: boolean;
-        disablePopUp: boolean;
+        disablePopUp?: boolean;
     }): Promise<void | Route> {
         const {
             action,
@@ -64,7 +63,8 @@ export class ActionsManager {
 
         if (instances) {
             if (action.handlerMany) {
-                return action.handlerMany({ action, instances, disablePopUp });
+                action.handlerMany({ action, instances, disablePopUp });
+                return Promise.resolve();
             }
 
             if (action.isEmpty) {
@@ -79,7 +79,8 @@ export class ActionsManager {
         }
 
         if (typeof action.handler === 'function') {
-            return action.handler({ action, instance, fromList, disablePopUp });
+            action.handler({ action, instance, fromList, disablePopUp });
+            return Promise.resolve();
         }
 
         if (action.isEmpty) {
@@ -152,47 +153,39 @@ export class ActionsManager {
             }
         } catch (error) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const str = this.app.error_handler.errorToString(error);
+            const str = this.app.error_handler.errorToString(error) as string;
 
-            const srt_to_show = i18n.t(pop_up_msg.instance.error.executeEmpty, [
+            const srt_to_show = i18n.ts(pop_up_msg.instance.error.executeEmpty, [
                 i18n.t(action.name),
                 i18n.t(this.currentView.title),
                 str,
                 parseResponseMessage((error as Record<string, any>).data),
             ]);
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            this.app.error_handler.showError(srt_to_show as string, str);
+            this.app.error_handler.showError(srt_to_show, str);
         }
     }
 
     async executeWithData<T extends string | Record<string, unknown>>({
         action,
-        data,
-        model,
+        instance,
         method,
         path,
         throwError = false,
         disablePopUp = false,
     }: {
         action: NotEmptyAction;
-        data?: Record<string, unknown>;
-        model?: typeof Model;
+        instance: Model;
         method?: HttpMethod;
         path?: string;
         throwError?: boolean;
         disablePopUp?: boolean;
     }): Promise<void | APIResponse<T>> {
-        if (!model) {
-            model = action.requestModel;
-        }
         if (!method) {
             method = action.method!;
         }
-        const instance = new model();
         try {
-            // @ts-expect-error models have no types
-            instance._validateAndSetData(data);
+            instance._validateAndSetData();
         } catch (e) {
             this.app.error_handler.defineErrorAndShow(e);
             if (throwError) {
@@ -206,7 +199,7 @@ export class ActionsManager {
                 method,
                 path: path ?? formatPath(action.path!, this.app.router.currentRoute.params),
                 data: instance._getInnerData(),
-                useBulk: model.shouldUseBulk(method),
+                useBulk: instance.shouldUseBulk(method),
             });
             if (!disablePopUp) {
                 guiPopUp.success(

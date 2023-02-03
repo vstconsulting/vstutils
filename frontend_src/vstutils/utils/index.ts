@@ -1,5 +1,10 @@
+import VueRouter from 'vue-router';
+import { getApp } from './app-helpers';
+
 import type { ParameterType } from 'swagger-schema-official';
+import type { defineStore } from 'pinia';
 import type { Field } from '../fields/base/';
+import type { Route, Location } from 'vue-router';
 
 export * from './todo.js';
 export * from './app-helpers';
@@ -198,4 +203,44 @@ export function emptyInnerData<T extends object = Record<string, unknown>>() {
 
 export function emptyRepresentData<T extends object = Record<string, unknown>>() {
     return {} as RepresentData<T>;
+}
+
+export type StoreInstance<SS extends object> = ReturnType<ReturnType<typeof defineStore<any, SS>>>;
+
+/**
+ * Creates an ID generator function. Every execution returns a prefix text
+ * concatenated with an incremented number.
+ * @param prefix - A text to be concatenated with an incremented number.
+ */
+export function createUniqueIdGenerator(prefix = '') {
+    let count = 0;
+    return () => prefix + (++count).toString(10);
+}
+
+export const getUniqueId = createUniqueIdGenerator();
+
+export function openPage(
+    options: string | (Omit<Location, 'params'> & { params?: Record<string, unknown> }),
+): Promise<Route | undefined> {
+    const router = getApp().router;
+
+    if (typeof options === 'object') {
+        // Get name by path so additional params can be passed
+        if (options.path && options.params) {
+            const route = router.resolve(options as Location).route;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            if (route.name && route.name !== '404' && !route.meta?.view?.isDeepNested) {
+                options.name = route.name;
+                delete options.path;
+            }
+        }
+    } else {
+        options = { path: options };
+    }
+    return router.push(options as Location).catch((error) => {
+        if (!VueRouter.isNavigationFailure(error)) {
+            throw error;
+        }
+        return undefined;
+    });
 }

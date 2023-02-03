@@ -1,6 +1,6 @@
 import { defineComponent } from 'vue';
 import type { CentrifugoAutoUpdateAction, TimerAutoUpdateAction } from './AutoUpdateController';
-import type { View } from './../views';
+import type { BaseView } from './../views';
 import ComponentIDMixin from '../ComponentIDMixin.js';
 
 export default defineComponent({
@@ -13,7 +13,7 @@ export default defineComponent({
             return undefined;
         },
         autoupdateSubscriptionLabels(): string[] | null | undefined {
-            return (this.view as View | null)?.subscriptionLabels;
+            return (this.view as BaseView | null)?.subscriptionLabels;
         },
         autoupdateTriggerType() {
             if (this.$app.centrifugoClient?.isConnected() && this.autoupdateSubscriptionLabels) {

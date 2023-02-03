@@ -1,9 +1,9 @@
 import type { Field } from '@/vstutils/fields/base';
-import type { Model } from './Model';
+import type { BaseModel } from './Model';
 
 const pkFields = ['id', 'pk'];
 
-type RawModel = typeof Model & {
+type RawModel = typeof BaseModel & {
     declaredFields?: Field[];
     viewFieldName?: string | null;
     pkFieldName?: string | null;
@@ -53,7 +53,7 @@ function getViewField(cls: RawModel) {
     return cls.pkField;
 }
 
-export function makeModel(cls: RawModel, name: string): typeof Model {
+export function makeModel(cls: RawModel, name: string): typeof BaseModel {
     // Set model name
     name = name || cls.name;
     if (name) {

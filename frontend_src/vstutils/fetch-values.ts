@@ -5,8 +5,8 @@ import { ArrayField } from '@/vstutils/fields/array';
 import { DynamicField } from '@/vstutils/fields/dynamic';
 import { FKField } from '@/vstutils/fields/fk/fk';
 
-import type { View } from '@/vstutils/views';
-import type { Model } from '@/vstutils/models';
+import type { BaseView } from '@/vstutils/views';
+import type { Model, ModelConstructor } from '@/vstutils/models';
 import type { Field } from '@/vstutils/fields/base';
 import type { QuerySet } from '@/vstutils/querySet';
 import type { InnerData } from '@/vstutils/utils';
@@ -40,7 +40,7 @@ export function fetchInstances(instances: Model[], options: Options = {}): Promi
     if (instances.length === 0) {
         return Promise.resolve();
     }
-    const modelClass = instances[0].constructor as typeof Model;
+    const modelClass = instances[0].constructor as ModelConstructor;
     const fields = Array.from(modelClass.fields.values());
     return fetchInstancesFields(instances, fields, options);
 }
@@ -51,7 +51,7 @@ export function fetchPKs(
     qs?: QuerySet,
 ): Promise<(Model | string | number | undefined | null)[]> {
     if (!qs) {
-        qs = field.getValueFetchQs((getApp().router.currentRoute.meta!.view as View).path);
+        qs = field.getValueFetchQs((getApp().router.currentRoute.meta!.view as BaseView).path);
     }
     if (!qs) {
         return Promise.resolve(pks);
@@ -104,7 +104,7 @@ async function fetchFieldValues(field: IFetchableField, instances: Model[]) {
     const fetchedInstances = await fetchPKs(pks, field);
 
     for (let i = 0; i < fetchedInstances.length; i++) {
-        instances[i]._setFieldValue(field.name, fetchedInstances[i], true);
+        instances[i].sandbox.set({ field: field.name, value: fetchedInstances[i], markChanged: false });
     }
 }
 
@@ -112,9 +112,12 @@ async function fetchArrayFieldValues(field: ArrayField, instances: Model[]): Pro
     const itemInstancesMap = new Map<Model, Model[]>();
     for (const instance of instances) {
         const items = field._deserializeValue(instance._data);
+        const constructor = instance.constructor as ModelConstructor;
         // Create new instance for each item and replace array value with value of one item
-        const itemInstances = items.map((item) =>
-            instance.clone({ data: createPropertyProxy(instance._data, field.name, item) }),
+        class ModelCopy extends constructor {}
+        ModelCopy.fields.set(field.name, field.itemField!);
+        const itemInstances = items.map(
+            (item) => new ModelCopy(createPropertyProxy(instance._data, field.name, item)),
         );
         itemInstancesMap.set(instance, itemInstances);
     }
@@ -127,11 +130,11 @@ async function fetchArrayFieldValues(field: ArrayField, instances: Model[]): Pro
 
     // Put processed items back into original instances
     for (const [instance, itemInstances] of itemInstancesMap) {
-        instance._setFieldValue(
-            field.name,
-            itemInstances.map((itemInstance) => field.getValue(itemInstance._data)),
-            true,
-        );
+        instance.sandbox.set({
+            field: field.name,
+            value: itemInstances.map((itemInstance) => field.getValue(itemInstance.sandbox.value)),
+            markChanged: false,
+        });
     }
 }
 
@@ -139,7 +142,7 @@ async function fetchDynamicFieldValues(field: DynamicField, instances: Model[]):
     const fields = new Map<Field, Model[]>();
 
     for (const instance of instances) {
-        const realField = field.getRealField(instance._data);
+        const realField = field.getRealField(instance.sandbox.value);
         const sameField = Array.from(fields.keys()).find((field) => realField.isEqual(field));
 
         if (sameField) {
@@ -161,13 +164,13 @@ async function fetchRelatedListFieldValues(field: RelatedListField, instances: M
 
     for (const instance of instances) {
         const value = field.getValue(instance._data) ?? [];
-        instance._setFieldValue(
-            field.name,
-            value.map((item) => new model(item)),
-            true,
-        );
+        instance.sandbox.set({
+            field: field.name,
+            value: value.map((item) => new model(item)),
+            markChanged: false,
+        });
     }
-    const allInstancesValues = instances.flatMap((instance) => field.getValue(instance._data));
+    const allInstancesValues = instances.flatMap((instance) => field.getValue(instance.sandbox.value));
 
     return fetchInstances(allInstancesValues as unknown as Model[]);
 }

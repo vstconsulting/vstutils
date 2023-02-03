@@ -1,74 +1,48 @@
 <template>
     <div class="row">
-        <component :is="beforeFieldsGroupsComponent" v-if="beforeFieldsGroupsComponent" :page="self" />
-        <div :class="modelsFieldsWrapperClasses">
+        <component :is="beforeFieldsGroups" v-if="beforeFieldsGroups" :page="self" />
+        <div :class="view.wrapperClasses">
             <ModelFields
                 v-if="response"
-                :data="data"
+                :data="sandbox"
                 :model="model"
                 :editable="!readOnly"
-                :fields-groups="fieldsGroups"
                 :fields-errors="fieldsErrors"
                 :hide-read-only="hideReadOnly"
-                :hide-not-required="hideNotRequired"
                 :require-value-on-clear="requireValueOnClear"
-                @set-value="setFieldValue"
+                @set-value="store.setFieldValue"
             />
         </div>
-        <component :is="afterFieldsGroupsComponent" v-if="afterFieldsGroupsComponent" :page="self" />
+        <component :is="afterFieldsGroups" v-if="afterFieldsGroups" :page="self" />
     </div>
 </template>
 
-<script>
-    import { BaseViewMixin } from '../BaseViewMixin.ts';
-    import HideNotRequiredSelect from './HideNotRequiredSelect';
-    import ModelFields from './ModelFields.vue';
-    import Card from '../Card.vue';
-    import { mapStoreActions, mapStoreState, ViewTypes } from '../../utils';
+<script setup lang="ts">
+    import { computed, getCurrentInstance } from 'vue';
+    import { storeToRefs } from 'pinia';
+    import { ViewTypes } from '@/vstutils/utils';
+    import { useViewStore } from '@/vstutils/store';
+    import { ViewPropsDef } from '@/vstutils/views/props';
+    import ModelFields from '@/vstutils/components/page/ModelFields.vue';
 
-    export default {
-        name: 'OneEntity',
-        components: { ModelFields, HideNotRequiredSelect, Card },
-        mixins: [BaseViewMixin],
-        data() {
-            return {
-                readOnly: this.view.type === ViewTypes.PAGE,
-                hideReadOnly: this.view.hideReadonlyFields,
-                hideNotRequired: false,
-            };
-        },
-        computed: {
-            requireValueOnClear() {
-                if (this.view.isEditPage() && this.view.isPartial) {
-                    return true;
-                }
-                return false;
-            },
-            self() {
-                return this;
-            },
-            beforeFieldsGroupsComponent() {
-                return null;
-            },
-            afterFieldsGroupsComponent() {
-                return null;
-            },
-            modelsFieldsWrapperClasses() {
-                return 'col-12';
-            },
-            fieldsGroups() {
-                return undefined;
-            },
-            data() {
-                return this.store.sandbox;
-            },
-            ...mapStoreState(['fieldsErrors', 'model', 'instance']),
-        },
-        methods: {
-            fieldsGroupClasses(name) {
-                return ['col-md-6', 'fields-group', `fields-group-${name.replace(/ /g, '_')}`];
-            },
-            ...mapStoreActions(['setFieldValue']),
-        },
-    };
+    import type { ViewPropsDefType, DetailView } from '@/vstutils/views';
+
+    const props = defineProps(ViewPropsDef as ViewPropsDefType<DetailView>);
+
+    const store = useViewStore(props.view, { watchQuery: true });
+
+    const readOnly = computed(() => props.view.type === ViewTypes.PAGE);
+    const hideReadOnly = computed(() => props.view.hideReadonlyFields);
+    const requireValueOnClear = computed(() => props.view.isEditPage() && props.view.isPartial);
+
+    const beforeFieldsGroups = computed(() =>
+        props.view.beforeFieldsGroups ? props.view.beforeFieldsGroups() : null,
+    );
+    const afterFieldsGroups = computed(() =>
+        props.view.afterFieldsGroups ? props.view.afterFieldsGroups() : null,
+    );
+
+    const self = getCurrentInstance()!.proxy;
+
+    const { response, sandbox, model, fieldsErrors } = storeToRefs(store);
 </script>

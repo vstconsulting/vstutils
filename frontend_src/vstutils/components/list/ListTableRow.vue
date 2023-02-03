@@ -18,7 +18,7 @@
                 :field="field"
                 :data="sandbox"
                 type="list"
-                @set-value="setFieldValue"
+                @set-value="instance.sandbox.set"
             />
         </td>
         <td v-if="showOperations" class="column column-actions" style="text-align: center">
@@ -131,10 +131,12 @@
             return {
                 formatPath,
                 tableColumnClasses,
-                sandbox: {},
             };
         },
         computed: {
+            sandbox() {
+                return this.instance.sandbox.value;
+            },
             hasOperations() {
                 return this.actions.length || this.sublinks.length;
             },
@@ -159,12 +161,6 @@
             },
         },
         watch: {
-            instance: {
-                handler(instance) {
-                    this.sandbox = instance._getRepresentData();
-                },
-                immediate: true,
-            },
             isSelected: {
                 handler(val) {
                     if (!this.multiActionsClasses) return;
@@ -175,9 +171,6 @@
             },
         },
         methods: {
-            setFieldValue({ field, value }) {
-                this.sandbox[field] = value;
-            },
             createActionClickHandler(callback, action) {
                 callback({
                     onHidden: () => this.$emit('execute-action', { action, instance: this.instance }),

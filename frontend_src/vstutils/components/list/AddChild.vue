@@ -59,6 +59,7 @@
     import Pagination from '@/vstutils/components/list/Pagination.vue';
     import OverlayLoader from '@/vstutils/components/OverlayLoader.vue';
     import type { ListView } from '@/vstutils/views';
+    import type { InstancesList } from '@/vstutils/models';
 
     const emit = defineEmits<{
         (e: 'close'): void;
@@ -75,7 +76,7 @@
     const loading = ref(true);
     const page = ref(1);
     const filterInput = ref<HTMLInputElement | null>(null);
-    const instances = ref(createInstancesList([]));
+    const instances = ref<InstancesList>(createInstancesList([]));
 
     const { toggleAllSelection, toggleSelection, selection, setSelection } = useSelection(instances);
     const paginationItems = usePagination({
