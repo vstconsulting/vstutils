@@ -141,6 +141,11 @@ class Action:
             swagger_kwargs['x-icons'] = self.icons.split(' ') if isinstance(self.icons, _t.Text) else list(self.icons)
         if self.is_page:
             swagger_kwargs['x-list'] = self.is_list
+        if self.result_serializer_class and issubclass(self.result_serializer_class, serializers.Serializer):
+            swagger_kwargs['responses'] = {
+                self.method_response_mapping[method].status_code: self.result_serializer_class
+                for method in self.methods
+            }
 
         res = swagger_auto_schema(**swagger_kwargs)(res)
         res.action = self
