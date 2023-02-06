@@ -7,7 +7,7 @@ import sys
 import time
 import traceback
 from pathlib import Path
-from subprocess import check_call
+import subprocess
 from collections import OrderedDict
 
 from environ import Env
@@ -163,7 +163,7 @@ class DockerCommand(BaseCommand):
                     logger.info(f'Migration locked by key: `{lock.id}`')
                     for db_name in self.databases_to_migrate:
                         logger.info(f'Migrating db "{db_name}".')
-                        check_call(
+                        subprocess.check_call(
                             [
                                 sys.executable,
                                 '-m',
