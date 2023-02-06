@@ -228,11 +228,24 @@ todo_include_todos = False
 
 viewcode_enable_epub = True
 
-_mermaid_cmd = os.path.expanduser('~/node_modules/.bin/mmdc')
+_mermaid_cmd = os.path.expanduser(os.path.join(os.environ.get("NODE_PATH", '~/node_modules'), '.bin/mmdc'))
+if not os.path.exists(_mermaid_cmd):
+    _mermaid_cmd = os.path.expanduser("~/.asdf/shims/mmdc")
+
+if not os.path.exists(_mermaid_cmd):
+    # RTD
+    _mermaid_cmd = '/home/docs/.asdf/shims/mmdc'
+
 if os.path.exists(_mermaid_cmd):
     mermaid_cmd = _mermaid_cmd
     mermaid_pdfcrop = 'pdfcrop'
     mermaid_output_format = 'png'
+    mermaid_params = ['--backgroundColor', 'transparent']
+
+    if (pup_conf := os.path.join(os.path.dirname(__file__), 'puppeteer-config.json')) and os.path.exists(pup_conf):
+        mermaid_params.append('--puppeteerConfigFile')
+        mermaid_params.append(pup_conf)
+
 
 autodoc_mock_imports = ["vstutils.tools", "vstutils.wapp"]
 

@@ -53,6 +53,9 @@ class Notificator:
         if isinstance(instance, (BaseModel, get_user_model())) and getattr(instance, '_notify_update', True):
             self.create_notification_from_instance(instance)
 
+    def get_openapi_secret(self):
+        return settings.CENTRIFUGO_CLIENT_KWARGS.get('token_hmac_secret_key', '')
+
     @raise_context_decorator_with_default(verbose=False)
     def get_client(self):
         centrifugo_client_kwargs = {**settings.CENTRIFUGO_CLIENT_KWARGS}
@@ -75,6 +78,9 @@ class Notificator:
         self.queue.append(
             (labels, data)
         )
+
+    def clear_messages(self):
+        self.queue.clear()
 
     @raise_context_decorator_with_default()
     def send(self):

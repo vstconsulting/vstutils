@@ -1,3 +1,4 @@
+import typing as _t
 from copy import copy
 from warnings import warn
 
@@ -114,7 +115,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
         return nested_view_obj
 
     def get_operation_id(self, operation_keys=None):
-        new_operation_keys = []
+        new_operation_keys: _t.List[str] = []
         append_new_operation_keys = new_operation_keys.append
 
         for key in operation_keys or []:

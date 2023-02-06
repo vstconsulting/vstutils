@@ -25,7 +25,7 @@ class Manager(models.Manager):
 
 
 class BaseModel(_BaseModel):
-    ...
+    objects: Manager.from_queryset(BQuerySet)
 
 
 class BModel(BaseModel):

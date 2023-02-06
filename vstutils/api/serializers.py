@@ -45,7 +45,7 @@ def update_declared_fields(
 
 class DependFromFkSerializerMixin:
     def to_internal_value(self, data):
-        if self.instance is not None and self.partial and isinstance(data, _t.Mapping):
+        if self.instance is not None and self.partial and isinstance(data, _t.Dict):
             missed_interfield_connections: _t.Iterable[fields.DependFromFkField] = {
                 f
                 for f in self._writable_fields

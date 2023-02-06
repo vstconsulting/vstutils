@@ -16,6 +16,7 @@ omit =
     test.py
     upload_big.py
     */vstutils/__main__.py
+    */vstutils/asgi_worker.py
     */vstutils/celery_beat_scheduler.py
     */vstutils/wsgi.py
     */vstutils/compile.py

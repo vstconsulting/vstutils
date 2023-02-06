@@ -112,12 +112,12 @@ class BaseTestCase(TestCase):
                 return b''.join(response.streaming_content).decode('utf-8')
             media_type = f'{getattr(response, "accepted_media_type", "")}' or \
                          response._content_type_for_repr.split(";")[0].replace('"', '').replace(',', '').strip()
-            rendered_content = (
+            rendered_content: _t.Union[str, bytes] = (
                 getattr(response, "rendered_content", False) or response.content
             )
             if media_type == 'application/msgpack':
                 return ormsgpack.unpackb(rendered_content)
-            if getattr(rendered_content, 'decode', False):
+            if getattr(rendered_content, 'decode', None):
                 rendered_content = str(rendered_content.decode('utf-8'))
             try:
                 if media_type in ('application/json', 'application/openapi+json'):

@@ -5,6 +5,7 @@ from django import forms
 from django.forms.utils import ErrorDict
 from django.test import override_settings
 from django.urls import reverse
+from django.http import request as drequest
 from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from django.contrib.auth.hashers import make_password, check_password
@@ -59,6 +60,8 @@ class AgreementField(forms.BooleanField):
 
 
 class RegistrationForm(UserCreationForm):
+    request: drequest.HttpRequest
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

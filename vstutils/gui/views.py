@@ -1,4 +1,5 @@
 #  pylint: disable=bad-super-call,unused-argument
+import typing as _t
 from pathlib import Path
 
 from markdown import markdown
@@ -27,13 +28,13 @@ class BaseView(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)
         if not self.minify_response:
-            response.minify_response = False
+            response.minify_response = False  # type: ignore
         return response
 
     @classmethod
     def as_view(cls, *args, **kwargs):
         view = super().as_view(*args, **kwargs)
-        return cls.login_required and login_required(view, login_url=reverse_lazy('login')) or view
+        return cls.login_required and login_required(view, login_url=reverse_lazy('login')) or view  # type: ignore
 
 
 class GUIView(BaseView):
@@ -134,8 +135,8 @@ class BaseAgreementsView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['header_message'] = self.title_message
-        path = Path(getattr(settings, self.path_in_settings, None))
-        translated_file_path = path.with_name(path.name + f'.{self.request.language.code}')
+        path = Path(_t.cast(str, getattr(settings, self.path_in_settings, None)))
+        translated_file_path = path.with_name(path.name + f'.{self.request.language.code}')  # type: ignore
 
         if translated_file_path.exists():
             path = translated_file_path

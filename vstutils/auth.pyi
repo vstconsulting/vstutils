@@ -1,6 +1,7 @@
 import typing as _t
 import logging
-from django.db.models import Model, QuerySet
+from django.db.models import QuerySet
+from django.contrib.auth import get_user_model
 from django.http.request import HttpRequest
 from .utils import ObjectHandlers
 from .ldap_utils import LDAP as __LDAP
@@ -9,6 +10,21 @@ from .ldap_utils import LDAP as __LDAP
 _LDAP: _t.Type[__LDAP]
 HAS_LDAP: bool
 logger: logging.Logger
+AbstractUserModel = get_user_model()
+GetUserMethodType = _t.Callable[[_t.Any, int], _t.Union[_t.Awaitable[_t.Optional[UserModel]], _t.Optional[UserModel]]]
+AuthRes = _t.Optional[UserModel]
+
+
+def get_secured_cache(key: str) -> _t.Optional[UserModel]:
+    ...
+
+
+def set_secured_cache(key: str, value: UserModel) -> None:
+    ...
+
+
+def cache_user_decorator(func: GetUserMethodType) -> GetUserMethodType:
+    ...
 
 
 class ObjectDoesNotExist(Exception):
@@ -16,12 +32,12 @@ class ObjectDoesNotExist(Exception):
     silent_variable_failure = True
 
 
-class UserModel(Model):
+class UserModel(AbstractUserModel):
     DoesNotExist: ObjectDoesNotExist
 
 
 class BaseAuthBackend:
-    def authenticate(self, request: HttpRequest, username=None, password=None):
+    def authenticate(self, request: HttpRequest, username: str = None, password: str = None):
         raise NotImplementedError  # nocv
 
     def patch_user_queryset(self, queryset: QuerySet) -> QuerySet:
@@ -30,6 +46,7 @@ class BaseAuthBackend:
     def user_can_authenticate(self, user: UserModel) -> bool:
         ...
 
+    @cache_user_decorator
     def get_user(self, user_id: int) -> _t.Union[UserModel, _t.NoReturn]:
         ...
 

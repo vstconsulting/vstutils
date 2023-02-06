@@ -56,7 +56,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         super().add_arguments(parser)
         for name, data in self._values_parser.items():
-            kwargs = dict(**data)
+            kwargs: dict = dict(**data)
             if not kwargs.get('help', None):
                 kwargs['help'] = self.default_help.format(name)
             parser.add_argument(

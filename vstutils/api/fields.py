@@ -530,6 +530,12 @@ class FkField(IntegerField):
         # Remove min/max validators from integer field.
         self.validators = self.validators[:-((self.max_value is not None) + (self.min_value is not None)) or None]
 
+    def to_internal_value(self, data):
+        return self.field_type(data)
+
+    def to_representation(self, value):
+        return self.field_type(value)
+
 
 class FkModelField(FkField):
     """
