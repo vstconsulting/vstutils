@@ -164,7 +164,16 @@ class DockerCommand(BaseCommand):
                     for db_name in self.databases_to_migrate:
                         logger.info(f'Migrating db "{db_name}".')
                         check_call(
-                            [sys.executable, '-m', self.project_name, 'migrate', '--database', db_name, *args],
+                            [
+                                sys.executable,
+                                '-m',
+                                self.project_name,
+                                'migrate',
+                                '--database',
+                                '--check',
+                                db_name,
+                                *args
+                            ],
                             env=self.env,
                             bufsize=0,
                             universal_newlines=True,
@@ -210,14 +219,14 @@ class DockerCommand(BaseCommand):
             os.makedirs(sqlite_default_dir)
         sqlite_db_path = os.path.join(sqlite_default_dir, os.environ.get(f'{self.prefix}_SQLITE_DBNAME', 'db.sqlite3'))
 
-        if os.getenv(f'{self.prefix}_DB_HOST') is not None:  # nocv
+        if os.getenv(f'{self.prefix}_DB_HOST') is not None:
             try:
                 pm_type = os.getenv(f'{self.prefix}_DB_TYPE', 'mysql')
 
                 default_port = ''
                 if pm_type == 'mysql':
                     default_port = '3306'
-                elif pm_type == 'postgresql':
+                elif pm_type == 'postgresql':  # nocv
                     default_port = '5432'
 
                 config['database'] = {
@@ -233,11 +242,11 @@ class DockerCommand(BaseCommand):
                 }
                 if pm_type == 'mysql':
                     config['database.options']['init_command'] = os.getenv('DB_INIT_CMD', '')
-            except KeyError as err:
+            except KeyError as err:  # nocv
                 raise Exception(
                     f'Not enough variables for connect to  SQL server. Variable {str(err)} is required.'
                 ) from err
-        else:
+        else:  # nocv
             config['database'] = {
                 'engine': 'django.db.backends.sqlite3',
                 'name': sqlite_db_path
