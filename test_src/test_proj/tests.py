@@ -690,11 +690,18 @@ class ViewsTestCase(BaseTestCase):
             list(self.get_result('get', '/api/v1/').keys()).sort(),
             list(self.settings_obj.API[self.settings_obj.VST_API_VERSION].keys()).sort()
         )
+
+        # Check static views
+        self.get_result('get', '/static/bundle/output.json', code=200)
+        self.get_result('get', '/docs/', code=200)
+        self.get_result('get', '/docs/index.html', code=200)
+
         # 404
         self.get_result('get', '/api/v1/some/', code=404)
         self.get_result('get', '/other_invalid_url/', code=404)
         self.get_result('get', '/api/user/', code=404)
         self.get_result('get', '/api/v1/user/1000/', code=404)
+        self.get_result('get', '/static/bundle/output.json_unknown', code=404)
 
         # Test js urls minification
         for js_url in ['service-worker.js']:
@@ -2555,6 +2562,12 @@ class EndpointTestCase(BaseTestCase):
         perf_results = '\n'.join(f'{k.upper()}: {v}ms' for k, v in map(iteration, ('post', 'put', 'patch')))
         print(f"\nTimings for different methods:\n{perf_results}\n")
 
+
+    @override_settings(CENTRIFUGO_CLIENT_KWARGS={
+        'address': 'https://localhost:8000',
+        'api_key': "XXX",
+        'token_hmac_secret_key': "YYY"
+    }, CENTRIFUGO_PUBLIC_HOST='https://public:8000/api')
     def test_transactional_bulk(self):
         request = [
             dict(
@@ -3254,7 +3267,7 @@ class ProjectTestCase(BaseTestCase):
             {'method': 'post', 'path': ['author', author1.id, 'check_named_response'], 'data': {}},
             # [2-4] Simple action check
             {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
-            {'method': 'put', 'path': ['author', author1.id, 'author_profile'], "data": {"phone": "88008008880"}},
+            {'method': 'put', 'path': ['author', author1.id, 'author_profile'], "data": {"phone": "88008008880", "referer": author2.id}},
             {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
             {'method': 'delete', 'path': ['author', author1.id, 'author_profile']},
             {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
@@ -3282,11 +3295,11 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[1]['data'], {"detail": "OK"})
 
         self.assertEqual(results[2]['status'], 200)
-        self.assertEqual(results[2]['data'], {"phone": ""})
+        self.assertEqual(results[2]['data'], {"phone": "", "referer": None})
         self.assertEqual(results[3]['status'], 200)
-        self.assertEqual(results[3]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[3]['data'], {"phone": "88008008880", "referer": author2.id})
         self.assertEqual(results[4]['status'], 200)
-        self.assertEqual(results[4]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[4]['data'], {"phone": "88008008880", "referer": author2.id})
         self.assertEqual(results[5]['status'], 204)
         self.assertEqual(results[6]['status'], 404)
 
@@ -3308,7 +3321,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[14]['data'], {"phone": None})
 
         self.assertEqual(results[15]['status'], 200)
-        valid_results = [{"name": a.name, "phone": a.phone} for a in Author.objects.all()]
+        valid_results = [{"name": a.name, "phone": a.phone, "referer": a.referer} for a in Author.objects.all()]
         self.assertEqual(results[15]['data'], {"count": len(valid_results), "results": valid_results})
 
         self.assertEqual(results[16]['status'], 201)

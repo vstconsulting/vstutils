@@ -9,6 +9,7 @@ from vstutils.models import BModel, BaseModel
 from vstutils.models import fields as model_fields
 from vstutils.api.serializers import VSTSerializer, BaseSerializer
 from vstutils.api.fields import (
+    FkField,
     FkModelField,
     MaskedField,
     DeepFkField,
@@ -46,6 +47,7 @@ def check_named_response(view, request, *args, **kwargs):
 
 
 class AuthorProfileSerializer(BaseSerializer):
+    referer = FkField(select='Author', allow_null=True)
     phone = PhoneField(allow_null=True, required=False)
 
     def update(self, instance, validated_data):
@@ -55,6 +57,7 @@ class AuthorProfileSerializer(BaseSerializer):
 
 
 class PhoneBookSerializer(AuthorProfileSerializer):
+    referer = FkField(select='Author', field_type=int)
     name = CharField(read_only=True)
 
 
@@ -117,6 +120,7 @@ class Author(BModel):
     phone = models.CharField(max_length=16, null=True)
     masked = models.CharField(max_length=255, null=True)
     decimal = models.DecimalField(default='13.37', decimal_places=2, max_digits=5)
+    referer = models.IntegerField(null=True)
 
     class Meta:
         _permission_classes = ('rest_framework.permissions.AllowAny', )

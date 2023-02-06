@@ -23,7 +23,7 @@ as BModel provides plenty of Meta attributes to autogenerate serializers and vie
 You can also use custom models without using database:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: vstutils.custom_model
+.. automodule:: vstutils.models.custom_model
     :members: ListModel,FileModel
 
 Model Fields
@@ -120,7 +120,7 @@ All classes inherit from:
 Middlewares
 ~~~~~~~~~~~
 
-By default, Django `supposes <https://docs.djangoproject.com/en/3.2/topics/http/middleware/#writing-your-own-middleware>`_
+By default, Django `supposes <https://docs.djangoproject.com/en/4.1/topics/http/middleware/#writing-your-own-middleware>`_
 that a developer creates Middleware class manually, but it's often a routine.
 The vstutils library offers a convenient request handler class for elegant OOP development.
 Middleware is used to process incoming requests and send responses before they reach final destination.

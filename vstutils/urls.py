@@ -1,18 +1,21 @@
 # pylint: disable=invalid-name
 import os
+import re
+import functools
 
 from django.conf import settings
 from django.urls.conf import include, re_path, path
 from django.contrib import admin
-from django.conf.urls.static import static
 from django.views.static import serve
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.contrib.staticfiles.views import serve as serve_static
 from django.views.generic.base import RedirectView
 from rest_framework import permissions
 
 from .api.routers import MainRouter
 from .utils import URLHandlers
 from .api.views import HealthView, MetricsView
+
+static_serve = functools.partial(serve_static, insecure=True)
 
 
 def get_valid_url(*args):
@@ -54,15 +57,24 @@ urlpatterns += [
 ] if getattr(settings, 'ENABLE_ADMIN_PANEL', False) else []
 
 urlpatterns += [re_path(rf'^{settings.API_URL}/', include(router.urls))]
-if settings.STATIC_URL.startswith('/'):  # pragma: no branch
-    urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
+if settings.STATIC_URL.startswith('/'):
+    urlpatterns.append(
+        re_path(r"^%s(?P<path>.*)$" % re.escape(settings.STATIC_URL.lstrip("/")), static_serve)
+    )
 if settings.MEDIA_URL.startswith('/') and settings.MEDIA_ROOT:
-    urlpatterns += static(settings.MEDIA_URL, view=serve, document_root=settings.MEDIA_ROOT)  # nocv
-if settings.HAS_DOCS:  # nocv
+    urlpatterns.append(re_path(
+        r"^%s(?P<path>.*)$" % re.escape(settings.MEDIA_URL.lstrip("/")),
+        functools.partial(serve, document_root=settings.MEDIA_ROOT)
+    ))
+if settings.HAS_DOCS:
     urlpatterns +=  [
         path(
             f'{settings.DOC_URL[1:]}',
             view=serve,
             kwargs={'path': 'index.html', 'document_root': settings.DOCS_ROOT}
         ),
-    ] + static(settings.DOC_URL, view=serve, document_root=settings.DOCS_ROOT)
+        re_path(
+            r"^%s(?P<path>.*)$" % re.escape(settings.DOC_URL.lstrip("/")),
+            functools.partial(serve, document_root=settings.DOCS_ROOT)
+        )
+    ]

@@ -100,12 +100,6 @@ CONFIG_FILES = tuple(filter(bool, (
     os.path.splitext(DEV_SETTINGS_FILE)[0] + '.yml' if DEV_SETTINGS_FILE else None,
 )))
 
-ConfigBoolType = cconfig.BoolType()
-ConfigIntType = cconfig.IntType()
-ConfigIntSecondsType = cconfig.IntSecondsType()
-ConfigListType = cconfig.ListType()
-ConfigStringType = cconfig.StrType()
-
 
 class BoolOrStringType(cconfig.BaseType):
     def convert(self, value: _t.Any) -> _t.Optional[_t.Union[bool, _t.Text]]:
@@ -129,6 +123,14 @@ class LocationsType(cconfig.ListType):
         return value
 
 
+ConfigBoolType = cconfig.BoolType()
+ConfigIntType = cconfig.IntType()
+ConfigFloatType = FloatType()
+ConfigIntSecondsType = cconfig.IntSecondsType()
+ConfigListType = cconfig.ListType()
+ConfigStringType = cconfig.StrType()
+
+
 class BackendSection(cconfig.Section):
     def key_handler_to_all(self, key):
         return super().key_handler_to_all(key).upper()
@@ -144,7 +146,7 @@ class MainSection(BaseAppendSection):
         'enable_admin_panel': ConfigBoolType,
         'enable_registration': ConfigBoolType,
         'enable_custom_translations': ConfigBoolType,
-        'allowed_hosts': cconfig.ListType(),
+        'allowed_hosts': ConfigListType,
         'first_day_of_week': ConfigIntType,
         'enable_agreement_terms': ConfigBoolType,
         'agreement_terms_path': ConfigStringType,
@@ -156,11 +158,11 @@ class MainSection(BaseAppendSection):
 class WebSection(BaseAppendSection):
     types_map = {
         'allow_cors': ConfigBoolType,
-        'cors_allowed_origins': cconfig.ListType(),
-        'cors_allowed_origins_regexes': cconfig.ListType(),
-        'cors_expose_headers': cconfig.ListType(),
-        'cors_allow_methods': cconfig.ListType(),
-        'cors_allow_headers': cconfig.ListType(),
+        'cors_allowed_origins': ConfigListType,
+        'cors_allowed_origins_regexes': ConfigListType,
+        'cors_expose_headers': ConfigListType,
+        'cors_allow_methods': ConfigListType,
+        'cors_allow_headers': ConfigListType,
         'cors_preflight_max_age': ConfigIntSecondsType,
         'session_timeout': ConfigIntSecondsType,
         'page_limit': ConfigIntType,
@@ -188,9 +190,31 @@ class WebSection(BaseAppendSection):
     }
 
 
+class UvicornSection(cconfig.Section):
+    types_map = {
+        'ws_max_size': ConfigIntType,
+        'ws_ping_interval': ConfigFloatType,
+        'ws_ping_timeout': ConfigFloatType,
+        'ws_per_message_deflate': ConfigBoolType,
+        'access_log': ConfigBoolType,
+        'use_colors': ConfigBoolType,
+        'reload': ConfigBoolType,
+        'reload_dirs': ConfigListType,
+        'workers': ConfigIntType,
+        'proxy_headers': ConfigBoolType,
+        'server_header': ConfigBoolType,
+        'date_header': ConfigBoolType,
+        'limit_concurrency': ConfigIntType,
+        'limit_max_requests': ConfigIntType,
+        'backlog': cconfig.BytesSizeType(),
+        'timeout_keep_alive': ConfigIntSecondsType,
+        'factory': ConfigBoolType,
+    }
+
+
 class DatabasesSection(BaseAppendSection):
     types_map = {
-        'databases_without_cte_support': cconfig.ListType(),
+        'databases_without_cte_support': ConfigListType,
     }
 
 
@@ -207,7 +231,7 @@ class DBTestSection(DBSection):
     type_serialize = ConfigBoolType
     type_create_db = ConfigBoolType
     type_create_user = ConfigBoolType
-    type_dependencies = cconfig.ListType()
+    type_dependencies = ConfigListType
 
 
 class DBOptionsSection(cconfig.Section):
@@ -228,6 +252,7 @@ class CacheSection(BackendSection):
 
 
 class CacheOptionsSection(BackendSection):
+    parent: BaseAppendSection
     types_map = {
         'binary': ConfigBoolType,
         'no_delay': ConfigBoolType,
@@ -369,8 +394,18 @@ class Boto3Subsection(BackendSection):
             return f'AWS_{key_uppercase}'
         return key_uppercase
 
+environ.environ.REDIS_DRIVER = 'django.core.cache.backends.redis.RedisCache'
 
-env = environ.Env(
+class DjangoEnv(environ.Env):
+    CACHE_SCHEMES = {
+        **environ.Env.CACHE_SCHEMES,
+        'rediscache': 'django.core.cache.backends.redis.RedisCache',
+        'redis': 'django.core.cache.backends.redis.RedisCache',
+        'rediss': 'django.core.cache.backends.redis.RedisCache',
+    }
+
+
+env = DjangoEnv(
     # set casting, default value
     DEBUG=(bool, False),
     DJANGO_LOG_LEVEL=(str, 'WARNING'),
@@ -508,6 +543,9 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'rate': os.getenv(f'{ENV_NAME}_GLOBAL_THROTTLE_RATE', ''),
             'actions': ConfigListType(os.getenv(f'{ENV_NAME}_GLOBAL_THROTTLE_ACTIONS', ('update', 'partial_update'))),
             'views': {},
+        },
+        'uvicorn': {
+            'loop': 'auto',
         }
     },
     section_overload={
@@ -545,6 +583,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'centrifugo': CentrifugoSection,
         'throttle': ThrottleSection,
         'storages.boto3': Boto3Subsection,
+        'uvicorn': UvicornSection,
     },
     format_exclude_sections=('uwsgi',)
 )
@@ -562,15 +601,20 @@ SECRET_FILE = os.getenv(
     f"{ENV_NAME}_SECRET_FILE",
     f"/etc/{VST_PROJECT_LIB}/secret"
 )
+SECRET_FILE_FALLBACK = os.getenv(
+    f"{ENV_NAME}_SECRET_FILE_FALLBACK",
+    f"/etc/{VST_PROJECT_LIB}/secret.fallback"
+)
 
 
-def secret_key():
-    return get_file_value(
-        SECRET_FILE, '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
-    )
+def secret_key(secret_file, default='*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'):
+    return get_file_value(secret_file, default)
 
 
-SECRET_KEY: _t.Text = lazy(secret_key, str)()
+SECRET_KEY: _t.Text = lazy(secret_key, str)(SECRET_FILE)
+SECRET_KEY_FALLBACKS: _t.List[str] = [
+    lazy(secret_key, str)(SECRET_FILE_FALLBACK, '3r4Edsgz9PSCSZCe7rRPD6KMkZg23EGK+nknCYjgIh3tkvcjoP27W+dKqtynMpTtwkU=')
+]
 
 # Main settings
 ##############################################################
@@ -630,8 +674,9 @@ INSTALLED_APPS += ADDONS
 # Additional middleware and auth
 ##############################################################
 MIDDLEWARE: _t.List[_t.Text] = [
-    'vstutils.middleware.FrontendChangesNotifications',
+    'vstutils.middleware.FastStaticMiddleware',
     'vstutils.middleware.ExecuteTimeHeadersMiddleware',
+    'vstutils.middleware.FrontendChangesNotifications',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -650,17 +695,20 @@ EXCLUDE_FROM_MINIFYING = []
 
 MIDDLEWARE_ENDPOINT_CONTROL = {
     'remove': [
-        'corsheaders.middleware.CorsMiddleware',
+        'vstutils.middleware.FastStaticMiddleware',
+        'vstutils.middleware.FrontendChangesNotifications',
         'htmlmin.middleware.HtmlMinifyMiddleware',
         'htmlmin.middleware.MarkRequestMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
+        'corsheaders.middleware.CorsMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'vstutils.middleware.LangMiddleware',
         'vstutils.middleware.TwoFaMiddleware',
-        'vstutils.middleware.FrontendChangesNotifications',
     ],
     'prepend': [
         'vstutils.api.endpoint.BulkMiddleware'
@@ -768,6 +816,7 @@ ROOT_URLCONF: _t.Text = os.getenv('VST_ROOT_URLCONF', f'{VST_PROJECT}.urls')
 WSGI: _t.Text = os.getenv('VST_WSGI', f'{VST_PROJECT}.wsgi')
 WSGI_APPLICATION: _t.Text = f"{WSGI}.application"
 UWSGI_APPLICATION: _t.Text = f'{WSGI}:application'
+UWSGI_WORKER_PATH: _t.Text = f'{VSTUTILS_DIR}/asgi_worker.py'
 
 uwsgi_settings: cconfig.Section = config['uwsgi']
 WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)
@@ -831,17 +880,12 @@ STATIC_FILES_FOLDERS = lazy(lambda: list(filter(bool, (
     os.path.join(os.path.dirname(rest_framework.__file__), 'static')
 ))), list)()
 
-if LOCALRUN:
-    STATICFILES_DIRS = list(STATIC_FILES_FOLDERS)
+STATICFILES_DIRS = list(STATIC_FILES_FOLDERS)
 
 STATICFILES_FINDERS: _t.Tuple[_t.Text, _t.Text] = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-
-if not LOCALRUN:
-    STATIC_ROOT = os.path.join(VST_PROJECT_DIR, 'static')  # nocv
-
 
 # Documentation files
 # http://django-docs.readthedocs.io/en/latest/#docs-access-optional
@@ -876,8 +920,8 @@ def parse_db(params):
         **default_data_from_env,
         **param_data.all()
     })
-    data_all = data.all()
-    USED_ENGINES.add(data_all.get('ENGINE'))
+    data_all: _t.Dict[_t.Text, _t.Union[_t.Optional[_t.Text], _t.Dict]] = data.all()
+    USED_ENGINES.add(_t.cast(str, data_all.get('ENGINE')))
     return db_name, data_all
 
 
@@ -1146,7 +1190,8 @@ CASE_SENSITIVE_API_FILTER = web.getboolean('case_sensitive_api_filter', fallback
 
 SILENCED_SYSTEM_CHECKS: _t.List = [
     "urls.W005",
-    "fields.W122"
+    "fields.W122",
+    "staticfiles.W004",
 ]
 
 

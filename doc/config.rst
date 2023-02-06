@@ -236,6 +236,9 @@ Worker settings
 
 Section ``[worker]``.
 
+.. warning::
+    These settings are needed only for rpc-enabled applications.
+
 Celery worker options:
 
 * **loglevel** - Celery worker log level. Default: from main_ section ``log_level``.
@@ -320,6 +323,13 @@ The following settings affects prometheus metrics endpoint (which can be used fo
 * **metrics_backend** - Python class path with metrics collector backend. Default: ``vstutils.api.metrics.DefaultBackend``
   Default backend collects metrics from uwsgi workers and python version info.
 
+
+Section ``[uvicorn]``.
+
+You can configure the necessary settings to run the uvicorn server.
+``vstutils`` supports almost all options from the cli, except for those that configure the application and connection.
+
+See all available uvicorn settings via ``uvicorn --help`` command.
 
 .. _centrifugo:
 
@@ -457,6 +467,9 @@ Settings related to web-server used by vstutils-based application in production
 More settings in `uWSGI docs
 <http://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_.
 
+But keep in mind that uWSGI is deprecated and may be removed in future releases.
+Use the uvicorn settings to manage your app server.
+
 
 Configuration options
 -----------------------------
@@ -469,7 +482,11 @@ This section contains additional information for configure additional elements.
 .. sourcecode:: ini
 
     [uwsgi]
-    addrport = 0.0.0.0:8443,foobar.crt,foobar.key
+    addrport = 0.0.0.0:8443
+
+    [uvicorn]
+    ssl_keyfile = /path/to/key.pem
+    ssl_certfile = /path/to/cert.crt
 
 #. We strictly do not recommend running the web server from root. Use HTTP proxy to run on privileged ports.
 
@@ -489,3 +506,5 @@ This section contains additional information for configure additional elements.
    There are also URI-specific variables for connecting to various services such as databases and caches.
    There are ``DATABASE_URL``, ``CACHE_URL``, ``LOCKS_CACHE_URL``, ``SESSIONS_CACHE_URL`` and ``ETAG_CACHE_URL``.
    As you can see from the names, they are closely related to the keys and names of the corresponding config sections.
+
+#. We recommend to install ``uvloop`` to your environment and setup ``loop = uvloop`` in ``[uvicorn]`` section for performance reasons.

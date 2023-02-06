@@ -28,7 +28,7 @@ class SingletonDatabaseScheduler(DatabaseScheduler):
         """
         if (self._heap is None or
                 not self.schedules_equal(self.old_schedulers, self.schedule)):
-            self.old_schedulers = copy.copy(self.schedule)
+            self.old_schedulers: dict = copy.copy(self.schedule)
             self.populate_heap()
 
         events_heap = self._heap

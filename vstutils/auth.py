@@ -1,10 +1,8 @@
-import typing as _t
 import logging
 import traceback
 
 from django.core.cache import cache
 from django.contrib.auth import get_user_model, backends
-from django.contrib.auth.models import AbstractUser
 from django.db.models import signals, QuerySet
 from django.dispatch import receiver
 from django.conf import settings
@@ -18,8 +16,7 @@ except ImportError:  # nocv
     _LDAP = object
     HAS_LDAP = False
 
-UserModel: AbstractUser = get_user_model()
-AuthRes = _t.Optional[UserModel]
+UserModel = get_user_model()
 logger = logging.getLogger(settings.VST_PROJECT_LIB)
 user_cache_prefix = 'auth_user_id_val'
 secure_serializer = SecurePickling()
@@ -35,7 +32,7 @@ if settings.CACHE_AUTH_USER:
 
 
 @raise_context_decorator_with_default(default=None)
-def get_secured_cache(key) -> AuthRes:
+def get_secured_cache(key):
     user = cache.get(key)
     if isinstance(user, UserModel):
         return user  # nocv
@@ -52,7 +49,7 @@ def cache_user_decorator(func):
     if not settings.CACHE_AUTH_USER:
         return func  # nocv
 
-    def wrapper(backend, user_id: int):
+    def wrapper(backend, user_id):
         cache_key = f'{user_cache_prefix}_{user_id}'
         user = get_secured_cache(cache_key)
         if user is None:
@@ -72,7 +69,7 @@ class BaseAuthBackend(backends.ModelBackend):
         return queryset
 
     @cache_user_decorator
-    def get_user(self, user_id: int) -> AuthRes:
+    def get_user(self, user_id):
         # pylint: disable=protected-access
         try:
             user = self.patch_user_queryset(UserModel._default_manager.select_related('twofa')).get(pk=user_id)
@@ -96,7 +93,7 @@ class LdapBackend(BaseAuthBackend):  # nocv
     def server(self):
         return settings.LDAP_SERVER
 
-    def authenticate(self, request: HttpRequest, username: _t.Text = None, password: _t.Text = None) -> AuthRes:
+    def authenticate(self, request, username=None, password=None):
         # pylint: disable=protected-access,unused-argument
         if not self.server or not HAS_LDAP:
             return
@@ -119,11 +116,11 @@ class AuthPluginsBackend(BaseAuthBackend):
     auth_header = 'HTTP_X_AUTH_PLUGIN'
 
     @raise_context()
-    def auth_with_plugin(self, plugin: _t.Text, request: HttpRequest, username: _t.Text, password: _t.Text) -> AuthRes:
+    def auth_with_plugin(self, plugin, request, username, password):
         return self.auth_handlers.get_object(plugin).authenticate(request, username, password)
 
     @raise_context()
-    def authenticate(self, request: HttpRequest, username: _t.Text = None, password: _t.Text = None) -> AuthRes:
+    def authenticate(self, request, username=None, password=None):
         # pylint: disable=protected-access,unused-argument
         if request and self.auth_header in request.META:
             return self.auth_with_plugin(

@@ -149,6 +149,8 @@ class BulkMiddleware(BaseMiddleware):
             request.language = request.META.pop('language')  # type: ignore
         if 'session' in request.META:
             request.session = request.META.pop('session')  # type: ignore
+        if 'notificator' in request.META:
+            request.notificator = request.META.pop('notificator')  # type: ignore
         return request
 
 
@@ -170,6 +172,7 @@ class BulkClient(Client):
         self.user = defaults.pop('user', None)
         self.language = defaults.pop('language', None)
         self.session = defaults.pop('session', None)
+        self.notificator = defaults.pop('notificator', None)
         super(Client, self).__init__(**defaults)
         self.exc_info = None
 
@@ -180,6 +183,8 @@ class BulkClient(Client):
             request['language'] = self.language
         if self.session:
             request['session'] = self.session
+        if self.notificator:
+            request['notificator'] = self.notificator
         response = self.handler(self._base_environ(**request))
         if response.cookies:
             self.cookies.update(response.cookies)
@@ -305,7 +310,7 @@ class OperationSerializer(serializers.Serializer):
             method=method_name,
             response=method(  # type: ignore
                 url,
-                content_type='application/json',
+                content_type=self.renderer.media_type,
                 secure=self.context['request']._request.is_secure(),
                 data=data,
                 **validated_data['headers']
@@ -363,6 +368,7 @@ class EndpointViewSet(views.APIView):
             kwargs['user'] = request.user  # type: ignore
         kwargs['language'] = getattr(request, 'language', None)
         kwargs['session'] = getattr(request, 'session', None)
+        kwargs['notificator'] = getattr(request, 'notificator', None)
         return kwargs
 
     def get_serializer(self, *args, **kwargs) -> OperationSerializer:
@@ -439,7 +445,7 @@ class EndpointViewSet(views.APIView):
         if should_gzip:
             patch_gzip_response(response, request)
 
-        return response
+        return response  # type: ignore[return-value]
 
     def post(self, request: BulkRequestType) -> responses.BaseResponseClass:
         """Execute transactional bulk request"""
@@ -447,6 +453,8 @@ class EndpointViewSet(views.APIView):
             with transaction.atomic():
                 return self.put(request, allow_fail=False)
         except Exception:
+            if notificator := getattr(request, 'notificator', None):
+                notificator.clear_messages()
             logger.debug(traceback.format_exc())
             return responses.HTTP_502_BAD_GATEWAY(self.results)
 

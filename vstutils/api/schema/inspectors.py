@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, Type, Text, Any, Union
+from typing import Dict, Type, Text, Any, Union, Set
 from collections import OrderedDict
 
 from django.http import FileResponse
@@ -398,6 +398,7 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
         if isinstance(field, (fields.NamedBinaryImageInJsonField, fields.MultipleNamedBinaryImageInJsonField)):
             items['x-format'] = FORMAT_NAMED_BIN_IMAGE
 
+        x_validators: Dict[str, Union[Set, int, str]]
         x_validators = items['x-validators'] = {
             'extensions': set()
         }

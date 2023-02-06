@@ -32,6 +32,7 @@ except ImportError:
     has_sphinx = False
 
 
+PY_MAJOR, PY_MINOR = sys.version_info[0:2]
 ignored_keys = ['-h', '--help', '--version']
 is_help = any([a for a in ignored_keys if a in sys.argv])
 is_develop = 'develop' in sys.argv
@@ -120,11 +121,12 @@ def make_extensions(extensions_list, packages):
     extra_compile_args = [
         '-g0', '-ggdb1',
         "-fno-strict-aliasing",
-        "-fno-var-tracking-assignments",
+        "-fno-var-tracking-assignments" if PY_MINOR != 6 else "",
         "-pipe", "-std=c99", '-Werror=sign-compare',
     ]
     if 'compile' in sys.argv:
         extra_compile_args.append("-DBUILD_FROM_SOURCE")
+    extra_compile_args = list(filter(bool, extra_compile_args))
     ext_modules = list(
         make_extention(m, f, extra_compile_args)
         for m, f in extensions_dict.items()
@@ -421,7 +423,7 @@ kwargs = dict(
         'vstutils/static/bundle/.*\.js$'
     ],
     install_requires=[
-        "django~=" + (os.environ.get('DJANGO_DEP', "") or "3.2.16"),
+        "django~=" + (os.environ.get('DJANGO_DEP', "") or "4.1.6"),
     ]
     + requirements
     + load_requirements('requirements-doc.txt'),
@@ -432,7 +434,7 @@ kwargs = dict(
         'doc': load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
         'stubs': load_requirements('requirements-stubs.txt'),
-        'pil': ['Pillow~=8.4.0;python_version<"3.7"', 'Pillow~=9.2.0;python_version>"3.6"'],
+        'pil': ['Pillow~=8.4.0;python_version<"3.7"', 'Pillow~=9.4.0;python_version>"3.6"'],
         'boto3': [
             i.replace('libcloud', 'libcloud,boto3')
             for i in requirements

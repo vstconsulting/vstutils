@@ -6,7 +6,7 @@ from django.db import models
 from django.utils.module_loading import import_string as import_class
 from django.utils.functional import cached_property
 
-from ..models import BaseModel
+from ..models import BaseModel, Manager, BQuerySet
 from ..models.custom_model import ListModel, CharField
 
 
@@ -18,6 +18,7 @@ for __attr_name in ['VST_PROJECT', 'VST_PROJECT_LIB_NAME']:
 
 
 class Language(ListModel):
+    objects: Manager.from_queryset(BQuerySet)
     data = [
         {'code': code, 'name': name}
         for code, name in settings.LANGUAGES
@@ -74,6 +75,7 @@ class Language(ListModel):
 
 
 class CustomTranslations(BaseModel):
+    objects: Manager.from_queryset(BQuerySet)
     _cache_responses = True
 
     original = CharField(primary_key=True, max_length=380)
@@ -88,7 +90,14 @@ class CustomTranslations(BaseModel):
 
 
 class TwoFactor(BaseModel):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
+    objects: Manager.from_queryset(BQuerySet)
+    recoverycode: Manager["RecoveryCode"]
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        related_name='twofa'
+    )
     secret = models.CharField(max_length=256, blank=False, null=False)
 
     class Meta:
@@ -108,9 +117,10 @@ class TwoFactor(BaseModel):
 
 
 class RecoveryCode(BaseModel):
+    objects: Manager.from_queryset(BQuerySet)
     id = models.AutoField(primary_key=True, max_length=100)
     key = models.CharField(max_length=256)
-    tfa = models.ForeignKey(TwoFactor, on_delete=models.CASCADE)
+    tfa = models.ForeignKey(TwoFactor, on_delete=models.CASCADE, related_name='recoverycode')
 
     class Meta:
         default_related_name = 'recoverycode'
@@ -120,7 +130,8 @@ class RecoveryCode(BaseModel):
 
 
 class UserSettings(BaseModel):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    objects: Manager.from_queryset(BQuerySet)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='_settings')
     value = models.JSONField(default=dict)
 
     class Meta:

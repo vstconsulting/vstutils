@@ -1,6 +1,7 @@
 import typing as _t
 from pathlib import Path
 from django.db.models.fields import CharField as cf, TextField as tf, IntegerField as intf, BooleanField as bf
+from django.db import models
 from .queryset import BQuerySet
 from .model import BaseModel
 
@@ -50,6 +51,7 @@ class CustomModelIterable:
 
 
 class ListModel(BaseModel):
+    objects: models.Manager.from_queryset(BQuerySet)
     data: _t.ClassVar[_t.List[_t.Dict]]
 
     @classmethod

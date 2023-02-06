@@ -280,7 +280,7 @@ def translate(text: tp.Text) -> tp.Text:
         return text
 
 
-def lazy_translate(text: tp.Text) -> functional.Promise:
+def lazy_translate(text: tp.Text) -> str:
     """
     The ``lazy_translate`` function has the same behavior as :func:`.translate`, but wraps it in a lazy promise.
 
@@ -370,7 +370,7 @@ class ClassPropertyDescriptor:
 
     meta = ClassPropertyMeta
 
-    def __init__(self, fget: tp.Callable, fset: tp.Callable = None):
+    def __init__(self, fget: tp.Callable, fset: tp.Optional[tp.Callable] = None):
         self.fget, self.fset = self._fix_function(fget), self._fix_function(fset)
 
     def __get__(self, obj, klass=None):
@@ -870,6 +870,7 @@ class KVExchanger(BaseVstObject):
     """
     __slots__ = ('key', 'timeout', '__djangocache__')
     TIMEOUT: tp.ClassVar[int] = 60
+    __djangocache__: tp.Any
 
     @classproperty
     def PREFIX(cls):
@@ -1106,7 +1107,7 @@ class ObjectHandlers(BaseVstObject):
     type: tp.Text
     err_message: tp.Optional[tp.Text]
 
-    def __init__(self, type_name: tp.Text, err_message: tp.Text = None):
+    def __init__(self, type_name: tp.Text, err_message: tp.Optional[tp.Text] = None):
         """
         :param type_name: -- type name for backends.Like name in dict.
         :type type_name: str
@@ -1175,7 +1176,7 @@ class ObjectHandlers(BaseVstObject):
             if backend is None:
                 raise ex.VSTUtilsException("Backend is 'None'.")  # pragma: no cover
             return self._get_backend(backend)
-        except KeyError or ImportError as err:
+        except KeyError or ImportError as err:  # type: ignore[truthy-function]
             msg = f"{name} ({self.err_message})" if self.err_message else name
             raise ex.UnknownTypeException(msg) from err
 

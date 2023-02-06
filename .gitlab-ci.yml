@@ -76,10 +76,10 @@ functional_test:
   parallel:
     matrix:
       - TOX_ENVS:
-          - py36-django32-install
+          - py38-django41-install
         BUILD_OPTIMIZATION: 'true'
       - TOX_ENVS:
-          - py311-django32-coverage
+          - py311-django41-coverage
 
 js_tests:
   <<: *branch_js_tests
