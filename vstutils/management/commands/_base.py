@@ -210,14 +210,14 @@ class DockerCommand(BaseCommand):
             os.makedirs(sqlite_default_dir)
         sqlite_db_path = os.path.join(sqlite_default_dir, os.environ.get(f'{self.prefix}_SQLITE_DBNAME', 'db.sqlite3'))
 
-        if os.getenv(f'{self.prefix}_DB_HOST') is not None:
+        if os.getenv(f'{self.prefix}_DB_HOST') is not None:  # nocv
             try:
                 pm_type = os.getenv(f'{self.prefix}_DB_TYPE', 'mysql')
 
                 default_port = ''
                 if pm_type == 'mysql':
                     default_port = '3306'
-                elif pm_type == 'postgresql':  # nocv
+                elif pm_type == 'postgresql':
                     default_port = '5432'
 
                 config['database'] = {
@@ -233,11 +233,11 @@ class DockerCommand(BaseCommand):
                 }
                 if pm_type == 'mysql':
                     config['database.options']['init_command'] = os.getenv('DB_INIT_CMD', '')
-            except KeyError as err:  # nocv
+            except KeyError as err:
                 raise Exception(
                     f'Not enough variables for connect to  SQL server. Variable {str(err)} is required.'
                 ) from err
-        else:  # nocv
+        else:
             config['database'] = {
                 'engine': 'django.db.backends.sqlite3',
                 'name': sqlite_db_path
