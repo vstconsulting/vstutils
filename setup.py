@@ -401,14 +401,13 @@ elif os.environ.get('BUILD_OPTIMIZATION', 'false') == 'true':
         'vstutils.models.queryset',
         'vstutils.models.cent_notify',
         'vstutils.models.fields',
-        'vstutils.custom_model',
+        'vstutils.models.custom_model',
         'vstutils.auth',
         'vstutils.celery_beat_scheduler',
         'vstutils.environment',
         'vstutils.middleware',
         'vstutils.tasks',
         'vstutils.tools',
-        'vstutils.utils',
     ]
 
 requirements = load_requirements('requirements.txt')
