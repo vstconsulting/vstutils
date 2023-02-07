@@ -392,7 +392,6 @@ if 'develop' in sys.argv:
     ext_list = []
 elif os.environ.get('BUILD_OPTIMIZATION', 'false') == 'true':
     ext_list = [
-        'vstutils.api.schema.generators',
         'vstutils.api.schema.inspectors',
         'vstutils.api.base',
         'vstutils.api.decorators',
