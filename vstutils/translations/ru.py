@@ -205,6 +205,7 @@ TRANSLATION = {
 
     # validators
     'imageValidationResolutionError': 'Должно быть не меньше {min} и не больше {max} px.',
+    'Invalid URL': 'Неверный URL',
 
     # instance operation success
     # add

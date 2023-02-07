@@ -175,7 +175,6 @@ export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> impl
         if (list_paths) {
             querysets = list_paths.map((listPath) => this.app.views.get(listPath)!.objects!.clone());
             if (!this.fkModel) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 this.fkModel = querysets[0]!.getResponseModelClass(RequestTypes.LIST);
             }
         } else {
@@ -192,8 +191,7 @@ export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> impl
     }
 
     _formatQuerysetPath(queryset: QuerySet) {
-        const params = this.app.router?.currentRoute.params || {};
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        const params = this.app.router?.currentRoute.params ?? {};
         return queryset.clone({ url: formatPath(queryset.url, params) });
     }
 

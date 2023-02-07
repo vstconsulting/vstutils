@@ -206,6 +206,7 @@ TRANSLATION = {
 
     # validators
     'imageValidationResolutionError': "必须至少为{min}且不超过{max}个像素",
+    'Invalid URL': '无效的网址',
 
     # instance operation success
     # add
