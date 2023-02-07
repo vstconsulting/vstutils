@@ -205,6 +205,7 @@ TRANSLATION = {
 
     # validators
     'imageValidationResolutionError': 'Phải có ít nhất {min} và không nhiều hơn {max} pixel.',
+    'Invalid URL': 'URL không hợp lệ',
 
     # instance operation success
     # add
