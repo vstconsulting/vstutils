@@ -10,6 +10,7 @@ from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_fi
 from drf_yasg import openapi
 from drf_yasg.inspectors.query import CoreAPICompatInspector, force_real_str, coreschema  # type: ignore
 from rest_framework.fields import Field, JSONField, DecimalField, empty
+from rest_framework.serializers import Serializer
 
 from .. import fields, serializers, validators
 from ...models.base import get_first_match_name
@@ -623,14 +624,18 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
             return super().get_serializer_ref_name(serializer.child)
         return super().get_serializer_ref_name(serializer)
 
-    def handle_schema(self, field: Any):
-        ref_name = self.get_serializer_ref_name(field)
-        definitions = self.components.with_scope(openapi.SCHEMA_DEFINITIONS)
+    def handle_schema(self, field: Serializer, schema: openapi.SwaggerDict, use_references: bool = True):
+        if use_references:
+            ref_name = self.get_serializer_ref_name(field)
+            definitions = self.components.with_scope(openapi.SCHEMA_DEFINITIONS)
 
-        if ref_name not in definitions:
-            return
+            if ref_name not in definitions:
+                return
 
-        schema = definitions[ref_name]
+            schema = definitions[ref_name]
+
+        if schema['type'] == openapi.TYPE_ARRAY:
+            schema = schema['items']
 
         if getattr(schema, '_handled', False):
             return
@@ -651,12 +656,12 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
             view_field_name = get_first_match_name(schema_properties, schema_properties[0])
 
         if schema_properties_groups:
-            not_handled = set(schema['properties']) - set(_get_handled_props(schema_properties_groups))
+            not_handled = set(schema_properties) - set(_get_handled_props(schema_properties_groups))
 
             if not_handled:
                 schema_properties_groups[''] = [
                     prop
-                    for prop in schema['properties']
+                    for prop in schema_properties
                     if prop in not_handled
                 ]
         schema['x-properties-groups'] = schema_properties_groups
@@ -680,6 +685,6 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
         result = super().field_to_swagger_object(field, swagger_object_type, use_references, **kwargs)
 
         if result != NotHandled:
-            self.handle_schema(field)
+            self.handle_schema(field, result, use_references)
 
         return result

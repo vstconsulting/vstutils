@@ -13,7 +13,7 @@ from django.urls import resolve, exceptions as url_exceptions
 from django.shortcuts import redirect
 
 from .api.models import Language
-from .utils import BaseVstObject
+from .utils import BaseVstObject, patch_gzip_response
 
 
 logger = logging.getLogger(settings.VST_PROJECT)
@@ -306,7 +306,7 @@ class FastStaticMiddleware(BaseMiddleware):
             try:
                 view, args, kwargs = resolve(request.path)
                 kwargs['request'] = request
-                return view(*args, **kwargs)
+                return patch_gzip_response(view(*args, **kwargs), request)
             except Http404 or url_exceptions.Resolver404:  # type: ignore
                 return HttpResponseNotFound("Not found\n")
         return await super().get_response_handler(request)

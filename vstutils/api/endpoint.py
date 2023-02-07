@@ -453,8 +453,8 @@ class EndpointViewSet(views.APIView):
             with transaction.atomic():
                 return self.put(request, allow_fail=False)
         except Exception:
-            if notificator := getattr(request, 'notificator', None):
-                notificator.clear_messages()
+            if hasattr(request, 'notificator'):
+                request.notificator.clear_messages()
             logger.debug(traceback.format_exc())
             return responses.HTTP_502_BAD_GATEWAY(self.results)
 

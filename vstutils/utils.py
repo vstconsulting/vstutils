@@ -252,6 +252,7 @@ def patch_gzip_response(response, request):
     if not response.status_code == 200:
         return  # nocv
     GZipMiddleware.process_response(None, request, response)
+    return response
 
 
 def patch_gzip_response_decorator(func):

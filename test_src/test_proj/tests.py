@@ -1959,7 +1959,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'field1': {'title': 'Field1', 'type': 'string', 'minLength': 1},
                 'field2': {'title': 'Field2', 'type': 'integer'}
             },
-            'required': ['field1', 'field2']
+            'required': ['field1', 'field2'],
+            'x-properties-groups': {'': ['field1', 'field2']},
+            'x-view-field-name': 'field2',
         }
 
         self.assertDictEqual(api['definitions']['DynamicFields']['properties']['dynamic_with_types'], {
@@ -2066,6 +2068,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
                                 'minLength': 1,
                             },
                         },
+                        'x-properties-groups': {'': ['some_data']},
+                        'x-view-field-name': 'some_data',
                     },
                 }
             }
