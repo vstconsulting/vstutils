@@ -274,25 +274,23 @@ class TwoFaMiddleware(BaseMiddleware):
 
 
 class FrontendChangesNotifications(BaseMiddleware):
-    sync_capable = False
-    async_capable = True
+    __slots__ = ('notificator_class',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
 
-    async def get_response_handler(self, request: HttpRequest) -> HttpResponse:
+    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
         # pylint: disable=invalid-overridden-method
         if settings.CENTRIFUGO_CLIENT_KWARGS and request.path != f'/{settings.API_URL}/health/':
             with self.notificator_class([]) as notificator:
                 request.notificator = notificator  # type: ignore
-                return await super().get_response_handler(request)
-        return await super().get_response_handler(request)
+                return super().get_response_handler(request)
+        return super().get_response_handler(request)
 
 
 class FastStaticMiddleware(BaseMiddleware):
-    sync_capable = False
-    async_capable = True
+    __slots__ = ()
 
     def check_request_path(self, request: HttpRequest) -> bool:
         return any((
@@ -300,7 +298,7 @@ class FastStaticMiddleware(BaseMiddleware):
             for path in (settings.STATIC_URL, settings.MEDIA_URL, settings.DOC_URL)
         ))
 
-    async def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
+    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
         # pylint: disable=invalid-overridden-method
         if self.check_request_path(request):
             try:
@@ -309,4 +307,4 @@ class FastStaticMiddleware(BaseMiddleware):
                 return patch_gzip_response(view(*args, **kwargs), request)
             except Http404 or url_exceptions.Resolver404:  # type: ignore
                 return HttpResponseNotFound("Not found\n")
-        return await super().get_response_handler(request)
+        return super().get_response_handler(request)
