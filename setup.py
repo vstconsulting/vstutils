@@ -190,10 +190,11 @@ def minify_static_files(base_dir, files, exclude=None):
                     with codecs.open(fext_file, 'w', encoding='utf-8') as static_file_fd:
                         static_file_fd.write(minified)
                     print('Minfied file {fext_file}.'.format(fext_file=fext_file))
-                with open(fext_file, 'rb') as f_in:
-                    with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
-                        shutil.copyfileobj(f_in, f_out)
-                print('Compressed file {fext_file}.'.format(fext_file=fext_file))
+                if not os.environ.get('NOT_COMPRESS', False):
+                    with open(fext_file, 'rb') as f_in:
+                        with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
+                            shutil.copyfileobj(f_in, f_out)
+                    print('Compressed file {fext_file}.'.format(fext_file=fext_file))
 
 
 def compile_py_func(fullname, compile_file_func):
