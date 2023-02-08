@@ -159,7 +159,7 @@ class DockerCommand(BaseCommand):
                         self._settings('DOCKERRUN_MIGRATE_LOCK_TIMEOUT'),
                         'Migration process still locked by another application process.',
                         int(os.getenv("DOCKER_MIGRATE_LOCK_KEY_TIMEOUT", '0')) or None
-                ) as lock:  # noqa: F841, pylint:disable=unused-variable
+                ) as lock:
                     logger.info(f'Migration locked by key: `{lock.id}`')
                     for db_name in self.databases_to_migrate:
                         logger.info(f'Migrating db "{db_name}".')
@@ -171,7 +171,6 @@ class DockerCommand(BaseCommand):
                                 'migrate',
                                 '--database',
                                 db_name,
-                                '--check',
                                 *args
                             ],
                             env=self.env,
@@ -263,7 +262,7 @@ class DockerCommand(BaseCommand):
         elif cache_type == 'memcache':  # nocv
             cache_engine = 'django.core.cache.backends.memcached.MemcachedCache'
         elif cache_type == 'redis':  # nocv
-            cache_engine = 'django_redis.cache.RedisCache'
+            cache_engine = 'django.core.cache.backends.redis.RedisCache'
         else:  # nocv
             raise Exception(f'Unknown cache type `{cache_type}`.')
 
