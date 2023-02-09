@@ -290,7 +290,7 @@ def lazy_translate(text: tp.Text) -> str:
 
     :param text: Text message which should be translated.
     """
-    return functional.lazy(translate, str)(text)
+    return tp.cast(str, functional.lazy(translate, str)(text))
 
 
 def create_view(model, **meta_options):

@@ -382,6 +382,10 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
             kwargs = items = deepcopy(self.default_schema_data)
             if field.file:
                 store_size = kwargs['properties']['name']
+                if field.max_content_size:
+                    kwargs['properties']['content']['maxLength'] = field.max_content_size
+                if field.min_content_size:
+                    kwargs['properties']['content']['minLength'] = field.max_content_size
             else:
                 store_size = kwargs
 
@@ -420,7 +424,7 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
             else:
                 x_validators['extensions'] = set(validator.extensions)
 
-        x_validators['extensions'] = tuple(x_validators['extensions'])
+        x_validators['extensions'] = sorted(x_validators['extensions'])
         if not x_validators['extensions']:
             del x_validators['extensions']
 

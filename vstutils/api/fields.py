@@ -720,9 +720,9 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
     __valid_keys = ('name', 'content', 'mediaType')
     default_error_messages = {
-        'not a JSON': lazy_translate('value is not a valid JSON'),  # type: ignore
-        'missing key': lazy_translate('key {missing_key} is missing'),  # type: ignore
-        'invalid key': lazy_translate('invalid key {invalid_key}'),  # type: ignore
+        'not a JSON': lazy_translate('value is not a valid JSON'),
+        'missing key': lazy_translate('key {missing_key} is missing'),
+        'invalid key': lazy_translate('invalid key {invalid_key}'),
     }
     file_field = FieldFile
 
@@ -730,7 +730,15 @@ class NamedBinaryFileInJsonField(VSTCharField):
         self.file = kwargs.pop('file', False)
         self.post_handlers = kwargs.pop('post_handlers', ())
         self.pre_handlers = kwargs.pop('pre_handlers', ())
+        if self.file:
+            self.max_content_size = int(kwargs.pop('max_content_size', 0))
+            self.min_content_size = int(kwargs.pop('min_content_size', 0))
+            max_length = kwargs.pop('max_length', None)
+            min_length = kwargs.pop('min_length', None)
         super(NamedBinaryFileInJsonField, self).__init__(**kwargs)
+        if self.file:
+            self.max_length = max_length
+            self.min_length = min_length
 
     def validate_value(self, data: _t.Dict):
         if not isinstance(data, dict):
@@ -778,6 +786,13 @@ class NamedBinaryFileInJsonField(VSTCharField):
     def run_validators(self, value: _t.Dict) -> None:
         if not raise_context_decorator_with_default(default=False)(self.should_not_handle)(value):
             super().run_validators(value)
+            if self.file:
+                if self.max_length and len(value['name']) > self.max_length:
+                    raise ValidationError(f'Name of file so long. Allowed only {self.max_length} symbols.')
+                if 0 < self.max_content_size < len(value['content']):
+                    raise ValidationError('The file is too large.')
+                if 0 < self.min_content_size > len(value['content']):
+                    raise ValidationError('The file is too small.')
 
     def should_not_handle(self, file):
         return (

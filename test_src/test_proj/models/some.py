@@ -160,8 +160,8 @@ class OverridenModelWithBinaryFiles(ModelWithBinaryFiles):
                 required=False,
                 validators=validators,
             ),
-            some_filefield=fields.NamedBinaryFileInJsonField(required=False, file=True, allow_null=True, max_length=100),
-            some_imagefield=fields.NamedBinaryImageInJsonField(required=False, file=True, allow_null=True, max_length=100)
+            some_filefield=fields.NamedBinaryFileInJsonField(required=False, file=True, allow_null=True, max_length=100, max_content_size=10000),
+            some_imagefield=fields.NamedBinaryImageInJsonField(required=False, file=True, allow_null=True, max_length=100, min_content_size=7000)
         )
         _filterset_fields = {
             'some_binfile': CharFilter(label='Some label for binfile')

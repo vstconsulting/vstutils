@@ -1559,6 +1559,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
             set(['text/plain', 'application/json']),
         )
         expected['some_namedbinfile']['x-validators']['extensions'] = from_api['some_namedbinfile']['x-validators']['extensions']
+        expected['some_filefield']['properties']['content']['maxLength'] = from_api['some_filefield']['properties']['content']['maxLength'] = 10000
+        expected['some_imagefield']['properties']['content']['minLength'] = from_api['some_imagefield']['properties']['content']['minLength'] = 7000
         self.assertDictEqual(expected, from_api)
         # Test swagger ui
         client = self._login()
@@ -4465,12 +4467,25 @@ class ProjectTestCase(BaseTestCase):
             'content': cat64,
             'mediaType': 'image/jpeg'
         }
+        long_name_image_content_dict = {
+            **valid_image_content_dict,
+            'name': 'a' * 101 + ".jpg"
+        }
+        long_content_image_content_dict = {
+            **valid_image_content_dict,
+            'content': base64.b64encode(b'a' * 10000 + b'a').decode('utf-8')
+        }
+        short_content_image_content_dict = {
+            **valid_image_content_dict,
+            'content': base64.b64encode(b'a' * 3000 + b'a').decode('utf-8')
+        }
 
         results = self.bulk([
             {
                 'method': 'post',
                 'path': ['testbinaryfiles'],
-                'data': {'some_filefield': valid_image_content_dict, 'some_imagefield': valid_image_content_dict}},
+                'data': {'some_filefield': valid_image_content_dict, 'some_imagefield': valid_image_content_dict}
+            },
             {
                 'method': 'get',
                 'path': ['testbinaryfiles', '<<0[data][id]>>']
@@ -4486,10 +4501,31 @@ class ProjectTestCase(BaseTestCase):
                     }
                 }
             },
+            {
+                'method': 'post',
+                'path': ['testbinarymodelschema'],
+                'data': {'some_filefield': long_name_image_content_dict, 'some_imagefield': long_name_image_content_dict}
+            },
+            {
+                'method': 'post',
+                'path': ['testbinarymodelschema'],
+                'data': {'some_filefield': long_content_image_content_dict, 'some_imagefield': long_content_image_content_dict}
+            },
+            {
+                'method': 'post',
+                'path': ['testbinarymodelschema'],
+                'data': {'some_filefield': short_content_image_content_dict, 'some_imagefield': short_content_image_content_dict}
+            },
         ])
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[3]['status'], 400)
+        self.assertEqual(results[3]['data']['some_filefield'][0], 'Name of file so long. Allowed only 100 symbols.')
+        self.assertEqual(results[4]['status'], 400)
+        self.assertEqual(results[4]['data']['some_filefield'][0], 'The file is too large.')
+        self.assertEqual(results[5]['status'], 400)
+        self.assertEqual(results[5]['data']['some_imagefield'][0], 'The file is too small.')
         model_qs = self.get_model_filter('test_proj.models.ModelWithBinaryFiles')
         instance = model_qs.get(id=results[0]['data']['id'])
         self.assertDictEqual({
