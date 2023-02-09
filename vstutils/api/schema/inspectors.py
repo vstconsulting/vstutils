@@ -382,10 +382,6 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
             kwargs = items = deepcopy(self.default_schema_data)
             if field.file:
                 store_size = kwargs['properties']['name']
-                if field.max_content_size:
-                    kwargs['properties']['content']['maxLength'] = field.max_content_size
-                if field.min_content_size:
-                    kwargs['properties']['content']['minLength'] = field.max_content_size
             else:
                 store_size = kwargs
 
@@ -402,6 +398,11 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
 
         if isinstance(field, (fields.NamedBinaryImageInJsonField, fields.MultipleNamedBinaryImageInJsonField)):
             items['x-format'] = FORMAT_NAMED_BIN_IMAGE
+
+        if field.max_content_size:
+            items['properties']['content']['maxLength'] = field.max_content_size
+        if field.min_content_size:
+            items['properties']['content']['minLength'] = field.max_content_size
 
         x_validators: Dict[str, Union[Set, int, str]]
         x_validators = items['x-validators'] = {

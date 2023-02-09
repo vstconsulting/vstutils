@@ -730,9 +730,9 @@ class NamedBinaryFileInJsonField(VSTCharField):
         self.file = kwargs.pop('file', False)
         self.post_handlers = kwargs.pop('post_handlers', ())
         self.pre_handlers = kwargs.pop('pre_handlers', ())
+        self.max_content_size = int(kwargs.pop('max_content_size', 0))
+        self.min_content_size = int(kwargs.pop('min_content_size', 0))
         if self.file:
-            self.max_content_size = int(kwargs.pop('max_content_size', 0))
-            self.min_content_size = int(kwargs.pop('min_content_size', 0))
             max_length = kwargs.pop('max_length', None)
             min_length = kwargs.pop('min_length', None)
         super(NamedBinaryFileInJsonField, self).__init__(**kwargs)
@@ -789,10 +789,10 @@ class NamedBinaryFileInJsonField(VSTCharField):
             if self.file:
                 if self.max_length and len(value['name']) > self.max_length:
                     raise ValidationError(f'Name of file so long. Allowed only {self.max_length} symbols.')
-                if 0 < self.max_content_size < len(value['content']):
-                    raise ValidationError('The file is too large.')
-                if 0 < self.min_content_size > len(value['content']):
-                    raise ValidationError('The file is too small.')
+            if 0 < self.max_content_size < len(value['content']):
+                raise ValidationError('The file is too large.')
+            if 0 < self.min_content_size > len(value['content']):
+                raise ValidationError('The file is too small.')
 
     def should_not_handle(self, file):
         return (
