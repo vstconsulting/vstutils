@@ -3821,6 +3821,11 @@ class ProjectTestCase(BaseTestCase):
 
         should_not_be = [
             # this actions shouldnot be in schema
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hidden_hosts/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hidden_hosts/{hidden_hosts_id}/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hidden_hosts/{hidden_hosts_id}/test/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hidden_hosts/{hidden_hosts_id}/test2/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hidden_hosts/{hidden_hosts_id}/test3/',
             '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test/',
             '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test2/',
             '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test3/',

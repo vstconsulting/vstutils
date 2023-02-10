@@ -48,7 +48,11 @@ class HostViewSet(Host.generated_view):
 @extend_filterbackends(list(HostGroup.generated_view.filter_backends)+[TestFilterBackend], override=True)
 class _HostGroupViewSet(HostGroup.generated_view):
     """
-    Host group opertaions.
+    Host group operations.
+
+    list:
+        return all hosts
+
     """
     select_related = True
 
@@ -62,6 +66,7 @@ def queryset_nested_filter(parent, qs):
 
 @nested_view('subgroups', 'id', view=_HostGroupViewSet, subs=None)
 @nested_view('hosts', 'id', view=HostViewSet)
+@nested_view('hidden_hosts', 'id', view=HostViewSet, schema=None)
 @nested_view('subhosts', methods=["get"], manager_name='hosts', view=HostViewSet)
 @nested_view(
     'shost', 'id',

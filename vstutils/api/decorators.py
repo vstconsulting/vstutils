@@ -14,6 +14,9 @@ from ..exceptions import VSTUtilsException
 from .. import utils
 
 
+empty = object()
+
+
 def ensure_is_object(obj):
     if isinstance(obj, (str, bytes)):
         return orjson.loads(obj)
@@ -391,6 +394,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         'append_arg',
         'allow_append',
         'manager_name',
+        'schema',
     )
 
     filter_subs = ('filter',)
@@ -526,16 +530,18 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         return self.get_view_type(sub, nested_sub=sub, **options)
 
     def get_decorator(self, detail=False, **options):
+        kwargs = dict(self.kwargs)
+        kwargs.update(options)
         return action(
             detail=True,
             url_path=_get_nested_subpath(
                 self.name,
                 self.request_arg if detail else '',
-                arg_regexp=self.kwargs.get('arg_regexp', '[0-9]') if detail else None,
+                arg_regexp=kwargs.pop('arg_regexp', '[0-9]') if detail else None,
                 empty_arg=self.empty_arg if detail else None,
-                sub_path=options.pop('sub_path', None)
+                sub_path=kwargs.pop('sub_path', None)
             ),
-            **options
+            **kwargs
         )
 
     def _filter_methods(self, methods, detail=False):
@@ -551,6 +557,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             kwargs['methods'] = self._filter_methods(self.methods, detail=detail)
         else:
             kwargs['methods'] = self.view.get_view_methods(detail)  # type: ignore
+        kwargs['schema'] = self.kwargs.get('schema', self.view.schema)
         view_class = self.get_decorator(**kwargs)(view)
         view_class._nested_args = getattr(self.view, '_nested_args', OrderedDict())
         view_class._nested_manager = self.kwargs.get('manager_name', self.name)
@@ -576,6 +583,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             sub_path=sub_view.url_path,
             methods=sub_view.mapping or self.methods,
             url_name=f'{self.name}-{sub_view.url_name}',
+            schema=self.kwargs.get('schema', sub_view.kwargs.get('schema', self.view.schema)),
             _nested_args=getattr(sub_view, '_nested_args', OrderedDict())
         )
         view_class = decorator(subaction_view)
