@@ -696,6 +696,18 @@ class ViewsTestCase(BaseTestCase):
         self.get_result('get', '/docs/', code=200)
         self.get_result('get', '/docs/index.html', code=200)
 
+        # Check static views from fastapi
+        fclient = self.api_test_client
+        response = fclient.get('/docs/')
+        self.assertEqual(response.status_code, 200)
+
+        response = fclient.get('/static/bundle/')
+        self.assertEqual(response.status_code, 404)
+        response = fclient.get('/static/bundle/output.json')
+        self.assertEqual(response.status_code, 200)
+        response = fclient.get('/media/test.txt')
+        self.assertEqual(response.status_code, 200)
+
         # 404
         self.get_result('get', '/api/v1/some/', code=404)
         self.get_result('get', '/other_invalid_url/', code=404)

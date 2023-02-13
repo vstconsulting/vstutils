@@ -674,7 +674,6 @@ INSTALLED_APPS += ADDONS
 # Additional middleware and auth
 ##############################################################
 MIDDLEWARE: _t.List[_t.Text] = [
-    'vstutils.middleware.FastStaticMiddleware',
     'vstutils.middleware.ExecuteTimeHeadersMiddleware',
     'vstutils.middleware.FrontendChangesNotifications',
     'htmlmin.middleware.HtmlMinifyMiddleware',
@@ -695,7 +694,6 @@ EXCLUDE_FROM_MINIFYING = []
 
 MIDDLEWARE_ENDPOINT_CONTROL = {
     'remove': [
-        'vstutils.middleware.FastStaticMiddleware',
         'vstutils.middleware.FrontendChangesNotifications',
         'htmlmin.middleware.HtmlMinifyMiddleware',
         'htmlmin.middleware.MarkRequestMiddleware',
@@ -817,6 +815,9 @@ WSGI: _t.Text = os.getenv('VST_WSGI', f'{VST_PROJECT}.wsgi')
 WSGI_APPLICATION: _t.Text = f"{WSGI}.application"
 UWSGI_APPLICATION: _t.Text = f'{WSGI}:application'
 UWSGI_WORKER_PATH: _t.Text = f'{VSTUTILS_DIR}/asgi_worker.py'
+
+ASGI: _t.Text = os.getenv('VST_ASGI', 'vstutils.asgi')
+ASGI_APPLICATION: _t.Text = f'{ASGI}.application'
 
 uwsgi_settings: cconfig.Section = config['uwsgi']
 WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)
