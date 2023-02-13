@@ -8,14 +8,14 @@ import time
 import uvicorn
 import uwsgi  # pylint: disable=import-error
 import django
-from django.core.asgi import get_asgi_application
 from django.conf import settings
+from django.utils.module_loading import import_string
 django.setup()
 
 
 async def init(servers_list, fds):
     config = uvicorn.Config(
-        app=get_asgi_application(),
+        app=import_string(settings.ASGI_APPLICATION),
         interface='asgi3',
         log_level=settings.LOG_LEVEL.lower(),
         **settings.CONFIG['uvicorn'].all(),

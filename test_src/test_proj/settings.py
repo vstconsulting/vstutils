@@ -160,3 +160,5 @@ TEST_VAR_FROM_ENV2 = main.get('DO_NOT_USE_IT_IN_CONFIG', "{ENV[VSTUTILS_TEST_ENV
 
 DATABASE_ROUTERS = ['test_proj.db_router.TestDbRouter']
 DOCKER_DATABASES_TO_MIGRATE = ('primary1',)
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+

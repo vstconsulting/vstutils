@@ -4,3 +4,4 @@ fakeldap==0.6.1
 tblib~=1.7.0
 beautifulsoup4==4.11.1
 dj-inmemorystorage~=2.1.0
+httpx~=0.23.3

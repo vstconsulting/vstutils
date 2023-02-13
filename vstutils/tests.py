@@ -12,8 +12,11 @@ from django.apps import apps
 from django.http import StreamingHttpResponse
 from django.db import transaction, models as django_models
 from django.urls import reverse
+from django.conf import settings
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
+from django.utils.module_loading import import_string
+from fastapi.testclient import TestClient
 
 from .utils import import_class, raise_context_decorator_with_default
 
@@ -63,6 +66,13 @@ class BaseTestCase(TestCase):
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             self.testcase.user = self.old_user
+
+    @property
+    def api_test_client(self):
+        return TestClient(
+            import_string(settings.ASGI_APPLICATION),
+            base_url=f"https://{self.server_name}",
+        )
 
     def _create_user(self, is_super_user=True, **kwargs):
         username = kwargs.pop('username', self.random_name())
@@ -129,8 +139,6 @@ class BaseTestCase(TestCase):
             return None
 
     def setUp(self):
-        # pylint: disable=import-outside-toplevel
-        from django.conf import settings
         self.settings_obj = settings
         self.client_kwargs = {
             "HTTP_X_FORWARDED_PROTOCOL": 'https',

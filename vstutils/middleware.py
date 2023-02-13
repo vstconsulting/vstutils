@@ -7,13 +7,13 @@ from django.db import connections
 from django.apps import apps
 from django.conf import settings
 from django.http.request import HttpRequest
-from django.http.response import HttpResponse, Http404, HttpResponseNotFound
+from django.http.response import HttpResponse
 from django.utils import translation
-from django.urls import resolve, exceptions as url_exceptions
+from django.urls import resolve
 from django.shortcuts import redirect
 
 from .api.models import Language
-from .utils import BaseVstObject, patch_gzip_response
+from .utils import BaseVstObject
 
 
 logger = logging.getLogger(settings.VST_PROJECT)
@@ -286,25 +286,4 @@ class FrontendChangesNotifications(BaseMiddleware):
             with self.notificator_class([]) as notificator:
                 request.notificator = notificator  # type: ignore
                 return super().get_response_handler(request)
-        return super().get_response_handler(request)
-
-
-class FastStaticMiddleware(BaseMiddleware):
-    __slots__ = ()
-
-    def check_request_path(self, request: HttpRequest) -> bool:
-        return any((
-            request.path.startswith(path)
-            for path in (settings.STATIC_URL, settings.MEDIA_URL, settings.DOC_URL)
-        ))
-
-    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
-        # pylint: disable=invalid-overridden-method
-        if self.check_request_path(request):
-            try:
-                view, args, kwargs = resolve(request.path)
-                kwargs['request'] = request
-                return patch_gzip_response(view(*args, **kwargs), request)
-            except Http404 or url_exceptions.Resolver404:  # type: ignore
-                return HttpResponseNotFound("Not found\n")
         return super().get_response_handler(request)
