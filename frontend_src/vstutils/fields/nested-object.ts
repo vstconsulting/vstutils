@@ -11,7 +11,7 @@ import type {
 import { BaseFieldLabel } from '@/vstutils/fields/base';
 import { BaseField, FieldPropsDef, useFieldWrapperClasses } from '@/vstutils/fields/base';
 import { onAppBeforeInit } from '@/vstutils/signals';
-import { emptyInnerData, mapObjectValues } from '@/vstutils/utils';
+import { emptyInnerData, emptyRepresentData, mapObjectValues } from '@/vstutils/utils';
 
 import type { ModelConstructor } from '@/vstutils/models';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
@@ -28,11 +28,11 @@ export const NestedObjectFieldMixin = defineComponent({
         const value = computed(() => {
             return props.field.getValue(props.data);
         });
-        const sandbox = computed(() => {
+        const sandbox = computed<RepresentData>(() => {
             if (value.value && typeof value.value === 'object') {
-                return value;
+                return value.value;
             } else {
-                return {};
+                return emptyRepresentData();
             }
         });
         const wrapperClasses = useFieldWrapperClasses(props);
@@ -58,7 +58,7 @@ export const NestedObjectFieldMixin = defineComponent({
                 h(ModelFields, {
                     props: {
                         editable: props.type === 'edit' && !props.field.readOnly,
-                        data: sandbox,
+                        data: sandbox.value,
                         model: props.field.nestedModel,
                         fieldsErrors: props.error,
                         hideNotRequired:

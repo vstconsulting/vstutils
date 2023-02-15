@@ -2,6 +2,7 @@ import { test, beforeAll, expect, beforeEach } from '@jest/globals';
 import fetchMock from 'jest-fetch-mock';
 import { createApp, openPage } from '@/unittests';
 import { fetchInstances } from '@/vstutils/fetch-values';
+import { ArrayField } from '@/vstutils/fields/array';
 
 let app;
 let User;
@@ -192,4 +193,9 @@ test('related list with array with dynamic with fk fetching', async () => {
     expect(instances[0].related_list[1].list[0].username).toBe('user1001');
     expect(instances[0].related_list[1].list[1].username).toBe('user1000');
     expect(instances[1].related_list[0].list[0].username).toBe('user1000');
+
+    // Check that model with array field was not changed
+    expect(ModelWithRelatedList.fields.get('related_list').itemsModel.fields.get('list')).toBeInstanceOf(
+        ArrayField,
+    );
 });

@@ -83,8 +83,9 @@ export function createModelSandbox(instance: Model) {
 
     function validate() {
         const data = getData();
-        // Validate data
+        // Validate represent data
         const errors: FieldValidationErrorInfo[] = [];
+
         for (const field of instance._fields.values()) {
             try {
                 field.validateValue(data);
@@ -92,13 +93,24 @@ export function createModelSandbox(instance: Model) {
                 errors.push({ field, message: (e as Error).message });
             }
         }
-        if (errors.length) throw new ModelValidationError(errors);
 
         // Create inner data
         const newData = emptyInnerData();
         for (const field of instance._fields.values()) {
             newData[field.name] = field.toInner(data);
         }
+
+        // Validate inner data
+        for (const field of instance._fields.values()) {
+            try {
+                field.validateInner(newData);
+            } catch (e) {
+                errors.push({ field, message: (e as Error).message });
+            }
+        }
+
+        if (errors.length) throw new ModelValidationError(errors);
+
         return newData;
     }
 

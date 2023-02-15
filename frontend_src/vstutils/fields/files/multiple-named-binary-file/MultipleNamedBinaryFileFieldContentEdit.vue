@@ -1,12 +1,11 @@
 <template>
     <div>
-        <FileSelector
-            :show-hide-button="hideable"
-            :has-value="value && value.length > 0"
-            :media-types="field.allowedMediaTypes"
+        <MultipleFilesInput
+            :hideable="hideable"
+            :clearable="value && value.length > 0"
+            :field="field"
             :text="text"
-            multiple
-            @read-file="readFiles"
+            @input="readFiles"
             @clear="emit('clear')"
             @hide="emit('hide-field')"
         />
@@ -18,17 +17,14 @@
     import { computed } from 'vue';
     import { i18n } from '@/vstutils/translation';
     import { readFileAsObject } from '@/vstutils/utils';
-    import FileSelector from '../FileSelector.vue';
+    import { FieldEditPropsDef } from '@/vstutils/fields/base';
+    import MultipleFilesInput from '../MultipleFilesInput.vue';
     import FilesList from './FilesList.vue';
 
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
     import type MultipleNamedBinaryFileField from './MultipleNamedBinaryFileField';
 
-    const props = defineProps<{
-        field: MultipleNamedBinaryFileField;
-        value: ExtractRepresent<MultipleNamedBinaryFileField> | null | undefined;
-        hideable: boolean;
-    }>();
+    const props = defineProps(FieldEditPropsDef as FieldEditPropsDefType<MultipleNamedBinaryFileField>);
 
     const emit = defineEmits<{
         (event: 'set-value', value: ExtractRepresent<MultipleNamedBinaryFileField> | null | undefined): void;

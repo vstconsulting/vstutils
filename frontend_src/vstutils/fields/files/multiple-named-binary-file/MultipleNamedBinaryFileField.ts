@@ -16,15 +16,13 @@ class MultipleNamedBinaryFileField
     extends BaseField<NamedFile[] | string, NamedFile[], FileFieldXOptions | undefined>
     implements IFileField
 {
-    maxSize?: number;
-    allowedMediaTypes?: string[];
+    allowedMediaTypes: string[] | undefined;
 
     constructor(options: FieldOptions<FileFieldXOptions | undefined, NamedFile[]>) {
         Object.assign(options, options.items);
         delete options.items;
         super(options);
 
-        this.maxSize = this.props?.max_size;
         this.allowedMediaTypes = parseAllowedMediaTypes(options);
     }
 

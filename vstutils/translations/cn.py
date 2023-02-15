@@ -207,6 +207,12 @@ TRANSLATION = {
     # validators
     'imageValidationResolutionError': "必须至少为{min}且不超过{max}个像素",
     'Invalid URL': '无效的网址',
+    'File{fileName} is too large': '文件{fileName}太大',
+    'File{fileName} is too small': '文件{fileName}太小',
+    'Min length: {0}': '最小长度: {0}',
+    'Max length: {0}': '最大长度: {0}',
+    'Minimum filename length: {0}': '最小文件名长度: {0}',
+    'Maximum filename length: {0}': '最大文件名长度: {0}',
 
     # instance operation success
     # add

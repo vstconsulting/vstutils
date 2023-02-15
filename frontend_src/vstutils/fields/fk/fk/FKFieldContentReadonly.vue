@@ -53,9 +53,13 @@
         return props.field.getValueFieldValue(props.value);
     });
     const href = computed<string>(() => {
-        if (fk.value && queryset.value) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/restrict-plus-operands
-            return queryset.value.url + fk.value;
+        if (fk.value) {
+            if (props.field.props.linkGenerator) {
+                return props.field.props.linkGenerator({ value: fk.value, field: props.field }) ?? '';
+            }
+            if (queryset.value) {
+                return queryset.value.url + fk.value;
+            }
         }
         return '';
     });

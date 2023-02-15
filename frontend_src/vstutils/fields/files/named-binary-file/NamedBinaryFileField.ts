@@ -8,7 +8,7 @@ import NamedBinaryFileFieldMixin from './NamedBinaryFileFieldMixin';
 
 import type { FileFieldXOptions, IFileField } from '../file';
 import type { NamedFile } from './utils';
-import { ensureMediaTypeExists } from './utils';
+import { ensureMediaTypeExists, validateNamedFileJson } from './utils';
 import type { InnerData } from '@/vstutils/utils';
 
 /**
@@ -21,13 +21,11 @@ export class NamedBinaryFileField
     extends BaseField<NamedFile, NamedFile, FileFieldXOptions | undefined>
     implements IFileField
 {
-    maxSize?: number;
-    allowedMediaTypes?: string[];
+    allowedMediaTypes: string[] | undefined;
 
     constructor(options: FieldOptions<FileFieldXOptions | undefined, NamedFile>) {
         super(options);
 
-        this.maxSize = this.props?.max_size;
         this.allowedMediaTypes = parseAllowedMediaTypes(options);
     }
 
@@ -42,6 +40,10 @@ export class NamedBinaryFileField
      */
     validateValue(data: Record<string, unknown> = {}) {
         const value = super.validateValue(data);
+
+        if (value) {
+            validateNamedFileJson(this, value);
+        }
 
         if (value && this.required && value.name === null && value.content === null) {
             throw {

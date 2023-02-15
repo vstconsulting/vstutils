@@ -115,6 +115,7 @@ async function fetchArrayFieldValues(field: ArrayField, instances: Model[]): Pro
         const constructor = instance.constructor as ModelConstructor;
         // Create new instance for each item and replace array value with value of one item
         class ModelCopy extends constructor {}
+        ModelCopy.fields = new Map(ModelCopy.fields);
         ModelCopy.fields.set(field.name, field.itemField!);
         const itemInstances = items.map(
             (item) => new ModelCopy(createPropertyProxy(instance._data, field.name, item)),

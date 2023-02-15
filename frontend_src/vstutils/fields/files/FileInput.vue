@@ -6,11 +6,12 @@
             type="file"
             :accept="fileTypesStr"
             :multiple="multiple"
+            :disabled="disabled"
             class="hidden-input"
             @input="handleInput"
         />
         <div class="input-group-append">
-            <label :for="inputId" :title="helpText" class="btn input-group-text">
+            <label :for="inputId" :title="helpText" :disabled="disabled" class="btn input-group-text">
                 <i aria-hidden="true" class="far fa-file-alt" />
                 <span class="sr-only">{{ helpText }}</span>
             </label>
@@ -30,6 +31,7 @@
             multiple?: boolean;
             text?: string;
             fileTypes?: string[];
+            disabled?: boolean;
         }>(),
         {
             fileTypes: () => ['*/*'],

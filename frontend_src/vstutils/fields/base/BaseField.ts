@@ -93,7 +93,8 @@ export interface Field<
     toInner(data: RepresentData): Inner | null | undefined;
     toRepresent(data: InnerData): Represent | null | undefined;
 
-    validateValue(data: Record<string, unknown>): void;
+    validateValue(data: RepresentData): void;
+    validateInner(data: InnerData): void;
     translateValue(value: Represent): Represent;
 
     getValue(data?: InnerData): Inner | null | undefined;
@@ -182,11 +183,11 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
     }
 
     static get app(): IApp {
-        return globalThis.__currentApp;
+        return globalThis.__currentApp!;
     }
 
     get app(): IApp {
-        return globalThis.__currentApp;
+        return globalThis.__currentApp!;
     }
 
     get fkLinkable(): boolean {
@@ -266,38 +267,37 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
      */
     validateValue(data: FieldsData) {
         const value = this._getValueFromData(data);
-        let value_length = 0;
         const samples = pop_up_msg.field.error;
         const $t = _translate;
 
-        if (value) {
-            value_length = value.toString().length;
-        }
+        if (typeof value === 'string') {
+            const value_length = value.toString().length;
 
-        if (this.options.maxLength && value_length > this.options.maxLength) {
-            throw {
-                error: 'validation',
-                message: $t(samples.maxLength).format([this.options.maxLength]),
-            };
-        }
-
-        if (this.options.minLength) {
-            if (value_length === 0) {
-                if (!this.options.required) {
-                    return;
-                }
-
+            if (this.options.maxLength && value_length > this.options.maxLength) {
                 throw {
                     error: 'validation',
-                    message: $t(samples.empty),
+                    message: $t(samples.maxLength).format([this.options.maxLength]),
                 };
             }
 
-            if (value_length < this.options.minLength) {
-                throw {
-                    error: 'validation',
-                    message: $t(samples.minLength).format([this.options.minLength]),
-                };
+            if (this.options.minLength) {
+                if (value_length === 0) {
+                    if (!this.options.required) {
+                        return;
+                    }
+
+                    throw {
+                        error: 'validation',
+                        message: $t(samples.empty),
+                    };
+                }
+
+                if (value_length < this.options.minLength) {
+                    throw {
+                        error: 'validation',
+                        message: $t(samples.minLength).format([this.options.minLength]),
+                    };
+                }
             }
         }
 
@@ -330,6 +330,12 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
 
         return value;
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    validateInner(data: InnerData): Inner | null | undefined {
+        return this.getValue(data);
+    }
+
     /**
      * Static property for storing field mixins.
      */
