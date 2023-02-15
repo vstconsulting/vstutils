@@ -206,6 +206,12 @@ TRANSLATION = {
     # validators
     'imageValidationResolutionError': 'Должно быть не меньше {min} и не больше {max} px.',
     'Invalid URL': 'Неверный URL',
+    'File{fileName} is too large': 'Файл{fileName} слишком большой',
+    'File{fileName} is too small': 'Файл{fileName} слишком маленький',
+    'Min length: {0}': 'Минимальная длина: {0}',
+    'Max length: {0}': 'Максимальная длина: {0}',
+    'Minimum filename length: {0}': 'Минимальная длина имени файла: {0}',
+    'Maximum filename length: {0}': 'Максимальная длина имени файла: {0}',
 
     # instance operation success
     # add

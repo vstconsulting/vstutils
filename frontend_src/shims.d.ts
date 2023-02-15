@@ -14,7 +14,7 @@ declare global {
     /* eslint-disable no-var */
     var spa: typeof SPA;
     var App: new (...args: any[]) => IApp;
-    var __currentApp: IApp;
+    var __currentApp: IApp | undefined;
     var SELECT2_THEME: string;
     var cleanAllCacheAndReloadPage: () => void;
     /* eslint-enable no-var */

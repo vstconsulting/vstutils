@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts">
-    import { defineComponent, ref, toRef, watch } from 'vue';
+    import { defineComponent, onMounted, ref, toRef, watch } from 'vue';
     import { useAutocompleteDropdown } from '@/vstutils/fields/autocomplete';
     import { BaseFieldContentEdit, FieldEditPropsDef } from '@/vstutils/fields/base';
     import { escapeHtml, getDependenceValueAsString, guiLocalSettings, RequestTypes } from '@/vstutils/utils';
@@ -127,8 +127,15 @@
                 }
             }
 
-            watch(toRef(props, 'value'), (newVal) => {
-                inputRef.value!.value = props.field.getValueFieldValue(newVal as string) as string;
+            onMounted(() => {
+                watch(
+                    toRef(props, 'value'),
+                    (newVal) => {
+                        inputRef.value!.value =
+                            (props.field.getValueFieldValue(newVal) as string | undefined) ?? '';
+                    },
+                    { immediate: true },
+                );
             });
 
             function selectItem(item: HTMLElement): void {

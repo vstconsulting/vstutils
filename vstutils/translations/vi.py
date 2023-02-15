@@ -206,6 +206,12 @@ TRANSLATION = {
     # validators
     'imageValidationResolutionError': 'Phải có ít nhất {min} và không nhiều hơn {max} pixel.',
     'Invalid URL': 'URL không hợp lệ',
+    'File{fileName} is too large': 'Tệp{fileName} quá lớn',
+    'File{fileName} is too small': 'Tệp{fileName} quá nhỏ',
+    'Min length: {0}': 'Độ dài tối thiểu: {0}',
+    'Max length: {0}': 'Độ dài tối đa: {0}',
+    'Minimum filename length: {0}': 'Độ dài tên tệp tối thiểu: {0}',
+    'Maximum filename length: {0}': 'Độ dài tên tệp tối đa: {0}',
 
     # instance operation success
     # add

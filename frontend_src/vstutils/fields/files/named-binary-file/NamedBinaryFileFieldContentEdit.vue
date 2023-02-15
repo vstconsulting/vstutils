@@ -1,10 +1,10 @@
 <template>
-    <FileSelector
-        :show-hide-button="hideable"
-        :has-value="!!value"
-        :media-types="field.allowedMediaTypes"
+    <SingleFileInput
+        :hideable="hideable"
+        :clearable="!!value"
+        :field="field"
         :text="name"
-        @read-file="readFile"
+        @input="readFile"
         @clear="emit('clear')"
         @hide="emit('hide-field')"
     />
@@ -13,17 +13,14 @@
 <script setup lang="ts">
     import { toRef } from 'vue';
     import { readFileAsObject } from '@/vstutils/utils';
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
-    import { validateFileSize } from '../file';
-    import FileSelector from '../FileSelector.vue';
-    import type NamedBinaryFileField from './NamedBinaryFileField';
-    import { useNamedFileText } from './utils';
+    import { FieldEditPropsDef } from '@/vstutils/fields/base';
+    import SingleFileInput from '../SingleFileInput.vue';
+    import { useNamedFileText, validateNamedFilesContentSize } from './utils';
 
-    const props = defineProps<{
-        field: NamedBinaryFileField;
-        value: ExtractRepresent<NamedBinaryFileField> | null | undefined;
-        hideable?: boolean;
-    }>();
+    import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import type NamedBinaryFileField from './NamedBinaryFileField';
+
+    const props = defineProps(FieldEditPropsDef as FieldEditPropsDefType<NamedBinaryFileField>);
 
     const emit = defineEmits<{
         (event: 'set-value', value: ExtractRepresent<NamedBinaryFileField> | null | undefined): void;
@@ -33,9 +30,11 @@
 
     const name = useNamedFileText(toRef(props, 'value'));
 
-    async function readFile(files: File[]) {
-        const file = files[0];
-        if (!file || !validateFileSize(props.field, file.size)) return;
-        emit('set-value', await readFileAsObject(file));
+    async function readFile(file: File) {
+        const fileObj = await readFileAsObject(file);
+        if (!validateNamedFilesContentSize(props.field, [fileObj])) {
+            return;
+        }
+        emit('set-value', fileObj);
     }
 </script>

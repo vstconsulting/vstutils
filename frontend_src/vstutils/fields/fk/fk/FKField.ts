@@ -71,6 +71,7 @@ export interface FKFieldXOptions extends FieldXOptions {
     model?: ModelDefinition;
     list_paths?: string[];
     showLoader?: boolean;
+    linkGenerator?: (ctx: { value: TRepresent | null | undefined; field: FKField }) => string | undefined;
 }
 
 export type TInner = number | string;

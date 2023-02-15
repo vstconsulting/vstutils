@@ -84,8 +84,11 @@ export class DynamicField
     toRepresent(data: InnerData) {
         return this.getRealField(data).toRepresent(data);
     }
-    validateValue(data: Record<string, unknown>) {
+    validateValue(data: RepresentData) {
         return this.getRealField(data).validateValue(data);
+    }
+    validateInner(data: InnerData) {
+        return this.getRealField(data).validateInner(data);
     }
     /**
      * Method, that returns Array with names of parent fields -
@@ -131,7 +134,7 @@ export class DynamicField
         }
 
         const state = view.getSavedState();
-        if (state?.instance) {
+        if (state.instance) {
             return state.instance._getRepresentData();
         }
 

@@ -3,7 +3,6 @@ import type { FieldPropsDefType } from '@/vstutils/fields/base';
 import { BaseFieldMixin, FieldPropsDef } from '@/vstutils/fields/base';
 import FileFieldContentEdit from './FileFieldContentEdit.vue';
 import type FileField from './FileField';
-import { validateFileSize } from './utils';
 
 const FileFieldMixin = defineComponent({
     components: {
@@ -29,7 +28,7 @@ const FileFieldMixin = defineComponent({
         readFile(event: FileList | Event) {
             const file = event instanceof FileList ? event[0] : (event.target as HTMLInputElement).files?.[0];
 
-            if (!file || !validateFileSize(this.field, file.size)) {
+            if (!file) {
                 return;
             }
 

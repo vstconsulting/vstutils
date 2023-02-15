@@ -18,7 +18,6 @@ export function parseAllowedMediaTypes(options: FieldOptions<FileFieldXOptions |
 
 export interface FileFieldXOptions extends FieldXOptions {
     media_types?: string[];
-    max_size?: number;
 }
 
 export class FileField
@@ -27,13 +26,10 @@ export class FileField
 {
     static fkLinkable = false;
 
-    maxSize?: number;
-    allowedMediaTypes?: string[];
+    allowedMediaTypes: string[] | undefined;
 
     constructor(options: FieldOptions<FileFieldXOptions, string>) {
         super(options);
-
-        this.maxSize = this.props?.max_size;
         this.allowedMediaTypes = parseAllowedMediaTypes(options);
     }
 

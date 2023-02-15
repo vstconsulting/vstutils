@@ -1,10 +1,10 @@
 <template>
-    <FileSelector
-        :show-hide-button="hasHideButton"
-        :has-value="value"
-        :media-types="field.allowedMediaTypes"
+    <FileFieldSelector
+        :hideable="hasHideButton"
+        :clearable="value"
+        :field="field"
         :text="selectorText"
-        @read-file="readFile"
+        @input="readFile"
         @clear="clearValue"
         @hide="$emit('hide-field', field)"
     />
@@ -14,16 +14,15 @@
     import { defineComponent } from 'vue';
     import { arrayBufferToBase64 } from '../../../utils';
     import { FileFieldContentEdit } from '../file';
-    import { validateFileSize } from '../file';
-    import FileSelector from './../FileSelector.vue';
+    import FileFieldSelector from './../FileFieldSelector.vue';
 
     export default defineComponent({
-        components: { FileSelector },
+        components: { FileFieldSelector },
         extends: FileFieldContentEdit,
         methods: {
             readFile(files: File[]) {
                 const file = files[0];
-                if (!file || !validateFileSize(this.field, file.size)) return;
+                if (!file) return;
 
                 const reader = new FileReader();
 
