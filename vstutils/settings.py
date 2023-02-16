@@ -648,6 +648,7 @@ INSTALLED_APPS: _t.List[_t.Text] = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'vstutils',
     'django.contrib.staticfiles',
     'corsheaders',
 ]
@@ -665,7 +666,6 @@ INSTALLED_APPS += [
 INSTALLED_APPS += ['drf_yasg']
 
 ADDONS: _t.List[_t.Text] = [
-    'vstutils',
     'vstutils.api',
 ]
 

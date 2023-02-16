@@ -43,6 +43,7 @@ from django.urls import reverse
 from fakeldap import MockLDAP
 
 from vstutils import utils
+from vstutils.asgi import application
 from vstutils.api.models import Language
 from vstutils.api.schema.inspectors import X_OPTIONS
 from vstutils.api.serializers import BaseSerializer
@@ -218,6 +219,33 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         self.remove_project_place(self.project_place)
         with self.assertRaises(Exception):
             call_command('newproject', '--name', 'test_project', dir=None, interactive=0)
+
+    def test_runserver(self):
+        with self.patch('uvicorn.run') as mock_urun:
+            mock_urun.side_effect = lambda *args, **kwargs: 'OK'
+
+            self.assertEqual(mock_urun.call_count, 0)
+            call_command('runserver')
+            self.assertEqual(mock_urun.call_count, 1)
+            mock_urun.assert_called_with(
+                app=application,
+                access_log=True,
+                interface='asgi3',
+                log_level=settings.LOG_LEVEL.lower(),
+                host='127.0.0.1',
+                port=8080,
+            )
+
+            call_command('runserver', addrport='0.0.0.0:80')
+            self.assertEqual(mock_urun.call_count, 2)
+            mock_urun.assert_called_with(
+                app=application,
+                access_log=True,
+                interface='asgi3',
+                log_level=settings.LOG_LEVEL.lower(),
+                host='0.0.0.0',
+                port=80,
+            )
 
     def test_dockerrun(self):
         with self.patch('subprocess.check_call') as mock_obj:
