@@ -10,7 +10,7 @@ import type { NamedFile } from '../named-binary-file';
 import { ensureMediaTypeExists } from '../named-binary-file';
 import type { FileFieldXOptions, IFileField } from '../file';
 import { parseAllowedMediaTypes } from '../file';
-import type { InnerData } from '@/vstutils/utils';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
 
 class MultipleNamedBinaryFileField
     extends BaseField<NamedFile[] | string, NamedFile[], FileFieldXOptions | undefined>
@@ -45,7 +45,7 @@ class MultipleNamedBinaryFileField
     /**
      * Redefinition of 'validateValue' method of binfile guiField.
      */
-    validateValue(data = {}) {
+    validateValue(data: RepresentData) {
         const value = super.validateValue(data);
 
         if (value && this.options.required && Array.isArray(value) && value.length === 0) {

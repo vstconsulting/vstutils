@@ -16,8 +16,6 @@ interface ModelPropertyDescriptor<Represent> extends PropertyDescriptor {
     set(this: Model, value: Represent | null | undefined): void;
 }
 
-type FieldsData = Record<string, unknown>;
-
 interface RedirectOptions {
     operation_name?: string;
     depend_field?: string;
@@ -265,8 +263,8 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
      * Method that validates value.
      * @param {RepresentData} data - Object with all values.
      */
-    validateValue(data: FieldsData) {
-        const value = this._getValueFromData(data);
+    validateValue(data: RepresentData) {
+        const value = this.getValue(data);
         const samples = pop_up_msg.field.error;
         const $t = _translate;
 
@@ -282,7 +280,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
 
             if (this.options.minLength) {
                 if (value_length === 0) {
-                    if (!this.options.required) {
+                    if (!this.required) {
                         return;
                     }
 
@@ -317,11 +315,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
             }
         }
 
-        if (value === undefined && this.options.required && this.options.default !== undefined) {
-            return this.options.default;
-        }
-
-        if (value === undefined && this.options.required && !this.options.default) {
+        if (value === undefined && this.required && !this.options.default) {
             throw {
                 error: 'validation',
                 message: $t(samples.required),

@@ -173,6 +173,7 @@ export class ActionsManager {
         path,
         throwError = false,
         disablePopUp = false,
+        sendAll,
     }: {
         action: NotEmptyAction;
         instance: Model;
@@ -180,6 +181,7 @@ export class ActionsManager {
         path?: string;
         throwError?: boolean;
         disablePopUp?: boolean;
+        sendAll?: boolean;
     }): Promise<void | APIResponse<T>> {
         if (!method) {
             method = action.method!;
@@ -198,7 +200,9 @@ export class ActionsManager {
             const response = await this.app.api.makeRequest({
                 method,
                 path: path ?? formatPath(action.path!, this.app.router.currentRoute.params),
-                data: instance._getInnerData(),
+                data: instance._getInnerData(
+                    sendAll ? undefined : Array.from(instance.sandbox.changedFields),
+                ),
                 useBulk: instance.shouldUseBulk(method),
             });
             if (!disablePopUp) {
