@@ -454,7 +454,6 @@ export const createActionStore = (view: ActionView) => {
 
     async function execute() {
         try {
-            pageWithEditableData.instance.value!.sandbox.markUnchanged();
             const executeAction = view.actions.get('execute') as NotEmptyAction;
             const response = await app.actions.executeWithData({
                 action: executeAction,
@@ -463,6 +462,7 @@ export const createActionStore = (view: ActionView) => {
                 path: view.getRequestPath(app.router.currentRoute),
                 throwError: true,
             });
+            pageWithEditableData.instance.value!.sandbox.markUnchanged();
             pageWithEditableData.fieldsErrors.value = {};
             if (executeAction.redirectPath) {
                 void openPage(

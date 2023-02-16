@@ -5,12 +5,16 @@ import type { RawLocation } from 'vue-router';
 
 export async function openPage(to: RawLocation) {
     const app = getApp();
+    let route;
     try {
-        await app.router.push(to);
+        route = await app.router.push(to);
     } catch (e) {
         if (!isNavigationFailure(e, NavigationFailureType.duplicated)) {
             throw Error('Navigation failed', { cause: e });
         }
+    }
+    if (route?.name === '404') {
+        throw new Error(`Location not found ${JSON.stringify(to)}`);
     }
     const view = app.router.currentRoute.meta!.view as IView;
     const store = view._createStore();

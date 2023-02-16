@@ -72,7 +72,12 @@ describe('Actions', () => {
         const instance = ReqModel.fromRepresentData({ testField: 'some val' });
 
         fetchMock.mockOnce(JSON.stringify([{ status: 200, data: { some: 'return val' } }]));
-        const result = await app.actions.executeWithData({ action, instance, throwError: true });
+        const result = await app.actions.executeWithData({
+            action,
+            instance,
+            throwError: true,
+            sendAll: true,
+        });
         expect(result.data).toEqual({ some: 'return val' });
         expect(fetchMock).toBeCalledTimes(1);
         const [url, req] = fetchMock.mock.calls[0];

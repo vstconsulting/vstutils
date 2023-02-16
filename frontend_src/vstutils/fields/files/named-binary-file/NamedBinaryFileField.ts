@@ -9,7 +9,7 @@ import NamedBinaryFileFieldMixin from './NamedBinaryFileFieldMixin';
 import type { FileFieldXOptions, IFileField } from '../file';
 import type { NamedFile } from './utils';
 import { ensureMediaTypeExists, validateNamedFileJson } from './utils';
-import type { InnerData } from '@/vstutils/utils';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
 
 /**
  * This field takes and returns JSON with 3 properties:
@@ -38,7 +38,7 @@ export class NamedBinaryFileField
     /**
      * Redefinition of 'validateValue' method of binfile guiField.
      */
-    validateValue(data: Record<string, unknown> = {}) {
+    validateValue(data: RepresentData) {
         const value = super.validateValue(data);
 
         if (value) {
