@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 
 NOT_FOUND_RESPONSE = PlainTextResponse('Not found', status_code=404)
-static_app = FastAPI(openapi_url=None)
+static_app = FastAPI(openapi_url=None, docs_url=None, redoc_url=None)
 static_app.add_middleware(GZipMiddleware)
 
 application = FastAPI(openapi_url=None, docs_url=None, redoc_url=None)

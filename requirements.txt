@@ -17,7 +17,7 @@ ormsgpack==1.2.4
 # web server
 uvicorn~=0.20.0
 pyuwsgi==2.0.21
-fastapi~=0.91.0
+fastapi~=0.92.0
 
 # Notifications
 cent~=4.1.0
