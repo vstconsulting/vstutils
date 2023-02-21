@@ -15,7 +15,7 @@
             <code>{{ secret }}</code>
         </p>
         <component
-            :is="pinField.component"
+            :is="pinField.getComponent()"
             :key="pinField.name"
             :field="pinField"
             :data="store.sandbox"
@@ -65,7 +65,7 @@
         return store.sandbox.enabled;
     });
     const pinField = computed(() => {
-        return store.model.fields.get('pin');
+        return store.model.fields.get('pin')!;
     });
     const secret = computed(() => {
         return store.sandbox.secret;

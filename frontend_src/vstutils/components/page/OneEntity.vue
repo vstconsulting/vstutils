@@ -10,6 +10,7 @@
                 :fields-errors="fieldsErrors"
                 :hide-read-only="hideReadOnly"
                 :require-value-on-clear="requireValueOnClear"
+                :fields-groups="fieldsGroups"
                 @set-value="store.setFieldValue"
             />
         </div>
@@ -44,5 +45,5 @@
 
     const self = getCurrentInstance()!.proxy;
 
-    const { response, sandbox, model, fieldsErrors } = storeToRefs(store);
+    const { response, sandbox, model, fieldsErrors, fieldsGroups } = storeToRefs(store);
 </script>

@@ -10,6 +10,7 @@ import {
     HttpMethods,
     joinPaths,
     pathToArray,
+    RequestTypes,
     ViewTypes,
 } from '@/vstutils/utils';
 
@@ -23,6 +24,7 @@ import {
     createNewViewStore,
     useBasePageData,
 } from '@/vstutils/store';
+import { i18n } from '@/vstutils/translation';
 
 import type { ComponentOptionsMixin } from 'vue/types/v3-component-options';
 import type { IAppInitialized } from '@/vstutils/app';
@@ -38,7 +40,7 @@ import type {
 } from '@/vstutils/store';
 
 import type { StyleValue } from 'vue/types/jsx';
-import type { HttpMethod } from '@/vstutils/utils';
+import type { HttpMethod, RepresentData } from '@/vstutils/utils';
 import type { Vue } from 'vue/types/vue';
 import type { Route, RouteConfig } from 'vue-router';
 import type { Operation as SwaggerOperation } from 'swagger-schema-official';
@@ -164,6 +166,8 @@ export interface IView<
     resolveState(args: ResolveStateArg<TStore>): Promise<TStateToSave>;
     getSavedState(): StoreState<TStateToSave> | undefined;
 
+    getTitle(state?: StoreState<TStateToSave>): string;
+
     /**
      * Creates new store instance for currently opened page
      * @internal
@@ -272,6 +276,10 @@ export abstract class BaseView<
      */
     get modelsList(): [ModelConstructor | null, ModelConstructor | null] {
         return [this.params.requestModel || null, this.params.responseModel || null];
+    }
+
+    getTitle(state?: StoreState<TStateToSave>): string {
+        return i18n.ts(this.title);
     }
 
     /**
@@ -417,6 +425,12 @@ export abstract class DetailView<
     hideReadonlyFields = false;
     wrapperClasses = 'col-12';
 
+    abstract getModel(): ModelConstructor;
+
+    getFieldsGroups(options: { data: RepresentData }) {
+        return this.getModel().getFieldsGroups(options);
+    }
+
     beforeFieldsGroups?: () => Component;
     afterFieldsGroups?: () => Component;
 }
@@ -458,6 +472,10 @@ export class PageView extends DetailView<PageViewStore, PageViewParams, PageView
         return super.getRoutePath();
     }
 
+    getModel() {
+        return this.objects.getResponseModelClass(RequestTypes.RETRIEVE);
+    }
+
     async resolveState(args: ResolveStateArg<PageViewStore>): Promise<PageViewStateToSave> {
         const { route, store } = args;
         if (store) {
@@ -478,6 +496,16 @@ export class PageView extends DetailView<PageViewStore, PageViewParams, PageView
                     .get(this.pkParamName ? route.params[this.pkParamName] : undefined),
             ),
         };
+    }
+
+    getTitle(state?: StoreState<PageViewStateToSave>): string {
+        if (this.useViewFieldAsTitle && state?.instance) {
+            const value = state.instance.getViewFieldValue();
+            if (value) {
+                return value as string;
+            }
+        }
+        return super.getTitle(state);
     }
 }
 
@@ -510,6 +538,10 @@ export class PageNewView extends DetailView<PageNewStore, PageNewParams> {
     getRoutePath() {
         return joinPaths(this.parent?.getRoutePath(), pathToArray(this.path).last);
     }
+
+    getModel() {
+        return this.objects.getResponseModelClass(RequestTypes.CREATE);
+    }
 }
 
 export class PageEditView extends DetailView<PageEditStore> {
@@ -535,6 +567,12 @@ export class PageEditView extends DetailView<PageEditStore> {
             return joinPaths(this.parent?.getRoutePath(), pathToArray(this.path).last);
         }
         return super.getRoutePath();
+    }
+
+    getModel() {
+        return this.objects.getRequestModelClass(
+            this.isPartial ? RequestTypes.PARTIAL_UPDATE : RequestTypes.UPDATE,
+        );
     }
 }
 
@@ -581,5 +619,9 @@ export class ActionView extends DetailView<ActionStore, ActionViewParams> {
             return formatPath(this.parent.path, currentRoute.params);
         }
         return currentRoute.path;
+    }
+
+    getModel() {
+        return this.action.requestModel;
     }
 }

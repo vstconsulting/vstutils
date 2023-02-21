@@ -3,7 +3,7 @@ import type { StoreGeneric } from 'pinia';
 import type { Action, IView, Sublink } from '@/vstutils/views';
 import type { Breadcrumb } from '@/vstutils/breadcrumbs';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
-import type { InstancesList, Model, ModelConstructor } from '@/vstutils/models';
+import type { FieldsGroup, InstancesList, Model, ModelConstructor } from '@/vstutils/models';
 import type { SetFieldValueOptions } from '@/vstutils/fields/base';
 import type { PaginationItem } from './helpers';
 
@@ -54,6 +54,8 @@ export interface DetailViewStore extends BaseViewStore {
     instance: Model | null;
     sandbox: RepresentData;
     fieldsErrors?: Record<string, unknown>;
+    fieldsGroups: FieldsGroup[];
+    model: ModelConstructor;
 
     setInstance(instance: Model): void;
     setFieldValue(options: SetFieldValueOptions): void;

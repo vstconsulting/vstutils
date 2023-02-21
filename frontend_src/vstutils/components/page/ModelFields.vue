@@ -49,7 +49,11 @@
 
 <script setup lang="ts">
     import { computed, provide, toRefs } from 'vue';
-    import { useHideableFieldsGroups, useModelFieldsGroups } from '@/vstutils/composables';
+    import {
+        getFieldsInstancesGroups,
+        getModelFieldsInstancesGroups,
+        useHideableFieldsGroups,
+    } from '@/vstutils/composables';
     import Card from '@/vstutils/components/Card.vue';
     import HideNotRequiredSelect from './HideNotRequiredSelect.vue';
 
@@ -60,6 +64,8 @@
     const props = defineProps<{
         data: RepresentData;
         model: ModelConstructor;
+
+        fieldsGroups?: FieldsGroup[];
 
         flatIfPossible?: boolean;
         flatFieldsClasses?: string | string[] | Record<string, boolean>;
@@ -89,7 +95,12 @@
         return props.editable ? 'edit' : 'readonly';
     });
 
-    const fieldsInstancesGroups = useModelFieldsGroups(model, data);
+    const fieldsInstancesGroups = computed(() => {
+        if (props.fieldsGroups) {
+            return getFieldsInstancesGroups(model.value, props.fieldsGroups);
+        }
+        return getModelFieldsInstancesGroups(model.value, data.value);
+    });
 
     const { hiddenFields, visibleFieldsGroups, hideField, showField } = useHideableFieldsGroups(
         fieldsInstancesGroups,

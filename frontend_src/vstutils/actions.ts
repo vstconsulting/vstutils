@@ -1,6 +1,7 @@
 import type { IApp, IAppInitialized } from '@/vstutils/app';
 import { guiPopUp, pop_up_msg } from './popUp';
 import type { HttpMethod } from './utils';
+import { emptyInnerData } from './utils';
 import {
     formatPath,
     parseResponseMessage,
@@ -196,13 +197,18 @@ export class ActionsManager {
             return;
         }
 
+        const data = emptyInnerData();
+        for (const field of instance._fields.values()) {
+            if (sendAll || field.required || instance.sandbox.changedFields.has(field.name)) {
+                data[field.name] = field.toInner(instance.sandbox.value);
+            }
+        }
+
         try {
             const response = await this.app.api.makeRequest({
                 method,
                 path: path ?? formatPath(action.path!, this.app.router.currentRoute.params),
-                data: instance._getInnerData(
-                    sendAll ? undefined : Array.from(instance.sandbox.changedFields),
-                ),
+                data,
                 useBulk: instance.shouldUseBulk(method),
             });
             if (!disablePopUp) {

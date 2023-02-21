@@ -66,6 +66,7 @@ import * as users from './vstutils/users';
 export * from './vstutils/ComponentsRegistrator.js';
 export * from './vstutils/AppConfiguration.ts';
 export * from '@/cache';
+export { i18n } from './vstutils/translation';
 
 export {
     AppRoot,

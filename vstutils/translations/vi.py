@@ -56,6 +56,7 @@ TRANSLATION = {
     'Select files': 'Chọn tệp tin',
     'Clear field': 'Vùng đất thoáng đãng',
     'Column is required!': 'Cột là bắt buộc!',
+    'Filters': 'Bộ lọc',
 
     # fields
     'Id': 'định danh',
