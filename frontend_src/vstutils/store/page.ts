@@ -14,7 +14,6 @@ import {
     PAGE_WITH_INSTANCE,
     useBasePageData,
     useEntityViewClasses,
-    useInstanceTitle,
     useListFilters,
     useOperations,
     usePageLeaveConfirmation,
@@ -26,7 +25,7 @@ import {
 
 import type { Route } from 'vue-router';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
-import type { Model, InstancesList, ModelConstructor } from '@/vstutils/models';
+import type { Model, InstancesList } from '@/vstutils/models';
 import type { PageEditView, PageNewView, PageView, ActionView, Action, ListView } from '@/vstutils/views';
 import type { PageViewStore } from './page-types';
 
@@ -219,14 +218,11 @@ export const createListViewStore = (view: ListView) => {
 
 export const createDetailViewStore = (view: PageView) => {
     const qsStore = useQuerySet(view);
-    const pageWithInstance = PAGE_WITH_INSTANCE();
+    const pageWithInstance = PAGE_WITH_INSTANCE(view);
     const base = useBasePageData(view);
     const app = getApp();
 
-    const title = useInstanceTitle({ view, instance: pageWithInstance.instance });
     const filtersQuery = ref(emptyInnerData());
-
-    const model = ref<ModelConstructor>(view.objects.getResponseModelClass(RequestTypes.RETRIEVE));
 
     function getInstancePk(): string | number | undefined | null {
         if (pageWithInstance.instance.value) {
@@ -327,9 +323,7 @@ export const createDetailViewStore = (view: PageView) => {
         ...qsStore,
         ...pageWithInstance,
         ...useOperations({ view, data: pageWithInstance.sandbox }),
-        entityViewClasses: useEntityViewClasses(model, pageWithInstance.sandbox),
-        model,
-        title,
+        entityViewClasses: useEntityViewClasses(pageWithInstance.model, pageWithInstance.sandbox),
         filtersQuery,
         filters,
         appliedDefaultFilterNames,
@@ -344,7 +338,7 @@ export const createDetailViewStore = (view: PageView) => {
 
 export const createNewViewStore = (view: PageNewView) => {
     const qsStore = useQuerySet(view);
-    const pageWithEditableData = PAGE_WITH_EDITABLE_DATA(PAGE_WITH_INSTANCE());
+    const pageWithEditableData = PAGE_WITH_EDITABLE_DATA(PAGE_WITH_INSTANCE(view));
     const base = useBasePageData(view);
     const app = getApp();
 
@@ -422,13 +416,9 @@ export const createEditViewStore = (view: PageEditView) => {
 
     const app = getApp();
 
-    const model = ref(
-        view.objects.getRequestModelClass(view.isPartial ? RequestTypes.PARTIAL_UPDATE : RequestTypes.UPDATE),
-    );
-
     function setInstance(instance: Model) {
-        if (!(instance instanceof model.value)) {
-            instance = new model.value(undefined, null, instance);
+        if (!(instance instanceof pageViewStore.model.value)) {
+            instance = new pageViewStore.model.value(undefined, null, instance);
         }
         pageViewStore.setInstance(instance);
     }
@@ -459,7 +449,7 @@ export const createEditViewStore = (view: PageEditView) => {
                     : undefined,
             );
 
-            pageViewStore.instance.value!.sandbox.markUnchanged();
+            instance.sandbox.markUnchanged();
             pageViewStore.fieldsErrors.value = {};
 
             guiPopUp.success(i18n.t(pop_up_msg.instance.success.save, [name, view.name]) as string);
@@ -491,7 +481,7 @@ export const createEditViewStore = (view: PageEditView) => {
         app.router.back();
     }
 
-    return { ...pageViewStore, model, setInstance, save, reload, cancel };
+    return { ...pageViewStore, setInstance, save, reload, cancel };
 };
 
 export const createActionViewStore = (view: ActionView) => {

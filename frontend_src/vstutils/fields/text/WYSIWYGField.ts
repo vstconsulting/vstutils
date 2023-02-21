@@ -16,7 +16,13 @@ export const WYSIWYGFieldMixin = defineFieldComponent<WYSIWYGField>({
         () =>
             h(WYSIWYGEditor, {
                 props: { readOnly: false, initialValue: props.value },
-                on: { change: (data: string) => emit('set-value', data) },
+                on: {
+                    change: (data: string) => {
+                        if (data !== props.value) {
+                            emit('set-value', data);
+                        }
+                    },
+                },
             }),
 });
 

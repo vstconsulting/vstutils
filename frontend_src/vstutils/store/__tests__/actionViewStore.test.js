@@ -25,6 +25,7 @@ test('createActionViewStore', async () => {
     expect(store.sandbox).toStrictEqual({
         bool: false,
         text: '',
+        choice: 'one',
     });
 
     // No data entered (error should appear because 'text' field is required)
@@ -43,7 +44,7 @@ test('createActionViewStore', async () => {
             JSON.stringify([
                 {
                     status: 201,
-                    data: { bool: false, text: 'Mshvill' },
+                    data: { bool: false, text: 'Mshvill', choice: 'one' },
                 },
             ]),
         );
@@ -53,6 +54,6 @@ test('createActionViewStore', async () => {
         let bulk = JSON.parse(request.body);
         expect(bulk[0].method).toBe('post');
         expect(bulk[0].path).toStrictEqual('/some_list/some_action/');
-        expect(bulk[0].data).toStrictEqual({ text: 'Mshvill' });
+        expect(bulk[0].data).toStrictEqual({ text: 'Mshvill', choice: 'one' });
     }
 });

@@ -56,6 +56,7 @@ TRANSLATION = {
     'Select files': '选择文件',
     'Clear field': '清场',
     'Column is required!': '列是必需的!',
+    'Filters': '过滤器',
 
     # fields
     'Id': '标识符',

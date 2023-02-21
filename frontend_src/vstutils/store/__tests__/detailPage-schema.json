@@ -1,4 +1,5 @@
 {
+    "$schema": "https://json.schemastore.org/swagger-2.0.json",
     "definitions": {
         "OneSomePage": {
             "required": [
@@ -55,10 +56,11 @@
             }
         },
         "SomeAction": {
-            "required": ["text"],
+            "required": ["text", "choice"],
             "properties": {
                 "text": {"type": "string", "minLength": 1},
-                "bool": {"type": "boolean"}
+                "bool": {"type": "boolean"},
+                "choice": {"type": "string", "enum": ["one", "two", "three"]}
             }
         }
     },

@@ -68,7 +68,11 @@
                 this.loaded = true;
                 if (this.value) {
                     const pk = this.field.getValueFieldValue(this.value);
-                    this.setValue(results.find((instance) => this.field.getValueFieldValue(instance) === pk));
+                    this.$emit(
+                        'set-value',
+                        results.find((instance) => this.field.getValueFieldValue(instance) === pk),
+                        { markChanged: false },
+                    );
                 }
                 this.$nextTick().then(() => {
                     this.selectOnLoad();
@@ -89,11 +93,21 @@
                 }
             },
             selected(node) {
-                if (!this.onlyLastChild || !node.children.length) {
-                    this.setValue(node.data.instance);
-                    this.selectedNode = node;
-                    this.selectedText = node.data.text;
+                const newInst = node.data.instance;
+                const currentInst = this.value;
+                if (
+                    typeof newInst === 'object' &&
+                    typeof currentInst === 'object' &&
+                    newInst.getPkValue() === currentInst.getPkValue()
+                ) {
+                    return;
                 }
+                if (this.onlyLastChild && !node.children.length) {
+                    return;
+                }
+                this.setValue(node.data.instance);
+                this.selectedNode = node;
+                this.selectedText = node.data.text;
             },
             removeValue() {
                 this.setValue(this.field.getEmptyValue());

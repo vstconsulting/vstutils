@@ -56,6 +56,7 @@ TRANSLATION = {
     'Select files': 'Выбрать файлы',
     'Clear field': 'Очистить поле',
     'Column is required!': 'Колонка обязательна',
+    'Filters': 'Фильтры',
 
     # fields
     'Id': 'Идентификатор',

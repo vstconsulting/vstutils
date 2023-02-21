@@ -1,9 +1,9 @@
 import { test, beforeAll, expect, jest } from '@jest/globals';
-import { ref, reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { createApp } from '@/unittests';
 import { StringField } from '@/vstutils/fields/text';
 
-import { useModelFieldsGroups, useHideableFieldsGroups } from '@/vstutils/composables';
+import { getModelFieldsInstancesGroups, useHideableFieldsGroups } from '@/vstutils/composables';
 
 let app;
 
@@ -24,7 +24,7 @@ test('useModelFieldsGroups', () => {
 
     Model.fieldsGroups = jest.fn(() => [{ title: 'Some group', fields: ['field2'] }]);
 
-    const filteredGroups = useModelFieldsGroups(ref(Model), ref(data));
+    const filteredGroups = computed(() => getModelFieldsInstancesGroups(Model, data));
 
     expect(filteredGroups.value).toHaveLength(1);
     expect(filteredGroups.value[0].title).toBe('Some group');
@@ -48,7 +48,7 @@ test('useHideableFieldsGroups', () => {
     const options = reactive({ hideReadOnly: true });
 
     const { showField, hideField, visibleFieldsGroups } = useHideableFieldsGroups(
-        useModelFieldsGroups(ref(Model), ref({})),
+        computed(() => getModelFieldsInstancesGroups(Model, {})),
         options,
     );
 

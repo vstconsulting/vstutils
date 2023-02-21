@@ -38,7 +38,7 @@ import {
 import type { Ref } from 'vue';
 import type { NavigationGuard, Route } from 'vue-router';
 import type { QuerySet } from '@/vstutils/querySet';
-import type { IView, ActionView, NotEmptyAction, ViewStore } from '@/vstutils/views';
+import type { IView, ActionView, NotEmptyAction, ViewStore, DetailView } from '@/vstutils/views';
 import type { Model, ModelConstructor } from '@/vstutils/models';
 import type { IApp } from '@/vstutils/app';
 import type { RepresentData, InnerData } from '@/vstutils/utils';
@@ -114,15 +114,6 @@ export function getRedirectUrl(): string {
     return url;
 }
 
-export const useInstanceTitle = ({ view, instance }: { view: IView; instance: Ref<Model | null> }) => {
-    return computed(() => {
-        if (view.isDetailPage() && view.useViewFieldAsTitle) {
-            return instance.value?.getViewFieldString(false) || i18n.st(view.title);
-        }
-        return i18n.st(view.title);
-    });
-};
-
 export const useQuerySet = (view: IView) => {
     if (!view.objects) {
         throw new Error(`View ${view.path} has no queryset`);
@@ -165,9 +156,7 @@ export const useBasePageData = (view: IView) => {
     const loading = ref(false);
     const error = ref<unknown>(null);
     const response = ref<unknown>(null);
-    const title = computed<string>(() => {
-        return i18n.st(view.title);
-    });
+    const title = computed<string>(() => view.getTitle(view.getSavedState()));
     const breadcrumbs = useBreadcrumbs();
 
     const {
@@ -402,7 +391,7 @@ export function useQueryBasedFiltering() {
     return { applyFilters, applyFieldsFilters, applySearchFilter };
 }
 
-export const PAGE_WITH_INSTANCE = () => {
+export const PAGE_WITH_INSTANCE = (view: DetailView) => {
     const app = getApp();
 
     const instance = shallowRef<Model | null>(null);
@@ -410,6 +399,14 @@ export const PAGE_WITH_INSTANCE = () => {
     const providedInstance = computed<Model | undefined>(
         () => app.rootVm.$route.params.providedInstance as unknown as Model | undefined,
     );
+
+    const model = computed(() => {
+        return view.getModel();
+    });
+
+    const fieldsGroups = computed(() => {
+        return view.getFieldsGroups({ data: sandbox.value });
+    });
 
     function setInstance(newInstance: Model) {
         instance.value = newInstance;
@@ -419,7 +416,7 @@ export const PAGE_WITH_INSTANCE = () => {
         instance.value?.sandbox.set(options);
     }
 
-    return { instance, sandbox, providedInstance, setInstance, setFieldValue };
+    return { instance, sandbox, providedInstance, setInstance, setFieldValue, fieldsGroups, model };
 };
 
 export const PAGE_WITH_EDITABLE_DATA = <T extends ReturnType<typeof PAGE_WITH_INSTANCE>>(base: T) => {
@@ -447,10 +444,9 @@ export const PAGE_WITH_EDITABLE_DATA = <T extends ReturnType<typeof PAGE_WITH_IN
 };
 
 export const createActionStore = (view: ActionView) => {
-    const pageWithEditableData = PAGE_WITH_EDITABLE_DATA(PAGE_WITH_INSTANCE());
+    const pageWithEditableData = PAGE_WITH_EDITABLE_DATA(PAGE_WITH_INSTANCE(view));
 
     const app = getApp();
-    const model = computed<ModelConstructor>(() => view.action.requestModel);
 
     async function execute() {
         try {
@@ -485,11 +481,10 @@ export const createActionStore = (view: ActionView) => {
         }
     }
 
-    pageWithEditableData.setInstance(new model.value());
+    pageWithEditableData.setInstance(new pageWithEditableData.model.value());
 
     return {
         ...pageWithEditableData,
-        model,
         execute,
     };
 };

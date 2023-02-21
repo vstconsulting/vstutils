@@ -1,36 +1,35 @@
 import { computed, ref } from 'vue';
 
-import type { Ref, ComputedRef } from 'vue';
-import type { FieldsInstancesGroup, ModelConstructor } from '@/vstutils/models';
+import type { Ref } from 'vue';
+import type { FieldsGroup, FieldsInstancesGroup, ModelConstructor } from '@/vstutils/models';
 import type { RepresentData } from '@/vstutils/utils';
 import type { Field } from '@/vstutils/fields/base';
 
-export function useModelFieldsGroups(
-    model: Ref<ModelConstructor>,
-    data: Ref<RepresentData>,
-): ComputedRef<FieldsInstancesGroup[]> {
-    return computed<FieldsInstancesGroup[]>(() => {
-        const groups = [];
-        for (const group of model.value.getFieldsGroups({ data: data.value })) {
-            const fields = [];
-            for (const fieldName of group.fields) {
-                if (typeof fieldName === 'object') {
-                    fields.push(fieldName);
-                    continue;
-                }
-                const field = model.value.fields.get(fieldName);
-                if (field) {
-                    fields.push(field);
-                } else {
-                    console.warn(`Unknown field ${model.value.name}.${fieldName} in group ${group.title}`);
-                }
+export function getFieldsInstancesGroups(model: ModelConstructor, groups: FieldsGroup[]) {
+    const instancesGroups: FieldsInstancesGroup[] = [];
+    for (const group of groups) {
+        const fields: Field[] = [];
+        for (const fieldName of group.fields) {
+            if (typeof fieldName === 'object') {
+                fields.push(fieldName);
+                continue;
             }
-            if (fields.length > 0) {
-                groups.push({ ...group, fields });
+            const field = model.fields.get(fieldName);
+            if (field) {
+                fields.push(field);
+            } else {
+                console.warn(`Unknown field ${model.name}.${fieldName} in group ${group.title}`);
             }
         }
-        return groups;
-    });
+        if (fields.length > 0) {
+            instancesGroups.push({ ...group, fields });
+        }
+    }
+    return instancesGroups;
+}
+
+export function getModelFieldsInstancesGroups(model: ModelConstructor, data: RepresentData) {
+    return getFieldsInstancesGroups(model, model.getFieldsGroups({ data }));
 }
 
 export function useHideableFieldsGroups(
