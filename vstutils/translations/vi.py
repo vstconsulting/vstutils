@@ -57,6 +57,11 @@ TRANSLATION = {
     'Clear field': 'Vùng đất thoáng đãng',
     'Column is required!': 'Cột là bắt buộc!',
     'Filters': 'Bộ lọc',
+    'Server error': 'Lỗi máy chủ',
+    'Page not found': 'Không tìm thấy trang',
+    'Permission denied': 'Quyền bị từ chối',
+    'Bad request': 'Yêu cầu không hợp lệ',
+    'Go back': 'Quay lại',
 
     # fields
     'Id': 'định danh',
