@@ -2468,7 +2468,7 @@ class EndpointTestCase(BaseTestCase):
         response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
 
         self.assertEqual(response[0]['status'], 404, response[0])
-        self.assertTrue('<h1>Not Found</h1>' in response[0]['data']['detail'])
+        self.assertTrue('Page not found' in response[0]['data']['detail'])
 
     def test_testing_tool(self):
         with self.assertRaises(AssertionError):

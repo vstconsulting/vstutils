@@ -57,6 +57,11 @@ TRANSLATION = {
     'Clear field': 'Очистить поле',
     'Column is required!': 'Колонка обязательна',
     'Filters': 'Фильтры',
+    'Server error': 'Ошибка сервера',
+    'Page not found': 'Страница не найдена',
+    'Permission denied': 'Доступ запрещен',
+    'Bad request': 'Неверный запрос',
+    'Go back': 'Вернуться назад',
 
     # fields
     'Id': 'Идентификатор',

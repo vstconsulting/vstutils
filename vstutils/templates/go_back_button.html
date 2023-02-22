@@ -1,0 +1,11 @@
+<script>
+    if (window.history.length > 1) {
+        const btn = document.createElement('btn');
+        btn.className = 'btn btn-default';
+        btn.textContent = '{% translate_text "Go back" %}';
+        btn.style.display = 'block';
+        btn.style.margin = '0.9rem 0';
+        btn.addEventListener('click', () => window.history.back());
+        document.currentScript.insertAdjacentElement('beforebegin', btn);
+    }
+</script>
