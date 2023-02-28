@@ -1,4 +1,5 @@
 import type { IApp } from './vstutils/app';
+import type SchemaLoader from './app_loader/OpenAPILoader.js';
 import type * as SPA from './app.common.js';
 
 declare global {
@@ -16,6 +17,7 @@ declare global {
     var App: new (...args: any[]) => IApp;
     var __currentApp: IApp | undefined;
     var SELECT2_THEME: string;
+    var schemaLoader: SchemaLoader;
     var cleanAllCacheAndReloadPage: () => void;
     /* eslint-enable no-var */
 }

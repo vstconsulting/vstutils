@@ -31,7 +31,7 @@ class OpenAPILoader {
 
     /**
      * Method, that promises to load OpenApi schema.
-     * @return {promise} Promise of OpenApi schema loading.
+     * @return {Promise<unknown>} Promise of OpenApi schema loading.
      */
     async loadSchema() {
         const cached = await this.cache.getJson(this.cacheKey);

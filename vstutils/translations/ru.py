@@ -62,6 +62,7 @@ TRANSLATION = {
     'Permission denied': 'Доступ запрещен',
     'Bad request': 'Неверный запрос',
     'Go back': 'Вернуться назад',
+    'Selected instances were successfully removed': 'Выбранные объекты были успешно удалены',
 
     # fields
     'Id': 'Идентификатор',

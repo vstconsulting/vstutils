@@ -35,14 +35,6 @@
                 <i class="fas fa-save" />
                 {{ $t('Save') }}
             </button>
-            <ConfirmModal
-                ref="reloadPageModal"
-                message="Changes in settings are successfully saved. Please refresh the page."
-                confirm-title="Reload now"
-                reject-title="Later"
-                @confirm="reloadPage"
-                @reject="close"
-            />
             <button class="btn btn-secondary btn-block" @click="cleanAllCache">
                 <i class="fas fa-sync-alt" />
                 {{ `${$t('Reload')} ${$t('cache')}` }}
@@ -52,10 +44,11 @@
 </template>
 
 <script lang="ts">
-    import { ref } from 'vue';
     import { HelpModal } from './modal';
     import ControlSidebarButton from './ControlSidebarButton.vue';
     import ConfirmModal from '../common/ConfirmModal.vue';
+    import { saveAllSettings } from '@/vstutils/utils';
+
     import type { Field, SetFieldValueOptions } from '@/vstutils/fields/base';
     import type { NestedObjectField } from '@/vstutils/fields/nested-object';
     import type AppRoot from '@/vstutils/AppRoot.vue';
@@ -65,16 +58,8 @@
     export default {
         name: 'ControlSidebar',
         components: { HelpModal, ConfirmModal },
-        setup() {
-            const reloadPageModal = ref<InstanceType<typeof ConfirmModal>>();
-
-            return {
-                reloadPageModal,
-            };
-        },
         data() {
             return {
-                isSaving: false,
                 UserSettings: this.$app.modelsResolver.byReferencePath('#/definitions/_UserSettings'),
 
                 localSettings: this.$app.localSettingsStore,
@@ -83,7 +68,9 @@
         },
         computed: {
             disableSaveButton() {
-                return (!this.userSettings.changed && !this.localSettings.changed) || this.isSaving;
+                return (
+                    (!this.userSettings.changed && !this.localSettings.changed) || this.userSettings.saving
+                );
             },
             localSettingsFields() {
                 return Array.from(this.$app.localSettingsModel.fields.values());
@@ -120,11 +107,6 @@
                 return [];
             },
         },
-        watch: {
-            'userSettings.changed': function () {
-                this.isSaving = false;
-            },
-        },
         mounted() {
             document.addEventListener('keydown', this.closeControlSidebar);
             document.addEventListener('click', this.closeControlSidebar);
@@ -137,17 +119,9 @@
         },
         methods: {
             async saveSettings() {
-                if (this.userSettings.changed) {
-                    this.isSaving = true;
-                    await this.userSettings.save();
+                if (await saveAllSettings()) {
+                    this.$app.openReloadPageModal();
                 }
-                if (this.localSettings.changed) {
-                    this.localSettings.save();
-                }
-                this.reloadPageModal!.openModal();
-            },
-            reloadPage() {
-                window.location.reload();
             },
             setUserSetting(section: string, options: SetFieldValueOptions) {
                 this.userSettings.setValue(section, options);
@@ -166,9 +140,6 @@
                 } else if (ev.type === 'scroll' && document.body.getBoundingClientRect().top <= 0) {
                     (this.$root as AppRootEl).closeControlSidebar();
                 }
-            },
-            close() {
-                this.reloadPageModal!.closeModal();
             },
         },
     };

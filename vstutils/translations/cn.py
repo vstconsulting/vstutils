@@ -62,6 +62,7 @@ TRANSLATION = {
     'Permission denied': '权限被拒绝',
     'Bad request': '错误请求',
     'Go back': '返回',
+    'Selected instances were successfully removed': '选定的实例已成功删除',
 
     # fields
     'Id': '标识符',

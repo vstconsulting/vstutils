@@ -6,7 +6,7 @@ import type { ApiConnector } from '@/vstutils/api';
 import type { ModelConstructor } from '@/vstutils/models';
 import type { InnerData } from '@/vstutils/utils';
 import type { SetFieldValueOptions } from '@/vstutils/fields/base';
-import { computed, ref } from 'vue';
+import { computed, readonly, ref } from 'vue';
 
 type Section = Record<string, unknown>;
 type Settings = Record<string, Section>;
@@ -18,6 +18,7 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: ModelCons
         const instance = ref(new modelClass());
         const settings = computed(() => instance.value.sandbox.value as Settings);
         const changed = computed(() => instance.value.sandbox.changed);
+        const saving = ref(false);
 
         function setValue(section: string, { field, value, ...options }: SetFieldValueOptions) {
             const currentSectionValue: Record<string, unknown> =
@@ -35,14 +36,19 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: ModelCons
             instance.value = new modelClass(data);
         }
         async function save() {
+            saving.value = true;
             instance.value._validateAndSetData();
             const dataToSave = instance.value._getInnerData();
-            const { data } = await api.bulkQuery<InnerData<Settings>>({
-                method: HttpMethods.PUT,
-                path: USER_SETTINGS_PATH,
-                data: dataToSave,
-            });
-            setData(data);
+            try {
+                const { data } = await api.bulkQuery<InnerData<Settings>>({
+                    method: HttpMethods.PUT,
+                    path: USER_SETTINGS_PATH,
+                    data: dataToSave,
+                });
+                setData(data);
+            } finally {
+                saving.value = false;
+            }
         }
         function setAndSave(section: string, options: SetFieldValueOptions) {
             setValue(section, options);
@@ -58,7 +64,7 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: ModelCons
             });
         }
 
-        return { settings, changed, init, setAndSave, save, rollback, setValue };
+        return { settings, changed, saving: readonly(saving), init, setAndSave, save, rollback, setValue };
     });
 
 export type UserSettingsStore = ReturnType<ReturnType<typeof createUserSettingsStore>>;

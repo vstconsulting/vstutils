@@ -13,6 +13,8 @@ export interface BaseViewStore extends StoreGeneric {
     error: unknown;
     response: unknown;
     title: string;
+    actions: Action[];
+    sublinks: Sublink[];
     initLoading: () => void;
     setLoadingSuccessful: () => void;
     setLoadingError: (error: unknown) => void;
