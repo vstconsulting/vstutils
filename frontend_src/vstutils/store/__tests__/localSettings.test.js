@@ -1,5 +1,5 @@
 import { expect, test } from '@jest/globals';
-import { makeModel, Model } from '@/vstutils/models';
+import { makeModel, BaseModel } from '@/vstutils/models';
 import { StringField } from '@/vstutils/fields/text';
 import { IntegerField } from '@/vstutils/fields/numbers/integer';
 import { createPinia } from 'pinia';
@@ -9,7 +9,7 @@ test('localSettings module', () => {
     const storage = window.sessionStorage;
 
     const Settings = makeModel(
-        class extends Model {
+        class extends BaseModel {
             static declaredFields = [
                 new StringField({ name: 'val1', required: false, type: 'string' }),
                 new IntegerField({ format: 'integer', name: 'val2', required: false, type: 'number' }),

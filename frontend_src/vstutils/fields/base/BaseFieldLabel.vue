@@ -23,9 +23,9 @@
         error?: string | object | unknown[];
     }>();
 
-    const label = computed(() => i18n.t(props.field.title) as string);
+    const label = computed(() => i18n.ts(props.field.title));
 
-    const requiredText = computed(() => i18n.t('Required field') as string);
+    const requiredText = computed(() => i18n.ts('Required field'));
     const showRequired = computed(() => props.type === 'edit' && props.field.required);
 
     const error = computed(() => {
@@ -37,7 +37,7 @@
 
     const description = computed(() => {
         if (props.field.description) {
-            return i18n.t(props.field.description) as string;
+            return i18n.ts(props.field.description);
         }
         return '';
     });

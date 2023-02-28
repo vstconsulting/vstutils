@@ -8,7 +8,8 @@ import NamedBinaryFileFieldMixin from './NamedBinaryFileFieldMixin';
 
 import type { FileFieldXOptions, IFileField } from '../file';
 import type { NamedFile } from './utils';
-import { ensureMediaTypeExists } from './utils';
+import { ensureMediaTypeExists, validateNamedFileJson } from './utils';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
 
 /**
  * This field takes and returns JSON with 3 properties:
@@ -20,13 +21,11 @@ export class NamedBinaryFileField
     extends BaseField<NamedFile, NamedFile, FileFieldXOptions | undefined>
     implements IFileField
 {
-    maxSize?: number;
-    allowedMediaTypes?: string[];
+    allowedMediaTypes: string[] | undefined;
 
     constructor(options: FieldOptions<FileFieldXOptions | undefined, NamedFile>) {
         super(options);
 
-        this.maxSize = this.props?.max_size;
         this.allowedMediaTypes = parseAllowedMediaTypes(options);
     }
 
@@ -39,21 +38,25 @@ export class NamedBinaryFileField
     /**
      * Redefinition of 'validateValue' method of binfile guiField.
      */
-    validateValue(data: Record<string, unknown> = {}) {
+    validateValue(data: RepresentData) {
         const value = super.validateValue(data);
+
+        if (value) {
+            validateNamedFileJson(this, value);
+        }
 
         if (value && this.required && value.name === null && value.content === null) {
             throw {
                 error: 'validation',
-                message: i18n.t(pop_up_msg.field.error.empty) as string,
+                message: i18n.ts(pop_up_msg.field.error.empty),
             };
         }
 
         return value;
     }
 
-    toRepresent(data: Record<string, unknown>) {
-        return ensureMediaTypeExists(this.getDataInnerValue(data));
+    toRepresent(data: InnerData) {
+        return ensureMediaTypeExists(this.getValue(data));
     }
 
     getEmptyValue() {

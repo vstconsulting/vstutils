@@ -5,11 +5,14 @@ import { defineComponent } from 'vue';
 import { BaseField, BaseFieldMixin } from '@/vstutils/fields/base';
 import { i18n } from '@/vstutils/translation';
 
+import { validateSimpleFileLength } from '../file';
 import CsvFileFieldEdit from './CSVFileFieldEdit.vue';
 import CsvFileFieldReadonly from './CsvFileFieldReadonly.vue';
 
 import type { Schema } from 'swagger-schema-official';
 import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
+import type { IFileField } from '../file';
 
 export { CsvFileFieldEdit, CsvFileFieldReadonly };
 
@@ -34,13 +37,14 @@ interface ColumnConfig {
     };
 }
 
-export class CsvFileField extends BaseField<
-    string,
-    string | unknown[][] | Record<string, unknown>[],
-    CsvFileFieldXOptions
-> {
+export class CsvFileField
+    extends BaseField<string, string | unknown[][] | Record<string, unknown>[], CsvFileFieldXOptions>
+    implements IFileField
+{
     parserConfig: ParseConfig<unknown[]>;
     minColumnWidth?: number;
+
+    allowedMediaTypes = ['text/csv'];
 
     constructor(options: FieldOptions<CsvFileFieldXOptions, string>) {
         super(options);
@@ -55,13 +59,15 @@ export class CsvFileField extends BaseField<
         return [CsvFileFieldMixin];
     }
 
-    toInner(data: Record<string, unknown>) {
-        const value = this.getDataRepresentValue(data);
+    toInner(data: RepresentData) {
+        const value = this.getValue(data);
         if (typeof value == 'string') {
             return value;
         }
-        // @ts-expect-error kek
-        return Papa.unparse(value, this.parserConfig);
+        if (value) {
+            return Papa.unparse(value as string[][], this.parserConfig as Papa.UnparseConfig);
+        }
+        return value;
     }
 
     get delimiter() {
@@ -70,7 +76,7 @@ export class CsvFileField extends BaseField<
 
     getTableConfig() {
         const obj = this.props.items;
-        const tableConfig: ColumnConfig[] = [{ prop: '_index', name: i18n.t('Index') as string }];
+        const tableConfig: ColumnConfig[] = [{ prop: '_index', name: i18n.ts('Index') }];
         for (const [name, property] of Object.entries(obj.properties ?? {})) {
             const column: ColumnConfig = {
                 prop: name,
@@ -87,6 +93,16 @@ export class CsvFileField extends BaseField<
             tableConfig.push(column);
         }
         return tableConfig;
+    }
+
+    validateInner(data: InnerData) {
+        const value = super.validateInner(data);
+
+        if (value) {
+            validateSimpleFileLength(this, value);
+        }
+
+        return value;
     }
 
     parseFile(text: string) {

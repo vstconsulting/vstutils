@@ -17,6 +17,8 @@ from .utils import BaseVstObject
 
 
 logger = logging.getLogger(settings.VST_PROJECT)
+ResponseType = _t.TypeVar("ResponseType", bound=HttpResponse)
+ResponseHandlerType = _t.Union[_t.Awaitable[ResponseType], ResponseType]
 
 
 @contextmanager
@@ -126,11 +128,21 @@ class BaseMiddleware(BaseVstObject):
 
         return request
 
-    def get_response_handler(self, request: HttpRequest) -> HttpResponse:
+    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
         """
         Entrypoint for breaking or continuing request handling.
         This function must return `django.http.HttpResponse` object
         or result of parent class calling.
+
+        Since the release of 5.3, it has been possible to write this method as asynchronous.
+        This should be used in cases where the middleware makes queries to the database or cache.
+        However, such a middleware should be excluded from bulk requests.
+
+        .. warning::
+            Never do asynchronous middleware in dependent chains.
+            They are designed to send independent requests to external sources.
+
+            Set ``async_capable`` to ``True`` and ``sync_capable`` to ``False`` for such middleware.
 
         :param request: HTTP-request object which is wrapped from client request.
         :type request: django.http.HttpRequest
@@ -138,7 +150,7 @@ class BaseMiddleware(BaseVstObject):
         """
         return self.get_response(request)
 
-    def __call__(self, request: HttpRequest) -> HttpResponse:
+    def __call__(self, request: HttpRequest) -> ResponseHandlerType:
         return self.handler(
             self.request_handler(request),
             self.get_response_handler(request)
@@ -174,7 +186,7 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
     def _round_time(self, seconds: _t.Union[int, float]):
         return round(seconds * 1000, 2)
 
-    def get_response_handler(self, request: HttpRequest) -> HttpResponse:
+    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
         start_time = time.time()
         get_response_handler = super().get_response_handler
         ql = QueryTimingLogger()
@@ -217,7 +229,7 @@ class LangMiddleware(BaseMiddleware):
             return obj, set_cookie
         return Language.objects.get(code=settings.LANGUAGE_CODE), set_cookie  # nocv
 
-    def get_response_handler(self, request: HttpRequest) -> HttpResponse:
+    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
         request.language, set_cookie = self.get_lang_object(request)  # type: ignore
         translation.activate(request.language.code)  # type: ignore
         request.LANGUAGE_CODE = translation.get_language()  # type: ignore
@@ -255,18 +267,21 @@ class TwoFaMiddleware(BaseMiddleware):
             url_name is not None and url_name.startswith('password_reset')
         ])
 
-    def get_response_handler(self, request: HttpRequest) -> HttpResponse:
+    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
         if request.user.need_twofa and self.check_url_name(request):  # type: ignore
             return redirect('login')
         return super().get_response_handler(request)
 
 
 class FrontendChangesNotifications(BaseMiddleware):
+    __slots__ = ('notificator_class',)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
 
-    def get_response_handler(self, request: HttpRequest) -> HttpResponse:
+    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
+        # pylint: disable=invalid-overridden-method
         if settings.CENTRIFUGO_CLIENT_KWARGS and request.path != f'/{settings.API_URL}/health/':
             with self.notificator_class([]) as notificator:
                 request.notificator = notificator  # type: ignore

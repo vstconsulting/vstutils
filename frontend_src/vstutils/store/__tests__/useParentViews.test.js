@@ -1,5 +1,4 @@
 import { expect, test, beforeAll, jest } from '@jest/globals';
-import { defineStore } from 'pinia';
 import { createApp } from '@/unittests/create-app';
 import { createSchema } from '@/unittests/schema';
 import { useParentViews } from '../helpers';
@@ -20,7 +19,7 @@ test('useParentViews', async () => {
     userView.resolveState = jest.fn(() => Promise.resolve());
 
     await app.router.push('/user/1337/');
-    await push(defineStore('user_store_1', userView.getStoreDefinition())());
+    await push(userView._createStore());
     expect(items.value.length).toBe(2);
     expect(itemsMap.value.get('/user/')).toBe(items.value[0]);
     expect(itemsMap.value.get('/user/{id}/')).toBe(items.value[1]);
@@ -29,7 +28,7 @@ test('useParentViews', async () => {
     expect(userView.resolveState).toBeCalledTimes(1);
 
     await app.router.push('/user/123/');
-    await push(defineStore('user_store_2', userView.getStoreDefinition())());
+    await push(userView._createStore());
     expect(items.value.length).toBe(2);
     expect(itemsMap.value.get('/user/')).toBe(items.value[0]);
     expect(itemsMap.value.get('/user/{id}/')).toBe(items.value[1]);

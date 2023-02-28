@@ -1,20 +1,18 @@
 <template>
     <div class="row">
         <div v-if="hideNotRequired && editable" class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <HideNotRequiredSelect
-                        class="col-lg-4 col-xs-12 col-sm-6 col-md-6"
-                        :fields="hiddenFields"
-                        @show-field="showField"
-                    />
-                </div>
-            </div>
+            <Card>
+                <HideNotRequiredSelect
+                    class="col-lg-4 col-xs-12 col-sm-6 col-md-6"
+                    :fields="hiddenFields"
+                    @show-field="showField"
+                />
+            </Card>
         </div>
         <template v-if="displayFlat">
             <component
-                :is="field.component"
-                v-for="field in filteredFieldsInstancesGroups[0].fields"
+                :is="field.getComponent()"
+                v-for="field in visibleFieldsGroups[0].fields"
                 :key="field.name"
                 :class="flatFieldsClasses"
                 :field="field"
@@ -23,160 +21,113 @@
                 :error="fieldsErrors && fieldsErrors[field.name]"
                 :hideable="hideNotRequired && !field.required"
                 style="margin-bottom: 1rem"
-                @hide-field="hiddenFields.push(field)"
-                @set-value="$emit('set-value', $event)"
+                @hide-field="hideField(field)"
+                @set-value="emit('set-value', $event)"
             />
         </template>
         <template v-else>
-            <div
-                v-for="(group, idx) in filteredFieldsInstancesGroups"
-                :key="idx"
-                :class="fieldsGroupClasses(group)"
-            >
-                <div class="card" :class="groupsClasses">
-                    <h5 v-if="group.title" class="card-header">
-                        {{ $t(group.title) }}
-                    </h5>
-                    <div class="card-body">
-                        <component
-                            :is="field.component"
-                            v-for="field in group.fields"
-                            :key="field.name"
-                            :field="field"
-                            :data="data"
-                            :type="fieldsType"
-                            :error="fieldsErrors && fieldsErrors[field.name]"
-                            :hideable="hideNotRequired && !field.required"
-                            style="margin-bottom: 1rem"
-                            @hide-field="hiddenFields.push(field)"
-                            @set-value="$emit('set-value', $event)"
-                        />
-                    </div>
-                </div>
+            <div v-for="(group, idx) in visibleFieldsGroups" :key="idx" :class="fieldsGroupClasses(group)">
+                <Card :class="groupsClasses" :title="$ts(group.title)">
+                    <component
+                        :is="field.getComponent()"
+                        v-for="field in group.fields"
+                        :key="field.name"
+                        :field="field"
+                        :data="data"
+                        :type="fieldsType"
+                        :error="fieldsErrors && fieldsErrors[field.name]"
+                        :hideable="hideNotRequired && !field.required"
+                        style="margin-bottom: 1rem"
+                        @hide-field="hideField(field)"
+                        @set-value="emit('set-value', $event)"
+                    />
+                </Card>
             </div>
         </template>
     </div>
 </template>
 
-<script>
+<script setup lang="ts">
+    import { computed, provide, toRefs } from 'vue';
+    import {
+        getFieldsInstancesGroups,
+        getModelFieldsInstancesGroups,
+        useHideableFieldsGroups,
+    } from '@/vstutils/composables';
+    import Card from '@/vstutils/components/Card.vue';
     import HideNotRequiredSelect from './HideNotRequiredSelect.vue';
 
-    export default {
-        name: 'ModelFields',
-        components: { HideNotRequiredSelect },
-        provide() {
-            return {
-                requireValueOnClear: this.requireValueOnClear,
-            };
-        },
-        props: {
-            data: { type: Object, required: true },
-            model: { type: Function, required: true },
+    import type { FieldComponentType, SetFieldValueOptions } from '@/vstutils/fields/base';
+    import type { FieldsGroup, ModelConstructor } from '@/vstutils/models';
+    import type { RepresentData } from '@/vstutils/utils';
 
-            flatIfPossible: { type: Boolean, default: false },
-            flatFieldsClasses: { type: [String, Array, Object], default: null },
+    const props = defineProps<{
+        data: RepresentData;
+        model: ModelConstructor;
 
-            fieldsGroups: {
-                type: Array,
-                default() {
-                    if (this.model.fieldsGroups) {
-                        return Object.entries(this.model.fieldsGroups).map(([groupName, fieldsNames]) => ({
-                            title: groupName,
-                            fields: fieldsNames,
-                        }));
-                    } else {
-                        return [{ title: '', fields: Array.from(this.model.fields.values()) }];
-                    }
-                },
-            },
+        fieldsGroups?: FieldsGroup[];
 
-            editable: { type: Boolean, default: false },
-            hideReadOnly: { type: Boolean, default: false },
-            hideNotRequired: { type: Boolean, default: false },
+        flatIfPossible?: boolean;
+        flatFieldsClasses?: string | string[] | Record<string, boolean>;
 
-            fieldsErrors: { type: Object, default: () => ({}) },
+        editable?: boolean;
+        hideReadOnly?: boolean;
 
-            groupsClasses: { type: [String, Object, Array], default: '' },
+        fieldsErrors?: Record<string, string>;
+        groupsClasses?: string | string[] | Record<string, boolean>;
 
-            requireValueOnClear: { type: Boolean, default: false },
-        },
-        data() {
-            return {
-                hiddenFields: [],
-            };
-        },
-        computed: {
-            displayFlat() {
-                return (
-                    this.flatIfPossible &&
-                    this.filteredFieldsInstancesGroups.length === 1 &&
-                    !this.filteredFieldsInstancesGroups[0].title
-                );
-            },
-            fieldsType() {
-                return this.editable ? 'edit' : 'readonly';
-            },
-            fieldsInstancesGroups() {
-                const groups = [];
-                for (const group of this.fieldsGroups) {
-                    const fields = [];
-                    for (const fieldName of group.fields) {
-                        if (typeof fieldName === 'object') {
-                            fields.push(fieldName);
-                            continue;
-                        }
-                        const field = this.model.fields.get(fieldName);
-                        if (field) {
-                            fields.push(field);
-                        } else {
-                            console.warn(`Cannot resolve field ${this.model.name}.${fieldName} `);
-                        }
-                    }
-                    if (fields.length > 0) {
-                        groups.push({ ...group, fields });
-                    }
+        requireValueOnClear?: boolean;
+    }>();
+
+    const emit = defineEmits<{
+        (e: 'set-value', options: SetFieldValueOptions): void;
+    }>();
+
+    provide('requireValueOnClear', props.requireValueOnClear);
+
+    const { model, data } = toRefs(props);
+
+    const hideNotRequired = computed(() => {
+        return model.value.hideNotRequired;
+    });
+
+    const fieldsType = computed<FieldComponentType>(() => {
+        return props.editable ? 'edit' : 'readonly';
+    });
+
+    const fieldsInstancesGroups = computed(() => {
+        if (props.fieldsGroups) {
+            return getFieldsInstancesGroups(model.value, props.fieldsGroups);
+        }
+        return getModelFieldsInstancesGroups(model.value, data.value);
+    });
+
+    const { hiddenFields, visibleFieldsGroups, hideField, showField } = useHideableFieldsGroups(
+        fieldsInstancesGroups,
+        props,
+    );
+
+    if (hideNotRequired?.value) {
+        for (const group of visibleFieldsGroups.value) {
+            for (const field of group.fields) {
+                if (!field.required && !props.data[field.name]) {
+                    hideField(field);
                 }
-                return groups;
-            },
-            filteredFieldsInstancesGroups() {
-                return this.fieldsInstancesGroups
-                    .map((group) => ({
-                        ...group,
-                        fields: group.fields.filter((field) => this.shouldShowField(field)),
-                    }))
-                    .filter((group) => group.fields.length > 0);
-            },
-        },
-        created() {
-            if (this.hideNotRequired) {
-                this.hiddenFields = this.filteredFieldsInstancesGroups
-                    .flatMap((group) => group.fields)
-                    .filter((field) => !field.required && !this.data[field.name]);
             }
-        },
-        methods: {
-            showField(fieldName) {
-                this.hiddenFields.splice(
-                    this.hiddenFields.findIndex((field) => field.name === fieldName),
-                    1,
-                );
-            },
-            shouldShowField(field) {
-                return (
-                    !field.hidden &&
-                    !(this.hideReadOnly && field.readOnly) &&
-                    !this.hiddenFields.includes(field)
-                );
-            },
-            fieldsGroupClasses({ title, wrapperClasses }) {
-                return [
-                    wrapperClasses || 'col-md-6',
-                    'fields-group',
-                    `fields-group-${title.replace(/ /g, '_')}`,
-                ];
-            },
-        },
-    };
+        }
+    }
+
+    const displayFlat = computed(() => {
+        return (
+            props.flatIfPossible &&
+            visibleFieldsGroups.value.length === 1 &&
+            !visibleFieldsGroups.value[0].title
+        );
+    });
+
+    function fieldsGroupClasses({ title, wrapperClasses }: FieldsGroup) {
+        return [wrapperClasses || 'col-md-6', 'fields-group', `fields-group-${title.replace(/ /g, '_')}`];
+    }
 </script>
 
 <style>

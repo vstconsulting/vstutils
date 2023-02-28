@@ -1,6 +1,5 @@
 import { test, expect, beforeAll } from '@jest/globals';
 import { ref } from 'vue';
-import { defineStore } from 'pinia';
 import { createApp } from '../../../unittests/create-app';
 import { createSchema } from '../../../unittests/schema';
 import fetchMock from 'jest-fetch-mock';
@@ -20,7 +19,7 @@ test('createListViewStore', async () => {
     const listView = app.views.get('/some_list/');
 
     // Get store for view and make sure that store is created, and it isn't null
-    const store = defineStore('some_store', listView.getStoreDefinition())();
+    const store = listView._createStore();
     expect(store).not.toBeNull();
 
     // Push our path to router
@@ -37,7 +36,7 @@ test('createListViewStore', async () => {
 
     expect(store.response).toBeTruthy();
     expect(store.loading).toBeFalsy();
-    expect(store.instances).toStrictEqual([]);
+    expect(store.instances.length).toBe(0);
 
     const data = JSON.stringify([
         {

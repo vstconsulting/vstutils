@@ -41,7 +41,7 @@
     });
 
     const imageAlt = computed(() => {
-        return i18n.t(props.field.title) as string;
+        return i18n.ts(props.field.title);
     });
 </script>
 

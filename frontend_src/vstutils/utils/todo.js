@@ -1,11 +1,8 @@
 import $ from 'jquery';
-import VueRouter from 'vue-router';
 import moment from 'moment';
-import { i18n } from '@/vstutils/translation';
 import { getApp } from './app-helpers';
 import { LocalSettings } from './localSettings';
 
-export const EMPTY = Symbol('EMPTY');
 export const guiLocalSettings = new LocalSettings('guiLocalSettings');
 
 export function hasOwnProp(obj, prop) {
@@ -661,7 +658,7 @@ export function findClosestPath(paths, current_path) {
  * @deprecated
  */
 export function _translate() {
-    return i18n.t(...arguments);
+    return getApp().i18n.t(...arguments);
 }
 
 /**
@@ -767,23 +764,6 @@ export function template(strings, ...keys) {
 }
 
 /**
- * @typedef {string} RequestType
- */
-
-/**
- * Enum for request types
- * @enum {RequestType}
- */
-export const RequestTypes = {
-    LIST: 'list',
-    RETRIEVE: 'retrieve',
-    CREATE: 'create',
-    UPDATE: 'update',
-    PARTIAL_UPDATE: 'partialUpdate',
-    REMOVE: 'remove',
-};
-
-/**
  * Enum for HTTP methods
  */
 export const FieldViews = {
@@ -809,28 +789,6 @@ export function formatPath(path, params, instance = null) {
     }
 
     return path;
-}
-
-/**
- * Method, that converts query object into string
- *
- * @param {(string|object|URLSearchParams)=} query
- * @param {boolean} useBulk - If false adds question mark (?) in front of string
- * @returns {string}
- */
-export function makeQueryString(query = undefined, useBulk = false) {
-    let queryStr = '';
-    if (typeof query === 'string') {
-        queryStr = new URLSearchParams(query).toString();
-    } else if (typeof query === 'object') {
-        queryStr = new URLSearchParams(Object.entries(query)).toString();
-    } else if (query instanceof URLSearchParams) {
-        queryStr = query.toString();
-    }
-
-    if (!useBulk && queryStr !== '') queryStr = `?${queryStr}`;
-
-    return queryStr;
 }
 
 export function copyToClipboard(value) {
@@ -1060,33 +1018,6 @@ export function iterFind(iterator, callbackFn) {
 }
 
 /**
- * Function that wraps object in Proxy
- * @param {object} target
- * @param {string|symbol} propertyToProxy
- * @param {*} newValue
- * @return {any|boolean|symbol}
- */
-export function createPropertyProxy(target, propertyToProxy, newValue = EMPTY) {
-    let value = newValue === EMPTY ? Reflect.get(target, propertyToProxy) : newValue;
-
-    return new Proxy(target, {
-        get(target, property, receiver) {
-            if (property === propertyToProxy) {
-                return value;
-            }
-            return Reflect.get(target, property, receiver);
-        },
-        set(target, property, updatedValue, receiver) {
-            if (property === propertyToProxy) {
-                value = updatedValue;
-                return true;
-            }
-            return Reflect.set(target, property, updatedValue, receiver);
-        },
-    });
-}
-
-/**
  * @param {KeyboardEvent} event
  */
 export function stopEnterPropagationCallback(event) {
@@ -1189,31 +1120,6 @@ export function generatePassword() {
     return result.sort(() => Math.random() - 0.5).join('');
 }
 
-/**
- * @param {Record<string,any>|string} options
- */
-export function openPage(options) {
-    const router = getApp().router;
-
-    if (typeof options === 'object') {
-        // Get name by path so additional params can be passed
-        if (options.path && options.params) {
-            const route = router.resolve(options)?.route;
-            if (route.name !== '404' && !route.meta?.view?.isDeepNested) {
-                options.name = route.name;
-                delete options['path'];
-            }
-        }
-    } else {
-        options = { path: options };
-    }
-    return router.push(options).catch((error) => {
-        if (!VueRouter.isNavigationFailure(error)) {
-            throw error;
-        }
-    });
-}
-
 export function mapStoreState(names) {
     const mapped = {};
     for (const name of names) {
@@ -1233,11 +1139,6 @@ export function mapStoreActions(names) {
     }
     return mapped;
 }
-
-export const getUniqueId = (() => {
-    let id = 0;
-    return () => String(++id);
-})();
 
 export function openSublink(sublink, instance = undefined) {
     const router = getApp().router;

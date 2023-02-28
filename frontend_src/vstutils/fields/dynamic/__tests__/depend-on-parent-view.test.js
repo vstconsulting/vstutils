@@ -1,7 +1,6 @@
 import { beforeAll, expect, test } from '@jest/globals';
 import schema from './depend-on-parent-view-schema.json';
 import fetchMock from 'jest-fetch-mock';
-import { defineStore } from 'pinia';
 import { createApp } from '@/unittests/create-app';
 import { createSchema } from '@/unittests/schema';
 import { PhoneField } from '@/vstutils/fields/text/phone';
@@ -19,7 +18,7 @@ test('DynamicField depending on value from parent view', async () => {
     );
 
     await app.router.push('/level_0/0/level_1/1/level_2/2/with_dynamic/');
-    const store = defineStore('store', view.getStoreDefinition())();
+    const store = view._createStore();
 
     fetchMock.mockResponseOnce(
         JSON.stringify([
@@ -58,31 +57,20 @@ test('DynamicField depending on value from parent view', async () => {
     expect(body).toStrictEqual([
         {
             method: 'get',
-            version: 'v1',
             path: ['level_0', '0'],
-            query: '',
-            headers: {},
         },
         {
             method: 'get',
-            version: 'v1',
             path: ['level_0', '0', 'level_1', '1'],
-            query: '',
-            headers: {},
         },
         {
             method: 'get',
-            version: 'v1',
             path: ['level_0', '0', 'level_1', '1', 'level_2', '2'],
-            query: '',
-            headers: {},
         },
         {
             method: 'get',
-            version: 'v1',
             path: ['level_0', '0', 'level_1', '1', 'level_2', '2', 'with_dynamic'],
             query: 'limit=20&offset=0',
-            headers: {},
         },
     ]);
 

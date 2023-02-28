@@ -1,19 +1,17 @@
 <template>
-    <BootstrapModal ref="modal" :title="$t(action.title)">
+    <BootstrapModal ref="modal" :title="$ts(action.title)">
         <template #activator="{ openModal }">
             <button class="dropdown-item" type="button" @click="openModal" v-text="$st(action.title)" />
         </template>
 
         <div class="container">
             <ModelFields
-                :data="sandbox"
-                :model="model"
+                :data="store.sandbox"
+                :model="store.model"
                 :editable="true"
-                :fields-groups="fieldsGroups"
-                :fields-errors="fieldsErrors"
+                :fields-errors="store.fieldsErrors"
                 :hide-read-only="true"
-                :hide-not-required="hideNotRequired"
-                @set-value="setFieldValue"
+                @set-value="store.setFieldValue"
             />
         </div>
 
@@ -25,91 +23,81 @@
     </BootstrapModal>
 </template>
 
-<script>
-    import { defineComponent } from 'vue';
-    import BootstrapModal from '../BootstrapModal.vue';
-    import ModelFields from '../page/ModelFields.vue';
-    import { guiPopUp, pop_up_msg } from '../../popUp';
-    import { formatPath, parseResponseMessage, getUniqueId } from '../../utils';
-    import { createActionStore } from './../../store/helpers';
+<script setup lang="ts">
+    import { computed, ref } from 'vue';
     import { defineStore } from 'pinia';
+    import { useRoute } from 'vue-router/composables';
 
-    export default defineComponent({
-        name: 'NotEmptyMultiactionModal',
-        components: { BootstrapModal, ModelFields },
-        props: {
-            action: { type: Object, required: true },
-        },
-        setup(props) {
-            const useStore = defineStore(`notEmptyMultiActionModal_${getUniqueId()}`, () =>
-                createActionStore(props.action.view),
-            );
-            const store = useStore();
-            return {
-                store,
-                model: store.model,
-                sandbox: store.sandbox,
-                fieldsGroups: store.fieldsGroups,
-                fieldsErrors: store.fieldsErrors,
-                changedFields: store.changedFields,
-                instance: store.instance,
-                setFieldValue: (...args) => store.setFieldValue(...args),
-            };
-        },
-        data() {
-            return {
-                view: this.action.view,
-                hideNotRequired: false,
-            };
-        },
-        methods: {
-            getRequestPaths() {
-                return this.$app.store.page.instances
-                    .filter((instance) => this.$app.store.page.selection.includes(instance.getPkValue()))
-                    .map((instance) => formatPath(this.view.path, this.$route.params, instance));
-            },
-            async execute() {
-                const instance = this.instance;
-                try {
-                    this.store.validateAndSetInstanceData();
-                } catch (e) {
-                    this.$app.error_handler.defineErrorAndShow(e);
-                    return;
-                }
-                const method = this.view.method;
-                const headers = { 'content-type': 'application/json' };
-                const responses = await Promise.allSettled(
-                    this.getRequestPaths().map((path) =>
-                        this.$app.api.makeRequest({
-                            method,
-                            headers,
-                            path,
-                            data: instance._getInnerData(),
-                            useBulk: instance.constructor.shouldUseBulk(method),
-                        }),
-                    ),
+    import { guiPopUp, pop_up_msg } from '@/vstutils/popUp';
+    import { i18n } from '@/vstutils/translation';
+    import { formatPath, parseResponseMessage, getUniqueId, getApp } from '@/vstutils/utils';
+    import { createActionStore } from '@/vstutils/store/helpers';
+    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
+    import ModelFields from '@/vstutils/components/page/ModelFields.vue';
+
+    import type { Action, ListView, ViewStore } from '@/vstutils/views';
+
+    const props = defineProps<{
+        action: Action;
+    }>();
+    const app = getApp();
+    const modal = ref<InstanceType<typeof BootstrapModal> | null>(null);
+
+    const useStore = defineStore(`notEmptyMultiActionModal_${getUniqueId()}`, () =>
+        createActionStore(props.action.view!),
+    );
+    const store = useStore();
+    const route = useRoute();
+
+    const view = computed(() => props.action.view!);
+
+    function getRequestPaths() {
+        const pageStore = app.store.page as ViewStore<ListView>;
+        return pageStore.instances
+            .filter((instance) => pageStore.selection.includes(instance.getPkValue()))
+            .map((instance) => formatPath(view.value.path, route.params, instance));
+    }
+
+    async function execute() {
+        const instance = store.instance!;
+        try {
+            instance._validateAndSetData();
+        } catch (e) {
+            app.error_handler.defineErrorAndShow(e);
+            return;
+        }
+        const method = view.value.method;
+        const headers = { 'content-type': 'application/json' };
+        const responses = await Promise.allSettled(
+            getRequestPaths().map((path) =>
+                app.api.makeRequest({
+                    method,
+                    headers,
+                    path,
+                    data: instance._getInnerData(),
+                    useBulk: instance.shouldUseBulk(method),
+                }),
+            ),
+        );
+        store.instance!.sandbox.markUnchanged();
+        for (const response of responses) {
+            if (response.status === 'fulfilled') {
+                guiPopUp.success(
+                    i18n.ts(pop_up_msg.instance.success.execute, [
+                        i18n.t(view.value!.title),
+                        parseResponseMessage(response.value.data),
+                    ]),
                 );
-                this.store.changedFields = [];
-                for (const response of responses) {
-                    if (response.status === 'fulfilled') {
-                        guiPopUp.success(
-                            this.$t(pop_up_msg.instance.success.execute, [
-                                this.$t(this.view.title),
-                                parseResponseMessage(response.value.data),
-                            ]),
-                        );
-                    } else {
-                        const str = this.$app.error_handler.errorToString(response.reason);
-                        const srt_to_show = this.$t(pop_up_msg.instance.error.execute, [
-                            this.$t(this.view.title),
-                            str,
-                        ]);
-                        this.$app.error_handler.showError(srt_to_show, str);
-                    }
-                }
-                this.$app.store.page.fetchData();
-                this.$refs.modal.close();
-            },
-        },
-    });
+            } else {
+                const str = app.error_handler.errorToString(response.reason);
+                const srt_to_show = i18n.ts(pop_up_msg.instance.error.execute, [
+                    i18n.t(view.value.title),
+                    str,
+                ]);
+                app.error_handler.showError(srt_to_show, str);
+            }
+        }
+        app.store.page.fetchData();
+        modal.value!.close();
+    }
 </script>

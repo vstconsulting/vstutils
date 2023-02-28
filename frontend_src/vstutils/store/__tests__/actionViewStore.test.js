@@ -1,8 +1,6 @@
 import { test, expect, beforeAll } from '@jest/globals';
-import { createApp } from '../../../unittests/create-app';
-import { createSchema } from '../../../unittests/schema';
+import { createApp, createSchema, openPage } from '@/unittests';
 import detailPageSchema from './detailPage-schema.json';
-import { defineStore } from 'pinia';
 import { ActionView } from '../../views';
 import fetchMock from 'jest-fetch-mock';
 
@@ -16,44 +14,46 @@ test('createActionViewStore', async () => {
         schema: createSchema(detailPageSchema),
     });
 
-    const actionView = app.views.get('/some_action/');
+    const actionView = app.views.get('/some_list/some_action/');
     expect(actionView).toBeInstanceOf(ActionView);
 
-    // Create store for detailView
-    const store = defineStore('action_store', actionView.getStoreDefinition())();
-    expect(store).not.toBeNull();
+    await openPage('/some_list/some_action/');
 
+    const store = app.store.page;
+    expect(store).not.toBeNull();
     expect(store.response).toBeTruthy();
     expect(store.sandbox).toStrictEqual({
-        id: undefined,
-        city: undefined,
-        name: 'Msh',
+        bool: false,
+        text: '',
+        choice: 'one',
     });
 
-    // Push our path to router
-    await app.router.push('/some_action/');
-    await app.store.setPage(store);
+    // No data entered (error should appear because 'text' field is required)
+    {
+        await store.execute();
+        expect(fetchMock).toBeCalledTimes(0);
+        expect(store.fieldsErrors.text).toBe('Field is empty.');
+    }
 
-    fetchMock.mockResponseOnce(
-        JSON.stringify([
-            {
-                data: {
-                    id: 1,
-                    city: 'Mshvill',
-                    name: 'Msh',
+    // Fill 'text' field (only this field should be sent)
+    {
+        store.setFieldValue({ field: 'text', value: 'Mshvill' });
+        expect(store.sandbox.text).toEqual('Mshvill');
+
+        fetchMock.mockResponseOnce(
+            JSON.stringify([
+                {
+                    status: 201,
+                    data: { bool: false, text: 'Mshvill', choice: 'one' },
                 },
-                status: 201,
-            },
-        ]),
-    );
-
-    store.setFieldValue({ field: 'city', value: 'Mshvill' });
-    expect(store.sandbox.city).toEqual('Mshvill');
-    await store.execute();
-
-    let [, request] = fetchMock.mock.calls[0];
-    let bulk = JSON.parse(request.body);
-    expect(bulk[0].method).toBe('post');
-    expect(bulk[0].path).toStrictEqual('/some_action/');
-    expect(bulk[0].data).toStrictEqual({ city: 'Mshvill', name: 'Msh' });
+            ]),
+        );
+        await store.execute();
+        expect(fetchMock).toBeCalledTimes(1);
+        let [, request] = fetchMock.mock.calls[0];
+        let bulk = JSON.parse(request.body);
+        expect(bulk[0].method).toBe('post');
+        expect(bulk[0].path).toStrictEqual('/some_list/some_action/');
+        expect(bulk[0].data).toStrictEqual({ text: 'Mshvill', choice: 'one' });
+    }
 });

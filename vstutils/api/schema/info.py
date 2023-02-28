@@ -29,7 +29,7 @@ api_info_dict = OrderedDict(
         'x-links': settings.OPENAPI_EXTRA_LINKS,
         'x-menu': settings.PROJECT_GUI_MENU,
         'x-docs': OrderedDict(
-            has_docs='docs' in settings.INSTALLED_APPS,
+            has_docs=settings.HAS_DOCS,
             docs_url=getattr(settings, 'DOC_URL', '/docs/'),
         ),
         'x-settings': OrderedDict(

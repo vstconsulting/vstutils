@@ -7,40 +7,37 @@
             @cancel="cancelValidation"
             @validated="onImagesValidated"
         />
-        <FileSelector
-            :show-hide-button="hideable"
-            :has-value="value && value.length > 0"
-            :media-types="field.allowedMediaTypes"
+        <MultipleFilesInput
+            :hideable="hideable"
+            :clearable="value && value.length > 0"
+            :field="field"
             :text="text"
-            multiple
-            @read-file="readFiles"
+            @input="readFiles"
             @clear="emit('clear')"
             @hide="emit('hide-field')"
         />
         <Carousel
             v-if="value && value.length"
             :items="value"
-            :name="$t(field.title)"
+            :name="$ts(field.title)"
             @remove-file="removeFile"
         />
     </div>
 </template>
 
 <script setup lang="ts">
-    import { ResolutionValidatorModal, useResolutionValidator } from '../named-binary-image';
-    import Carousel from './Carousel.vue';
     import { computed } from 'vue';
     import { i18n } from '@/vstutils/translation';
-    import FileSelector from '../FileSelector.vue';
-    import type MultipleNamedBinaryImageField from './MultipleNamedBinaryImageField';
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
-    import type { NamedFile } from '../named-binary-file';
+    import { FieldEditPropsDef } from '@/vstutils/fields/base';
+    import { ResolutionValidatorModal, useResolutionValidator } from '../named-binary-image';
+    import MultipleFilesInput from '../MultipleFilesInput.vue';
+    import Carousel from './Carousel.vue';
 
-    const props = defineProps<{
-        field: MultipleNamedBinaryImageField;
-        value: ExtractRepresent<MultipleNamedBinaryImageField> | null | undefined;
-        hideable: boolean;
-    }>();
+    import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import type { NamedFile } from '../named-binary-file';
+    import type MultipleNamedBinaryImageField from './MultipleNamedBinaryImageField';
+
+    const props = defineProps(FieldEditPropsDef as FieldEditPropsDefType<MultipleNamedBinaryImageField>);
 
     const emit = defineEmits<{
         (event: 'set-value', value: ExtractRepresent<MultipleNamedBinaryImageField> | null | undefined): void;

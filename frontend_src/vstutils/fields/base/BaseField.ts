@@ -1,8 +1,9 @@
 import type { Schema, ParameterType, ParameterCollectionFormat } from 'swagger-schema-official';
+import { toRaw } from 'vue';
+import type { InnerData, RepresentData } from '../../utils';
 import { _translate, capitalize, deepEqual, nameToTitle, X_OPTIONS } from '../../utils';
 import { pop_up_msg } from '../../popUp';
-import type { Model } from '../../models';
-import type { QuerySet } from '../../querySet';
+import type { Model, ModelConstructor } from '../../models';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 import { i18n } from '../../translation';
 import type { IApp } from '@/vstutils/app';
@@ -10,12 +11,10 @@ import type { Component, ComponentOptions } from 'vue';
 import type Vue from 'vue';
 import type { ComponentOptionsMixin } from 'vue/types/v3-component-options';
 
-type ModelPropertyDescriptor<Represent> = PropertyDescriptor & {
+interface ModelPropertyDescriptor<Represent> extends PropertyDescriptor {
     get(this: Model): Represent | null | undefined;
     set(this: Model, value: Represent | null | undefined): void;
-};
-
-type FieldsData = Record<string, unknown>;
+}
 
 interface RedirectOptions {
     operation_name?: string;
@@ -82,21 +81,24 @@ export interface Field<
 
     redirect?: RedirectOptions;
 
-    model?: typeof Model;
+    model?: ModelConstructor;
 
     translateFieldName: string;
+    fkLinkable: boolean;
 
     getComponent(): Component;
 
-    toInner(data: Record<string, unknown>): Inner | null | undefined;
-    toRepresent(data: Record<string, unknown>): Represent | null | undefined;
-    validateValue(data: Record<string, unknown>): void;
+    toInner(data: RepresentData): Inner | null | undefined;
+    toRepresent(data: InnerData): Represent | null | undefined;
 
-    getDataInnerValue(data?: Record<string, unknown>): Inner | null | undefined;
-    getDataRepresentValue(data?: Record<string, unknown>): Represent | null | undefined;
+    validateValue(data: RepresentData): void;
+    validateInner(data: InnerData): void;
+    translateValue(value: Represent): Represent;
+
+    getValue(data?: InnerData): Inner | null | undefined;
+    getValue(data?: RepresentData): Represent | null | undefined;
 
     prepareFieldForView(path: string): void;
-    afterInstancesFetched(instances: Model[], queryset: QuerySet): Promise<void>;
 
     getInitialValue(args?: { requireValue: boolean }): Inner | undefined | null;
     getEmptyValue(): Inner | undefined | null;
@@ -105,9 +107,9 @@ export interface Field<
 
     isEqual(other: Field<any, any, any>): boolean;
 
-    isSameValues(data1: FieldsData, data2: FieldsData): boolean;
+    isSameValues(data1: RepresentData, data2: RepresentData): boolean;
 
-    parseFieldError(errorData: unknown, instanceData: FieldsData): unknown;
+    parseFieldError(errorData: unknown, instanceData: InnerData): unknown;
 }
 
 export type FieldMixin = ComponentOptionsMixin | ComponentOptions<Vue> | typeof Vue;
@@ -141,7 +143,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
     redirect?: RedirectOptions;
 
     validators: ((value: Represent) => void)[];
-    model?: typeof Model;
+    model?: ModelConstructor;
 
     translateFieldName: string;
 
@@ -179,11 +181,15 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
     }
 
     static get app(): IApp {
-        return globalThis.__currentApp;
+        return globalThis.__currentApp!;
     }
 
     get app(): IApp {
-        return globalThis.__currentApp;
+        return globalThis.__currentApp!;
+    }
+
+    get fkLinkable(): boolean {
+        return (this.constructor as typeof BaseField).fkLinkable;
     }
 
     getComponent(): Component {
@@ -194,16 +200,17 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
         return value;
     }
 
-    getDataInnerValue(data?: Record<string, unknown>): Inner | null | undefined {
-        return data?.[this.name] as Inner | null | undefined;
-    }
-
-    getDataRepresentValue(data?: Record<string, unknown>): Represent | null | undefined {
-        return data?.[this.name] as Represent | null | undefined;
+    getValue(data?: InnerData): Inner | null | undefined;
+    getValue(data?: RepresentData): Represent | null | undefined;
+    getValue(data?: InnerData | RepresentData): Inner | Represent | null | undefined {
+        if (!data) {
+            return undefined;
+        }
+        return this._getValueFromData(data);
     }
 
     _getValueFromData(data: Record<string, unknown>): Inner | Represent | undefined | null {
-        return data?.[this.name] as Inner | Represent | undefined | null;
+        return data[this.name] as Inner | Represent | undefined | null;
     }
 
     warn(msg: string): void {
@@ -220,12 +227,6 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
      */
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     prepareFieldForView(path: string): void {}
-
-    /**
-     * Method that will be called after every fetch of instances from api (QuerySet#items, QuerySet#get)
-     */
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    async afterInstancesFetched(instances: Model[], queryset: QuerySet) {}
 
     /**
      * Returns field default value if any, or empty value otherwise
@@ -247,55 +248,54 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
     /**
      * Method, that converts field value to appropriate for API form.
      */
-    toInner(data: FieldsData): Inner | null | undefined {
-        return this._getValueFromData(data) as Inner;
+    toInner(data: RepresentData): Inner | null | undefined {
+        return this.getValue(data as unknown as InnerData);
     }
 
     /**
      * Method, that converts field value from API to display form
      */
-    toRepresent(data: FieldsData): Represent | null | undefined {
-        return this._getValueFromData(data) as Represent;
+    toRepresent(data: InnerData): Represent | null | undefined {
+        return this.getValue(data as unknown as RepresentData);
     }
 
     /**
      * Method that validates value.
      * @param {RepresentData} data - Object with all values.
      */
-    validateValue(data: FieldsData) {
-        const value = this._getValueFromData(data);
-        let value_length = 0;
+    validateValue(data: RepresentData) {
+        const value = this.getValue(data);
         const samples = pop_up_msg.field.error;
         const $t = _translate;
 
-        if (value) {
-            value_length = value.toString().length;
-        }
+        if (typeof value === 'string') {
+            const value_length = value.toString().length;
 
-        if (this.options.maxLength && value_length > this.options.maxLength) {
-            throw {
-                error: 'validation',
-                message: $t(samples.maxLength).format([this.options.maxLength]),
-            };
-        }
-
-        if (this.options.minLength) {
-            if (value_length === 0) {
-                if (!this.options.required) {
-                    return;
-                }
-
+            if (this.options.maxLength && value_length > this.options.maxLength) {
                 throw {
                     error: 'validation',
-                    message: $t(samples.empty),
+                    message: $t(samples.maxLength).format([this.options.maxLength]),
                 };
             }
 
-            if (value_length < this.options.minLength) {
-                throw {
-                    error: 'validation',
-                    message: $t(samples.minLength).format([this.options.minLength]),
-                };
+            if (this.options.minLength) {
+                if (value_length === 0) {
+                    if (!this.required) {
+                        return;
+                    }
+
+                    throw {
+                        error: 'validation',
+                        message: $t(samples.empty),
+                    };
+                }
+
+                if (value_length < this.options.minLength) {
+                    throw {
+                        error: 'validation',
+                        message: $t(samples.minLength).format([this.options.minLength]),
+                    };
+                }
             }
         }
 
@@ -315,11 +315,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
             }
         }
 
-        if (value === undefined && this.options.required && this.options.default !== undefined) {
-            return this.options.default;
-        }
-
-        if (value === undefined && this.options.required && !this.options.default) {
+        if (value === undefined && this.required && !this.options.default) {
             throw {
                 error: 'validation',
                 message: $t(samples.required),
@@ -328,6 +324,12 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
 
         return value;
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    validateInner(data: InnerData): Inner | null | undefined {
+        return this.getValue(data);
+    }
+
     /**
      * Static property for storing field mixins.
      */
@@ -344,11 +346,11 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
 
         return {
             get() {
-                return fieldThis.toRepresent(this._data);
+                return toRaw(this).sandbox.value[fieldThis.name] as Represent | null | undefined;
             },
             set(value: Represent) {
-                fieldThis.validateValue(this._data);
-                this._data[fieldThis.name] = fieldThis.toInner({ ...this._data, [fieldThis.name]: value });
+                fieldThis.validateValue({ ...this.sandbox.value, [fieldThis.name]: value });
+                this.sandbox.set({ field: fieldThis.name, value });
             },
         };
     }
@@ -358,15 +360,15 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
         if (other.constructor !== this.constructor) return false;
         return deepEqual(this.options, other.options);
     }
-    isSameValues(data1: FieldsData, data2: FieldsData) {
+    isSameValues(data1: RepresentData, data2: RepresentData) {
         return deepEqual(this.toInner(data1), this.toInner(data2));
     }
-    parseFieldError(errorData: unknown, instanceData: FieldsData): unknown | null {
+    parseFieldError(errorData: unknown, instanceData: InnerData): unknown | null {
         if (!errorData) {
             return '';
         }
         if (typeof errorData === 'string') {
-            return i18n.t(errorData) as string;
+            return i18n.ts(errorData);
         }
         if (Array.isArray(errorData)) {
             return errorData

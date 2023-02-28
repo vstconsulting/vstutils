@@ -1,9 +1,7 @@
 # pylint: disable=no-member,redefined-outer-name,unused-argument
-from warnings import warn
-
-from django.urls.conf import include, re_path
+from django.urls.conf import include, re_path, path
 from django.conf import settings
-from rest_framework import routers, permissions, versioning, schemas
+from rest_framework import routers, permissions, versioning
 
 from . import responses
 from ..utils import import_class
@@ -104,29 +102,16 @@ class APIRouter(_AbstractRouter):
         self.router_version_name = kwargs.pop('version', self.default_root_view_name)
         self.root_view_name = self.router_version_name
         super().__init__(*args, **kwargs)
-        self.__register_schema()
         self.__register_openapi()
 
     def __register_openapi(self):
         schema_view = import_class(settings.OPENAPI_VIEW_CLASS)
         cache_timeout = settings.SCHEMA_CACHE_TIMEOUT
-        swagger_kwargs = {'cache_timeout': 0 if settings.DEBUG else cache_timeout}
+        swagger_kwargs = {'cache_timeout': 0 if settings.DEBUG or settings.TESTS_RUN else cache_timeout}
         self.register_view(
             '_openapi',
             schema_view.with_ui('swagger', **swagger_kwargs),
             name='_openapi'
-        )
-
-    def __register_schema(self, name='schema'):
-        try:
-            self.register_view(rf'{name}', self._get_schema_view(), name)
-        except BaseException as exc:  # nocv
-            warn(f"Couldn't attach schema view: {exc}")
-
-    def _get_schema_view(self):
-        return schemas.get_schema_view(
-            title=self.router_version_name,
-            version=self.router_version_name
         )
 
     def get_api_root_view(self, *args, **kwargs):
@@ -225,7 +210,7 @@ class MainRouter(_AbstractRouter):
     def get_urls(self):
         urls = super().get_urls()
         for prefix, router, name in self.routers:
-            urls.append(re_path(
+            urls.append(path(
                 prefix,
                 include(
                     (router.urls, settings.VST_PROJECT),

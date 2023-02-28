@@ -26,43 +26,40 @@
     </div>
 </template>
 
-<script>
+<script setup lang="ts">
+    import { computed } from 'vue';
+    import { getApp } from '@/vstutils/utils';
     import Preloader from './Preloader.vue';
     import ButtonsRow from './ButtonsRow.vue';
     import SelectedFilters from './SelectedFilters.vue';
-    import ErrorPage from '../ErrorPage';
+    import ErrorPage from '../ErrorPage.vue';
+    import type { Action, IView, Sublink } from '@/vstutils/views';
 
-    export default {
-        name: 'EntityView',
-        components: { ErrorPage, ButtonsRow, Preloader, SelectedFilters },
-        props: {
-            view: { type: Object, default: null },
-            loading: { type: Boolean, required: true },
-            error: { type: [Object, Error], default: () => ({}) },
-            response: { type: Boolean, default: false },
-            showUsedFilters: { type: Boolean, default: true },
-            isContainerFluid: { type: Boolean, default: true },
-            actions: { type: Array, default: () => [] },
-            sublinks: { type: Array, default: () => [] },
-        },
-        computed: {
-            showPage() {
-                return !this.error && this.response;
-            },
-            errorData() {
-                if (this.error) {
-                    return window.app.error_handler.errorToString(this.error);
-                }
-                return null;
-            },
-            containerClass() {
-                return this.isContainerFluid ? 'container-fluid' : 'container';
-            },
-            rootClasses() {
-                return this.$app.store.entityViewClasses;
-            },
-        },
-    };
+    const props = withDefaults(
+        defineProps<{
+            view: IView | null;
+            loading: boolean;
+            error: unknown;
+            response: unknown;
+            showUsedFilters?: boolean;
+            isContainerFluid?: boolean;
+            actions?: Action[];
+            sublinks?: Sublink[];
+        }>(),
+        { actions: () => [], sublinks: () => [], isContainerFluid: true },
+    );
+
+    const app = getApp();
+
+    const showPage = computed(() => !props.error && props.response);
+    const errorData = computed(() => {
+        if (props.error) {
+            return app.error_handler.errorToString(props.error);
+        }
+        return null;
+    });
+    const containerClass = computed(() => (props.isContainerFluid ? 'container-fluid' : 'container'));
+    const rootClasses = computed(() => app.store.entityViewClasses);
 </script>
 
 <style scoped>

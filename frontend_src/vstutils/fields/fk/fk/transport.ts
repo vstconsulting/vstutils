@@ -1,12 +1,12 @@
 import type { Ref } from 'vue';
 
+import { createInstancesList } from '@/vstutils/models';
 import { signals } from '@/vstutils/signals';
 
 import type { FKField } from './FKField';
-
-import type { InstancesList } from '@/vstutils/store';
-import type { Model } from '@/vstutils/models';
+import type { InstancesList, Model } from '@/vstutils/models';
 import type { QuerySet } from '@/vstutils/querySet';
+import type { RepresentData } from '@/vstutils/utils';
 
 const pageSize = 20;
 
@@ -23,7 +23,7 @@ export interface FKFieldFilterSignalObj {
     nest_prom: Promise<InstancesList> | undefined;
 }
 
-export function createTransport(field: FKField, querysets: QuerySet[], data: Ref<Record<string, unknown>>) {
+export function createTransport(field: FKField, querysets: QuerySet[], data: Ref<RepresentData>) {
     let currentQuerysetIdx = 0;
     let currentQuerysetOffset = 0;
 
@@ -48,11 +48,9 @@ export function createTransport(field: FKField, querysets: QuerySet[], data: Ref
         if (signalObj.nest_prom) {
             req = signalObj.nest_prom;
         } else if (signalObj.dependenceFilters !== null) {
-            req = queryset
-                .filter({ ...filters, ...signalObj.dependenceFilters })
-                .items() as Promise<InstancesList>;
+            req = queryset.filter({ ...filters, ...signalObj.dependenceFilters }).items();
         } else {
-            req = Promise.resolve([] as InstancesList);
+            req = Promise.resolve(createInstancesList([]));
         }
 
         const instances = await req;

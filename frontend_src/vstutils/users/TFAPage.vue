@@ -11,17 +11,17 @@
             <img :src="qrcode" />
         </div>
         <p>
-            {{ $u.capitalize($t('code')) }}:
+            {{ $u.capitalize($ts('code')) }}:
             <code>{{ secret }}</code>
         </p>
         <component
-            :is="pinField.component"
+            :is="pinField.getComponent()"
             :key="pinField.name"
             :field="pinField"
-            :data="data"
+            :data="store.sandbox"
             type="edit"
             style="max-width: 340px; margin: 0 auto"
-            @set-value="setFieldValue"
+            @set-value="store.setFieldValue"
         />
         <hr />
         <p>
@@ -31,61 +31,60 @@
         <div class="card recovery-codes">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{ $u.capitalize($t('recovery codes')) }}
+                    {{ $u.capitalize($ts('recovery codes')) }}
                 </h3>
                 <div class="card-tools">
                     <button class="btn btn-secondary" @click="copyRecoveryCodes">
-                        {{ $u.capitalize($t('copy')) }}
+                        {{ $u.capitalize($ts('copy')) }}
                     </button>
                 </div>
             </div>
-            <div ref="recoveryCodes" class="card-body">
+            <div ref="recoveryCodesEl" class="card-body">
                 <code v-for="code in recoveryCodes" :key="code" class="col-3">{{ code }}</code>
             </div>
         </div>
     </div>
 </template>
 
-<script>
+<script lang="ts" setup>
     import QRCode from 'qrcode';
-    import OneEntity from '../components/page/OneEntity.vue';
-    import { copyToClipboard } from '../utils';
+    import { computed, ref, toRef, watch } from 'vue';
+    import { useViewStore } from '@/vstutils/store';
+    import { copyToClipboard } from '@/vstutils/utils';
+    import { ViewPropsDef } from '@/vstutils/views';
 
-    export default {
-        name: 'TFAPage',
-        mixins: [OneEntity],
-        data() {
-            return {
-                qrcode: '',
-            };
-        },
-        computed: {
-            isEnabled() {
-                return this.instance?.enabled;
-            },
-            pinField() {
-                return this.model.fields.get('pin');
-            },
-            secret() {
-                return this.store.sandbox.secret;
-            },
-            recoveryCodes() {
-                return (this.store.sandbox?.recovery || '').split(',');
-            },
-        },
-        watch: {
-            async 'store.secretUri'(value) {
-                if (value) {
-                    this.qrcode = await QRCode.toDataURL(value, { scale: 6 });
-                }
-            },
-        },
-        methods: {
-            copyRecoveryCodes() {
-                copyToClipboard(this.$refs.recoveryCodes.innerText);
-            },
-        },
-    };
+    import type { PageEditView, ViewPropsDefType } from '@/vstutils/views';
+
+    const props = defineProps(ViewPropsDef as ViewPropsDefType<PageEditView>);
+
+    const store = useViewStore(props.view);
+
+    const qrcode = ref('');
+
+    const isEnabled = computed(() => {
+        return store.sandbox.enabled;
+    });
+    const pinField = computed(() => {
+        return store.model.fields.get('pin')!;
+    });
+    const secret = computed(() => {
+        return store.sandbox.secret;
+    });
+    const recoveryCodes = computed(() => {
+        return ((store.sandbox?.recovery as string | undefined) || '').split(',');
+    });
+
+    watch(toRef(store, 'secretUri'), async (value) => {
+        if (value) {
+            qrcode.value = await QRCode.toDataURL(value, { scale: 6 });
+        }
+    });
+
+    const recoveryCodesEl = ref<HTMLElement>();
+
+    function copyRecoveryCodes() {
+        copyToClipboard(recoveryCodesEl.value!.innerText);
+    }
 </script>
 
 <style scoped>

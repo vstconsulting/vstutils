@@ -7,7 +7,7 @@ import sys
 import time
 import traceback
 from pathlib import Path
-from subprocess import check_call
+import subprocess
 from collections import OrderedDict
 
 from environ import Env
@@ -27,7 +27,7 @@ logger_lib = logging.getLogger(settings.VST_PROJECT_LIB)
 
 class BaseCommand(_BaseCommand):
     interactive = False
-    requires_system_checks = ()  # type: ignore
+    requires_system_checks = ()
     keep_base_opts = False
     help = "Service command for web-application"
 
@@ -159,12 +159,20 @@ class DockerCommand(BaseCommand):
                         self._settings('DOCKERRUN_MIGRATE_LOCK_TIMEOUT'),
                         'Migration process still locked by another application process.',
                         int(os.getenv("DOCKER_MIGRATE_LOCK_KEY_TIMEOUT", '0')) or None
-                ) as lock:  # noqa: F841, pylint:disable=unused-variable
+                ) as lock:
                     logger.info(f'Migration locked by key: `{lock.id}`')
                     for db_name in self.databases_to_migrate:
                         logger.info(f'Migrating db "{db_name}".')
-                        check_call(
-                            [sys.executable, '-m', self.project_name, 'migrate', '--database', db_name, *args],
+                        subprocess.check_call(
+                            [
+                                sys.executable,
+                                '-m',
+                                self.project_name,
+                                'migrate',
+                                '--database',
+                                db_name,
+                                *args
+                            ],
                             env=self.env,
                             bufsize=0,
                             universal_newlines=True,
@@ -254,7 +262,7 @@ class DockerCommand(BaseCommand):
         elif cache_type == 'memcache':  # nocv
             cache_engine = 'django.core.cache.backends.memcached.MemcachedCache'
         elif cache_type == 'redis':  # nocv
-            cache_engine = 'django_redis.cache.RedisCache'
+            cache_engine = 'django.core.cache.backends.redis.RedisCache'
         else:  # nocv
             raise Exception(f'Unknown cache type `{cache_type}`.')
 

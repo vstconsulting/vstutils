@@ -12,10 +12,13 @@ from django.apps import apps
 from django.http import StreamingHttpResponse
 from django.db import transaction, models as django_models
 from django.urls import reverse
+from django.conf import settings
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
+from django.utils.module_loading import import_string
+from fastapi.testclient import TestClient
 
-from .utils import import_class, raise_context_decorator_with_default, deprecated
+from .utils import import_class, raise_context_decorator_with_default
 
 User = get_user_model()
 
@@ -63,6 +66,13 @@ class BaseTestCase(TestCase):
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             self.testcase.user = self.old_user
+
+    @property
+    def api_test_client(self):
+        return TestClient(
+            import_string(settings.ASGI_APPLICATION),
+            base_url=f"https://{self.server_name}",
+        )
 
     def _create_user(self, is_super_user=True, **kwargs):
         username = kwargs.pop('username', self.random_name())
@@ -112,12 +122,12 @@ class BaseTestCase(TestCase):
                 return b''.join(response.streaming_content).decode('utf-8')
             media_type = f'{getattr(response, "accepted_media_type", "")}' or \
                          response._content_type_for_repr.split(";")[0].replace('"', '').replace(',', '').strip()
-            rendered_content = (
+            rendered_content: _t.Union[str, bytes] = (
                 getattr(response, "rendered_content", False) or response.content
             )
             if media_type == 'application/msgpack':
                 return ormsgpack.unpackb(rendered_content)
-            if getattr(rendered_content, 'decode', False):
+            if getattr(rendered_content, 'decode', None):
                 rendered_content = str(rendered_content.decode('utf-8'))
             try:
                 if media_type in ('application/json', 'application/openapi+json'):
@@ -129,8 +139,6 @@ class BaseTestCase(TestCase):
             return None
 
     def setUp(self):
-        # pylint: disable=import-outside-toplevel
-        from django.conf import settings
         self.settings_obj = settings
         self.client_kwargs = {
             "HTTP_X_FORWARDED_PROTOCOL": 'https',
@@ -365,39 +373,6 @@ class BaseTestCase(TestCase):
             self._logout(client)
 
         return result
-
-    @deprecated
-    def mass_create(self, url, data, *fields, **kwargs):
-        """
-        Mass creation objects in api-abstration. Uses :meth:`.get_result` method.
-
-        :param url: url to abstract layer like argument in :meth:`.get_result`. For example: ``/api/v1/project/``.
-        :param data: list with data to send on creation and feature checks.
-        :params fields: list of fields to check after creation.
-        :param kwargs: extra-kwargs for request method.
-        :return: list of id from all resulted objects.
-        :rtype: list
-
-        .. note::
-            The method does not use endpoint requests. That mean if you want
-            send some extra headers or data you can do it by additional kwargs.
-
-        """
-
-        results_id = []
-        counter = 0
-        for dt in data:
-            result = self.get_result("post", url, 201, data=json.dumps(dt), **kwargs)
-            self.assertTrue(isinstance(result, dict))
-            for field in fields:
-                st = "[~~ENCRYPTED~~]"
-                if field == "vars" and st in result['vars'].values():
-                    pass  # nocv
-                else:
-                    self.assertEqual(result[field], data[counter][field])
-            results_id.append(result["id"])
-            counter += 1
-        return results_id
 
     def list_test(self, url, count):
         """

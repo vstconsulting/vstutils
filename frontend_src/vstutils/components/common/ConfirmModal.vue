@@ -1,5 +1,5 @@
 <template>
-    <BootstrapModal ref="modal" :title="$t(title)" @exit="closeCallback">
+    <BootstrapModal ref="modal" :title="$ts(title)" @exit="closeCallback">
         <template #body>
             <div>
                 <p>
@@ -34,8 +34,7 @@
         (e: 'reject'): void;
     }>();
 
-    // TODO Replace 'any' with 'InstanceType<typeof BootstrapModal>' in vstutils 5.3
-    const modal = ref<any | null>(null);
+    const modal = ref<InstanceType<typeof BootstrapModal> | null>(null);
 
     let isActioned = false;
 
@@ -61,5 +60,9 @@
         }
     }
 
-    defineExpose({ openModal });
+    function closeModal() {
+        modal.value!.close();
+    }
+
+    defineExpose({ openModal, closeModal });
 </script>

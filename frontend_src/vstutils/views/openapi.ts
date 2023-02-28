@@ -1,15 +1,26 @@
-import { getApp, ViewTypes } from '../utils';
-import FiltersModal from '../components/list/FiltersModal.vue';
-import AddChildModal from '../components/list/AddChildModal.vue';
-import NestedDeletionModal from '../components/common/NestedDeletionModal.vue';
-import FiltersModalDetail from '@/vstutils/components/page/FiltersModalDetail';
+import { getApp, ViewTypes } from '@/vstutils/utils';
+
+import type {
+    Action,
+    ActionView,
+    IView,
+    ListView,
+    PageEditView,
+    PageNewView,
+    PageView,
+    ViewStore,
+} from './View';
+
+type Operations = Record<string, Record<string, Action>>;
+
+const getStore = <T extends IView>() => getApp().store.page as ViewStore<T>;
 
 /**
  * Dictionary, that contains names of openapi schema attributes.
- * This dictionary is needed for easier updates of following opeanapi versions,
+ * This dictionary is needed for easier updates of following openapi versions,
  * that can contain another attributes names.
  */
-const openapi_dictionary = {
+export const openapi_dictionary = {
     paths: {
         name: 'paths',
         operation_id: {
@@ -27,8 +38,10 @@ const openapi_dictionary = {
                     doNotGroup: true,
                     confirmationRequired: true,
                     isEmpty: true,
-                    handler: (...args) => getApp().store.page.removeInstance(...args),
-                    handlerMany: (...args) => getApp().store.page.removeInstances(...args),
+                    handler: (...args) =>
+                        // @ts-expect-error Instance
+                        getStore<PageView>().removeInstance(...args),
+                    handlerMany: (...args) => getStore<ListView>().removeInstances(...args),
                 },
                 nested_remove: {
                     name: 'remove',
@@ -38,7 +51,7 @@ const openapi_dictionary = {
                     isMultiAction: true,
                     style: { order: 100, marginLeft: 'auto' },
                     doNotGroup: true,
-                    component: NestedDeletionModal,
+                    component: () => import('@/vstutils/components/common/NestedDeletionModal.vue'),
                 },
             },
             list: {
@@ -53,7 +66,9 @@ const openapi_dictionary = {
                 add: {
                     name: 'add',
                     title: 'Add',
-                    component: AddChildModal,
+                    component: () => import('@/vstutils/components/list/AddChildModal.vue'),
+                    classes: ['btn', 'btn-primary'],
+                    iconClasses: ['fa', 'fa-folder-open'],
                     style: { order: -10 },
                     doNotGroup: true,
                 },
@@ -61,7 +76,7 @@ const openapi_dictionary = {
                     name: 'filters',
                     title: '',
                     iconClasses: ['fas', 'fa-filter'],
-                    component: FiltersModal,
+                    component: () => import('@/vstutils/components/list/FiltersModal.vue'),
                     style: { order: -5 },
                     doNotGroup: true,
                 },
@@ -79,7 +94,7 @@ const openapi_dictionary = {
                     name: 'filters',
                     title: '',
                     iconClasses: ['fas', 'fa-filter'],
-                    component: FiltersModalDetail,
+                    component: () => import('@/vstutils/components/page/FiltersModalDetail.vue'),
                     style: { order: -5 },
                     doNotGroup: true,
                 },
@@ -91,7 +106,7 @@ const openapi_dictionary = {
                     iconClasses: ['fas', 'fa-save'],
                     style: { order: -10 },
                     doNotGroup: true,
-                    handler: (...args) => getApp().store.page.save(...args),
+                    handler: () => getStore<PageNewView>().save(),
                 },
             },
             page_edit: {
@@ -102,7 +117,7 @@ const openapi_dictionary = {
                     doNotShowOnList: true,
                     style: { order: -9 },
                     doNotGroup: true,
-                    handler: (...args) => getApp().store.page.save(...args),
+                    handler: () => getStore<PageEditView>().save(),
                 },
                 reload: {
                     name: 'reload',
@@ -111,7 +126,7 @@ const openapi_dictionary = {
                     doNotShowOnList: true,
                     style: { order: -8 },
                     doNotGroup: true,
-                    handler: (...args) => getApp().store.page.reload(...args),
+                    handler: () => getStore<PageEditView>().reload(),
                 },
                 cancel: {
                     name: 'cancel',
@@ -121,18 +136,19 @@ const openapi_dictionary = {
                     doNotShowOnList: true,
                     style: { order: 100, marginLeft: 'auto' },
                     doNotGroup: true,
-                    handler: (...args) => getApp().store.page.cancel(...args),
+                    handler: () => getStore<PageEditView>().cancel(),
                 },
             },
             action: {
                 execute: {
                     name: 'execute',
+                    title: 'Execute',
                     style: { order: -7 },
                     doNotGroup: true,
-                    handler: (...args) => getApp().store.page.execute(...args),
+                    handler: (...args) => getStore<ActionView>().execute(),
                 },
             },
-        },
+        } satisfies Operations,
         multiActions: ['remove'],
         types_operations_always_to_add: ['page_new', 'page_edit', 'action'],
     },
@@ -179,5 +195,3 @@ const openapi_dictionary = {
         },
     },
 };
-
-export default openapi_dictionary;

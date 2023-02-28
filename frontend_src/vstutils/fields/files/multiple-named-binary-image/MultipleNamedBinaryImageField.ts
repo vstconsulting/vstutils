@@ -14,6 +14,7 @@ export class MultipleNamedBinaryImageField extends MultipleNamedBinaryFileField 
     constructor(options: FieldOptions<FileFieldXOptions | undefined, NamedFile[]>) {
         super(options);
         this.resolutionConfig = ResolutionValidatorConfig.createIfNeeded(this.options);
+        this.options.properties = { name: { minLength: 6 } };
     }
 
     static get mixins() {

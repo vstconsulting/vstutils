@@ -5,6 +5,7 @@ from .queryset import BQuerySet as _BQuerySet
 from .decorators import register_view_action as view_action, register_view_method as view_method
 from .model import BaseModel as _BaseModel
 from .base import LAZY_MODEL
+from .custom_model import ListModel, FileModel, CustomQuerySet
 
 
 class register_view_action(view_action):
@@ -24,7 +25,7 @@ class Manager(models.Manager):
 
 
 class BaseModel(_BaseModel):
-    ...
+    objects: Manager.from_queryset(BQuerySet)
 
 
 class BModel(BaseModel):

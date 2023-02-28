@@ -1,43 +1,23 @@
 <template>
-    <BootstrapModal v-if="fields.length" ref="modal">
-        <template #content="{ closeModal }">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    {{ $u.capitalize($t('filters')) }}
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="container">
-                    <div class="row">
-                        <div class="col">
-                            <component
-                                :is="field.component"
-                                v-for="field in fields"
-                                :key="field.name"
-                                :field="field"
-                                :data="filtersData"
-                                type="edit"
-                                @set-value="setFilterValue"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button
-                    class="btn btn-default btn-close-filters-modal"
-                    aria-label="Cancel"
-                    @click="closeModal"
-                >
-                    {{ $u.capitalize($t('cancel')) }}
-                </button>
-                <button class="btn btn-primary btn-apply-filters" aria-label="Filter" @click="filter">
-                    {{ $u.capitalize($t('apply')) }}
-                </button>
-            </div>
+    <BootstrapModal v-if="fields.length" ref="modal" :title="$u.capitalize($ts('filters'))">
+        <div class="filters-container">
+            <component
+                :is="field.getComponent()"
+                v-for="field in fields"
+                :key="field.name"
+                :field="field"
+                :data="filtersData"
+                type="edit"
+                @set-value="setFilterValue"
+            />
+        </div>
+        <template #footer="{ closeModal }">
+            <button class="btn btn-default btn-close-filters-modal" aria-label="Cancel" @click="closeModal">
+                {{ $u.capitalize($ts('cancel')) }}
+            </button>
+            <button class="btn btn-primary btn-apply-filters" aria-label="Filter" @click="filter">
+                {{ $u.capitalize($ts('apply')) }}
+            </button>
         </template>
         <template #activator>
             <slot :execute="openModal" />
@@ -45,53 +25,51 @@
     </BootstrapModal>
 </template>
 
-<script>
-    import Vue from 'vue';
-    import { mapObjectValues } from '../../utils';
-    import ModalWindowAndButtonMixin from '../../fields/ModalWindowAndButtonMixin.js';
+<script lang="ts" setup>
+    import { computed, ref, set } from 'vue';
+    import { emptyRepresentData, getApp, mapObjectValues } from '@/vstutils/utils';
     import BootstrapModal from '../BootstrapModal.vue';
+    import type { RepresentData } from '@/vstutils/utils';
+    import type { ListView, ViewStore } from '@/vstutils/views';
+    import type { SetFieldValueOptions } from '@/vstutils/fields/base';
 
-    /**
-     * Component for filter modal window and button, that opens it.
-     */
-    export default {
-        name: 'FiltersModal',
-        components: { BootstrapModal },
-        mixins: [ModalWindowAndButtonMixin],
-        props: {
-            view: { type: Object, required: true },
-        },
-        data() {
-            return {
-                filtersData: {},
-            };
-        },
-        computed: {
-            fields() {
-                return Object.values(this.view.filters).filter((field) => !field.hidden);
-            },
-            filters() {
-                return this.$app.store.page.filters;
-            },
-        },
-        methods: {
-            openModal() {
-                this.$refs.modal.open();
-                this.filtersData = mapObjectValues(this.filters, (val, key) =>
-                    this.view.filters[key] ? this.view.filters[key].toRepresent(this.filters) : val,
-                );
-            },
-            setFilterValue({ field, value }) {
-                Vue.set(this.filtersData, field, value);
-            },
-            filter() {
-                this.$app.store.page.applyFieldsFilters(
-                    Object.fromEntries(
-                        this.fields.map((field) => [field.name, field.toInner(this.filtersData)]),
-                    ),
-                );
-                this.$refs.modal.close();
-            },
-        },
-    };
+    const props = defineProps<{
+        view: ListView;
+    }>();
+
+    const app = getApp();
+    const filtersData = ref(emptyRepresentData());
+    const modal = ref<InstanceType<typeof BootstrapModal> | null>(null);
+
+    const store = computed(() => app.store.page as ViewStore<ListView>);
+
+    const fields = computed(() => {
+        return Object.values(props.view.filters).filter((field) => !field.hidden);
+    });
+    const filters = computed(() => {
+        return store.value.filters;
+    });
+
+    function openModal() {
+        modal.value!.open();
+        filtersData.value = mapObjectValues(filters.value, (val: unknown, key: string) =>
+            props.view.filters[key] ? props.view.filters[key].toRepresent(filters.value) : val,
+        ) as RepresentData;
+    }
+    function setFilterValue({ field, value }: SetFieldValueOptions) {
+        set(filtersData.value, field, value);
+    }
+    function filter() {
+        store.value.applyFieldsFilters(
+            Object.fromEntries(fields.value.map((field) => [field.name, field.toInner(filtersData.value)])),
+        );
+        modal.value!.close();
+    }
 </script>
+
+<style scoped>
+    .filters-container {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+</style>

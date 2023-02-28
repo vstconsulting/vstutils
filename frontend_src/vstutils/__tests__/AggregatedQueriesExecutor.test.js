@@ -1,7 +1,7 @@
 import { expect, beforeEach, test, describe, beforeAll } from '@jest/globals';
 import fetchMock from 'jest-fetch-mock';
-import { makeModel, Model } from '../models/Model.js';
-import QuerySet from '../querySet/QuerySet.js';
+import { makeModel, BaseModel } from '../models';
+import { QuerySet } from '../querySet/QuerySet.ts';
 import { StringField } from '../fields/text/';
 import { IntegerField } from '../fields/numbers/integer.js';
 import { RequestTypes } from '../utils';
@@ -24,7 +24,7 @@ describe('AggregatedQueriesExecutor', () => {
     const nameField = new StringField({ name: 'name' });
 
     const User = makeModel(
-        class extends Model {
+        class extends BaseModel {
             static declaredFields = [idField, nameField];
         },
         'User',

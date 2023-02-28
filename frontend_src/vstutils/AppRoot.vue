@@ -37,34 +37,23 @@
             <ControlSidebar v-if="isControlSidebarOpen" />
         </transition>
 
-        <ConfirmModal
-            ref="saveSettingsModal"
-            :message="$t('Do you want to save your changes? The page will be reloaded.')"
-            :confirm-title="$t('Reload now')"
-            :reject-title="$t('Cancel')"
-            @confirm="saveSettings"
-            @reject="rollbackSettings"
-        />
-
-        <ConfirmModal
-            ref="confirmationModal"
-            :message="`${$t('Confirm action')} ${confirmation.actionName}`"
-            :confirm-title="$t('Confirm')"
-            :reject-title="$t('Cancel')"
-            @confirm="confirm"
-            @reject="reject"
-        />
-
         <component :is="c" v-for="(c, name) in additionalComponents" :ref="name" :key="name" />
+
+        <AppModals ref="appModals" />
 
         <portal-target name="root-bottom" multiple />
     </div>
 </template>
-<script>
+<script lang="ts">
+    import { ref } from 'vue';
     import ControlSidebar from './components/items/ControlSidebar.vue';
     import { Logo, MainFooter, Sidebar, TopNavigation, convertXMenuToSidebar } from './components/items';
     import ConfirmModal from './components/common/ConfirmModal.vue';
     import EntityView from './components/common/EntityView.vue';
+    import AppModals from './components/common/AppModals.vue';
+
+    import type { PropType } from 'vue';
+    import type { XMenu } from './AppConfiguration';
 
     const DARK_MODE_CLASS = 'dark-mode';
 
@@ -78,26 +67,23 @@
             Logo,
             ConfirmModal,
             EntityView,
-        },
-        provide() {
-            return {
-                requestConfirmation: this.initConfirmation,
-            };
+            AppModals,
         },
         props: {
             info: { type: Object, required: true },
             // eslint-disable-next-line vue/prop-name-casing
-            x_menu: { type: Array, required: true },
+            x_menu: { type: Array as PropType<XMenu>, required: true },
             // eslint-disable-next-line vue/prop-name-casing
             x_docs: { type: Object, required: true },
+        },
+        setup() {
+            const appModals = ref<InstanceType<typeof AppModals>>();
+
+            return { appModals };
         },
         data() {
             return {
                 layoutClasses: ['sidebar-mini', 'layout-fixed', 'layout-footer-fixed'],
-                confirmation: {
-                    callback: null,
-                    actionName: '',
-                },
                 isControlSidebarOpen: false,
                 userSettings: this.$app.userSettingsStore,
                 localSettings: this.$app.localSettingsStore,
@@ -124,7 +110,6 @@
                         name: 'Documentation',
                         href: this.x_docs.docs_url,
                         icon: 'fa fa-book',
-                        origin_link: true,
                     });
                 }
 
@@ -178,7 +163,7 @@
                 return null;
             },
             userPermissionClasses() {
-                return ['is_superuser', 'is_staff'].filter((c) => window[c]);
+                return (['is_superuser', 'is_staff'] as const).filter((c) => window[c]);
             },
             bodyClasses() {
                 return [...this.userPermissionClasses, ...this.layoutClasses];
@@ -206,7 +191,7 @@
             goBack() {
                 return this.$router.back();
             },
-            updateBodyClass(newClass, oldClass) {
+            updateBodyClass(newClass: string, oldClass: string) {
                 if (oldClass) {
                     document.body.classList.remove(oldClass);
                 }
@@ -214,26 +199,17 @@
                     document.body.classList.add(newClass);
                 }
             },
-            initConfirmation(callback, actionName) {
-                this.confirmation.callback = callback;
-                this.confirmation.actionName = ` "${this.$t(actionName)}"?`;
-                this.$refs.confirmationModal.openModal();
-            },
-            confirm() {
-                this.confirmation.callback();
-                this.confirmation.callback = null;
-            },
-            reject() {
-                this.confirmation.callback = null;
-            },
             openControlSidebar() {
                 this.isControlSidebarOpen = true;
                 document.body.classList.add('control-sidebar-slide-open');
             },
             closeControlSidebar() {
+                if (this.userSettings.saving) {
+                    return;
+                }
                 document.body.classList.remove('control-sidebar-slide-open');
-                if (this.userSettings.changed || this.localSettings.changed) {
-                    this.$refs.saveSettingsModal.openModal();
+                if ((this.userSettings.changed || this.localSettings.changed) && !this.userSettings.saving) {
+                    this.appModals!.openSaveSettingsModal();
                 }
                 this.isControlSidebarOpen = false;
             },
@@ -244,7 +220,7 @@
                     this.openControlSidebar();
                 }
             },
-            setDarkMode(value) {
+            setDarkMode(value: boolean) {
                 const hasDarkMode = document.body.classList.contains(DARK_MODE_CLASS);
                 if (value && !hasDarkMode) {
                     document.body.classList.add(DARK_MODE_CLASS);
@@ -252,25 +228,12 @@
                     document.body.classList.remove(DARK_MODE_CLASS);
                 }
             },
-            async setLanguage(value) {
+            async setLanguage(value: string) {
                 if (value && this.$i18n.locale !== value) {
                     await this.$app.setLanguage(value);
                     await this.$app.cache.delete(window.schemaLoader.cacheKey);
                     await window.schemaLoader.loadSchema();
                 }
-            },
-            async saveSettings() {
-                if (this.userSettings.changed) {
-                    await this.userSettings.save();
-                }
-                if (this.localSettings.changed) {
-                    await this.localSettings.save();
-                }
-                window.location.reload();
-            },
-            rollbackSettings() {
-                this.userSettings.rollback();
-                this.localSettings.rollback();
             },
         },
     };

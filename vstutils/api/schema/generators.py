@@ -99,7 +99,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
             if self._update_param_model(param, model, model_field):
                 continue
             elif self._update_param_view(param, model, view_cls):
-                continue
+                continue  # nocv
         return parameters
 
     def get_operation_keys(self, subpath, method, view):
@@ -120,8 +120,8 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         result = super().get_schema(request, *args, **kwargs)
         if request and getattr(request, 'accepted_media_type', None) == 'application/openapi+json':
             result['info']['x-user-id'] = request.user.pk
-            if settings.CENTRIFUGO_CLIENT_KWARGS and request.user.is_authenticated:
-                secret = settings.CENTRIFUGO_CLIENT_KWARGS.get('token_hmac_secret_key', '')
+            if (notificator := getattr(request, 'notificator', None)) and request.user.is_authenticated:
+                secret = notificator.get_openapi_secret()
                 if secret and request.user.pk:
                     result['info']['x-centrifugo-token'] = jwt.encode(
                         {

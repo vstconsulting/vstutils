@@ -16,15 +16,13 @@ import ormsgpack
 from configparserc import config as cconfig
 from .tools import get_file_value
 
-from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
+from . import __version__, __file__ as vstutils_file
 
 
 SIMPLE_OBJECT_SETTINGS_TYPE = _t.Dict[_t.Text, _t.Dict[_t.Text, _t.Any]]
-
+VSTUTILS_VERSION = __version__
 
 class Env(dict):
-    __slots__ = ()
-
     def __getitem__(self, item):
         if item in self:
             return super().__getitem__(item)
@@ -102,12 +100,6 @@ CONFIG_FILES = tuple(filter(bool, (
     os.path.splitext(DEV_SETTINGS_FILE)[0] + '.yml' if DEV_SETTINGS_FILE else None,
 )))
 
-ConfigBoolType = cconfig.BoolType()
-ConfigIntType = cconfig.IntType()
-ConfigIntSecondsType = cconfig.IntSecondsType()
-ConfigListType = cconfig.ListType()
-ConfigStringType = cconfig.StrType()
-
 
 class BoolOrStringType(cconfig.BaseType):
     def convert(self, value: _t.Any) -> _t.Optional[_t.Union[bool, _t.Text]]:
@@ -131,26 +123,30 @@ class LocationsType(cconfig.ListType):
         return value
 
 
-class BackendSection(cconfig.Section):
-    __slots__ = ()
+ConfigBoolType = cconfig.BoolType()
+ConfigIntType = cconfig.IntType()
+ConfigFloatType = FloatType()
+ConfigIntSecondsType = cconfig.IntSecondsType()
+ConfigListType = cconfig.ListType()
+ConfigStringType = cconfig.StrType()
 
+
+class BackendSection(cconfig.Section):
     def key_handler_to_all(self, key):
         return super().key_handler_to_all(key).upper()
 
 
 class BaseAppendSection(cconfig.AppendSection):
-    __slots__ = ()
     get: _t.Callable[..., _t.Any]
 
 
 class MainSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'debug': ConfigBoolType,
         'enable_admin_panel': ConfigBoolType,
         'enable_registration': ConfigBoolType,
         'enable_custom_translations': ConfigBoolType,
-        'allowed_hosts': cconfig.ListType(),
+        'allowed_hosts': ConfigListType,
         'first_day_of_week': ConfigIntType,
         'enable_agreement_terms': ConfigBoolType,
         'agreement_terms_path': ConfigStringType,
@@ -160,14 +156,13 @@ class MainSection(BaseAppendSection):
 
 
 class WebSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'allow_cors': ConfigBoolType,
-        'cors_allowed_origins': cconfig.ListType(),
-        'cors_allowed_origins_regexes': cconfig.ListType(),
-        'cors_expose_headers': cconfig.ListType(),
-        'cors_allow_methods': cconfig.ListType(),
-        'cors_allow_headers': cconfig.ListType(),
+        'cors_allowed_origins': ConfigListType,
+        'cors_allowed_origins_regexes': ConfigListType,
+        'cors_expose_headers': ConfigListType,
+        'cors_allow_methods': ConfigListType,
+        'cors_allow_headers': ConfigListType,
         'cors_preflight_max_age': ConfigIntSecondsType,
         'session_timeout': ConfigIntSecondsType,
         'page_limit': ConfigIntType,
@@ -195,16 +190,35 @@ class WebSection(BaseAppendSection):
     }
 
 
-class DatabasesSection(BaseAppendSection):
-    __slots__ = ()
-
+class UvicornSection(cconfig.Section):
     types_map = {
-        'databases_without_cte_support': cconfig.ListType(),
+        'ws_max_size': ConfigIntType,
+        'ws_ping_interval': ConfigFloatType,
+        'ws_ping_timeout': ConfigFloatType,
+        'ws_per_message_deflate': ConfigBoolType,
+        'access_log': ConfigBoolType,
+        'use_colors': ConfigBoolType,
+        'reload': ConfigBoolType,
+        'reload_dirs': ConfigListType,
+        'workers': ConfigIntType,
+        'proxy_headers': ConfigBoolType,
+        'server_header': ConfigBoolType,
+        'date_header': ConfigBoolType,
+        'limit_concurrency': ConfigIntType,
+        'limit_max_requests': ConfigIntType,
+        'backlog': cconfig.BytesSizeType(),
+        'timeout_keep_alive': ConfigIntSecondsType,
+        'factory': ConfigBoolType,
+    }
+
+
+class DatabasesSection(BaseAppendSection):
+    types_map = {
+        'databases_without_cte_support': ConfigListType,
     }
 
 
 class DBSection(BackendSection):
-    __slots__ = ()
     types_map = {
         'conn_max_age': ConfigIntSecondsType,
         'atomic_requests': ConfigBoolType,
@@ -214,15 +228,13 @@ class DBSection(BackendSection):
 
 
 class DBTestSection(DBSection):
-    __slots__ = ()
     type_serialize = ConfigBoolType
     type_create_db = ConfigBoolType
     type_create_user = ConfigBoolType
-    type_dependencies = cconfig.ListType()
+    type_dependencies = ConfigListType
 
 
 class DBOptionsSection(cconfig.Section):
-    __slots__ = ()
     types_map = {
         'timeout': ConfigIntSecondsType,
         'connect_timeout': ConfigIntSecondsType,
@@ -233,7 +245,6 @@ class DBOptionsSection(cconfig.Section):
 
 
 class CacheSection(BackendSection):
-    __slots__ = ()
     types_map = {
         'timeout': ConfigIntSecondsType,
         'location': LocationsType(),
@@ -241,6 +252,7 @@ class CacheSection(BackendSection):
 
 
 class CacheOptionsSection(BackendSection):
+    parent: BaseAppendSection
     types_map = {
         'binary': ConfigBoolType,
         'no_delay': ConfigBoolType,
@@ -296,7 +308,6 @@ class CacheBehaviorsSection(cconfig.Section):
 
 
 class MailSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'port': ConfigIntType,
         'tls': ConfigBoolType,
@@ -308,12 +319,10 @@ class MailSection(BaseAppendSection):
 
 
 class UWSGISection(cconfig.Section):
-    __slots__ = ()
     type_daemon = ConfigBoolType
 
 
 class RPCSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'concurrency': ConfigIntType,
         'prefetch_multiplier': ConfigIntType,
@@ -328,7 +337,6 @@ class RPCSection(BaseAppendSection):
 
 
 class RPCBrokerSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'visibility_timeout': ConfigIntSecondsType,
         'wait_time_seconds': ConfigIntSecondsType,
@@ -338,7 +346,6 @@ class RPCBrokerSection(BaseAppendSection):
 
 
 class WorkerSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'beat': ConfigBoolType,
         'events': ConfigBoolType,
@@ -352,7 +359,6 @@ class WorkerSection(BaseAppendSection):
 
 
 class CentrifugoSection(cconfig.Section):
-    __slots__ = ()
     type_address = cconfig.StrType()
     type_public_address = cconfig.StrType()
     type_api_key = cconfig.StrType()
@@ -362,7 +368,6 @@ class CentrifugoSection(cconfig.Section):
 
 
 class ThrottleSection(BaseAppendSection):
-    __slots__ = ()
     types_map = {
         'rate': ConfigStringType,
         'actions': ConfigListType,
@@ -389,8 +394,18 @@ class Boto3Subsection(BackendSection):
             return f'AWS_{key_uppercase}'
         return key_uppercase
 
+environ.environ.REDIS_DRIVER = 'django.core.cache.backends.redis.RedisCache'
 
-env = environ.Env(
+class DjangoEnv(environ.Env):
+    CACHE_SCHEMES = {
+        **environ.Env.CACHE_SCHEMES,
+        'rediscache': 'django.core.cache.backends.redis.RedisCache',
+        'redis': 'django.core.cache.backends.redis.RedisCache',
+        'rediss': 'django.core.cache.backends.redis.RedisCache',
+    }
+
+
+env = DjangoEnv(
     # set casting, default value
     DEBUG=(bool, False),
     DJANGO_LOG_LEVEL=(str, 'WARNING'),
@@ -528,6 +543,9 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'rate': os.getenv(f'{ENV_NAME}_GLOBAL_THROTTLE_RATE', ''),
             'actions': ConfigListType(os.getenv(f'{ENV_NAME}_GLOBAL_THROTTLE_ACTIONS', ('update', 'partial_update'))),
             'views': {},
+        },
+        'uvicorn': {
+            'loop': 'auto',
         }
     },
     section_overload={
@@ -565,6 +583,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'centrifugo': CentrifugoSection,
         'throttle': ThrottleSection,
         'storages.boto3': Boto3Subsection,
+        'uvicorn': UvicornSection,
     },
     format_exclude_sections=('uwsgi',)
 )
@@ -582,15 +601,20 @@ SECRET_FILE = os.getenv(
     f"{ENV_NAME}_SECRET_FILE",
     f"/etc/{VST_PROJECT_LIB}/secret"
 )
+SECRET_FILE_FALLBACK = os.getenv(
+    f"{ENV_NAME}_SECRET_FILE_FALLBACK",
+    f"/etc/{VST_PROJECT_LIB}/secret.fallback"
+)
 
 
-def secret_key():
-    return get_file_value(
-        SECRET_FILE, '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
-    )
+def secret_key(secret_file, default='*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'):
+    return get_file_value(secret_file, default)
 
 
-SECRET_KEY: _t.Text = lazy(secret_key, str)()
+SECRET_KEY: _t.Text = lazy(secret_key, str)(SECRET_FILE)
+SECRET_KEY_FALLBACKS: _t.List[str] = [
+    lazy(secret_key, str)(SECRET_FILE_FALLBACK, '3r4Edsgz9PSCSZCe7rRPD6KMkZg23EGK+nknCYjgIh3tkvcjoP27W+dKqtynMpTtwkU=')
+]
 
 # Main settings
 ##############################################################
@@ -616,15 +640,6 @@ except ImportError:  # nocv
     pass
 RPC_ENABLED: bool = has_django_celery_beat
 
-# :docs:
-HAS_DOCS: bool = False
-try:
-    import docs
-    HAS_DOCS = True
-except ImportError:  # nocv
-    pass
-
-
 # Applications definition
 ##############################################################
 INSTALLED_APPS: _t.List[_t.Text] = [
@@ -633,6 +648,7 @@ INSTALLED_APPS: _t.List[_t.Text] = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'vstutils',
     'django.contrib.staticfiles',
     'corsheaders',
 ]
@@ -647,13 +663,9 @@ INSTALLED_APPS += [
     'django_filters',
 ]
 
-if HAS_DOCS:
-    INSTALLED_APPS.append('docs')
-
 INSTALLED_APPS += ['drf_yasg']
 
 ADDONS: _t.List[_t.Text] = [
-    'vstutils',
     'vstutils.api',
 ]
 
@@ -662,8 +674,8 @@ INSTALLED_APPS += ADDONS
 # Additional middleware and auth
 ##############################################################
 MIDDLEWARE: _t.List[_t.Text] = [
-    'vstutils.middleware.FrontendChangesNotifications',
     'vstutils.middleware.ExecuteTimeHeadersMiddleware',
+    'vstutils.middleware.FrontendChangesNotifications',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -682,17 +694,19 @@ EXCLUDE_FROM_MINIFYING = []
 
 MIDDLEWARE_ENDPOINT_CONTROL = {
     'remove': [
-        'corsheaders.middleware.CorsMiddleware',
+        'vstutils.middleware.FrontendChangesNotifications',
         'htmlmin.middleware.HtmlMinifyMiddleware',
         'htmlmin.middleware.MarkRequestMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
+        'corsheaders.middleware.CorsMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'vstutils.middleware.LangMiddleware',
         'vstutils.middleware.TwoFaMiddleware',
-        'vstutils.middleware.FrontendChangesNotifications',
     ],
     'prepend': [
         'vstutils.api.endpoint.BulkMiddleware'
@@ -800,6 +814,10 @@ ROOT_URLCONF: _t.Text = os.getenv('VST_ROOT_URLCONF', f'{VST_PROJECT}.urls')
 WSGI: _t.Text = os.getenv('VST_WSGI', f'{VST_PROJECT}.wsgi')
 WSGI_APPLICATION: _t.Text = f"{WSGI}.application"
 UWSGI_APPLICATION: _t.Text = f'{WSGI}:application'
+UWSGI_WORKER_PATH: _t.Text = f'{VSTUTILS_DIR}/asgi_worker.py'
+
+ASGI: _t.Text = os.getenv('VST_ASGI', 'vstutils.asgi')
+ASGI_APPLICATION: _t.Text = f'{ASGI}.application'
 
 uwsgi_settings: cconfig.Section = config['uwsgi']
 WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)
@@ -863,24 +881,21 @@ STATIC_FILES_FOLDERS = lazy(lambda: list(filter(bool, (
     os.path.join(os.path.dirname(rest_framework.__file__), 'static')
 ))), list)()
 
-if LOCALRUN:
-    STATICFILES_DIRS = list(STATIC_FILES_FOLDERS)
+STATICFILES_DIRS = list(STATIC_FILES_FOLDERS)
 
 STATICFILES_FINDERS: _t.Tuple[_t.Text, _t.Text] = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
-if not LOCALRUN:
-    STATIC_ROOT = os.path.join(VST_PROJECT_DIR, 'static')  # nocv
-
-
 # Documentation files
 # http://django-docs.readthedocs.io/en/latest/#docs-access-optional
 ##############################################################
 DOCS_ROOT: _t.Text = os.path.join(BASE_DIR, 'doc/html')
-DOCS_ACCESS: _t.Text = 'public'
 DOC_URL: _t.Text = "/docs/"
+
+# :docs:
+HAS_DOCS: bool = os.path.exists(DOCS_ROOT)
 
 if HAS_DOCS:
     EXCLUDE_FROM_MINIFYING.append(DOC_URL.lstrip('/'))
@@ -906,8 +921,8 @@ def parse_db(params):
         **default_data_from_env,
         **param_data.all()
     })
-    data_all = data.all()
-    USED_ENGINES.add(data_all.get('ENGINE'))
+    data_all: _t.Dict[_t.Text, _t.Union[_t.Optional[_t.Text], _t.Dict]] = data.all()
+    USED_ENGINES.add(_t.cast(str, data_all.get('ENGINE')))
     return db_name, data_all
 
 
@@ -927,7 +942,7 @@ if 'django.db.backends.mysql' in USED_ENGINES:  # nocv
 for db in filter(lambda x: x.get('ENGINE', None) == 'django.db.backends.sqlite3', DATABASES.values()):
     try:
         db['OPTIONS'].setdefault('timeout', 20)
-    except:  # nocv
+    except Exception:  # nocv
         pass
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -957,13 +972,14 @@ if any([True for c in CACHES.values() if 'OPTIONS' in c and c['OPTIONS'].get('SE
 # E-Mail settings
 # https://docs.djangoproject.com/en/3.2/ref/settings/#email-host
 ##############################################################
+mail = config['mail']
+EMAIL_HOST_USER = mail["user"]
+
 if 'EMAIL_URL' in os.environ:
     vars().update(env.email('EMAIL_URL'))  # nocv
 else:
-    mail = config['mail']
     EMAIL_BACKEND: _t.Text = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_PORT = mail["port"]
-    EMAIL_HOST_USER = mail["user"]
     EMAIL_HOST_PASSWORD = mail["password"]
     if mail.get('tls', None) is not None:
         EMAIL_USE_TLS = mail['tls']  # nocv
@@ -1175,7 +1191,8 @@ CASE_SENSITIVE_API_FILTER = web.getboolean('case_sensitive_api_filter', fallback
 
 SILENCED_SYSTEM_CHECKS: _t.List = [
     "urls.W005",
-    "fields.W122"
+    "fields.W122",
+    "staticfiles.W004",
 ]
 
 
@@ -1313,19 +1330,19 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
 }
 
 GUI_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
-    r'^$': 'GUI',
-    r'^manifest.json$': 'MANIFEST',
-    r'^service-worker.js$': 'SERVICE_WORKER',
-    r'^offline.html$': 'OFFLINE',
+    r'': 'GUI',
+    'manifest.json': 'MANIFEST',
+    'service-worker.js': 'SERVICE_WORKER',
+    'offline.html': 'OFFLINE',
 }
 
 ACCOUNT_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
     'LOGIN_URL': 'LOGIN',
     'LOGOUT_URL': 'LOGOUT',
-    r'^password_reset/$': 'PASSWORD_RESET',
-    r'^password_reset_done/$': 'PASSWORD_RESET_DONE',
-    r'^password_reset_complete/$': 'PASSWORD_RESET_COMPLETE',
-    r'^password_reset_confirm/(?P<uidb64>.*)/(?P<token>.*)/$': 'PASSWORD_RESET_CONFIRM',
+    'password_reset/': 'PASSWORD_RESET',
+    'password_reset_done/': 'PASSWORD_RESET_DONE',
+    'password_reset_complete/': 'PASSWORD_RESET_COMPLETE',
+    'password_reset_confirm/<uidb64>/<token>/': 'PASSWORD_RESET_CONFIRM',
 }
 
 
@@ -1346,16 +1363,16 @@ def get_accounts_views_mapping():
 
 URLS = lazy(lambda: {**GUI_VIEWS}, dict)()
 ACCOUNT_URLS = lazy(get_accounts_views_mapping, dict)()
-ACCOUNT_URL = '^account/'
+ACCOUNT_URL = 'account/'
 
-REGISTRATION_URL = r'^registration/$'
+REGISTRATION_URL = 'registration/'
 REGISTRATION_ENABLED = main['enable_registration']
 
-AGREEMENT_TEMRS_URL = r'^terms/$'
+AGREEMENT_TEMRS_URL = 'terms/'
 ENABLE_AGREEMENT_TERMS: bool = main.getboolean('enable_agreement_terms', fallback=REGISTRATION_ENABLED)
 AGREEMENT_TERMS_PATH: str = main['agreement_terms_path']
 
-CONSENT_TO_PROCESSING_URL = r'^consent_to_processing/$'
+CONSENT_TO_PROCESSING_URL = 'consent_to_processing/'
 ENABLE_CONSENT_TO_PROCESSING: bool = main.getboolean('enable_consent_to_processing', fallback=REGISTRATION_ENABLED)
 CONSENT_TO_PROCESSING_PATH: str = main['consent_to_processing_path']
 

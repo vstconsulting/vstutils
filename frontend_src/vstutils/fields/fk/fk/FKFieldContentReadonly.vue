@@ -1,12 +1,14 @@
 <template>
-    <div>
-        <template v-if="!representField.constructor.fkLinkable">
+    <div v-if="field.showLoader && loading" class="loader">
+        <i class="fa-spin fas fa-sync-alt" />
+    </div>
+    <div v-else>
+        <template v-if="!linkable && representField">
             <component
-                :is="representField.component"
+                :is="representField.getComponent()"
                 :field="representField"
                 :data="{ [representField.name]: field.getViewFieldValue(value) }"
-                :type="$parent.type"
-                :hideable="$parent.hideable"
+                type="readonly"
                 hide-title
             />
             <div v-if="withLink" class="object-link">
@@ -26,19 +28,22 @@
 
 <script setup lang="ts">
     import { computed, toRef } from 'vue';
-    import type { Model } from '@/vstutils/models';
-    import type { FKField, TRepresent } from './FKField';
     import { ensureValueFetched, useQuerySets } from './composables';
+    import { FieldReadonlyPropsDef } from '@/vstutils/fields/base';
 
-    const props = defineProps<{
-        field: FKField;
-        value: TRepresent | null | undefined;
-        data: Record<string, unknown>;
-    }>();
+    import type { Model } from '@/vstutils/models';
+    import type { FieldReadonlyPropsDefType } from '@/vstutils/fields/base';
+    import type { FKField } from './FKField';
+
+    const props = defineProps(FieldReadonlyPropsDef as FieldReadonlyPropsDefType<FKField>);
 
     const { queryset } = useQuerySets(props.field, props.data);
 
     const representField = props.field.fkModel!.fields.get(props.field.viewField);
+
+    const linkable = computed(() => {
+        return representField?.fkLinkable;
+    });
 
     const withLink = computed<boolean>(
         () => props.field.makeLink && (!props.value || !(props.value as Model).__notFound),
@@ -47,9 +52,13 @@
         return props.field.getValueFieldValue(props.value);
     });
     const href = computed<string>(() => {
-        if (fk.value && queryset.value) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/restrict-plus-operands
-            return queryset.value.url + fk.value;
+        if (fk.value) {
+            if (props.field.props.linkGenerator) {
+                return props.field.props.linkGenerator({ ...props, value: props.value }) ?? '';
+            }
+            if (queryset.value) {
+                return queryset.value.url + fk.value;
+            }
         }
         return '';
     });
@@ -60,12 +69,16 @@
         return '';
     });
 
-    ensureValueFetched(props.field, queryset.value!, toRef(props, 'value'));
+    const { loading } = ensureValueFetched(props.field, toRef(props, 'value'));
 </script>
 
 <style scoped>
     .object-link {
         margin-top: 5px;
+        text-align: center;
+    }
+
+    .field-component.type-list .loader::v-deep {
         text-align: center;
     }
 </style>

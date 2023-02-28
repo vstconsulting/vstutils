@@ -1,7 +1,8 @@
-import type { QuerySet } from '@/vstutils/querySet';
+import { computed, getCurrentInstance, readonly, ref, watch } from 'vue';
+import { fetchPKs } from '@/vstutils/fetch-values';
 import { getApp } from '@/vstutils/utils';
+
 import type { Ref } from 'vue';
-import { computed, getCurrentInstance, watchEffect } from 'vue';
 import type { FKField, TRepresent } from './FKField';
 
 export function useQuerySets(field: FKField, data: Record<string, unknown>) {
@@ -16,20 +17,29 @@ export function useQuerySets(field: FKField, data: Record<string, unknown>) {
     return { querysets, queryset };
 }
 
-export function ensureValueFetched(
-    field: FKField,
-    queryset: QuerySet,
-    value: Ref<TRepresent | null | undefined>,
-) {
+export function ensureValueFetched(field: FKField, value: Ref<TRepresent | null | undefined>) {
     const vm = getCurrentInstance();
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    watchEffect(async () => {
-        if (!value.value || typeof value.value === 'object' || !field.fetchData) {
-            return;
-        }
-        const [instance] = await field._fetchRelated([value.value], queryset);
-        if (instance && typeof instance === 'object') {
-            vm?.proxy.$emit('set-value', instance, { markChanged: false });
-        }
-    });
+    const loading = ref(false);
+
+    watch(
+        value,
+        async (value) => {
+            if (!value || typeof value === 'object' || !field.fetchData) {
+                return;
+            }
+            loading.value = true;
+            try {
+                const [instance] = await fetchPKs([value], field);
+                if (instance && typeof instance === 'object') {
+                    vm?.proxy.$emit('set-value', instance, { markChanged: false });
+                }
+            } catch (e) {
+                getApp().error_handler.defineErrorAndShow(e);
+            }
+            loading.value = false;
+        },
+        { immediate: true },
+    );
+
+    return { loading: readonly(loading) };
 }

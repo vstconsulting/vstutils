@@ -5,9 +5,9 @@ Additional serializer fields for generating OpenAPI and GUI.
 import logging
 import typing as _t
 import copy
-import json
 import functools
 import base64
+import uuid
 from urllib.parse import quote
 
 import orjson
@@ -22,11 +22,13 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.fields.files import FieldFile
 
+from .renderers import ORJSONRenderer
 from ..models import fields as vst_model_fields
 from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default, translate, lazy_translate
 
 DependenceType = _t.Optional[_t.Dict[_t.Text, _t.Text]]
 DEFAULT_NAMED_FILE_DATA = {"name": None, "content": None, 'mediaType': None}
+renderer: _t.Callable[..., bytes] = functools.partial(ORJSONRenderer().render, media_type=ORJSONRenderer.media_type)
 
 
 class VSTCharField(CharField):
@@ -38,7 +40,7 @@ class VSTCharField(CharField):
     def to_internal_value(self, data) -> _t.Text:
         with raise_context():
             if not isinstance(data, str):
-                data = json.dumps(data)
+                data = renderer(data).decode('utf-8')
         data = str(data)
         return super().to_internal_value(data)
 
@@ -323,7 +325,7 @@ class DynamicJsonTypeField(VSTCharField):
         value = super().get_attribute(value)
         if self.is_json(real_field):
             with raise_context():
-                value = json.loads(value)
+                value = orjson.loads(value)
         if real_field:
             return real_field.to_representation(value)
         return value
@@ -456,6 +458,9 @@ class FkField(IntegerField):
     :param autocomplete_represent: this argument indicates which attribute will be
                                    get from OpenApi schema definition model as represent value.
                                    Default is ``name``.
+    :param field_type: defines the autocomplete_property type for further definition in the schema
+                       and casting to the type from the api. Default is passthroughs but require `int` or `str` objects.
+    :type field_type: type
     :param use_prefetch: prefetch values on frontend at list-view. Default is ``True``.
     :type use_prefetch: bool
     :param make_link: show value as link to model. Default is ``True``.
@@ -518,11 +523,18 @@ class FkField(IntegerField):
         self.make_link = kwargs.pop('make_link', True)
         self.dependence = kwargs.pop('dependence', None)
         self.filters = kwargs.pop('filters', None)
+        self.field_type = kwargs.pop('field_type', lambda x: x)
         super().__init__(**kwargs)
         if self.filters and self.dependence and set(self.dependence.values()) & set(self.filters.keys()):
             self.fail('ambiguous_filter')
         # Remove min/max validators from integer field.
         self.validators = self.validators[:-((self.max_value is not None) + (self.min_value is not None)) or None]
+
+    def to_internal_value(self, data):
+        return self.field_type(data)
+
+    def to_representation(self, value):
+        return self.field_type(value)
 
 
 class FkModelField(FkField):
@@ -588,7 +600,7 @@ class FkModelField(FkField):
         self.model_class = get_if_lazy(self.model_class)
         if isinstance(value, self.model_class):
             return value  # nocv
-        return self.model_class.objects.get(**{self.autocomplete_property: value})
+        return self.model_class.objects.get(**{self.autocomplete_property: self.field_type(value)})
 
     def get_value(self, dictionary: _t.Any) -> _t.Any:
         value = super().get_value(dictionary)
@@ -599,7 +611,7 @@ class FkModelField(FkField):
     def to_internal_value(self, data: _t.Union[models.Model, int]) -> _t.Union[models.Model]:  # type: ignore[override]
         if isinstance(data, self.model_class):
             return data
-        elif isinstance(data, (int, str)):  # nocv
+        elif isinstance(data, (int, str, uuid.UUID)):  # nocv
             # deprecated
             return self._get_data_from_model(data)
         self.fail('Unknown datatype')  # nocv
@@ -607,7 +619,7 @@ class FkModelField(FkField):
     def to_representation(self, value: _t.Union[int, models.Model]) -> _t.Any:
         self.model_class = get_if_lazy(self.model_class)
         if self.model_class is not None and isinstance(value, self.model_class._meta.pk.model):  # type: ignore
-            return getattr(value, self.autocomplete_property)
+            return self.field_type(getattr(value, self.autocomplete_property))
         else:  # nocv
             # Uses only if value got from `.values()`
             return value  # type: ignore
@@ -708,9 +720,9 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
     __valid_keys = ('name', 'content', 'mediaType')
     default_error_messages = {
-        'not a JSON': lazy_translate('value is not a valid JSON'),  # type: ignore
-        'missing key': lazy_translate('key {missing_key} is missing'),  # type: ignore
-        'invalid key': lazy_translate('invalid key {invalid_key}'),  # type: ignore
+        'not a JSON': lazy_translate('value is not a valid JSON'),
+        'missing key': lazy_translate('key {missing_key} is missing'),
+        'invalid key': lazy_translate('invalid key {invalid_key}'),
     }
     file_field = FieldFile
 
@@ -718,7 +730,15 @@ class NamedBinaryFileInJsonField(VSTCharField):
         self.file = kwargs.pop('file', False)
         self.post_handlers = kwargs.pop('post_handlers', ())
         self.pre_handlers = kwargs.pop('pre_handlers', ())
+        self.max_content_size = int(kwargs.pop('max_content_size', 0))
+        self.min_content_size = int(kwargs.pop('min_content_size', 0))
+        if self.file:
+            max_length = kwargs.pop('max_length', None)
+            min_length = kwargs.pop('min_length', None)
         super(NamedBinaryFileInJsonField, self).__init__(**kwargs)
+        if self.file:
+            self.max_length = max_length
+            self.min_length = min_length
 
     def validate_value(self, data: _t.Dict):
         if not isinstance(data, dict):
@@ -741,7 +761,9 @@ class NamedBinaryFileInJsonField(VSTCharField):
         if self.file:
             return {'content': value.url, 'name': value.name, 'mediaType': ''}
         else:
-            result = json.loads(value)
+            if not value:
+                return DEFAULT_NAMED_FILE_DATA
+            result = orjson.loads(value)
             if not result.get('mediaType'):
                 result['mediaType'] = None
             return result
@@ -764,6 +786,13 @@ class NamedBinaryFileInJsonField(VSTCharField):
     def run_validators(self, value: _t.Dict) -> None:
         if not raise_context_decorator_with_default(default=False)(self.should_not_handle)(value):
             super().run_validators(value)
+            if self.file:
+                if self.max_length and len(value['name']) > self.max_length:
+                    raise ValidationError(f'Name of file so long. Allowed only {self.max_length} symbols.')
+            if 0 < self.max_content_size < len(value['content']):
+                raise ValidationError('The file is too large.')
+            if 0 < self.min_content_size > len(value['content']):
+                raise ValidationError('The file is too small.')
 
     def should_not_handle(self, file):
         return (
@@ -853,7 +882,9 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
                 {'content': file.url, 'name': file.name, 'mediaType': ''}
                 for file in value
             ]
-        return json.loads(value)
+        if not value:
+            return []
+        return orjson.loads(value)
 
 
 class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):

@@ -56,6 +56,13 @@ TRANSLATION = {
     'Select files': '选择文件',
     'Clear field': '清场',
     'Column is required!': '列是必需的!',
+    'Filters': '过滤器',
+    'Server error': '服务器错误',
+    'Page not found': '页面未找到',
+    'Permission denied': '权限被拒绝',
+    'Bad request': '错误请求',
+    'Go back': '返回',
+    'Selected instances were successfully removed': '选定的实例已成功删除',
 
     # fields
     'Id': '标识符',
@@ -206,6 +213,13 @@ TRANSLATION = {
 
     # validators
     'imageValidationResolutionError': "必须至少为{min}且不超过{max}个像素",
+    'Invalid URL': '无效的网址',
+    'File{fileName} is too large': '文件{fileName}太大',
+    'File{fileName} is too small': '文件{fileName}太小',
+    'Min length: {0}': '最小长度: {0}',
+    'Max length: {0}': '最大长度: {0}',
+    'Minimum filename length: {0}': '最小文件名长度: {0}',
+    'Maximum filename length: {0}': '最大文件名长度: {0}',
 
     # instance operation success
     # add

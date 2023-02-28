@@ -1,4 +1,4 @@
-import QuerySet from './QuerySet.js';
+import { QuerySet } from './QuerySet.ts';
 
 class MethodNotImplemented extends Error {
     constructor() {

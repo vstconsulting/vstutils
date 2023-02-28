@@ -41,10 +41,9 @@ from django.http import FileResponse, HttpResponseNotModified
 from django.test.client import RequestFactory
 from django.urls import reverse
 from fakeldap import MockLDAP
-from requests.auth import HTTPBasicAuth
-from rest_framework.test import CoreAPIClient
 
 from vstutils import utils
+from vstutils.asgi import application
 from vstutils.api.models import Language
 from vstutils.api.schema.inspectors import X_OPTIONS
 from vstutils.api.serializers import BaseSerializer
@@ -82,6 +81,7 @@ from .models import (
     ModelForCheckFileAndImageField,
     ModelWithNestedModels,
     ProtectedBySignal,
+    ModelWithUuidFK,
 )
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
@@ -219,6 +219,33 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         self.remove_project_place(self.project_place)
         with self.assertRaises(Exception):
             call_command('newproject', '--name', 'test_project', dir=None, interactive=0)
+
+    def test_runserver(self):
+        with self.patch('uvicorn.run') as mock_urun:
+            mock_urun.side_effect = lambda *args, **kwargs: 'OK'
+
+            self.assertEqual(mock_urun.call_count, 0)
+            call_command('runserver')
+            self.assertEqual(mock_urun.call_count, 1)
+            mock_urun.assert_called_with(
+                app=application,
+                access_log=True,
+                interface='asgi3',
+                log_level=settings.LOG_LEVEL.lower(),
+                host='127.0.0.1',
+                port=8080,
+            )
+
+            call_command('runserver', addrport='0.0.0.0:80')
+            self.assertEqual(mock_urun.call_count, 2)
+            mock_urun.assert_called_with(
+                app=application,
+                access_log=True,
+                interface='asgi3',
+                log_level=settings.LOG_LEVEL.lower(),
+                host='0.0.0.0',
+                port=80,
+            )
 
     def test_dockerrun(self):
         with self.patch('subprocess.check_call') as mock_obj:
@@ -691,11 +718,30 @@ class ViewsTestCase(BaseTestCase):
             list(self.get_result('get', '/api/v1/').keys()).sort(),
             list(self.settings_obj.API[self.settings_obj.VST_API_VERSION].keys()).sort()
         )
+
+        # Check static views
+        self.get_result('get', '/static/bundle/output.json', code=200)
+        self.get_result('get', '/docs/', code=200)
+        self.get_result('get', '/docs/index.html', code=200)
+
+        # Check static views from fastapi
+        fclient = self.api_test_client
+        response = fclient.get('/docs/')
+        self.assertEqual(response.status_code, 200)
+
+        response = fclient.get('/static/bundle/')
+        self.assertEqual(response.status_code, 404)
+        response = fclient.get('/static/bundle/output.json')
+        self.assertEqual(response.status_code, 200)
+        response = fclient.get('/media/test.txt')
+        self.assertEqual(response.status_code, 200)
+
         # 404
         self.get_result('get', '/api/v1/some/', code=404)
         self.get_result('get', '/other_invalid_url/', code=404)
         self.get_result('get', '/api/user/', code=404)
         self.get_result('get', '/api/v1/user/1000/', code=404)
+        self.get_result('get', '/static/bundle/output.json_unknown', code=404)
 
         # Test js urls minification
         for js_url in ['service-worker.js']:
@@ -842,7 +888,11 @@ class ViewsTestCase(BaseTestCase):
             }
             for i in range(10)
         ]
-        users_id = self.mass_create('/api/v1/user/', data, 'username')
+        results = self.bulk([
+            {'method': 'post', 'path': 'user', 'data': i}
+            for i in data
+        ])
+        users_id = tuple(r['data']['id'] for r in results)
         self.assertEqual(self.get_count('django.contrib.auth.models.User'), 13)
         comma_id_list = ",".join([str(i) for i in users_id])
         result = self.get_result('get', '/api/v1/user/?id={}'.format(comma_id_list))
@@ -1417,7 +1467,11 @@ class DefaultBulkTestCase(BaseTestCase):
             dict(username="USER{}".format(i), password="123", password2='123')
             for i in range(10)
         ]
-        users_id = self.mass_create('/api/v1/user/', data, 'username')
+        results = self.bulk([
+            {'method': 'post', 'path': ['user'], 'data': i}
+            for i in data
+        ])
+        users_id = tuple(r['data']['id'] for r in results)
         test_user = dict(username=self.random_name(), password='123', password2='123')
         userself_data = dict(first_name='me')
         bulk_request_data = [
@@ -1545,6 +1599,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
             set(['text/plain', 'application/json']),
         )
         expected['some_namedbinfile']['x-validators']['extensions'] = from_api['some_namedbinfile']['x-validators']['extensions']
+        expected['some_filefield']['properties']['content']['maxLength'] = from_api['some_filefield']['properties']['content']['maxLength'] = 10000
+        expected['some_imagefield']['properties']['content']['minLength'] = from_api['some_imagefield']['properties']['content']['minLength'] = 7000
         self.assertDictEqual(expected, from_api)
         # Test swagger ui
         client = self._login()
@@ -1731,6 +1787,13 @@ class OpenapiEndpointTestCase(BaseTestCase):
             api['definitions']['ModelWithBinaryFiles']['properties']['some_validatedmultiplenamedbinimage']['items']['x-validators'],
             img_res_validator_data
         )
+
+        # Check fields with uuid as fk
+        self.assertEqual(api['definitions']['ModelWithUuidPk']['properties']['id']['type'], 'string')
+        self.assertEqual(api['definitions']['ModelWithUuidPk']['properties']['id']['format'], 'uuid')
+        self.assertEqual(api['definitions']['ModelWithUuidFK']['properties']['fk']['type'], 'string')
+        self.assertEqual(api['definitions']['ModelWithUuidFK']['properties']['fk']['format'], 'fk')
+
         # Check default fields grouping
         self.assertEqual(api['definitions']['ExtraPost']['x-properties-groups'], {"": ['id', 'author', 'title']})
 
@@ -1938,7 +2001,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'field1': {'title': 'Field1', 'type': 'string', 'minLength': 1},
                 'field2': {'title': 'Field2', 'type': 'integer'}
             },
-            'required': ['field1', 'field2']
+            'required': ['field1', 'field2'],
+            'x-properties-groups': {'': ['field1', 'field2']},
+            'x-view-field-name': 'field2',
         }
 
         self.assertDictEqual(api['definitions']['DynamicFields']['properties']['dynamic_with_types'], {
@@ -2013,6 +2078,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
             },
         })
 
+        # Check hide non required fields option
+        self.assertTrue(api['definitions']['SubVariables']['x-hide-not-required'])
+
         # Check public centrifugo address when absolute path is provided
         self.assertEqual(api['info']['x-centrifugo-address'], 'wss://vstutilstestserver/notify/connection/websocket')
 
@@ -2023,6 +2091,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'type': 'string',
                 'format': 'csvfile',
                 'title': 'Some data',
+                'maxLength': 1024,
+                'minLength': 1,
                 X_OPTIONS: {
                     'media_types': ['text/csv',],
                     'parserConfig': {
@@ -2040,6 +2110,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
                                 'minLength': 1,
                             },
                         },
+                        'x-properties-groups': {'': ['some_data']},
+                        'x-view-field-name': 'some_data',
                     },
                 }
             }
@@ -2396,7 +2468,7 @@ class EndpointTestCase(BaseTestCase):
         response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
 
         self.assertEqual(response[0]['status'], 404, response[0])
-        self.assertTrue('<h1>Not Found</h1>' in response[0]['data']['detail'])
+        self.assertTrue('Page not found' in response[0]['data']['detail'])
 
     def test_testing_tool(self):
         with self.assertRaises(AssertionError):
@@ -2536,6 +2608,12 @@ class EndpointTestCase(BaseTestCase):
         perf_results = '\n'.join(f'{k.upper()}: {v}ms' for k, v in map(iteration, ('post', 'put', 'patch')))
         print(f"\nTimings for different methods:\n{perf_results}\n")
 
+
+    @override_settings(CENTRIFUGO_CLIENT_KWARGS={
+        'address': 'https://localhost:8000',
+        'api_key': "XXX",
+        'token_hmac_secret_key': "YYY"
+    }, CENTRIFUGO_PUBLIC_HOST='https://public:8000/api')
     def test_transactional_bulk(self):
         request = [
             dict(
@@ -3174,24 +3252,6 @@ class LangTestCase(BaseTestCase):
         self.assertEqual(ru_lang_obj.translate('Some shared translation'), 'Серверный перевод имеет более высокий приоритет')
 
 
-class CoreApiTestCase(BaseTestCase):
-
-    def test_coreapi(self):
-        client = CoreAPIClient()
-        client.session.auth = HTTPBasicAuth(
-            self.user.data['username'], self.user.data['password']
-        )
-        client.session.headers.update({'x-test': 'true'})
-        schema = client.get('http://testserver/api/v1/schema/')
-        result = client.action(schema, ['v1', 'user', 'list'])
-        self.assertEqual(result['count'], 1)
-        create_data = dict(username='test', password='123', password2='123')
-        result = client.action(schema, ['v1', 'user', 'add'], create_data)
-        self.assertEqual(result['username'], create_data['username'])
-        self.assertFalse(result['is_staff'])
-        self.assertTrue(result['is_active'])
-
-
 class ProjectTestCase(BaseTestCase):
     use_msgpack = True
 
@@ -3227,6 +3287,20 @@ class ProjectTestCase(BaseTestCase):
             }
         ]
 
+    def test_model_with_fk_uuid(self):
+        results = self.bulk([
+            {'method': "post", 'path': ['uuid_as_pk']}
+            for _ in range(3)
+        ] + [
+            {'method': "post", 'path': ['uuid_as_fk'], 'data': {'fk': f'<<{i}[data][id]>>'}}
+            for i in range(3)
+        ] + [{'method': "get", 'path': ['uuid_as_fk']}])
+        for result in results[:-1]:
+            self.assertEqual(result['status'], 201)
+
+        self.assertEqual(results[-1]['status'], 200)
+        self.assertEqual(results[-1]['data']['count'], 3)
+
     def test_make_action(self):
         author1 = Author.objects.create(name='Author1', phone='')
         author2 = Author.objects.create(name='Author2', phone='')
@@ -3239,7 +3313,7 @@ class ProjectTestCase(BaseTestCase):
             {'method': 'post', 'path': ['author', author1.id, 'check_named_response'], 'data': {}},
             # [2-4] Simple action check
             {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
-            {'method': 'put', 'path': ['author', author1.id, 'author_profile'], "data": {"phone": "88008008880"}},
+            {'method': 'put', 'path': ['author', author1.id, 'author_profile'], "data": {"phone": "88008008880", "referer": author2.id}},
             {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
             {'method': 'delete', 'path': ['author', author1.id, 'author_profile']},
             {'method': 'get', 'path': ['author', author1.id, 'author_profile']},
@@ -3267,11 +3341,11 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[1]['data'], {"detail": "OK"})
 
         self.assertEqual(results[2]['status'], 200)
-        self.assertEqual(results[2]['data'], {"phone": ""})
+        self.assertEqual(results[2]['data'], {"phone": "", "referer": None})
         self.assertEqual(results[3]['status'], 200)
-        self.assertEqual(results[3]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[3]['data'], {"phone": "88008008880", "referer": author2.id})
         self.assertEqual(results[4]['status'], 200)
-        self.assertEqual(results[4]['data'], {"phone": "88008008880"})
+        self.assertEqual(results[4]['data'], {"phone": "88008008880", "referer": author2.id})
         self.assertEqual(results[5]['status'], 204)
         self.assertEqual(results[6]['status'], 404)
 
@@ -3293,7 +3367,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[14]['data'], {"phone": None})
 
         self.assertEqual(results[15]['status'], 200)
-        valid_results = [{"name": a.name, "phone": a.phone} for a in Author.objects.all()]
+        valid_results = [{"name": a.name, "phone": a.phone, "referer": a.referer} for a in Author.objects.all()]
         self.assertEqual(results[15]['data'], {"count": len(valid_results), "results": valid_results})
 
         self.assertEqual(results[16]['status'], 201)
@@ -3734,9 +3808,6 @@ class ProjectTestCase(BaseTestCase):
             '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subgroups/',
             '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subgroups/{subgroups_id}/',
             '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/',
-            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test/',
-            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test2/',
-            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test3/',
             '/deephosts/{id}/subsubhosts/',
             '/deephosts/{id}/subsubhosts/{subsubhosts_id}/',
             '/deephosts/{id}/subsubhosts/{subsubhosts_id}/copy/',
@@ -3757,9 +3828,6 @@ class ProjectTestCase(BaseTestCase):
             '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subgroups/',
             '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subgroups/{subgroups_id}/',
             '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/',
-            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test/',
-            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test2/',
-            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test3/',
             '/hosts/',
             '/hosts/{id}/',
             '/hosts/{id}/copy/',
@@ -3777,9 +3845,6 @@ class ProjectTestCase(BaseTestCase):
             '/hosts/{id}/subgroups/',
             '/hosts/{id}/subgroups/{subgroups_id}/',
             '/hosts/{id}/subhosts/',
-            '/hosts/{id}/subhosts/test/',
-            '/hosts/{id}/subhosts/test2/',
-            '/hosts/{id}/subhosts/test3/',
             '/subhosts/',
             '/subhosts/{id}/',
             '/subhosts/{id}/test/',
@@ -3794,8 +3859,29 @@ class ProjectTestCase(BaseTestCase):
             '/user/{id}/change_password/'
         ]
 
+        should_not_be = [
+            # this actions shouldnot be in schema
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hidden_hosts/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hidden_hosts/{hidden_hosts_id}/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hidden_hosts/{hidden_hosts_id}/test/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hidden_hosts/{hidden_hosts_id}/test2/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hidden_hosts/{hidden_hosts_id}/test3/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test2/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test3/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test2/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test3/',
+            '/hosts/{id}/subhosts/test/',
+            '/hosts/{id}/subhosts/test2/',
+            '/hosts/{id}/subhosts/test3/',
+        ]
+
         for url in urls:
             self.assertIn(url, data['paths'])
+
+        for url in should_not_be:
+            self.assertNotIn(url, data['paths'])
 
         self.assertNotIn('/testbinaryfiles2/', data['paths'])
 
@@ -3850,7 +3936,7 @@ class ProjectTestCase(BaseTestCase):
         changed_pk = self.get_model_class('test_proj.ChangedPkField')
         value = changed_pk.objects.create(reg_number='TW23', name='test')
         value2 = changed_pk.objects.create(reg_number='TW24', name='test')
-        field = fields.FkModelField(select=changed_pk, autocomplete_property='reg_number')
+        field = fields.FkModelField(select=changed_pk, autocomplete_property='reg_number', field_type=str)
         self.assertEqual(field.to_representation(value), value.reg_number)
         results = self.bulk([
             {
@@ -4426,12 +4512,25 @@ class ProjectTestCase(BaseTestCase):
             'content': cat64,
             'mediaType': 'image/jpeg'
         }
+        long_name_image_content_dict = {
+            **valid_image_content_dict,
+            'name': 'a' * 101 + ".jpg"
+        }
+        long_content_image_content_dict = {
+            **valid_image_content_dict,
+            'content': base64.b64encode(b'a' * 10000 + b'a').decode('utf-8')
+        }
+        short_content_image_content_dict = {
+            **valid_image_content_dict,
+            'content': base64.b64encode(b'a' * 3000 + b'a').decode('utf-8')
+        }
 
         results = self.bulk([
             {
                 'method': 'post',
                 'path': ['testbinaryfiles'],
-                'data': {'some_filefield': valid_image_content_dict, 'some_imagefield': valid_image_content_dict}},
+                'data': {'some_filefield': valid_image_content_dict, 'some_imagefield': valid_image_content_dict}
+            },
             {
                 'method': 'get',
                 'path': ['testbinaryfiles', '<<0[data][id]>>']
@@ -4447,10 +4546,31 @@ class ProjectTestCase(BaseTestCase):
                     }
                 }
             },
+            {
+                'method': 'post',
+                'path': ['testbinarymodelschema'],
+                'data': {'some_filefield': long_name_image_content_dict, 'some_imagefield': long_name_image_content_dict}
+            },
+            {
+                'method': 'post',
+                'path': ['testbinarymodelschema'],
+                'data': {'some_filefield': long_content_image_content_dict, 'some_imagefield': long_content_image_content_dict}
+            },
+            {
+                'method': 'post',
+                'path': ['testbinarymodelschema'],
+                'data': {'some_filefield': short_content_image_content_dict, 'some_imagefield': short_content_image_content_dict}
+            },
         ])
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[3]['status'], 400)
+        self.assertEqual(results[3]['data']['some_filefield'][0], 'Name of file so long. Allowed only 100 symbols.')
+        self.assertEqual(results[4]['status'], 400)
+        self.assertEqual(results[4]['data']['some_filefield'][0], 'The file is too large.')
+        self.assertEqual(results[5]['status'], 400)
+        self.assertEqual(results[5]['data']['some_imagefield'][0], 'The file is too small.')
         model_qs = self.get_model_filter('test_proj.models.ModelWithBinaryFiles')
         instance = model_qs.get(id=results[0]['data']['id'])
         self.assertDictEqual({

@@ -56,6 +56,13 @@ TRANSLATION = {
     'Select files': 'Выбрать файлы',
     'Clear field': 'Очистить поле',
     'Column is required!': 'Колонка обязательна',
+    'Filters': 'Фильтры',
+    'Server error': 'Ошибка сервера',
+    'Page not found': 'Страница не найдена',
+    'Permission denied': 'Доступ запрещен',
+    'Bad request': 'Неверный запрос',
+    'Go back': 'Вернуться назад',
+    'Selected instances were successfully removed': 'Выбранные объекты были успешно удалены',
 
     # fields
     'Id': 'Идентификатор',
@@ -205,6 +212,13 @@ TRANSLATION = {
 
     # validators
     'imageValidationResolutionError': 'Должно быть не меньше {min} и не больше {max} px.',
+    'Invalid URL': 'Неверный URL',
+    'File{fileName} is too large': 'Файл{fileName} слишком большой',
+    'File{fileName} is too small': 'Файл{fileName} слишком маленький',
+    'Min length: {0}': 'Минимальная длина: {0}',
+    'Max length: {0}': 'Максимальная длина: {0}',
+    'Minimum filename length: {0}': 'Минимальная длина имени файла: {0}',
+    'Maximum filename length: {0}': 'Максимальная длина имени файла: {0}',
 
     # instance operation success
     # add

@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, Type, Text, Any
+from typing import Dict, Type, Text, Any, Union, Set
 from collections import OrderedDict
 
 from django.http import FileResponse
@@ -10,9 +10,11 @@ from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_fi
 from drf_yasg import openapi
 from drf_yasg.inspectors.query import CoreAPICompatInspector, force_real_str, coreschema  # type: ignore
 from rest_framework.fields import Field, JSONField, DecimalField, empty
+from rest_framework.serializers import Serializer
 
 from .. import fields, serializers, validators
 from ...models.base import get_first_match_name
+from ...utils import raise_context_decorator_with_default
 
 
 # Extra types
@@ -90,6 +92,13 @@ basic_type_info[fields.CrontabField] = {
     'type': openapi.TYPE_STRING,
     'format': FORMAT_CRONTAB,
 }
+
+
+@raise_context_decorator_with_default(verbose=False, default=None)
+def get_fk_component_field_type(field, components):
+    return components.get(
+        field.select_model, openapi.SCHEMA_DEFINITIONS
+    )['properties'][field.autocomplete_property]['type']
 
 
 def field_have_redirect(field, **kwargs):
@@ -238,8 +247,19 @@ class FkFieldInspector(FieldInspector):
             }
             del options['dependence']
 
+        field_type = openapi.TYPE_STRING
+        if field.field_type.__name__ == '<lambda>':
+            field_type = get_fk_component_field_type(field, self.components)
+            if field_type is None:
+                if field.autocomplete_property in {'id', 'pk'}:
+                    field_type = openapi.TYPE_INTEGER
+                else:
+                    field_type = openapi.TYPE_STRING
+        elif field.field_type is int:
+            field_type = openapi.TYPE_INTEGER
+
         kwargs = {
-            'type': openapi.TYPE_INTEGER,
+            'type': field_type,
             'format': field_format,
             X_OPTIONS: options,
         }
@@ -335,7 +355,7 @@ class RatingFieldInspector(FieldInspector):
 
 
 class NamedBinaryImageInJsonFieldInspector(FieldInspector):
-    default_schema_data = {
+    default_schema_data: Dict[str, Union[str, Dict[str, openapi.Schema], int]] = {
         'type': openapi.TYPE_OBJECT,
         'x-format': FORMAT_NAMED_BIN_FILE,
         'properties': {
@@ -354,12 +374,21 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
     }
 
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
-        # pylint: disable=unused-variable,invalid-name,too-many-nested-blocks
+        # pylint: disable=unused-variable,invalid-name,too-many-nested-blocks,too-many-branches
         if isinstance(field, fields.MultipleNamedBinaryFileInJsonField):
             kwargs = deepcopy(self.default_multiple_schema_data)
             items = kwargs['items']
         elif isinstance(field, fields.NamedBinaryFileInJsonField):
             kwargs = items = deepcopy(self.default_schema_data)
+            if field.file:
+                store_size = kwargs['properties']['name']
+            else:
+                store_size = kwargs
+
+            if field.max_length:
+                store_size['maxLength'] = field.max_length
+            if field.min_length:
+                store_size['minLength'] = field.min_length  # nocv
         else:
             return NotHandled
 
@@ -370,6 +399,12 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
         if isinstance(field, (fields.NamedBinaryImageInJsonField, fields.MultipleNamedBinaryImageInJsonField)):
             items['x-format'] = FORMAT_NAMED_BIN_IMAGE
 
+        if field.max_content_size:
+            items['properties']['content']['maxLength'] = field.max_content_size
+        if field.min_content_size:
+            items['properties']['content']['minLength'] = field.max_content_size
+
+        x_validators: Dict[str, Union[Set, int, str]]
         x_validators = items['x-validators'] = {
             'extensions': set()
         }
@@ -390,7 +425,7 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
             else:
                 x_validators['extensions'] = set(validator.extensions)
 
-        x_validators['extensions'] = tuple(x_validators['extensions'])
+        x_validators['extensions'] = sorted(x_validators['extensions'])
         if not x_validators['extensions']:
             del x_validators['extensions']
 
@@ -442,6 +477,11 @@ class FileInStringInspector(FieldInspector):
             }
         }
 
+        if field.max_length:
+            kwargs['maxLength'] = field.max_length
+        if field.min_length:
+            kwargs['minLength'] = field.min_length
+
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
@@ -468,6 +508,11 @@ class CSVFileFieldInspector(FieldInspector):
                 'items': self.probe_field_inspectors(field.items, swagger_object_type, False)
             }
         }
+
+        if field.max_length:
+            kwargs['maxLength'] = field.max_length
+        if field.min_length:
+            kwargs['minLength'] = field.min_length
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
@@ -584,14 +629,18 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
             return super().get_serializer_ref_name(serializer.child)
         return super().get_serializer_ref_name(serializer)
 
-    def handle_schema(self, field: Any):
-        ref_name = self.get_serializer_ref_name(field)
-        definitions = self.components.with_scope(openapi.SCHEMA_DEFINITIONS)
+    def handle_schema(self, field: Serializer, schema: openapi.SwaggerDict, use_references: bool = True):
+        if use_references:
+            ref_name = self.get_serializer_ref_name(field)
+            definitions = self.components.with_scope(openapi.SCHEMA_DEFINITIONS)
 
-        if ref_name not in definitions:
-            return
+            if ref_name not in definitions:
+                return
 
-        schema = definitions[ref_name]
+            schema = definitions[ref_name]
+
+        if schema['type'] == openapi.TYPE_ARRAY:
+            schema = schema['items']
 
         if getattr(schema, '_handled', False):
             return
@@ -606,17 +655,18 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
         translate_model = getattr(serializer_class, '_translate_model', None)
 
         view_field_name = getattr(serializer_class, '_view_field_name', None)
+        hide_not_required = getattr(serializer_class, '_hide_not_required', None)
 
         if view_field_name is None and schema_properties:
             view_field_name = get_first_match_name(schema_properties, schema_properties[0])
 
         if schema_properties_groups:
-            not_handled = set(schema['properties']) - set(_get_handled_props(schema_properties_groups))
+            not_handled = set(schema_properties) - set(_get_handled_props(schema_properties_groups))
 
             if not_handled:
                 schema_properties_groups[''] = [
                     prop
-                    for prop in schema['properties']
+                    for prop in schema_properties
                     if prop in not_handled
                 ]
         schema['x-properties-groups'] = schema_properties_groups
@@ -628,6 +678,9 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
         if translate_model:
             schema['x-translate-model'] = translate_model
 
+        if hide_not_required:
+            schema['x-hide-not-required'] = bool(hide_not_required)
+
         schema._handled = True  # pylint: disable=protected-access
 
     def field_to_swagger_object(self, field: Any, swagger_object_type: Any, use_references: Any, **kwargs: Any):
@@ -637,6 +690,6 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
         result = super().field_to_swagger_object(field, swagger_object_type, use_references, **kwargs)
 
         if result != NotHandled:
-            self.handle_schema(field)
+            self.handle_schema(field, result, use_references)
 
         return result

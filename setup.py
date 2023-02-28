@@ -32,6 +32,7 @@ except ImportError:
     has_sphinx = False
 
 
+PY_MAJOR, PY_MINOR = sys.version_info[0:2]
 ignored_keys = ['-h', '--help', '--version']
 is_help = any([a for a in ignored_keys if a in sys.argv])
 is_develop = 'develop' in sys.argv
@@ -120,11 +121,12 @@ def make_extensions(extensions_list, packages):
     extra_compile_args = [
         '-g0', '-ggdb1',
         "-fno-strict-aliasing",
-        "-fno-var-tracking-assignments",
+        "-fno-var-tracking-assignments" if PY_MINOR != 6 else "",
         "-pipe", "-std=c99", '-Werror=sign-compare',
     ]
     if 'compile' in sys.argv:
         extra_compile_args.append("-DBUILD_FROM_SOURCE")
+    extra_compile_args = list(filter(bool, extra_compile_args))
     ext_modules = list(
         make_extention(m, f, extra_compile_args)
         for m, f in extensions_dict.items()
@@ -188,10 +190,11 @@ def minify_static_files(base_dir, files, exclude=None):
                     with codecs.open(fext_file, 'w', encoding='utf-8') as static_file_fd:
                         static_file_fd.write(minified)
                     print('Minfied file {fext_file}.'.format(fext_file=fext_file))
-                with open(fext_file, 'rb') as f_in:
-                    with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
-                        shutil.copyfileobj(f_in, f_out)
-                print('Compressed file {fext_file}.'.format(fext_file=fext_file))
+                if not os.environ.get('NOT_COMPRESS', False):
+                    with open(fext_file, 'rb') as f_in:
+                        with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
+                            shutil.copyfileobj(f_in, f_out)
+                    print('Compressed file {fext_file}.'.format(fext_file=fext_file))
 
 
 def compile_py_func(fullname, compile_file_func):
@@ -390,7 +393,6 @@ if 'develop' in sys.argv:
     ext_list = []
 elif os.environ.get('BUILD_OPTIMIZATION', 'false') == 'true':
     ext_list = [
-        'vstutils.api.schema.generators',
         'vstutils.api.schema.inspectors',
         'vstutils.api.base',
         'vstutils.api.decorators',
@@ -400,14 +402,13 @@ elif os.environ.get('BUILD_OPTIMIZATION', 'false') == 'true':
         'vstutils.models.queryset',
         'vstutils.models.cent_notify',
         'vstutils.models.fields',
-        'vstutils.custom_model',
+        'vstutils.models.custom_model',
         'vstutils.auth',
         'vstutils.celery_beat_scheduler',
         'vstutils.environment',
         'vstutils.middleware',
         'vstutils.tasks',
         'vstutils.tools',
-        'vstutils.utils',
     ]
 
 requirements = load_requirements('requirements.txt')
@@ -421,7 +422,7 @@ kwargs = dict(
         'vstutils/static/bundle/.*\.js$'
     ],
     install_requires=[
-        "django~=" + (os.environ.get('DJANGO_DEP', "") or "3.2.16"),
+        "django~=" + (os.environ.get('DJANGO_DEP', "") or "4.1.6"),
     ]
     + requirements
     + load_requirements('requirements-doc.txt'),
@@ -429,10 +430,10 @@ kwargs = dict(
         'test': load_requirements('requirements-test.txt'),
         'rpc': requirements_rpc,
         'ldap': load_requirements('requirements-ldap.txt'),
-        'doc': ['django-docs==0.3.3'] + load_requirements('requirements-doc.txt'),
+        'doc': load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
         'stubs': load_requirements('requirements-stubs.txt'),
-        'pil': ['Pillow~=8.4.0;python_version<"3.7"', 'Pillow~=9.2.0;python_version>"3.6"'],
+        'pil': ['Pillow~=8.4.0;python_version<"3.7"', 'Pillow~=9.4.0;python_version>"3.6"'],
         'boto3': [
             i.replace('libcloud', 'libcloud,boto3')
             for i in requirements

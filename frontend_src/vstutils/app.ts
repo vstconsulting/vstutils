@@ -8,7 +8,7 @@ import type VueI18n from 'vue-i18n';
 
 import { ActionsManager } from '@/vstutils/actions';
 import type { ApiConnector } from '@/vstutils/api';
-import { apiConnector, openapi_dictionary } from '@/vstutils/api';
+import { apiConnector } from '@/vstutils/api';
 import type { Language } from '@/vstutils/api/TranslationsManager';
 import { TranslationsManager } from '@/vstutils/api/TranslationsManager';
 import type { AppConfiguration } from '@/vstutils/AppConfiguration';
@@ -17,7 +17,7 @@ import { AutoUpdateController } from '@/vstutils/autoupdate';
 import type { ComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
 import { globalComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
 import { addDefaultFields, FieldsResolver } from '@/vstutils/fields';
-import type { Model } from '@/vstutils/models';
+import type { Model, ModelConstructor } from '@/vstutils/models';
 import { ModelsResolver } from '@/vstutils/models';
 import { ErrorHandler } from '@/vstutils/popUp';
 import { QuerySetsResolver } from '@/vstutils/querySet';
@@ -33,11 +33,13 @@ import type { GlobalStore, LocalSettingsStore, UserSettingsStore } from '@/vstut
 import { createLocalSettingsStore, createUserSettingsStore, GLOBAL_STORE, pinia } from '@/vstutils/store';
 import { i18n } from '@/vstutils/translation';
 import * as utils from '@/vstutils/utils';
-import type { View } from '@/vstutils/views';
-import { ListView, PageNewView, PageView, ViewConstructor, ViewsTree } from '@/vstutils/views';
+import type { IView, BaseView } from '@/vstutils/views';
+import { ListView, PageNewView, PageView, ViewsTree } from '@/vstutils/views';
+import ViewConstructor from '@/vstutils/views/ViewConstructor.js';
 
 import type { Cache } from '@/cache';
-import type { GlobalStoreInitialized } from './store/globalStore';
+import type { InnerData } from '@/vstutils/utils';
+import type { GlobalStoreInitialized } from '@/vstutils/store/globalStore';
 
 export function getCentrifugoClient(address?: string, token?: string) {
     if (!address) {
@@ -50,9 +52,7 @@ export function getCentrifugoClient(address?: string, token?: string) {
     return client;
 }
 
-interface IAppRoot extends Vue {
-    initConfirmation(callback: () => void, title: string): void;
-}
+type TAppRoot = InstanceType<typeof AppRoot>;
 
 export interface IApp {
     config: AppConfiguration;
@@ -80,30 +80,36 @@ export interface IApp {
 
     additionalRootMixins: any[];
 
-    views: Map<string, View>;
+    views: Map<string, IView>;
 
     store: GlobalStore;
     userSettingsStore?: UserSettingsStore;
 
     localSettingsStore: LocalSettingsStore | null;
-    localSettingsModel: typeof Model | null;
+    localSettingsModel: ModelConstructor | null;
 
     autoUpdateController: AutoUpdateController;
 
     actions: ActionsManager;
 
-    rootVm: IAppRoot | null;
+    rootVm: TAppRoot | null;
+
+    darkModeEnabled: boolean;
 
     start(): void;
     mount(target: HTMLElement | string): void;
+
+    initActionConfirmationModal(options: { title: string }): Promise<void>;
+    openReloadPageModal(): void;
+    setLanguage(lang: string): void;
 }
 
 export interface IAppInitialized extends IApp {
     router: VueRouter;
     user: Model;
-    rootVm: IAppRoot;
+    rootVm: TAppRoot;
     localSettingsStore: LocalSettingsStore;
-    localSettingsModel: typeof Model;
+    localSettingsModel: ModelConstructor;
     userSettingsStore: UserSettingsStore;
     viewsTree: ViewsTree;
     store: GlobalStoreInitialized;
@@ -131,26 +137,26 @@ export class App implements IApp {
 
     api: ApiConnector;
     languages: Language[] | null;
-    rawUser: Record<string, any> | null;
+    rawUser: InnerData | null;
     user: Model | null;
 
     appRootComponent: ComponentOptions<Vue>;
     additionalRootMixins: ComponentOptions<Vue>[];
 
-    views = new Map<string, View>();
+    views = new Map<string, IView>();
 
     store: GlobalStore;
     userSettingsStore?: UserSettingsStore;
 
     localSettingsStore: LocalSettingsStore | null = null;
-    localSettingsModel: typeof Model | null;
+    localSettingsModel: ModelConstructor | null;
 
     autoUpdateController: AutoUpdateController;
 
     actions: ActionsManager;
 
-    rootVm: IAppRoot | null = null;
-    application: Vue | null = null;
+    rootVm: TAppRoot | null = null;
+    application: unknown | null = null;
 
     constructor(config: AppConfiguration, cache: Cache, vue?: typeof Vue) {
         globalThis.__currentApp = this;
@@ -182,7 +188,6 @@ export class App implements IApp {
         this.languages = null;
         /**
          * Property that stores raw user response
-         * @type {Object|null}
          */
         this.rawUser = null;
         /**
@@ -225,7 +230,7 @@ export class App implements IApp {
             this.centrifugoClient.connect();
         }
 
-        let userSettingsModel: typeof Model;
+        let userSettingsModel: ModelConstructor;
         try {
             userSettingsModel = this.modelsResolver.byReferencePath('#/definitions/_UserSettings');
         } catch (e) {
@@ -249,10 +254,8 @@ export class App implements IApp {
         this.afterInitialDataBeforeMount();
 
         const usersQs = this.views.get('/user/')?.objects;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const UserModel = usersQs?.getModelClass(utils.RequestTypes.RETRIEVE);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-        this.user = new UserModel(this.rawUser, usersQs);
+        const UserModel = usersQs?.getResponseModelClass(utils.RequestTypes.RETRIEVE);
+        this.user = new UserModel!(this.rawUser, usersQs);
 
         this.global_components.registerAll(this.vue);
 
@@ -261,7 +264,7 @@ export class App implements IApp {
 
     getCurrentViewPath(this: IAppInitialized) {
         const route = this.router.currentRoute;
-        const view = route.meta?.view as View | undefined;
+        const view = route.meta?.view as BaseView | undefined;
         return view?.path;
     }
 
@@ -269,11 +272,9 @@ export class App implements IApp {
         this.generateDefinitionsModels();
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        this.views = new ViewConstructor(
-            openapi_dictionary,
-            this.modelsResolver,
-            this.fieldsResolver,
-        ).generateViews(this.config.schema);
+        this.views = new ViewConstructor(undefined, this.modelsResolver, this.fieldsResolver).generateViews(
+            this.config.schema,
+        );
 
         this.viewsTree = new ViewsTree(this.views);
         this.qsResolver = new QuerySetsResolver(this.viewsTree);
@@ -298,7 +299,7 @@ export class App implements IApp {
 
     prepareViewsModelsFields() {
         for (const [path, view] of this.views) {
-            const models = new Set<typeof Model>();
+            const models = new Set<ModelConstructor>();
 
             if (view.objects) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -307,7 +308,7 @@ export class App implements IApp {
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                         for (const model of m) models.add(model);
                     } else {
-                        models.add(m as typeof Model);
+                        models.add(m!);
                     }
                 }
             }
@@ -347,8 +348,7 @@ export class App implements IApp {
         for (const view of this.views.values()) {
             if (view instanceof PageNewView && view.nestedAllowAppend) {
                 const listView = view.listView!;
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                const modelName = listView.objects.getResponseModelClass(utils.RequestTypes.LIST).name;
+                const modelName = listView.objects.getResponseModelClass(utils.RequestTypes.LIST)!.name;
                 try {
                     // @ts-expect-error TODO refactor qs resolver to ts
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -395,7 +395,8 @@ export class App implements IApp {
         this.localSettingsStore = createLocalSettingsStore(
             window.localStorage,
             'localSettings',
-            this.localSettingsModel,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            this.localSettingsModel as ModelConstructor,
         )(pinia);
         this.localSettingsStore.load();
     }
@@ -419,12 +420,12 @@ export class App implements IApp {
         //                  in tests, so use router.constructor instead.
         Vue.use(this.router.constructor);
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        /* eslint-disable */
         Vue.prototype.$app = this;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         Vue.prototype.$u = utils;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         Vue.prototype.$st = i18n.st.bind(i18n);
+        Vue.prototype.$ts = i18n.ts.bind(i18n);
+        /* eslint-enable */
 
         this.rootVm = new Vue({
             mixins: [this.appRootComponent, ...this.additionalRootMixins],
@@ -437,9 +438,13 @@ export class App implements IApp {
             router: this.router,
             i18n: this.i18n,
         });
-        this.application = this.rootVm;
+        this.application = this.rootVm as unknown as Vue;
         signals.emit(APP_AFTER_INIT, { app: this });
         utils.__setApp(this as unknown as IAppInitialized);
+    }
+
+    get darkModeEnabled() {
+        return (this.userSettingsStore?.settings.main.dark_mode as boolean | undefined) ?? false;
     }
 
     mount(target: HTMLElement | string = '#RealBody') {
@@ -447,5 +452,21 @@ export class App implements IApp {
             throw new Error('Please initialize app first');
         }
         this.rootVm.$mount(target);
+    }
+
+    initActionConfirmationModal({ title }: { title: string }): Promise<void> {
+        return new Promise((resolve) => {
+            if (this.rootVm?.appModals) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+                this.rootVm.appModals!.initActionConfirmationModal(() => resolve(), title);
+            }
+        });
+    }
+
+    openReloadPageModal() {
+        if (this.rootVm?.appModals) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            this.rootVm.appModals!.openReloadPageModal();
+        }
     }
 }

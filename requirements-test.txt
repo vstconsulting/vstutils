@@ -1,7 +1,7 @@
 # Packages needed for test
-coverage~=6.2.0;python_version<"3.7"
-coverage~=6.5.0;python_version>"3.6"
+coverage~=7.1.0
 fakeldap==0.6.1
 tblib~=1.7.0
 beautifulsoup4==4.11.1
 dj-inmemorystorage~=2.1.0
+httpx~=0.23.3

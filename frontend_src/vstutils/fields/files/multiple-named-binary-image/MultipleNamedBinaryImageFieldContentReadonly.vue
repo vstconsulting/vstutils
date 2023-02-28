@@ -3,7 +3,7 @@
         <div>
             {{ text }}
         </div>
-        <Carousel v-if="value && value.length" :items="value" :name="$t(field.title)" readonly />
+        <Carousel v-if="value && value.length" :items="value" :name="$ts(field.title)" readonly />
     </div>
 </template>
 

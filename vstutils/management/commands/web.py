@@ -1,5 +1,5 @@
 # pylint: disable=no-member
-
+import typing as _t
 import os
 import sys
 import time
@@ -113,7 +113,7 @@ class Command(BaseCommand):
         return args
 
     def _get_worker_options(self):
-        cmd = []
+        cmd: _t.List[str] = []
 
         # Check that worker is enabled in settings.
         if not getattr(settings, 'RUN_WORKER', False):
@@ -139,11 +139,10 @@ class Command(BaseCommand):
             f'--set-ph=lib_name={settings.VST_PROJECT_LIB}',
             f'--set-ph=api_path={settings.API_URL}',
             f'--set-ph=vstutils_version={settings.VSTUTILS_VERSION}',
-            f'--module={settings.UWSGI_APPLICATION}',
+            f'--env=DJANGO_SETTINGS_MODULE={os.getenv("DJANGO_SETTINGS_MODULE")}',
+            f'--python-worker-override={settings.UWSGI_WORKER_PATH}',
+            f'--socket={opts["addrport"]}'
         ]
-        #  Setup http addr:port.
-        addrport = opts['addrport']
-        cmd += [f'--{"https" if len(addrport.split(",")) > 1 else "http"}={addrport}']
 
         # Import uwsgi-args from this command args (key=value).
         cmd += [
@@ -153,19 +152,6 @@ class Command(BaseCommand):
         # Import config from project.
         if opts['config'] and Path(opts['config']).exists():
             cmd += [f'--ini={opts["config"]}']
-
-        # Connect static files.
-        if settings.STATIC_URL.startswith('/'):
-            cmd += [f'--set-ph=static_url={settings.STATIC_URL}']
-            for static_path in settings.STATIC_FILES_FOLDERS:
-                if f"{settings.STATIC_URL}={static_path}" not in cmd:
-                    cmd += ['--static-map', f"{settings.STATIC_URL}={static_path}"]
-
-        if settings.MEDIA_URL.startswith('/') and settings.MEDIA_ROOT:
-            cmd += ['--static-map', f"{settings.MEDIA_URL}={settings.MEDIA_ROOT}"]
-
-        if 'docs' in settings.INSTALLED_APPS and getattr(settings, 'DOCS_ACCESS', 'public') == 'public':
-            cmd += ['--static-map', f"{settings.DOC_URL}={settings.DOCS_ROOT}"]
 
         # Append uwsgi configs.
         for config_file in map(Path, settings.CONFIG_FILES):

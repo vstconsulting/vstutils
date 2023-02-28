@@ -6,8 +6,8 @@ Read more in Django REST Framework documentation for
 """
 
 import typing as _t
-import json
 
+import orjson
 from django.db import models
 from django.http.request import QueryDict
 from rest_framework import serializers
@@ -45,7 +45,7 @@ def update_declared_fields(
 
 class DependFromFkSerializerMixin:
     def to_internal_value(self, data):
-        if self.instance is not None and self.partial and isinstance(data, _t.Mapping):
+        if self.instance is not None and self.partial and isinstance(data, _t.Dict):
             missed_interfield_connections: _t.Iterable[fields.DependFromFkField] = {
                 f
                 for f in self._writable_fields
@@ -109,6 +109,10 @@ class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer):
         field_class, field_kwargs = super().build_standard_field(field_name, model_field)
         if isinstance(model_field, models.FileField) and issubclass(field_class, fields.NamedBinaryFileInJsonField):
             field_kwargs['file'] = True
+            if model_field.max_length:
+                field_kwargs['max_length'] = model_field.max_length
+                if isinstance(model_field.upload_to, str):
+                    field_kwargs['max_length'] -= len(model_field.upload_to)
         return field_class, field_kwargs
 
     def build_relational_field(self, field_name, relation_info):
@@ -121,6 +125,17 @@ class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer):
                 if key in VALID_FK_KWARGS
             }
             field_kwargs['select'] = relation_info.related_model
+
+            autocomplete_property = field_kwargs.get('autocomplete_property', 'id')
+            autocomplete_field = next(
+                (f for f in relation_info.related_model._meta.fields if f.attname == autocomplete_property),
+                relation_info.related_model._meta.pk
+            )
+
+            if isinstance(autocomplete_field, models.IntegerField):
+                field_kwargs['field_type'] = int
+            else:
+                field_kwargs['field_type'] = str
 
             return fields.FkModelField, field_kwargs
         # if DRF ForeignField in model or related_model is not BModel, perform default DRF logic
@@ -152,7 +167,7 @@ class DataSerializer(EmptySerializer):
 
     def to_representation(self, instance):
         if not isinstance(instance, (dict, list)):
-            result = json.loads(instance)
+            result = orjson.loads(instance)
             if isinstance(result, dict):
                 result = utils.Dict(result)
             return result

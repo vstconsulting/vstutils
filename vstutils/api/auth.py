@@ -20,7 +20,7 @@ from vstutils.utils import raise_context_decorator_with_default, translate, lazy
 User: _t.Type[AbstractUser] = get_user_model()  # type: ignore[override]
 
 
-class ChangePasswordPermission(permissions.IsAuthenticatedOpenApiRequest):
+class ChangePasswordPermission(permissions.IsAuthenticatedOpenApiRequest):  # type: ignore
     def has_object_permission(self, request: drf_request.Request, view: base.GenericViewSet, obj: User):  # type: ignore
         return (
             request.user.is_superuser or

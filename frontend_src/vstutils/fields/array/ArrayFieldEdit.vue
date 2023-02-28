@@ -24,19 +24,19 @@
 
 <script>
     import $ from 'jquery';
+    import { createUniqueIdGenerator } from '@/vstutils/utils';
     import { BaseFieldContentEdit } from '../base';
-    import { createGenerator } from '../../ComponentIDMixin.js';
+
+    const idGenerator = createUniqueIdGenerator();
 
     export default {
         name: 'ArrayFieldEdit',
         mixins: [BaseFieldContentEdit],
         data() {
-            const idGenerator = createGenerator();
             const value = this.value || [];
             return {
                 showItemField: false,
                 newValue: undefined,
-                idGenerator,
                 internalValues: value.map((item) => ({ id: idGenerator(), value: item })),
             };
         },

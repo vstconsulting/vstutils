@@ -1,4 +1,4 @@
-import { onBeforeUnmount, onMounted } from 'vue';
+import { onBeforeUnmount, onMounted, getCurrentInstance, onScopeDispose } from 'vue';
 
 import { getApp, getUniqueId } from '@/vstutils/utils';
 import type {
@@ -51,18 +51,22 @@ export function useAutoUpdate({
     function stop() {
         app.autoUpdateController.unsubscribe(id);
     }
-    function setCallback(callback: () => Promise<unknown>) {
+    function setCallback(callback: () => Promise<void>) {
         autoUpdateAction.callback = callback;
     }
-    function setPk(newPk: string) {
+    function setPk(newPk: CentrifugoAutoUpdateAction['pk']) {
         pk = newPk;
     }
 
-    if (startOnMount) {
-        onMounted(start);
+    // If composable called inside component then use vue hooks
+    if (getCurrentInstance() !== null) {
+        if (startOnMount) {
+            onMounted(start);
+        }
+        onBeforeUnmount(stop);
+    } else {
+        onScopeDispose(stop);
     }
-
-    onBeforeUnmount(stop);
 
     return { start, stop, setCallback, setPk };
 }

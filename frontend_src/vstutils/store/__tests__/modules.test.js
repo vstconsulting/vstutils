@@ -1,19 +1,16 @@
 import { expect, test, describe, beforeAll } from '@jest/globals';
-import { defineStore } from 'pinia';
-import { createListViewStore } from '../page.ts';
-import { createApp } from '../../../unittests/create-app';
-import { createSchema } from '../../../unittests/schema';
+import { createApp, createSchema, openPage } from '@/unittests';
 
 describe('List store module', () => {
     let app;
-    let store;
 
     beforeAll(async () => {
         app = await createApp({ schema: createSchema() });
-        store = defineStore('LIST_STORE_MODULE', createListViewStore(app.views.get('/user/')))(app.pinta);
     });
 
     test('Set queryset', async () => {
+        await openPage('/user/');
+        const store = app.store.page;
         const qs = app.views.get('/user/').objects;
 
         store.setQuerySet(qs);

@@ -1,11 +1,10 @@
 import datetime
 import os
 from django.db import models
-from django_filters import ChoiceFilter
 from rest_framework import permissions, fields as drf_fields
 from vstutils.api.serializers import BaseSerializer, DataSerializer
 from vstutils.models.decorators import register_view_action
-from vstutils.custom_model import ListModel, FileModel
+from vstutils.models.custom_model import ListModel, FileModel
 from vstutils.api import fields, base, responses
 
 

@@ -16,6 +16,12 @@ API['v4'] = {}
 API[VST_API_VERSION][r'test_json_file_image_fields_model'] = dict(
     model='test_proj.models.ModelForCheckFileAndImageField'
 )
+API[VST_API_VERSION][r'uuid_as_pk'] = dict(
+    model='test_proj.models.ModelWithUuidPk'
+)
+API[VST_API_VERSION][r'uuid_as_fk'] = dict(
+    model='test_proj.models.ModelWithUuidFK'
+)
 API[VST_API_VERSION][r'deep_nested_model'] = dict(
     model='test_proj.models.DeepNestedModel'
 )
@@ -98,10 +104,10 @@ API[VST_API_VERSION][r'cachable'] = dict(
 API[VST_API_VERSION][r'dynamic_fields'] = dict(
     model='test_proj.models.dynamic_fields.DynamicFields'
 )
-API['v2'][r'testbinaryfiles2'] = dict(
+API['v2']['testbinaryfiles2'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )
-API['v2'][r'request_info'] = dict(
+API['v2']['request_info'] = dict(
     view='test_proj.views.RequestInfoTestView'
 )
 API['v2'][r'settings'] = dict(
@@ -112,7 +118,7 @@ API['v2'][r'settings'] = dict(
 API['v3'][r'testbinaryfiles'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )
-API['v4'][r'user'] = dict(
+API['v4']['user'] = dict(
     view='test_proj.views.TestUserViewSet'
 )
 
@@ -120,7 +126,7 @@ API[VST_API_VERSION][r'test_changed_fk'] = dict(
     model='test_proj.models.ModelWithChangedFk'
 )
 
-GUI_VIEWS[r'^gui/$'] = r'^$'
+GUI_VIEWS[r'^gui/$'] = ''
 GUI_VIEWS[r'^csrf_disable_gui/$'] = {
     'BACKEND': 'vstutils.gui.views.GUIView',
     'CSRF_ENABLE': False
@@ -154,3 +160,5 @@ TEST_VAR_FROM_ENV2 = main.get('DO_NOT_USE_IT_IN_CONFIG', "{ENV[VSTUTILS_TEST_ENV
 
 DATABASE_ROUTERS = ['test_proj.db_router.TestDbRouter']
 DOCKER_DATABASES_TO_MIGRATE = ('primary1',)
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+

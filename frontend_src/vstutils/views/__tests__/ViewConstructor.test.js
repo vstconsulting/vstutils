@@ -1,6 +1,5 @@
 import { describe, expect, test, beforeAll } from '@jest/globals';
 import { HttpMethods, RequestTypes } from '../../utils';
-import openapi_dictionary from '../../api/openapi.js';
 import ViewConstructor from '../ViewConstructor.js';
 import testSchema from './../../../__mocks__/testSchema.json';
 import { PageEditView, ViewTypes } from '../View.ts';
@@ -21,7 +20,7 @@ describe('ViewConstructor', () => {
         const fieldsResolver = new FieldsResolver(testSchema);
         addDefaultFields(fieldsResolver);
         const modelsResolver = new ModelsResolver(fieldsResolver, testSchema);
-        const viewConstructor = new ViewConstructor(openapi_dictionary, modelsResolver, fieldsResolver);
+        const viewConstructor = new ViewConstructor(undefined, modelsResolver, fieldsResolver);
         views = viewConstructor.generateViews(testSchema);
         modelsClasses = modelsResolver._definitionsModels;
     });

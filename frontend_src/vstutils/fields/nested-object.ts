@@ -11,12 +11,14 @@ import type {
 import { BaseFieldLabel } from '@/vstutils/fields/base';
 import { BaseField, FieldPropsDef, useFieldWrapperClasses } from '@/vstutils/fields/base';
 import { onAppBeforeInit } from '@/vstutils/signals';
-import { mapObjectValues } from '@/vstutils/utils';
+import { emptyInnerData, emptyRepresentData, mapObjectValues } from '@/vstutils/utils';
 
-import type { Model } from '@/vstutils/models';
+import type { ModelConstructor } from '@/vstutils/models';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
+import type { ModelDefinition } from '../AppConfiguration';
 
-type TInner = Record<string, unknown>;
-type TRepresent = Record<string, unknown>;
+type TInner = InnerData;
+type TRepresent = RepresentData;
 
 export const NestedObjectFieldMixin = defineComponent({
     props: FieldPropsDef as FieldPropsDefType<NestedObjectField>,
@@ -24,19 +26,19 @@ export const NestedObjectFieldMixin = defineComponent({
     setup(props, { emit }) {
         const modelClass = props.field.nestedModel!;
         const value = computed(() => {
-            return props.field._getValueFromData(props.data) as TRepresent | null | undefined;
+            return props.field.getValue(props.data);
         });
-        const sandbox = computed(() => {
+        const sandbox = computed<RepresentData>(() => {
             if (value.value && typeof value.value === 'object') {
-                return value;
+                return value.value;
             } else {
-                return {};
+                return emptyRepresentData();
             }
         });
         const wrapperClasses = useFieldWrapperClasses(props);
 
         function renderList() {
-            const val = value.value ? new modelClass(value.value).getViewFieldString() : '';
+            const val = value.value ? modelClass.fromRepresentData(value.value).getViewFieldString() : '';
             return [h('div', val)];
         }
 
@@ -56,10 +58,11 @@ export const NestedObjectFieldMixin = defineComponent({
                 h(ModelFields, {
                     props: {
                         editable: props.type === 'edit' && !props.field.readOnly,
-                        data: sandbox,
+                        data: sandbox.value,
                         model: props.field.nestedModel,
                         fieldsErrors: props.error,
-                        hideNotRequired: props.field.hideNotRequired,
+                        hideNotRequired:
+                            props.field.hideNotRequired ?? props.field.nestedModel?.hideNotRequired,
                     },
                     on: { 'set-value': setFieldValue },
                 }),
@@ -83,7 +86,7 @@ export class NestedObjectField
     extends BaseField<TInner, TRepresent, NestedObjectFieldXOptions>
     implements Field<TInner, TRepresent, NestedObjectFieldXOptions>
 {
-    nestedModel: typeof Model | null = null;
+    nestedModel: ModelConstructor | null = null;
     hideNotRequired?: boolean;
 
     constructor(options: FieldOptions<NestedObjectFieldXOptions, TInner>) {
@@ -92,20 +95,20 @@ export class NestedObjectField
         onAppBeforeInit(() => this.resolveNestedModel());
     }
     getEmptyValue() {
-        return {};
+        return emptyInnerData();
     }
     resolveNestedModel() {
-        this.nestedModel = this.app.modelsResolver.bySchemaObject(this.options);
+        this.nestedModel = this.app.modelsResolver.bySchemaObject(this.options as ModelDefinition);
     }
-    toRepresent(data: Record<string, unknown>) {
-        const value = this._getValueFromData(data);
+    toRepresent(data: InnerData) {
+        const value = this.getValue(data);
         if (value) {
             return this.nestedModel!.innerToRepresent(value);
         }
         return value;
     }
-    toInner(data: Record<string, unknown>) {
-        const value = this._getValueFromData(data);
+    toInner(data: RepresentData) {
+        const value = this.getValue(data);
         if (value) {
             return this.nestedModel!.representToInner(value);
         }
@@ -114,7 +117,7 @@ export class NestedObjectField
     static get mixins() {
         return [NestedObjectFieldMixin];
     }
-    parseFieldError(data: unknown, instanceData: Record<string, unknown>) {
+    parseFieldError(data: unknown, instanceData: InnerData) {
         if (data && typeof data === 'object' && !Array.isArray(data)) {
             return mapObjectValues(data, (item: unknown) =>
                 super.parseFieldError(item, instanceData),

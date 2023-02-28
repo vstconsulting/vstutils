@@ -2,14 +2,14 @@
     <BootstrapModal
         v-if="value && value.length > 0"
         classes="modal-lg"
-        :title="$t(field.title)"
+        :title="$ts(field.title)"
         @exit="shown = false"
         @shown="shown = true"
     >
         <template #body>
             <Splide v-if="shown" :options="options">
                 <SplideSlide v-for="(item, idx) in preparedItems" :key="idx">
-                    <img :src="item.imgSrc" :alt="item.name" class="slide-image" />
+                    <img :src="item.imgSrc" :alt="item.name ?? ''" class="slide-image" />
                 </SplideSlide>
             </Splide>
         </template>

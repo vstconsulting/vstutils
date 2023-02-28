@@ -3,8 +3,7 @@ import { ref } from 'vue';
 import { guiPopUp } from '@/vstutils/popUp';
 import { i18n } from '@/vstutils/translation';
 import { loadImage, makeDataImageUrl, readFileAsObject } from '@/vstutils/utils';
-
-import { validateFileSize } from '../file';
+import { validateNamedFilesContentSize } from '../named-binary-file';
 
 import type { NamedFile } from '../named-binary-file';
 import type { IImageField } from './NamedBinaryImageField';
@@ -22,10 +21,10 @@ export function useResolutionValidator(
     async function readFiles(files: FileList | File[]) {
         const results: NamedFile[] = [];
         for (const file of files) {
-            if (!validateFileSize(field, file.size)) {
-                return;
-            }
             results.push(await readFileAsObject(file));
+        }
+        if (!validateNamedFilesContentSize(field, results)) {
+            return;
         }
         const allowedMediaTypes = field.allowedMediaTypes;
         if (allowedMediaTypes && allowedMediaTypes.length > 0) {

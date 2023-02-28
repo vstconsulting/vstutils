@@ -1,6 +1,6 @@
 import type { IApp } from './vstutils/app';
+import type SchemaLoader from './app_loader/OpenAPILoader.js';
 import type * as SPA from './app.common.js';
-import type { APIResponse } from '@/vstutils/api/ApiConnector';
 
 declare global {
     interface String {
@@ -15,16 +15,11 @@ declare global {
     /* eslint-disable no-var */
     var spa: typeof SPA;
     var App: new (...args: any[]) => IApp;
-    var __currentApp: IApp;
+    var __currentApp: IApp | undefined;
     var SELECT2_THEME: string;
+    var schemaLoader: SchemaLoader;
+    var cleanAllCacheAndReloadPage: () => void;
     /* eslint-enable no-var */
-}
-
-declare module '@/vstutils/models' {
-    export class Model {
-        __notFound?: true;
-        _response?: APIResponse;
-    }
 }
 
 export {};

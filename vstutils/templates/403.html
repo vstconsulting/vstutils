@@ -1,0 +1,8 @@
+{% extends "base_error.html" %}
+
+{% block status_code %}403{% endblock %}
+{% block error_text %}{% translate_text "Permission denied" %}{% endblock %}
+
+{% block alter_auth %}
+    {% include "go_back_button.html" %}
+{% endblock %}

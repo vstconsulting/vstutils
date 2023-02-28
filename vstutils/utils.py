@@ -23,7 +23,7 @@ from enum import Enum, EnumMeta
 
 from django.conf import settings
 from django.middleware.gzip import GZipMiddleware
-from django.urls import re_path, include
+from django.urls import re_path, path, include
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
@@ -252,6 +252,7 @@ def patch_gzip_response(response, request):
     if not response.status_code == 200:
         return  # nocv
     GZipMiddleware.process_response(None, request, response)
+    return response
 
 
 def patch_gzip_response_decorator(func):
@@ -280,7 +281,7 @@ def translate(text: tp.Text) -> tp.Text:
         return text
 
 
-def lazy_translate(text: tp.Text) -> functional.Promise:
+def lazy_translate(text: tp.Text) -> str:
     """
     The ``lazy_translate`` function has the same behavior as :func:`.translate`, but wraps it in a lazy promise.
 
@@ -289,7 +290,7 @@ def lazy_translate(text: tp.Text) -> functional.Promise:
 
     :param text: Text message which should be translated.
     """
-    return functional.lazy(translate, str)(text)
+    return tp.cast(str, functional.lazy(translate, str)(text))
 
 
 def create_view(model, **meta_options):
@@ -370,7 +371,7 @@ class ClassPropertyDescriptor:
 
     meta = ClassPropertyMeta
 
-    def __init__(self, fget: tp.Callable, fset: tp.Callable = None):
+    def __init__(self, fget: tp.Callable, fset: tp.Optional[tp.Callable] = None):
         self.fget, self.fset = self._fix_function(fget), self._fix_function(fset)
 
     def __get__(self, obj, klass=None):
@@ -870,6 +871,7 @@ class KVExchanger(BaseVstObject):
     """
     __slots__ = ('key', 'timeout', '__djangocache__')
     TIMEOUT: tp.ClassVar[int] = 60
+    __djangocache__: tp.Any
 
     @classproperty
     def PREFIX(cls):
@@ -1042,7 +1044,6 @@ class Paginator(BasePaginator):
     """
     Class for fragmenting the query for small queries.
     """
-    __slots__ = ()
 
     def __init__(self, qs, chunk_size=None):
         """
@@ -1107,7 +1108,7 @@ class ObjectHandlers(BaseVstObject):
     type: tp.Text
     err_message: tp.Optional[tp.Text]
 
-    def __init__(self, type_name: tp.Text, err_message: tp.Text = None):
+    def __init__(self, type_name: tp.Text, err_message: tp.Optional[tp.Text] = None):
         """
         :param type_name: -- type name for backends.Like name in dict.
         :type type_name: str
@@ -1176,7 +1177,7 @@ class ObjectHandlers(BaseVstObject):
             if backend is None:
                 raise ex.VSTUtilsException("Backend is 'None'.")  # pragma: no cover
             return self._get_backend(backend)
-        except KeyError or ImportError as err:
+        except KeyError or ImportError as err:  # type: ignore[truthy-function]
             msg = f"{name} ({self.err_message})" if self.err_message else name
             raise ex.UnknownTypeException(msg) from err
 
@@ -1301,15 +1302,21 @@ class URLHandlers(ObjectHandlers):
         view_kwargs = options.pop('view_kwargs', {})
         csrf_enable = self.get_backend_data(regexp).get('CSRF_ENABLE', True)
         if regexp in self.settings_urls:
-            regexp = rf'^{self.get_django_settings(regexp)[1:]}'
+            regexp = f'{self.get_django_settings(regexp)[1:]}'
         view_class = self[name]
         namespace = view_kwargs.pop('namespace', self.default_namespace)
         result: tp.Union[tp.Tuple, types.ModuleType]
+
+        if any(s in regexp for s in (r'^', r'$', r'(', r'?')):
+            path_handler = re_path
+        else:
+            path_handler = path
+
         if isinstance(view_class, View) or hasattr(view_class, 'as_view'):
             view = view_class.as_view(**view_kwargs)
             if not csrf_enable:
                 view = csrf_exempt(view)
-            return re_path(regexp, view, *args, **options)
+            return path_handler(regexp, view, *args, **options)
         elif (isinstance(view_class, types.ModuleType) and
               hasattr(view_class, 'urlpatterns') and
               hasattr(view_class, 'app_name')):
@@ -1317,7 +1324,7 @@ class URLHandlers(ObjectHandlers):
             namespace = None
         else:
             result = (view_class, 'gui')
-        return re_path(regexp, include(result, namespace=namespace), *args, **view_kwargs)
+        return path_handler(regexp, include(result, namespace=namespace), *args, **view_kwargs)
 
     def urls(self) -> tp.Iterable:
         for regexp in self.list():

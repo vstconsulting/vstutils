@@ -23,7 +23,7 @@ as BModel provides plenty of Meta attributes to autogenerate serializers and vie
 You can also use custom models without using database:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: vstutils.custom_model
+.. automodule:: vstutils.models.custom_model
     :members: ListModel,FileModel
 
 Model Fields
@@ -81,6 +81,9 @@ To expand the set of actions, you need to create an action that will work with s
 For these purposes, there is a standard :func:`rest_framework.decorators.action`, which can also be extended using the scheme.
 But for the greater convenience, there is a set of decorator objects in vstutils to eliminate the routine of writing boilerplate code.
 
+The main philosophy for these wrappers is that the developer writes business logic without being distracted by the boilerplate code.
+Often, most of the errors in the code appear precisely because of the blurry look from the routine writing of the code.
+
 
 .. automodule:: vstutils.api.actions
     :members:
@@ -117,7 +120,7 @@ All classes inherit from:
 Middlewares
 ~~~~~~~~~~~
 
-By default, Django `supposes <https://docs.djangoproject.com/en/3.2/topics/http/middleware/#writing-your-own-middleware>`_
+By default, Django `supposes <https://docs.djangoproject.com/en/4.1/topics/http/middleware/#writing-your-own-middleware>`_
 that a developer creates Middleware class manually, but it's often a routine.
 The vstutils library offers a convenient request handler class for elegant OOP development.
 Middleware is used to process incoming requests and send responses before they reach final destination.

@@ -25,7 +25,15 @@ export const RUPluralizationRule = (choice: number, choicesLength: number) => {
 
 declare module 'vue-i18n' {
     export default class VueI18n {
+        /**
+         * If translation doesn't exist, checks if translation for lowercased text exists and returns it capitalized,
+         * also null and undefined are converted to empty string
+         */
         st(text: string | null | undefined): string;
+        /**
+         * Works the same as `t` but always converts result to string
+         */
+        ts(key: VueI18n.Path, values?: VueI18n.Values): string;
     }
 }
 
@@ -46,6 +54,10 @@ VueI18n.prototype.st = function st(text: string | null | undefined): string {
     }
 
     return text;
+};
+
+VueI18n.prototype.ts = function ts(key: VueI18n.Path, values?: VueI18n.Values): string {
+    return String(this.t(key, values));
 };
 
 export const i18n = new VueI18n({

@@ -1,8 +1,8 @@
-import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
 import { BaseField } from '@/vstutils/fields/base';
 import { mergeDeep } from '@/vstutils/utils';
-
 import DependFromFkFieldMixin from './DependFromFkFieldMixin.vue';
+import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
 
 interface XOptions extends FieldXOptions {
     field: string;
@@ -31,15 +31,15 @@ export class DependFromFkField extends BaseField<unknown, unknown, XOptions> {
         return [DependFromFkFieldMixin];
     }
 
-    toInner(data: Record<string, unknown>) {
+    toInner(data: RepresentData) {
         return this.getRealField(data).toInner(data);
     }
 
-    toRepresent(data: Record<string, unknown>) {
+    toRepresent(data: InnerData) {
         return this.getRealField(data).toRepresent(data);
     }
 
-    validateValue(data: Record<string, unknown>) {
+    validateValue(data: RepresentData) {
         this.getRealField(data).validateValue(data);
     }
 

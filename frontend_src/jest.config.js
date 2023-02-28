@@ -47,7 +47,6 @@ module.exports = {
     // A map from regular expressions to paths to transformers
     transform: {
         '.*\\.vue$': '@vue/vue2-jest',
+        '^.+\\.m?[tj]sx?$': ['ts-jest/legacy', { useESM: true, isolatedModules: true }],
     },
-
-    preset: 'ts-jest/presets/js-with-babel',
 };

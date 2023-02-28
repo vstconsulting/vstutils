@@ -4,3 +4,4 @@ import { ViewsTree } from './ViewsTree.js';
 export { ViewConstructor, ViewsTree };
 
 export * from './View';
+export * from './props';

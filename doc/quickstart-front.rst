@@ -273,6 +273,22 @@ To do it you also should listen signal `"allViews.created"` and change parameter
     });
 
 
+Changing title of the view
+--------------------------
+
+To change title and string displayed in the breadcrumbs change `title` property of the view or method `getTitle` for more complex logic.
+
+.. sourcecode:: javascript
+
+    spa.signals.once('allViews.created', ({ views }) => {
+        const usersList = views.get('/user/');
+        usersList.title = 'Users list';
+
+        const userDetail = views.get('/user/{id}/');
+        userDetail.getTitle = (state) => (state?.instance ? `User: ${state.instance.id}` : 'User');
+    });
+
+
 Basic Webpack configuration
 ---------------------------
 To use webpack in you project rename `webpack.config.js.default` to `webpack.config.js`.

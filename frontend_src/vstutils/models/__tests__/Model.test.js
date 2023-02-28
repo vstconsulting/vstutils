@@ -1,5 +1,5 @@
-import { expect, jest, test, describe, it } from '@jest/globals';
-import { makeModel, Model } from '../Model.js';
+import { expect, test, describe, it } from '@jest/globals';
+import { BaseModel, makeModel } from '../index.ts';
 import { StringField } from '../../fields/text';
 import { IntegerField } from '../../fields/numbers/integer.js';
 import JSONField from '../../fields/json/JSONField.js';
@@ -11,7 +11,7 @@ const settingsField = new JSONField({ name: 'settings' });
 
 describe('Model', () => {
     const AbstractUser = makeModel(
-        class extends Model {
+        class extends BaseModel {
             static declaredFields = [emailField];
         },
         'AbstractUser',
@@ -34,7 +34,7 @@ describe('Model', () => {
         expect(abstractUser._name).toBe('AbstractUser');
         expect(user._name).toBe('User');
 
-        const Nameless = makeModel(class Nameless extends Model {});
+        const Nameless = makeModel(class Nameless extends BaseModel {});
         const nameless = new Nameless();
         expect(Nameless.name).toBe('Nameless');
         expect(nameless._name).toBe('Nameless');
@@ -76,6 +76,7 @@ describe('Model', () => {
         // Set value and check that 'toInner' is invoked
         const settingsSpy = jest.spyOn(user._fields.get('settings'), 'toInner');
         user.settings = { param1: 'value2', param2: 2, param3: false };
+        user._validateAndSetData();
         expect(settingsSpy).toBeCalledTimes(1);
         expect(user.settings).toStrictEqual({ param1: 'value2', param2: 2, param3: false });
 
@@ -98,7 +99,7 @@ describe('Model', () => {
             age: 22,
             settings: { param1: 'value2', param2: 2, param3: false },
         });
-        // Check validation data
+        // // Check validation data
         user._validateAndSetData({
             email: 'test@mail.com',
             firstName: 'Alex',
@@ -109,18 +110,11 @@ describe('Model', () => {
         expect(user.age).toBe(30);
         expect(user.firstName).toBe('Alex');
 
-        // Check _setFieldValue
-        const emailSpy = jest.spyOn(user._fields.get('email'), 'toInner');
-        user._setFieldValue('email', 'name1@user.com');
-        user._setFieldValue('email', 'name2@user.com');
-        expect(emailSpy).toBeCalledTimes(2);
-        user._setFieldValue('email', 'test@mail.com', true);
-        expect(emailSpy).toBeCalledTimes(2);
-
         // Check invalid fields
         emailField.options.maxLength = 1;
-        expect(() => user._validateAndSetData({ email: 'invalid@mail.com' })).toThrow();
-        expect(user.email).toBe('test@mail.com');
+        user.sandbox.set({ field: 'email', value: 'invalid@mail.com' });
+        expect(() => user.sandbox.validate()).toThrow();
+        expect(user._getInnerData().email).toBe('test@mail.com');
     });
 
     test('pk field', () => {
@@ -129,7 +123,7 @@ describe('Model', () => {
         const field2 = new StringField({ name: 'field2' });
 
         const Model1 = makeModel(
-            class Model1 extends Model {
+            class Model1 extends BaseModel {
                 static declaredFields = [field2];
             },
         );
@@ -171,7 +165,7 @@ describe('Model', () => {
         const field1 = new StringField({ name: 'field1' });
 
         const Model1 = makeModel(
-            class Model1 extends Model {
+            class Model1 extends BaseModel {
                 static declaredFields = [name];
             },
         );
@@ -193,12 +187,12 @@ describe('Model', () => {
             'value',
         );
 
-        const NoViewField = makeModel(class NoViewField extends Model {});
+        const NoViewField = makeModel(class NoViewField extends BaseModel {});
         expect(NoViewField.viewField).toBeNull();
         expect(new NoViewField().getViewFieldValue('default')).toBe('default');
 
         const Model3 = makeModel(
-            class Model3 extends Model {
+            class Model3 extends BaseModel {
                 static declaredFields = [name];
             },
         );
@@ -213,13 +207,13 @@ describe('Model', () => {
         const name = new StringField({ name: 'name' });
 
         const RetrieveModel = makeModel(
-            class RetrieveModel extends Model {
+            class RetrieveModel extends BaseModel {
                 static declaredFields = [id, name];
             },
         );
 
         const UpdateModel = makeModel(
-            class UpdateModel extends Model {
+            class UpdateModel extends BaseModel {
                 static declaredFields = [name];
             },
         );

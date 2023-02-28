@@ -1,6 +1,5 @@
 import { beforeAll, expect, test } from '@jest/globals';
 import fetchMock from 'jest-fetch-mock';
-import { defineStore } from 'pinia';
 import { createApp } from '@/unittests/create-app';
 import { createSchema } from '@/unittests/schema';
 import deepNestedSchema from './deep-nested-schema.json';
@@ -16,7 +15,7 @@ beforeAll(async () => {
 
 test('filtering of deep nested on root page', async () => {
     const view = app.views.get('/group/');
-    const store = defineStore('detail_store', view.getStoreDefinition())();
+    const store = view._createStore();
     await app.router.push('/group/');
     await app.store.setPage(store);
 

@@ -1,12 +1,12 @@
 import { expect, test, describe } from '@jest/globals';
 import { DeepFKField } from '../deep-fk';
-import { makeModel, Model } from '../../../models/Model';
+import { BaseModel, makeModel } from '../../../models';
 import { NumberField } from '../../numbers';
 import { StringField } from '../../text';
 
 describe('DeepFKfield', () => {
     const Category = makeModel(
-        class Category extends Model {
+        class Category extends BaseModel {
             static declaredFields = [
                 new NumberField({ name: 'id' }),
                 new NumberField({ name: 'deep_parent' }),

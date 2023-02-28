@@ -17,16 +17,18 @@
 </template>
 
 <script lang="ts">
-    import { defineComponent, ref, toRef, watch } from 'vue';
-    import type { ExtractRepresent, FieldEditPropsDefType } from '../../base';
-    import { BaseFieldContentEdit, FieldEditPropsDef } from '../../base';
-    import { escapeHtml, getDependenceValueAsString, guiLocalSettings, RequestTypes } from '../../../utils';
+    import { defineComponent, onMounted, ref, toRef, watch } from 'vue';
+    import { useAutocompleteDropdown } from '@/vstutils/fields/autocomplete';
+    import { BaseFieldContentEdit, FieldEditPropsDef } from '@/vstutils/fields/base';
+    import { escapeHtml, getDependenceValueAsString, guiLocalSettings, RequestTypes } from '@/vstutils/utils';
     import { signals } from '@/vstutils/signals';
-    import { useQuerySets } from '@/vstutils/fields/fk/fk/composables';
+    import { useQuerySets } from '@/vstutils/fields/fk/fk';
+
+    import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
     import type FKAutocompleteField from './FKAutocompleteField';
-    import { useAutocompleteDropdown } from '@/vstutils/fields/autocomplete/composables';
     import type { QuerySet } from '@/vstutils/querySet';
     import type { Model } from '@/vstutils/models';
+    import type { InnerData } from '@/vstutils/utils';
 
     type Repr = ExtractRepresent<FKAutocompleteField>;
 
@@ -62,7 +64,7 @@
                 // TODO Make dependence like in fk
                 const formatData = {
                     fieldType: props.field.options.format,
-                    modelName: queryset.value!.getModelClass(RequestTypes.LIST).name,
+                    modelName: queryset.value!.getResponseModelClass(RequestTypes.LIST).name,
                     fieldName: props.field.options.name,
                 };
 
@@ -101,7 +103,7 @@
                                 new props.field.fkModel!({
                                     [props.field.viewField]: props.field.options.default,
                                     [props.field.valueField]: props.field.options.default,
-                                }),
+                                } as InnerData),
                             );
                         } else {
                             matches.push(props.field.options.default);
@@ -125,8 +127,15 @@
                 }
             }
 
-            watch(toRef(props, 'value'), (newVal) => {
-                inputRef.value!.value = props.field.getValueFieldValue(newVal as string) as string;
+            onMounted(() => {
+                watch(
+                    toRef(props, 'value'),
+                    (newVal) => {
+                        inputRef.value!.value =
+                            (props.field.getValueFieldValue(newVal) as string | undefined) ?? '';
+                    },
+                    { immediate: true },
+                );
             });
 
             function selectItem(item: HTMLElement): void {

@@ -11,7 +11,7 @@ class ObjectDoesNotExist(Exception):
 
 
 class BaseModel(models.Model, metaclass=ModelBaseClass):
-    objects: _t.Union[models.Manager, BQuerySet]  # type: ignore
+    objects: models.manager.from_queryset(BQuerySet)
     DoesNotExist: ObjectDoesNotExist
     generated_view: _t.Type[api_base.GenericViewSet]
 

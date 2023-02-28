@@ -1,29 +1,33 @@
-import { ref, computed } from 'vue';
-import type { Model } from '../models';
-import { ModelValidationError } from '../models';
-import type { PageEditView, PageNewView, PageView, ActionView, Action, ListView } from '../views';
-import { isInstancesEqual, RequestTypes, openPage, getApp } from '../utils';
-import { i18n } from '../translation';
-import { guiPopUp, pop_up_msg } from '../popUp';
-import type { Route } from 'vue-router';
-import type { InstancesList, BaseViewStore } from './helpers';
+import { computed, ref } from 'vue';
+
+import { createInstancesList, ModelValidationError } from '@/vstutils/models';
+import { guiPopUp, pop_up_msg } from '@/vstutils/popUp';
+import { i18n } from '@/vstutils/translation';
+import { emptyInnerData } from '@/vstutils/utils';
+import { getApp, isInstancesEqual, openPage, RequestTypes } from '@/vstutils/utils';
+import { fetchInstances } from '@/vstutils/fetch-values';
 import {
-    useBasePageData,
-    useQuerySet,
-    useListFilters,
-    useSelection,
-    PAGE_WITH_INSTANCE,
-    useInstanceTitle,
-    useOperations,
-    PAGE_WITH_EDITABLE_DATA,
-    getRedirectUrl,
     createActionStore,
-    useQueryBasedFiltering,
+    filterNonEmpty,
+    getRedirectUrl,
+    PAGE_WITH_EDITABLE_DATA,
+    PAGE_WITH_INSTANCE,
+    useBasePageData,
     useEntityViewClasses,
+    useListFilters,
+    useOperations,
     usePageLeaveConfirmation,
     usePagination,
-    filterNonEmpty,
+    useQueryBasedFiltering,
+    useQuerySet,
+    useSelection,
 } from './helpers';
+
+import type { Route } from 'vue-router';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
+import type { Model, InstancesList } from '@/vstutils/models';
+import type { PageEditView, PageNewView, PageView, ActionView, Action, ListView } from '@/vstutils/views';
+import type { PageViewStore } from './page-types';
 
 const createRemoveInstance =
     ({ pageView, unselect }: { pageView?: PageView | null; unselect?: (id: string | number) => void }) =>
@@ -37,7 +41,7 @@ const createRemoveInstance =
         instance: Model;
         fromList?: boolean;
         purge?: boolean;
-    }) => {
+    }): Promise<Route | undefined> => {
         const app = getApp();
         try {
             if (!fromList) {
@@ -72,19 +76,19 @@ const createRemoveInstance =
 
             app.error_handler.showError(srt_to_show, str);
         }
+        return Promise.resolve(undefined);
     };
 
-export const createListViewStore = (view: ListView) => () => {
+export const createListViewStore = (view: ListView) => {
     const base = useBasePageData(view);
     const qsStore = useQuerySet(view);
     const app = getApp();
     const { count, pageNumber, pageSize, setQuery, filters } = useListFilters(qsStore.queryset);
     const paginationItems = usePagination({ count, page: pageNumber, size: pageSize });
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     const model = computed(() => view.objects.getResponseModelClass(RequestTypes.LIST));
 
-    const instances = ref<InstancesList>([]);
+    const instances = ref<InstancesList>(createInstancesList([]));
 
     const selection = useSelection(instances);
     const isEmpty = computed(() => !instances.value.length);
@@ -117,7 +121,7 @@ export const createListViewStore = (view: ListView) => () => {
     }
 
     async function updateData() {
-        const newInstances = (await qsStore.queryset.value.items()) as InstancesList;
+        const newInstances = await qsStore.queryset.value.items();
         if (!isInstancesEqual(instances.value, newInstances)) {
             setInstances(newInstances);
         } else if (instances.value.extra?.count && count.value !== instances.value.extra.count) {
@@ -127,7 +131,7 @@ export const createListViewStore = (view: ListView) => () => {
 
     function getQuery(): Route['query'] {
         const route = app.router.currentRoute;
-        let query = route.query;
+        const query = { ...route.query };
 
         let deepParentFilter: string | null = null;
 
@@ -138,7 +142,7 @@ export const createListViewStore = (view: ListView) => () => {
         }
 
         if (deepParentFilter !== null) {
-            query = { ...query, __deep_parent: deepParentFilter };
+            query.__deep_parent = deepParentFilter;
         }
 
         return query;
@@ -164,7 +168,7 @@ export const createListViewStore = (view: ListView) => () => {
     }: {
         action: Action;
         instances: Model[];
-        purge: boolean;
+        purge?: boolean;
     }) {
         const removedInstancesIds: (string | number)[] = [];
         try {
@@ -177,7 +181,6 @@ export const createListViewStore = (view: ListView) => () => {
             );
             guiPopUp.success(i18n.t(pop_up_msg.instance.success.removeMany) as string);
         } catch (error) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const str = app.error_handler.errorToString(error) as string;
             const strToShow = i18n.t(pop_up_msg.instance.error.removeMany, [str]) as string;
             app.error_handler.showError(strToShow, str);
@@ -213,19 +216,15 @@ export const createListViewStore = (view: ListView) => () => {
     };
 };
 
-export const createDetailViewStore = (view: PageView) => () => {
+export const createDetailViewStore = (view: PageView) => {
     const qsStore = useQuerySet(view);
-    const pageWithInstance = PAGE_WITH_INSTANCE();
+    const pageWithInstance = PAGE_WITH_INSTANCE(view);
     const base = useBasePageData(view);
     const app = getApp();
 
-    const title = useInstanceTitle({ view, instance: pageWithInstance.instance });
-    const filtersQuery = ref<Record<string, unknown>>({});
+    const filtersQuery = ref(emptyInnerData());
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const model = ref<typeof Model>(view.objects.getResponseModelClass(RequestTypes.RETRIEVE));
-
-    function getInstancePk(): string | number {
+    function getInstancePk(): string | number | undefined | null {
         if (pageWithInstance.instance.value) {
             return pageWithInstance.instance.value.getPkValue()!;
         }
@@ -233,7 +232,7 @@ export const createDetailViewStore = (view: PageView) => () => {
     }
 
     function getAutoUpdatePk() {
-        return getInstancePk();
+        return getInstancePk() ?? undefined;
     }
 
     /**
@@ -266,7 +265,7 @@ export const createDetailViewStore = (view: PageView) => () => {
 
     function setFilters(query: Record<string, unknown>) {
         if (view.filtersModelClass) {
-            const instance = new view.filtersModelClass(query);
+            const instance = new view.filtersModelClass(query as InnerData);
             filtersQuery.value = instance._getInnerData();
         }
     }
@@ -275,20 +274,20 @@ export const createDetailViewStore = (view: PageView) => () => {
         const qs = qsStore.queryset.value;
 
         if (!instancePk) {
-            instancePk = getInstancePk();
+            instancePk = getInstancePk()!;
         }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const newInstance = await qs.filter(filtersQuery.value).get(instancePk);
 
         const instance = pageWithInstance.instance.value;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         if (forceSet || !instance || !newInstance.isEqual(instance)) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            (app.store.page as DetailPageStore).setInstance(newInstance);
+            (app.store.page as PageViewStore).setInstance(newInstance);
         }
     }
 
-    async function fetchData(instancePk?: string | number, { forceSet = false } = {}) {
+    async function fetchData({
+        instancePk,
+        forceSet = false,
+    }: { instancePk?: string | number; forceSet?: boolean } = {}) {
         base.initLoading();
         setFilters(app.router.currentRoute.query);
 
@@ -296,7 +295,7 @@ export const createDetailViewStore = (view: PageView) => () => {
             if (pageWithInstance.providedInstance.value) {
                 const instance = pageWithInstance.providedInstance.value;
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-                await instance._queryset._executeAfterInstancesFetchedHooks([instance], instance.constructor);
+                await fetchInstances([instance]);
                 pageWithInstance.setInstance(instance);
             } else {
                 await updateData(instancePk, { forceSet });
@@ -308,15 +307,15 @@ export const createDetailViewStore = (view: PageView) => () => {
         }
     }
 
-    function applyFilters(newFiltersRepresentData: Record<string, unknown>) {
+    function applyFilters(newFilters: RepresentData) {
         if (view.filtersModelClass) {
-            const query = filterNonEmpty(view.filtersModelClass.representToInner(newFiltersRepresentData));
+            const query = filterNonEmpty(view.filtersModelClass.representToInner(newFilters));
             return openPage({
                 path: app.router.currentRoute.path,
                 query,
-            });
+            }) as Promise<void>;
         }
-        return undefined;
+        return Promise.resolve();
     }
 
     return {
@@ -324,9 +323,7 @@ export const createDetailViewStore = (view: PageView) => () => {
         ...qsStore,
         ...pageWithInstance,
         ...useOperations({ view, data: pageWithInstance.sandbox }),
-        entityViewClasses: useEntityViewClasses(model, pageWithInstance.sandbox),
-        model,
-        title,
+        entityViewClasses: useEntityViewClasses(pageWithInstance.model, pageWithInstance.sandbox),
         filtersQuery,
         filters,
         appliedDefaultFilterNames,
@@ -339,27 +336,21 @@ export const createDetailViewStore = (view: PageView) => () => {
     };
 };
 
-export type DetailPageStore = BaseViewStore & {
-    setInstance(instance: Model): void;
-    instance: Model;
-    getInstancePk(): string | number | undefined;
-    applyFilters(filters: Record<string, unknown>): Promise<Route | void> | undefined;
-};
-
-export const createNewViewStore = (view: PageNewView) => () => {
+export const createNewViewStore = (view: PageNewView) => {
     const qsStore = useQuerySet(view);
-    const pageWithEditableData = PAGE_WITH_EDITABLE_DATA(PAGE_WITH_INSTANCE());
+    const pageWithEditableData = PAGE_WITH_EDITABLE_DATA(PAGE_WITH_INSTANCE(view));
     const base = useBasePageData(view);
     const app = getApp();
 
     usePageLeaveConfirmation({ askIf: pageWithEditableData.isPageChanged });
 
-    const model = ref(view.objects.getResponseModelClass(RequestTypes.CREATE) as typeof Model);
+    const model = ref(view.objects.getResponseModelClass(RequestTypes.CREATE));
 
-    function fetchData({ data }: { data?: Record<string, any> } = { data: undefined }) {
+    function fetchData({ data }: { data?: InnerData } = { data: undefined }) {
         const queryset = qsStore.queryset.value;
         pageWithEditableData.setInstance(new model.value(model.value.getInitialData(data), queryset));
         base.setLoadingSuccessful();
+        return Promise.resolve();
     }
     async function save() {
         try {
@@ -382,14 +373,14 @@ export const createNewViewStore = (view: PageNewView) => () => {
 
             const providedInstance = await instance.create(method);
 
-            pageWithEditableData.changedFields.value = [];
+            pageWithEditableData.instance.value!.sandbox.markUnchanged();
             pageWithEditableData.fieldsErrors.value = {};
 
             guiPopUp.success(i18n.t(pop_up_msg.instance.success.save, [name, view.name]) as string);
             if (view.isDeepNested) {
-                return openPage(getRedirectUrl());
+                return openPage(getRedirectUrl()) as Promise<void>;
             }
-            return openPage({ path: getRedirectUrl(), params: { providedInstance } });
+            return openPage({ path: getRedirectUrl(), params: { providedInstance } }) as Promise<void>;
         } catch (error) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
             const modelValidationError = instance.parseModelError((error as any).data);
@@ -418,22 +409,16 @@ export const createNewViewStore = (view: PageNewView) => () => {
     };
 };
 
-export const createEditViewStore = (view: PageEditView) => () => {
-    const pageViewStore = PAGE_WITH_EDITABLE_DATA(createDetailViewStore(view as unknown as PageView)());
+export const createEditViewStore = (view: PageEditView) => {
+    const pageViewStore = PAGE_WITH_EDITABLE_DATA(createDetailViewStore(view as unknown as PageView));
 
     usePageLeaveConfirmation({ askIf: pageViewStore.isPageChanged });
 
     const app = getApp();
 
-    const model = ref(
-        view.objects.getRequestModelClass(
-            view.isPartial ? RequestTypes.PARTIAL_UPDATE : RequestTypes.UPDATE,
-        ) as typeof Model,
-    );
-
     function setInstance(instance: Model) {
-        if (!(instance instanceof model.value)) {
-            instance = new model.value(undefined, null, instance);
+        if (!(instance instanceof pageViewStore.model.value)) {
+            instance = new pageViewStore.model.value(undefined, null, instance);
         }
         pageViewStore.setInstance(instance);
     }
@@ -459,17 +444,19 @@ export const createEditViewStore = (view: PageEditView) => () => {
 
             const providedInstance = await instance.update(
                 method,
-                (view as unknown as PageEditView).isPartial ? pageViewStore.changedFields.value : null,
+                (view as unknown as PageEditView).isPartial
+                    ? Array.from(pageViewStore.instance.value!.sandbox.changedFields)
+                    : undefined,
             );
 
-            pageViewStore.changedFields.value = [];
+            instance.sandbox.markUnchanged();
             pageViewStore.fieldsErrors.value = {};
 
             guiPopUp.success(i18n.t(pop_up_msg.instance.success.save, [name, view.name]) as string);
             if (view.isDeepNested) {
-                return openPage(getRedirectUrl());
+                return openPage(getRedirectUrl()) as Promise<void>;
             }
-            return openPage({ path: getRedirectUrl(), params: { providedInstance } });
+            return openPage({ path: getRedirectUrl(), params: { providedInstance } }) as Promise<void>;
         } catch (error) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
             const modelValidationError = instance.parseModelError((error as any).data);
@@ -487,17 +474,17 @@ export const createEditViewStore = (view: PageEditView) => () => {
     }
 
     function reload() {
-        return pageViewStore.fetchData(undefined, { forceSet: true });
+        return pageViewStore.fetchData({ forceSet: true });
     }
     function cancel() {
-        pageViewStore.changedFields.value = [];
-        return app.router.back();
+        pageViewStore.instance.value!.sandbox.markUnchanged();
+        app.router.back();
     }
 
-    return { ...pageViewStore, model, setInstance, save, reload, cancel };
+    return { ...pageViewStore, setInstance, save, reload, cancel };
 };
 
-export const createActionViewStore = (view: ActionView) => () => {
+export const createActionViewStore = (view: ActionView) => {
     const base = useBasePageData(view);
     const actionStore = createActionStore(view);
 

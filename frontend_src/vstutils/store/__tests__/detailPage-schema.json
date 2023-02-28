@@ -1,4 +1,5 @@
 {
+    "$schema": "https://json.schemastore.org/swagger-2.0.json",
     "definitions": {
         "OneSomePage": {
             "required": [
@@ -52,6 +53,14 @@
                     "minLength": 1,
                     "default": "Msh"
                 }
+            }
+        },
+        "SomeAction": {
+            "required": ["text", "choice"],
+            "properties": {
+                "text": {"type": "string", "minLength": 1},
+                "bool": {"type": "boolean"},
+                "choice": {"type": "string", "enum": ["one", "two", "three"]}
             }
         }
     },
@@ -197,15 +206,8 @@
                 }
             }
         },
-        "/some_action/": {
-            "parameters": [
-                {
-                    "name": "id",
-                    "in": "path",
-                    "required": true,
-                    "type": "integer"
-                }
-            ],
+        "/some_list/some_action/": {
+            "parameters": [],
             "post": {
                 "operationId": "some_action",
                 "parameters": [
@@ -214,7 +216,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Some"
+                            "$ref": "#/definitions/SomeAction"
                         }
                     }
                 ],
@@ -222,7 +224,7 @@
                     "201": {
                         "description": "CREATED",
                         "schema": {
-                            "$ref": "#/definitions/Some"
+                            "$ref": "#/definitions/SomeAction"
                         }
                     }
                 }

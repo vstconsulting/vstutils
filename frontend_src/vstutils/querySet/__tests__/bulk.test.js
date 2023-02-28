@@ -1,8 +1,8 @@
 import { beforeAll, beforeEach, describe, expect, test } from '@jest/globals';
 import fetchMock from 'jest-fetch-mock';
 import { apiConnector } from '../../api';
-import { Model, makeModel } from '../../models';
-import QuerySet from '../QuerySet.js';
+import { BaseModel, makeModel } from '../../models';
+import { QuerySet } from '../QuerySet.ts';
 import { RequestTypes } from '../../utils';
 import { IntegerField } from '../../fields/numbers/integer.js';
 
@@ -21,19 +21,19 @@ describe('bulk or non bulk selection', () => {
 
     test('non bulks only', async () => {
         const Post = makeModel(
-            class extends Model {
+            class extends BaseModel {
                 static declaredFields = [idField];
                 static nonBulkMethods = ['get', 'post'];
             },
         );
         const OnePost = makeModel(
-            class extends Model {
+            class extends BaseModel {
                 static declaredFields = [idField];
                 static nonBulkMethods = ['get', 'patch', 'put', 'delete'];
             },
         );
         const CreatePost = makeModel(
-            class extends Model {
+            class extends BaseModel {
                 static declaredFields = [idField];
                 static nonBulkMethods = ['post'];
             },

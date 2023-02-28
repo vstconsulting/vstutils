@@ -1,13 +1,14 @@
 <template>
     <div>
         <div class="csv-table" :style="requiredErrorTextVar">
-            <FileSelector
-                :show-hide-button="hideable"
-                :has-value="value && value.length"
+            <FileFieldSelector
+                :field="field"
+                :hideable="hideable"
+                :clearable="value && value.length"
                 :text="text"
-                @read-file="updateFile($event[0])"
+                @input="updateFile($event[0])"
                 @clear="clear"
-                @hide="$emit('hide-field', field)"
+                @hide="emit('hide-field')"
             />
             <div class="m-0">
                 <DataTable
@@ -20,7 +21,7 @@
         </div>
         <ConfirmModal
             ref="confirmationModalRef"
-            :message="$t('Your changes will be deleted. Are you sure?')"
+            :message="$ts('Your changes will be deleted. Are you sure?')"
             @confirm="confirmClear"
             @reject="rejectClear"
         />
@@ -34,7 +35,7 @@
     import { readFileAsText } from '@/vstutils/utils';
     import ConfirmModal from '@/vstutils/components/common/ConfirmModal.vue';
     import DataTable from './DataTable.vue';
-    import FileSelector from '../FileSelector.vue';
+    import FileFieldSelector from '../FileFieldSelector.vue';
 
     import type { ParseResult } from 'papaparse';
     import type { ExtractRepresent } from '@/vstutils/fields/base';
@@ -68,7 +69,7 @@
     const tableConfig = props.field.getTableConfig();
 
     const rows = computed(() => {
-        return props.value || [];
+        return (props.value || []) as Record<string, unknown>[];
     });
     const requiredErrorTextVar = computed(() => {
         return `--required-error-text: "${i18n.tc('Column is required!')}"`;

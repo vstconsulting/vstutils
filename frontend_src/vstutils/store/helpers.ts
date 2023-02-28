@@ -1,43 +1,49 @@
-import type { StoreGeneric } from 'pinia';
-import { defineStore } from 'pinia';
-import type { Ref } from 'vue';
+import { getActivePinia } from 'pinia';
 import {
     computed,
     del,
     onBeforeUnmount,
     onMounted,
+    onScopeDispose,
     onUnmounted,
+    provide,
     ref,
-    set,
     shallowReadonly,
     shallowRef,
+    toRef,
     watch,
 } from 'vue';
+import { useRoute } from 'vue-router/composables';
 
 import type { APIResponse } from '@/vstutils/api';
 import { useAutoUpdate } from '@/vstutils/autoupdate';
 import { useBreadcrumbs } from '@/vstutils/breadcrumbs';
-import type { Model } from '@/vstutils/models';
 import { ModelValidationError } from '@/vstutils/models';
-import { signals } from '@/vstutils/signals';
+import { filterOperations, signals } from '@/vstutils/signals';
 import { i18n } from '@/vstutils/translation';
 import {
     classesFromFields,
     getApp,
     getRedirectUrlFromResponse,
-    getUniqueId,
     IGNORED_FILTERS,
     joinPaths,
     makeQueryString,
     mergeDeep,
     openPage,
     pathToArray,
+    emptyRepresentData,
+    emptyInnerData,
 } from '@/vstutils/utils';
 
-import type { QuerySet } from '../querySet';
-import type { IView, ActionView, NotEmptyAction } from '../views';
+import type { Ref } from 'vue';
 import type { NavigationGuard, Route } from 'vue-router';
+import type { QuerySet } from '@/vstutils/querySet';
+import type { IView, ActionView, NotEmptyAction, ViewStore, DetailView } from '@/vstutils/views';
+import type { Model, ModelConstructor } from '@/vstutils/models';
 import type { IApp } from '@/vstutils/app';
+import type { RepresentData, InnerData } from '@/vstutils/utils';
+import type { BaseViewStore } from './page-types';
+import type { SetFieldValueOptions } from '../fields/base';
 
 export function useParentViews() {
     interface Item {
@@ -101,28 +107,12 @@ export function useParentViews() {
     };
 }
 
-export interface InstancesList extends Array<Model> {
-    extra?: {
-        count?: number;
-        [key: string]: any;
-    };
-}
-
 export function getRedirectUrl(): string {
     const url = getApp()
         .router.currentRoute.path.replace(/\/edit\/?$/, '')
         .replace(/\/new\/?$/, '');
     return url;
 }
-
-export const useInstanceTitle = ({ view, instance }: { view: IView; instance: Ref<Model | null> }) => {
-    return computed(() => {
-        if (view.isDetailPage() && view.useViewFieldAsTitle) {
-            return instance.value?.getViewFieldString(false) || i18n.st(view.title);
-        }
-        return i18n.st(view.title);
-    });
-};
 
 export const useQuerySet = (view: IView) => {
     if (!view.objects) {
@@ -136,7 +126,7 @@ export const useQuerySet = (view: IView) => {
     return { queryset, setQuerySet };
 };
 
-export const useEntityViewClasses = (modelClass: Ref<typeof Model>, data: Ref<Record<string, any>>) => {
+export const useEntityViewClasses = (modelClass: Ref<ModelConstructor>, data: Ref<Record<string, any>>) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
     const flatFields = computed(() => Array.from(modelClass.value.fields.values()));
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -149,26 +139,14 @@ export const useOperations = ({
     isListItem = false,
 }: {
     view: IView;
-    data?: Ref<Record<string, any>>;
+    data?: Ref<RepresentData>;
     isListItem?: boolean;
 }) => {
     const actions = computed(() => {
-        const obj = {
-            actions: Array.from(view.actions.values()).filter((action) => !action.hidden),
-            data: data?.value,
-            isListItem,
-        };
-        signals.emit(`<${view.path}>filterActions`, obj);
-        return obj.actions;
+        return filterOperations('actions', Array.from(view.actions.values()), data?.value, isListItem);
     });
     const sublinks = computed(() => {
-        const obj = {
-            sublinks: Array.from(view.sublinks.values()).filter((sublink) => !sublink.hidden),
-            data: data?.value,
-            isListItem,
-        };
-        signals.emit(`<${view.path}>filterSublinks`, obj);
-        return obj.sublinks;
+        return filterOperations('sublinks', Array.from(view.sublinks.values()), data?.value, isListItem);
     });
 
     return { actions, sublinks };
@@ -178,9 +156,7 @@ export const useBasePageData = (view: IView) => {
     const loading = ref(false);
     const error = ref<unknown>(null);
     const response = ref<unknown>(null);
-    const title = computed<string>(() => {
-        return i18n.st(view.title);
-    });
+    const title = computed<string>(() => view.getTitle(view.getSavedState()));
     const breadcrumbs = useBreadcrumbs();
 
     const {
@@ -217,15 +193,16 @@ export const useBasePageData = (view: IView) => {
 
     function fetchData() {
         setLoadingSuccessful();
+        return Promise.resolve();
     }
 
     return {
         ...useOperations({ view, isListItem: false }),
+        view: ref(view),
         loading,
         error,
         response,
         title,
-        view: ref(view),
         breadcrumbs,
         initLoading,
         setLoadingSuccessful,
@@ -236,20 +213,6 @@ export const useBasePageData = (view: IView) => {
         setAutoUpdateCallback,
         setAutoUpdatePk,
     };
-};
-
-export type BaseViewStore = StoreGeneric & {
-    readonly view: IView;
-    readonly title: string;
-    fetchData?: () => Promise<void>;
-    updateData?: () => Promise<void>;
-    getAutoUpdatePk?: () => string | number;
-    entityViewClasses?: string[];
-    getStateToSave?(): unknown;
-    startAutoUpdate(): void;
-    stopAutoUpdate(): void;
-    setAutoUpdateCallback(callback: Promise<unknown>): void;
-    setAutoUpdatePk(pk: number | string): void;
 };
 
 export const useSelection = (instances: Ref<Model[]>) => {
@@ -294,16 +257,16 @@ export function useListFilters(qs: Ref<QuerySet>) {
     const count = ref(0);
     const pageSize = ref(app.config.defaultPageLimit);
     const pageNumber = ref(1);
-    const filters = ref<Record<string, any>>({});
+    const filters = ref<InnerData>(emptyInnerData());
 
     function setQuery(query: Record<string, any>) {
         query = filterNonEmpty(query);
         const limit = pageSize.value;
         const page = Number(query.page) || 1;
-        filters.value = query;
+        filters.value = query as InnerData;
         pageNumber.value = page;
         qs.value = qs.value.clone({
-            query: mergeDeep({ limit, offset: limit * (page - 1) }, query),
+            query: mergeDeep({ limit, offset: limit * (page - 1) }, query) as Record<string, unknown>,
         });
     }
 
@@ -428,54 +391,46 @@ export function useQueryBasedFiltering() {
     return { applyFilters, applyFieldsFilters, applySearchFilter };
 }
 
-export const PAGE_WITH_INSTANCE = () => {
+export const PAGE_WITH_INSTANCE = (view: DetailView) => {
     const app = getApp();
 
     const instance = shallowRef<Model | null>(null);
-    const sandbox = ref<Record<string, any>>({});
+    const sandbox = computed(() => instance.value?.sandbox.value ?? emptyRepresentData());
     const providedInstance = computed<Model | undefined>(
         () => app.rootVm.$route.params.providedInstance as unknown as Model | undefined,
     );
 
+    const model = computed(() => {
+        return view.getModel();
+    });
+
+    const fieldsGroups = computed(() => {
+        return view.getFieldsGroups({ data: sandbox.value });
+    });
+
     function setInstance(newInstance: Model) {
         instance.value = newInstance;
-        sandbox.value = instance.value._getRepresentData();
     }
 
-    function setFieldValue({ field, value }: { field: string; value: unknown }) {
-        set(sandbox.value, field, value);
+    function setFieldValue(options: SetFieldValueOptions) {
+        instance.value?.sandbox.set(options);
     }
 
-    return { instance, sandbox, providedInstance, setInstance, setFieldValue };
+    return { instance, sandbox, providedInstance, setInstance, setFieldValue, fieldsGroups, model };
 };
 
 export const PAGE_WITH_EDITABLE_DATA = <T extends ReturnType<typeof PAGE_WITH_INSTANCE>>(base: T) => {
     const fieldsErrors = ref<Record<string, any>>({});
-    const changedFields = ref<string[]>([]);
-    const isPageChanged = computed<boolean>(() => changedFields.value.length > 0);
+    const changedFields = computed(() => base.instance.value?.sandbox.changedFields);
+    const isPageChanged = computed(() => base.instance.value?.sandbox.changed ?? false);
 
-    function validateAndSetInstanceData(params?: { instance?: Model | null; data?: Record<string, any> }) {
-        const instance = params?.instance ?? base.instance.value;
-        const data = params?.data ?? base.sandbox.value;
-        if (instance) {
-            instance._validateAndSetData(data);
-        }
+    function validateAndSetInstanceData() {
+        base.instance.value!._validateAndSetData();
     }
 
-    function setFieldValue({
-        field,
-        value,
-        markChanged = true,
-    }: {
-        field: string;
-        value: unknown;
-        markChanged: boolean;
-    }) {
-        del(fieldsErrors.value, field);
-        if (markChanged && !changedFields.value.includes(field)) {
-            changedFields.value.push(field);
-        }
-        return base.setFieldValue({ field, value });
+    function setFieldValue(options: SetFieldValueOptions) {
+        del(fieldsErrors.value, options.field);
+        base.setFieldValue(options);
     }
 
     return {
@@ -489,29 +444,34 @@ export const PAGE_WITH_EDITABLE_DATA = <T extends ReturnType<typeof PAGE_WITH_IN
 };
 
 export const createActionStore = (view: ActionView) => {
-    const pageWithEditableData = PAGE_WITH_EDITABLE_DATA(PAGE_WITH_INSTANCE());
+    const pageWithEditableData = PAGE_WITH_EDITABLE_DATA(PAGE_WITH_INSTANCE(view));
 
     const app = getApp();
-    const model = computed<typeof Model>(() => view.action.requestModel);
 
     async function execute() {
         try {
-            pageWithEditableData.changedFields.value = [];
             const executeAction = view.actions.get('execute') as NotEmptyAction;
             const response = await app.actions.executeWithData({
                 action: executeAction,
-                data: pageWithEditableData.sandbox.value,
-                model: model.value,
+                instance: pageWithEditableData.instance.value!,
                 method: view.method,
                 path: view.getRequestPath(app.router.currentRoute),
                 throwError: true,
             });
+            pageWithEditableData.instance.value!.sandbox.markUnchanged();
             pageWithEditableData.fieldsErrors.value = {};
-            void openPage(
-                executeAction.redirectPath ??
+            if (executeAction.redirectPath) {
+                void openPage(
+                    typeof executeAction.redirectPath === 'function'
+                        ? executeAction.redirectPath()
+                        : executeAction.redirectPath,
+                );
+            } else {
+                void openPage(
                     getRedirectUrlFromResponse((response as APIResponse).data, view.action.responseModel) ??
-                    view.getRedirectUrl(app.router.currentRoute),
-            );
+                        view.getRedirectUrl(app.router.currentRoute),
+                );
+            }
         } catch (e) {
             if (e instanceof ModelValidationError) {
                 pageWithEditableData.fieldsErrors.value = e.toFieldsErrors();
@@ -521,26 +481,37 @@ export const createActionStore = (view: ActionView) => {
         }
     }
 
-    pageWithEditableData.setInstance(new model.value());
+    pageWithEditableData.setInstance(new pageWithEditableData.model.value());
 
     return {
         ...pageWithEditableData,
-        model,
         execute,
     };
 };
 
-export function useViewStore<T extends IView>(view: T) {
+export function useViewStore<T extends IView>(view: T, options: { watchQuery?: boolean } = {}): ViewStore<T> {
     const app = getApp();
-    const store = defineStore(`page_${getUniqueId()}`, view.getStoreDefinition())() as BaseViewStore;
-    if (store.fetchData) {
-        void store.fetchData();
-    }
+    const route = useRoute();
+    const store = view._createStore() as ViewStore<T>;
+    void store.fetchData();
 
     void app.store.setPage(store);
 
-    onUnmounted(() => {
+    provide('view', view);
+
+    if (options.watchQuery) {
+        watch(toRef(route, 'query'), () => {
+            void store.fetchData();
+        });
+    }
+
+    onScopeDispose(() => {
         store.$dispose();
+        const pinia = getActivePinia();
+        if (pinia) {
+            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+            delete pinia.state.value[store.$id];
+        }
     });
 
     return store;
@@ -601,7 +572,7 @@ export function usePageLeaveConfirmation({
 
     function askForLeaveConfirmation() {
         if (askIf.value) {
-            return window.confirm(i18n.t(message) as string);
+            return window.confirm(i18n.ts(message));
         }
         return true;
     }

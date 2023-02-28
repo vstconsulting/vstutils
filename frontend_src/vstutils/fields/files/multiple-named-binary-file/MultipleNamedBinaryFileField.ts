@@ -10,20 +10,19 @@ import type { NamedFile } from '../named-binary-file';
 import { ensureMediaTypeExists } from '../named-binary-file';
 import type { FileFieldXOptions, IFileField } from '../file';
 import { parseAllowedMediaTypes } from '../file';
+import type { InnerData, RepresentData } from '@/vstutils/utils';
 
 class MultipleNamedBinaryFileField
     extends BaseField<NamedFile[] | string, NamedFile[], FileFieldXOptions | undefined>
     implements IFileField
 {
-    maxSize?: number;
-    allowedMediaTypes?: string[];
+    allowedMediaTypes: string[] | undefined;
 
     constructor(options: FieldOptions<FileFieldXOptions | undefined, NamedFile[]>) {
         Object.assign(options, options.items);
         delete options.items;
         super(options);
 
-        this.maxSize = this.props?.max_size;
         this.allowedMediaTypes = parseAllowedMediaTypes(options);
     }
 
@@ -46,7 +45,7 @@ class MultipleNamedBinaryFileField
     /**
      * Redefinition of 'validateValue' method of binfile guiField.
      */
-    validateValue(data = {}) {
+    validateValue(data: RepresentData) {
         const value = super.validateValue(data);
 
         if (value && this.options.required && Array.isArray(value) && value.length === 0) {
@@ -54,15 +53,15 @@ class MultipleNamedBinaryFileField
 
             throw {
                 error: 'validation',
-                message: (i18n.t(pop_up_msg.field.error.empty) as string).format(i18n.t(title) as string),
+                message: i18n.ts(pop_up_msg.field.error.empty).format(i18n.ts(title)),
             };
         }
 
         return value;
     }
 
-    toRepresent(data: Record<string, unknown>) {
-        let value = this.getDataInnerValue(data);
+    toRepresent(data: InnerData) {
+        let value = this.getValue(data);
         if (typeof value === 'string') {
             value = JSON.parse(value) as NamedFile[];
         }

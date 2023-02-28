@@ -1,12 +1,15 @@
 import io
+import uuid
 
 from django.db import models
 from django.http.response import FileResponse
 
 from vstutils.api import fields, filters, actions
-from vstutils.models import BModel
+from vstutils.models import BModel, BaseModel
+from vstutils.models import fields as model_fields
 from vstutils.api.serializers import VSTSerializer, BaseSerializer
 from vstutils.api.fields import (
+    FkField,
     FkModelField,
     MaskedField,
     DeepFkField,
@@ -44,6 +47,7 @@ def check_named_response(view, request, *args, **kwargs):
 
 
 class AuthorProfileSerializer(BaseSerializer):
+    referer = FkField(select='Author', allow_null=True)
     phone = PhoneField(allow_null=True, required=False)
 
     def update(self, instance, validated_data):
@@ -53,6 +57,7 @@ class AuthorProfileSerializer(BaseSerializer):
 
 
 class PhoneBookSerializer(AuthorProfileSerializer):
+    referer = FkField(select='Author', field_type=int)
     name = CharField(read_only=True)
 
 
@@ -115,6 +120,7 @@ class Author(BModel):
     phone = models.CharField(max_length=16, null=True)
     masked = models.CharField(max_length=255, null=True)
     decimal = models.DecimalField(default='13.37', decimal_places=2, max_digits=5)
+    referer = models.IntegerField(null=True)
 
     class Meta:
         _permission_classes = ('rest_framework.permissions.AllowAny', )
@@ -209,7 +215,7 @@ class Post(BModel):
             'author': FkModelField(select=Author, read_only=True),
             'rating': RatingField(required=False, front_style='slider', min_value=0, max_value=10),
             'category': DeepFkField(select='test_proj.Category', allow_null=True, required=False, only_last_child=True),
-            'some_data': CSVFileField(delimiter=';', items=SomeDataCsvSerializer(), min_column_width=300),
+            'some_data': CSVFileField(delimiter=';', items=SomeDataCsvSerializer(), min_column_width=300, max_length=1024, min_length=1),
             'text': WYSIWYGField(),
         }
         _filterset_fields = {
@@ -269,3 +275,11 @@ class ModelWithCrontabField(BModel):
         _override_detail_fields = _override_list_fields = {
             'cron': CrontabField()
         }
+
+
+class ModelWithUuidPk(BaseModel):
+    id = models.UUIDField(primary_key=True, db_index=True, default=uuid.uuid4)
+
+
+class ModelWithUuidFK(BModel):
+    fk = model_fields.FkModelField(ModelWithUuidPk, on_delete=models.CASCADE)

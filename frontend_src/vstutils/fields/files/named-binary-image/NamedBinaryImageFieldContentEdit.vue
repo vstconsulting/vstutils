@@ -14,12 +14,12 @@
             @validated="onImageValidated"
         />
 
-        <FileSelector
-            :show-hide-button="hideable"
-            :has-value="!!value"
-            :media-types="field.allowedMediaTypes"
+        <SingleFileInput
+            :hideable="hideable"
+            :clearable="!!value"
+            :field="field"
             :text="name"
-            @read-file="readFiles"
+            @input="readFiles([$event])"
             @clear="emit('clear')"
             @hide="emit('hide-field')"
         />
@@ -27,22 +27,19 @@
 </template>
 
 <script setup lang="ts">
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
-    import { computed, ref, toRef } from 'vue';
-    import type { NamedFile } from '../named-binary-file';
+    import { computed, toRef } from 'vue';
+    import { FieldEditPropsDef } from '@/vstutils/fields/base';
     import { useNamedFileText } from '../named-binary-file';
-    import { useDragAndDrop } from '../useDragAndDrop';
     import ImageBlock from './ImageBlock.vue';
-    import type NamedBinaryImageField from './NamedBinaryImageField';
     import { useResolutionValidator } from './useResolutionValidator';
     import ResolutionValidatorModal from './ResolutionValidatorModal.vue';
-    import FileSelector from '../FileSelector.vue';
+    import SingleFileInput from '../SingleFileInput.vue';
 
-    const props = defineProps<{
-        field: NamedBinaryImageField;
-        value: ExtractRepresent<NamedBinaryImageField> | null | undefined;
-        hideable: boolean;
-    }>();
+    import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import type { NamedFile } from '../named-binary-file';
+    import type NamedBinaryImageField from './NamedBinaryImageField';
+
+    const props = defineProps(FieldEditPropsDef as FieldEditPropsDefType<NamedBinaryImageField>);
 
     const emit = defineEmits<{
         (event: 'set-value', value: ExtractRepresent<NamedBinaryImageField> | null | undefined): void;
