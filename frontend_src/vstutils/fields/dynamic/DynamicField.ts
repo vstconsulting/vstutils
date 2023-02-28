@@ -134,7 +134,7 @@ export class DynamicField
         }
 
         const state = view.getSavedState();
-        if (state.instance) {
+        if (state?.instance) {
             return state.instance._getRepresentData();
         }
 

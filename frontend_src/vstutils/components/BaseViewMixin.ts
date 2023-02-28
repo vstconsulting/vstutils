@@ -4,7 +4,6 @@ import { useViewStore } from '../store/helpers';
 import { ViewPropsDef } from '../views/props';
 
 export const BaseViewMixin = defineComponent({
-    inject: ['requestConfirmation'],
     props: ViewPropsDef,
     setup(props) {
         const store = useViewStore(props.view, { watchQuery: true });

@@ -39,7 +39,6 @@ import type {
     DetailViewStore,
 } from '@/vstutils/store';
 
-import type { StyleValue } from 'vue/types/jsx';
 import type { HttpMethod, RepresentData } from '@/vstutils/utils';
 import type { Vue } from 'vue/types/vue';
 import type { Route, RouteConfig } from 'vue-router';
@@ -53,7 +52,7 @@ export { ViewTypes };
 export interface Operation {
     name: string;
     title: string;
-    style?: StyleValue;
+    style?: Record<string, string | number> | string;
     classes?: string[];
     iconClasses?: string[];
     appendFragment?: string;
@@ -268,7 +267,7 @@ export abstract class BaseView<
         return Promise.resolve({} as TStateToSave);
     }
     getSavedState() {
-        return getApp().store.viewItemsMap.get(this.path)?.state as StoreState<TStateToSave>;
+        return getApp().store.viewItemsMap.get(this.path)?.state as StoreState<TStateToSave> | undefined;
     }
 
     /**
@@ -279,7 +278,7 @@ export abstract class BaseView<
     }
 
     getTitle(state?: StoreState<TStateToSave>): string {
-        return i18n.ts(this.title);
+        return i18n.st(this.title);
     }
 
     /**
@@ -500,9 +499,9 @@ export class PageView extends DetailView<PageViewStore, PageViewParams, PageView
 
     getTitle(state?: StoreState<PageViewStateToSave>): string {
         if (this.useViewFieldAsTitle && state?.instance) {
-            const value = state.instance.getViewFieldValue();
+            const value = state.instance.getViewFieldString(false);
             if (value) {
-                return value as string;
+                return value;
             }
         }
         return super.getTitle(state);

@@ -419,7 +419,7 @@ export default class ViewConstructor {
             }
 
             // Set action
-            if (action && isNested) {
+            if (action && isNested && !action.view?.hidden) {
                 parent.actions.set(action.name, action);
                 if (
                     action.isMultiAction &&

@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import moment from 'moment';
-import { i18n } from '@/vstutils/translation';
 import { getApp } from './app-helpers';
 import { LocalSettings } from './localSettings';
 
@@ -659,7 +658,7 @@ export function findClosestPath(paths, current_path) {
  * @deprecated
  */
 export function _translate() {
-    return i18n.t(...arguments);
+    return getApp().i18n.t(...arguments);
 }
 
 /**

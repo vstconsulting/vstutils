@@ -244,3 +244,26 @@ export function openPage(
         return undefined;
     });
 }
+
+/**
+ * Saves user and local settings. If failed, shows error message.
+ * @returns True if any of the settings was changed and successfully saved
+ */
+export async function saveAllSettings() {
+    const app = getApp();
+    let saved = false;
+
+    for (const store of [app.localSettingsStore, app.userSettingsStore]) {
+        if (store.changed) {
+            try {
+                await store.save();
+                saved = true;
+            } catch (e) {
+                app.error_handler.defineErrorAndShow(e);
+                return false;
+            }
+        }
+    }
+
+    return saved;
+}

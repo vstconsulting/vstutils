@@ -71,6 +71,7 @@ signals.once('allViews.created', ({ views }) => {
                 store.setFieldValue({
                     field: 'secret',
                     value: generateBase32String(),
+                    markChanged: false,
                 });
 
                 const codes = [];
@@ -79,7 +80,7 @@ signals.once('allViews.created', ({ views }) => {
                     const code = generateRandomString(RECOVERY_CODE_LENGTH).toLowerCase();
                     codes.push(code.slice(0, half) + '-' + code.slice(half));
                 }
-                store.setFieldValue({ field: 'recovery', value: codes.join(',') });
+                store.setFieldValue({ field: 'recovery', value: codes.join(','), markChanged: false });
             }
         }
 

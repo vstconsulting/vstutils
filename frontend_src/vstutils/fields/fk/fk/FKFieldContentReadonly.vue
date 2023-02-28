@@ -28,15 +28,14 @@
 
 <script setup lang="ts">
     import { computed, toRef } from 'vue';
-    import type { Model } from '@/vstutils/models';
-    import type { FKField, TRepresent } from './FKField';
     import { ensureValueFetched, useQuerySets } from './composables';
+    import { FieldReadonlyPropsDef } from '@/vstutils/fields/base';
 
-    const props = defineProps<{
-        field: FKField;
-        value: TRepresent | null | undefined;
-        data: Record<string, unknown>;
-    }>();
+    import type { Model } from '@/vstutils/models';
+    import type { FieldReadonlyPropsDefType } from '@/vstutils/fields/base';
+    import type { FKField } from './FKField';
+
+    const props = defineProps(FieldReadonlyPropsDef as FieldReadonlyPropsDefType<FKField>);
 
     const { queryset } = useQuerySets(props.field, props.data);
 
@@ -55,7 +54,7 @@
     const href = computed<string>(() => {
         if (fk.value) {
             if (props.field.props.linkGenerator) {
-                return props.field.props.linkGenerator({ value: fk.value, field: props.field }) ?? '';
+                return props.field.props.linkGenerator({ ...props, value: props.value }) ?? '';
             }
             if (queryset.value) {
                 return queryset.value.url + fk.value;

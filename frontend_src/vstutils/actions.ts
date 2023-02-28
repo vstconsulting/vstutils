@@ -23,17 +23,6 @@ export class ActionsManager {
         this.app = app as IAppInitialized;
     }
 
-    requestConfirmation({ title }: { title: string }): Promise<void> {
-        return new Promise((resolve) => {
-            const root = this.app.rootVm;
-            if (typeof root.initConfirmation === 'function') {
-                root.initConfirmation(() => resolve(), title);
-            } else {
-                console.warn('Action confirmation is not available');
-            }
-        });
-    }
-
     get currentView() {
         return this.app.router.currentRoute.meta?.view as IView;
     }
@@ -56,7 +45,7 @@ export class ActionsManager {
         } = args;
 
         if (action.confirmationRequired && !skipConfirmation) {
-            return this.requestConfirmation({ title: action.title }).then(() => {
+            return this.app.initActionConfirmationModal({ title: action.title }).then(() => {
                 args.skipConfirmation = true;
                 return this.execute(args);
             });

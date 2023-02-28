@@ -52,9 +52,7 @@ export function getCentrifugoClient(address?: string, token?: string) {
     return client;
 }
 
-interface IAppRoot extends Vue {
-    initConfirmation(callback: () => void, title: string): void;
-}
+type TAppRoot = InstanceType<typeof AppRoot>;
 
 export interface IApp {
     config: AppConfiguration;
@@ -94,18 +92,22 @@ export interface IApp {
 
     actions: ActionsManager;
 
-    rootVm: IAppRoot | null;
+    rootVm: TAppRoot | null;
 
     darkModeEnabled: boolean;
 
     start(): void;
     mount(target: HTMLElement | string): void;
+
+    initActionConfirmationModal(options: { title: string }): Promise<void>;
+    openReloadPageModal(): void;
+    setLanguage(lang: string): void;
 }
 
 export interface IAppInitialized extends IApp {
     router: VueRouter;
     user: Model;
-    rootVm: IAppRoot;
+    rootVm: TAppRoot;
     localSettingsStore: LocalSettingsStore;
     localSettingsModel: ModelConstructor;
     userSettingsStore: UserSettingsStore;
@@ -153,8 +155,8 @@ export class App implements IApp {
 
     actions: ActionsManager;
 
-    rootVm: IAppRoot | null = null;
-    application: Vue | null = null;
+    rootVm: TAppRoot | null = null;
+    application: unknown | null = null;
 
     constructor(config: AppConfiguration, cache: Cache, vue?: typeof Vue) {
         globalThis.__currentApp = this;
@@ -436,7 +438,7 @@ export class App implements IApp {
             router: this.router,
             i18n: this.i18n,
         });
-        this.application = this.rootVm;
+        this.application = this.rootVm as unknown as Vue;
         signals.emit(APP_AFTER_INIT, { app: this });
         utils.__setApp(this as unknown as IAppInitialized);
     }
@@ -450,5 +452,21 @@ export class App implements IApp {
             throw new Error('Please initialize app first');
         }
         this.rootVm.$mount(target);
+    }
+
+    initActionConfirmationModal({ title }: { title: string }): Promise<void> {
+        return new Promise((resolve) => {
+            if (this.rootVm?.appModals) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+                this.rootVm.appModals!.initActionConfirmationModal(() => resolve(), title);
+            }
+        });
+    }
+
+    openReloadPageModal() {
+        if (this.rootVm?.appModals) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            this.rootVm.appModals!.openReloadPageModal();
+        }
     }
 }

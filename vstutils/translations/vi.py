@@ -62,6 +62,7 @@ TRANSLATION = {
     'Permission denied': 'Quyền bị từ chối',
     'Bad request': 'Yêu cầu không hợp lệ',
     'Go back': 'Quay lại',
+    'Selected instances were successfully removed': 'Các trường hợp đã chọn đã được xóa thành công',
 
     # fields
     'Id': 'định danh',
