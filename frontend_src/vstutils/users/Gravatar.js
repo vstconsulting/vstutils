@@ -1,4 +1,5 @@
 import md5 from 'md5';
+import { getApp } from '@/vstutils/utils';
 
 /**
  * Class, that defines urls to users gravatars.
@@ -15,7 +16,7 @@ export default class Gravatar {
             this.base_url = opt.base_url;
         }
 
-        this.default_gravatar = window.app.api.openapi.info['x-settings'].static_path + 'img/anonymous.png';
+        this.default_gravatar = getApp().api.openapi.info['x-settings'].static_path + 'img/anonymous.png';
     }
     /**
      * Method, that returns url of default gravatar image.

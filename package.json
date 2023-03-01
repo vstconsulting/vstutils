@@ -64,7 +64,8 @@
     "izimodal/jquery": "^3.4.1",
     "jquery-slimscroll/jquery": "^3.4.1",
     "jquery.scrollto/jquery": "^3.4.1",
-    "admin-lte/jquery-validation": "^1.19.5"
+    "admin-lte/jquery-validation": "^1.19.5",
+    "admin-lte/jszip": "^3.10.1"
   },
   "devDependencies": {
     "@babel/core": "^7.16.7",

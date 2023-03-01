@@ -46,7 +46,7 @@
             actions?: Action[];
             sublinks?: Sublink[];
         }>(),
-        { actions: () => [], sublinks: () => [], isContainerFluid: true },
+        { actions: () => [], sublinks: () => [], isContainerFluid: true, showUsedFilters: true },
     );
 
     const app = getApp();

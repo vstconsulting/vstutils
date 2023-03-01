@@ -221,6 +221,7 @@ class DatabasesSection(BaseAppendSection):
 class DBSection(BackendSection):
     types_map = {
         'conn_max_age': ConfigIntSecondsType,
+        'conn_health_checks': ConfigBoolType,
         'atomic_requests': ConfigBoolType,
         'autocommit': ConfigBoolType,
         'disable_server_side_cursors': ConfigBoolType,

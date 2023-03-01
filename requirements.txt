@@ -12,7 +12,7 @@ MarkupSafe==2.0.1  # Fix coreschema
 django-filter==22.1
 django-crispy-forms~=1.14.0
 drf_orjson_renderer~=1.7.1
-ormsgpack==1.2.4
+ormsgpack==1.2.5
 
 # web server
 uvicorn~=0.20.0
