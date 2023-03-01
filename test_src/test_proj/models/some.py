@@ -153,9 +153,9 @@ class OverridenModelWithBinaryFiles(ModelWithBinaryFiles):
             some_binfile=fields.BinFileInStringField(required=False, max_length=2*1024*1024, min_length=1),
             some_namedbinfile=fields.NamedBinaryFileInJsonField(required=False, validators=files_validators),
             some_validatednamedbinimage=fields.NamedBinaryImageInJsonField(required=False, validators=validators),
-            some_namedbinimage=fields.NamedBinaryImageInJsonField(required=False),
+            some_namedbinimage=fields.NamedBinaryImageInJsonField(required=False, background_fill_color='pink'),
             some_multiplenamedbinfile=fields.MultipleNamedBinaryFileInJsonField(required=False),
-            some_multiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(required=False),
+            some_multiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(required=False, background_fill_color='white'),
             some_validatedmultiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(
                 required=False,
                 validators=validators,

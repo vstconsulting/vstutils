@@ -270,6 +270,7 @@
             height: config.height.max || data.height,
             maxWidth: 4096,
             maxHeight: 4096,
+            fillColor: props.field.backgroundFillColor,
         });
         let img = canvas.toDataURL(props.image.mediaType || `image/${format.value}`);
         img = img.replace(/data:\w*\/?\w*;?(base64)?,/, ''); // Remove data url info (data:image/png;base64,)
