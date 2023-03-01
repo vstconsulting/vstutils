@@ -398,6 +398,10 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
 
         if isinstance(field, (fields.NamedBinaryImageInJsonField, fields.MultipleNamedBinaryImageInJsonField)):
             items['x-format'] = FORMAT_NAMED_BIN_IMAGE
+            if field.background_fill_color:
+                if 'x-options' not in items:
+                    items['x-options'] = {}
+                items['x-options']['backgroundFillColor'] = field.background_fill_color
 
         if field.max_content_size:
             items['properties']['content']['maxLength'] = field.max_content_size

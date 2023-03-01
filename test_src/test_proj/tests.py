@@ -1601,6 +1601,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
         expected['some_namedbinfile']['x-validators']['extensions'] = from_api['some_namedbinfile']['x-validators']['extensions']
         expected['some_filefield']['properties']['content']['maxLength'] = from_api['some_filefield']['properties']['content']['maxLength'] = 10000
         expected['some_imagefield']['properties']['content']['minLength'] = from_api['some_imagefield']['properties']['content']['minLength'] = 7000
+        expected['some_namedbinimage']['x-options'] = {'backgroundFillColor': 'pink'}
+        expected['some_multiplenamedbinimage']['items']['x-options'] = {'backgroundFillColor': 'white'}
         self.assertDictEqual(expected, from_api)
         # Test swagger ui
         client = self._login()

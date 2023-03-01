@@ -17,13 +17,13 @@ import type { InnerData, RepresentData } from '@/vstutils/utils';
  * - mediaType - string - MIME type of file
  * - content - base64 string - content of file.
  */
-export class NamedBinaryFileField
-    extends BaseField<NamedFile, NamedFile, FileFieldXOptions | undefined>
+export class NamedBinaryFileField<XOptions extends FileFieldXOptions = FileFieldXOptions>
+    extends BaseField<NamedFile, NamedFile, XOptions>
     implements IFileField
 {
     allowedMediaTypes: string[] | undefined;
 
-    constructor(options: FieldOptions<FileFieldXOptions | undefined, NamedFile>) {
+    constructor(options: FieldOptions<XOptions, NamedFile>) {
         super(options);
 
         this.allowedMediaTypes = parseAllowedMediaTypes(options);
