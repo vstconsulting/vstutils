@@ -78,7 +78,8 @@ export interface IApp {
     languages: Language[] | null;
     user: Model | null;
 
-    additionalRootMixins: any[];
+    appRootComponent: ComponentOptions<Vue>;
+    additionalRootMixins: ComponentOptions<Vue>[];
 
     views: Map<string, IView>;
 

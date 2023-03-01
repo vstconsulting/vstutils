@@ -122,10 +122,12 @@ export async function loadImage(url: string): Promise<HTMLImageElement> {
 }
 
 export function deferredPromise<T>() {
-    let resolve, reject;
+    let resolve: (value: T) => void;
+    let reject: (reason?: any) => void;
     const promise = new Promise<T>((res, rej) => {
         [resolve, reject] = [res, rej];
     });
+    // @ts-expect-error - We know that resolve and reject are defined
     return { promise, reject, resolve };
 }
 
