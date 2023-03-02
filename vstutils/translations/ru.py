@@ -63,6 +63,7 @@ TRANSLATION = {
     'Bad request': 'Неверный запрос',
     'Go back': 'Вернуться назад',
     'Selected instances were successfully removed': 'Выбранные объекты были успешно удалены',
+    'Cannot parse CSV file in field "{fieldName}"': 'Не удалось разобрать CSV файл в поле "{fieldName}"',
 
     # fields
     'Id': 'Идентификатор',

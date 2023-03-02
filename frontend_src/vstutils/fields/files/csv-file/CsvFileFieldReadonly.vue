@@ -9,15 +9,16 @@
                 <label for="checkbox">{{ $t('Download with headers') }}</label>
             </div>
         </div>
-        <DataTable :config="tableConfig" :min-column-width="field.minColumnWidth" :rows="rows" readonly />
+        <DataTable :model="rowModel" :min-column-width="field.minColumnWidth" :rows="rows" readonly />
     </div>
 </template>
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import type { CsvFileField } from './index';
-    import type { ExtractRepresent } from '../../base';
     import DataTable from './DataTable.vue';
+
+    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type { CsvFileField } from './index';
 
     const props = defineProps<{
         field: CsvFileField;
@@ -25,36 +26,17 @@
     }>();
 
     const withHeader = ref(false);
-    const tableConfig = props.field.getTableConfig();
-
-    const rows = computed(() => {
-        if (!props.value) return [];
-        const columnsNames = tableConfig.slice(1).map((column) => column.prop);
-        const parsed = props.field.parseFile(props.value as string);
-        const value = parsed.data.map((el) => {
-            return el.reduce((acc: Record<string, unknown>, n, i) => {
-                acc[columnsNames[i]] = n;
-                return acc;
-            }, {});
-        });
-        return value;
-    });
+    const rowModel = computed(() => props.field.rowModel!);
+    const rows = computed(() => props.value ?? []);
 
     function download() {
-        let data = props.value;
-
-        if (withHeader.value) {
-            const header = tableConfig
-                .slice(1)
-                .map((el) => el.name)
-                .join(props.field.delimiter as string);
-            data = `${header}\n${data}`;
+        if (props.value) {
+            const data = props.field.unparse(props.value, !withHeader.value);
+            const blob = new Blob([data as string], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            window.open(url);
+            URL.revokeObjectURL(url);
         }
-
-        const blob = new Blob([data as string], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        window.open(url);
-        window.URL.revokeObjectURL(url);
     }
 </script>
 

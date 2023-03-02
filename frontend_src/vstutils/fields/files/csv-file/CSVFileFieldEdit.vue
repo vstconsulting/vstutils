@@ -12,7 +12,7 @@
             />
             <div class="m-0">
                 <DataTable
-                    :config="tableConfig"
+                    :model="rowModel"
                     :min-column-width="field.minColumnWidth"
                     :rows="rows"
                     @change="emit('set-value', $event)"
@@ -30,22 +30,17 @@
 <script setup lang="ts">
     import { computed, ref } from 'vue';
 
-    import { guiPopUp } from '@/vstutils/popUp';
     import { i18n } from '@/vstutils/translation';
     import { readFileAsText } from '@/vstutils/utils';
+    import { FieldEditPropsDef } from '@/vstutils/fields/base';
     import ConfirmModal from '@/vstutils/components/common/ConfirmModal.vue';
     import DataTable from './DataTable.vue';
     import FileFieldSelector from '../FileFieldSelector.vue';
 
-    import type { ParseResult } from 'papaparse';
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
     import type { CsvFileField } from './index';
 
-    const props = defineProps<{
-        field: CsvFileField;
-        value: ExtractRepresent<CsvFileField> | null | undefined;
-        hideable: boolean;
-    }>();
+    const props = defineProps(FieldEditPropsDef as FieldEditPropsDefType<CsvFileField>);
 
     const emit = defineEmits<{
         (event: 'set-value', value: ExtractRepresent<CsvFileField> | null | undefined): void;
@@ -53,24 +48,10 @@
         (event: 'clear'): void;
     }>();
 
-    const confirmationModalRef = ref<any>(null);
+    const confirmationModalRef = ref<InstanceType<typeof ConfirmModal>>();
 
-    let parsed: ParseResult<unknown[]> = {
-        data: [],
-        errors: [],
-        meta: {
-            delimiter: '',
-            linebreak: '',
-            aborted: false,
-            truncated: false,
-            cursor: 0,
-        },
-    };
-    const tableConfig = props.field.getTableConfig();
-
-    const rows = computed(() => {
-        return (props.value || []) as Record<string, unknown>[];
-    });
+    const rowModel = computed(() => props.field.rowModel!);
+    const rows = computed(() => props.value || []);
     const requiredErrorTextVar = computed(() => {
         return `--required-error-text: "${i18n.tc('Column is required!')}"`;
     });
@@ -79,14 +60,14 @@
     });
 
     function clear() {
-        confirmationModalRef.value.openModal();
+        confirmationModalRef.value!.openModal();
     }
     function confirmClear() {
         emit('clear');
-        confirmationModalRef.value.closeModal();
+        confirmationModalRef.value!.closeModal();
     }
     function rejectClear() {
-        confirmationModalRef.value.closeModal();
+        confirmationModalRef.value!.closeModal();
     }
     async function updateFile(file: File) {
         if (!file) {
@@ -94,20 +75,10 @@
             return;
         }
         const content = await readFileAsText(file);
-        const columnsNames = tableConfig.slice(1).map((column) => column.prop);
-        parsed = props.field.parseFile(content);
-        if (parsed.errors.length > 0) {
-            guiPopUp.error();
-            console.error(parsed);
-            return;
+        const data = props.field.parseFile(content);
+        if (data) {
+            emit('set-value', data);
         }
-        const value = parsed.data.map((el) => {
-            return el.reduce((acc: Record<string, unknown>, n, i) => {
-                acc[columnsNames[i]] = n;
-                return acc;
-            }, {});
-        });
-        emit('set-value', value);
     }
 </script>
 
