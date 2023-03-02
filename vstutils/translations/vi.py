@@ -63,6 +63,7 @@ TRANSLATION = {
     'Bad request': 'Yêu cầu không hợp lệ',
     'Go back': 'Quay lại',
     'Selected instances were successfully removed': 'Các trường hợp đã chọn đã được xóa thành công',
+    'Cannot parse CSV file in field "{fieldName}"': 'Không thể phân tích tệp CSV trong trường "{fieldName}"',
 
     # fields
     'Id': 'định danh',

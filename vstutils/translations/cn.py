@@ -63,6 +63,7 @@ TRANSLATION = {
     'Bad request': '错误请求',
     'Go back': '返回',
     'Selected instances were successfully removed': '选定的实例已成功删除',
+    'Cannot parse CSV file in field "{fieldName}"': '无法解析字段“{fieldName}”中的CSV文件',
 
     # fields
     'Id': '标识符',
