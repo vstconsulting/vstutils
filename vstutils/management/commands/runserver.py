@@ -22,6 +22,11 @@ class Command(BaseCommand):
             action='store_false', dest='access_log', default=True,
             help="Disable access logs.",
         )
+        parser.add_argument(
+            '--no-reload',
+            action='store_false', dest='reload', default=True,
+            help="Disable autoreload for project and lib files.",
+        )
 
     def handle(self, *args, **opts):
         super().handle(*args, **opts)
@@ -30,11 +35,20 @@ class Command(BaseCommand):
         if not host:
             host = '127.0.0.1'
 
+        reload = opts.pop('reload')
+
         uvicorn.run(
-            app=import_string(settings.ASGI_APPLICATION),
+            app=':'.join(settings.ASGI_APPLICATION.rsplit('.', maxsplit=1)),
             access_log=opts['access_log'],
             log_level=self.LOG_LEVEL.lower(),
             interface='asgi3',
             host=host,
             port=int(port),
+            reload=reload,
+            workers=1,
+            reload_dirs=list({
+                settings.VSTUTILS_DIR,
+                settings.VST_PROJECT_DIR,
+                settings.VST_PROJECT_LIB_DIR,
+            }) if reload else None,
         )
