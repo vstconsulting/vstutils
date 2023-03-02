@@ -1,6 +1,5 @@
 import uvicorn
 from django.conf import settings
-from django.utils.module_loading import import_string
 from django.core.management.commands import runserver
 
 from ._base import BaseCommand

@@ -81,7 +81,6 @@ from .models import (
     ModelForCheckFileAndImageField,
     ModelWithNestedModels,
     ProtectedBySignal,
-    ModelWithUuidFK,
 )
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
@@ -228,23 +227,29 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
             call_command('runserver')
             self.assertEqual(mock_urun.call_count, 1)
             mock_urun.assert_called_with(
-                app=application,
+                app='vstutils.asgi:application',
                 access_log=True,
                 interface='asgi3',
                 log_level=settings.LOG_LEVEL.lower(),
                 host='127.0.0.1',
                 port=8080,
+                reload=True,
+                workers=1,
+                reload_dirs=[settings.VSTUTILS_DIR, settings.VST_PROJECT_DIR]
             )
 
             call_command('runserver', addrport='0.0.0.0:80')
             self.assertEqual(mock_urun.call_count, 2)
             mock_urun.assert_called_with(
-                app=application,
+                app='vstutils.asgi:application',
                 access_log=True,
                 interface='asgi3',
                 log_level=settings.LOG_LEVEL.lower(),
                 host='0.0.0.0',
                 port=80,
+                reload=True,
+                workers=1,
+                reload_dirs=[settings.VSTUTILS_DIR, settings.VST_PROJECT_DIR]
             )
 
     def test_dockerrun(self):
