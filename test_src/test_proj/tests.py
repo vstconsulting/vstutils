@@ -235,7 +235,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
                 port=8080,
                 reload=True,
                 workers=1,
-                reload_dirs=[settings.VSTUTILS_DIR, settings.VST_PROJECT_DIR]
+                reload_dirs=sorted([settings.VST_PROJECT_DIR, settings.VSTUTILS_DIR]),
             )
 
             call_command('runserver', addrport='0.0.0.0:80')
@@ -249,7 +249,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
                 port=80,
                 reload=True,
                 workers=1,
-                reload_dirs=[settings.VSTUTILS_DIR, settings.VST_PROJECT_DIR]
+                reload_dirs=sorted([settings.VST_PROJECT_DIR, settings.VSTUTILS_DIR]),
             )
 
     def test_dockerrun(self):

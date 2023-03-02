@@ -45,7 +45,7 @@ class Command(BaseCommand):
             port=int(port),
             reload=reload,
             workers=1,
-            reload_dirs=list({
+            reload_dirs=sorted({
                 settings.VSTUTILS_DIR,
                 settings.VST_PROJECT_DIR,
                 settings.VST_PROJECT_LIB_DIR,
