@@ -1,0 +1,55 @@
+{
+    "$schema": "https://json.schemastore.org/swagger-2.0.json",
+    "definitions": {
+        "Category": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "parent": {"type": "integer"},
+                "name": {"type": "integer"}
+            }
+        }
+    },
+    "paths": {
+        "/category/": {
+            "get": {
+                "operationId": "category_list",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Category"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "parameters": []
+        }
+    }
+}
