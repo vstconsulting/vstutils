@@ -422,7 +422,7 @@ kwargs = dict(
         'vstutils/static/bundle/.*\.js$'
     ],
     install_requires=[
-        "django~=" + (os.environ.get('DJANGO_DEP', "") or "4.1.6"),
+        "django~=" + (os.environ.get('DJANGO_DEP', "") or "4.1.7"),
     ]
     + requirements
     + load_requirements('requirements-doc.txt'),
@@ -433,7 +433,7 @@ kwargs = dict(
         'doc': load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
         'stubs': load_requirements('requirements-stubs.txt'),
-        'pil': ['Pillow~=8.4.0;python_version<"3.7"', 'Pillow~=9.4.0;python_version>"3.6"'],
+        'pil': ['Pillow~=9.4.0'],
         'boto3': [
             i.replace('libcloud', 'libcloud,boto3')
             for i in requirements
@@ -467,7 +467,7 @@ kwargs = dict(
 
 all_deps = []
 for key, deps in kwargs['extras_require'].items():
-    if key not in ('sqs', 'librabbitmq'):
+    if key not in ('sqs', 'librabbitmq', 'stubs'):
         all_deps += deps
 
 kwargs['extras_require']['all'] = all_deps

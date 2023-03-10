@@ -1,7 +1,7 @@
 # Packages needed for test
-coverage~=7.1.0
+coverage~=7.2.1
 fakeldap==0.6.1
 tblib~=1.7.0
-beautifulsoup4==4.11.1
+beautifulsoup4==4.11.2
 dj-inmemorystorage~=2.1.0
 httpx~=0.23.3
