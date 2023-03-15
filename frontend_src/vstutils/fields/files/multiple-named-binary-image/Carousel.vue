@@ -5,7 +5,7 @@
                 v-for="(item, idx) in preparedItems"
                 :key="idx"
                 style="cursor: pointer"
-                @click.native="onClick(item)"
+                @click.native="onClick(idx)"
             >
                 <div class="splide__container">
                     <div class="splide__content" style="overflow: hidden">
@@ -26,14 +26,16 @@
                 </div>
             </splide-slide>
         </splide>
-        <BootstrapModal ref="modalRef" :title="$ts(name)">
-            <img
-                v-if="activeItem"
-                style="max-height: 80vh"
-                :src="activeItem.imgSrc"
-                :alt="activeItem.name ?? ''"
-                class="image-field-content"
-            />
+        <BootstrapModal ref="modalRef" :title="$ts(name)" render-body-when-shown>
+            <splide class="modal-slider" :options="{ rewind: true, perPage: 1, start: selectedImageIdx }">
+                <splide-slide v-for="(item, idx) in preparedItems" :key="idx">
+                    <img
+                        :src="item.imgSrc"
+                        :alt="item.name ?? ''"
+                        style="max-width: 100%; max-height: 100%"
+                    />
+                </splide-slide>
+            </splide>
         </BootstrapModal>
     </div>
 </template>
@@ -46,8 +48,6 @@
     import type { NamedFile } from '../named-binary-file';
     import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
-    type InternalItem = NamedFile & { imgSrc: string };
-
     const props = defineProps<{
         items: NamedFile[];
         name: string;
@@ -57,8 +57,9 @@
         (e: 'remove-file', index: number): void;
     }>();
 
-    const splideRef = ref<any>(null);
-    const modalRef = ref<any>(null);
+    const splideRef = ref<any>();
+    const modalRef = ref<InstanceType<typeof BootstrapModal>>();
+    const selectedImageIdx = ref(0);
 
     const preparedItems = computed(() => {
         return props.items.map((i) => {
@@ -80,11 +81,9 @@
         width: '90vw',
     };
 
-    let activeItem = ref<{ imgSrc: string; name?: string | null } | null>(null);
-
-    function onClick(item: InternalItem) {
-        activeItem.value = { imgSrc: item.imgSrc, name: item.name };
-        modalRef.value.open();
+    function onClick(idx: number) {
+        selectedImageIdx.value = idx;
+        modalRef.value!.open();
     }
 
     function updateOptions() {
@@ -147,5 +146,19 @@
         transition: transform 0.05s ease-in-out;
         transform: scale(1.05);
         background-color: transparent;
+    }
+
+    .modal-slider {
+        width: 100%;
+
+        img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        & ::v-deep .splide__pagination__page.is-active {
+            border: 1px solid gray;
+        }
     }
 </style>
