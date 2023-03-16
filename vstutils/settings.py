@@ -404,6 +404,7 @@ class DjangoEnv(environ.Env):
         'redis': 'django.core.cache.backends.redis.RedisCache',
         'rediss': 'django.core.cache.backends.redis.RedisCache',
     }
+    BOOLEAN_TRUE_STRINGS = environ.Env.BOOLEAN_TRUE_STRINGS + ('enable', 'ENABLE')
 
 
 env = DjangoEnv(
@@ -420,51 +421,53 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'debug': env('DEBUG'),
             'allowed_hosts': ('*',),
             'timezone': env('TIMEZONE'),
-            'first_day_of_week': 0,
+            'first_day_of_week': env.int(f'{ENV_NAME}_FIRST_DAY_OF_WEEK', default=0),
             'log_level': env('DJANGO_LOG_LEVEL'),
-            'enable_admin_panel': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_ADMIN_PANEL', 'false')),
-            'enable_registration': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_REGISTRATION', 'false')),
+            'enable_admin_panel': env.bool(f'{ENV_NAME}_ENABLE_ADMIN_PANEL', default=False),
+            'enable_registration': env.bool(f'{ENV_NAME}_ENABLE_REGISTRATION', default=False),
             'enable_custom_translations': False,
-            'ldap-server': None,
-            'ldap-default-domain': '',
-            'ldap-auth_format': 'cn=<username>,<domain>',
-            'language_cookie_name': 'lang',
-            'agreement_terms_path': f'/etc/{VST_PROJECT_LIB}/terms.md',
-            'consent_to_processing_path': f'/etc/{VST_PROJECT_LIB}/consent_to_processing.md',
+            'ldap-server': env.str(f'{ENV_NAME}_LDAP_CONNECTION', default=None),
+            'ldap-default-domain': env.str(f'{ENV_NAME}_LDAP_DOMAIN', default=''),
+            'ldap-auth_format': env.str(f'{ENV_NAME}_LDAP_AUTH_FORMAT', default='cn=<username>,<domain>'),
+            'language_cookie_name': env.str(f'{ENV_NAME}_LANGUAGE_COOKIE_NAME', default='lang'),
+            'agreement_terms_path': env.str(f'{ENV_NAME}_TERMS_PATH', default=f'/etc/{VST_PROJECT_LIB}/terms.md'),
+            'consent_to_processing_path': env.str(
+                f'{ENV_NAME}_CONSENT_TO_PROCESSING_PATH', default=f'/etc/{VST_PROJECT_LIB}/consent_to_processing.md'
+            ),
         },
         'web': {
-            'allow_cors': False,
-            'cors_allowed_origins': [],
-            'cors_allowed_origins_regexes': [],
-            'cors_expose_headers': [],
-            'cors_preflight_max_age': '1d',
-            'session_timeout': '2w',
+            'allow_cors': env.bool(f'{ENV_NAME}_WEB_ALLOW_CORS', default=False),
+            'cors_allowed_origins': env.list(f'{ENV_NAME}_WEB_CORS_ALLOWED_ORIGINS', default=[]),
+            'cors_allowed_origins_regexes': env.list(f'{ENV_NAME}_WEB_CORS_ALLOWED_ORIGINS_REGEXES', default=[]),
+            'cors_expose_headers': env.list(f'{ENV_NAME}_WEB_CORS_EXPOSE_HEADERS', default=[]),
+            'cors_preflight_max_age': env.str(f'{ENV_NAME}_WEB_CORS_PREFLIGHT_MAX_AGE', default='1d'),
+            'session_timeout': env.str(f"{ENV_NAME}_SESSION_TIMEOUT", default='2w'),
             'static_files_url': '/static/',
-            'page_limit': 20,
-            'rest_page_limit': 1000,
+            'page_limit': env.int(f'{ENV_NAME}_WEB_PAGE_LIMIT', default=20),
+            'rest_page_limit': env.int(f'{ENV_NAME}_WEB_REST_PAGE_LIMIT', default=1000),
             'rest_swagger_description': (
                     vst_project_module.__doc__ or vst_lib_module.__doc__ or ''
             ).replace('\n', '\\n').replace('\r', '\\r'),
             'public_openapi': False,
-            'openapi_cache_timeout': 120,
-            'enable_gravatar': True,
-            'request_max_size': 2621440,
+            'openapi_cache_timeout': env.int(f'{ENV_NAME}_WEB_OPENAPI_CACHE_TIMEOUT', default=120),
+            'enable_gravatar': env.bool(f'{ENV_NAME}_WEB_ENABLE_GRAVATAR', default=True),
+            'request_max_size': env.int(f'{ENV_NAME}_WEB_REQUEST_MAX_SIZE', default=2621440),
             'x_frame_options': 'SAMEORIGIN',
-            'use_x_forwarded_host': False,
-            'use_x_forwarded_port': False,
-            'password_reset_timeout_days': 1,
-            'secure_browser_xss_filter': False,
-            'secure_content_type_nosniff': False,
-            'secure_hsts_include_subdomains': False,
-            'secure_hsts_preload': False,
-            'secure_hsts_seconds': 0,
-            'health_throttle_rate': 60,
-            'metrics_throttle_rate': 120,
+            'use_x_forwarded_host': env.bool(f'{ENV_NAME}_WEB_USE_X_FORWARDED_HOST', default=False),
+            'use_x_forwarded_port': env.bool(f'{ENV_NAME}_WEB_USE_X_FORWARDED_PORT', default=False),
+            'password_reset_timeout_days': env.int(f'{ENV_NAME}_WEB_PASSWORD_RESET_TIMEOUT_DAYS', default=1),
+            'secure_browser_xss_filter': env.bool(f'{ENV_NAME}_WEB_SECURE_BROWSER_XSS_FILTER', default=False),
+            'secure_content_type_nosniff': env.bool(f'{ENV_NAME}_WEB_SECURE_CONTENT_TYPE_NOSNIFF', default=False),
+            'secure_hsts_include_subdomains': env.bool(f'{ENV_NAME}_WEB_SECURE_HSTS_INCLUDE_SUBDOMAINS', default=False),
+            'secure_hsts_preload': env.bool(f'{ENV_NAME}_WEB_SECURE_HSTS_PRELOAD', default=False),
+            'secure_hsts_seconds': env.int(f'{ENV_NAME}_WEB_SECURE_HSTS_SECONDS', default=0),
+            'health_throttle_rate': env.int(f'{ENV_NAME}_WEB_HEALTH_THROTTLE_RATE', default=60),
+            'metrics_throttle_rate': env.int(f'{ENV_NAME}_WEB_METRICS_THROTTLE_RATE', default=120),
             'bulk_threads': 3,
             'max_tfa_attempts': ConfigIntType(os.getenv(f'{ENV_NAME}_MAX_TFA_ATTEMPTS', 5)),
             'etag_default_timeout': ConfigIntSecondsType(os.getenv(f'{ENV_NAME}_ETAG_TIMEOUT', '1d')),
-            'allow_auto_image_resize': True,
-            'enable_metrics': True,
+            'allow_auto_image_resize': env.bool(f'{ENV_NAME}_WEB_ALLOW_AUTO_IMAGE_RESIZE', default=True),
+            'enable_metrics': env.bool(f'{ENV_NAME}_WEB_ENABLE_METRICS', default=True),
         },
         'database': {
             **env.db(default=f'sqlite:///{KWARGS["PROG"]}/db.{KWARGS["PROG_NAME"]}.sqlite3'),
@@ -511,28 +514,28 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'name': 'System Administrator'
         },
         'uwsgi': {
-            'daemon': True
+            'daemon': env.bool(f'{ENV_NAME}_DAEMON', default=True)
         },
         'rpc': {
-            'concurrency': 4,
-            'prefetch_multiplier': 1,
-            'max_tasks_per_child': 1,
-            'heartbeat': 10,
-            'results_expiry_days': 1,
-            'create_instance_attempts': 10,
+            'concurrency': env.int(f'{ENV_NAME}_RPC_CONCURRENCY', default=4),
+            'prefetch_multiplier': env.int(f'{ENV_NAME}_RPC_PREFETCH_MULTIPLIER', default=1),
+            'max_tasks_per_child': env.int(f'{ENV_NAME}_RPC_MAX_TASKS_PER_CHILD', default=1),
+            'heartbeat': env.int(f'{ENV_NAME}_RPC_HEARTBEAT', default=10),
+            'results_expiry_days': env.int(f'{ENV_NAME}_RPC_RESULTS_EXPIRY_DAYS', default=1),
+            'create_instance_attempts': env.int(f'{ENV_NAME}_RPC_CREATE_INSTANCE_ATTEMPTS', default=10),
             'default_delivery_mode': "persistent",
             'broker_transport_options': {},
-            'enable_worker': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_WORKER', 'True')),
-            'task_send_sent_event': True,
-            'worker_send_task_events': True,
+            'enable_worker': env.bool(f'{ENV_NAME}_ENABLE_WORKER', default=env.bool('WORKER', default=True)),
+            'task_send_sent_event': env.bool(f'{ENV_NAME}_RPC_TASK_SEND_SENT_EVENT', default=True),
+            'worker_send_task_events': env.bool(f'{ENV_NAME}_RPC_WORKER_SEND_TASK_EVENTS', default=True),
         },
         'worker': {
             'app': os.getenv('VST_CELERY_APP', '{PROG_NAME}.wapp:app'),
             'loglevel': '{this[main][log_level]}',
-            'pidfile': '/run/{PROG_NAME}_worker.pid',
+            'pidfile': env.str(f'{ENV_NAME}_WORKER_PID', default='/run/{PROG_NAME}_worker.pid'),
             'autoscale': '{this[rpc][concurrency]},1',
             'hostname': f'{pwd.getpwuid(os.getuid()).pw_name}@%h',
-            'beat': True
+            'beat': env.bool(f'{ENV_NAME}_SCHEDULER_ENABLE', default=True)
         },
         'storages': {
             'filesystem': {
@@ -812,9 +815,6 @@ PASSWORD_RESET_TIMEOUT_DAYS: int = web['password_reset_timeout_days']
 ROOT_URLCONF: _t.Text = os.getenv('VST_ROOT_URLCONF', f'{VST_PROJECT}.urls')
 
 # wsgi appilcation settings
-WSGI: _t.Text = os.getenv('VST_WSGI', f'{VST_PROJECT}.wsgi')
-WSGI_APPLICATION: _t.Text = f"{WSGI}.application"
-UWSGI_APPLICATION: _t.Text = f'{WSGI}:application'
 UWSGI_WORKER_PATH: _t.Text = f'{VSTUTILS_DIR}/asgi_worker.py'
 
 ASGI: _t.Text = os.getenv('VST_ASGI', 'vstutils.asgi')
