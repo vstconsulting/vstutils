@@ -2075,6 +2075,15 @@ class OpenapiEndpointTestCase(BaseTestCase):
                     'context_depend': {
                         'minLength': 1,
                         'type': 'string',
+                    },
+                    'another_serializer': {
+                        'required': ['list_field'],
+                        'type': 'object',
+                        'properties': {
+                            'list_field': {'type': 'array', 'items': {'type': 'string', 'minLength': 1}}
+                        },
+                        'x-properties-groups': {'': ['list_field']},
+                        'x-view-field-name': 'list_field',
                     }
                 },
             },
