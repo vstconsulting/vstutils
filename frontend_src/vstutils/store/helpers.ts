@@ -13,7 +13,6 @@ import {
     toRef,
     watch,
 } from 'vue';
-import { useRoute } from 'vue-router/composables';
 
 import type { APIResponse } from '@/vstutils/api';
 import { useAutoUpdate } from '@/vstutils/autoupdate';
@@ -489,13 +488,16 @@ export const createActionStore = (view: ActionView) => {
     };
 };
 
-export function useViewStore<T extends IView>(view: T, options: { watchQuery?: boolean } = {}): ViewStore<T> {
+/**
+ * @internal
+ */
+export async function createViewStore<T extends IView>(
+    view: T,
+    options: { watchQuery?: boolean } = {},
+): Promise<ViewStore<T>> {
     const app = getApp();
-    const route = useRoute();
+    const route = app.router.currentRoute;
     const store = view._createStore() as ViewStore<T>;
-    void store.fetchData();
-
-    void app.store.setPage(store);
 
     provide('view', view);
 
@@ -514,7 +516,21 @@ export function useViewStore<T extends IView>(view: T, options: { watchQuery?: b
         }
     });
 
+    try {
+        await app.store.setPage(store);
+        // eslint-disable-next-line no-empty
+    } catch {}
+
+    try {
+        await store.fetchData();
+        // eslint-disable-next-line no-empty
+    } catch {}
+
     return store;
+}
+
+export function useViewStore<T extends IView>(): ViewStore<T> {
+    return getApp().store.page as ViewStore<T>;
 }
 
 export const onRouterBeforeEach = (() => {

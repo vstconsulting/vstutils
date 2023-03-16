@@ -51,13 +51,10 @@
     import { computed, ref, toRef, watch } from 'vue';
     import { useViewStore } from '@/vstutils/store';
     import { copyToClipboard } from '@/vstutils/utils';
-    import { ViewPropsDef } from '@/vstutils/views';
 
-    import type { PageEditView, ViewPropsDefType } from '@/vstutils/views';
+    import type { PageEditView } from '@/vstutils/views';
 
-    const props = defineProps(ViewPropsDef as ViewPropsDefType<PageEditView>);
-
-    const store = useViewStore(props.view);
+    const store = useViewStore<PageEditView>();
 
     const qrcode = ref('');
 

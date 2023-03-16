@@ -1,10 +1,17 @@
-import type { PropType } from 'vue';
 import { set, defineComponent, h } from 'vue';
-import type { Field } from '@/vstutils/fields/base';
+
+import { FieldReadonlyEmitsDef, FieldReadonlyPropsDef } from '@/vstutils/fields/base';
 import { BaseFieldMixin } from '@/vstutils/fields/base';
 import ArrayFieldEdit from './ArrayFieldEdit.vue';
-import type ArrayField from './ArrayField';
+
 import type { VNode } from 'vue';
+import type {
+    Field,
+    FieldReadonlyEmitsDefType,
+    FieldReadonlyPropsDefType,
+    SetFieldValueOptions,
+} from '@/vstutils/fields/base';
+import type ArrayField from './ArrayField';
 
 const NOT_INLINE_FIELDS = ['textarea', 'uri'];
 
@@ -20,30 +27,25 @@ function isInline(field: Field) {
 
 function createReadOnlyComponent(type: string) {
     return defineComponent({
-        props: {
-            field: { type: Object as PropType<ArrayField>, required: true },
-            data: { type: Object as PropType<Record<string, unknown>>, required: true },
-            value: { type: Array, default: undefined },
-        },
-
-        emits: ['set-value'],
+        props: FieldReadonlyPropsDef as FieldReadonlyPropsDefType<ArrayField>,
+        emits: FieldReadonlyEmitsDef as FieldReadonlyEmitsDefType<ArrayField>,
 
         setup(props, { emit }) {
-            function setItemValue(options: { value: unknown; [key: string]: unknown }, idx: number) {
-                set(props.value, idx, options.value);
-                emit('set-value', props.value, options);
+            function setItemValue(options: SetFieldValueOptions, idx: number) {
+                const value = props.value ?? [];
+                set(value, idx, options.value);
+                emit('set-value', value, options);
             }
             function renderItem(item: unknown, idx: number, attrs = {}): VNode {
                 return h(props.field.itemField?.getComponent(), {
                     props: {
                         field: props.field.itemField,
-                        data: { [props.field.name]: item },
+                        data: { ...props.data, [props.field.name]: item },
                         type,
                         hideTitle: true,
                     },
                     on: {
-                        'set-value': (options: { value: unknown; [key: string]: unknown }) =>
-                            setItemValue(options, idx),
+                        'set-value': (options: SetFieldValueOptions) => setItemValue(options, idx),
                     },
                     ...attrs,
                 });
@@ -67,8 +69,8 @@ function createReadOnlyComponent(type: string) {
             }
 
             return isInline(props.field.itemField!)
-                ? () => renderInline(props.value)
-                : () => renderBlocks(props.value);
+                ? () => renderInline(props.value ?? [])
+                : () => renderBlocks(props.value ?? []);
         },
     });
 }

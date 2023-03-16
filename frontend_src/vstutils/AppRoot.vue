@@ -15,13 +15,7 @@
         </aside>
 
         <div class="content-wrapper">
-            <EntityView
-                v-bind="entityViewProps"
-                @execute-action="
-                    (action) => $app.actions.execute({ action, instance: $app.store.page.instance })
-                "
-                @open-sublink="$u.openSublink($event, $app.store.page.instance)"
-            >
+            <EntityView :key="$route.path">
                 <router-view :key="$route.path" ref="currentViewComponent" />
             </EntityView>
         </div>
@@ -114,29 +108,6 @@
                 }
 
                 return menu;
-            },
-            entityViewProps() {
-                const store = this.$app.store.page;
-
-                if (store) {
-                    return {
-                        error: store.error,
-                        loading: store.loading,
-                        response: store.response,
-                        view: store.view,
-                        actions: store.actions,
-                        sublinks: store.sublinks,
-                    };
-                }
-
-                return {
-                    error: null,
-                    loading: false,
-                    response: true,
-                    view: null,
-                    actions: [],
-                    sublinks: [],
-                };
             },
             showBackButton() {
                 return this.$route.name !== 'home' && this.$route.meta?.view.showBackButton;

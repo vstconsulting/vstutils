@@ -252,7 +252,7 @@ export class BaseModel implements Model {
                 return value.getViewFieldString();
             }
             if (value && typeof value === 'object') {
-                value = ('name' in value && value.name) || ('title' in value && value.title);
+                value = ('name' in value && value.name) || ('title' in value && value.title) || undefined;
             }
             if (value === null || value === undefined) {
                 return '';
