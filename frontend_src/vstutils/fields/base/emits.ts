@@ -1,6 +1,6 @@
 import type { ObjectEmitsOptions } from 'vue/types/v3-setup-context';
 import type { Field } from './BaseField';
-import type { SetFieldValueOptions, ExtractRepresent } from './types';
+import type { SetFieldValueOptions, ExtractRepresent, SetFieldValueParams } from './types';
 
 // --- Component emits ---
 
@@ -19,7 +19,7 @@ export const FieldEmitsNames = Object.keys(FieldEmitsDef) as unknown as (keyof F
 
 function createEditFieldEmitsDef<T extends Field>() {
     return {
-        'set-value': (value: ExtractRepresent<T> | null | undefined) => true,
+        'set-value': (value: ExtractRepresent<T> | null | undefined, params?: SetFieldValueParams) => true,
         'hide-field': () => true,
         clear: () => true,
     } satisfies ObjectEmitsOptions;
@@ -35,7 +35,7 @@ export const FieldEditEmitsNames = Object.keys(
 
 function createReadonlyFieldEmitsDef<T extends Field>() {
     return {
-        'set-value': (value: ExtractRepresent<T> | null | undefined) => true,
+        'set-value': (value: ExtractRepresent<T> | null | undefined, params?: SetFieldValueParams) => true,
     } satisfies ObjectEmitsOptions;
 }
 

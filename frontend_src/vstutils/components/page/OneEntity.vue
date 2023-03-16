@@ -30,7 +30,7 @@
 
     const props = defineProps(ViewPropsDef as ViewPropsDefType<DetailView>);
 
-    const store = useViewStore(props.view, { watchQuery: true });
+    const store = useViewStore<DetailView>();
 
     const readOnly = computed(() => props.view.type === ViewTypes.PAGE);
     const hideReadOnly = computed(() => props.view.hideReadonlyFields);

@@ -51,10 +51,7 @@ export const NestedObjectFieldMixin = defineComponent({
         }
 
         function renderDetail() {
-            return [
-                h(BaseFieldLabel, {
-                    props: { field: props.field, error: props.error, type: props.type },
-                }),
+            const children = [
                 h(ModelFields, {
                     props: {
                         editable: props.type === 'edit' && !props.field.readOnly,
@@ -67,6 +64,14 @@ export const NestedObjectFieldMixin = defineComponent({
                     on: { 'set-value': setFieldValue },
                 }),
             ];
+            if (!props.hideTitle) {
+                children.unshift(
+                    h(BaseFieldLabel, {
+                        props: { field: props.field, error: props.error, type: props.type },
+                    }),
+                );
+            }
+            return children;
         }
 
         return () =>

@@ -113,7 +113,7 @@
                 this.newValue = value;
             },
             addValue() {
-                const id = this.idGenerator();
+                const id = idGenerator();
                 const value = this.newValue;
                 this.internalValues.push({ id, value });
                 $(this.$refs.select).append(new Option(id, id, true, true)).trigger('change');
