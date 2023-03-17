@@ -398,12 +398,6 @@ class Boto3Subsection(BackendSection):
 environ.environ.REDIS_DRIVER = 'django.core.cache.backends.redis.RedisCache'
 
 class DjangoEnv(environ.Env):
-    CACHE_SCHEMES = {
-        **environ.Env.CACHE_SCHEMES,
-        'rediscache': 'django.core.cache.backends.redis.RedisCache',
-        'redis': 'django.core.cache.backends.redis.RedisCache',
-        'rediss': 'django.core.cache.backends.redis.RedisCache',
-    }
     BOOLEAN_TRUE_STRINGS = environ.Env.BOOLEAN_TRUE_STRINGS + ('enable', 'ENABLE')
 
 

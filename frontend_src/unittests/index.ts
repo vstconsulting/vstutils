@@ -31,7 +31,7 @@ export function mountApp() {
     );
 }
 
-function waitFor(callback: () => boolean) {
+export function waitFor(callback: () => boolean) {
     const { promise, resolve, reject } = deferredPromise<void>();
 
     let intervalId: ReturnType<typeof setInterval>;

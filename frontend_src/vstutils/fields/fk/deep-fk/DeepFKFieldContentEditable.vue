@@ -96,13 +96,15 @@
                 const newInst = node.data.instance;
                 const currentInst = this.value;
                 if (
+                    newInst &&
+                    currentInst &&
                     typeof newInst === 'object' &&
                     typeof currentInst === 'object' &&
                     newInst.getPkValue() === currentInst.getPkValue()
                 ) {
                     return;
                 }
-                if (this.onlyLastChild && !node.children.length) {
+                if (this.onlyLastChild && node.children.length) {
                     return;
                 }
                 this.setValue(node.data.instance);
