@@ -59,8 +59,13 @@ stages:
 code_style:
   <<: *branch_tests
   stage: code_standarts
-  variables:
-    TOX_ENVS: "flake,mypy,pylint,bandit  --parallel 3"
+  parallel:
+    matrix:
+      - TOX_ENVS:
+          - flake
+          - mypy
+          - pylint
+          - bandit
 
 js_style:
   <<: *branch_js_tests
