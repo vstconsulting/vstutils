@@ -1,5 +1,7 @@
+import { expect } from '@jest/globals';
 import { mount as vueMount } from '@vue/test-utils';
-import { deferredPromise, getApp } from '@/vstutils/utils';
+import { waitFor as _waitFor } from '@testing-library/dom';
+import { getApp } from '@/vstutils/utils';
 
 import type { ComponentOptions } from 'vue';
 
@@ -12,14 +14,14 @@ export function mount(component: ComponentOptions<Vue>, options?: Parameters<typ
     return vueMount(component, { localVue: app.vue, i18n: app.i18n, router: app.router, ...options });
 }
 
-export function mountApp() {
+export async function mountApp() {
     const app = globalThis.__currentApp;
 
     if (!app) {
         throw new Error('App is not initialized, use createApp() first');
     }
 
-    return mount(
+    const wrapper = mount(
         { mixins: [app.appRootComponent, ...app.additionalRootMixins] },
         {
             propsData: {
@@ -29,33 +31,27 @@ export function mountApp() {
             },
         },
     );
+
+    // @ts-expect-error Override rootVm
+    app.rootVm = wrapper.vm;
+
+    await waitForPageLoading();
+
+    return wrapper;
 }
 
-export function waitFor(callback: () => boolean) {
-    const { promise, resolve, reject } = deferredPromise<void>();
-
-    let intervalId: ReturnType<typeof setInterval>;
-    // eslint-disable-next-line prefer-const
-    let timeoutId: ReturnType<typeof setTimeout>;
-
-    // eslint-disable-next-line prefer-const
-    intervalId = setInterval(() => {
-        if (callback()) {
-            clearInterval(intervalId);
-            clearTimeout(timeoutId);
-            resolve();
-        }
-    }, 50);
-
-    timeoutId = setTimeout(() => {
-        clearInterval(intervalId);
-        reject('waitFor timeout');
-    }, 1000);
-
-    return promise;
+export function waitFor<T>(callback: () => T, options?: Parameters<typeof _waitFor>[1]) {
+    const container = options?.container || __currentApp?.rootVm?.$el;
+    if (!container) {
+        throw new Error('App must be mounted first or custom must be provided');
+    }
+    return _waitFor(callback, {
+        ...options,
+        // @ts-expect-error $el is ok here
+        container,
+    });
 }
 
-export function waitForPageLoading() {
-    const app = getApp();
-    return waitFor(() => !app.store.page.loading);
+export async function waitForPageLoading() {
+    await waitFor(() => expect(__currentApp?.rootVm?.$el.querySelector('.in-loading')).toBeFalsy());
 }

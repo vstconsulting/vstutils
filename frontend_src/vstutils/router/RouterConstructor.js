@@ -1,7 +1,5 @@
 import VueRouter from 'vue-router';
 import { signals } from '@/vstutils/signals';
-import { View } from '../views';
-import { NotFound, Home } from '@/vstutils/router/customPages';
 
 export default class RouterConstructor {
     /**
@@ -41,17 +39,6 @@ export default class RouterConstructor {
      * @return {array} Routes Array.
      */
     formRoutesBasedOnViews() {
-        if (!this.views.has('/')) {
-            const homeView = new View({ path: '/', routeName: 'home' }, null, [Home]);
-            this.views.set('/', homeView);
-        }
-
-        if (!this.views.has('*')) {
-            const notFoundView = new View({ path: '*', routeName: '404' }, null, [NotFound]);
-            notFoundView.showOperationButtons = false;
-            this.views.set('*', notFoundView);
-        }
-
         let routes = [];
 
         for (let view of this.views.values()) {

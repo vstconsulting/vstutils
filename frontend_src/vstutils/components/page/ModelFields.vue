@@ -57,7 +57,7 @@
     import Card from '@/vstutils/components/Card.vue';
     import HideNotRequiredSelect from './HideNotRequiredSelect.vue';
 
-    import type { FieldComponentType, SetFieldValueOptions } from '@/vstutils/fields/base';
+    import type { Field, FieldComponentType, SetFieldValueOptions } from '@/vstutils/fields/base';
     import type { FieldsGroup, ModelConstructor } from '@/vstutils/models';
     import type { RepresentData } from '@/vstutils/utils';
 
@@ -102,15 +102,27 @@
         return getModelFieldsInstancesGroups(model.value, data.value);
     });
 
-    const { hiddenFields, visibleFieldsGroups, hideField, showField } = useHideableFieldsGroups(
-        fieldsInstancesGroups,
-        props,
-    );
+    const {
+        hiddenFields,
+        visibleFieldsGroups,
+        hideField: _hideField,
+        showField: _showField,
+    } = useHideableFieldsGroups(fieldsInstancesGroups, props);
+
+    function showField(field: Field) {
+        emit('set-value', { field: field.name, value: field.getInitialValue(), markChanged: true });
+        _showField(field);
+    }
+
+    function hideField(field: Field) {
+        emit('set-value', { field: field.name, value: undefined, markChanged: true });
+        _hideField(field);
+    }
 
     if (hideNotRequired?.value) {
         for (const group of visibleFieldsGroups.value) {
             for (const field of group.fields) {
-                if (!field.required && !props.data[field.name]) {
+                if (!field.required && props.data[field.name] === undefined) {
                     hideField(field);
                 }
             }

@@ -1,5 +1,5 @@
 import { test, expect, beforeAll } from '@jest/globals';
-import { createApp, createSchema, openPage } from '@/unittests';
+import { createApp, createSchema, mountApp, openPage } from '@/unittests';
 import detailPageSchema from './detailPage-schema.json';
 import { ActionView } from '../../views';
 import fetchMock from 'jest-fetch-mock';
@@ -14,6 +14,8 @@ test('createActionViewStore', async () => {
         schema: createSchema(detailPageSchema),
     });
 
+    await mountApp();
+
     const actionView = app.views.get('/some_list/some_action/');
     expect(actionView).toBeInstanceOf(ActionView);
 
@@ -23,9 +25,9 @@ test('createActionViewStore', async () => {
     expect(store).not.toBeNull();
     expect(store.response).toBeTruthy();
     expect(store.sandbox).toStrictEqual({
-        bool: false,
-        text: '',
-        choice: 'one',
+        bool: undefined,
+        text: undefined,
+        choice: undefined,
     });
 
     // No data entered (error should appear because 'text' field is required)
