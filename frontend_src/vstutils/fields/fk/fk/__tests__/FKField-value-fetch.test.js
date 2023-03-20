@@ -10,8 +10,6 @@ describe('FKField value loader indicator', () => {
 
     beforeAll(async () => {
         app = await createApp();
-        app.router.push('/user/');
-        app.store.setPage(app.views.get('/user/')._createStore());
         User = app.modelsResolver.byReferencePath('#/definitions/User');
         User.nonBulkMethods = ['get', 'GET'];
         field = app.fieldsResolver.resolveField({
@@ -34,9 +32,7 @@ describe('FKField value loader indicator', () => {
     test.each(['readonly', 'edit'])('%s with loader', async (type) => {
         const { promise, resolve } = deferredPromise();
 
-        fetchMock.mockResponseOnce(() => {
-            return Promise.resolve(JSON.stringify([{ id: 6 }]));
-        });
+        fetchMock.mockResponseOnce(JSON.stringify({ results: [{ id: 6 }], count: 1 }));
         const wrapper = mount({
             template: `
                 <FKField

@@ -1,6 +1,6 @@
 import type { IApp, IAppInitialized } from '@/vstutils/app';
 import { guiPopUp, pop_up_msg } from './popUp';
-import type { HttpMethod } from './utils';
+import type { HttpMethod, InnerData } from './utils';
 import { emptyInnerData } from './utils';
 import {
     formatPath,
@@ -176,8 +176,9 @@ export class ActionsManager {
         if (!method) {
             method = action.method!;
         }
+        let data: InnerData;
         try {
-            instance._validateAndSetData();
+            data = instance.sandbox.validate();
         } catch (e) {
             this.app.error_handler.defineErrorAndShow(e);
             if (throwError) {
@@ -186,10 +187,10 @@ export class ActionsManager {
             return;
         }
 
-        const data = emptyInnerData();
+        const dataToSend = emptyInnerData();
         for (const field of instance._fields.values()) {
             if (sendAll || field.required || instance.sandbox.changedFields.has(field.name)) {
-                data[field.name] = field.toInner(instance.sandbox.value);
+                dataToSend[field.name] = data[field.name];
             }
         }
 

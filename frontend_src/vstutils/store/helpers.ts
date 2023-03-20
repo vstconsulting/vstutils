@@ -2,6 +2,7 @@ import { getActivePinia } from 'pinia';
 import {
     computed,
     del,
+    getCurrentInstance,
     onBeforeUnmount,
     onMounted,
     onScopeDispose,
@@ -553,7 +554,7 @@ export const onRouterBeforeEach = (() => {
     return function onRouterBeforeEach(callback: NavigationGuard) {
         const id = ++lastId;
         handlers.set(id, callback);
-        onUnmounted(() => {
+        (getCurrentInstance() ? onUnmounted : onScopeDispose)(() => {
             handlers.delete(id);
         });
     };
@@ -578,13 +579,15 @@ export function usePageLeaveConfirmation({
         }
     }
 
-    onMounted(() => {
-        window.addEventListener('beforeunload', beforeUnloadHandler);
-    });
+    if (getCurrentInstance()) {
+        onMounted(() => {
+            window.addEventListener('beforeunload', beforeUnloadHandler);
+        });
 
-    onBeforeUnmount(() => {
-        window.removeEventListener('beforeunload', beforeUnloadHandler);
-    });
+        onBeforeUnmount(() => {
+            window.removeEventListener('beforeunload', beforeUnloadHandler);
+        });
+    }
 
     function askForLeaveConfirmation() {
         if (askIf.value) {

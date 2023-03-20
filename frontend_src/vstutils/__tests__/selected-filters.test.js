@@ -10,7 +10,7 @@ beforeAll(async () => {
 });
 
 test('Selected filters', async () => {
-    const wrapper = mountApp();
+    const wrapper = await mountApp();
 
     fetchMock.mockResponseOnce(JSON.stringify([{ status: 200, data: { count: 0, results: [] } }]));
     await app.router.push('/user?id=1,2,3');
@@ -18,6 +18,5 @@ test('Selected filters', async () => {
 
     const filters = wrapper.find('.selected-filters');
 
-    expect(filters.exists()).toBeTruthy();
     expect(filters.text().replace(/\s/g, '')).toBe('Id:1,2,3×');
 });

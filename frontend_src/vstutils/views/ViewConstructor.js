@@ -11,9 +11,10 @@ import {
 import { signals } from '@/vstutils/signals';
 import { QuerySet, SingleEntityQueryset } from '../querySet';
 import { NoModel } from '../models';
-import { ActionView, ListView, PageEditView, PageNewView, PageView } from './View.ts';
+import { ActionView, ListView, PageEditView, PageNewView, PageView, View } from './View.ts';
 import DetailWithoutListPageMixin from '../components/page/DetailWithoutListPageMixin.js';
 import NotEmptyMultiactionModal from '../components/list/NotEmptyMultiactionModal.vue';
+import { NotFound, Home } from '@/vstutils/router/customPages';
 import { openapi_dictionary } from './openapi';
 
 /**
@@ -576,6 +577,19 @@ export default class ViewConstructor {
      * @return {Map<string, View>} Map of views objects, ready for usage.
      */
     generateViews(openapi_schema) {
-        return this.getViews(openapi_schema);
+        const views = this.getViews(openapi_schema);
+
+        if (!views.has('/')) {
+            const homeView = new View({ path: '/', routeName: 'home' }, null, [Home]);
+            views.set('/', homeView);
+        }
+
+        if (!views.has('*')) {
+            const notFoundView = new View({ path: '*', routeName: '404' }, null, [NotFound]);
+            notFoundView.showOperationButtons = false;
+            views.set('*', notFoundView);
+        }
+
+        return views;
     }
 }

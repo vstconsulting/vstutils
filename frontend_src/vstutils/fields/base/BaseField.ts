@@ -91,7 +91,7 @@ export interface Field<
     toInner(data: RepresentData): Inner | null | undefined;
     toRepresent(data: InnerData): Represent | null | undefined;
 
-    validateValue(data: RepresentData): void;
+    validateValue(data: RepresentData): Represent | null | undefined;
     validateInner(data: InnerData): void;
     translateValue(value: Represent): Represent;
 
@@ -263,10 +263,14 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
      * Method that validates value.
      * @param {RepresentData} data - Object with all values.
      */
-    validateValue(data: RepresentData) {
-        const value = this.getValue(data);
+    validateValue(data: RepresentData): Represent | null | undefined {
+        let value = this.getValue(data);
         const samples = pop_up_msg.field.error;
         const $t = _translate;
+
+        if (this.type === 'string' && this.required && value === undefined) {
+            value = '' as Represent;
+        }
 
         if (typeof value === 'string') {
             const value_length = value.toString().length;
@@ -349,8 +353,10 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
                 return toRaw(this).sandbox.value[fieldThis.name] as Represent | null | undefined;
             },
             set(value: Represent) {
-                fieldThis.validateValue({ ...this.sandbox.value, [fieldThis.name]: value });
-                this.sandbox.set({ field: fieldThis.name, value });
+                this.sandbox.set({
+                    field: fieldThis.name,
+                    value: fieldThis.validateValue({ ...this.sandbox.value, [fieldThis.name]: value }),
+                });
             },
         };
     }

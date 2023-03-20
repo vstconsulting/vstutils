@@ -19,6 +19,8 @@ declare global {
     var SELECT2_THEME: string;
     var schemaLoader: SchemaLoader;
     var cleanAllCacheAndReloadPage: () => void;
+    var IS_TESTS: boolean | undefined;
+    var DISABLE_AUTO_UPDATE: boolean | undefined;
     /* eslint-enable no-var */
 }
 

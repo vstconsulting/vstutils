@@ -79,7 +79,7 @@ export class BaseModel implements Model {
 
     constructor(data?: InnerData, queryset?: QuerySet | null, parentInstance?: Model) {
         if (!data) {
-            data = parentInstance?._getInnerData() ?? this._c.getInitialData();
+            data = parentInstance?._getInnerData() ?? emptyInnerData();
         }
         if (!queryset && parentInstance) {
             queryset = parentInstance._queryset;
