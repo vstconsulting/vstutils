@@ -1,6 +1,7 @@
 # pylint: disable=import-error,invalid-name,no-member,function-redefined,unused-import
 
 import gzip
+import mimetypes
 import os
 import pathlib
 import sys
@@ -2825,7 +2826,7 @@ class ValidatorsTestCase(BaseTestCase):
 
         # check wrong image extension
         with self.assertRaisesMessage(ValidationError, '[ErrorDetail(string=\'Unsupported image file format '
-                                                       '"cat.bmp" (image/x-ms-bmp) '
+                                                       f'"cat.bmp" ({mimetypes.guess_type("cat.bmp")[0]}) '
                                                        'is not in listed supported types (image/jpeg).\', '
                                                        'code=\'invalid\')]'):
             img_validator({
