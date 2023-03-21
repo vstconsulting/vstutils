@@ -21,6 +21,7 @@ import { useBreadcrumbs } from '@/vstutils/breadcrumbs';
 import { ModelValidationError } from '@/vstutils/models';
 import { filterOperations, signals } from '@/vstutils/signals';
 import { i18n } from '@/vstutils/translation';
+import { useRoute } from 'vue-router/composables';
 import {
     classesFromFields,
     getApp,
@@ -497,7 +498,7 @@ export async function createViewStore<T extends IView>(
     options: { watchQuery?: boolean } = {},
 ): Promise<ViewStore<T>> {
     const app = getApp();
-    const route = app.router.currentRoute;
+    const route = useRoute();
     const store = view._createStore() as ViewStore<T>;
 
     provide('view', view);
