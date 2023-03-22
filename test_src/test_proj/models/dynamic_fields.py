@@ -1,5 +1,5 @@
 from django.db import models
-from rest_framework.fields import CharField, IntegerField
+from rest_framework.fields import CharField, IntegerField, ListField
 from rest_framework.serializers import Serializer
 from vstutils.api import fields
 from vstutils.api.serializers import BaseSerializer
@@ -18,6 +18,10 @@ class SomeField(CharField):
 class SomeSerializer(BaseSerializer):
     field1 = SomeField()
     field2 = IntegerField()
+
+
+class AnotherSerializer(BaseSerializer):
+    list_field = ListField(child=CharField())
 
 
 class DynamicFields(BModel):
@@ -46,6 +50,7 @@ class DynamicFields(BModel):
                 'integer': IntegerField(max_value=1337),
                 'boolean': 'boolean',
                 'image':  fields.NamedBinaryImageInJsonField(),
-                'context_depend': SomeField()
+                'context_depend': SomeField(),
+                'another_serializer': AnotherSerializer(),
             }),
         }

@@ -121,6 +121,32 @@
                     "default": {}
                 }
             }
+        },
+        "TwoFA": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "title": "Enabled",
+                    "type": "boolean",
+                    "readOnly": true
+                },
+                "secret": {
+                    "title": "Secret",
+                    "type": "string",
+                    "minLength": 1,
+                    "x-nullable": true
+                },
+                "pin": {
+                    "title": "Enter the six-digit code from the application",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "recovery": {
+                    "title": "Recovery",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
         }
     },
     "paths": {
@@ -286,6 +312,92 @@
                     "name": "id",
                     "in": "path",
                     "description": "A unique integer value identifying this user.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/user/{id}/twofa/": {
+            "get": {
+                "operationId": "user_twofa_get",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TwoFA"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "operationId": "user_twofa_update",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/TwoFA"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TwoFA"
+                        }
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/user/{id}/_settings/": {
+            "get": {
+                "operationId": "user__settings_get",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/_UserSettings"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "operationId": "user__settings_update",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/_UserSettings"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/_UserSettings"
+                        }
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
                     "required": true,
                     "type": "integer"
                 }

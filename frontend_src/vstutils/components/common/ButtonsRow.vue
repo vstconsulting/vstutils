@@ -80,50 +80,47 @@
     </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+    import { computed } from 'vue';
     import OperationButton from './OperationButton.vue';
     import CompactOperations from './CompactOperations.vue';
-    import type { PropType } from 'vue';
+
     import type { Action, IView, Sublink } from '@/vstutils/views';
 
-    export default {
-        name: 'ButtonsRow',
-        components: { CompactOperations, OperationButton },
-        props: {
-            view: { type: Object as PropType<IView>, required: true },
-            actions: { type: Array as PropType<Array<Action>>, default: () => [] },
-            sublinks: { type: Array as PropType<Array<Sublink>>, default: () => [] },
-        },
-        computed: {
-            totalOperations() {
-                return this.actions.length + this.sublinks.length;
-            },
-            groupedActions() {
-                return this.actions.filter((action) => !action.doNotGroup);
-            },
-            notGroupedActions() {
-                return this.actions.filter((action) => action.doNotGroup);
-            },
-            shouldGroupActions() {
-                return (
-                    this.groupedActions.length > 1 ||
-                    this.groupedActions.some((action) => !action.iconClasses)
-                );
-            },
-            groupedSublinks() {
-                return this.sublinks.filter((sublink) => !sublink.doNotGroup);
-            },
-            notGroupedSublinks() {
-                return this.sublinks.filter((sublink) => sublink.doNotGroup);
-            },
-            shouldGroupSublinks() {
-                return (
-                    this.groupedSublinks.length > 1 ||
-                    this.groupedSublinks.some((sublink) => !sublink.iconClasses)
-                );
-            },
-        },
-    };
+    const props = withDefaults(
+        defineProps<{
+            view: IView;
+            actions?: Action[];
+            sublinks?: Sublink[];
+        }>(),
+        { sublinks: () => [], actions: () => [] },
+    );
+
+    const totalOperations = computed(() => {
+        return props.actions.length + props.sublinks.length;
+    });
+
+    const groupedActions = computed(() => {
+        return props.actions.filter((action) => !action.doNotGroup);
+    });
+    const notGroupedActions = computed(() => {
+        return props.actions.filter((action) => action.doNotGroup);
+    });
+    const shouldGroupActions = computed(() => {
+        return groupedActions.value.length > 1 || groupedActions.value.some((action) => !action.iconClasses);
+    });
+
+    const groupedSublinks = computed(() => {
+        return props.sublinks.filter((sublink) => !sublink.doNotGroup);
+    });
+    const notGroupedSublinks = computed(() => {
+        return props.sublinks.filter((sublink) => sublink.doNotGroup);
+    });
+    const shouldGroupSublinks = computed(() => {
+        return (
+            groupedSublinks.value.length > 1 || groupedSublinks.value.some((sublink) => !sublink.iconClasses)
+        );
+    });
 </script>
 
 <style scoped>

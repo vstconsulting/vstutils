@@ -1,18 +1,22 @@
-import type { ParseConfig } from 'papaparse';
 import Papa from 'papaparse';
 import { defineComponent } from 'vue';
 
 import { BaseField, BaseFieldMixin } from '@/vstutils/fields/base';
-import { i18n } from '@/vstutils/translation';
+import { onAppBeforeInit } from '@/vstutils/signals';
+import { emptyInnerData } from '@/vstutils/utils';
 
 import { validateSimpleFileLength } from '../file';
 import CsvFileFieldEdit from './CSVFileFieldEdit.vue';
 import CsvFileFieldReadonly from './CsvFileFieldReadonly.vue';
 
-import type { Schema } from 'swagger-schema-official';
+import type { ParseConfig } from 'papaparse';
 import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
+import type { ModelConstructor } from '@/vstutils/models';
+import type { ModelDefinition } from '@/vstutils/AppConfiguration';
 import type { IFileField } from '../file';
+import { guiPopUp } from '@/vstutils/popUp';
+import { i18n } from '@/app.common';
 
 export { CsvFileFieldEdit, CsvFileFieldReadonly };
 
@@ -26,23 +30,17 @@ export const CsvFileFieldMixin = defineComponent({
 
 interface CsvFileFieldXOptions extends FieldXOptions {
     minColumnWidth?: number;
-    items: Schema;
+    items: ModelDefinition;
 }
 
-interface ColumnConfig {
-    prop: string;
-    name: string;
-    eClass?: {
-        missedValue?: string;
-    };
+interface ParserConfig extends ParseConfig<unknown[]> {
+    delimiter?: string;
 }
 
-export class CsvFileField
-    extends BaseField<string, string | unknown[][] | Record<string, unknown>[], CsvFileFieldXOptions>
-    implements IFileField
-{
-    parserConfig: ParseConfig<unknown[]>;
+export class CsvFileField extends BaseField<string, InnerData[], CsvFileFieldXOptions> implements IFileField {
+    parserConfig: ParserConfig;
     minColumnWidth?: number;
+    rowModel?: ModelConstructor;
 
     allowedMediaTypes = ['text/csv'];
 
@@ -53,6 +51,10 @@ export class CsvFileField
             Object.assign(this.parserConfig, this.props.parserConfig);
         }
         this.minColumnWidth = this.props.minColumnWidth;
+
+        onAppBeforeInit(() => {
+            this.rowModel = this.app.modelsResolver.bySchemaObject(this.props.items);
+        });
     }
 
     static get mixins() {
@@ -65,34 +67,25 @@ export class CsvFileField
             return value;
         }
         if (value) {
-            return Papa.unparse(value as string[][], this.parserConfig as Papa.UnparseConfig);
+            return Papa.unparse(value, this.parserConfig as Papa.UnparseConfig);
         }
         return value;
     }
 
-    get delimiter() {
-        return this.parserConfig.delimiter || ',';
+    toRepresent(data: InnerData) {
+        const strValue = this.getValue(data);
+        if (typeof strValue == 'string') {
+            return this.parseFile(strValue);
+        }
+        return strValue;
     }
 
-    getTableConfig() {
-        const obj = this.props.items;
-        const tableConfig: ColumnConfig[] = [{ prop: '_index', name: i18n.ts('Index') }];
-        for (const [name, property] of Object.entries(obj.properties ?? {})) {
-            const column: ColumnConfig = {
-                prop: name,
-                name: property.title || name,
-            };
-            if (!this.readOnly && obj.required?.includes(name)) {
-                column.eClass = {
-                    missedValue: `
-                        const value = row["${name}"];
-                        return !value || value === '0';
-                    `,
-                };
-            }
-            tableConfig.push(column);
-        }
-        return tableConfig;
+    getColumnsNames() {
+        return Array.from(this.rowModel!.fields.keys());
+    }
+
+    get delimiter() {
+        return this.parserConfig.delimiter || ',';
     }
 
     validateInner(data: InnerData) {
@@ -105,7 +98,29 @@ export class CsvFileField
         return value;
     }
 
-    parseFile(text: string) {
-        return Papa.parse(text, this.parserConfig);
+    /**
+     * Parses CSV file text. If error occurs, shows popup with error message.
+     * @returns Array of inner data objects or undefined if text cannot be parsed
+     */
+    parseFile(text: string): InnerData[] | undefined {
+        const columnsNames = this.getColumnsNames();
+        const parsed = Papa.parse(text, this.parserConfig);
+        if (parsed.errors.length > 0) {
+            console.error(parsed);
+            guiPopUp.error(
+                i18n.ts('Cannot parse CSV file in field "{fieldName}"', { fieldName: i18n.t(this.title) }),
+            );
+            return;
+        }
+        return parsed.data.map((el) => {
+            return el.reduce((acc: InnerData, n, i) => {
+                acc[columnsNames[i]] = n;
+                return acc;
+            }, emptyInnerData());
+        });
+    }
+
+    unparse(value: InnerData[], omitHeader = false) {
+        return Papa.unparse(value, { delimiter: this.delimiter, header: !omitHeader });
     }
 }

@@ -1,9 +1,12 @@
 import type { Field } from './BaseField';
 
-export interface SetFieldValueOptions<T extends Field = Field> {
+export interface SetFieldValueParams {
+    markChanged?: boolean;
+}
+
+export interface SetFieldValueOptions<T extends Field = Field> extends SetFieldValueParams {
     field: string;
     value: ExtractRepresent<T> | null | undefined;
-    markChanged?: boolean;
 }
 
 export type ExtractInner<T> = T extends Field<infer Inner> ? Inner : never;

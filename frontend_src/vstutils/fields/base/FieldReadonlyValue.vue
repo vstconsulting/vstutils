@@ -14,7 +14,7 @@
     export default defineComponent({
         props: {
             field: { type: Object as PropType<Field>, required: true },
-            value: { type: [String, Number], required: false },
+            value: { required: false },
         },
         computed: {
             ariaLabel(): string {

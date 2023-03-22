@@ -75,7 +75,9 @@ describe('DeepFKfield', () => {
         const emitted = wrapper.emitted();
 
         // Wait for categories to load and display
-        await waitFor(() => wrapper.find('li[data-id="1"]').exists());
+        await waitFor(() => expect(wrapper.find('li[data-id="1"]').exists()).toBeTruthy(), {
+            container: wrapper.element,
+        });
 
         // Select category with subcategory
         wrapper.find('li[data-id="1"]').find('.tree-content').trigger('click');

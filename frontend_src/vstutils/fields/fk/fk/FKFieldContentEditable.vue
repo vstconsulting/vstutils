@@ -16,10 +16,12 @@
     import { createTransport } from './transport';
     import { ensureValueFetched, useQuerySets } from './composables';
     import { FieldEditPropsDef } from '@/vstutils/fields/base';
+    import { HideButton } from '@/vstutils/fields/buttons';
     import type { FieldEditPropsDefType } from '@/vstutils/fields/base';
     import type { FKField, TRepresent } from './FKField';
 
     export default defineComponent({
+        components: { HideButton },
         props: FieldEditPropsDef as FieldEditPropsDefType<FKField>,
         setup(props) {
             const { querysets } = useQuerySets(props.field, props.data);

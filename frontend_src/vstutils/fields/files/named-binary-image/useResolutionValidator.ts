@@ -45,20 +45,7 @@ export function useResolutionValidator(
                 } catch (e) {}
 
                 const errors = [];
-                if (img) {
-                    if (img.naturalHeight < field.resolutionConfig.height.min)
-                        errors.push(
-                            i18n.t('Height should be more then {height}px.', {
-                                height: field.resolutionConfig.height.min,
-                            }),
-                        );
-                    if (img.naturalWidth < field.resolutionConfig.width.min)
-                        errors.push(
-                            i18n.t('Width should be more then {width}px.', {
-                                width: field.resolutionConfig.width.min,
-                            }),
-                        );
-                } else {
+                if (!img) {
                     errors.push(i18n.t('Invalid file {0}', [name]));
                 }
                 if (errors.length) {

@@ -40,7 +40,7 @@ export class DependFromFkField extends BaseField<unknown, unknown, XOptions> {
     }
 
     validateValue(data: RepresentData) {
-        this.getRealField(data).validateValue(data);
+        return this.getRealField(data).validateValue(data);
     }
 
     getFieldByFormat(format: Record<string, unknown> | string, data: Record<string, unknown>): Field {

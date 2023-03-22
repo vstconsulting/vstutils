@@ -33,7 +33,7 @@ export class QuerySetsResolver {
             return this.viewsTree.findInFirstLevel(matcher) || this.viewsTree.findInAllPaths(matcher);
         }
 
-        const node = this.viewsTree.root.get(pathToArray(path));
+        const node = path === '/' ? this.viewsTree.root : this.viewsTree.root.get(pathToArray(path));
         if (!node) {
             throw new Error('View does not exists in tree: ' + path);
         }

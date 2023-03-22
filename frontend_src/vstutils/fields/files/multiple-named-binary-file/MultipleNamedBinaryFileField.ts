@@ -12,13 +12,13 @@ import type { FileFieldXOptions, IFileField } from '../file';
 import { parseAllowedMediaTypes } from '../file';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
 
-class MultipleNamedBinaryFileField
-    extends BaseField<NamedFile[] | string, NamedFile[], FileFieldXOptions | undefined>
+class MultipleNamedBinaryFileField<XOptions extends FileFieldXOptions = FileFieldXOptions>
+    extends BaseField<NamedFile[] | string, NamedFile[], XOptions>
     implements IFileField
 {
     allowedMediaTypes: string[] | undefined;
 
-    constructor(options: FieldOptions<FileFieldXOptions | undefined, NamedFile[]>) {
+    constructor(options: FieldOptions<XOptions, NamedFile[]>) {
         Object.assign(options, options.items);
         delete options.items;
         super(options);

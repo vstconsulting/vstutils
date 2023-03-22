@@ -29,7 +29,7 @@
                                     </button>
                                 </slot>
                             </div>
-                            <div class="modal-body">
+                            <div v-if="renderBody" class="modal-body">
                                 <slot name="body" />
                                 <slot :open-modal="open" :close-modal="close" />
                             </div>
@@ -86,13 +86,26 @@
             wrapperClasses: { type: [Array, String], default: null },
             classes: { type: [Array, String], default: null },
             loading: { type: Boolean, default: false },
+            /**
+             * If true, modal body will be rendered only when animation has ended and modal is fully visible
+             */
+            renderBodyWhenShown: { type: Boolean, default: false },
         },
         emits: ['shown', 'exit'],
-        data(): { isOpen: boolean; jEl: JQuery<HTMLElement> | null } {
+        data() {
             return {
                 isOpen: false,
-                jEl: null,
+                isShown: false,
+                jEl: null as JQuery<HTMLElement> | null,
             };
+        },
+        computed: {
+            renderBody() {
+                if (this.renderBodyWhenShown) {
+                    return this.isShown;
+                }
+                return true;
+            },
         },
         beforeDestroy() {
             if (this.isOpen) {
@@ -106,11 +119,13 @@
                     .modal({ show: true })
                     .on('hidden.bs.modal', () => {
                         this.isOpen = false;
+                        this.isShown = false;
                         this.jEl = null;
                         this.$emit('exit');
                         onModalClosed();
                     })
                     .on('shown.bs.modal', () => {
+                        this.isShown = true;
                         this.$emit('shown');
                         onModalOpened();
                     });

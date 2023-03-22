@@ -7,15 +7,25 @@ import ResolutionValidatorConfig from './ResolutionValidatorConfig';
 
 export interface IImageField extends IFileField {
     resolutionConfig: ResolutionValidatorConfig | null;
+    backgroundFillColor: string;
 }
 
-export class NamedBinaryImageField extends NamedBinaryFileField implements IImageField {
+export interface NamedBinaryImageFieldXOptions extends FileFieldXOptions {
+    backgroundFillColor?: string;
+}
+
+export class NamedBinaryImageField
+    extends NamedBinaryFileField<NamedBinaryImageFieldXOptions>
+    implements IImageField
+{
     static fkLinkable = false;
     resolutionConfig: ResolutionValidatorConfig | null;
+    backgroundFillColor: string;
 
-    constructor(options: FieldOptions<FileFieldXOptions | undefined, NamedFile>) {
+    constructor(options: FieldOptions<NamedBinaryImageFieldXOptions, NamedFile>) {
         super(options);
         this.resolutionConfig = ResolutionValidatorConfig.createIfNeeded(options);
+        this.backgroundFillColor = this.props.backgroundFillColor ?? 'transparent';
     }
 
     static get mixins() {

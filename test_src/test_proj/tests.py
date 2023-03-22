@@ -1,6 +1,7 @@
 # pylint: disable=import-error,invalid-name,no-member,function-redefined,unused-import
 
 import gzip
+import mimetypes
 import os
 import pathlib
 import sys
@@ -1606,6 +1607,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
         expected['some_namedbinfile']['x-validators']['extensions'] = from_api['some_namedbinfile']['x-validators']['extensions']
         expected['some_filefield']['properties']['content']['maxLength'] = from_api['some_filefield']['properties']['content']['maxLength'] = 10000
         expected['some_imagefield']['properties']['content']['minLength'] = from_api['some_imagefield']['properties']['content']['minLength'] = 7000
+        expected['some_namedbinimage']['x-options'] = {'backgroundFillColor': 'pink'}
+        expected['some_multiplenamedbinimage']['items']['x-options'] = {'backgroundFillColor': 'white'}
         self.assertDictEqual(expected, from_api)
         # Test swagger ui
         client = self._login()
@@ -2078,6 +2081,15 @@ class OpenapiEndpointTestCase(BaseTestCase):
                     'context_depend': {
                         'minLength': 1,
                         'type': 'string',
+                    },
+                    'another_serializer': {
+                        'required': ['list_field'],
+                        'type': 'object',
+                        'properties': {
+                            'list_field': {'type': 'array', 'items': {'type': 'string', 'minLength': 1}}
+                        },
+                        'x-properties-groups': {'': ['list_field']},
+                        'x-view-field-name': 'list_field',
                     }
                 },
             },
@@ -2814,7 +2826,7 @@ class ValidatorsTestCase(BaseTestCase):
 
         # check wrong image extension
         with self.assertRaisesMessage(ValidationError, '[ErrorDetail(string=\'Unsupported image file format '
-                                                       '"cat.bmp" (image/x-ms-bmp) '
+                                                       f'"cat.bmp" ({mimetypes.guess_type("cat.bmp")[0]}) '
                                                        'is not in listed supported types (image/jpeg).\', '
                                                        'code=\'invalid\')]'):
             img_validator({

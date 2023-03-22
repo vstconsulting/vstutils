@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, test } from '@jest/globals';
 import fetchMock from 'jest-fetch-mock';
 import { RequestTypes } from '@/vstutils/utils';
-import { createApp, openPage } from '@/unittests';
+import { createApp } from '@/unittests';
 import { QuerySet } from '../QuerySet';
 
 describe('QuerySet prefetch', () => {
@@ -11,7 +11,7 @@ describe('QuerySet prefetch', () => {
     beforeAll(async () => {
         app = await createApp();
         User = app.modelsResolver.byReferencePath('#/definitions/User');
-        await openPage('/user/');
+        User.nonBulkMethods = ['get'];
         fetchMock.enableMocks();
     });
 

@@ -6,7 +6,7 @@ import { ViewPropsDef } from '../views/props';
 export const BaseViewMixin = defineComponent({
     props: ViewPropsDef,
     setup(props) {
-        const store = useViewStore(props.view, { watchQuery: true });
+        const store = useViewStore();
         return { store };
     },
     computed: {

@@ -830,7 +830,16 @@ class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
     Extends :class:`.NamedBinaryFileInJsonField` to represent image on frontend
     (if binary image is valid).Validate this field with
     :class:`vstutils.api.validators.ImageValidator`.
+
+    :param background_fill_color: Color to fill area that is not covered by image after cropping.
+        Transparent by default but will be black if image format is not supporting transparency.
+        Can be any valid CSS color.
+    :type background_fill_color: str
     """
+
+    def __init__(self, *args, **kwargs):
+        self.background_fill_color = kwargs.pop('background_fill_color', None)
+        super().__init__(*args, **kwargs)
 
 
 class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
@@ -891,7 +900,16 @@ class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):
     """
     Extends :class:`.MultipleNamedBinaryFileInJsonField` but uses list of JSONs.
     Used for operating with multiple images and works as list of :class:`NamedBinaryImageInJsonField`.
+
+    :param background_fill_color: Color to fill area that is not covered by image after cropping.
+        Transparent by default but will be black if image format is not supporting transparency.
+        Can be any valid CSS color.
+    :type background_fill_color: str
     """
+
+    def __init__(self, *args, **kwargs):
+        self.background_fill_color = kwargs.pop('background_fill_color', None)
+        super().__init__(*args, **kwargs)
 
 
 class PasswordField(CharField):

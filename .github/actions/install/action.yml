@@ -1,0 +1,40 @@
+name: Install
+description: Install dependencies
+
+inputs:
+  python-version:
+    description: Python version for installing dependencies
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout the source code
+      uses: actions/checkout@v2
+
+    - name: Set the python version
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Set up pip package caching
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+        restore-keys: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+
+    - name: Install pip dependencies
+      shell: bash
+      run: pip install 'tox<4' 'tox-gh-actions<3'
+
+    - name: Install system dependencies
+      shell: bash
+      run: sudo apt update && sudo apt install -y gcc libffi-dev libkrb5-dev libffi7 libssl-dev libyaml-dev libsasl2-dev libldap2-dev
+
+    - name: Cache tox environments
+      uses: actions/cache@v2
+      with:
+        path: .tox
+        key: ${{ runner.os }}-tox-${{ inputs.python-version }}-${{ hashFiles('tox*.ini') }}-${{ hashFiles('requirements*.txt') }}
+        restore-keys: ${{ runner.os }}-tox-${{ inputs.python-version }}-${{ hashFiles('tox*.ini') }}-${{ hashFiles('requirements*.txt') }}

@@ -1,0 +1,62 @@
+name: Review
+
+on: [push, pull_request]
+
+jobs:
+  js_review:
+    name: Run linters and tests for js code
+    runs-on: "ubuntu-22.04"
+    strategy:
+      matrix:
+        node: [ 16 ]
+
+    steps:
+      - name: Checkout the source code
+        uses: actions/checkout@v3
+
+      - name: Set the node version
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run linters
+        run: yarn lint
+
+      - name: Run tests
+        run: yarn test
+
+  py_review:
+    name: Run linters and tests for python code
+    runs-on: "ubuntu-22.04"
+    strategy:
+      matrix:
+        python: [3.8, "3.11"]
+
+    steps:
+      - name: Checkout the source code
+        uses: actions/checkout@v3
+
+      - name: Set the node version
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Set the python version
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install dependencies
+        uses: ./.github/actions/install
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Run tests
+        env:
+          PYTHON_VERSION: ${{ matrix.python }}
+        run: tox

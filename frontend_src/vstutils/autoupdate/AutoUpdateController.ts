@@ -176,6 +176,8 @@ export class AutoUpdateController {
     }
 
     start() {
+        if (globalThis.DISABLE_AUTO_UPDATE) return;
+
         this.isStarted = true;
 
         if (this.timeoutId) {

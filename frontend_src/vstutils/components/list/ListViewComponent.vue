@@ -81,7 +81,7 @@
     const props = defineProps(ViewPropsDef as ViewPropsDefType<ListView>);
 
     const app = getApp();
-    const store = useViewStore(props.view, { watchQuery: true });
+    const store = useViewStore<ListView>();
 
     const multiActionsClasses = useUniqueCssClasses('selected__');
     provide('multiActionsClasses', multiActionsClasses);

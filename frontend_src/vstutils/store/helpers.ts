@@ -2,6 +2,7 @@ import { getActivePinia } from 'pinia';
 import {
     computed,
     del,
+    getCurrentInstance,
     onBeforeUnmount,
     onMounted,
     onScopeDispose,
@@ -13,7 +14,6 @@ import {
     toRef,
     watch,
 } from 'vue';
-import { useRoute } from 'vue-router/composables';
 
 import type { APIResponse } from '@/vstutils/api';
 import { useAutoUpdate } from '@/vstutils/autoupdate';
@@ -21,6 +21,7 @@ import { useBreadcrumbs } from '@/vstutils/breadcrumbs';
 import { ModelValidationError } from '@/vstutils/models';
 import { filterOperations, signals } from '@/vstutils/signals';
 import { i18n } from '@/vstutils/translation';
+import { useRoute } from 'vue-router/composables';
 import {
     classesFromFields,
     getApp,
@@ -489,13 +490,16 @@ export const createActionStore = (view: ActionView) => {
     };
 };
 
-export function useViewStore<T extends IView>(view: T, options: { watchQuery?: boolean } = {}): ViewStore<T> {
+/**
+ * @internal
+ */
+export async function createViewStore<T extends IView>(
+    view: T,
+    options: { watchQuery?: boolean } = {},
+): Promise<ViewStore<T>> {
     const app = getApp();
     const route = useRoute();
     const store = view._createStore() as ViewStore<T>;
-    void store.fetchData();
-
-    void app.store.setPage(store);
 
     provide('view', view);
 
@@ -514,7 +518,21 @@ export function useViewStore<T extends IView>(view: T, options: { watchQuery?: b
         }
     });
 
+    try {
+        await app.store.setPage(store);
+        // eslint-disable-next-line no-empty
+    } catch {}
+
+    try {
+        await store.fetchData();
+        // eslint-disable-next-line no-empty
+    } catch {}
+
     return store;
+}
+
+export function useViewStore<T extends IView>(): ViewStore<T> {
+    return getApp().store.page as ViewStore<T>;
 }
 
 export const onRouterBeforeEach = (() => {
@@ -537,7 +555,7 @@ export const onRouterBeforeEach = (() => {
     return function onRouterBeforeEach(callback: NavigationGuard) {
         const id = ++lastId;
         handlers.set(id, callback);
-        onUnmounted(() => {
+        (getCurrentInstance() ? onUnmounted : onScopeDispose)(() => {
             handlers.delete(id);
         });
     };
@@ -562,13 +580,15 @@ export function usePageLeaveConfirmation({
         }
     }
 
-    onMounted(() => {
-        window.addEventListener('beforeunload', beforeUnloadHandler);
-    });
+    if (getCurrentInstance()) {
+        onMounted(() => {
+            window.addEventListener('beforeunload', beforeUnloadHandler);
+        });
 
-    onBeforeUnmount(() => {
-        window.removeEventListener('beforeunload', beforeUnloadHandler);
-    });
+        onBeforeUnmount(() => {
+            window.removeEventListener('beforeunload', beforeUnloadHandler);
+        });
+    }
 
     function askForLeaveConfirmation() {
         if (askIf.value) {

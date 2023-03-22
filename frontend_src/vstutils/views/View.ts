@@ -216,7 +216,7 @@ export abstract class BaseView<
     showOperationButtons = true;
     showBackButton = true;
 
-    protected extendStoreHook = <T>(def: T): T => def;
+    _extendStoreHook = <T>(def: T): T => def;
 
     constructor(params: TParams, objects: QuerySet, mixins: ViewMixin[] = []) {
         this.params = params;
@@ -252,12 +252,12 @@ export abstract class BaseView<
     }
 
     extendStore(hook: <T>(originalStore: T) => T) {
-        const currentHook = this.extendStoreHook;
-        this.extendStoreHook = (def) => hook(currentHook(def));
+        const currentHook = this._extendStoreHook;
+        this._extendStoreHook = (def) => hook(currentHook(def));
     }
 
-    protected createStoreWithHook<T>(definition: T) {
-        const useStore = defineStore(`page_${getViewStoreId()}`, () => this.extendStoreHook(definition));
+    _createStoreWithHook<T>(definition: T) {
+        const useStore = defineStore(`page_${getViewStoreId()}`, () => this._extendStoreHook(definition));
         return useStore();
     }
 
@@ -332,7 +332,7 @@ export abstract class BaseView<
 
 export class View extends BaseView {
     _createStore(): BaseViewStore {
-        return this.createStoreWithHook(useBasePageData(this));
+        return this._createStoreWithHook(useBasePageData(this));
     }
 }
 
@@ -365,7 +365,7 @@ export class ListView extends BaseView<ListViewStore, ListViewParams> {
     }
 
     _createStore(): ListViewStore {
-        return this.createStoreWithHook(createListViewStore(this));
+        return this._createStoreWithHook(createListViewStore(this));
     }
 
     getRoutePath(): string {
@@ -452,7 +452,7 @@ export class PageView extends DetailView<PageViewStore, PageViewParams, PageView
     }
 
     _createStore(): PageViewStore {
-        return this.createStoreWithHook(createDetailViewStore(this));
+        return this._createStoreWithHook(createDetailViewStore(this));
     }
 
     getRoutePath(): string {
@@ -531,7 +531,7 @@ export class PageNewView extends DetailView<PageNewStore, PageNewParams> {
     }
 
     _createStore(): PageNewStore {
-        return this.createStoreWithHook(createNewViewStore(this));
+        return this._createStoreWithHook(createNewViewStore(this));
     }
 
     getRoutePath() {
@@ -558,7 +558,7 @@ export class PageEditView extends DetailView<PageEditStore> {
     }
 
     _createStore(): PageEditStore {
-        return this.createStoreWithHook(createEditViewStore(this));
+        return this._createStoreWithHook(createEditViewStore(this));
     }
 
     getRoutePath() {
@@ -594,7 +594,7 @@ export class ActionView extends DetailView<ActionStore, ActionViewParams> {
     }
 
     _createStore(): ActionStore {
-        return this.createStoreWithHook(createActionViewStore(this));
+        return this._createStoreWithHook(createActionViewStore(this));
     }
 
     getRoutePath() {

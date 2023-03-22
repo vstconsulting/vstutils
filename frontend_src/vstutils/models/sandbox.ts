@@ -1,9 +1,11 @@
 import Vue, { computed, customRef, markRaw, readonly, ref } from 'vue';
 
-import type { RepresentData } from '@/vstutils/utils';
+import { emptyRepresentData } from '@/vstutils/utils';
 import { emptyInnerData } from '@/vstutils/utils';
-import type { SetFieldValueOptions } from '@/vstutils/fields/base';
 import { ModelValidationError, type FieldValidationErrorInfo } from './errors';
+
+import type { RepresentData } from '@/vstutils/utils';
+import type { SetFieldValueOptions } from '@/vstutils/fields/base';
 import type { Model, ModelConstructor } from './Model';
 
 type ReadonlySet<T> = Omit<Set<T>, 'add' | 'clear' | 'delete'>;
@@ -86,9 +88,10 @@ export function createModelSandbox(instance: Model) {
         // Validate represent data
         const errors: FieldValidationErrorInfo[] = [];
 
+        const validatedData = emptyRepresentData();
         for (const field of instance._fields.values()) {
             try {
-                field.validateValue(data);
+                validatedData[field.name] = field.validateValue(data);
             } catch (e) {
                 errors.push({ field, message: (e as Error).message });
             }
@@ -97,7 +100,7 @@ export function createModelSandbox(instance: Model) {
         // Create inner data
         const newData = emptyInnerData();
         for (const field of instance._fields.values()) {
-            newData[field.name] = field.toInner(data);
+            newData[field.name] = field.toInner(validatedData);
         }
 
         // Validate inner data

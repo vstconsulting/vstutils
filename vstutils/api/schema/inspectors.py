@@ -9,7 +9,7 @@ from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_field_type
 from drf_yasg import openapi
 from drf_yasg.inspectors.query import CoreAPICompatInspector, force_real_str, coreschema  # type: ignore
-from rest_framework.fields import Field, JSONField, DecimalField, empty
+from rest_framework.fields import Field, JSONField, DecimalField, ListField, empty
 from rest_framework.serializers import Serializer
 
 from .. import fields, serializers, validators
@@ -398,6 +398,10 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
 
         if isinstance(field, (fields.NamedBinaryImageInJsonField, fields.MultipleNamedBinaryImageInJsonField)):
             items['x-format'] = FORMAT_NAMED_BIN_IMAGE
+            if field.background_fill_color:
+                if 'x-options' not in items:
+                    items['x-options'] = {}
+                items['x-options']['backgroundFillColor'] = field.background_fill_color
 
         if field.max_content_size:
             items['properties']['content']['maxLength'] = field.max_content_size
@@ -638,6 +642,9 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
                 return
 
             schema = definitions[ref_name]
+
+        if isinstance(field, ListField):
+            return
 
         if schema['type'] == openapi.TYPE_ARRAY:
             schema = schema['items']

@@ -77,7 +77,7 @@ export class ViewsTree {
      * @return {Node}
      */
     static buildViewsTree(views) {
-        const root = new Node();
+        const root = new Node(null, views.get('/'));
 
         for (const [path, view] of views) {
             const dt = pathToArray(path);
