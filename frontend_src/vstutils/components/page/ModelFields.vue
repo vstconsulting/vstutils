@@ -122,7 +122,12 @@
     if (hideNotRequired?.value) {
         for (const group of visibleFieldsGroups.value) {
             for (const field of group.fields) {
-                if (!field.required && props.data[field.name] === undefined) {
+                if (
+                    !field.required &&
+                    (props.data[field.name] === undefined ||
+                        (Array.isArray(props.data[field.name]) &&
+                            (props.data[field.name] as []).length === 0))
+                ) {
                     hideField(field);
                 }
             }

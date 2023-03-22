@@ -10,10 +10,13 @@
                 @set-value="({ field, value }) => $set(newItemData, field, value)"
             />
 
-            <button type="button" class="btn btn-success" @click="addItem">
-                <i class="fas fa-plus" />
-                {{ $t('Add') }}
-            </button>
+            <div class="d-flex">
+                <button type="button" class="btn btn-success" @click="addItem">
+                    <i class="fas fa-plus" />
+                    {{ $t('Add') }}
+                </button>
+                <HideButton v-if="hideable" class="ml-1" @click.native="$emit('hide-field', field)" />
+            </div>
         </Card>
 
         <Card v-for="(item, idx) in items" :key="idx">
@@ -42,6 +45,7 @@
     import type { NestedObjectField } from '@/vstutils/fields/nested-object';
     import type ArrayField from '../../ArrayField';
     import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import { HideButton } from '@/vstutils/fields/buttons';
 
     type Value = ExtractRepresent<ArrayField<NestedObjectField>>;
 
@@ -49,6 +53,7 @@
         field: ArrayField<NestedObjectField>;
         data: Record<string, unknown>;
         value?: Value;
+        hideable?: boolean;
     }>();
 
     const emit = defineEmits<{
