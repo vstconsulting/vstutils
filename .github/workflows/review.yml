@@ -1,6 +1,12 @@
 name: Review
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - "*"
+    tags-ignore:
+      - "*"
+  pull_request:
 
 jobs:
   js_review:
