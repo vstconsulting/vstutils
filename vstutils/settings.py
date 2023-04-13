@@ -511,6 +511,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'daemon': env.bool(f'{ENV_NAME}_DAEMON', default=True)
         },
         'rpc': {
+            'connection': env.str(f'{ENV_NAME}_RPC_ENGINE', default='file:///tmp'),
             'concurrency': env.int(f'{ENV_NAME}_RPC_CONCURRENCY', default=4),
             'prefetch_multiplier': env.int(f'{ENV_NAME}_RPC_PREFETCH_MULTIPLIER', default=1),
             'max_tasks_per_child': env.int(f'{ENV_NAME}_RPC_MAX_TASKS_PER_CHILD', default=1),
@@ -1209,7 +1210,10 @@ if RPC_ENABLED:
         CELERY_RESULT_BACKEND = __broker_url
     else:  # nocv
         CELERY_BROKER_URL = __broker_url
-        CELERY_RESULT_BACKEND = rpc.get("result_backend", fallback=CELERY_BROKER_URL)
+        CELERY_RESULT_BACKEND = env.str(
+            f'{ENV_NAME}_RPC_RESULT_BACKEND',
+            rpc.get("result_backend", fallback=CELERY_BROKER_URL)
+        )
 
     CELERY_WORKER_CONCURRENCY = rpc["concurrency"]
     CELERY_WORKER_HIJACK_ROOT_LOGGER = False

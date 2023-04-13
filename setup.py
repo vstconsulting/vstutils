@@ -387,6 +387,7 @@ def make_setup(**opts):
 ########################################################################################
 # end block
 
+os.environ.setdefault('NOT_COMPRESS', 'True')
 ext_list = []
 
 if 'develop' in sys.argv:
