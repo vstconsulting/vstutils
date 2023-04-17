@@ -30,7 +30,7 @@ export class QuerySetsResolver {
         const matcher = this._getMatcher(modelName);
 
         if (!path) {
-            return this.viewsTree.findInFirstLevel(matcher) || this.viewsTree.findInAllPaths(matcher);
+            return this.viewsTree.findInFirstLevel(matcher);
         }
 
         const node = path === '/' ? this.viewsTree.root : this.viewsTree.root.get(pathToArray(path));
@@ -42,8 +42,7 @@ export class QuerySetsResolver {
             matcher(node.view) ||
             this.viewsTree.findInChildren(node, matcher) ||
             this.viewsTree.findInNeighbourPaths(node, matcher) ||
-            this.viewsTree.findInParentsDeep(node, matcher) ||
-            this.viewsTree.findInAllPaths(matcher);
+            this.viewsTree.findInParentsDeep(node, matcher);
 
         if (qs) {
             return qs;

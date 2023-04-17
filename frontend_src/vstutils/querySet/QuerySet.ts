@@ -9,6 +9,7 @@ import type { InstancesList, Model, ModelConstructor } from '@/vstutils/models';
 import type { Field } from '@/vstutils/fields/base';
 import type { ListResponseData } from './types';
 import { fetchInstances } from '@/vstutils/fetch-values';
+import { readonly } from 'vue';
 
 const REQUEST_MODEL = 0;
 const RESPONSE_MODEL = 1;
@@ -179,7 +180,12 @@ export class QuerySet {
 
         if (!save_cache) clone.clearCache();
 
-        return Object.freeze(clone);
+        return Object.freeze(
+            // Vue 2 internally makes object readonly, this will fail for freezed
+            // object, so we need to make it readonly before freezing
+            // TODO: Remove in Vue 3
+            readonly(clone) as QuerySet,
+        );
     }
 
     /**

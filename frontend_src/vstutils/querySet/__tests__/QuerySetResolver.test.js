@@ -73,11 +73,15 @@ describe('QuerySetResolver test', () => {
 
     test('test nested queryset', () => {
         // test nested qs
-        expect(resolver.findQuerySet('Model2', level3_path2.path)).toStrictEqual(qs6);
+        expect(() => resolver.findQuerySet('Model2', level3_path2.path)).toThrow(
+            'Cannot find model Model2 for path /path2/{id}/path2/',
+        );
         // test parent qs
         expect(resolver.findQuerySet('Model1', level3_path2.path)).toStrictEqual(qs4);
         // test sibling qs
-        expect(resolver.findQuerySet('Model3', level3_path2.path)).toStrictEqual(qs7);
+        expect(() => resolver.findQuerySet('Model3', level3_path2.path)).toThrow(
+            'Cannot find model Model3 for path /path2/{id}/path2/',
+        );
         // test invalid model
         expect(() => resolver.findQuerySet('Model4', level3_path2.path)).toThrow();
     });
