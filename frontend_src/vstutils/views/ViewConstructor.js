@@ -177,7 +177,7 @@ export default class ViewConstructor {
                     ? pathSchema[EDIT_STYLE_PROPERTY_NAME]
                     : editStyleViewDefault;
             const pathParameters = path.format_keys().map((paramName) => {
-                const paramSchema = pathSchema.parameters.find((param) => param.name === paramName);
+                const paramSchema = (pathSchema.parameters ?? []).find((param) => param.name === paramName);
                 if (!paramSchema) {
                     throw new Error(`Cannot find schema for param "${paramName}" on view "${path}"`);
                 }
@@ -193,7 +193,7 @@ export default class ViewConstructor {
                 if (!operationSchema) continue;
                 const operationId = operationSchema[this.dictionary.paths.operation_id.name];
 
-                const request = Object.values(operationSchema.parameters).find(isBodyParam);
+                const request = Object.values(operationSchema.parameters ?? []).find(isBodyParam);
                 const requestModel = request ? this._getOperationModel(request) : null;
 
                 const responseCode = Object.keys(operationSchema.responses).find(isSuccessful);
