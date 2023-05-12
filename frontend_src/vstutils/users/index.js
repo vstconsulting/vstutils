@@ -5,9 +5,8 @@ import TFAPage from './TFAPage.vue';
 import { IntegerField } from '../fields/numbers/integer.js';
 import { guiPopUp, pop_up_msg } from '../popUp';
 import { generatePassword, getApp, generateBase32String, generateRandomString } from '../utils';
-import { getRedirectUrl } from '../store/helpers';
+import { useViewStore } from '@/vstutils/store';
 import './settings.js';
-import { openPage } from '../utils';
 export { Gravatar };
 
 const usersPath = '/user/';
@@ -133,7 +132,7 @@ signals.connect('</user/{id}/twofa/>filterActions', (obj) => {
                     app.store.page.loading = false;
                     app.store.page.changedFields = [];
                     guiPopUp.success(app.i18n.t(pop_up_msg.instance.success.save, ['', 'TFA']));
-                    openPage({ path: getRedirectUrl({ instance }) });
+                    await useViewStore().fetchData();
                 } catch (error) {
                     app.store.page.loading = false;
                     let str = app.error_handler.errorToString(error);
