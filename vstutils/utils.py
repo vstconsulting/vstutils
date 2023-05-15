@@ -40,6 +40,7 @@ from .tools import multikeysort
 
 logger: logging.Logger = logging.getLogger('vstutils')
 ON_POSIX = 'posix' in sys.builtin_module_names
+_gzip_object = GZipMiddleware(lambda *args, **kwargs: None)  # type: ignore
 
 
 def deprecated(func: tp.Callable):
@@ -251,7 +252,7 @@ def send_template_email(sync: bool = False, **kwargs):
 def patch_gzip_response(response, request):
     if not response.status_code == 200:
         return  # nocv
-    GZipMiddleware.process_response(None, request, response)
+    GZipMiddleware.process_response(_gzip_object, request, response)
     return response
 
 
