@@ -21,6 +21,7 @@ from django.db.models.query import QuerySet
 from django.db import transaction, models
 from django.utils.functional import cached_property, lazy
 from django.utils.http import urlencode
+from django.contrib.contenttypes.fields import GenericForeignKey
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, mixins as drf_mixins, exceptions, status
 from rest_framework.serializers import BaseSerializer
@@ -32,6 +33,7 @@ from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 
 from ..utils import classproperty, get_if_lazy, raise_context_decorator_with_default, patch_gzip_response_decorator
 from . import responses, fields
+from .filter_backends import get_serializer_readable_fields
 from .serializers import (
     ErrorSerializer,
     ValidationErrorSerializer,
@@ -337,19 +339,13 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
 
             serializer_class = self.get_serializer_class()
             if issubclass(serializer_class, BaseSerializer):
-                serializer = serializer_class()
-                read_fields = {
-                    f.source if f.source and '.' not in f.source else f.field_name
-                    for f in serializer._readable_fields
-                }
-                model_fields = {
-                    f.name
-                    for f in queryset.model._meta.get_fields()
-                }
+                read_fields = get_serializer_readable_fields(serializer_class())
+                _fields = queryset.model._meta.get_fields()
+                model_fields = {f.name for f in _fields}
                 fk_related_fields = {
                     f.name
-                    for f in queryset.model._meta.get_fields()
-                    if isinstance(f, models.ForeignKey)
+                    for f in _fields
+                    if isinstance(f, (models.ForeignKey, models.ManyToManyField, GenericForeignKey))
                 }
                 deferable_fields = (
                         model_fields -

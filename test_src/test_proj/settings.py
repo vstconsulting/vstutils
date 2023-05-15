@@ -6,6 +6,7 @@ INSTALLED_APPS += [
 ]
 
 MIDDLEWARE.append('vstutils.middleware.TimezoneHeadersMiddleware')
+MIDDLEWARE.insert(0, 'django.middleware.gzip.GZipMiddleware')
 
 HEALTH_BACKEND_CLASS = 'test_proj.health.TestDefaultBackend'
 

@@ -10,6 +10,14 @@ from vstutils.utils import raise_context, translate as _
 from .filters import extra_filter
 
 
+def get_serializer_readable_fields(serializer):
+    # pylint: disable=protected-access
+    return {
+        f.source if f.source and '.' not in f.source else f.field_name
+        for f in serializer._readable_fields
+    }
+
+
 class DjangoFilterBackend(BaseDjangoFilterBackend):
     def get_coreschema_field(self, field):
         kwargs = {
@@ -155,10 +163,12 @@ class SelectRelatedFilterBackend(VSTFilterBackend):
     }
 
     def filter_model_fields(self, view, field_types):
+        serializer = view.get_serializer_class()()
+        readable_fields = get_serializer_readable_fields(serializer)
         return tuple(
             f.name
-            for f in view.get_serializer_class().Meta.model()._meta.fields
-            if isinstance(f, field_types)
+            for f in serializer.Meta.model()._meta.fields
+            if isinstance(f, field_types) and f.name in readable_fields
         )
 
     def filter_by_func(self, queryset, queryset_func_name, related):
