@@ -48,7 +48,7 @@
 
 <script lang="ts" setup>
     import QRCode from 'qrcode';
-    import { computed, ref, toRef, watch } from 'vue';
+    import { computed, ref, watch } from 'vue';
     import { useViewStore } from '@/vstutils/store';
     import { copyToClipboard } from '@/vstutils/utils';
 
@@ -71,11 +71,15 @@
         return ((store.sandbox?.recovery as string | undefined) || '').split(',');
     });
 
-    watch(toRef(store, 'secretUri'), async (value) => {
-        if (value) {
-            qrcode.value = await QRCode.toDataURL(value, { scale: 6 });
-        }
-    });
+    watch(
+        () => store.secretUri as string | undefined,
+        async (value) => {
+            if (value) {
+                qrcode.value = await QRCode.toDataURL(value, { scale: 6 });
+            }
+        },
+        { immediate: true },
+    );
 
     const recoveryCodesEl = ref<HTMLElement>();
 
