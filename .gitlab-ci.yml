@@ -1,5 +1,5 @@
 default:
-  image: registry.gitlab.com/vstconsulting/images:ubuntu
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
   cache: &global_cache
     paths:
       - node_modules/
@@ -12,7 +12,7 @@ variables:
   ARTIFACT_DOWNLOAD_ATTEMPTS: 3
   RESTORE_CACHE_ATTEMPTS: 3
   DJANGO_LOG_LEVEL: 'CRITICAL'
-  TOX_ARGS: "--workdir /cache/.tox_vstutils_${CI_BUILD_REF_NAME}"
+  TOX_ARGS: "--workdir /cache/.tox_vstutils_${CI_COMMIT_REF_NAME}"
   CC: "ccache gcc"
   UWSGI_PROFILE: "minimal"
 
@@ -25,15 +25,15 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: registry.gitlab.com/vstconsulting/images:ubuntu
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
   coverage: '/\d+\%\s*$/'
   variables:
     TOX_ENVS: ""
     YARN_CACHE_FOLDER: "${CI_PROJECT_DIR}/yarn"
   before_script:
     - >
-      if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then
-        export TOX_ARGS="--workdir /tmp/.tox_vstutils_${CI_BUILD_REF_NAME}";
+      if [ "${CI_COMMIT_REF_NAME}" != "master" -a "${CI_COMMIT_REF_NAME}" != "developer" ]; then
+        export TOX_ARGS="--workdir /tmp/.tox_vstutils_${CI_COMMIT_REF_NAME}";
         unset BUILD_OPTIMIZATION;
       fi
     - if [ "${TOX_ENVS}" ]; then export TOX_ARGS="${TOX_ARGS} -e ${TOX_ENVS}"; fi
@@ -50,7 +50,7 @@ stages:
 
 .js_tests_template: &branch_js_tests
   <<: *branch_tests
-  image: registry.gitlab.com/vstconsulting/images:node-tests
+  image: registry.gitlab.com/vstconsulting/images:node18-tests
   before_script:
     - yarn install --pure-lockfile --mutex network
   script:
@@ -129,7 +129,7 @@ release:
 
 release_pypi:
   stage: release
-  image: registry.gitlab.com/vstconsulting/images:ubuntu
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
   artifacts:
     reports:
       dotenv: variables.env
