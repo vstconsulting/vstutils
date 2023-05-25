@@ -54,7 +54,7 @@
                             :class="multiActionsClasses.uniq.value"
                             :selected="selection"
                             :instances="instances"
-                            @execute-multi-action="executeMultiAction"
+                            @execute-multi-action="store.executeMultiAction($event)"
                         />
                     </transition>
                     <Pagination :items="paginationItems" style="float: right" />
@@ -68,7 +68,6 @@
     import { computed, provide, ref } from 'vue';
     import { storeToRefs } from 'pinia';
 
-    import { getApp } from '@/vstutils/utils';
     import { ViewPropsDef } from '@/vstutils/views/props';
     import { useViewStore } from '@/vstutils/store';
 
@@ -76,11 +75,10 @@
     import MultiActions from './MultiActions.vue';
     import Pagination from './Pagination.vue';
 
-    import type { Action, ListView, ViewPropsDefType } from '@/vstutils/views';
+    import type { ListView, ViewPropsDefType } from '@/vstutils/views';
 
     const props = defineProps(ViewPropsDef as ViewPropsDefType<ListView>);
 
-    const app = getApp();
     const store = useViewStore<ListView>();
 
     const multiActionsClasses = useUniqueCssClasses('selected__');
@@ -98,14 +96,6 @@
     const fields = computed(() => Array.from(store.model.fields.values()).filter((field) => !field.hidden));
 
     const searchFieldValue = ref('');
-
-    async function executeMultiAction(action: Action) {
-        const instances = store.instances.filter((instance) =>
-            store.selection.includes(instance.getPkValue()!),
-        );
-
-        return app.actions.execute({ action, instances });
-    }
 
     const {
         error,

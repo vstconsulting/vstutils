@@ -85,11 +85,11 @@ function fetchInstancesFields(instances: Model[], fields: Field[], options?: Opt
         if (isFetchableField(field) && (field.usePrefetch || !options?.isPrefetch)) {
             promises.push(fetchFieldValues(field, instances));
         } else if (field instanceof ArrayField) {
-            promises.push(fetchArrayFieldValues(field as ArrayField, instances));
+            promises.push(fetchArrayFieldValues(field as ArrayField, instances, options));
         } else if (field instanceof DynamicField) {
-            promises.push(fetchDynamicFieldValues(field, instances));
+            promises.push(fetchDynamicFieldValues(field, instances, options));
         } else if (field instanceof RelatedListField) {
-            promises.push(fetchRelatedListFieldValues(field, instances));
+            promises.push(fetchRelatedListFieldValues(field, instances, options));
         }
     }
     return Promise.all(promises) as unknown as Promise<void>;
@@ -108,7 +108,11 @@ async function fetchFieldValues(field: IFetchableField, instances: Model[]) {
     }
 }
 
-async function fetchArrayFieldValues(field: ArrayField, instances: Model[]): Promise<void> {
+async function fetchArrayFieldValues(
+    field: ArrayField,
+    instances: Model[],
+    options?: Options,
+): Promise<void> {
     const itemInstancesMap = new Map<Model, Model[]>();
     for (const instance of instances) {
         const items = field._deserializeValue(instance._data);
@@ -127,7 +131,7 @@ async function fetchArrayFieldValues(field: ArrayField, instances: Model[]): Pro
 
     const itemField = field.itemField!;
 
-    await fetchInstancesFields(allItemInstances, [itemField]);
+    await fetchInstancesFields(allItemInstances, [itemField], options);
 
     // Put processed items back into original instances
     for (const [instance, itemInstances] of itemInstancesMap) {
@@ -139,7 +143,11 @@ async function fetchArrayFieldValues(field: ArrayField, instances: Model[]): Pro
     }
 }
 
-async function fetchDynamicFieldValues(field: DynamicField, instances: Model[]): Promise<void> {
+async function fetchDynamicFieldValues(
+    field: DynamicField,
+    instances: Model[],
+    options?: Options,
+): Promise<void> {
     const fields = new Map<Field, Model[]>();
 
     for (const instance of instances) {
@@ -154,13 +162,17 @@ async function fetchDynamicFieldValues(field: DynamicField, instances: Model[]):
     }
 
     const promises = Array.from(fields.entries()).map(([field, instances]) =>
-        fetchInstancesFields(instances, [field]),
+        fetchInstancesFields(instances, [field], options),
     );
 
     return Promise.all(promises) as unknown as Promise<void>;
 }
 
-async function fetchRelatedListFieldValues(field: RelatedListField, instances: Model[]): Promise<void> {
+async function fetchRelatedListFieldValues(
+    field: RelatedListField,
+    instances: Model[],
+    options?: Options,
+): Promise<void> {
     const model = field.itemsModel!;
 
     for (const instance of instances) {
@@ -173,5 +185,5 @@ async function fetchRelatedListFieldValues(field: RelatedListField, instances: M
     }
     const allInstancesValues = instances.flatMap((instance) => field.getValue(instance.sandbox.value));
 
-    return fetchInstances(allInstancesValues as unknown as Model[]);
+    return fetchInstances(allInstancesValues as unknown as Model[], options);
 }
