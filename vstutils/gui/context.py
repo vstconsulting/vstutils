@@ -41,7 +41,7 @@ def settings_constants(request: HttpRequest) -> Dict:
     return {
         "login_url": reverse('login'),
         "logout_url": reverse('logout'),
-        "docs_url": reverse('docs:docs_root') if getattr(settings, 'HAS_DOCS', False) else '',
+        "docs_url": settings.DOC_URL if getattr(settings, 'HAS_DOCS', False) else '',
         "has_docs": getattr(settings, 'HAS_DOCS', False),
         "timezone": getattr(settings, 'TIME_ZONE', 'UTC'),
         "debug": debug_enabled,
