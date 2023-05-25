@@ -188,6 +188,14 @@ export const createListViewStore = (view: ListView) => {
         selection.unselectIds(removedInstancesIds);
     }
 
+    async function executeMultiAction(action: Action) {
+        const selected = instances.value.filter((instance) =>
+            selection.selection.value.includes(instance.getPkValue()!),
+        );
+
+        await app.actions.execute({ action, instances: selected });
+    }
+
     return {
         ...base,
         ...qsStore,
@@ -213,6 +221,7 @@ export const createListViewStore = (view: ListView) => {
             unselect: (id) => selection.unselectIds([id]),
         }),
         removeInstances,
+        executeMultiAction,
     };
 };
 

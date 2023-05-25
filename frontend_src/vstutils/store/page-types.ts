@@ -50,6 +50,7 @@ export interface ListViewStore extends BaseViewStore {
         purge?: boolean;
     }) => Promise<void | Route>;
     removeInstances: (arg: { action: Action; instances: Model[]; purge?: boolean }) => Promise<void>;
+    executeMultiAction(action: Action): Promise<void>;
 }
 
 export interface DetailViewStore extends BaseViewStore {

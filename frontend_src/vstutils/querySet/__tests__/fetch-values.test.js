@@ -199,3 +199,27 @@ test('related list with array with dynamic with fk fetching', async () => {
         ArrayField,
     );
 });
+
+test('disabled prefetch inside an array field', async () => {
+    const ModelFkInsideArray = app.modelsResolver.bySchemaObject({
+        properties: {
+            id: { type: 'integer' },
+            array: {
+                type: 'array',
+                items: {
+                    ...userFkField,
+                    'x-options': {
+                        ...userFkField['x-options'],
+                        usePrefetch: false,
+                    },
+                },
+            },
+        },
+    });
+
+    fetchMock.mockResponseOnce(JSON.stringify([{ status: 200, data: { count: 0, results: [] } }]));
+
+    await fetchInstances([new ModelFkInsideArray({ id: 1, array: [1, 2, 3] })], { isPrefetch: true });
+
+    expect(fetchMock).toBeCalledTimes(0);
+});
