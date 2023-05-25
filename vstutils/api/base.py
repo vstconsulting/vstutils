@@ -496,17 +496,26 @@ class CachableHeadMixin(GenericViewSet):
             f'{request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, settings.LANGUAGE_CODE)}'
         )
 
-    def check_etag(self, request):
-        etag_data = self.get_etag_value(self.model_class, request)  # type: ignore
+    def _get_etag(self, model_class, request):
+        return f'"{self.get_etag_value(model_class, request)}"'
 
-        if request.method == "GET" and etag_data == str(request.headers.get("If-None-Match", None)):
-            raise self.NotModifiedException("")
-        # TODO: Workflow with ETag on PUT/PATCH
+    def check_etag(self, request, model_class=None):
+        if request.method == "GET":
+            header = request.headers.get("If-None-Match", None)
+            if not header:
+                return
+            data = self._get_etag(model_class or self.model_class, request)
+            header = str(header)
+            if header[0] != '"':
+                header = f'"{header}"'
+            if data == header:
+                raise self.NotModifiedException("")
+        # TODO: Workflow with ETag on PUT/PATCH/DELETE
 
     def finalize_response(self, request: Request, response: RestResponse, *args, **kwargs) -> RestResponse:
         result_response = super().finalize_response(request, response, *args, **kwargs)
         if self.is_main_action and 'ETag' not in result_response.headers:
-            result_response.headers['ETag'] = lazy(self.get_etag_value, str)(self.model_class, request)
+            result_response.headers['ETag'] = lazy(self._get_etag, str)(self.model_class, request)
         return result_response
 
     def initial(self, request: Request, *args: _t.Any, **kwargs: _t.Any) -> None:
