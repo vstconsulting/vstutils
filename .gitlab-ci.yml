@@ -155,16 +155,16 @@ release_job:
       when: on_success
     - when: never
   script:
-    - echo "running release job for $CI_COMMIT_TAG"
+    - echo "running release job for ${CI_COMMIT_TAG}"
   release:
-    name: '$CI_COMMIT_TAG'
-    description: '$CI_COMMIT_DESCRIPTION'
-    tag_name: '$CI_COMMIT_TAG'
-    ref: '$CI_COMMIT_SHA'
+    name: "${CI_COMMIT_TAG}"
+    description: "${CI_COMMIT_DESCRIPTION}"
+    tag_name: "${CI_COMMIT_TAG}"
+    ref: "${CI_COMMIT_SHA}"
     milestones:
-      - '$MILESTONE'
+      - "${MILESTONE}"
     assets:
       links:
         - name: 'PyPI'
-          url: 'https://pypi.org/project/vstutils/$CI_COMMIT_TAG/'
+          url: "https://pypi.org/project/vstutils/${CI_COMMIT_TAG}/"
           link_type: 'other'
