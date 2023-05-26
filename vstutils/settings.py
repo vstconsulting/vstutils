@@ -158,6 +158,8 @@ class MainSection(BaseAppendSection):
 class WebSection(BaseAppendSection):
     types_map = {
         'allow_cors': ConfigBoolType,
+        'cors_allow_all_origins': ConfigBoolType,
+        'cors_allowed_credentials': ConfigBoolType,
         'cors_allowed_origins': ConfigListType,
         'cors_allowed_origins_regexes': ConfigListType,
         'cors_expose_headers': ConfigListType,
@@ -431,6 +433,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         },
         'web': {
             'allow_cors': env.bool(f'{ENV_NAME}_WEB_ALLOW_CORS', default=False),
+            'cors_allowed_credentials': env.bool(f'{ENV_NAME}_WEB_CORS_ALLOWED_CREDENTIALS', default=False),
             'cors_allowed_origins': env.list(f'{ENV_NAME}_WEB_CORS_ALLOWED_ORIGINS', default=[]),
             'cors_allowed_origins_regexes': env.list(f'{ENV_NAME}_WEB_CORS_ALLOWED_ORIGINS_REGEXES', default=[]),
             'cors_expose_headers': env.list(f'{ENV_NAME}_WEB_CORS_EXPOSE_HEADERS', default=[]),
@@ -649,7 +652,6 @@ INSTALLED_APPS: _t.List[_t.Text] = [
     'django.contrib.messages',
     'vstutils',
     'django.contrib.staticfiles',
-    'corsheaders',
 ]
 
 if has_django_celery_beat:
@@ -679,7 +681,6 @@ MIDDLEWARE: _t.List[_t.Text] = [
     'htmlmin.middleware.MarkRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -698,7 +699,6 @@ MIDDLEWARE_ENDPOINT_CONTROL = {
         'htmlmin.middleware.MarkRequestMiddleware',
         'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
-        'corsheaders.middleware.CorsMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -718,7 +718,8 @@ MAX_TFA_ATTEMPTS: int = web['max_tfa_attempts']
 # Allow cross-domain access
 CORS_ORIGIN_ALLOW_ALL: bool = web['allow_cors']
 CORS_ALLOWED_ORIGINS: _t.Sequence[str] = web['cors_allowed_origins']
-CORS_ALLOWED_ORIGIN_REGEXES: _t.Sequence[_t.Union[str, _t.Pattern[str]]] = web['cors_allowed_origins_regexes']
+CORS_ALLOWED_CREDENTIALS: bool = web['cors_allowed_credentials']
+CORS_ALLOWED_ORIGIN_REGEXES: _t.Sequence[_t.Union[str, _t.Pattern[str]]] = web['cors_allowed_origins_regexes'] or None
 CORS_EXPOSE_HEADERS: _t.Sequence = web['cors_expose_headers']
 CORS_PREFLIGHT_MAX_AGE: int = web['cors_preflight_max_age']
 if 'cors_allow_methods' in web:
