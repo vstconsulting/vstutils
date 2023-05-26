@@ -506,6 +506,8 @@ class CachableHeadMixin(GenericViewSet):
                 return
             data = self._get_etag(model_class or self.model_class, request)
             header = str(header)
+            if header[:2] in ('W/', "w/"):
+                header = header[2:]
             if header[0] != '"':
                 header = f'"{header}"'
             if data == header:

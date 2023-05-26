@@ -3,6 +3,7 @@ from vstutils.settings import *
 
 INSTALLED_APPS += [
     'test_proj',
+    'test_apps',
 ]
 
 MIDDLEWARE.append('vstutils.middleware.TimezoneHeadersMiddleware')

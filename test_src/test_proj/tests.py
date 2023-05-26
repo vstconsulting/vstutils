@@ -44,7 +44,6 @@ from django.urls import reverse
 from fakeldap import MockLDAP
 
 from vstutils import utils
-from vstutils.asgi import application
 from vstutils.api.models import Language
 from vstutils.api.schema.inspectors import X_OPTIONS
 from vstutils.api.serializers import BaseSerializer
@@ -741,6 +740,15 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         response = fclient.get('/media/test.txt')
         self.assertEqual(response.status_code, 200)
+
+        response = fclient.get('/.well-known/test.json')
+        self.assertEqual(response.status_code, 200)
+        # Check stats
+        response = fclient.get('/.well-known/test.json', headers={'if-none-match': response.headers['etag']})
+        self.assertEqual(response.status_code, 304)
+
+        response = fclient.get('/test/view/json')
+        self.assertEqual(response.status_code, 418)
 
         # 404
         self.get_result('get', '/api/v1/some/', code=404)
@@ -3472,7 +3480,7 @@ class ProjectTestCase(BaseTestCase):
         instance = CachableModel.objects.create(name='1')
         results = self.bulk([
             {"method": 'get', "path": ['cachable']},
-            {"method": 'get', "path": ['cachable'], 'headers': {"HTTP_IF_NONE_MATCH": '<<0[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cachable'], 'headers': {"HTTP_IF_NONE_MATCH": 'W/<<0[headers][ETag]>>'}},
         ])
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[0]['data']['count'], 1)
