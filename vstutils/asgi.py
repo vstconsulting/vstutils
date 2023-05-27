@@ -1,5 +1,6 @@
 import os
 import posixpath
+import time
 
 from django.conf import settings
 from django.core.asgi import get_asgi_application
@@ -62,6 +63,15 @@ async def well_known(file_path: str, request: Request):
 
 
 before_mount_app.send(sender=application, static=static)
+
+
+@application.middleware('http')
+async def add_server_timing_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    response.headers['Server-Timing'] = f'total;dur={round((time.time()-start_time)*1000, 2)}'
+    return response
+
 
 if not any(m.path == '/' for m in application.routes):
     application.mount("/", get_asgi_application())

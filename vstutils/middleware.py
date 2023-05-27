@@ -208,7 +208,7 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
             else:
                 response_durations = ""
             response_durations += f', db_execution_time;dur={self._round_time(ql.queries_time)}'
-            response['Server-Timing'] = f'total;dur={total_time}{response_durations or ""}'
+            response['Server-Timing'] = f'total_app;dur={total_time}{response_durations or ""}'
         return response
 
 
