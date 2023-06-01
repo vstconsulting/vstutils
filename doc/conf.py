@@ -46,7 +46,7 @@ release = version
 #
 # needs_sphinx = '1.0'
 
-locale_dirs = ['locale/']
+locale_dirs = [f'{os.path.dirname(__file__)}/locale/']
 gettext_compact = False
 
 # Add any Sphinx extension module names here, as strings. They can be

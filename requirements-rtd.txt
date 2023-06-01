@@ -1,5 +1,6 @@
 -rrequirements.txt
 -rrequirements-doc.txt
+-rrequirements-test.txt
 -rrequirements-rpc.txt
 django~=4.1.8
 typing-extensions
