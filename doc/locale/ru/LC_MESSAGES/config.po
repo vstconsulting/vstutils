@@ -1,0 +1,1377 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018-2022, VST Consulting
+# This file is distributed under the same license as the VST Utils package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: VST Utils 5.0.4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-06-01 08:19+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../config.rst:2
+msgid "Configuration manual"
+msgstr "Руководство по настройке"
+
+#: ../../config.rst:5
+msgid "Introduction"
+msgstr "Введение"
+
+#: ../../config.rst:6
+msgid ""
+"Though default configuration is suitable for many common cases, vstutils-"
+"based applications is highly configurable system. For advanced settings "
+"(scalability, dedicated DB, custom cache, logging or directories) you can"
+" configure vstutils-based application deeply by tweaking "
+"``/etc/{{app_name or app_lib_name}}/settings.ini``."
+msgstr ""
+"Хоть и стандартная конфигурация подходит в большинстве случаев, "
+"приложение на vstutils является высоко настраиваемой системой. Для "
+"расширенных настроек (масштабируемость, выделенная база данных, "
+"настраиваемый кэш, логгирование или директории) вы можете глубоко "
+"настраивать приложение, основанное на vstutils, изменяя файл настроек "
+"``/etc/{{app_name or app_lib_name}}/settings.ini``."
+
+#: ../../config.rst:11
+msgid ""
+"The most important thing to keep in mind when planning your application "
+"architecture is that vstutils-based applications have a service-oriented "
+"structure. To build a distributed scalable system you only need to "
+"connect to a shared database_, shared cache_, locks_ and a shared rpc_ "
+"service (MQ such as RabbitMQ, Redis, etc.). A shared file storage may be "
+"required in some cases, a but vstutils does not require it."
+msgstr ""
+"Самое важное, о чем нужно помнить при планировании архитектуры вашего "
+"приложения, это то, что приложения, основанные на vstutils, имеют "
+"сервисно-ориентированную структуру. Чтобы построить распределенную "
+"масштабируемую систему, вам нужно только подключиться к :ref:`общей базе "
+"данных <database>`, :ref:`общему кэшу <cache>`, :ref:`блокировкам "
+"<locks>` и общей :ref:`службе rpc <rpc>` (MQ, такому как RabbitMQ, Redis "
+"и т. д.). В некоторых случаях может потребоваться общее файловое "
+"хранилище, но vstutils не требует его."
+
+#: ../../config.rst:17
+msgid "Let's cover the main sections of the config and its parameters:"
+msgstr "Рассмотрим основные разделы конфигурации и их параметры:"
+
+#: ../../config.rst:22
+msgid "Main settings"
+msgstr "Основные настройки"
+
+#: ../../config.rst:24
+msgid "Section ``[main]``."
+msgstr "Раздел ``[main]``."
+
+#: ../../config.rst:26
+msgid ""
+"This section is intended for settings related to whole vstutils-based "
+"application (both worker and web). Here you can specify verbosity level "
+"of vstutils-based application during work, which can be useful for "
+"troubleshooting (logging level etc). Also there are settings for changing"
+" timezone for whole app and allowed domains."
+msgstr ""
+"Этот раздел предназначен для настроек, относящихся ко всему приложению на"
+" основе vstutils (как рабочему процессу, так и веб-интерфейсу). Здесь вы "
+"можете указать уровень подробности вывода информации о работе приложения "
+"на основе vstutils, что может быть полезно при устранении неполадок "
+"(уровень логгирования и т. д.). Также здесь находятся настройки для "
+"изменения часового пояса приложения в целом и разрешенных доменов."
+
+#: ../../config.rst:31
+msgid "To use LDAP protocol, create following settings in section ``[main]``."
+msgstr ""
+"Чтобы использовать протокол LDAP, создайте следующие настройки в разделе "
+"``[main]``."
+
+#: ../../config.rst:39
+msgid ""
+"ldap-default-domain is an optional argument, that is aimed to make user "
+"authorization easier (without input of domain name)."
+msgstr ""
+"ldap-default-domain - это необязательный аргумент, который направлен на "
+"то, чтобы сделать авторизацию проще (без ввода доменного имени)."
+
+#: ../../config.rst:42
+msgid ""
+"ldap-auth_format is an optional argument, that is aimed to customize LDAP"
+" authorization. Default value: cn=<username>,<domain>"
+msgstr ""
+"ldap-auth_format это необязательный аргумент, который направлен на то, "
+"чтобы кастомизировать LDAP авторизацию. Значение по умолчанию: "
+"cn=<username>,<domain>"
+
+#: ../../config.rst:45
+msgid "In the example above authorization logic will be the following:"
+msgstr "В примере выше логика авторизации будет следующая: "
+
+#: ../../config.rst:47
+msgid "System checks combination of login:password in database;"
+msgstr "Система проверяет комбинацию login:password в базе данных"
+
+#: ../../config.rst:49
+msgid "System checks combination of login:password in LDAP:"
+msgstr "Система проверяет комбинацию login:password в LDAP:"
+
+#: ../../config.rst:51
+msgid ""
+"if domain was mentioned, it will be set during authorization (if user "
+"enter login without ``user@domain.name`` or without ``DOMAIN\\user`` );"
+msgstr ""
+"Если домен был указан, то он будет установлен во время авторизации "
+"(например, если пользователь ввел login без `user@domain.name`` или без "
+"``DOMAIN\\user``);"
+
+#: ../../config.rst:54
+msgid ""
+"if authorization was successful and there is user with entered "
+"credentials in database, server creates session that user."
+msgstr ""
+"Если авторизация была успешной и пользователь с предоставленными данными "
+"существует в базе данных, сервер создает сессию этого пользователя."
+
+#: ../../config.rst:58
+msgid "**debug** - Enable debug mode. Default: false."
+msgstr "**debug** - Включить режим отладки. По умолчанию: false."
+
+#: ../../config.rst:59
+msgid ""
+"**allowed_hosts** - Comma separated list of domains, which allowed to "
+"serve. Default: ``*``."
+msgstr ""
+"**allowed_hosts** - Разделенный запятой список доменов, которым разрешено"
+" обслуживание. По умолчанию: ``*``."
+
+#: ../../config.rst:60
+msgid ""
+"**first_day_of_week** - Integer value with first day of week. Default: "
+"``0``."
+msgstr ""
+"**first_day_of_week** - Целочисленное значение первого дня недели. по "
+"умолчанию: ``0``."
+
+#: ../../config.rst:61
+msgid "**ldap-server** - LDAP server connection."
+msgstr "**ldap-server** - Подключение к серверу LDAP."
+
+#: ../../config.rst:62
+msgid "**ldap-default-domain** - Default domain for auth."
+msgstr "**ldap-default-domain** - Домен по умолчанию для аутентификации"
+
+#: ../../config.rst:63
+msgid ""
+"**ldap-auth_format** - Default search request format for auth. Default: "
+"``cn=<username>,<domain>``."
+msgstr ""
+"**ldap-auth_format** - Формат запроса поиска по умолчанию для "
+"аутентификации. По умолчанию: ``cn=<username>,<domain>``."
+
+#: ../../config.rst:64
+msgid "**timezone** - Timezone for web-application. Default: UTC."
+msgstr "**timezone** - часовой пояс для веб-приложения. По умолчанию: UTC."
+
+#: ../../config.rst:65
+msgid "**log_level** - Logging level. Default: WARNING."
+msgstr "**log_level** - Уровень логгирования. По умолчанию WARNING."
+
+#: ../../config.rst:66
+msgid ""
+"**enable_django_logs** - Enable or disable Django logger to output. "
+"Useful for debugging. Default: false."
+msgstr ""
+"**enable_django_logs** - Включить или выключить вывод логов Django. "
+"Полезно для отладки. По умолчанию: false."
+
+#: ../../config.rst:68
+msgid ""
+"**enable_admin_panel** - Enable or disable Django Admin panel. Default: "
+"false."
+msgstr ""
+"**enable_admin_panel** - Включить или выключить панели администратора "
+"Django. По умолчанию: false."
+
+#: ../../config.rst:69
+msgid ""
+"**enable_registration** - Enable or disable user self-registration. "
+"Default: false."
+msgstr ""
+"**enable_registration** - Включить или выключить самостоятельную "
+"регистрацию пользователей. По умолчанию: false."
+
+#: ../../config.rst:70
+msgid ""
+"**enable_user_self_remove** - Enable or disable user self-removing. "
+"Default: false."
+msgstr ""
+"**enable_user_self_remove** - Включить или выключить самоудаление "
+"пользователей. По умолчанию: false."
+
+#: ../../config.rst:71
+msgid ""
+"**auth-plugins** - Comma separated list of django authentication "
+"backends. Authorization attempt is made until the first successful one in"
+" order specified in the list."
+msgstr ""
+"**auth-plugins** - Список аутентифицированных бэкендов Django, "
+"разделенных запятыми. Попытка авторизации повторяется до первой успешной "
+"в соответствии с порядком, указанным в списке."
+
+#: ../../config.rst:73
+msgid ""
+"**auth-cache-user** - Enable or disable user instance caching. It "
+"increases session performance on each request but saves model instance in"
+" unsafe storage (default django cache). The instance is serialized to a "
+"string using the :mod:`standard python module pickle <pickle>` and then "
+"encrypted with :wiki:`Vigenère cipher <Vigenère cipher>`. Read more in "
+"the :class:`vstutils.utils.SecurePickling` documentation. Default: false."
+msgstr ""
+"**auth-cache-user** - Включить или выключить кэширование экземпляра "
+"пользователя. Это увеличивает производительность сеанса при каждом "
+"запросе, но сохраняет экземпляр модели в небезопасном хранилище (кэше "
+"Django по умолчанию). Экземпляр сериализуется в строку с использованием "
+":mod:`стандартного модуля python pickle <pickle>`, а затем шифруется с "
+"помощью :wiki:`шифра Виженера <Vigenère cipher>`. Дополнительную "
+"информацию можно найти в документации "
+":class:`vstutils.utils.SecurePickling`. По умолчанию: false."
+
+#: ../../config.rst:83
+msgid "Databases settings"
+msgstr "Настройки базы данных"
+
+#: ../../config.rst:85
+msgid "Section ``[databases]``."
+msgstr "Раздел ``[databases]``."
+
+#: ../../config.rst:87
+msgid ""
+"The main section that is designed to manage multiple databases connected "
+"to the project."
+msgstr ""
+"Основной раздел, предназначенный для управления несколькими базами "
+"данных, которые подключены к проекту. "
+
+#: ../../config.rst:90
+msgid ""
+"These settings are for all databases and are vendor-independent, with the"
+" exception of tablespace management."
+msgstr ""
+"Эти настройки актуальны для всех баз данных за исключением пространства "
+"таблиц."
+
+#: ../../config.rst:93
+msgid ""
+"**default_tablespace** - Default tablespace to use for models that don’t "
+"specify one, if the backend supports it. Read more at "
+":django_topics:`Declaring tablespaces for tables <db/tablespaces"
+"/#declaring-tablespaces-for-tables>`."
+msgstr ""
+"**default_tablespace** - Табличное пространство по умолчанию, "
+"используемое для индексов полей, в которых оно не указано, если бэкенд "
+"это поддерживает. Дополнительную информацию можно найти в разделе "
+":django_topics:`Объявление табличных пространств для индексов "
+"<db/tablespaces/#declaring-tablespaces-for-indexes>`."
+
+#: ../../config.rst:96
+msgid ""
+"**default_index_tablespace** - Default tablespace to use for indexes on "
+"fields that don’t specify one, if the backend supports it. Read more at "
+":django_topics:`Declaring tablespaces for indexes <db/tablespaces"
+"/#declaring-tablespaces-for-indexes>`."
+msgstr ""
+"**default_index_tablespace** - Табличное пространство по умолчанию, "
+"используемое для индексов полей, в которых оно не указано, если бэкенд "
+"это поддерживает Дополнительную информацию можно найти в разделе "
+":django_topics:`Объявление табличных пространств для индексов "
+"<db/tablespaces/#declaring-tablespaces-for-indexes>`.\""
+
+#: ../../config.rst:99
+msgid ""
+"**databases_without_cte_support** - A comma-separated list of database "
+"section names that do not support CTEs (Common Table Expressions)."
+msgstr ""
+"**databases_without_cte_support** - Разделенный запятыми список разделов "
+"баз данных которые не поддерживают CTEs (Common Table Expressions)."
+
+#: ../../config.rst:103
+msgid ""
+"Although MariaDB supports Common Table Expressions, but database "
+"connected to MariaDB still needs to be added to "
+"``databases_without_cte_support`` list. The problem is that the "
+"implementation of recursive queries in the MariaDB does not allow using "
+"it in a standard form. MySQL (since 8.0) works as expected."
+msgstr ""
+"Хоть MariaDB и поддерживает CTEs (Common Table Expressions), но база "
+"данных, подключенная к MariaDB все равно должна быть добавлена в список "
+"``databases_without_cte_support``. Проблема заключается в том, что "
+"реализация рекурсивных запросов MariaDB не позволяет использовать их в "
+"стандартной форме. MySQL (начиная с версии 8.0) работает ожидаемым "
+"образом."
+
+#: ../../config.rst:108
+msgid ""
+"Also, all subsections of this section are available connections to the "
+"DBMS. So the ``databases.default`` section will be used by django as the "
+"default connection."
+msgstr ""
+"Также, все подразделы этого раздела представляют собой доступные "
+"подключения к СУБД. Таким образом, раздел ``databases.default`` будет "
+"использоваться Django в качестве подключения по умолчанию."
+
+#: ../../config.rst:111
+msgid ""
+"Here you can change settings related to database, which vstutils-based "
+"application will use. vstutils-based application supports all databases "
+"supported by ``django``. List of supported out of the box: SQLite "
+"(default choice), MySQL, Oracle, or PostgreSQL. Configuration details "
+"available at :django_docs:`Django database documentation "
+"<settings/#databases>`. To run vstutils-based application at multiple "
+"nodes (cluster), use client-server database (SQLite not suitable) shared "
+"for all nodes."
+msgstr ""
+"Здесь вы можете изменять настройки, связанные с базой данных, которую "
+"будет использовать приложение, основанное на vstutils. Приложение, "
+"основанное на vstutils, поддерживает все базы данных, поддерживаемые "
+"``Django``. Список поддерживаемых баз данных изначально включает SQLite "
+"(выбор по умолчанию), MySQL, Oracle или PostgreSQL. Подробную информацию "
+"о конфигурации можно найти в :django_docs:`документации Django по базам "
+"данных <settings/#databases>`. Для запуска приложения, основанного на "
+"vstutils, на нескольких узлах (кластере) используйте клиент-серверную "
+"базу данных (SQLite не подходит), используемую всеми узлами."
+
+#: ../../config.rst:119
+msgid ""
+"You can also set the base template for connecting to the database in the "
+"``database`` section."
+msgstr ""
+"Вы также можете задать базовый шаблон для подключения к базе данныхв "
+"разделе ``database``."
+
+#: ../../config.rst:123
+msgid "Section ``[database]``."
+msgstr "Раздел ``[database]``."
+
+#: ../../config.rst:125
+msgid ""
+"This section is designed to define the basic template for connections to "
+"various databases. This can be useful to reduce the list of settings in "
+"the ``databases.*`` subsections by setting the same connection for a "
+"different set of databases in the project. For more details read the "
+"django docs about :django_topics:`Multiple databases <db/multi-db"
+"/#multiple-databases>`"
+msgstr ""
+"Этот раздел предназначен для определения базового шаблона для подключения"
+" к различным базам данных. Это может быть полезно для сокращения списка "
+"настроек в подразделах ``databases.*`` путем установки одного и того же "
+"подключения для различного набора баз данных в проекте. Дополнительные "
+"сведения можно найти в документации Django :django_topics:`о "
+"множественных базах данных <db/multi-db/#multiple-databases>`"
+
+#: ../../config.rst:130
+msgid "There is a list of settings, required for MySQL/MariaDB database."
+msgstr "Здесь приведен список настроек, необходимых для базы данных MySQL/MariaDB"
+
+#: ../../config.rst:132
+msgid ""
+"Firstly, if you use MySQL/MariaDB and you have set timezone different "
+"from \"UTC\" you should run command below:"
+msgstr ""
+"Во-первых, если вы используете MySQL/MariaDB и установили часовой пояс, "
+"отличный от \"UTC\", вам следует выполнить следующую команду:"
+
+#: ../../config.rst:139
+msgid ""
+"Secondly, to use MySQL/MariaDB set following options in ``settings.ini`` "
+"file:"
+msgstr ""
+"Во-вторых, чтобы использовать MySQL/MariaDB установите следующие "
+"настройки в файле ``settings.ini``:"
+
+#: ../../config.rst:147
+msgid "Finally, add some options to MySQL/MariaDB configuration:"
+msgstr "Наконец, добавьте некоторые настройки в конфигурацию MySQL/MariaDB"
+
+#: ../../config.rst:163
+msgid "Cache settings"
+msgstr "Настройки кэша"
+
+#: ../../config.rst:165
+msgid "Section ``[cache]``."
+msgstr "Раздел ``[cache]``."
+
+#: ../../config.rst:167
+msgid ""
+"This section is cache backend related settings used by vstutils-based "
+"application. vstutils supports all cache backends that Django does. "
+"Filesystem, in-memory, memcached are supported out of the box and many "
+"others are supported with additional plugins. You can find details about "
+"cache configs supported :django_docs:`Django caches documentation "
+"<settings/#caches>`. In clusters we advice to share cache between nodes "
+"to improve performance using client-server cache realizations. We "
+"recommend to use Redis in production environments."
+msgstr ""
+"В этом разделе находятся настройки, связанные с кэшем, используемые "
+"приложением, основанным на vstutils. vstutils поддерживает все бэкэнды "
+"кэша, которые поддерживает Django. Файловая система, в памяти, memcached "
+"поддерживаются изначально, а многие другие поддерживаются с помощью "
+"дополнительных плагинов. Подробную информацию о настройках кэша можно "
+"найти в :django_docs:`документации Django о поддерживаемых кэшах "
+"<settings/#caches>`. При кластеризации мы рекомендуем делить кэш между "
+"узлами для повышения производительности с использованием реализаций "
+"клиент-серверного кэша. Мы рекомендуем использовать Redis в "
+"производственных окружениях."
+
+#: ../../config.rst:180
+msgid "Locks settings"
+msgstr "Настройки блокировок"
+
+#: ../../config.rst:182
+msgid "Section ``[locks]``."
+msgstr "Раздел ``[locks]``."
+
+#: ../../config.rst:184
+msgid ""
+"Locks is a system that vstutils-based application uses to avoid damage "
+"from parallel actions working on the same entity simultaneously. It is "
+"based on Django cache, so there is another bunch of same settings as "
+"cache_. And why there is another section for them, you may ask. Because "
+"cache backend is used for locking must provide some guarantees, which do "
+"not required to usual cache: it MUST be shared for all vstutils-based "
+"application threads and nodes. So, for example, in-memory backend is not "
+"suitable. In case of clusterization we strongly recommend to use Redis or"
+" Memcached as backend for that purpose. Cache and locks backend can be "
+"the same, but don't forget about requirement we said above."
+msgstr ""
+"Блокировки - это система, которую приложение, основанное на vstutils, "
+"использует для предотвращения повреждения от параллельных действий, "
+"выполняемых одновременно над одной сущностью. Она основана на кэше "
+"Django, поэтому есть еще одна группа настроек, аналогичных настройкам "
+"cache_. Вы можете спросить, почему для них существует еще один раздел. "
+"Потому что бэкэнд кэша, используемый для блокировки, должен обеспечивать "
+"некоторые гарантии, которые не требуются для обычного кэша: он ДОЛЖЕН "
+"быть общим для всех потоков и узлов приложения, основанного на vstutils. "
+"Например, бэкенд in-memory не подходит. В случае кластеризации "
+"настоятельно рекомендуется использовать Redis или Memcached в качестве "
+"бэкэнда для этой цели. Бэкэнд кэша и блокировок могут быть одним и тем "
+"же, но не забывайте о требованиях, о которых мы говорили выше."
+
+#: ../../config.rst:197
+msgid "Session cache settings"
+msgstr "Настройки кэша сессий"
+
+#: ../../config.rst:199
+msgid "Section ``[session]``."
+msgstr "Раздел ``[session]``."
+
+#: ../../config.rst:201
+msgid ""
+"vstutils-based application store sessions in database_, but for better "
+"performance, we use a cache-based session backend. It is based on Django "
+"cache, so there is another bunch of same settings as cache_. By default, "
+"settings are got from cache_."
+msgstr ""
+"Приложение, основанное на vstutils, хранит сеансы в `базе данных`_, но "
+"для повышения производительности мы используем кэшевый бэкэнд для "
+"сеансов. Он также основан на кэше Django, поэтому здесь есть еще одна "
+"группа настроек, аналогичных настройкам cache_. По умолчанию настройки "
+"получаются из cache_."
+
+#: ../../config.rst:210
+msgid "Rpc settings"
+msgstr "Настройки RPC"
+
+#: ../../config.rst:212
+msgid "Section ``[rpc]``."
+msgstr "Раздел ``[rpc]``."
+
+#: ../../config.rst:214
+msgid ""
+"vstutils-based application uses Celery for long-running async tasks. "
+"Celery is based on message queue concept, so between web-service and "
+"workers running under Celery must be some kind of message broker "
+"(RabbitMQ or something).  Those settings relate to this broker and Celery"
+" itself. Those kinds of settings: broker backend, number of worker-"
+"processes per node and some settings used for troubleshoot server-broker-"
+"worker interaction problems."
+msgstr ""
+"Приложение, основанное на vstutils, использует Celery для выполнения "
+"длительных асинхронных задач. Celery основан на концепции очереди "
+"сообщений, поэтому между веб-сервисом и рабочими процессами, работающими "
+"под управлением Celery, должен быть некий брокер сообщений (например, "
+"RabbitMQ). Эти настройки относятся к этому брокеру и самому Celery. В них"
+" указывается бэкэнд брокера, количество рабочих процессов на узел и "
+"некоторые настройки, используемые для устранения проблем взаимодействия "
+"сервера, брокера и рабочих процессов."
+
+#: ../../config.rst:222
+msgid "This section require vstutils with `rpc` extra dependency."
+msgstr "Для этого раздела требуется vstutils с дополнительной зависимостью rpc."
+
+#: ../../config.rst:224
+msgid ""
+"**connection** - Celery :celery_docs:`broker connection "
+"<userguide/configuration.html#conf-broker-settings>`. Default: "
+"``filesystem:///var/tmp``."
+msgstr ""
+"**connection** - Соединение с :celery_docs:`брокером celery "
+"<userguide/configuration.html#conf-broker-settings>`. По умолчанию: "
+"``filesystem:///var/tmp``."
+
+#: ../../config.rst:225
+msgid "**concurrency** - Count of celery worker threads. Default: 4."
+msgstr ""
+"**concurrency** - Количество потоков рабочего процесса Celery. По "
+"умолчанию: 4."
+
+#: ../../config.rst:226
+msgid ""
+"**heartbeat** - Interval between sending heartbeat packages, which says "
+"that connection still alive. Default: 10."
+msgstr ""
+"**heartbeat** - Интервал между отправкой пакетов-сигналов, которые "
+"говорят, что соединение все еще активно. По умолчанию: 10."
+
+#: ../../config.rst:227
+msgid ""
+"**enable_worker** - Enable or disable worker with webserver. Default: "
+"true."
+msgstr ""
+"**enable_worker** - Включить или отключить рабочий процесс с "
+"веб-сервером. По умолчанию: true."
+
+#: ../../config.rst:229
+msgid ""
+"The following variables from :celery_docs:`Django settings "
+"<userguide/configuration.html#new-lowercase-settings>` are also supported"
+" (with the corresponding types):"
+msgstr ""
+"Также поддерживаются следующие переменные из :celery_docs:`настроек "
+"Django <userguide/configuration.html#new-lowercase-settings>` (с "
+"соответствующими типами):"
+
+#: ../../config.rst:232
+msgid ""
+"**prefetch_multiplier** - :celery_docs:`CELERYD_PREFETCH_MULTIPLIER "
+"<userguide/configuration.html#std-setting-worker_prefetch_multiplier>`"
+msgstr ""
+
+#: ../../config.rst:233
+msgid ""
+"**max_tasks_per_child** - :celery_docs:`CELERYD_MAX_TASKS_PER_CHILD "
+"<userguide/configuration.html#std-setting-worker_max_tasks_per_child>`"
+msgstr ""
+
+#: ../../config.rst:234
+msgid ""
+"**results_expiry_days** - :celery_docs:`CELERY_RESULT_EXPIRES "
+"<userguide/configuration.html#std-setting-result_expires>`"
+msgstr ""
+
+#: ../../config.rst:235
+msgid ""
+"**default_delivery_mode** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE "
+"<userguide/configuration.html#task-default-delivery-mode>`"
+msgstr ""
+
+#: ../../config.rst:236
+msgid ""
+"**task_send_sent_event** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE "
+"<userguide/configuration.html#task_send_sent_event>`"
+msgstr ""
+
+#: ../../config.rst:237
+msgid ""
+"**worker_send_task_events** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE "
+"<userguide/configuration.html#worker_send_task_events>`"
+msgstr ""
+
+#: ../../config.rst:243
+msgid "Worker settings"
+msgstr "Настройки рабочего процесса (worker`a)"
+
+#: ../../config.rst:245
+msgid "Section ``[worker]``."
+msgstr "Раздел ``[worker]``."
+
+#: ../../config.rst:248
+msgid "These settings are needed only for rpc-enabled applications."
+msgstr ""
+"Эти настройки необходимы только для приложений с включенной поддержкой "
+"RPC."
+
+#: ../../config.rst:250
+msgid "Celery worker options:"
+msgstr "Настройки рабочего процесса celery:"
+
+#: ../../config.rst:252
+msgid ""
+"**loglevel** - Celery worker log level. Default: from main_ section "
+"``log_level``."
+msgstr ""
+"**loglevel** - Уровень логгирования рабочего процесса. По умолчанию: из "
+"раздела main_ ``log_level``."
+
+#: ../../config.rst:253
+msgid ""
+"**pidfile** - Celery worker pidfile. Default: "
+"``/run/{app_name}_worker.pid``"
+msgstr ""
+"**pidfile** - Файл pid для рабочего процесса Celery. по умолчанию: "
+"``/run/{app_name}_worker.pid``\""
+
+#: ../../config.rst:254
+msgid ""
+"**autoscale** - Options for autoscaling. Two comma separated numbers: "
+"max,min."
+msgstr ""
+"**autoscale** - Параметры для автомасштабирования. Два числа, разделенных"
+" запятой: максимальное,минимальное."
+
+#: ../../config.rst:255
+msgid "**beat** - Enable or disable celery beat scheduler. Default: ``true``."
+msgstr ""
+"**beat** - Включить или отключить планировщик celery beat. По умолчанию: "
+"``true``."
+
+#: ../../config.rst:257
+msgid "See other settings via ``celery worker --help`` command."
+msgstr "Другие настройки можно увидеть с помощью команды ``celery worker --help``"
+
+#: ../../config.rst:264
+msgid "SMTP settings"
+msgstr "SMTP-настройки"
+
+#: ../../config.rst:266
+msgid "Section ``[mail]``."
+msgstr "Раздел ``[mail]``."
+
+#: ../../config.rst:268
+msgid ""
+"Django comes with several email sending backends. With the exception of "
+"the SMTP backend (default when ``host`` is set), these backends are "
+"useful only in testing and development."
+msgstr ""
+"Django поставляется с несколькими вариантами отправки электронной почты. "
+"За исключением бэкэнда SMTP (который является значением по умолчанию при "
+"установке ``host``), эти бэкэнды полезны только для тестирования и "
+"разработки."
+
+#: ../../config.rst:271
+msgid ""
+"Applications based on vstutils uses only ``smtp`` and ``console`` "
+"backends."
+msgstr ""
+"Приложения, основанные на vstutils, используют только бэкэнды ``smtp`` и "
+"``console``."
+
+#: ../../config.rst:273
+msgid ""
+"**host** - IP or domain for smtp-server. If it not set vstutils uses "
+"``console`` backends. Default: ``None``."
+msgstr ""
+"**host** - IP-адрес или доменное имя smtp-сервера. Если не указано, "
+"vstutils использует бэкэнд ``console``. По умолчанию: ``None``."
+
+#: ../../config.rst:274
+msgid "**port** - Port for smtp-server connection. Default: ``25``."
+msgstr "**port** - Порт для подключения к smtp-серверу. По умолчанию: ``25``."
+
+#: ../../config.rst:275
+msgid "**user** - Username for smtp-server connection. Default: ``\"\"``."
+msgstr ""
+"**user** - Имя пользователя для подключения к SMTP-серверу. По умолчанию:"
+" ``\"\"``."
+
+#: ../../config.rst:276
+msgid ""
+"**password** - Auth password for smtp-server connection. Default: "
+"``\"\"``."
+msgstr ""
+"**password** - Пароль для аутентификации на smtp-сервере. По умолчанию: "
+"``\"\"``."
+
+#: ../../config.rst:277
+msgid ""
+"**tls** - Enable/disable tls for smtp-server connection. Default: "
+"``False``."
+msgstr ""
+"**tls** - Включить или отключить TLS для подключения к smtp-серверу. По "
+"умолчанию: ``False``"
+
+#: ../../config.rst:278
+msgid ""
+"**send_confirmation** - Enable/disable confirmation message after "
+"registration. Default: ``False``."
+msgstr ""
+"**send_confirmation** - Включить или отключить отправку сообщения с "
+"подтверждением после регистрации. По умолчанию: ``False``."
+
+#: ../../config.rst:279
+msgid ""
+"**authenticate_after_registration** - Enable/disable autologin after "
+"registration confirmation. Default: ``False``."
+msgstr ""
+"**authenticate_after_registration** - Включить или отключить "
+"автоматический вход пользователя после подтверждения регистрации. По "
+"умолчанию: ``False``."
+
+#: ../../config.rst:285
+msgid "Web settings"
+msgstr "Web-настройки"
+
+#: ../../config.rst:287
+msgid "Section ``[web]``."
+msgstr "Раздел ``[web]``."
+
+#: ../../config.rst:289
+msgid ""
+"These settings are related to web-server. Those settings includes: "
+"session_timeout, static_files_url and pagination limit."
+msgstr ""
+"Эти настройки относятся к веб-серверу. Среди них: session_timeout, "
+"static_files_url и лимит пагинации."
+
+#: ../../config.rst:292
+msgid "**allow_cors** - enable cross-origin resource sharing. Default: ``False``."
+msgstr ""
+"**allow_cors** - включить cross-origin resource sharing. По умолчанию: "
+"``False``."
+
+#: ../../config.rst:293
+msgid ""
+"**cors_allowed_origins**, **cors_allowed_origins_regexes**, "
+"**cors_expose_headers**, **cors_allow_methods**, **cors_allow_headers**, "
+"**cors_preflight_max_age** - `Settings <https://github.com/adamchainz"
+"/django-cors-headers#configuration>`_ from ``django-cors-headers`` lib "
+"with their defaults."
+msgstr ""
+"**cors_allowed_origins**, **cors_allowed_origins_regexes**, "
+"**cors_expose_headers**, **cors_allow_methods**, **cors_allow_headers**, "
+"**cors_preflight_max_age** - `Настройки <https://github.com/adamchainz"
+"/django-cors-headers#configuration>`_ из библиотеки ``django-cors-"
+"headers`` со значениями по умолчанию."
+
+#: ../../config.rst:296
+msgid ""
+"**enable_gravatar** - Enable/disable gravatar service using for users. "
+"Default: ``True``."
+msgstr ""
+"**enable_gravatar** - Включить/отключить использование сервиса Gravatar "
+"для пользователей. По умолчанию: ``True``."
+
+#: ../../config.rst:297
+msgid ""
+"**rest_swagger_description** - Help string in Swagger schema. Useful for "
+"dev-integrations."
+msgstr ""
+"**rest_swagger_description** - Строка справки в схеме Swagger. Полезно "
+"для разработки интеграций."
+
+#: ../../config.rst:298
+msgid ""
+"**openapi_cache_timeout** - Cache timeout for storing schema data. "
+"Default: ``120``."
+msgstr ""
+"**openapi_cache_timeout** - Время кэширования данных схемы. По умолчанию:"
+" ``120``."
+
+#: ../../config.rst:299
+msgid ""
+"**health_throttle_rate** - Count of requests to ``/api/health/`` "
+"endpoint. Default: ``60``."
+msgstr ""
+"Количество запросов к конечной точке ``/api/health/``. По умолчанию: "
+"``60``."
+
+#: ../../config.rst:300
+msgid ""
+"**bulk_threads** - Threads count for PATCH ``/api/endpoint/`` endpoint. "
+"Default: ``3``."
+msgstr ""
+"**bulk_threads** - Количество потоков для PATCH ``/api/endpoint/``. По "
+"умолчанию: ``3``."
+
+#: ../../config.rst:301
+msgid "**session_timeout** - Session lifetime. Default: ``2w`` (two weeks)."
+msgstr ""
+"**session_timeout** - Время жизни сессии. По умолчанию: ``2w`` (две "
+"недели)."
+
+#: ../../config.rst:302
+msgid ""
+"**etag_default_timeout** - Cache timeout for Etag headers to control "
+"models caching. Default: ``1d`` (one day)."
+msgstr ""
+"**etag_default_timeout** -  Время кэширования заголовков Etag для "
+"управления кэшированием моделей. По умолчанию: ``1d`` (один день)."
+
+#: ../../config.rst:303
+msgid ""
+"**rest_page_limit** and **page_limit** - Default limit of objects in API "
+"list. Default: ``1000``."
+msgstr ""
+"**rest_page_limit** and **page_limit** - Максимальное количество объектов"
+" в списке API. По умолчанию: ``1000``."
+
+#: ../../config.rst:304
+msgid ""
+"**session_cookie_domain** - The domain to use for session cookies. Read "
+":django_docs:`more <settings/#std:setting-SESSION_COOKIE_DOMAIN>`. "
+"Default: ``None``."
+msgstr ""
+"**session_cookie_domain** - Домен, используемый для сессионных cookie. "
+":django_docs:`Подробнее <settings/#std:setting-SESSION_COOKIE_DOMAIN>`. "
+"По умолчанию: ``None``."
+
+#: ../../config.rst:306
+msgid ""
+"**csrf_trusted_origins** - A list of hosts which are trusted origins for "
+"unsafe requests. Read :django_docs:`more <settings/#csrf-trusted-"
+"origins>`. Default: from **session_cookie_domain**."
+msgstr ""
+"**csrf_trusted_origins** - Список хостов, которым доверяются небезопасные"
+" запросы. :django_docs:`Подробнее <settings/#csrf-trusted-origins>`. По "
+"умолчанию: значение из **session_cookie_domain**."
+
+#: ../../config.rst:308
+msgid ""
+"**case_sensitive_api_filter** - Enables/disables case sensitive search "
+"for name filtering. Default: ``True``."
+msgstr ""
+"**case_sensitive_api_filter** - Включить/отключить чувствительность к "
+"регистру при фильтрации по имени. По умолчанию: ``True``."
+
+#: ../../config.rst:310
+msgid ""
+"**secure_proxy_ssl_header_name** - Header name which activates SSL urls "
+"in responses. Read :django_docs:`more <settings/#secure-proxy-ssl-"
+"header>`. Default: ``HTTP_X_FORWARDED_PROTOCOL``."
+msgstr ""
+"**secure_proxy_ssl_header_name** - Имя заголовка, которое активирует "
+"использование URL-адресов SSL в ответах. :django_docs:`Подробнее "
+"<settings/#secure-proxy-ssl-header>`. По умолчанию: "
+"``HTTP_X_FORWARDED_PROTOCOL``."
+
+#: ../../config.rst:312
+msgid ""
+"**secure_proxy_ssl_header_value** - Header value which activates SSL urls"
+" in responses. Read :django_docs:`more <settings/#secure-proxy-ssl-"
+"header>`. Default: ``https``."
+msgstr ""
+"**secure_proxy_ssl_header_value** - Значение заголовка, которое "
+"активирует использование URL-адресов SSL в ответах. "
+":django_docs:`Подробнее <settings/#secure-proxy-ssl-header>`. По "
+"умолчанию: ``https``."
+
+#: ../../config.rst:316
+msgid ""
+"The following variables from Django settings are also supported (with the"
+" corresponding types):"
+msgstr ""
+"Также поддерживаются следующие переменные из настроек Django (с "
+"соответствующими типами):"
+
+#: ../../config.rst:318
+msgid ""
+"**secure_browser_xss_filter** - :django_docs:`SECURE_BROWSER_XSS_FILTER "
+"<settings/#secure-browser-xss-filter>`"
+msgstr ""
+
+#: ../../config.rst:319
+msgid ""
+"**secure_content_type_nosniff** - "
+":django_docs:`SECURE_CONTENT_TYPE_NOSNIFF <settings/#secure-content-type-"
+"nosniff>`"
+msgstr ""
+
+#: ../../config.rst:320
+msgid ""
+"**secure_hsts_include_subdomains** - "
+":django_docs:`SECURE_HSTS_INCLUDE_SUBDOMAINS <settings/#secure-hsts-"
+"include-subdomains>`"
+msgstr ""
+
+#: ../../config.rst:321
+msgid ""
+"**secure_hsts_preload** - :django_docs:`SECURE_HSTS_PRELOAD <settings"
+"/#secure-hsts-preload>`"
+msgstr ""
+
+#: ../../config.rst:322
+msgid ""
+"**secure_hsts_seconds** - :django_docs:`SECURE_HSTS_SECONDS <settings"
+"/#secure-hsts-seconds>`"
+msgstr ""
+
+#: ../../config.rst:323
+msgid ""
+"**password_reset_timeout_days** - "
+":django_docs:`PASSWORD_RESET_TIMEOUT_DAYS <settings/#std:setting-"
+"PASSWORD_RESET_TIMEOUT>`"
+msgstr ""
+
+#: ../../config.rst:324
+msgid ""
+"**request_max_size** - :django_docs:`DATA_UPLOAD_MAX_MEMORY_SIZE "
+"<settings/#std:setting-DATA_UPLOAD_MAX_MEMORY_SIZE>`"
+msgstr ""
+
+#: ../../config.rst:325
+msgid ""
+"**x_frame_options** - :django_docs:`X_FRAME_OPTIONS <settings/#x-frame-"
+"options>`"
+msgstr ""
+
+#: ../../config.rst:326
+msgid ""
+"**use_x_forwarded_host** - :django_docs:`USE_X_FORWARDED_HOST "
+"<settings/#use-x-forwarded-host>`"
+msgstr ""
+
+#: ../../config.rst:327
+msgid ""
+"**use_x_forwarded_port** - :django_docs:`USE_X_FORWARDED_PORT "
+"<settings/#use-x-forwarded-port>`"
+msgstr ""
+
+#: ../../config.rst:329
+msgid ""
+"The following settings affects prometheus metrics endpoint (which can be "
+"used for monitoring application):"
+msgstr ""
+"Следующие настройки влияют на эндпоинт метрик Prometheus (который может "
+"использоваться для мониторинга приложения):"
+
+#: ../../config.rst:331
+msgid ""
+"**metrics_throttle_rate** - Count of requests to ``/api/metrics/`` "
+"endpoint. Default: ``120``."
+msgstr ""
+"**metrics_throttle_rate** - Количество запросов к эндпоинту "
+"``/api/metrics/``. По умолчанию: ``120``."
+
+#: ../../config.rst:332
+msgid ""
+"**enable_metrics** - Enable/disable ``/api/metrics/`` endpoint for app. "
+"Default: ``true``"
+msgstr ""
+"**enable_metrics** - Включить/отключить эндпоинт ``/api/metrics/`` для "
+"приложения. По умолчанию: ``true``."
+
+#: ../../config.rst:333
+msgid ""
+"**metrics_backend** - Python class path with metrics collector backend. "
+"Default: ``vstutils.api.metrics.DefaultBackend`` Default backend collects"
+" metrics from uwsgi workers and python version info."
+msgstr ""
+"**metrics_backend** - Путь к классу Python с бэкендом сборщика метрик. По"
+" умолчанию: ``vstutils.api.metrics.DefaultBackend``. Стандартный бэкенд "
+"собирает метрики из рабочих процессов uwsgi и информацию о версии Python."
+
+#: ../../config.rst:337
+msgid "Section ``[uvicorn]``."
+msgstr "Раздел ``[uvicorn]``."
+
+#: ../../config.rst:339
+msgid ""
+"You can configure the necessary settings to run the uvicorn server. "
+"``vstutils`` supports almost all options from the cli, except for those "
+"that configure the application and connection."
+msgstr ""
+"Вы можете настроить необходимые параметры для запуска сервера uvicorn. "
+"``vstutils`` поддерживает практически все опции из командной строки, за "
+"исключением тех, которые настраивают приложение и соединение."
+
+#: ../../config.rst:342
+msgid "See all available uvicorn settings via ``uvicorn --help`` command."
+msgstr ""
+"Вы можете посмотреть все доступные настройки uvicorn, введя команду "
+"``uvicorn --help``"
+
+#: ../../config.rst:347
+msgid "Centrifugo client settings"
+msgstr "Настройки клиента Centrifugo"
+
+#: ../../config.rst:349
+msgid "Section ``[centrifugo]``."
+msgstr "Раздел ``[centrifugo]``."
+
+#: ../../config.rst:351
+msgid ""
+"To install app with centrifugo client, ``[centrifugo]`` section must be "
+"set. Centrifugo is used by application to auto-update page data. When "
+"user change some data, other clients get notification on "
+"``subscriptions_update`` channel with model label and primary key. "
+"Without the service all GUI-clients get page data every 5 seconds (by "
+"default)."
+msgstr ""
+"Для установки приложения с клиентом Centrifugo должен быть задан раздел "
+"``[centrifugo]``. Centrifugo используется приложением для автоматического"
+" обновления данных на странице. Когда пользователь изменяет какие-либо "
+"данные, другие клиенты получают уведомление на канале "
+"``subscriptions_update`` с меткой модели и первичным ключом. Без этой "
+"службы все клиенты GUI получают данные страницы каждые 5 секунд (по "
+"умолчанию)."
+
+#: ../../config.rst:357
+msgid "**address** - Centrifugo server address."
+msgstr "**address** - Адрес сервера Centrifugo."
+
+#: ../../config.rst:358
+msgid "**api_key** - API key for clients."
+msgstr "**api_key** - Ключ API для клиентов."
+
+#: ../../config.rst:359
+msgid "**token_hmac_secret_key** - API key for jwt-token generation."
+msgstr "**token_hmac_secret_key** - Ключ API для генерации JWT-токена."
+
+#: ../../config.rst:360
+msgid "**timeout** - Connection timeout."
+msgstr "**timeout** - Таймаут подключения."
+
+#: ../../config.rst:361
+msgid "**verify** - Connection verification."
+msgstr "**verify** - Проверка подключения."
+
+#: ../../config.rst:362
+msgid ""
+"**subscriptions_prefix** - Prefix used for generating update channels, by"
+" default \"{VST_PROJECT}.update\"."
+msgstr ""
+"**subscriptions_prefix** -  Префикс, используемый для генерации каналов "
+"обновления, по умолчанию \"{VST_PROJECT}.update\"."
+
+#: ../../config.rst:365
+msgid ""
+"These settings also add parameters to the OpenAPI schema and change how "
+"the auto-update system works in the GUI. ``token_hmac_secret_key`` is "
+"used for jwt-token generation (based on session expiration time). Token "
+"will be used for Centrifugo-JS client."
+msgstr ""
+"Эти настройки также добавляют параметры в схему OpenAPI и меняют работу "
+"системы автообновления в GUI. ``token_hmac_secret_key`` используется для "
+"генерации JWT-токена (на основе времени истечения сессии). Токен будет "
+"использоваться для клиента Centrifugo-JS."
+
+#: ../../config.rst:373
+msgid "Storage settings"
+msgstr "Настройки хранилища"
+
+#: ../../config.rst:375
+msgid "Section ``[storages]``."
+msgstr "Раздел ``[storages]``."
+
+#: ../../config.rst:377
+msgid ""
+"Applications based on ``vstutils`` supports filesystem storage out of "
+"box. Setup ``media_root`` and ``media_url`` in ``[storages.filesystem]`` "
+"section to configure custom media dir and relative url. By default it "
+"would be ``{/path/to/project/module}/media`` and ``/media/``."
+msgstr ""
+"Приложения, основанные на ``vstutils``, поддерживают хранение файлов в "
+"файловой системе из коробки. Чтобы настроить пользовательский "
+"медиа-каталог и относительный URL, установите значения ``media_root`` и "
+"``media_url`` в разделе [storages.filesystem]. По умолчанию они будут "
+"равны ``{/path/to/project/module}/media`` и ``/media/``."
+
+#: ../../config.rst:382
+msgid ""
+"Applications based on ``vstutils`` supports store files in external "
+"services with `Apache Libcloud <http://libcloud.apache.org/>`_ and `Boto3"
+" <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_."
+msgstr ""
+"Приложения, основанные на ``vstutils``, также поддерживают хранение "
+"файлов во внешних службах с помощью `Apache Libcloud "
+"<http://libcloud.apache.org/>`_ и `Boto3 "
+"<https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_."
+
+#: ../../config.rst:385
+msgid ""
+"Apache Libcloud settings grouped by sections named "
+"``[storages.libcloud.provider]``, where ``provider`` is name of storage. "
+"Each section has four keys: ``type``, ``user``, ``key`` and ``bucket``. "
+"Read more about the settings in `django-storages libcloud docs <https"
+"://django-storages.readthedocs.io/en/latest/backends/apache_libcloud.html"
+"#libcloud-providers>`_"
+msgstr ""
+"Настройки Apache Libcloud группируются по разделам с именами "
+"``[storages.libcloud.provider]``, где ``provider`` - это имя хранилища. "
+"Каждый раздел имеет четыре ключа: ``type``, ``user``, ``key`` и "
+"``bucket``. Подробнее о настройках можно прочитать в документации "
+"`django-storages libcloud <https://django-"
+"storages.readthedocs.io/en/latest/backends/apache_libcloud.html#libcloud-"
+"providers>`_."
+
+#: ../../config.rst:390
+msgid ""
+"This setting is required to configure connections to cloud storage "
+"providers. Each entry corresponds to a single ‘bucket’ of storage. You "
+"can have multiple buckets for a single service provider (e.g., multiple "
+"S3 buckets), and you can define buckets at multiple providers."
+msgstr ""
+"Эта настройка необходима для настройки соединений с провайдерами "
+"облачного хранилища. Каждая запись соответствует отдельному ‘bucket’ "
+"хранилища. Вы можете иметь несколько buckets для одного провайдера услуг "
+"(например, несколько buckets S3), и вы можете определить buckets в "
+"нескольких провайдерах."
+
+#: ../../config.rst:395
+msgid ""
+"For ``Boto3`` all settings grouped by section named ``[storages.boto3]``."
+" Section must contain following keys: ``access_key_id``, "
+"``secret_access_key``, ``storage_bucket_name``. Read more about the "
+"settings in `django-storages amazon-S3 docs <https://django-"
+"storages.readthedocs.io/en/latest/backends/amazon-S3.html>`_"
+msgstr ""
+"Для ``Boto3`` все настройки группируются в разделе с именем "
+"``[storages.boto3]``. Раздел должен содержать следующие ключи: "
+"``access_key_id``, ``secret_access_key``, ``storage_bucket_name``. "
+"Подробнее о настройках можно прочитать в документации `django-storages "
+"amazon-S3 <https://django-"
+"storages.readthedocs.io/en/latest/backends/amazon-S3.html>`_."
+
+#: ../../config.rst:400
+msgid ""
+"Storage has following priority to choose storage engine if multiple was "
+"provided:"
+msgstr ""
+"При выборе движка хранилища используется следующий приоритет, если их "
+"было предоставлено несколько:"
+
+#: ../../config.rst:402
+msgid "Libcloud store when config contains this section."
+msgstr "Хранилище Libcloud, когда конфигурация содержит этот раздел."
+
+#: ../../config.rst:404
+msgid "Boto3 store, when you have section and has all required keys."
+msgstr "Хранилище Boto3, когда у вас есть раздел и имеются все необходимые ключи."
+
+#: ../../config.rst:406
+msgid "FileSystem store otherwise."
+msgstr "В противном случае хранилище FileSystem."
+
+#: ../../config.rst:408
+msgid ""
+"Once you have defined your Libcloud providers, you have an option of "
+"setting one provider as the default provider of Libcloud storage. You can"
+" do it by setup ``[storages.libcloud.default]`` section or vstutils will "
+"set the first storage as default."
+msgstr ""
+"После того, как вы определили ваших провайдеров Libcloud, у вас есть "
+"возможность установить одного, как провайдера по умолчанию для хранилища "
+"Libcloud. Вы можете сделать это, настроив раздел "
+"``[storages.libcloud.default]`` или же vstutils установит первое "
+"хранилище, как хранилище по умолчанию."
+
+#: ../../config.rst:413
+msgid ""
+"If you configure default libcloud provider, vstutils will use it as "
+"global file storage. To override it set "
+"``default=django.core.files.storage.FileSystemStorage`` in ``[storages]``"
+" section. When ``[storages.libcloud.default]`` is empty "
+"``django.core.files.storage.FileSystemStorage`` is used as default. To "
+"override it set "
+"``default=storages.backends.apache_libcloud.LibCloudStorage`` in "
+"``[storages]`` section and use Libcloud provider as default."
+msgstr ""
+"Если вы настроили провайдера Libcloud по умолчанию, vstutils будет "
+"использовать его в качестве глобального хранилища файлов. Чтобы "
+"переопределить это, установите "
+"``default=django.core.files.storage.FileSystemStorage`` в разделе "
+"``[storages]``. Когда ``[storages.libcloud.default]`` пусто, по умолчанию"
+" используется ``django.core.files.storage.FileSystemStorage``. Чтобы "
+"переопределить это, установите "
+"``default=storages.backends.apache_libcloud.LibCloudStorage`` в разделе "
+"``[storages]`` и используйте провайдера Libcloud, как по умолчанию."
+
+#: ../../config.rst:421
+msgid ""
+"Here is example for boto3 connection to minio cluster with public read "
+"permissions, external proxy domain and internal connection support:"
+msgstr ""
+"Вот пример подключения boto3 к кластеру minio с публичными правами на "
+"чтение, внешним доменом прокси и поддержкой внутреннего подключения:"
+
+#: ../../config.rst:450
+msgid "Throttle settings"
+msgstr "Настройки Throttle"
+
+#: ../../config.rst:452
+msgid "Section ``[throttle]``."
+msgstr "Раздел ``[throttle]``."
+
+#: ../../config.rst:454
+msgid ""
+"By including this section to your config, you can setup global and per-"
+"view throttle rates. Global throttle rates are specified under root "
+"[throttle] section.To specify per-view throttle rate, you need to include"
+" child section."
+msgstr ""
+"Путем добавления этой секции в вашу конфигурацию вы можете настроить "
+"глобальные и индивидуальные throttle rates для каждого View. Глобальные "
+"throttle rates указываются в секции [throttle]. Чтобы указать "
+"индивидуальные throttle rates для конкретного View, вам нужно добавить "
+"дочернюю секцию."
+
+#: ../../config.rst:458
+msgid "For example, if you want to apply throttle to ``api/v1/author``:"
+msgstr ""
+"Например, если вы хотите применить ограничение количества запросов для "
+"``api/v1/author``:"
+
+#: ../../config.rst:466
+msgid ""
+"**rate** - Throttle rate in format number_of_requests/time_period. "
+"Expected time_periods: second/minute/hour/day."
+msgstr ""
+"**rate** - Ограничение количества запросов в формате "
+"number_of_requests/time_period. Expected time_periods: "
+"second/minute/hour/day."
+
+#: ../../config.rst:467
+msgid ""
+"**actions** - Comma separated list of drf actions. Throttle will be "
+"applied only on specified here actions. Default: update, partial_update."
+msgstr ""
+"**actions** - Разделенный запятой список действий DRF. Ограничение "
+"количества запросов будет применяться только к указанным здесь действиям."
+" По умолчанию: update, partial_update."
+
+#: ../../config.rst:469
+msgid ""
+"More on throttling at `DRF Throttle docs <https://www.django-rest-"
+"framework.org/api-guide/throttling/>`_."
+msgstr ""
+"Подробнее об ограничении количества запросов в `документации DRF Throttle"
+" <https://www.django-rest-framework.org/api-guide/throttling/>`_."
+
+#: ../../config.rst:473
+msgid "Production web settings"
+msgstr "Настройки для продакшн-сервера"
+
+#: ../../config.rst:475
+msgid "Section ``[uwsgi]``."
+msgstr "Раздел ``[uwsgi]``."
+
+#: ../../config.rst:477
+msgid ""
+"Settings related to web-server used by vstutils-based application in "
+"production (for deb and rpm packages by default). Most of them related to"
+" system paths (logging, PID-file and so on). More settings in `uWSGI docs"
+" <http://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_."
+msgstr ""
+"Настройки, связанные с веб-сервером, используемым в приложении на основе "
+"vstutils в продакшн-среде (по умолчанию для пакетов deb и rpm). "
+"Большинство из них относятся к системным путям (логгирование, PID-файл и "
+"т. д.). Дополнительные настройки смотрите в `документации uWSGI. <http"
+"://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_."
+
+#: ../../config.rst:483
+msgid ""
+"But keep in mind that uWSGI is deprecated and may be removed in future "
+"releases. Use the uvicorn settings to manage your app server."
+msgstr ""
+"Однако имейте в виду, что uWSGI устарел и может быть удален в будущих "
+"версиях. Используйте настройки uvicorn для управления сервером вашего "
+"приложения."
+
+#: ../../config.rst:488
+msgid "Configuration options"
+msgstr "Параметры конфигурации"
+
+#: ../../config.rst:490
+msgid ""
+"This section contains additional information for configure additional "
+"elements."
+msgstr ""
+"В этом разделе содержится дополнительная информация для настройки "
+"дополнительных элементов."
+
+#: ../../config.rst:492
+msgid ""
+"If you need set ``https`` for your web settings, you can do it using "
+"HAProxy, Nginx, Traefik or configure it in ``settings.ini``."
+msgstr ""
+"Если вам необходимо настроить ``HTTPS`` для ваших веб-настроек, вы можете"
+" сделать это с помощью HAProxy, Nginx, Traefik или настроить в файле "
+"``settings.ini``."
+
+#: ../../config.rst:504
+msgid ""
+"We strictly do not recommend running the web server from root. Use HTTP "
+"proxy to run on privileged ports."
+msgstr ""
+"Мы настоятельно не рекомендуем запускать веб-сервер от имени root. "
+"Используйте HTTP-прокси, чтобы работать на привилегированных портах."
+
+#: ../../config.rst:506
+msgid ""
+"You can use `{ENV[HOME:-value]}` (where `HOME` is environment variable, "
+"`value` is default value) in configuration values."
+msgstr ""
+"Вы можете использовать `{ENV[HOME:-value]}` (где `HOME` - переменная "
+"окружения, `value` - значение по умолчанию) в значениях конфигурации."
+
+#: ../../config.rst:509
+msgid ""
+"You can use environment variables for setup important settings. But "
+"config variables has more priority then env. Available settings are: "
+"``DEBUG``, ``DJANGO_LOG_LEVEL``, ``TIMEZONE`` and some settings with "
+"``[ENV_NAME]`` prefix."
+msgstr ""
+"Вы можете использовать переменные окружения для настройки важных "
+"параметров. Однако переменные конфигурации имеют более высокий приоритет,"
+" чем переменные окружения. Доступные настройки: ``DEBUG``, "
+"``DJANGO_LOG_LEVEL``, ``TIMEZONE`` и некоторые настройки с префиксом "
+"``[ENV_NAME]``."
+
+#: ../../config.rst:512
+msgid ""
+"For project without special settings and project levels named ``project``"
+" these variables will start with ``PROJECT_`` prefix. There is a list of "
+"these variables: ``{ENV_NAME}_ENABLE_ADMIN_PANEL``, "
+"``{ENV_NAME}_ENABLE_REGISTRATION``, ``{ENV_NAME}_MAX_TFA_ATTEMPTS``, "
+"``{ENV_NAME}_ETAG_TIMEOUT``, ``{ENV_NAME}_SEND_CONFIRMATION_EMAIL``, "
+"``{ENV_NAME}_SEND_EMAIL_RETRIES``, ``{ENV_NAME}_SEND_EMAIL_RETRY_DELAY``,"
+" ``{ENV_NAME}_AUTHENTICATE_AFTER_REGISTRATION``, "
+"``{ENV_NAME}_MEDIA_ROOT`` (dir with uploads), "
+"``{ENV_NAME}_GLOBAL_THROTTLE_RATE``, and "
+"``{ENV_NAME}_GLOBAL_THROTTLE_ACTIONS``."
+msgstr ""
+"Для проекта без специальных настроек и проектов с именами, начинающимися "
+"с ``project``, эти переменные будут иметь префикс ``PROJECT_``. Вот "
+"список этих переменных: ``{ENV_NAME}_ENABLE_ADMIN_PANEL``, "
+"``{ENV_NAME}_ENABLE_REGISTRATION``, ``{ENV_NAME}_MAX_TFA_ATTEMPTS``, "
+"``{ENV_NAME}_ETAG_TIMEOUT``, ``{ENV_NAME}_SEND_CONFIRMATION_EMAIL``, "
+"``{ENV_NAME}_SEND_EMAIL_RETRIES``, ``{ENV_NAME}_SEND_EMAIL_RETRY_DELAY``,"
+" ``{ENV_NAME}_AUTHENTICATE_AFTER_REGISTRATION``, "
+"``{ENV_NAME}_MEDIA_ROOT`` (директория с загрузками), "
+"``{ENV_NAME}_GLOBAL_THROTTLE_RATE``, и "
+"``{ENV_NAME}_GLOBAL_THROTTLE_ACTIONS``."
+
+#: ../../config.rst:519
+msgid ""
+"There are also URI-specific variables for connecting to various services "
+"such as databases and caches. There are ``DATABASE_URL``, ``CACHE_URL``, "
+"``LOCKS_CACHE_URL``, ``SESSIONS_CACHE_URL`` and ``ETAG_CACHE_URL``. As "
+"you can see from the names, they are closely related to the keys and "
+"names of the corresponding config sections."
+msgstr ""
+"Также существуют переменные, специфичные для URI, для подключения к "
+"различным сервисам, таким как базы данных и кэши. Вот некоторые из них "
+"``DATABASE_URL``, ``CACHE_URL``, ``LOCKS_CACHE_URL``, "
+"``SESSIONS_CACHE_URL`` и ``ETAG_CACHE_URL``. Как видно из названий, они "
+"тесно связаны с ключами и именами соответствующих секций конфигурации."
+
+#: ../../config.rst:523
+msgid ""
+"We recommend to install ``uvloop`` to your environment and setup ``loop ="
+" uvloop`` in ``[uvicorn]`` section for performance reasons."
+msgstr ""
+"Мы рекомендуем установить ``uvloop`` в ваше окружение и настроить ``loop "
+"= uvloop`` в разделе ``[uvicorn]`` для повышения производительности."

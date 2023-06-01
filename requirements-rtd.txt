@@ -3,3 +3,4 @@
 -rrequirements-rpc.txt
 django~=4.1.8
 typing-extensions
+sphinx-intl~=2.1.0

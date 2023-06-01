@@ -12,7 +12,7 @@ There are several stages in vstutils app:
     * `checkCacheVersions()` checks if app version has been changed since last visit and cleans all cached data if so;
     * loading open api schema from backend. Emits 'openapi.loaded' signal;
     * loading all static files from `SPA_STATIC` in setting.py;
-    * sets `AppConfiguration` from openapi schema;
+    * sets `AppConfiguration` from OpenAPI schema;
 
 2. App started:
 

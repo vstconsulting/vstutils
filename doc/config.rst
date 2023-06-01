@@ -76,6 +76,7 @@ In the example above authorization logic will be the following:
   and then encrypted with :wiki:`Vigenère cipher <Vigenère cipher>`.
   Read more in the :class:`vstutils.utils.SecurePickling` documentation. Default: false.
 
+
 .. _database:
 
 Databases settings
@@ -90,10 +91,12 @@ These settings are for all databases and are vendor-independent,
 with the exception of tablespace management.
 
 * **default_tablespace** - Default tablespace to use for models that don’t specify one, if the backend supports it.
-                           Read more at :django_topics:`Declaring tablespaces for tables <db/tablespaces/#declaring-tablespaces-for-tables>`.
+  Read more at :django_topics:`Declaring tablespaces for tables <db/tablespaces/#declaring-tablespaces-for-tables>`.
+
 * **default_index_tablespace** - Default tablespace to use for indexes on fields that don’t specify one, if the backend supports it.
-                                 Read more at :django_topics:`Declaring tablespaces for indexes <db/tablespaces/#declaring-tablespaces-for-indexes>`.
-* **databases_without_cte_support** - A comma-separated list of database section names that do not support CTEs (Common Table Experssions).
+  Read more at :django_topics:`Declaring tablespaces for indexes <db/tablespaces/#declaring-tablespaces-for-indexes>`.
+
+* **databases_without_cte_support** - A comma-separated list of database section names that do not support CTEs (Common Table Expressions).
 
 
 .. warning::
@@ -114,6 +117,7 @@ To run vstutils-based application at multiple nodes (cluster),
 use client-server database (SQLite not suitable) shared for all nodes.
 
 You can also set the base template for connecting to the database in the ``database`` section.
+
 
 
 Section ``[database]``.
@@ -152,6 +156,7 @@ Finally, add some options to MySQL/MariaDB configuration:
       character-set-server=utf8
       collation-server=utf8_unicode_ci
 
+
 .. _cache:
 
 Cache settings
@@ -162,11 +167,12 @@ Section ``[cache]``.
 This section is cache backend related settings used by vstutils-based application.
 vstutils supports all cache backends that Django does.
 Filesystem, in-memory, memcached are supported out of the box and many others are supported with
-additional plugins. You can find details about cache configusupported
+additional plugins. You can find details about cache configs supported
 :django_docs:`Django caches documentation
 <settings/#caches>`. In clusters we advice to share cache between nodes to improve performance
 using client-server cache realizations.
 We recommend to use Redis in production environments.
+
 
 .. _locks:
 
@@ -184,6 +190,7 @@ be shared for all vstutils-based application threads and nodes. So, for example,
 to use Redis or Memcached as backend for that purpose. Cache and locks backend
 can be the same, but don't forget about requirement we said above.
 
+
 .. _session:
 
 Session cache settings
@@ -196,6 +203,7 @@ we use a cache-based session backend. It is based on Django cache, so there is
 another bunch of same settings as cache_. By default,
 settings are got from cache_.
 
+
 .. _rpc:
 
 Rpc settings
@@ -205,7 +213,7 @@ Section ``[rpc]``.
 
 vstutils-based application uses Celery for long-running async tasks.
 Celery is based on message queue concept,
-so between web-service and workers running under Celery bust be some kind of
+so between web-service and workers running under Celery must be some kind of
 message broker (RabbitMQ or something).  Those settings relate to this broker
 and Celery itself. Those kinds of settings: broker backend, number of
 worker-processes per node and some settings used for troubleshoot
@@ -249,6 +257,7 @@ Celery worker options:
 See other settings via ``celery worker --help`` command.
 
 
+
 .. _mail:
 
 SMTP settings
@@ -268,6 +277,7 @@ Applications based on vstutils uses only ``smtp`` and ``console`` backends.
 * **tls** - Enable/disable tls for smtp-server connection. Default: ``False``.
 * **send_confirmation** - Enable/disable confirmation message after registration. Default: ``False``.
 * **authenticate_after_registration** - Enable/disable autologin after registration confirmation. Default: ``False``.
+
 
 .. _web:
 
@@ -352,9 +362,10 @@ every 5 seconds (by default).
 * **subscriptions_prefix** - Prefix used for generating update channels, by default "{VST_PROJECT}.update".
 
 .. note::
-    These settings also add parameters to the OpenApi schema and change how the auto-update system works in the GUI.
+    These settings also add parameters to the OpenAPI schema and change how the auto-update system works in the GUI.
     ``token_hmac_secret_key`` is used for jwt-token generation (based on
     session expiration time). Token will be used for Centrifugo-JS client.
+
 
 .. _storages:
 
@@ -432,6 +443,7 @@ external proxy domain and internal connection support:
     querystring_auth = false
     default_acl = public-read
 
+
 .. _throttle:
 
 Throttle settings
@@ -455,6 +467,7 @@ For example, if you want to apply throttle to ``api/v1/author``:
 * **actions** - Comma separated list of drf actions. Throttle will be applied only on specified here actions. Default: update, partial_update.
 
 More on throttling at `DRF Throttle docs <https://www.django-rest-framework.org/api-guide/throttling/>`_.
+
 
 Production web settings
 -----------------------
@@ -496,8 +509,8 @@ This section contains additional information for configure additional elements.
 #. You can use environment variables for setup important settings. But config variables has more priority then env.
    Available settings are: ``DEBUG``, ``DJANGO_LOG_LEVEL``, ``TIMEZONE`` and some settings with ``[ENV_NAME]`` prefix.
 
-   For project without special settings and project levels named ``project`` this variables will stars with ``PROJECT_`` prefix.
-   There list of this variables: ``{ENV_NAME}_ENABLE_ADMIN_PANEL``, ``{ENV_NAME}_ENABLE_REGISTRATION``, ``{ENV_NAME}_MAX_TFA_ATTEMPTS``,
+   For project without special settings and project levels named ``project`` these variables will start with ``PROJECT_`` prefix.
+   There is a list of these variables: ``{ENV_NAME}_ENABLE_ADMIN_PANEL``, ``{ENV_NAME}_ENABLE_REGISTRATION``, ``{ENV_NAME}_MAX_TFA_ATTEMPTS``,
    ``{ENV_NAME}_ETAG_TIMEOUT``, ``{ENV_NAME}_SEND_CONFIRMATION_EMAIL``, ``{ENV_NAME}_SEND_EMAIL_RETRIES``,
    ``{ENV_NAME}_SEND_EMAIL_RETRY_DELAY``, ``{ENV_NAME}_AUTHENTICATE_AFTER_REGISTRATION``,
    ``{ENV_NAME}_MEDIA_ROOT`` (dir with uploads), ``{ENV_NAME}_GLOBAL_THROTTLE_RATE``,

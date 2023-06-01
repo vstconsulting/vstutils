@@ -108,7 +108,7 @@ For convenience, we have dynamically wrapped it in a set of classes
 that have appropriate names and additionally provides following capabilities:
 
 - String responses are wrapped in json like ``{ "detail": "string response" }``.
-- Attribute timings are kept for further processing in middlewares.
+- Attribute timings are kept for further processing in middleware.
 - Status code is set by class name (e.g. ``HTTP_200_OK`` or ``Response200`` has code 200).
 
 All classes inherit from:
@@ -117,7 +117,7 @@ All classes inherit from:
     :members: BaseResponseClass
 
 
-Middlewares
+Middleware
 ~~~~~~~~~~~
 
 By default, Django `supposes <https://docs.djangoproject.com/en/4.1/topics/http/middleware/#writing-your-own-middleware>`_
@@ -131,9 +131,9 @@ Middleware is used to process incoming requests and send responses before they r
 Filter Backends
 ~~~~~~~~~~~~~~~
 `Filter Backends <https://www.django-rest-framework.org/api-guide/filtering/#djangofilterbackend>`_ are used to modify model queryset.
-To create custom filter backend to, (i.g. annotate model queryset), you should inherit from :class:vstutils.api.filter_backends.VSTFilterBackend
-and override :meth:vstutils.api.filter_backends.VSTFilterBackend.filter_queryset and in some cases
-:meth:vstutils.api.filter_backends.VSTFilterBackend.get_schema_fields.
+To create custom filter backend to, (i.g. annotate model queryset), you should inherit from :class:`vstutils.api.filter_backends.VSTFilterBackend`
+and override :meth:`vstutils.api.filter_backends.VSTFilterBackend.filter_queryset` and in some cases
+:meth:`vstutils.api.filter_backends.VSTFilterBackend.get_schema_fields`.
 
 .. automodule:: vstutils.api.filter_backends
     :members:
@@ -155,7 +155,7 @@ Tasks
 Endpoint
 --------
 
-Endpoint view has two purposes: bulk requests execution and providing openapi schema.
+Endpoint view has two purposes: bulk requests execution and providing OpenAPI schema.
 
 Endpoint url is ``/{API_URL}/endpoint/``, for example value with default settings is ``/api/endpoint/``.
 
@@ -168,7 +168,7 @@ Endpoint url is ``/{API_URL}/endpoint/``, for example value with default setting
 Bulk requests
 ~~~~~~~~~~~~~
 
-Bulk request allows you send multiple reques`t to api at once, it accepts json list of operations.
+Bulk request allows you send multiple requests to api at once, it accepts json list of operations.
 
 +-----------------------------------+--------------------+--------------------------+
 | Method                            | Transactional      | Synchronous              |
@@ -216,19 +216,19 @@ Transactional bulk request returns ``502 BAG GATEWAY`` and does rollback after f
     If you send non-transactional bulk request, you will get ``200`` status and must
     validate statuses on each operation responses.
 
-Openapi schema
+OpenAPI schema
 ~~~~~~~~~~~~~~
 
 Request on ``GET /{API_URL}/endpoint/`` returns Swagger UI.
 
-Request on ``GET /{API_URL}/endpoint/?format=openapi`` returns openapi schema in json format. Also you can specify required
+Request on ``GET /{API_URL}/endpoint/?format=openapi`` returns OpenAPI schema in json format. Also you can specify required
 version of schema using ``version`` query parameter (e.g., ``GET /{API_URL}/endpoint/?format=openapi&version=v2``).
 
 To change the schema after generating and before sending to user use hooks.
 Define one or more function, each taking 2 named arguments:
 
 * ``request`` - user request object.
-* ``schema`` - ordered dict with openapi schema.
+* ``schema`` - ordered dict with OpenAPI schema.
 
 .. note::
     Sometimes hooks may raise an exception;
@@ -254,9 +254,9 @@ To connect hook(s) to your app add function import name to the ``OPENAPI_HOOKS``
 Testing Framework
 -----------------
 
-VST Utils Framework includes a helper in base testcase class and
+VST Utils Framework includes a helper in base test case class and
 improves support for making API requests. That means if you want make bulk request
-to endpoint you dont need create and init test client, but just need to call:
+to endpoint you don't need create and init test client, but just need to call:
 
 .. sourcecode:: python
 
@@ -266,7 +266,7 @@ to endpoint you dont need create and init test client, but just need to call:
 
 Creating test case
 ~~~~~~~~~~~~~~~~~~
-``test.py`` module contains testcase classes based on :class:`vstutils.tests.BaseTestCase`.
+``test.py`` module contains test case classes based on :class:`vstutils.tests.BaseTestCase`.
 At the moment, we officially support two styles of writing tests:
 classic and simple query wrappers with run check and
 runtime optimized bulk queries with manual value checking.
@@ -276,7 +276,7 @@ Simple example with classic tests
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For example, if you have api endpoint like ``/api/v1/project/`` and model Project
-you can write testcase like this:
+you can write test case like this:
 
 .. sourcecode:: python
 

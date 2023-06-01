@@ -298,7 +298,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         It relies on the passed arguments to build logic.
         So, if the named argument data was passed, then the serializer will be validated and saved.
 
-        :param autosave: Enables / disables the execution of saving by the serializer if named argument `data` passed.
+        :param autosave: Enables/disables the execution of saving by the serializer if named argument `data` passed.
                          Enabled by default.
         :type autosave: bool
         :param: data: Default serializer class argument with serializable data. Enables validation and saving.
@@ -308,7 +308,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         :param custom_data: Dict with data which will passed to `validated_data` without validation.
         :type custom_data: dict
         :param serializer_class: Serializer class for this execution.
-                                 May be usefull when request and response serializers is different.
+                                 May be useful when request and response serializers are different.
         :type serializer_class: None,type[rest_framework.serializers.Serializer]
         :return: Ready serializer with default logic performed.
         :rtype: rest_framework.serializers.Serializer
@@ -406,6 +406,11 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         """
         Get request query data and serialize values if `query_serializer_class` attribute exists
         or attribute was send.
+
+        :param request: DRF request object.
+        :param query_serializer: serializer class for processing parameters in query_params.
+        :param raise_exception: flag that indicates whether an exception should be thrown during validation in
+                                the serializer or not.
         """
         serializer_class: _t.Optional[_t.Type[BaseSerializer]] = (
                 query_serializer or getattr(self, 'query_serializer', None)
@@ -567,7 +572,7 @@ class CopyMixin(GenericViewSet):
 
 class FileResponseRetrieveMixin(GenericViewSet):
     """
-    ViewSet mixin for retriving FileResponse from models with file fields data.
+    ViewSet mixin for retrieving FileResponse from models with file fields data.
 
     Example:
 

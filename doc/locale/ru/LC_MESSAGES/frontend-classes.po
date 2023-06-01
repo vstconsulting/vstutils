@@ -1,0 +1,1226 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018-2022, VST Consulting
+# This file is distributed under the same license as the VST Utils package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: VST Utils 5.0.4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-09-01 09:53+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../frontend-classes.rst:2
+msgid "Frontend Classes"
+msgstr ""
+
+#: ../../frontend-classes.rst:5
+msgid "Fields"
+msgstr ""
+
+#: ../../FieldsResolver.js:./vstutils/fields/FieldsResolver.FieldsResolver(9):9
+msgid ""
+"Helps with creation of fields, $ref can be used to reference schema "
+"objects"
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63)
+#: ../../BaseApp.js:./BaseApp.BaseApp#BaseApp(32)
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9)
+#: ../../BinaryFileField.js:./vstutils/fields/files/binary-file/BinaryFileField.BinaryFileField(9)
+#: ../../CrontabField.js:./vstutils/fields/crontab/CrontabField.CrontabField(8)
+#: ../../DateField.js:./vstutils/fields/datetime/DateField.DateField(8)
+#: ../../DynamicField.js:./vstutils/fields/dynamic/DynamicField.DynamicField(8)
+#: ../../FKField.js:./vstutils/fields/fk/fk/FKField.FKField(51)
+#: ../../FieldsResolver.js:./vstutils/fields/FieldsResolver.FieldsResolver(9)
+#: ../../Model.js:./vstutils/models/Model.Model(159)
+#: ../../ModelsResolver.js:./vstutils/models/ModelsResolver.ModelsResolver(11)
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6)
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31)
+#: ../../QuerySetsResolver.js:./vstutils/querySet/QuerySetsResolver.QuerySetsResolver(6)
+#: ../../RouterConstructor.js:./vstutils/router/RouterConstructor.RouterConstructor#RouterConstructor(12)
+#: ../../TimeIntervalField.js:./vstutils/fields/datetime/TimeIntervalField.TimeIntervalField(9)
+#: ../../View.js:./vstutils/views/View.View(53)
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43)
+#: ../../color.js:./vstutils/fields/color.ColorField(28)
+#: ../../index.js:./vstutils/store/index.StoreConstructor(101)
+#: ../../localSettings.js:./vstutils/utils/localSettings.LocalSettings#LocalSettings(12)
+#: ../../spa.js:./spa.App(24)
+msgid "Arguments"
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63)
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9)
+#: ../../BooleanField.js:./vstutils/fields/boolean/BooleanField.BooleanField(8)
+#: ../../FKField.js:./vstutils/fields/fk/fk/FKField.FKField(51)
+#: ../../FieldsResolver.js:./vstutils/fields/FieldsResolver.FieldsResolver(9)
+#: ../../Model.js:./vstutils/models/Model.Model(159)
+#: ../../ModelsResolver.js:./vstutils/models/ModelsResolver.ModelsResolver(11)
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6)
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31)
+#: ../../QuerySetsResolver.js:./vstutils/querySet/QuerySetsResolver.QuerySetsResolver(6)
+#: ../../View.js:./vstutils/views/View.View(53)
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43)
+#: ../../spa.js:./spa.App(24)
+msgid "Returns"
+msgstr ""
+
+#: ../../FieldsResolver.js:./vstutils/fields/FieldsResolver.FieldsResolver(9):67
+msgid "**\\*** --"
+msgstr ""
+
+#: ../../FieldsResolver.js:./vstutils/fields/FieldsResolver.FieldsResolver(9):116
+msgid ""
+"Method that creates field instance by schema object or format. If schema "
+"object contain reference ($ref), it will be resolved using app."
+msgstr ""
+
+#: ../../FieldsResolver.js:./vstutils/fields/FieldsResolver.FieldsResolver(9):119
+msgid "Name must be provided if string mode is used or obj has no name."
+msgstr ""
+
+#: ../../FieldsResolver.js:./vstutils/fields/FieldsResolver.FieldsResolver(9):125
+msgid "**BaseField** --"
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):23
+msgid "Constructor of base field class."
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):25
+msgid "Object with field options."
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):43
+msgid ""
+"Method, that prepares instance of field for usage. Method is called after"
+" models and views are created, for every field instance that is part of "
+"view."
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):68
+msgid ""
+"Method that will be called after every fetch of instances from api "
+"(QuerySet#items, QuerySet#get)"
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):94
+msgid "Returns field default value if any, empty string otherwise"
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):96
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):121
+msgid "**TInner** --"
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):117
+msgid "Method, that converts field value to appropriate for API form."
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):142
+msgid "Method, that converts field value from API to display form"
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):144
+msgid "Object with values of current field"
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):146
+msgid "**TRepresent** --"
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):167
+msgid "Method that validates value."
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):169
+msgid "Object with all values."
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):191
+msgid "Method that creates property descriptor from current field"
+msgstr ""
+
+#: ../../BaseField.js:./vstutils/fields/base/BaseField.BaseField(9):193
+msgid "**PropertyDescriptor** --"
+msgstr ""
+
+#: ../../AutocompleteField.js:./vstutils/fields/autocomplete/AutocompleteField.AutocompleteField(7):9
+msgid "Autocomplete guiField class."
+msgstr ""
+
+#: ../../AutocompleteField.js:./vstutils/fields/autocomplete/AutocompleteField.AutocompleteField(7):43
+#: ../../ChoicesField.js:./vstutils/fields/choices/ChoicesField.ChoicesField(7):43
+#: ../../PasswordField.js:./vstutils/fields/password/PasswordField.PasswordField(7):43
+#: ../../email.js:./vstutils/fields/email.EmailField(21):43
+msgid "Redefinition of string guiField static property 'mixins'."
+msgstr ""
+
+#: ../../BooleanField.js:./vstutils/fields/boolean/BooleanField.BooleanField(8):9
+msgid "Field to store bool value"
+msgstr ""
+
+#: ../../BooleanField.js:./vstutils/fields/boolean/BooleanField.BooleanField(8):43
+#: ../../BooleanField.js:./vstutils/fields/boolean/BooleanField.BooleanField(8):66
+#: ../../BooleanField.js:./vstutils/fields/boolean/BooleanField.BooleanField(8):89
+#: ../../Model.js:./vstutils/models/Model.Model(159):383
+#: ../../Model.js:./vstutils/models/Model.Model(159):510
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):53
+msgid "**boolean** --"
+msgstr ""
+
+#: ../../ChoicesField.js:./vstutils/fields/choices/ChoicesField.ChoicesField(7):9
+msgid "Choices guiField class."
+msgstr ""
+
+#: ../../CrontabField.js:./vstutils/fields/crontab/CrontabField.CrontabField(8):9
+msgid "Crontab guiField class. Field to create crontab commands from GUI."
+msgstr ""
+
+#: ../../BinaryFileField.js:./vstutils/fields/files/binary-file/BinaryFileField.BinaryFileField(9):44
+#: ../../CrontabField.js:./vstutils/fields/crontab/CrontabField.CrontabField(8):44
+#: ../../DateField.js:./vstutils/fields/datetime/DateField.DateField(8):43
+#: ../../DateTimeField.js:./vstutils/fields/datetime/DateTimeField.DateTimeField(8):43
+#: ../../DynamicField.js:./vstutils/fields/dynamic/DynamicField.DynamicField(8):65
+#: ../../FKMultiAutocompleteField.js:./vstutils/fields/fk/multi-autocomplete/FKMultiAutocompleteField.FKMultiAutocompleteField(7):43
+#: ../../JSONField.js:./vstutils/fields/json/JSONField.JSONField(8):43
+#: ../../MultipleNamedBinaryFileField.js:./vstutils/fields/files/multiple-named-binary-file/MultipleNamedBinaryFileField.MultipleNamedBinFileField(13):47
+#: ../../MultipleNamedBinaryImageField.js:./vstutils/fields/files/multiple-named-binary-image/MultipleNamedBinaryImageField.MultipleNamedBinaryImageField(12):47
+#: ../../NamedBinaryFileField.js:./vstutils/fields/files/named-binary-file/NamedBinaryFileField.NamedBinaryFileField(13):47
+#: ../../NamedBinaryImageField.js:./vstutils/fields/files/named-binary-image/NamedBinaryImageField.NamedBinaryImageField(12):47
+#: ../../TextAreaField.js:./vstutils/fields/text/TextAreaField.TextAreaField(7):43
+#: ../../TimeIntervalField.js:./vstutils/fields/datetime/TimeIntervalField.TimeIntervalField(9):45
+#: ../../UptimeField.js:./vstutils/fields/datetime/UptimeField.UptimeField(15):72
+#: ../../color.js:./vstutils/fields/color.ColorField(28):43
+#: ../../integer.js:./vstutils/fields/numbers/integer.IntegerField(20):43
+msgid "Redefinition of base guiField static property 'mixins'."
+msgstr ""
+
+#: ../../CrontabField.js:./vstutils/fields/crontab/CrontabField.CrontabField(8):64
+#: ../../DateField.js:./vstutils/fields/datetime/DateField.DateField(8):63
+#: ../../color.js:./vstutils/fields/color.ColorField(28):63
+msgid "Custom method for toInner and toRepresent methods."
+msgstr ""
+
+#: ../../CrontabField.js:./vstutils/fields/crontab/CrontabField.CrontabField(8):88
+#: ../../TimeIntervalField.js:./vstutils/fields/datetime/TimeIntervalField.TimeIntervalField(9):65
+#: ../../color.js:./vstutils/fields/color.ColorField(28):87
+msgid "Redefinition of base guiField method toInner."
+msgstr ""
+
+#: ../../CrontabField.js:./vstutils/fields/crontab/CrontabField.CrontabField(8):112
+#: ../../TimeIntervalField.js:./vstutils/fields/datetime/TimeIntervalField.TimeIntervalField(9):89
+#: ../../color.js:./vstutils/fields/color.ColorField(28):111
+msgid "Redefinition of base guiField method toRepresent."
+msgstr ""
+
+#: ../../DateField.js:./vstutils/fields/datetime/DateField.DateField(8):9
+msgid "Date guiField class."
+msgstr ""
+
+#: ../../DateTimeField.js:./vstutils/fields/datetime/DateTimeField.DateTimeField(8):9
+msgid "Date-time guiField class."
+msgstr ""
+
+#: ../../TimeIntervalField.js:./vstutils/fields/datetime/TimeIntervalField.TimeIntervalField(9):9
+msgid ""
+"Time_interval guiField class. Field that gets time in milliseconds and "
+"convert it into seconds before render. Before sending data to API it "
+"converts time from seconds to milliseconds."
+msgstr ""
+
+#: ../../UptimeField.js:./vstutils/fields/datetime/UptimeField.UptimeField(15):9
+msgid ""
+"Uptime guiField class. Field that gets time in seconds as value and shows"
+" it in convenient way for user. Due to size of time field selects one of "
+"the most appropriate pattern from these templates: - 23:59:59 - 01d "
+"00:00:00 - 01m 30d 00:00:00 - 99y 11m 30d 22:23:24"
+msgstr ""
+
+#: ../../UptimeField.js:./vstutils/fields/datetime/UptimeField.UptimeField(15):49
+msgid ""
+"Array of regexps for current field. These regexps are needed for "
+"converting value from seconds to uptime format."
+msgstr ""
+
+#: ../../DynamicField.js:./vstutils/fields/dynamic/DynamicField.DynamicField(8):9
+msgid "Dynamic guiField class."
+msgstr ""
+
+#: ../../DynamicField.js:./vstutils/fields/dynamic/DynamicField.DynamicField(8):41
+msgid "**type:** Object.<string, BaseField>"
+msgstr ""
+
+#: ../../DynamicField.js:./vstutils/fields/dynamic/DynamicField.DynamicField(8):85
+msgid ""
+"Method, that returns real field instance - some guiField instance of "
+"format, that current field should have in current moment."
+msgstr ""
+
+#: ../../BinaryFileField.js:./vstutils/fields/files/binary-file/BinaryFileField.BinaryFileField(9):67
+#: ../../DynamicField.js:./vstutils/fields/dynamic/DynamicField.DynamicField(8):88
+msgid ""
+"Object with values of current field and fields from the same fields "
+"wrapper. For example, from the same Model Instance."
+msgstr ""
+
+#: ../../DynamicField.js:./vstutils/fields/dynamic/DynamicField.DynamicField(8):110
+msgid "Redefinition of 'toInner' method of base guiField."
+msgstr ""
+
+#: ../../DynamicField.js:./vstutils/fields/dynamic/DynamicField.DynamicField(8):134
+msgid "Redefinition of 'toRepresent' method of base guiField."
+msgstr ""
+
+#: ../../FileField.js:./vstutils/fields/files/file/FileField.FileField(7):9
+msgid "File guiField class."
+msgstr ""
+
+#: ../../BinaryFileField.js:./vstutils/fields/files/binary-file/BinaryFileField.BinaryFileField(9):9
+msgid ""
+"BinFile guiField class. Field takes file's content, converts it into "
+"base64 string and sends this string to API."
+msgstr ""
+
+#: ../../BinaryFileField.js:./vstutils/fields/files/binary-file/BinaryFileField.BinaryFileField(9):64
+msgid ""
+"Method, that converts field's value to base64. It's supposed that value "
+"of current field is an instance of ArrayBuffer."
+msgstr ""
+
+#: ../../NamedBinaryFileField.js:./vstutils/fields/files/named-binary-file/NamedBinaryFileField.NamedBinaryFileField(13):9
+msgid ""
+"NamedBinFile guiField class. This field takes and returns JSON with 2 "
+"properties: - name - string - name of file; - mediaType - string - MIME "
+"type of file - content - base64 string - content of file."
+msgstr ""
+
+#: ../../MultipleNamedBinaryFileField.js:./vstutils/fields/files/multiple-named-binary-file/MultipleNamedBinaryFileField.MultipleNamedBinFileField(13):67
+#: ../../NamedBinaryFileField.js:./vstutils/fields/files/named-binary-file/NamedBinaryFileField.NamedBinaryFileField(13):67
+msgid "Redefinition of 'validateValue' method of binfile guiField."
+msgstr ""
+
+#: ../../NamedBinaryImageField.js:./vstutils/fields/files/named-binary-image/NamedBinaryImageField.NamedBinaryImageField(12):9
+msgid ""
+"NamedBinImage guiField class. This field takes and returns JSON with 2 "
+"properties: - name - string - name of image; - mediaType - string - MIME "
+"type of file; - content - base64 string - content of image."
+msgstr ""
+
+#: ../../MultipleNamedBinaryFileField.js:./vstutils/fields/files/multiple-named-binary-file/MultipleNamedBinaryFileField.MultipleNamedBinFileField(13):9
+#: ../../MultipleNamedBinaryImageField.js:./vstutils/fields/files/multiple-named-binary-image/MultipleNamedBinaryImageField.MultipleNamedBinaryImageField(12):9
+msgid ""
+"MultipleNamedBinFile guiField class. This field takes and returns array "
+"with objects, consisting of 2 properties: - name - string - name of file;"
+" - mediaType - string - MIME type of file; - content - base64 string - "
+"content of file."
+msgstr ""
+
+#: ../../DeepFKField.js:./vstutils/fields/fk/deep-fk/DeepFKField.DeepFKField(7):9
+msgid "DeepFKField extends `FkField`, but displays as tree"
+msgstr ""
+
+#: ../../FKAutocompleteField.js:./vstutils/fields/fk/autocomplete/FKAutocompleteField.FKAutocompleteField(7):9
+msgid "FkField with autocomplete feature for GUI."
+msgstr ""
+
+#: ../../FKField.js:./vstutils/fields/fk/fk/FKField.FKField(51):9
+msgid "Foreign key GUI field class for nested models."
+msgstr ""
+
+#: ../../FKField.js:./vstutils/fields/fk/fk/FKField.FKField(51):47
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):471
+msgid "**Promise.\\<Array.\\<Model\\>\\>** --"
+msgstr ""
+
+#: ../../FKField.js:./vstutils/fields/fk/fk/FKField.FKField(51):68
+msgid ""
+"Method, that selects one, the most appropriate queryset, from querysets "
+"array."
+msgstr ""
+
+#: ../../FKField.js:./vstutils/fields/fk/fk/FKField.FKField(51):70
+msgid "Object with instance data."
+msgstr ""
+
+#: ../../FKField.js:./vstutils/fields/fk/fk/FKField.FKField(51):71
+msgid "Array with field QuerySets."
+msgstr ""
+
+#: ../../FKField.js:./vstutils/fields/fk/fk/FKField.FKField(51):76
+msgid "**QuerySet\\|undefined** --"
+msgstr ""
+
+#: ../../FKField.js:./vstutils/fields/fk/fk/FKField.FKField(51):97
+msgid ""
+"Method that returns dependence filters. If null is returned it means that"
+" at least one of required and non nullable fields is empty and field "
+"should be disabled."
+msgstr ""
+
+#: ../../FKField.js:./vstutils/fields/fk/fk/FKField.FKField(51):102
+msgid "**Object\\|null** --"
+msgstr ""
+
+#: ../../FKMultiAutocompleteField.js:./vstutils/fields/fk/multi-autocomplete/FKMultiAutocompleteField.FKMultiAutocompleteField(7):9
+msgid "FK_multi_autocomplete guiField class."
+msgstr ""
+
+#: ../../JSONField.js:./vstutils/fields/json/JSONField.JSONField(8):9
+msgid "JSON guiField class."
+msgstr ""
+
+#: ../../integer.js:./vstutils/fields/numbers/integer.IntegerField(20):9
+msgid "Field to store integers"
+msgstr ""
+
+#: ../../PasswordField.js:./vstutils/fields/password/PasswordField.PasswordField(7):9
+msgid "Password guiField class."
+msgstr ""
+
+#: ../../index.js:./vstutils/fields/related-list/index.RelatedListField(32):9
+msgid ""
+"Field shows selected fields values of related objects. On list view shows"
+" modal window."
+msgstr ""
+
+#: ../../TextAreaField.js:./vstutils/fields/text/TextAreaField.TextAreaField(7):9
+msgid "Textarea guiField class."
+msgstr ""
+
+#: ../../color.js:./vstutils/fields/color.ColorField(28):9
+msgid "Color guiField class."
+msgstr ""
+
+#: ../../email.js:./vstutils/fields/email.EmailField(21):9
+msgid "Email guiField class."
+msgstr ""
+
+#: ../../email.js:./vstutils/fields/email.EmailField(21):65
+msgid "Static property, that returns regExp for email string validation."
+msgstr ""
+
+#: ../../email.js:./vstutils/fields/email.EmailField(21):85
+msgid "Redefinition of 'validateValue' method of string guiField."
+msgstr ""
+
+#: ../../frontend-classes.rst:94
+msgid "Views"
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):9
+msgid "Class used to create views objects from schema"
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):23
+msgid "Constructor of ViewConstructor class."
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):25
+msgid ""
+"Dict, that has info about properties names in OpenApi Schema and some "
+"settings for views of different types."
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):47
+msgid "Method, that generates new guiField objects for View filters."
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):49
+msgid "**Object.\\<string\\, BaseField\\>** --"
+msgstr ""
+
+#: ../../ModelsResolver.js:./vstutils/models/ModelsResolver.ModelsResolver(11):99
+#: ../../QuerySetsResolver.js:./vstutils/querySet/QuerySetsResolver.QuerySetsResolver(6):69
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):74
+msgid "**function** --"
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):95
+msgid "Method, that returns path's name."
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):97
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):197
+msgid "Key of path object, from OpenApi's path dict."
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):119
+msgid ""
+"Method that sets nested querysets needed for to getting instances that "
+"can be added"
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):167
+msgid ""
+"Method, that returns dict with views, ready to use. Method creates views,"
+" sets internal links for them and so on."
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):170
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):224
+msgid "OpenApi Schema."
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):172
+msgid "**Map.\\<string\\, View\\>** -- Map of views objects, ready for usage."
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):193
+msgid ""
+"Method, that return operation_id options for view schema. It gets "
+"operation_id options from openapi_dictionary and sets them."
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):196
+msgid "Operation_id value."
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):264
+#: ../../Model.js:./vstutils/models/Model.Model(159):431
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):198
+msgid "Http method"
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):222
+msgid "Method, that creates views based on OpenApi schema."
+msgstr ""
+
+#: ../../ViewConstructor.js:./vstutils/views/ViewConstructor.ViewConstructor(43):226
+msgid "**Map.\\<string\\, View\\>** -- views Dict of views objects."
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):9
+msgid "View class - constructor, that returns view object."
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):23
+#: ../../View.js:./vstutils/views/View.View(53):49
+msgid "Constructor of View class."
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):69
+msgid "**type:** Map.<string, Action>"
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):93
+msgid ""
+"Property, that stores extensions for components, which would render "
+"current view."
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):116
+msgid "Property that returns array with request and response model"
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):136
+msgid "**type:** View|null"
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):158
+msgid "**type:** string"
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):180
+msgid "**type:** Map.<string, Sublink>"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):123
+#: ../../View.js:./vstutils/views/View.View(53):202
+msgid "**type:** Array.<string>|null"
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):228
+msgid "**Object** -- component properties"
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):249
+msgid "Method that returns Vue component for view"
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):251
+#: ../../View.js:./vstutils/views/View.View(53):320
+msgid "**Object** --"
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):272
+msgid "Method returns string with template of route path for current view."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):181
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):204
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):227
+#: ../../View.js:./vstutils/views/View.View(53):274
+msgid "**string** --"
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):295
+msgid "Returns custom store module"
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):297
+msgid "**Object\\|undefined** --"
+msgstr ""
+
+#: ../../View.js:./vstutils/views/View.View(53):318
+msgid "Method that returns route object for view (RouteConfig)"
+msgstr ""
+
+#: ../../frontend-classes.rst:102
+msgid "QuerySets"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):9
+msgid "Base QuerySet class."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):25
+msgid "Must be without leading and ending slashes"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):26
+msgid "Models classes"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):27
+msgid "Object with query parameters"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):28
+msgid "Object that describes path parameters"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):49
+msgid "Function that checks if given object is instance of Model"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):74
+msgid ""
+"Method, that returns new QuerySet with current value of 'this.query' "
+"property."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):96
+msgid "Method, that cleans QuerySet cache."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):118
+msgid "Method, that returns clone (new QuerySet instance) of current QuerySet."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):120
+msgid "Object with properties, that should be rewritten in clone."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):121
+msgid "If true, cache of current QuerySet will be saved in clone."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):124
+msgid "**QuerySet** -- Clone - new QuerySet instance."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):145
+msgid ""
+"Method, that returns copy (new QuerySet instance) of current QuerySet, "
+"with cache of current QuerySet."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):148
+msgid "Object with properties, that should be rewritten in copy instance."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):150
+msgid "**object** -- Copy - new QuerySet instance."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):171
+msgid ""
+"Method, that sends query to API for creation of new Model instance and "
+"returns promise, that returns Model instance, if query response was "
+"successful."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):174
+msgid "new model data."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):322
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):175
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):254
+msgid "Http method."
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):266
+#: ../../Model.js:./vstutils/models/Model.Model(159):433
+#: ../../Model.js:./vstutils/models/Model.Model(159):460
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):178
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):317
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):395
+msgid "**Promise.\\<Model\\>** --"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):199
+msgid ""
+"Method, that deletes provided instances or all instances that match "
+"current queryset items(). This method is expected to be called after "
+"instance filtering."
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):289
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):206
+#: ../../spa.js:./spa.App(24):139 ../../spa.js:./spa.App(24):187
+msgid "**Promise** --"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):227
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):290
+msgid ""
+"Method, that returns new QuerySet with new filters, that will be saved in"
+" 'query' property."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):229
+msgid ""
+"Object with filters(key, value), according to which some instances should"
+" be excluded from Model instances list."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):251
+msgid "Method, that sends API request to ApiConnector."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):321
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):253
+msgid "Request parameters."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):323
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):255
+msgid "API version."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):325
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):257
+msgid "URL query params."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):337
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):269
+msgid "**Promise.\\<APIResponse\\>** --"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):292
+msgid ""
+"Object with filters(key, value), according to which Model instances list "
+"should be sorted."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):294
+msgid "**QuerySet** --"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):315
+msgid "Method, that returns promise with Model instance."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):338
+msgid "Getter that returns queryset urls as string array"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):340
+msgid "**Array.\\<string\\>** --"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):361
+msgid ""
+"Method that returns proper model for specified operation. If custom "
+"operation type used and model for that type exists in configuration it "
+"will be returned. If no appropriate model found, than null is returned."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):365
+msgid ""
+"Order used to determine model class: `PARTIAL_UPDATE` / `UPDATE` -> "
+"`CREATE` -> `RETRIEVE` -> `LIST`"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):369
+msgid "0 for request and 1 for response"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):372
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):420
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):445
+msgid "**function\\|null** --"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):393
+msgid ""
+"Method returns one instance, if more than one instance found error is "
+"thrown"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):416
+msgid "Method that returns request model for given operation"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):441
+msgid "Method that returns response model for given operation"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):466
+msgid ""
+"Method, that sends to API get request for getting list of Model "
+"instances, appropriate for filters from 'this.query' property. Method, "
+"returns promise, that returns list of Model instances, if api request was"
+" successful."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):492
+msgid "Method, that sends api request for model update"
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):495
+msgid "Model instances to update."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):496
+msgid "Http method, PATCH by default."
+msgstr ""
+
+#: ../../QuerySet.js:./vstutils/querySet/QuerySet.QuerySet(31):502
+msgid "**Array.\\<Promise.\\<Model\\>\\>** --"
+msgstr ""
+
+#: ../../QuerySetsResolver.js:./vstutils/querySet/QuerySetsResolver.QuerySetsResolver(6):9
+msgid "QuerySetsResolver chooses appropriate queryset for path."
+msgstr ""
+
+#: ../../frontend-classes.rst:110
+msgid "Models"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):9
+msgid "Class of Base Model."
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):31
+msgid "Model name"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):79
+msgid "**type:** Array.<BaseField>"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):101
+msgid "**type:** Object.<string, Array.<string>>"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):145
+#: ../../Model.js:./vstutils/models/Model.Model(159):167
+msgid "**type:** string|null"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):191
+msgid "[fieldsNames]"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):193
+#: ../../Model.js:./vstutils/models/Model.Model(159):485
+msgid "**InnerData** --"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):216
+msgid "**RepresentData** --"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159)
+msgid "Throws"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):262
+msgid "Method, that creates new Model instance."
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):287
+msgid "Method, that sends api request to delete Model instance."
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):310
+msgid "Method, that returns instance's value of PK field."
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):332
+msgid ""
+"Returns value of view field as safe escaped string or undefined if model "
+"has no view field."
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):336
+msgid "**string\\|undefined** --"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):357
+msgid "Method, that returns instance's value of view field."
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):379
+msgid "Checks if this instance's data is equal to data of the provided instance"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):408
+msgid "**ModelValidationError\\|undefined** --"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):429
+msgid "Method that saves current model instance"
+msgstr ""
+
+#: ../../Model.js:./vstutils/models/Model.Model(159):454
+msgid "Method to update model data"
+msgstr ""
+
+#: ../../ModelsResolver.js:./vstutils/models/ModelsResolver.ModelsResolver(11):9
+msgid "ModelsResolver Resolves model by reference path"
+msgstr ""
+
+#: ../../ModelsResolver.js:./vstutils/models/ModelsResolver.ModelsResolver(11):68
+msgid "Resolves model by reference path"
+msgstr ""
+
+#: ../../ModelsResolver.js:./vstutils/models/ModelsResolver.ModelsResolver(11):72
+msgid "**function\\|undefined** --"
+msgstr ""
+
+#: ../../ModelsResolver.js:./vstutils/models/ModelsResolver.ModelsResolver(11):93
+msgid "Resolves model by schema object. Schema object or $ref is supported."
+msgstr ""
+
+#: ../../ModelsResolver.js:./vstutils/models/ModelsResolver.ModelsResolver(11):111
+msgid ":any:`{@link https://swagger.io/specification/v2/#schemaObject}`"
+msgstr ""
+
+#: ../../frontend-classes.rst:119
+msgid "App"
+msgstr ""
+
+#: ../../BaseApp.js:./BaseApp.BaseApp#BaseApp(32):23
+#: ../../spa.js:./spa.App(24):24 ../../spa.js:./spa.App(24):48
+msgid "Constructor of App class."
+msgstr ""
+
+#: ../../BaseApp.js:./BaseApp.BaseApp#BaseApp(32):25
+#: ../../spa.js:./spa.App(24):26
+msgid "Object with OpenAPI schema."
+msgstr ""
+
+#: ../../BaseApp.js:./BaseApp.BaseApp#BaseApp(32):26
+msgid "Object, that manages api responses cache operations."
+msgstr ""
+
+#: ../../spa.js:./spa.App(24):9
+msgid ""
+"Class for a App object. App object - JS object, that has all properties, "
+"needed for an application work."
+msgstr ""
+
+#: ../../spa.js:./spa.App(24):27
+msgid "Cache instance (is supposed to be instance of FilesCache class)."
+msgstr ""
+
+#: ../../spa.js:./spa.App(24):70
+msgid ""
+"Main(root) Vue instance for current application, that has access to the "
+"app store and app router."
+msgstr ""
+
+#: ../../spa.js:./spa.App(24):90
+msgid "**type:** QuerySetsResolver"
+msgstr ""
+
+#: ../../spa.js:./spa.App(24):112
+msgid "**type:** Map.<string, View>"
+msgstr ""
+
+#: ../../spa.js:./spa.App(24):134
+msgid ""
+"Method returns a promise of checking that current language exists and "
+"translations for language is loaded. This method is supposed to be called"
+" after app was mounted and only from this.setLanguage(lang) method."
+msgstr ""
+
+#: ../../spa.js:./spa.App(24):137
+msgid "Code of language, that should be prefetched."
+msgstr ""
+
+#: ../../spa.js:./spa.App(24):160
+msgid ""
+"Method, that creates store and router for an application and mounts it to"
+" DOM."
+msgstr ""
+
+#: ../../spa.js:./spa.App(24):182
+msgid ""
+"Method returns a promise of applying some language to app interface. This"
+" method is supposed to be called after app was mounted."
+msgstr ""
+
+#: ../../spa.js:./spa.App(24):185
+msgid "Code of language, that should be set as current App language."
+msgstr ""
+
+#: ../../frontend-classes.rst:126
+msgid "ErrorHandler"
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):9
+msgid "Class, that is responsible for showing of pop up notification."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):23
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):45
+msgid "Constructor of PopUp class."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):25
+msgid "Object with pop up settings."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):65
+msgid "Method, that generates default pop up notification."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):67
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):93
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):119
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):175
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):201
+msgid "Body text of pop up notification."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):68
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):94
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):120
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):176
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):202
+msgid "Object with custom settings for pop up notification."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):91
+msgid "Method, that generates error pop up notification."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):117
+msgid "Method, that generates info pop up notification."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):143
+msgid ""
+"Method, that generates question pop up. Returns promise of getting user's"
+" answer."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):146
+msgid "Question text."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):147
+msgid "Array of strings - titles for answer buttons."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):148
+msgid "Object with custom settings for question pop up."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):152
+msgid "**promise** -- ."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):173
+msgid "Method, that generates success pop up notification."
+msgstr ""
+
+#: ../../PopUp.js:./vstutils/popUp/PopUp.PopUp(6):199
+msgid "Method, that generates warning pop up notification."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):9
+msgid "Class, that sends API requests."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):23
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):43
+msgid "Constructor of ApiConnector class."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):63
+msgid "**type:** AppConfiguration"
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):87
+msgid "Property for collecting several bulk requests into one."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):131
+msgid "Method, that sends one big bulk request to API."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):133
+msgid "**Promise** -- Promise of getting bulk request response."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):154
+msgid "Method, that collects several bulk requests into one."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):156
+msgid "Body of bulk request."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):158
+msgid "**Promise.\\<BulkResponse\\>** --"
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):179
+msgid "Method returns URL of API host (server)."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):202
+msgid ""
+"Method returns relative path (from host url) to the directory with static"
+" path."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):225
+msgid "Method returns string, containing time zone of API host."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):248
+msgid "Method returns id of user, that is now authorized and uses application."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):250
+msgid "**number\\|string** --"
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):271
+msgid ""
+"Method that sets application configuration. Must be called before making "
+"any requests."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):275
+msgid "**ApiConnector** --"
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):296
+msgid "Method, that loads data of authorized user."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):298
+msgid "**Promise** -- Promise of getting data of authorized user."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):319
+msgid "Method, that sends API request."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):328
+msgid "Make request using bulk request."
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):361
+msgid "bulk type"
+msgstr ""
+
+#: ../../ApiConnector.js:./vstutils/api/ApiConnector.ApiConnector(63):364
+msgid "**Promise.\\<Array.\\<BulkResponse\\>\\>** --"
+msgstr ""
+
+#: ../../RouterConstructor.js:./vstutils/router/RouterConstructor.RouterConstructor#RouterConstructor(12):23
+msgid "Constructor of RouterConstructor Class."
+msgstr ""
+
+#: ../../RouterConstructor.js:./vstutils/router/RouterConstructor.RouterConstructor#RouterConstructor(12):25
+msgid ""
+"Map with views objects. generated by View class and having description in"
+" OpenAPI Schema."
+msgstr ""
+
+#: ../../RouterConstructor.js:./vstutils/router/RouterConstructor.RouterConstructor#RouterConstructor(12):26
+msgid ""
+"Dict with mixins for Vue components of custom Views, that have no "
+"description in OpenAPI Schema (home page, 404 error page)."
+msgstr ""
+
+#: ../../index.js:./vstutils/store/index.StoreConstructor(101):9
+msgid ""
+"Class, that manages Store creation. Store - object, that contains data of"
+" all App components. In current realization, Store is Vuex Store. More "
+"about Vuex - https://vuex.vuejs.org/."
+msgstr ""
+
+#: ../../index.js:./vstutils/store/index.StoreConstructor(101):26
+#: ../../index.js:./vstutils/store/index.StoreConstructor(101):50
+msgid "Constructor of StoreConstructor class."
+msgstr ""
+
+#: ../../index.js:./vstutils/store/index.StoreConstructor(101):70
+msgid "Method, that returns App store."
+msgstr ""
+
+#: ../../index.js:./vstutils/store/index.StoreConstructor(101):92
+msgid ""
+"Method, that forms store actions - asynchronous operations. More about "
+"action - https://vuex.vuejs.org/guide/actions.html."
+msgstr ""
+
+#: ../../index.js:./vstutils/store/index.StoreConstructor(101):115
+msgid ""
+"Method, that forms store getters - properties/methods, that return data "
+"from store. More about getters - "
+"https://vuex.vuejs.org/guide/getters.html."
+msgstr ""
+
+#: ../../index.js:./vstutils/store/index.StoreConstructor(101):138
+msgid ""
+"Method, that forms store mutations - single way of state changing in Vuex"
+" store. More about mutations - "
+"https://vuex.vuejs.org/guide/mutations.html."
+msgstr ""
+
+#: ../../index.js:./vstutils/store/index.StoreConstructor(101):161
+msgid "Method, that forms 'state' property of Store object."
+msgstr ""
+
+#: ../../frontend-classes.rst:141
+msgid ""
+"LocalSettings is an abstraction, that is responsible for manipulating by "
+"settings saved to the `Local Storage <https://developer.mozilla.org/en-"
+"US/docs/Web/API/Window/localStorage>`_. It is used for saving some user's"
+" local settings to the one property(object) of `Local Storage "
+"<https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage>`_."
+msgstr ""
+
+#: ../../frontend-classes.rst:144
+msgid "For example:"
+msgstr ""
+
+#: ../../localSettings.js:./vstutils/utils/localSettings.LocalSettings#LocalSettings(12):23
+msgid "Constructor of LocalSettings Class."
+msgstr ""
+
+#: ../../localSettings.js:./vstutils/utils/localSettings.LocalSettings#LocalSettings(12):25
+msgid ""
+"Key name of Local Storage's property to which Local Settings will be "
+"saved."
+msgstr ""
+

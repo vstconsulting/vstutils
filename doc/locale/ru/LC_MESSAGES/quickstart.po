@@ -1,0 +1,992 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018-2022, VST Consulting
+# This file is distributed under the same license as the VST Utils package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: VST Utils 5.0.4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-06-01 08:13+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../quickstart.rst:2
+msgid "Quick Start"
+msgstr "Быстрый старт"
+
+#: ../../quickstart.rst:3
+msgid ""
+"Starting of new project, based on VST Utils Framework, is rather simple. "
+"We recommend to create a virtual environment for each project to avoid "
+"conflicts in the system."
+msgstr ""
+"Создать новый проект, основанный на фреймворке VST Utils, довольно "
+"просто. Мы рекомендуем создавать виртуальное окружение отдельно для "
+"каждого из ваших проектов, чтобы избежать конфликтов в системе."
+
+#: ../../quickstart.rst:6
+msgid ""
+"Let’s learn by example. All you need to do is run several commands. This "
+"manual consist of two parts:"
+msgstr ""
+"Давайте учиться на примерах. Все что вам нужно сделать это запустить "
+"несколько команд. Этот мануал состоит из двух частей:"
+
+#: ../../quickstart.rst:10
+msgid ""
+"Description of the process of creating a new application and the main "
+"commands for launching and deploying."
+msgstr ""
+"Описание процесса создания нового приложения и основных команд для "
+"запуска и развертывания."
+
+#: ../../quickstart.rst:12
+msgid "Description of the process of creating new entities in the application."
+msgstr "Описание процесса создания новых сущностей в приложении."
+
+#: ../../quickstart.rst:16
+msgid "New application creation"
+msgstr "Создание нового приложения"
+
+#: ../../quickstart.rst:18
+msgid ""
+"Throughout this tutorial, we’ll go through a creation of a basic poll "
+"application."
+msgstr "В этом руководстве мы создадим базовое приложение."
+
+#: ../../quickstart.rst:20
+msgid "**Install VST Utils**"
+msgstr "**Установка VST Utils**"
+
+#: ../../quickstart.rst:26
+msgid ""
+"In this case, we install a package with the minimum required set of "
+"dependencies for creating new projects. However, inside the project, the "
+"extra argument `prod` is used, which additionally installs the packages "
+"necessary for working in the production environment. There is also a set "
+"of test dependencies, which contains everything you need for testing and "
+"analyzing code coverage."
+msgstr ""
+"В данном случае мы устанавливаем пакет с минимальным набором зависимостей"
+" для создания новых проектов. Однако, внутри проекта используется "
+"специальный аргумент `prod` который дополнительно устанавливает все "
+"пакеты, необходимые для работы в окружении для развертывания. Также "
+"имеется набор зависимостей для тестирования, в котором содержится все, "
+"что нужно для тестирования и анализа покрытия кода."
+
+#: ../../quickstart.rst:31
+msgid "It is also worth noting extra dependencies as:"
+msgstr "Также стоит отметить дополнительно зависимости, такие как:"
+
+#: ../../quickstart.rst:33
+msgid "**rpc** - install dependencies for asynchronous tasks working"
+msgstr "**rpc** - установка зависимостей для выполнения асинхронных задач"
+
+#: ../../quickstart.rst:34
+msgid "**ldap** - a set of dependencies for ldap authorization support"
+msgstr "**ldap** - набор зависимостей для поддержки авторизации ldap"
+
+#: ../../quickstart.rst:35
+msgid ""
+"**doc** - everything which needed to build documentation and to implement"
+" the delivery of documentation inside a running server"
+msgstr ""
+"**doc** - все, что нужно для построения документации и осуществления "
+"доставки документации на запущенный сервер"
+
+#: ../../quickstart.rst:36
+msgid "**pil** - library for correct work of image validators"
+msgstr "**pil** - библиотека для корректной работы валидации изображений"
+
+#: ../../quickstart.rst:37
+msgid ""
+"**boto3** - an additional set of packages for working with S3 storage "
+"outside of AWS"
+msgstr ""
+"**boto3** - дополнительный набор зависимостей для работы с S3 хранилищем "
+"вне AWS"
+
+#: ../../quickstart.rst:38
+msgid ""
+"**sqs** - a set of dependencies for connecting asynchronous tasks to SQS "
+"queues (can be used instead of the **rpc**)."
+msgstr ""
+"**sqs** - набор зависимостей  для соединения асинхронных задач с SQS "
+"очередями (может использоваться вместо **rpc**)."
+
+#: ../../quickstart.rst:40
+msgid ""
+"You can combine multiple dependencies at the same time to assemble your "
+"set of functionality into a project. For example, to work an application "
+"with asynchronous tasks and media storage in MinIO, you will need the "
+"following command:"
+msgstr ""
+"Вы можете комбинировать разные зависимости одновременно, чтобы собрать "
+"ваш функциональный набор в проекте. Например, для работы приложения с "
+"асинхронными задачами и медиахранилищем в MinIO вам потребуется следующая"
+" команда:"
+
+#: ../../quickstart.rst:47
+msgid ""
+"To install the most complete set of dependencies, you can use the common "
+"parameter **all**."
+msgstr ""
+"Чтобы установить наиболее полный набор зависимостей, вы можете "
+"использовать обычный параметр **all**."
+
+#: ../../quickstart.rst:54
+msgid "**Create new project, based on VST Utils**"
+msgstr "**Создание нового проекта, основанного на VST Utils**"
+
+#: ../../quickstart.rst:56
+msgid ""
+"If this is your first time using vstutils, you’ll have to take care of "
+"some initial setup. Namely, you’ll need to auto-generate some code that "
+"establishes a vstutils application – a collection of settings for an "
+"instance of vstutils, including database configuration, Django-specific "
+"and vstutils-specific options and application-specific settings. To "
+"create new project execute following command:"
+msgstr ""
+"Если вы впервые используете vstutils, вам нужно позаботиться о начальной "
+"настройке. А именно: вам необходимо будет автоматически сгенерировать "
+"код, создающий приложение vstutils, включая конфигурацию базы данных, "
+"специфичные опции для Django и vstutils, а также настройки, специфичные "
+"для приложения. Для создания нового проекта выполните следующую команду: "
+
+#: ../../quickstart.rst:66
+msgid "This command will offer you to specify such options of new app, as:"
+msgstr "Эта команда предложит указать такие параметры нового приложения, как:"
+
+#: ../../quickstart.rst:68
+msgid "**project name** - name of your new application;"
+msgstr "**project name** - имя вашего нового приложения;"
+
+#: ../../quickstart.rst:69
+msgid ""
+"**project guiname** - name of your new application, that will be used in "
+"GUI (web-interface);"
+msgstr ""
+"**project guiname** - имя вашего нового приложения, которое будет "
+"использоваться в GUI(веб-интерфейсе);"
+
+#: ../../quickstart.rst:70
+msgid "**project directory** - path to directory, where project will be created."
+msgstr "**project directory** - путь к директории, в которой будет создан проект."
+
+#: ../../quickstart.rst:72
+msgid ""
+"Or you can execute following command, that includes all needed data for "
+"new project creation."
+msgstr ""
+"Или вы можете выполнить следующую команду, которая содержит всю "
+"необходимую информацию для создания нового проекта."
+
+#: ../../quickstart.rst:78
+msgid "This command creates new project without confirming any data."
+msgstr "Эта команда создает новый проект без подтверждения какой-либо информации."
+
+#: ../../quickstart.rst:81
+msgid "These commands create several files in ``project directory``."
+msgstr "Эти команды создают несколько файлов в ``project directory``:"
+
+#: ../../quickstart.rst:114
+msgid "where:"
+msgstr "где"
+
+#: ../../quickstart.rst:116
+msgid "**frontend_src** - directory that contains all sources for frontend;"
+msgstr ""
+"**frontend_src** - директория, содержащая все исходные файлы для "
+"фронтенда;"
+
+#: ../../quickstart.rst:117
+msgid "**MANIFEST.in** - this file is used for building installation package;"
+msgstr ""
+"**MANIFEST.in** - этот файл используется для создания установочного "
+"пакета;"
+
+#: ../../quickstart.rst:118
+msgid "**{{app_name}}** - directory with files of your application;"
+msgstr "**{{app_name}}** - директория с файлами вашего приложения;"
+
+#: ../../quickstart.rst:119
+msgid ""
+"**package.json** - this file contains list of frontend dependencies and "
+"commands to build;"
+msgstr ""
+"**package.json** - этот файл содержит список зависимостей фронтенда и "
+"команд для сборки;"
+
+#: ../../quickstart.rst:120
+msgid ""
+"**README.rst** - default README file for your application (this file "
+"includes base commands for starting/stopping your application);"
+msgstr ""
+"**README.rst** - стандартный README файл для вашего приложения (этот файл"
+" включает базовые команды для запуска/остановки вашего приложения);"
+
+#: ../../quickstart.rst:121
+msgid ""
+"**requirements-test.txt** - file with list of requirements for test "
+"environment;"
+msgstr ""
+"**requirements-test.txt** - файл со списком зависимостей для тестирования"
+" вашего окружения;"
+
+#: ../../quickstart.rst:122
+msgid ""
+"**requirements.txt** - file with list of requirements for your "
+"application;"
+msgstr "**requirements.txt** - файл со списком зависимостей вашего приложения;"
+
+#: ../../quickstart.rst:123
+msgid "**setup.cfg** - this file is used for building installation package;"
+msgstr "**setup.cfg** - файл, используемый для сборки установочного пакета;"
+
+#: ../../quickstart.rst:124
+msgid "**setup.py** - this file is used for building installation package;"
+msgstr "**setup.py** - файл, используемый для сборки установочного пакета;"
+
+#: ../../quickstart.rst:125
+msgid "**test.py** - this file is used for tests creation;"
+msgstr "**test.py** - этот файл используется для создания тестов;"
+
+#: ../../quickstart.rst:126
+msgid "**tox.ini** - this file is used for tests execution;"
+msgstr "**tox.ini** - этот файл используется для выполнения тестов;"
+
+#: ../../quickstart.rst:127
+msgid ""
+"**webpack.config.js.default** - this file contain minimal script for "
+"webpack (replace '.default' if write smthg in 'app.js')."
+msgstr ""
+"**webpack.config.js.default** - этот файл содержит минимальный скрипт для"
+" webpack (замените '.default', если пишите что-то в 'app.js')."
+
+#: ../../quickstart.rst:129
+msgid ""
+"You should execute below commands  from the "
+"``/{{app_dir}}/{{app_name}}/`` directory. It is good practice to use tox "
+"(should be installed before use) to create a debugging environment for "
+"your application. For these purposes, it is recommended to use ``tox -e "
+"contrib`` in the project directory, which will automatically create a new"
+" environment with the required dependencies."
+msgstr ""
+"Вам нужно выполнять приведенные ниже команды из директории "
+"``/{{app_dir}}/{{app_name}}/``. Хорошей практикой будет использование tox"
+" (должен быть установлен перед использованием) для создания отладочной "
+"среды для вашего приложения. Для этих целей рекомендуется использовать "
+"``tox -e contrib`` в директории проекта, что автоматически создаст новое "
+"окружение с необходимыми зависимостями."
+
+#: ../../quickstart.rst:134
+msgid "**Apply migrations**"
+msgstr "**Применение миграций**"
+
+#: ../../quickstart.rst:136
+msgid ""
+"Let’s verify a newly created vstutils project does work. Change into the "
+"outer ``/{{app_dir}}/{{app_name}}`` directory, if you haven’t already, "
+"and run the following command:"
+msgstr ""
+"Давайте проверим, работает ли новый проект vstutils. Перейдите во внешний"
+" каталог ``/{{app_dir}}/{{app_name}}``, если вы еще этого не сделали, и "
+"выполните следующую команду:"
+
+#: ../../quickstart.rst:144
+msgid ""
+"This command create SQLite (by default) database with default SQL-schema."
+" VSTUTILS supports all databases `Django does "
+"<https://docs.djangoproject.com/en/4.1/ref/databases/#databases>`_."
+msgstr ""
+"Эта команда создаст базу данных SQLite (по умолчанию) с SQL схемой по "
+"умолчанию. VSTUTILS поддерживает все базы данных которые поддерживает "
+"`Django. "
+"<https://docs.djangoproject.com/en/4.1/ref/databases/#databases>`_"
+
+#: ../../quickstart.rst:147
+msgid "**Create superuser**"
+msgstr "**Создание суперпользователя**"
+
+#: ../../quickstart.rst:153
+msgid "**Start your application**"
+msgstr "**Запуск приложения**"
+
+#: ../../quickstart.rst:159
+msgid ""
+"Web-interface of your application has been started on the port 8080. "
+"You’ve started the vstutils production server based on `uWSGI <https"
+"://uwsgi-docs.readthedocs.io/>`_."
+msgstr ""
+"Веб-интерфейс вашего приложения будет запущен на порту 8080. Вы запустили"
+" сервер vstutils для продакшена на основе `uWSGI <https://uwsgi-"
+"docs.readthedocs.io/>`_."
+
+#: ../../quickstart.rst:163
+msgid ""
+"Now’s a good time to note: if you want to run the web-server with a "
+"debugger, then you should run `the standard Django's dev-server "
+"<https://docs.djangoproject.com/en/4.1/intro/tutorial01/#the-development-"
+"server>`_."
+msgstr ""
+"Сейчас хорошее время отметить: если вы хотите запустить веб-сервер с "
+"отладчиком, то вам следует запустить стандартный сервер разработки Django"
+" <https://docs.djangoproject.com/en/3.2/intro/tutorial01/#the-"
+"development-server>`_"
+
+#: ../../quickstart.rst:168
+msgid "If you need to stop the server, use following command:"
+msgstr "Если вам нужно остановить сервер, используйте следующую команду:"
+
+#: ../../quickstart.rst:175
+msgid ""
+"You've created the simplest application, based on VST Utils framework. "
+"This application only contains User Model. If you want to create your own"
+" models look at the section below."
+msgstr ""
+"Вы создали простейшее приложение, основанное на фреймворке VST Utils. Это"
+" приложение содержит только модель пользователя. Если вы хотите создать "
+"свои собственные модели, обратитесь к разделу ниже."
+
+#: ../../quickstart.rst:180
+msgid "Adding new models to application"
+msgstr "Добавление новых моделей в приложение"
+
+#: ../../quickstart.rst:181
+msgid ""
+"If you want to add some new entities to your application, you need to do "
+"following on the back-end:"
+msgstr ""
+"Если вы хотите добавить новые сущности в ваше приложение, вам необходимо "
+"выполнить следующие действия на серверной стороне: "
+
+#: ../../quickstart.rst:183
+msgid "Create Model;"
+msgstr "Создайте модель;"
+
+#: ../../quickstart.rst:184
+msgid "Create Serializer (optional);"
+msgstr "Создайте сериализатор (опционально);"
+
+#: ../../quickstart.rst:185
+msgid "Create View (optional);"
+msgstr "Создайте view (опционально);"
+
+#: ../../quickstart.rst:186
+msgid "Add created Model or View to the API;"
+msgstr "Добавьте созданную модель или view в API;"
+
+#: ../../quickstart.rst:187
+msgid "Make migrations;"
+msgstr "Создайте миграции;"
+
+#: ../../quickstart.rst:188
+msgid "Apply migrations;"
+msgstr "Примените миграции;"
+
+#: ../../quickstart.rst:189
+msgid "Restart your application."
+msgstr "Перезапустите ваше приложение."
+
+#: ../../quickstart.rst:191
+msgid ""
+"Let's look how you can do it on the AppExample - application, that has 2 "
+"custom models:"
+msgstr ""
+"Давайте посмотрим, как это можно сделать на примере приложения AppExample"
+" которое содержит 2 пользовательские модели: "
+
+#: ../../quickstart.rst:193
+msgid "Task (abstraction for some tasks/activities, that user should do);"
+msgstr ""
+"Task (абстракция для некоторых задач/активностей, которые пользователь "
+"должен выполнить);"
+
+#: ../../quickstart.rst:194
+msgid ""
+"Stage (abstraction for some stages, that user should do to complete the "
+"task. This model is nested into the Task Model)."
+msgstr ""
+"Stage (абстракция для некоторых этапов, которые пользователь должен "
+"пройти для выполнения задачи. Эта модель вложена в модель Task)."
+
+#: ../../quickstart.rst:198
+msgid "Models creation"
+msgstr "Создание моделей"
+
+#: ../../quickstart.rst:199
+msgid ""
+"Firstly, you need to create file ``{{model_name}}.py`` in the "
+"``/{{app_dir}}/{{app_name}}/{{app_name}}/models`` directory."
+msgstr ""
+"Сначала вам необходимо создать файл ``{{model_name}}.py`` в директории "
+"``/{{app_dir}}/{{app_name}}/{{app_name}}/models``."
+
+#: ../../quickstart.rst:201
+#, fuzzy
+msgid "Let make out an example from **BModel**:"
+msgstr "Давайте рассмотрим пример с моделью **BModel**:"
+
+#: of vstutils.models.BModel:1
+msgid ""
+"Default model class that generates model viewset, separate serializers "
+"for list() and retrieve(), filters, api endpoints and nested views."
+msgstr ""
+"Класс модели по умолчанию, который генерирует viewset, отдельные "
+"сериализаторы для list() и retrieve(), фильтры, эндпоинты API и вложенные"
+" view"
+
+#: of vstutils.models.BModel:159
+msgid "Examples:"
+msgstr "Примеры:"
+
+#: of vstutils.models.BModel:55
+msgid ""
+"In this case, you create models which could converted to simple view, "
+"where:"
+msgstr ""
+"В данном случае вы создаете модели, которые могут быть преобразованы в "
+"простое view, где: "
+
+#: of vstutils.models.BModel:57
+msgid ""
+"``POST``/``GET`` to ``/api/version/task/`` - creates new or get list of "
+"tasks"
+msgstr ""
+"``POST``/``GET`` по адресу ``/api/version/task/`` - создает новую задачу "
+"или получает список задач"
+
+#: of vstutils.models.BModel:58
+msgid ""
+"``PUT``/``PATCH``/``GET``/``DELETE`` to ``/api/version/task/:id/`` - "
+"updates, retrieves or removes instance of task"
+msgstr ""
+"``PUT``/``PATCH``/``GET``/``DELETE`` по адресу ``/api/version/task/:id/``"
+" - обновляет, извлекает или удаляет экземпляр задачи"
+
+#: of vstutils.models.BModel:59
+msgid ""
+"``POST``/``GET`` to ``/api/version/task/:id/stage/`` - creates new or get"
+" list of stages in task"
+msgstr ""
+"``POST``/``GET`` по адресу ``/api/version/task/:id/stage/`` - создает "
+"новую или получает список стадий в задаче"
+
+#: of vstutils.models.BModel:60
+msgid ""
+"``PUT``/``PATCH``/``GET``/``DELETE`` to "
+"``/api/version/task/:id/stage/:stage_id`` - updates, retrieves or removes"
+" instance of stage in task."
+msgstr ""
+"``PUT``/``PATCH``/``GET``/``DELETE`` по адресу "
+"``/api/version/task/:id/stage/:stage_id`` - обновляет, извлекает или "
+"удаляет экземпляр стадии в задаче."
+
+#: of vstutils.models.BModel:63
+msgid "To attach a view to an API insert the following code in `settings.py`:"
+msgstr "Для привязки view к API вставьте следующий код в файл `settings.py`:"
+
+#: of vstutils.models.BModel:71
+msgid ""
+"For primary access to generated view inherit from `Task.generated_view` "
+"property."
+msgstr ""
+"Для основного доступа к сгенерированному view унаследуйтесь от свойства "
+"`Task.generated_view`."
+
+#: of vstutils.models.BModel:73
+msgid ""
+"To make translation on frontend easier use ``_translate_model`` attribute"
+" with model_name."
+msgstr ""
+"Чтобы упростить перевод на фронтенде используйте атрибут "
+"``_translate_model`` с model_name"
+
+#: of vstutils.models.BModel:75
+msgid "List of meta-attributes for generating a view:"
+msgstr "Список мета-атрибутов для создания view:"
+
+#: of vstutils.models.BModel:77
+msgid ""
+"``_view_class`` - list of additional view classes to inherit from, class "
+"or string to import with base class ViewSet. Constants are also "
+"supported:"
+msgstr ""
+"``_view_class`` - список дополнительных классов view для наследования, "
+"класс или строка для импорта с базовым классом viewSet. Также "
+"поддерживаются константы: "
+
+#: of vstutils.models.BModel:81
+msgid "``read_only`` - to create a view only for viewing;"
+msgstr "``read_only`` - для создания view только для просмотра;"
+
+#: of vstutils.models.BModel:82
+msgid "``list_only`` - to create a view with list only;"
+msgstr "``list_only`` - для создания view только со списком;"
+
+#: of vstutils.models.BModel:83
+msgid "``history`` - to create a view only for viewing and deleting records."
+msgstr "``history`` - для создания view только для просмотра и удаления записей"
+
+#: of vstutils.models.BModel:85
+msgid "CRUD-view is applied by default."
+msgstr "CRUD-view применяется по умолчанию."
+
+#: of vstutils.models.BModel:87
+msgid ""
+"``_serializer_class`` - class of API serializer; use this attribute to "
+"specify parent class for autogenerated serializers. Default is "
+":class:`vstutils.api.serializers.VSTSerializer`. Can take a string to "
+"import, serializer class or "
+":class:`django.utils.functional.SimpleLazyObject`."
+msgstr ""
+"``_serializer_class`` - класс сериализатора API; используйте этот "
+"атрибут, чтобы указать родительский класс для автоматически создаваемых "
+"сериализаторов. По умолчанию используется "
+":class:`vstutils.api.serializers.VSTSerializer`. Может принимать строку "
+"для импорта, класс сериализатора или "
+":class:`django.utils.functional.SimpleLazyObject`."
+
+#: of vstutils.models.BModel:90
+msgid ""
+"``_serializer_class_name`` - model name for OpenAPI definitions.This "
+"would be a model name in generated admin interface. Default is name of "
+"model class."
+msgstr ""
+"``_serializer_class_name`` - имя модели для определений OpenAPI. Это "
+"будет имя модели в сгенерированном интерфейсе администратора. По "
+"умолчанию используется имя класса модели."
+
+#: of vstutils.models.BModel:92
+msgid ""
+"``_list_fields`` or ``_detail_fields`` - list of fields which will be "
+"listed in entity list or detail view accordingly. Same as DRF serializers"
+" meta-attribute \"fields\"."
+msgstr ""
+"``_list_fields`` или ``_detail_fields`` - список полей, которые будут "
+"перечислены списке сущностей или детальном view соответственно. То же "
+"самое, что и мета-атрибут \"fields\" сериализаторов DRF."
+
+#: of vstutils.models.BModel:94
+msgid ""
+"``_override_list_fields`` or ``_override_detail_fields`` - mapping with "
+"names and field types that will be redeclared in serializer "
+"attributes(think of it as declaring fields in DRF ModelSerializer)."
+msgstr ""
+"``_override_list_fields`` или ``_override_detail_fields`` - отображение с"
+" именами и типами полей, которые будут переопределены в атрибутах "
+"сериализатора (рассматривайте это как объявление полей в сериализаторе "
+"DRF ModelSerializer)."
+
+#: of vstutils.models.BModel:96
+msgid ""
+"``_properties_groups`` - dict with key as group name and value as list of"
+" fields(str). Allows to group fields in sections on frontend."
+msgstr ""
+"``_properties_groups`` -  словарь с ключом в виде имени группы и "
+"значением в виде списка полей (строк). Позволяет группировать поля в "
+"разделы на фронтенде."
+
+#: of vstutils.models.BModel:98
+msgid "``_view_field_name`` - name of field frontend shows as main view name."
+msgstr ""
+"``_view_field_name`` - имя поля, которое фронтенд показывает в качестве "
+"основного имени view."
+
+#: of vstutils.models.BModel:99
+msgid ""
+"``_non_bulk_methods`` - list of methods which must not used via bulk "
+"requests."
+msgstr ""
+"``_non_bulk_methods`` - список методов, которые не должны использоваться "
+"через пакетные запросы."
+
+#: of vstutils.models.BModel:100
+msgid ""
+"``_extra_serializer_classes`` - mapping with additional serializers in "
+"viewset. For example, custom serializer, which will compute smth in "
+"action (mapping name). Value can be string for import. Important note: "
+"setting `model` attribute to None allows to use standard serializer "
+"generation mechanism and get fields from a list or detail serializer (set"
+" `__inject_from__` serializer's meta attribute to `list` or `detail` "
+"accordingly). In some cases, it is required to pass the model to the "
+"serializer. For these purposes, the constant `LAZY_MODEL` can be used as "
+"a meta attribute. Each time the serializer is used, the exact model where"
+" this serializer was declared will be set."
+msgstr ""
+"``_extra_serializer_classes`` - отображение с дополнительными "
+"сериализаторами в viewset. Например, пользовательский сериализатор, "
+"который будет вычислять что-то в действии (имя отображения). Значение "
+"может быть строкой для импорта. Важное замечание: установка атрибута "
+"модели в None позволяет использовать стандартный механизм создания "
+"сериализатора и получать поля из сериализатора списка или детальной "
+"записи (установите `__inject_from__`  мета-атрибут сериализатора в `list`"
+" или `detail` соответственно). В некоторых случаях требуется передать "
+"модель в сериализатор. Для этого можно использовать константу "
+"`LAZY_MODEL`  в качестве мета-атрибута. Каждый раз при использовании "
+"сериализатора будет установлена точная модель, в которой был объявлен "
+"этот сериализатор."
+
+#: of vstutils.models.BModel:107
+msgid ""
+"``_filterset_fields`` - list/dict of filterset names for API-filtering. "
+"Default is list of fields in list view. During processing a list of "
+"fields checks for the presence of special field names and inherit "
+"additional parent classes. If the list contains ``id``, class will "
+"inherit from :class:`vstutils.api.filters.DefaultIDFilter`. If the list "
+"contains ``name``, class will inherit from "
+":class:`vstutils.api.filters.DefaultNameFilter`. If both conditions are "
+"present, inheritance will be from all of the above classes. Possible "
+"values include `list` of fields to filter or `dict` where key is a field "
+"name and value is a Filter class. Dict extends attribute functionality "
+"and provides ability to override filter field class (None value disables "
+"overriding)."
+msgstr ""
+"``_filterset_fields`` - список/словарь имен фильтров для фильтрации API. "
+"По умолчанию это список полей в view списке. При обработке списка полей "
+"проверяется наличие специальных имен полей и наследуются дополнительные "
+"родительские классы. Если список содержит ``id``, класс будет "
+"наследоваться от :class:`vstutils.api.filters.DefaultIDFilter`. Если "
+"список содержит ``name``, класс будет наследоваться от "
+":class:`vstutils.api.filters.DefaultNameFilter`. Если присутствуют оба "
+"условия, наследование будет происходить от всех вышеперечисленных "
+"классов. Возможные значения включают список (`list`) полей для фильтрации"
+" или словарь (`dict`), где ключ - это имя поля, а значение - класс "
+"Filter. Словарь расширяет функциональность атрибута и позволяет "
+"переопределять класс поля фильтра (значение None отключает "
+"переопределение)."
+
+#: of vstutils.models.BModel:116
+msgid ""
+"``_search_fields`` - tuple or list of fields using for search requests. "
+"By default (or `None`) get all filterable fields in detail view."
+msgstr ""
+"``_search_fields`` - кортеж или список полей, используемых для поисковых "
+"запросов. По умолчанию (или `None`) получаются все поля, по которым можно"
+" фильтровать в детальном view."
+
+#: of vstutils.models.BModel:118
+msgid ""
+"``_copy_attrs`` - list of model-instance attributes indicates that object"
+" is copyable with this attrs."
+msgstr ""
+"``_copy_attrs`` - список атрибутов экземпляра модели, указывающих, что "
+"объект можно скопировать с этими атрибутами."
+
+#: of vstutils.models.BModel:119
+msgid ""
+"``_nested`` - key-value mapping with nested views (key - nested name, "
+"kwargs for :class:`vstutils.api.decorators.nested_view` decorator but "
+"supports ``model`` attribute as nested). ``model`` can be string for "
+"import."
+msgstr ""
+"``_nested`` - отображение ключ-значение с вложенными view (ключ - имя "
+"вложенного view, kwargs для декоратора "
+":class:`vstutils.api.decorators.nested_view`, но поддерживает атрибут "
+"``model``  в качестве вложенного view). ``model``  может быть строкой для"
+" импорта."
+
+#: of vstutils.models.BModel:122
+msgid ""
+"``_extra_view_attributes`` - key-value mapping with additional view "
+"attributes, but has less priority over generated attributes."
+msgstr ""
+"``_extra_view_attributes`` - отображение ключ-значение с дополнительными "
+"атрибутами view, но имеет меньший приоритет перед сгенерированными "
+"атрибутами."
+
+#: of vstutils.models.BModel:126
+msgid ""
+"In common, you can also add custom attributes to override or extend the "
+"default list of processing classes. Supported view attributes are "
+"``filter_backends``, ``permission_classes``, ``authentication_classes``, "
+"``throttle_classes``, ``renderer_classes`` and ``parser_classes``. List "
+"of meta-attributes for settings of view is looks like:"
+msgstr ""
+"Также вы также можете добавлять пользовательские атрибуты для "
+"переопределения или расширения списка обрабатываемых классов по "
+"умолчанию. Поддерживаемые атрибуты view: ``filter_backends``, "
+"``permission_classes``, ``authentication_classes``, ``throttle_classes``,"
+" ``renderer_classes`` и ``parser_classes``. Список мета-атрибутов для "
+"настроек view выглядит следующим образом:"
+
+#: of vstutils.models.BModel:131
+msgid "``_pre_{attribute}`` - List of classes included before defaults."
+msgstr ""
+"``_pre_{attribute}`` - список классов, включаемых перед значениями по "
+"умолчанию."
+
+#: of vstutils.models.BModel:132
+msgid "``_{attribute}`` - List of classes included after defaults."
+msgstr "``_{attribute}`` - список классов, включаемых после значений по умолчанию."
+
+#: of vstutils.models.BModel:133
+msgid ""
+"``_override_{attribute}`` - boolean flag indicates that attribute "
+"override default viewset (otherwise appends). Default is ``False``."
+msgstr ""
+"``_override_{attribute}`` - флаг-булево значение, указывающее, "
+"переопределяет ли атрибут view по умолчанию (в противном случае "
+"добавляется). По умолчанию False."
+
+#: of vstutils.models.BModel:137
+msgid ""
+"You may need to create an `action <https://www.django-rest-framework.org"
+"/api-guide/viewsets/#marking-extra-actions-for-routing>`_ on generated "
+"view. Use :class:`vstutils.models.decorators.register_view_action` "
+"decorator with the ``detail`` argument to determine applicability to a "
+"list or detail entry. In this case, the decorated method will take an "
+"instance of the view object as ``self`` attribute."
+msgstr ""
+"Возможно, вам понадобится создать `action <https://www.django-rest-"
+"framework.org/api-guide/viewsets/#marking-extra-actions-for-routing>`_ в "
+"сгенерированном view. Используйте декоратор "
+":class:`vstutils.models.decorators.register_view_action` с аргументом "
+"``detail``, чтобы определить применимость к списку или детальной записи. "
+"В этом случае декорированный метод будет принимать объект view в качестве"
+" атрибута ``self``."
+
+#: of vstutils.models.BModel:144
+msgid ""
+"In some cases, inheriting models may require to inherit Meta class from "
+"the base model. If the Meta is explicitly declared in the base class, "
+"then you can get it through the attribute `OriginalMeta` and use it for "
+"inheritance."
+msgstr ""
+"В некоторых случаях при наследовании моделей может потребоваться "
+"наследовать класс Meta от базовой модели. Если Meta явно объявлена в "
+"базовом классе, вы можете получить ее через атрибут `OriginalMeta` и "
+"использовать для наследования."
+
+#: of vstutils.models.BModel:149
+msgid ""
+"Docstring of model will be reused for view descriptions. It is possible "
+"to write both a general description for all actions and description for "
+"each action using the following syntax:"
+msgstr ""
+"Docstring модели будет использоваться для описания view. Можно написать "
+"как общее описание для всех действий, так и описание для каждого "
+"действия, используя следующий синтаксис:"
+
+#: ../../quickstart.rst:208
+msgid ""
+"More information about Models you can find in `Django Models "
+"documentation "
+"<https://docs.djangoproject.com/en/4.1/topics/db/models/>`_."
+msgstr ""
+"Более подробную информацию о моделях вы можете найти в документации "
+"`Django Models "
+"<https://docs.djangoproject.com/en/3.2/topics/db/models/>`_."
+
+#: ../../quickstart.rst:210
+msgid ""
+"If you don't need to create custom "
+":ref:`serializers<SerializerCreateTag>` or :ref:`view "
+"sets<ViewSetCreateTag>`, you can go to this "
+":ref:`stage<AddModelsToApiTag>`."
+msgstr ""
+"Если вам не нужно создавать пользовательские "
+":ref:`сериализаторы<SerializerCreateTag>` или :ref:`view "
+"sets<ViewSetCreateTag>`, вы можете перейти к этому "
+":ref:`этапу<AddModelsToApiTag>`."
+
+#: ../../quickstart.rst:215
+msgid "Serializers creation"
+msgstr "Создание сериализаторов"
+
+#: ../../quickstart.rst:217
+msgid "*Note - If you don't need custom serializer you can skip this section*"
+msgstr ""
+"*Примечание - Если вам не нужен пользовательский сериализатор, вы можете "
+"пропустить этот раздел.*"
+
+#: ../../quickstart.rst:219
+msgid ""
+"Firstly, you need to create file ``serializers.py`` in the "
+"``/{{app_dir}}/{{app_name}}/{{app_name}}/`` directory."
+msgstr ""
+"В первую очередь вам необходимо создать файл ``serializers.py`` в "
+"директории ``/{{app_dir}}/{{app_name}}/{{app_name}}/``."
+
+#: ../../quickstart.rst:221
+msgid "Then you need to add some code like this to ``serializers.py``:"
+msgstr ""
+"Затем вам нужно добавить некоторый код, подобный следующему, в файл "
+"``serializers.py``:"
+
+#: ../../quickstart.rst:244
+msgid ""
+"More information about Serializers you can find in `Django REST Framework"
+" documentation for Serializers <https://www.django-rest-framework.org"
+"/api-guide/serializers/#modelserializer>`_."
+msgstr ""
+"Более подробную информацию о сериализаторах вы можете найти в "
+"документации `Django REST Framework по сериализаторам <https://www"
+".django-rest-framework.org/api-guide/serializers/#modelserializer>`_."
+
+#: ../../quickstart.rst:250
+msgid "Views creation"
+msgstr "Создание views"
+
+#: ../../quickstart.rst:252
+msgid "*Note - If you don't need custom view set you can skip this section*"
+msgstr ""
+"*Примечание - Если вам не нужен пользовательский view set, вы можете "
+"пропустить этот раздел.*"
+
+#: ../../quickstart.rst:254
+msgid ""
+"Firstly, you need to create file ``views.py`` in the "
+"``/{{app_dir}}/{{app_name}}/{{app_name}}/`` directory."
+msgstr ""
+"В первую очередь вам необходимо создать файл ``views.py`` в директории "
+"``/{{app_dir}}/{{app_name}}/{{app_name}}/``."
+
+#: ../../quickstart.rst:256
+msgid "Then you need to add some code like this to ``views.py``:"
+msgstr ""
+"Затем вам нужно добавить некоторый код, подобный следующему, в файл "
+"``views.py``:"
+
+#: ../../quickstart.rst:285
+msgid ""
+"More information about Views and ViewSets you can find in `Django REST "
+"Framework documentation for views <https://www.django-rest-framework.org"
+"/api-guide/viewsets/>`_."
+msgstr ""
+"Больше информации о view и viewset вы можете найти в `документации Django"
+" REST Framework для view <https://www.django-rest-framework.org/api-"
+"guide/viewsets/>`_."
+
+#: ../../quickstart.rst:291
+msgid "Adding Models to API"
+msgstr "Добавление моделей в API"
+
+#: ../../quickstart.rst:293
+msgid ""
+"To add created Models to the API you need to write something like this at"
+" the end of your ``settings.py`` file:"
+msgstr ""
+"Для добавления моделей в APi вам нужно написать код, подобный этому в в "
+"конце файла ``settings.py``:"
+
+#: ../../quickstart.rst:329
+msgid "Migrations creation"
+msgstr "Создание миграций"
+
+#: ../../quickstart.rst:330
+msgid ""
+"To make migrations open ``/{{app_dir}}/{{app_name}}/`` directory and "
+"execute following command:"
+msgstr ""
+"Для создания миграций откройте директорию ``/{{app_dir}}/{{app_name}}/`` "
+"и выполните следующую команду:"
+
+#: ../../quickstart.rst:336
+msgid ""
+"More information about Migrations you can find in `Django Migrations "
+"documentation "
+"<https://docs.djangoproject.com/en/4.1/topics/migrations/>`_."
+msgstr ""
+"Более подробную информацию о миграциях вы можете найти в `документации "
+"Django Migrations "
+"<https://docs.djangoproject.com/en/3.2/topics/migrations/>`_."
+
+#: ../../quickstart.rst:340
+msgid "Migrations applying"
+msgstr "Применение миграций"
+
+#: ../../quickstart.rst:341
+msgid ""
+"To apply migrations you need to open ``/{{app_dir}}/{{app_name}}/`` "
+"directory and execute following command:"
+msgstr ""
+"Для применения миграций вам необходимо открыть директорию "
+"``/{{app_dir}}/{{app_name}}/`` и выполнить следующую команду:"
+
+#: ../../quickstart.rst:349
+msgid "Restart of Application"
+msgstr "Перезапуск приложения"
+
+#: ../../quickstart.rst:350
+msgid ""
+"To restart your application, firstly, you need to stop it (if it was "
+"started before):"
+msgstr ""
+"Для перезапуска вашего приложения вам сначала нужно остановить его (если "
+"оно было запущено ранее):"
+
+#: ../../quickstart.rst:356
+msgid "And then start it again:"
+msgstr "Затем запустите его снова:"
+
+#: ../../quickstart.rst:362
+msgid "After cache reloading you will see following page:"
+msgstr "После перезагрузки кэша вы увидите следующую страницу:"
+
+#: ../../quickstart.rst:366
+msgid ""
+"As you can see, link to new Task View has been added to the sidebar menu."
+" Let's click on it."
+msgstr ""
+"Как вы можете видеть, ссылка на новое Task view добавлена в боковое меню."
+" Давайте нажмем на нее."
+
+#: ../../quickstart.rst:370
+msgid "There is no task instance in your app. Add it using 'new' button."
+msgstr ""
+"В вашем приложении нет экземпляра задачи. Добавьте его, используя кнопку "
+"'new'."
+
+#: ../../quickstart.rst:374
+msgid "After creating a new task you'll see a following page:"
+msgstr "После создания новой задачи вы увидите следующую страницу:"
+
+#: ../../quickstart.rst:378
+msgid ""
+"As you can see, there is 'stages' button, that opens page with this "
+"task's stages list. Let's click on it."
+msgstr ""
+"Как видите, есть кнопка 'stages', которая открывает страницу со списком "
+"этапов этой задачи. Давайте на нее нажмем."
+
+#: ../../quickstart.rst:382
+msgid "There is no stage instances in your app. Let's create 2 new stages."
+msgstr "В вашем приложении нет экземпляров этапов. Давайте создадим 2 новых этапа."
+
+#: ../../quickstart.rst:387
+msgid "After stages creation page with stages list will looks like this:"
+msgstr "После создания этапов страница со списком этапов будет выглядеть так:"
+
+#: ../../quickstart.rst:391
+msgid ""
+"Sorting by 'order' field works, as we mentioned in the our ``models.py`` "
+"file for Stage Model."
+msgstr ""
+"Сортировка по полю `order` работает, как мы указали в нашем файле "
+"``models.py`` для модели Stage."
+
+#: ../../quickstart.rst:393
+msgid ""
+"Additional information about Django and Django REST Framework you can "
+"find in `Django documentation <https://docs.djangoproject.com/en/4.1/>`_ "
+"and `Django REST Framework documentation <https://www.django-rest-"
+"framework.org/>`_."
+msgstr ""
+"Дополнительную информацию о Django и Django REST Framework вы можете "
+"найти в `документации Django <https://docs.djangoproject.com/en/3.2/>`_ и"
+" `документации Django REST Framework <https://www.django-rest-"
+"framework.org/>`_."
+
+#~ msgid "sourcecode::"
+#~ msgstr ""
+#~ "Эти команды создают несколько файлов в"
+#~ " ``project directory``. Дерево каталогов:"
+

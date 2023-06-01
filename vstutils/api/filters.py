@@ -73,7 +73,7 @@ class FkFilterHandler:
 
     :param related_pk: Field name of related model's primary key. Default is 'id'.
     :param related_name: Field name of related model's charfield. Default is 'name'.
-    :param pk_handler: Changes handler for checking value before search. Sends "0" in handler falls. Default is 'int()'.
+    :param pk_handler: Changes handler for checking value before search. Sends "0" if handler falls. Default is 'int()'.
 
     Example:
         .. sourcecode:: python

@@ -28,7 +28,7 @@ ApiResultType = _t.Union[BulkDataType, _t.Dict, _t.Sequence[BulkDataType]]
 
 class BaseTestCase(TestCase):
     """
-    Main testcase class extends :class:`django.test.TestCase`.
+    Main test case class extends :class:`django.test.TestCase`.
     """
     server_name = 'vstutilstestserver'
 
@@ -209,7 +209,7 @@ class BaseTestCase(TestCase):
         """
         Getting model class by string or return model arg.
 
-        :param model: string which contains model name (if attribute ``model`` is set to the testcase class),
+        :param model: string which contains model name (if attribute ``model`` is set to the test case class),
                       module import, ``app.ModelName`` or :class:`django.db.models.Model`.
         :type model: str,django.db.models.Model
         :return: Model class.
@@ -238,7 +238,7 @@ class BaseTestCase(TestCase):
         Simple wrapper over :meth:`.get_model_class` which returns filtered
         queryset from model.
 
-        :param model: string which contains model name (if attribute ``model`` is set to the testcase class),
+        :param model: string which contains model name (if attribute ``model`` is set to the test case class),
                       module import, ``app.ModelName`` or :class:`django.db.models.Model`.
         :type model: str,django.db.models.Model
         :param kwargs: named arguments to :meth:`django.db.models.query.QuerySet.filter`.
@@ -251,7 +251,7 @@ class BaseTestCase(TestCase):
         """
         Simple wrapper over :meth:`.get_model_filter` which returns counter of items.
 
-        :param model: string which contains model name (if attribute ``model`` is set to the testcase class),
+        :param model: string which contains model name (if attribute ``model`` is set to the test case class),
                       module import, ``app.ModelName`` or :class:`django.db.models.Model`.
         :type model: str,django.db.models.Model
         :param kwargs: named arguments to :meth:`django.db.models.query.QuerySet.filter`.
@@ -277,7 +277,7 @@ class BaseTestCase(TestCase):
 
     def assertCount(self, iterable: _t.Sized, count: int, msg: _t.Any = None):
         """
-        Call :func:`len` over ``iterable`` and check equals with ``count``.
+        Calls :func:`len` over ``iterable`` and checks equality with ``count``.
 
         :param iterable: any iterable object which could be sended to :func:`len`.
         :param count: expected result.
@@ -320,7 +320,7 @@ class BaseTestCase(TestCase):
 
     def get_result(self, rtype, url, code: int = None, *args, **kwargs) -> ApiResultType:
         """
-        Execute and test response code on request with returning parsed result of request.
+        Executes and tests response code on request with returning parsed result of request.
         The method uses the following procedure:
 
         - Test client authorization (with :attr:`.user` which creates in :meth:`.setUp`).
@@ -405,7 +405,7 @@ class BaseTestCase(TestCase):
 
     def endpoint_call(self, data: BulkDataType = None, method: str = 'get', code: int = 200, **kwargs) -> ApiResultType:
         """
-        Make request to endpoint and assert response status code if specified (default is 200).
+        Makes request to endpoint and asserts response status code if specified (default is 200).
         Uses :meth:`.get_result` method for execution.
 
         :param data: request data
@@ -445,7 +445,7 @@ class BaseTestCase(TestCase):
 
     def bulk(self, data: BulkDataType, code: int = 200, **kwargs) -> ApiResultType:
         """
-        Make non transactional bulk request and assert status code (default is 200)
+        Makes non-transactional bulk request and asserts status code (default is 200)
 
         :param data: request data
         :param code: http status to assert

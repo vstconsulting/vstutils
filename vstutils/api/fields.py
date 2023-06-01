@@ -85,7 +85,7 @@ class SecretFileInString(FileInStringField):
 
 class BinFileInStringField(FileInStringField):
     """
-    Field extends :class:`.FileInStringField`, but work with binary(base64) files.
+    Field extends :class:`.FileInStringField`, but works with binary (base64) files.
 
     :param media_types: List of MIME types to select on the user's side.
                         Supported syntax using ``*``. Default: `['*/*']`
@@ -103,7 +103,7 @@ class CSVFileField(FileInStringField):
 
     :param items: The config of the table. This is a drf or vst serializer which includes char fields
                   which are the keys in the dictionaries into which the data from csv is serialized
-                  and the  names for columns in a table.
+                  and the names for columns in a table.
                   The fields must be in the order you want them to appear in the table.
                   Following options may be included:
 
@@ -163,16 +163,16 @@ class AutoCompletionField(VSTCharField):
     Field that provides autocompletion on frontend, using specified list of objects.
 
     :param autocomplete: Autocompletion reference. You can set list/tuple with
-                         values or set OpenApi schema definition name.
+                         values or set OpenAPI schema definition name.
                          For definition name GUI will find optimal link and
                          will show values based on ``autocomplete_property`` and
                          ``autocomplete_represent`` arguments.
     :type autocomplete: list,tuple,str
     :param autocomplete_property: this argument indicates which attribute will be
-                                  get from OpenApi schema definition model as value.
+                                  get from OpenAPI schema definition model as value.
     :type autocomplete_property: str
     :param autocomplete_represent: this argument indicates which attribute will be
-                                   get from OpenApi schema definition model as represent value.
+                                   get from OpenAPI schema definition model as represent value.
     :param use_prefetch: prefetch values on frontend at list-view. Default is ``True``.
     :type use_prefetch: bool
 
@@ -197,13 +197,13 @@ class AutoCompletionField(VSTCharField):
 
 class CommaMultiSelect(VSTCharField):
     """
-    Field containing a list of values with specified separator(default: ",").
+    Field containing a list of values with specified separator (default: ",").
     Gets list of values from another model or custom list. Provides autocompletion as :class:`.AutoCompletionField`,
     but with comma-lists.
     Suited for property-fields in model where main logic is already implemented or
-    with :class:`CharField`.
+    with :class:`model.CharField`.
 
-    :param select: OpenApi schema definition name or list with values.
+    :param select: OpenAPI schema definition name or list with values.
     :type select: str,tuple,list
     :param select_separator: separator of values. Default is comma.
     :type select_separator: str
@@ -211,9 +211,9 @@ class CommaMultiSelect(VSTCharField):
                                              Default is ``name``.
     :param use_prefetch: prefetch values on frontend at list-view. Default is ``False``.
     :param make_link: Show value as link to model. Default is ``True``.
-    :param dependence: Dictionary, where keys are name of field from the same model, and values are name of query filter
-                       .If at least one of the fields that we depend on is non nullable, required and set to null,
-                       autocompletion list will be empty and field will be disabled.
+    :param dependence: Dictionary, where keys are name of field from the same model, and values are name of query
+                       filter. If at least one of the fields that we depend on is non nullable, required and set to
+                       null, autocompletion list will be empty and field will be disabled.
     :type dependence: dict
 
 
@@ -258,13 +258,13 @@ class DynamicJsonTypeField(VSTCharField):
     :param field: field in model which value change will change type of current value.
     :type field: str
     :param types: key-value mapping where key is value of subscribed field and
-                  value is type (in OpenApi format) of current field.
+                  value is type (in OpenAPI format) of current field.
     :type type: dict
     :param choices: variants of choices for different subscribed field values.
                     Uses mapping where key is value of subscribed field and
                     value is list with values to choice.
     :type choices: dict
-    :param source_view: Allows to to use parent views data as source for field creation.
+    :param source_view: Allows to use parent views data as source for field creation.
                         Exact view path (`/user/{id}/`) or relative parent specifier
                         (`<<parent>>.<<parent>>.<<parent>>`) can be provided. For example if current page is
                         `/user/1/role/2/` and `source_view` is `<<parent>>.<<parent>>` then data
@@ -339,7 +339,7 @@ class DependEnumField(DynamicJsonTypeField):
     :param field: field in model which value change will change type of current value.
     :type field: str
     :param types: key-value mapping where key is value of subscribed field and
-                  value is type (in OpenApi format) of current field.
+                  value is type (in OpenAPI format) of current field.
     :type type: dict
     :param choices: variants of choices for different subscribed field values.
                     Uses mapping where key is value of subscribed field and
@@ -367,7 +367,7 @@ class DependFromFkField(DynamicJsonTypeField):
     :param field: field in model which value change changes type of current value.
                   Field must be :class:`.FkModelField`.
     :type field: str
-    :param field_attribute: attribute of model related model instance with name of type.
+    :param field_attribute: attribute of related model instance with name of type.
     :type field_attribute: str
 
     .. warning::
@@ -446,17 +446,17 @@ class HtmlField(VSTCharField):
 
 class FkField(IntegerField):
     """
-    Implementation of ForeignKeyField.You can specify which field of a related model will be
-    stored in field(default: "id"), and which will represent field on frontend.
+    Implementation of ForeignKeyField. You can specify which field of a related model will be
+    stored in field (default: "id"), and which will represent field on frontend.
 
-    :param select: OpenApi schema definition name.
+    :param select: OpenAPI schema definition name.
     :type select: str
     :param autocomplete_property: this argument indicates which attribute will be
-                                  get from OpenApi schema definition model as value.
+                                  get from OpenAPI schema definition model as value.
                                   Default is ``id``.
     :type autocomplete_property: str
     :param autocomplete_represent: this argument indicates which attribute will be
-                                   get from OpenApi schema definition model as represent value.
+                                   get from OpenAPI schema definition model as represent value.
                                    Default is ``name``.
     :param field_type: defines the autocomplete_property type for further definition in the schema
                        and casting to the type from the api. Default is passthroughs but require `int` or `str` objects.
@@ -466,24 +466,24 @@ class FkField(IntegerField):
     :param make_link: show value as link to model. Default is ``True``.
     :type make_link: bool
     :param dependence: dictionary, where keys are names of a field from the same model,
-                       and keys are name of query filter.
+                       and values are names of query filter.
                        If at least one of the fields that we depend on is non nullable, required and set to null,
                        autocompletion list will be empty and field will be disabled.
 
                        There are some special keys for dependence dictionary to get data that is stored
                        on frontend without additional database query:
 
-                       ``'<<pk>>'``, - get primary key of current instance
+                       ``'<<pk>>'`` gets primary key of current instance,
 
-                       ``'<<view_name>>'`` get view name from Vue component,
+                       ``'<<view_name>>'`` gets view name from Vue component,
 
-                       ``'<<parent_view_name>>'`` get view name from Vue component,
+                       ``'<<parent_view_name>>'`` gets parent view name from Vue component,
 
-                       ``'<<view_level>>'`` get view level,
+                       ``'<<view_level>>'`` gets view level,
 
-                       ``'<<operation_id>>'`` get operation_id,
+                       ``'<<operation_id>>'`` gets operation_id,
 
-                       ``'<<parent_operation_id'>>`` get parent_operation_id
+                       ``'<<parent_operation_id'>>`` gets parent_operation_id.
     :type dependence: dict
 
     Examples:
@@ -491,7 +491,7 @@ class FkField(IntegerField):
 
             field = FkField(select=Category, dependence={'<<pk>>': 'my_filter'})
 
-    This filter  will get pk of current object and make query on frontend '/category?my_filter=3'
+    This filter will get pk of current object and make query on frontend '/category?my_filter=3'
     where '3' is primary key of current instance.
 
 
@@ -543,14 +543,14 @@ class FkModelField(FkField):
     This field is useful for :class:`django.db.models.ForeignKey` fields in model to set.
 
     :param select: model class (based on :class:`vstutils.models.BModel`) or serializer class
-                   which used in API and has path in OpenApi schema.
+                   which used in API and has path in OpenAPI schema.
     :type select: vstutils.models.BModel,vstutils.api.serializers.VSTSerializer
     :param autocomplete_property: this argument indicates which attribute will be
-                                  get from OpenApi schema definition model as value.
+                                  get from OpenAPI schema definition model as value.
                                   Default is ``id``.
     :type autocomplete_property: str
     :param autocomplete_represent: this argument indicates which attribute will be
-                                   get from OpenApi schema definition model as represent value.
+                                   get from OpenAPI schema definition model as represent value.
                                    Default is ``name``.
     :param use_prefetch: prefetch values on frontend at list-view. Default is ``True``.
     :param make_link: Show value as link to model. Default is ``True``.
@@ -646,7 +646,7 @@ class DeepFkField(FkModelField):
 
 class UptimeField(IntegerField):
     """
-    Field for some uptime(time duration), in seconds, for example.
+    Time duration field, in seconds. May be used to compute some uptime.
 
     .. note::
         Effective only in GUI. Works similar to :class:`rest_framework.IntegerField` in API.
@@ -661,7 +661,7 @@ class RedirectFieldMixin:
     :param operation_name: prefix for operation_id, for example if operation_id is `history_get`
            then operation_name is `history`
     :type operation_name: str
-    :param depend_field: name of the field that we depend on, its' value will be used for operation_id
+    :param depend_field: name of the field that we depend on, its value will be used for operation_id
     :type depend_field: str
     :param concat_field_name: if True then name of the field will be added at the end of operation_id
     :type concat_field_name: bool
@@ -699,7 +699,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
     """
     Field that takes JSON with properties:
     * name - string - name of file;
-    * mediaType - string - MIME type of file
+    * mediaType - string - MIME type of file;
     * content - base64 string - content of file.
 
     This field is useful for saving binary files with their names in :class:`django.db.models.CharField`
@@ -828,7 +828,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
 class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
     """
     Extends :class:`.NamedBinaryFileInJsonField` to represent image on frontend
-    (if binary image is valid).Validate this field with
+    (if binary image is valid). Validate this field with
     :class:`vstutils.api.validators.ImageValidator`.
 
     :param background_fill_color: Color to fill area that is not covered by image after cropping.
@@ -948,7 +948,7 @@ class RelatedListField(VSTCharField):
 
     By default :class:`.VSTCharField` used to serialize all field values and represent it on
     frontend. You can specify `serializer_class` and override fields as you need. For example title, description
-    and other field properties can be set to customize frontend behaviour.
+    and other field properties can be set to customize frontend behavior.
 
     :param related_name: name of a related manager for reverse foreign key
     :type related_name: str
@@ -1099,12 +1099,12 @@ class RelatedListField(VSTCharField):
 class RatingField(FloatField):
     """
     Extends class 'rest_framework.serializers.FloatField'. This field represents a rating form input on frontend.
-    Grading limits can be specified with 'min_value=' and 'max_value=', defaults are 0 to 5.Minimal step between
-    grades are specified in 'step=', default - 1.Frontend visual representation can be chosen
+    Grading limits can be specified with 'min_value=' and 'max_value=', defaults are 0 to 5. Minimal step between
+    grades are specified in 'step=', default - 1. Frontend visual representation can be chosen
     with 'front_style=', available variants are listed in 'self.valid_front_styles'.
 
-    for 'slider' front style, you can specify slider color, by passing valid color to 'color='.
-    for 'fa_icon' front style, you can specify FontAwesome icon that would be used for displaying rating, by passing a
+    For 'slider' front style, you can specify slider color, by passing valid color to 'color='.
+    For 'fa_icon' front style, you can specify FontAwesome icon that would be used for displaying rating, by passing a
     valid FontAwesome icon code to 'fa_class='.
 
     :param min_value: minimal level
@@ -1155,7 +1155,7 @@ def is_all_digits_validator(value):
 class PhoneField(CharField):
     """
     Extends class 'rest_framework.serializers.CharField'.
-    Field for for phone in international format
+    Field for phone in international format
     """
 
     def __init__(self, **kwargs):
@@ -1169,7 +1169,7 @@ class PhoneField(CharField):
 class MaskedField(CharField):
     """
     Extends class 'rest_framework.serializers.CharField'.
-    Field that applies mask to value
+    Field that applies mask to value.
 
     :param mask: `IMask <https://imask.js.org/guide.html>`_
     :type mask: dict, str

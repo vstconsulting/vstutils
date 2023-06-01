@@ -107,7 +107,7 @@ class BModel(BaseModel):
 
         For primary access to generated view inherit from `Task.generated_view` property.
 
-        To make translation on frontend easier use ``_translate_model`` attribute with model_name
+        To make translation on frontend easier use ``_translate_model`` attribute with model_name.
 
         List of meta-attributes for generating a view:
 
@@ -152,7 +152,7 @@ class BModel(BaseModel):
           (None value disables overriding).
         - ``_search_fields`` - tuple or list of fields using for search requests.
           By default (or `None`) get all filterable fields in detail view.
-        - ``_copy_attrs`` - list of model-instance attributes indicates that object is copiable with this attrs.
+        - ``_copy_attrs`` - list of model-instance attributes indicates that object is copyable with this attrs.
         - ``_nested`` - key-value mapping with nested views (key - nested name,
           kwargs for :class:`vstutils.api.decorators.nested_view` decorator but supports
           ``model`` attribute as nested). ``model`` can be string for import.

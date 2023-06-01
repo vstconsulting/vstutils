@@ -330,22 +330,22 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     and two viewsets. Decorator nests viewset to parent viewset class and
     generate paths in API.
 
-    :param name: -- Name of nested path. Also used as default name for related queryset (see `manager_name`).
+    :param name: Name of nested path. Also used as default name for related queryset (see `manager_name`).
     :type name: str
-    :param arg: -- Name of nested primary key field.
+    :param arg: Name of nested primary key field.
     :type arg: str
-    :param view: -- Nested viewset class.
+    :param view: Nested viewset class.
     :type view:
         vstutils.api.base.ModelViewSet,
         vstutils.api.base.HistoryModelViewSet,
         vstutils.api.base.ReadOnlyModelViewSet
-    :param allow_append: -- Flag for allowing to append existed instances.
+    :param allow_append: Flag for allowing to append existed instances.
     :type allow_append: bool
-    :param manager_name: -- Name of model-object attr which contains nested queryset.
+    :param manager_name: Name of model-object attr which contains nested queryset.
     :type manager_name: str,typing.Callable
-    :param methods: -- List of allowed methods to nested view endpoints.
+    :param methods: List of allowed methods to nested view endpoints.
     :type methods: list
-    :param subs: -- List of allowed subviews or actions to nested view endpoints.
+    :param subs: List of allowed subviews or actions to nested view endpoints.
     :type subs: list,None
     :param queryset_filters: List of callable objects which returns filtered queryset of main.
 
@@ -378,10 +378,10 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
         This code generates api paths:
 
-         * `/tasks/` - GET,POST
-         * `/tasks/{id}/` - GET,PUT,PATCH,DELETE
-         * `/tasks/{id}/stages/` - GET,POST
-         * `/tasks/{id}/stages/{stages_id}/` - GET,PUT,PATCH,DELETE
+         * `/tasks/` - GET, POST
+         * `/tasks/{id}/` - GET, PUT, PATCH, DELETE
+         * `/tasks/{id}/stages/` - GET, POST
+         * `/tasks/{id}/stages/{stages_id}/` - GET, PUT, PATCH, DELETE
 
     """
     __slots__ = (
