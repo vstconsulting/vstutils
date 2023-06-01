@@ -1,0 +1,923 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018-2022, VST Consulting
+# This file is distributed under the same license as the VST Utils package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: VST Utils 5.0.4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-05-24 08:36+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../frontend-manual.rst:2
+msgid "Frontend documentation"
+msgstr ""
+
+#: ../../frontend-manual.rst:5
+msgid "API Flowchart"
+msgstr ""
+
+#: ../../frontend-manual.rst:7
+msgid "This flowchart shows how data goes though application from and to API."
+msgstr ""
+
+#: ../../frontend-manual.rst:39
+msgid "Signals"
+msgstr ""
+
+#: ../../frontend-manual.rst:40
+msgid ""
+"System of signals is a mechanism, that VST Utils uses for app "
+"customization."
+msgstr ""
+
+#: ../../frontend-manual.rst:42
+msgid "Let's look how it works."
+msgstr ""
+
+#: ../../frontend-manual.rst:44
+msgid ""
+"Very often you need to modify something after some event has occurred. "
+"But how can you know about this event? And what if you need to know about"
+" this event in several blocks of code?"
+msgstr ""
+
+#: ../../frontend-manual.rst:47
+msgid "To solve this problem VST Utils uses system of signals, where:"
+msgstr ""
+
+#: ../../frontend-manual.rst:49
+msgid ""
+"you can emit some signal, which tells all subscribers, that some event "
+"has occurred, and pass some data/variables from the context, where this "
+"event has occurred;"
+msgstr ""
+
+#: ../../frontend-manual.rst:51
+msgid ""
+"you can subscribe to some signal, that notifies you about some event, and"
+" also you can pass some callback (handler) that can do something with "
+"data/variables, that were passed from the context, where event had "
+"occurred."
+msgstr ""
+
+#: ../../frontend-manual.rst:55
+msgid "Emit signal"
+msgstr ""
+
+#: ../../frontend-manual.rst:56
+msgid "To emit some signal you need to write following in you code:"
+msgstr ""
+
+#: ../../frontend-manual.rst:62 ../../frontend-manual.rst:86
+msgid "where:"
+msgstr ""
+
+#: ../../frontend-manual.rst:64 ../../frontend-manual.rst:88
+msgid "**name_of_signal** - string, which stores name of signal (event);"
+msgstr ""
+
+#: ../../frontend-manual.rst:65
+msgid ""
+"**context** - some variable of any type, that will be passed to the "
+"callback (handler) during connection to this signal."
+msgstr ""
+
+#: ../../frontend-manual.rst:67
+msgid "Example of signal emitting:"
+msgstr ""
+
+#: ../../frontend-manual.rst:79
+msgid "Connect to signal"
+msgstr ""
+
+#: ../../frontend-manual.rst:80
+msgid "To connect to some signal you need to write following in you code:"
+msgstr ""
+
+#: ../../frontend-manual.rst:89
+msgid ""
+"**callback** - function, that can do something with variables, which will"
+" be passed from event's context to this callback as arguments."
+msgstr ""
+
+#: ../../frontend-manual.rst:91
+msgid "Example of connecting to signal:"
+msgstr ""
+
+#: ../../frontend-manual.rst:104
+msgid "List of signals in VST Utils"
+msgstr ""
+
+#: ../../frontend-manual.rst:105
+msgid ""
+"VST Utils has some signals, that are emitting during application work. If"
+" you need to customize something in you project you can subscribe to "
+"these signals and add callback function with desired behavior. Also you "
+"can emit you own signals in your project."
+msgstr ""
+
+#: ../../frontend-manual.rst:112
+msgid "openapi.loaded"
+msgstr ""
+
+#: ../../frontend-manual.rst:113
+msgid "**Signal name:** \"openapi.loaded\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:115
+msgid "**Context argument:** openapi - {object} - OpenAPI schema loaded from API."
+msgstr ""
+
+#: ../../frontend-manual.rst:117
+msgid ""
+"**Description:** This signal is emitted after OpenAPI schema was loaded. "
+"You can use this signal if you need to change something in the OpenAPI "
+"schema, before it was parsed."
+msgstr ""
+
+#: ../../frontend-manual.rst:121
+msgid "resource.loaded"
+msgstr ""
+
+#: ../../frontend-manual.rst:122
+msgid "**Signal name:** \"resource.loaded\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:124 ../../frontend-manual.rst:132
+msgid "**Context argument:** None."
+msgstr ""
+
+#: ../../frontend-manual.rst:126
+msgid ""
+"**Description:** This signal is emitted after all static files were "
+"successfully loaded and added to the page."
+msgstr ""
+
+#: ../../frontend-manual.rst:129
+msgid "app.version.updated"
+msgstr ""
+
+#: ../../frontend-manual.rst:130
+msgid "**Signal name:** \"app.version.updated\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:134
+msgid ""
+"**Description:** This signal is emitted during app loading if VST Utils "
+"detects, that version of your project was updated."
+msgstr ""
+
+#: ../../frontend-manual.rst:139
+msgid "app.beforeInitRouter"
+msgstr ""
+
+#: ../../frontend-manual.rst:140
+msgid "**Signal name:** \"app.beforeInitRouter\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:142
+msgid ""
+"**Context argument:** obj - {object} - Object with following structure: "
+"{routerConstructor: RouterConstructor}, where routerConstructor is an "
+"instance of RouterConstructor."
+msgstr ""
+
+#: ../../frontend-manual.rst:144
+msgid ""
+"**Description:** This signal is emitted after creation of "
+"RouterConstructor instance and before app creation"
+msgstr ""
+
+#: ../../frontend-manual.rst:148
+msgid "app.beforeInit"
+msgstr ""
+
+#: ../../frontend-manual.rst:149
+msgid "**Signal name:** \"app.beforeInit\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:151 ../../frontend-manual.rst:160
+msgid ""
+"**Context argument:** obj - {object} - Object with following structure: "
+"{app: app}, where app is an instance of App class."
+msgstr ""
+
+#: ../../frontend-manual.rst:153
+msgid ""
+"**Description:** This signal is emitted after app variable initialization"
+" (OpenAPI schema was parsed, models and views were created), but before "
+"app was mounted to the page."
+msgstr ""
+
+#: ../../frontend-manual.rst:157
+msgid "app.afterInit"
+msgstr ""
+
+#: ../../frontend-manual.rst:158
+msgid "**Signal name:** \"app.afterInit\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:162
+msgid "**Description:** This signal is emitted after app was mounted to the page."
+msgstr ""
+
+#: ../../frontend-manual.rst:165
+msgid "app.language.changed"
+msgstr ""
+
+#: ../../frontend-manual.rst:166
+msgid "**Signal name:** \"app.language.changed\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:168
+msgid ""
+"**Context argument:** obj - {object} - Object with following structure: "
+"{lang: lang}, where lang is an code of applied language."
+msgstr ""
+
+#: ../../frontend-manual.rst:170
+msgid ""
+"**Description:** This signal is emitted after app interface language was "
+"changed."
+msgstr ""
+
+#: ../../frontend-manual.rst:173
+msgid "models[model_name].fields.beforeInit"
+msgstr ""
+
+#: ../../frontend-manual.rst:174
+msgid ""
+"**Signal name:** \"models[\" + model_name + \"].fields.beforeInit\". For "
+"example, for User model: \"models[User].fields.beforeInit\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:176
+msgid ""
+"**Context argument:** fields - {object} - Object with pairs of key, "
+"value, where key - name of field, value - object with it options. On this"
+" moment, field - is just object with options, it is not guiFields "
+"instance."
+msgstr ""
+
+#: ../../frontend-manual.rst:179
+msgid ""
+"**Description:** This signal is emitted before creation of guiFields "
+"instances for Model fields."
+msgstr ""
+
+#: ../../frontend-manual.rst:182
+msgid "models[model_name].fields.afterInit"
+msgstr ""
+
+#: ../../frontend-manual.rst:183
+msgid ""
+"**Signal name:** \"models[\" + model_name + \"].fields.afterInit\". For "
+"example, for User model: \"models[User].fields.afterInit\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:185
+msgid ""
+"**Context argument:** fields - {object} - Object with pairs of key, "
+"value, where key - name of field, value - guiFields instance."
+msgstr ""
+
+#: ../../frontend-manual.rst:187
+msgid ""
+"**Description:** This signal is emitted after creation of guiFields "
+"instances for Model fields."
+msgstr ""
+
+#: ../../frontend-manual.rst:190
+msgid "models[model_name].created"
+msgstr ""
+
+#: ../../frontend-manual.rst:191
+msgid ""
+"**Signal name:** \"models[\" + model_name + \"].created\". For example, "
+"for User model: \"models[User].created\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:193
+msgid ""
+"**Context argument:** obj - {object} - Object with following structure: "
+"{model: model}, where model is the created Model."
+msgstr ""
+
+#: ../../frontend-manual.rst:195
+msgid "**Description:** This signal is emitted after creation of Model object."
+msgstr ""
+
+#: ../../frontend-manual.rst:198
+msgid "allModels.created"
+msgstr ""
+
+#: ../../frontend-manual.rst:199
+msgid "**Signal name:** \"allModels.created\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:201
+msgid ""
+"**Context argument:** obj - {object} - Object with following structure: "
+"{models: models}, where models is the object, storing Models objects."
+msgstr ""
+
+#: ../../frontend-manual.rst:203
+msgid "**Description:** This signal is emitted after all models were created."
+msgstr ""
+
+#: ../../frontend-manual.rst:207
+msgid "allViews.created"
+msgstr ""
+
+#: ../../frontend-manual.rst:208
+msgid "**Signal name:** \"allViews.created\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:210
+msgid ""
+"**Context argument:** obj - {object} - Object with following structure: "
+"{views: views}, where views - object with all View Instances."
+msgstr ""
+
+#: ../../frontend-manual.rst:213
+msgid ""
+"**Description:** This signal is emitted after creation of all View "
+"Instances, with set actions / child_links / multi_actions / operations / "
+"sublinks properties."
+msgstr ""
+
+#: ../../frontend-manual.rst:217
+msgid "routes[name].created"
+msgstr ""
+
+#: ../../frontend-manual.rst:218
+msgid ""
+"**Signal name:** \"routes[\" + name + \"].created\". For example, for "
+"``/user/`` view: \"routes[/user/].created\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:220
+msgid ""
+"**Context argument:** route - {object} - Object with following structure:"
+" {name: name, path: path, component: component}, where name - name of "
+"route, path - template of route's path, component - component, that will "
+"be rendered for current route."
+msgstr ""
+
+#: ../../frontend-manual.rst:223
+msgid ""
+"**Description:** This signal will be emitted after route was formed and "
+"added to routes list."
+msgstr ""
+
+#: ../../frontend-manual.rst:226
+msgid "allRoutes.created"
+msgstr ""
+
+#: ../../frontend-manual.rst:227
+msgid "**Signal name:** \"allRoutes.created\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:229
+msgid ""
+"**Context argument:** routes - {array} - Array with route objects with "
+"following structure: {name: name, path: path, component: component}, "
+"where name - name of route, path - template of route's path, component - "
+"component, that will be rendered for current route."
+msgstr ""
+
+#: ../../frontend-manual.rst:232
+msgid ""
+"**Description:** This signal is emitted after all routes was formed and "
+"added to routes list."
+msgstr ""
+
+#: ../../frontend-manual.rst:235
+msgid "<${PATH}>filterActions"
+msgstr ""
+
+#: ../../frontend-manual.rst:236
+msgid "**Signal name:** \"<${PATH}>filterActions\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:238
+msgid ""
+"**Context argument:** obj - {actions: Object[], data} - Actions is array "
+"of action objects. Data represents current instance's data."
+msgstr ""
+
+#: ../../frontend-manual.rst:240
+msgid "**Description:** This signal will be executed to filter actions."
+msgstr ""
+
+#: ../../frontend-manual.rst:243
+msgid "<${PATH}>filterSublinks"
+msgstr ""
+
+#: ../../frontend-manual.rst:244
+msgid "**Signal name:** \"<${PATH}>filterSublinks\"."
+msgstr ""
+
+#: ../../frontend-manual.rst:246
+msgid ""
+"**Context argument:** obj - {sublinks: Object[], data} - Actions is array"
+" of sublink objects. Data represents current instance's data."
+msgstr ""
+
+#: ../../frontend-manual.rst:248
+msgid "**Description:** This signal will be executed to filter sublinks."
+msgstr ""
+
+#: ../../frontend-manual.rst:253
+msgid "Field Format"
+msgstr ""
+
+#: ../../frontend-manual.rst:254
+msgid ""
+"Very often during creation of some new app developers need to make common"
+" fields of some base types and formats (string, boolean, number and so "
+"on). Create everytime similar functionality is rather boring and "
+"ineffective, so we tried ti solve this problem with the help of VST "
+"Utils."
+msgstr ""
+
+#: ../../frontend-manual.rst:258
+msgid ""
+"VST Utils has set of built-in fields of the most common types and "
+"formats, that can be used for different cases. For example, when you need"
+" to add some field to you web form, that should hide value of inserted "
+"value, just set appropriate field format to ``password`` instead of "
+"``string`` to show stars instead of actual characters."
+msgstr ""
+
+#: ../../frontend-manual.rst:264
+msgid ""
+"Field classes are used in Model Instances as fields and also are used in "
+"Views Instances of ``list`` type as filters."
+msgstr ""
+
+#: ../../frontend-manual.rst:266
+msgid ""
+"All available fields classes are stored in the ``guiFields`` variable. "
+"There are 44 fields formats in VST Utils:"
+msgstr ""
+
+#: ../../frontend-manual.rst:268
+msgid "**base** - base field, from which the most other fields are inherited;"
+msgstr ""
+
+#: ../../frontend-manual.rst:269
+msgid ""
+"**string** - string field, for inserting and representation of some short"
+" 'string' values;"
+msgstr ""
+
+#: ../../frontend-manual.rst:270
+msgid ""
+"**textarea** - string field, for inserting and representation of some "
+"long 'string' values;"
+msgstr ""
+
+#: ../../frontend-manual.rst:271
+msgid ""
+"**number** - number field, for inserting and representation of 'number' "
+"values;"
+msgstr ""
+
+#: ../../frontend-manual.rst:272
+msgid ""
+"**integer** - number field, for inserting and representation of values of"
+" 'integer' format;"
+msgstr ""
+
+#: ../../frontend-manual.rst:273
+msgid ""
+"**int32** - number field, for inserting and representation of values of "
+"'int32' format;"
+msgstr ""
+
+#: ../../frontend-manual.rst:274
+msgid ""
+"**int64** - number field, for inserting and representation of values of "
+"'int64' format;"
+msgstr ""
+
+#: ../../frontend-manual.rst:275
+msgid ""
+"**double** - number field, for inserting and representation of values of "
+"'double' format;"
+msgstr ""
+
+#: ../../frontend-manual.rst:276
+msgid ""
+"**float** - number field, for inserting and representation of values of "
+"'float' format;;"
+msgstr ""
+
+#: ../../frontend-manual.rst:277
+msgid ""
+"**boolean** - boolean field, for inserting and representation of "
+"'boolean' values;"
+msgstr ""
+
+#: ../../frontend-manual.rst:278
+msgid ""
+"**choices** - string field, with strict set of preset values, user can "
+"only choose one of the available value variants;"
+msgstr ""
+
+#: ../../frontend-manual.rst:279
+msgid ""
+"**autocomplete** - string field, with set of preset values, user can "
+"either choose one of the available value variants or insert his own "
+"value;"
+msgstr ""
+
+#: ../../frontend-manual.rst:280
+msgid "**password** - string field, that hides inserted value by '*' symbols;"
+msgstr ""
+
+#: ../../frontend-manual.rst:281
+msgid "**file** - string field, that can read content of the file;"
+msgstr ""
+
+#: ../../frontend-manual.rst:282
+msgid ""
+"**secretfile** - string field, that can read content of the file and then"
+" hide it from representation;"
+msgstr ""
+
+#: ../../frontend-manual.rst:283
+msgid ""
+"**binfile** - string field, that can read content of the file and convert"
+" it to the 'base64' format;"
+msgstr ""
+
+#: ../../frontend-manual.rst:284
+msgid ""
+"**namedbinfile** - field of JSON format, that takes and returns JSON with"
+" 2 properties: name (string) - name of file and content(base64 string) - "
+"content of file;"
+msgstr ""
+
+#: ../../frontend-manual.rst:285
+msgid ""
+"**namedbinimage** - field of JSON format, that takes and returns JSON "
+"with 2 properties: name (string) - name of image and content(base64 "
+"string) - content of image;"
+msgstr ""
+
+#: ../../frontend-manual.rst:286
+msgid ""
+"**multiplenamedbinfile** - field of JSON format, that takes and returns "
+"array with objects, consisting of 2 properties: name (string) - name of "
+"file and content(base64 string) - content of file;"
+msgstr ""
+
+#: ../../frontend-manual.rst:287
+msgid ""
+"**multiplenamedbinimage** - field of JSON format, that takes and returns "
+"array with objects, consisting of 2 properties: name (string) - name of "
+"image and content(base64 string) - content of image;"
+msgstr ""
+
+#: ../../frontend-manual.rst:288
+msgid ""
+"**text_paragraph** - string field, that is represented as text paragraph "
+"(without any inputs);"
+msgstr ""
+
+#: ../../frontend-manual.rst:289
+msgid ""
+"**plain_text** - string field, that saves all non-printing characters "
+"during representation;"
+msgstr ""
+
+#: ../../frontend-manual.rst:290
+msgid ""
+"**html** - string field, that contents different html tags and that "
+"renders them during representation;"
+msgstr ""
+
+#: ../../frontend-manual.rst:291
+msgid ""
+"**date** - date field, for inserting and representation of 'date' values "
+"in 'YYYY-MM-DD' format;"
+msgstr ""
+
+#: ../../frontend-manual.rst:292
+msgid ""
+"**date_time** - date field, for inserting and representation of 'date' "
+"values in 'YYYY-MM-DD HH:mm' format;"
+msgstr ""
+
+#: ../../frontend-manual.rst:293
+msgid ""
+"**uptime** - string field, that converts time duration (amount of "
+"seconds) into one of the most appropriate variants (23:59:59 / 01d "
+"00:00:00 / 01m 30d 00:00:00 / 99y 11m 30d 22:23:24) due to the it's value"
+" size;"
+msgstr ""
+
+#: ../../frontend-manual.rst:295
+msgid ""
+"**time_interval** - number field, that converts time from milliseconds "
+"into seconds;"
+msgstr ""
+
+#: ../../frontend-manual.rst:296
+msgid ""
+"**crontab** - string field, that has additional form for creation "
+"schedule in 'crontab' format;"
+msgstr ""
+
+#: ../../frontend-manual.rst:297
+msgid ""
+"**json** - field of JSON format, during representation it uses another "
+"guiFields for representation of current field properties;"
+msgstr ""
+
+#: ../../frontend-manual.rst:298
+msgid ""
+"**api_object** - field, that is used for representation of some Model "
+"Instance from API (value of this field is the whole Model Instance data)."
+" This is read only field;"
+msgstr ""
+
+#: ../../frontend-manual.rst:300
+msgid ""
+"**fk** - field, that is used for representation of some Model Instance "
+"from API (value of this field is the Model Instance Primary Key). During "
+"edit mode this field has strict set of preset values to choose;"
+msgstr ""
+
+#: ../../frontend-manual.rst:302
+msgid ""
+"**fk_autocomplete** - field, that is used for representation of some "
+"Model Instance from API (value of this field is the Model Instance "
+"Primary Key or some string). During edit mode user can either choose of "
+"the preset values from autocomplete list or insert his own value;"
+msgstr ""
+
+#: ../../frontend-manual.rst:304
+msgid ""
+"**fk_multi_autocomplete** - field, that is used for representation of "
+"some Model Instance from API (value of this field is the Model Instance "
+"Primary Key or some string). During edit mode user can either choose of "
+"the preset values from modal window or insert his own value;"
+msgstr ""
+
+#: ../../frontend-manual.rst:306
+msgid "**color** - string field, that stores HEX code of selected color;"
+msgstr ""
+
+#: ../../frontend-manual.rst:307
+msgid ""
+"**inner_api_object** - field, that is linked to the fields of another "
+"model;"
+msgstr ""
+
+#: ../../frontend-manual.rst:308
+msgid "**api_data** - field for representing some data from API;"
+msgstr ""
+
+#: ../../frontend-manual.rst:309
+msgid ""
+"**dynamic** - field, that can change its format depending on the values "
+"of surrounding fields;"
+msgstr ""
+
+#: ../../frontend-manual.rst:310
+msgid "**hidden** - field, that is hidden from representation;"
+msgstr ""
+
+#: ../../frontend-manual.rst:311
+msgid ""
+"**form** - field, that combines several other fields and stores those "
+"values as one JSON, where key - name of form field, value - value of form"
+" field;"
+msgstr ""
+
+#: ../../frontend-manual.rst:313
+msgid "**button** - special field for form field, imitates button in form;"
+msgstr ""
+
+#: ../../frontend-manual.rst:314
+msgid ""
+"**string_array** - field, that converts array with strings into one "
+"string;"
+msgstr ""
+
+#: ../../frontend-manual.rst:315
+msgid ""
+"**string_id** - string field, that is supposed to be used in URLs as 'id'"
+" key. It has additional validation, that checks, that field's value is "
+"not equal to some other URL keys (new/ edit/ remove)."
+msgstr ""
+
+#: ../../frontend-manual.rst:319
+msgid "Layout customization with CSS"
+msgstr ""
+
+#: ../../frontend-manual.rst:320
+msgid ""
+"If you need to customize elements with css we have some functionality for"
+" it. There are classes applied to root elements of ``EntityView`` (if it "
+"contains `ModelField`), ``ModelField`` , ``ListTableRow`` and "
+"``MultiActions`` depending on the fields they contain. Classes are formed"
+" for the fields with \"boolean\" and \"choices\" types. Also classes "
+"apply to operations buttons and links."
+msgstr ""
+
+#: ../../frontend-manual.rst
+msgid "Classes generation rules"
+msgstr ""
+
+#: ../../frontend-manual.rst:327
+msgid ""
+"``EntityView, ModelField and ListTableRow`` - *field-[field_name]-[field-"
+"value]*"
+msgstr ""
+
+#: ../../frontend-manual.rst:332 ../../frontend-manual.rst:336
+#: ../../frontend-manual.rst:345
+msgid "**Example:**"
+msgstr ""
+
+#: ../../frontend-manual.rst:330
+msgid ""
+"*\"field-active-true\"* for model that contains \"boolean\" field with "
+"name \"active\" and value \"true\""
+msgstr ""
+
+#: ../../frontend-manual.rst:331
+msgid ""
+"*\"field-tariff_type-WAREHOUSE\"* for model that contains \"choices\" "
+"field with name \"tariff_type\" and value \"WAREHOUSE\""
+msgstr ""
+
+#: ../../frontend-manual.rst:336
+msgid "``MultiActions`` - *selected__field-[field_name]-[field-value]*"
+msgstr ""
+
+#: ../../frontend-manual.rst:336
+msgid ""
+"*\"selected__field-tariff_type-WAREHOUSE\"* and *\"selected__field-"
+"tariff_type-SLIDE\"* if selected 2 ``ListTableRow`` that contains "
+"\"choices\" field with name \"tariff_type\" and values \"WAREHOUSE\" and "
+"\"SLIDE\" respectively."
+msgstr ""
+
+#: ../../frontend-manual.rst:345
+msgid "``Operation`` - *operation__[operation_name]*"
+msgstr ""
+
+#: ../../frontend-manual.rst:342
+msgid "**Warning**"
+msgstr ""
+
+#: ../../frontend-manual.rst:340
+msgid ""
+"If you hide operations using CSS classes and for example all actions were"
+" hidden then Actions dropdown button will still be visible."
+msgstr ""
+
+#: ../../frontend-manual.rst:342
+msgid ""
+"For better control over actions and sublinks see :ref:`changing-actions-"
+"or-sublinks`"
+msgstr ""
+
+#: ../../frontend-manual.rst:345
+msgid ""
+"*operation__pickup_point* if operation button or link has name "
+"*pickup_point*"
+msgstr ""
+
+#: ../../frontend-manual.rst:347
+msgid "Based on these classes, you can change the styles of various elements."
+msgstr ""
+
+#: ../../frontend-manual.rst:373
+msgid "A few use cases:"
+msgstr ""
+
+#: ../../frontend-manual.rst:350
+msgid ""
+"If you need to hide the button for the \"change_category\" action on a "
+"product detail view when product is not \"active\", you can do so by "
+"adding a CSS selector:"
+msgstr ""
+
+#: ../../frontend-manual.rst:358
+msgid ""
+"Hide the button for the \"remove\" action in ``MultiActions`` menu if "
+"selected at least one product with status \"active\":"
+msgstr ""
+
+#: ../../frontend-manual.rst:366
+msgid ""
+"If you need to change *background-color* to red for order with status "
+"\"CANCELLED\" on ``ListView`` component do this:"
+msgstr ""
+
+#: ../../frontend-manual.rst:374
+msgid ""
+"In this case, you need to use the extra class \"item-row\" (Used for "
+"example, you can choose another one) for specify the element to be "
+"selected in the selector, because the class \"field-status-CANCELLED\" is"
+" added in different places on the page."
+msgstr ""
+
+#~ msgid "app.beforeInitStore"
+#~ msgstr ""
+
+#~ msgid "**Signal name:** \"app.beforeInitStore\"."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Context argument:** obj - {object} -"
+#~ " Object with following structure: "
+#~ "{storeConstructor: StoreConstructor}, where "
+#~ "storeConstructor is an instance of "
+#~ "StoreConstructor."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Description:** This signal is emitted "
+#~ "after creation of StoreConstructor instance"
+#~ " and before app creation"
+#~ msgstr ""
+
+#~ msgid "GuiCustomizer.beforeInit"
+#~ msgstr ""
+
+#~ msgid "**Signal name:** \"GuiCustomizer.beforeInit\"."
+#~ msgstr ""
+
+#~ msgid "**Context argument:** obj - {object} - Instance of GuiCustomizer class."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Description:** This signal will be "
+#~ "executed before initialization of "
+#~ "GuiCustomizer Instance."
+#~ msgstr ""
+
+#~ msgid "GuiCustomizer.skins_custom_settings.reseted"
+#~ msgstr ""
+
+#~ msgid "**Signal name:** \"GuiCustomizer.skins_custom_settings.reseted\"."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Description:** This signal will be "
+#~ "executed after custom settings of "
+#~ "GuiCustomizer skin were reset."
+#~ msgstr ""
+
+#~ msgid "GuiCustomizer.skins_custom_settings.saved"
+#~ msgstr ""
+
+#~ msgid "**Signal name:** \"GuiCustomizer.skins_custom_settings.saved\"."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Description:** This signal will be "
+#~ "executed after custom settings of "
+#~ "GuiCustomizer skin were saved."
+#~ msgstr ""
+
+#~ msgid "GuiCustomizer.skin.name.changed"
+#~ msgstr ""
+
+#~ msgid "**Signal name:** \"GuiCustomizer.skin.name.changed\"."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Description:** This signal will be "
+#~ "executed after changing of current "
+#~ "GuiCustomizer skin."
+#~ msgstr ""
+
+#~ msgid "GuiCustomizer.skin.settings.changed"
+#~ msgstr ""
+
+#~ msgid "**Signal name:** \"GuiCustomizer.skin.settings.changed\"."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Description:** This signal will be "
+#~ "executed after changing of current "
+#~ "GuiCustomizer skin's settings."
+#~ msgstr ""
+

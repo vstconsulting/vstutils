@@ -26,7 +26,7 @@ Throughout this tutorial, we’ll go through a creation of a basic poll applicat
     In this case, we install a package with the minimum required set of dependencies for creating new projects.
     However, inside the project, the extra argument `prod` is used, which additionally installs the packages necessary
     for working in the production environment.
-    There is also a set of dependencies test, which contains everything you need for testing and analyzing code coverage.
+    There is also a set of test dependencies, which contains everything you need for testing and analyzing code coverage.
 
     It is also worth noting extra dependencies as:
 
@@ -63,7 +63,7 @@ Throughout this tutorial, we’ll go through a creation of a basic poll applicat
 
         python -m vstutils newproject --name {{app_name}}
 
-    This command will confirm you such options of new app, as:
+    This command will offer you to specify such options of new app, as:
 
     * **project name** - name of your new application;
     * **project guiname** - name of your new application, that will be used in GUI (web-interface);
@@ -198,7 +198,7 @@ Models creation
 ~~~~~~~~~~~~~~~
 Firstly, you need to create file ``{{model_name}}.py`` in the ``/{{app_dir}}/{{app_name}}/{{app_name}}/models`` directory.
 
-Let make out an example from **`BModel**:
+Let make out an example from **BModel**:
 
 .. autoclass:: vstutils.models.BModel
     :exclude-members:

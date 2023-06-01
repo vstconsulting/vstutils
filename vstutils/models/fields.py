@@ -19,6 +19,7 @@ class MultipleFieldFile(FieldFile):
     and :meth:`MultipleFieldFile.delete` to manipulate the underlying file, as well as update the
     associated model instance.
     """
+
     def __init__(self, instance, field, name):
         super(MultipleFieldFile, self).__init__(instance, field, name)
         self._old_name = self.name
@@ -93,9 +94,10 @@ class MultipleFileDescriptor(FileDescriptor):
         instance = MyModel.objects.get(pk=1)
         instance.files[0].size
     """
+
     def get_file(self, file, instance):
         """
-        Always return valid attr_class object.For details on logic see
+        Always return valid attr_class object. For details on logic see
         :meth:`django.db.models.fields.files.FileDescriptor.__get__`.
         """
         if isinstance(file, str) or file is None:
@@ -135,6 +137,7 @@ class MultipleFileMixin:
     Mixin suited to use with :class:`django.db.models.fields.files.FieldFile` to transform it to
     a Field with list of files.
     """
+
     def __init__(self, **kwargs):
         kwargs['max_length'] = None
         super().__init__(**kwargs)
@@ -187,6 +190,7 @@ class MultipleImageFieldFile(ImageFile, MultipleFieldFile):
     Subclasses :class:`MultipleFieldFile` and :class:`ImageFile mixin`,
     handles deleting _dimensions_cache when file is deleted.
     """
+
     def delete(self, save=True):
         if hasattr(self, '_dimensions_cache'):
             del self._dimensions_cache
@@ -231,13 +235,13 @@ class MultipleNamedBinaryFileInJSONField(TextField):
 class MultipleNamedBinaryImageInJSONField(MultipleNamedBinaryFileInJSONField):
     """
     Extends :class:`django.db.models.TextField`. Use this field in :class:`vstutils.models.BModel` to get
-    `vstutils.api.MultipleNamedBinaryImageInJSONField in serializer`.
+    `vstutils.api.MultipleNamedBinaryImageInJSONField` in serializer.
     """
 
 
 class FkModelField(ForeignKey):
     """
     Extends :class:`django.db.models.ForeignKey`. Use this field in :class:`vstutils.models.BModel` to get
-    `vstutils.api.FkModelField in serializer`. To set Foreign Key relation set `to` argument to string path to model
+    `vstutils.api.FkModelField` in serializer. To set Foreign Key relation set `to` argument to string path to model
     or to Model Class as in :class:`django.db.models.ForeignKey`
     """

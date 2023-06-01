@@ -177,9 +177,9 @@ class FileMediaTypeValidator:
 
 class ImageValidator(FileMediaTypeValidator):
     """
-        Base Image Validation class
-        Validates image format
-        Won't work if Pillow isn't installed
+        Base Image Validation class.
+        Validates image format.
+        Won't work if Pillow isn't installed.
         Base Image Validation class.
         Validates media types.
 
@@ -232,7 +232,7 @@ class ImageOpenValidator(ImageValidator):
 
 class ImageBaseSizeValidator(ImageOpenValidator):
     """
-    Validates image size
+    Validates image size.
     To use this class for validating image width/height, rewrite
     self.orientation to ('height',) or ('width',) or ('height', 'width')
 

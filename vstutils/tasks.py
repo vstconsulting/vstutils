@@ -96,7 +96,7 @@ class TaskClass(BaseTask, metaclass=TaskMeta):
         - by executing ``Foo.do(*args, **kwargs)``
         - get registered task instance like that - app.tasks['full_path.to.task.class.Foo']
 
-    Also you can make you registered task periodic, by adding it to CELERY_BEAT_SCHEDULE in settings.py:
+    Also you can make your registered task periodic, by adding it to CELERY_BEAT_SCHEDULE in settings.py:
 
         .. sourcecode:: python
 

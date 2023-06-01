@@ -1,0 +1,568 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2018-2022, VST Consulting
+# This file is distributed under the same license as the VST Utils package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: VST Utils 5.0.4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-05-24 08:36+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../quickstart-front.rst:2
+msgid "Frontend Quickstart"
+msgstr ""
+
+#: ../../quickstart-front.rst:5
+msgid ""
+"VST utils framework uses Vue ecosystem to render frontend. The quickstart"
+" manual will guide you through the most important steps to customize "
+"frontend features. App installation and setting up described in - "
+":doc:`Backend Section <quickstart>` of this docs."
+msgstr ""
+
+#: ../../quickstart-front.rst:8
+msgid "There are several stages in vstutils app:"
+msgstr ""
+
+#: ../../quickstart-front.rst:10
+msgid "Before app started:"
+msgstr ""
+
+#: ../../quickstart-front.rst:12
+msgid ""
+"`checkCacheVersions()` checks if app version has been changed since last "
+"visit and cleans all cached data if so;"
+msgstr ""
+
+#: ../../quickstart-front.rst:13
+msgid "loading open api schema from backend. Emits 'openapi.loaded' signal;"
+msgstr ""
+
+#: ../../quickstart-front.rst:14
+msgid "loading all static files from `SPA_STATIC` in setting.py;"
+msgstr ""
+
+#: ../../quickstart-front.rst:15
+msgid "sets `AppConfiguration` from OpenAPI schema;"
+msgstr ""
+
+#: ../../quickstart-front.rst:17
+msgid "App started:"
+msgstr ""
+
+#: ../../quickstart-front.rst:19
+msgid ""
+"if there is centrifugoClient in settings.py connects it. To read more "
+"about centrifugo configuration check \":ref:`centrifugo`\";"
+msgstr ""
+
+#: ../../quickstart-front.rst:20
+msgid "downloading a list of available languages and translations;"
+msgstr ""
+
+#: ../../quickstart-front.rst:21
+msgid "`api.loadUser()` returns user data;"
+msgstr ""
+
+#: ../../quickstart-front.rst:22
+msgid ""
+"`ModelsResolver` creates models from schema, emits signal "
+"`models[${modelName}].created` for each created model and "
+"`allModels.created` when all models created;"
+msgstr ""
+
+#: ../../quickstart-front.rst:23
+msgid ""
+"`ViewConstructor.generateViews()` inits `View` fieldClasses and "
+"modelClasses;"
+msgstr ""
+
+#: ../../quickstart-front.rst:24
+msgid ""
+"`QuerySetsResolver` finds appropriate queryset by model name and view "
+"path;"
+msgstr ""
+
+#: ../../quickstart-front.rst:25
+msgid "`global_components.registerAll()`  registers Vue `global_components`;"
+msgstr ""
+
+#: ../../quickstart-front.rst:26
+msgid "`prepare()` emits `app.beforeInit` with { app: this };"
+msgstr ""
+
+#: ../../quickstart-front.rst:27
+msgid ""
+"initialize model with `LocalSettings`. Find out more about this in the "
+"section :ref:`localSettings`;"
+msgstr ""
+
+#: ../../quickstart-front.rst:28
+msgid ""
+"creates routerConstructor from `this.views`, emits 'app.beforeInitRouter'"
+" with { routerConstructor } and gets new VueRouter({this.routes});"
+msgstr ""
+
+#: ../../quickstart-front.rst:29
+msgid ""
+"inits application `Vue()` from schema.info, pinia store and emits "
+"'app.afterInit' with {app: this};"
+msgstr ""
+
+#: ../../quickstart-front.rst:31
+msgid "Application mounted."
+msgstr ""
+
+#: ../../quickstart-front.rst:34
+msgid ""
+"There is a flowchart representing application initialization process "
+"(signal names have red font):"
+msgstr ""
+
+#: ../../quickstart-front.rst:75
+msgid "Field customization"
+msgstr ""
+
+#: ../../quickstart-front.rst:76
+msgid "To add custom script to the project, set script name in settings.py"
+msgstr ""
+
+#: ../../quickstart-front.rst:85
+msgid "and put the script (`main.js`) in `{appName}/static/` directory."
+msgstr ""
+
+#: ../../quickstart-front.rst:87
+msgid ""
+"In `main.js` create new field by extending it from BaseField (or any "
+"other appropriate field)"
+msgstr ""
+
+#: ../../quickstart-front.rst:89
+msgid ""
+"For example lets create a field that renders HTML h1 element with 'Hello "
+"World!` text:"
+msgstr ""
+
+#: ../../quickstart-front.rst:103
+msgid "Or render person's name with some prefix"
+msgstr ""
+
+#: ../../quickstart-front.rst:118
+msgid ""
+"Register this field to `app.fieldsResolver` to provide appropriate field "
+"format and type to a new field"
+msgstr ""
+
+#: ../../quickstart-front.rst:125
+msgid ""
+"Listen for a appropriate "
+"`models[ModelWithFieldToChange].fields.beforeInit` signal to change field"
+" Format"
+msgstr ""
+
+#: ../../quickstart-front.rst:134
+msgid ""
+"List of  models and their fields is available during runtime in console "
+"at `app.modelsClasses`"
+msgstr ""
+
+#: ../../quickstart-front.rst:136
+msgid ""
+"To change Filed behavior, create new field class with a desired logic. "
+"Let's say you need to send number of milliseconds to API, user however "
+"wants to type in number of seconds. A solution would be to override "
+"field's `toInner` and `toRepresent` methods."
+msgstr ""
+
+#: ../../quickstart-front.rst:157
+msgid ""
+"Now you have field that show seconds, but saves/receives data in "
+"milliseconds on detail view of AllFieldsModel."
+msgstr ""
+
+#: ../../quickstart-front.rst:160
+msgid ""
+"If you need to show some warning or error to developer console you can "
+"use field `warn` and `error` methods. You can pass some message and it "
+"will print it with field type, model name and field name."
+msgstr ""
+
+#: ../../quickstart-front.rst:164
+msgid "Change path to FkField"
+msgstr ""
+
+#: ../../quickstart-front.rst:165
+msgid ""
+"Sometime you may need to request different set of objects for FkField. "
+"For example to choose from only famous authors, create `famous_author` "
+"endpoint on backend and set FkField request path to `famous_author`. "
+"Listen for `app.beforeInit` signal."
+msgstr ""
+
+#: ../../quickstart-front.rst:175
+msgid ""
+"Now when we create new post on `/post/` endpoint Author FkField makes get"
+" request to `/famous_author/` instead of `/author/`. It's useful to get "
+"different set of authors (that may have been previously filtered on "
+"backend)."
+msgstr ""
+
+#: ../../quickstart-front.rst:179
+msgid "CSS Styling"
+msgstr ""
+
+#: ../../quickstart-front.rst:181
+msgid "Like scripts, css files may be added to SPA_STATIC in setting.py"
+msgstr ""
+
+#: ../../quickstart-front.rst:192
+msgid ""
+"Let's inspect page and find css class for our customField. It is `column-"
+"format-customField` and  generated with `column-format-{Field.format}` "
+"pattern."
+msgstr ""
+
+#: ../../quickstart-front.rst:195
+msgid "Use regular css styling to change appearance of the field."
+msgstr ""
+
+#: ../../quickstart-front.rst:205
+msgid ""
+"Other page elements are also available for styling: for example, to hide "
+"certain column set corresponding field to none."
+msgstr ""
+
+#: ../../quickstart-front.rst:214
+msgid "Show primary key column on list"
+msgstr ""
+
+#: ../../quickstart-front.rst:216
+msgid ""
+"Every pk column has `pk-column` CSS class and hidden by default (using "
+"`display: none;`)."
+msgstr ""
+
+#: ../../quickstart-front.rst:218
+msgid ""
+"For example this style will show pk column on all list views of `Order` "
+"model:"
+msgstr ""
+
+#: ../../quickstart-front.rst:228
+msgid "View customization"
+msgstr ""
+
+#: ../../quickstart-front.rst:230
+msgid ""
+"Listen for signal `\"allViews.created\"` and add new custom mixin to the "
+"view."
+msgstr ""
+
+#: ../../quickstart-front.rst:232
+msgid "Next code snippet depicts rendering new view instead of default view."
+msgstr ""
+
+#: ../../quickstart-front.rst:245
+msgid ""
+"Learn more about Vue `render()` function at `Vue documentation "
+"<https://v3.vuejs.org/guide/render-function.html>`_."
+msgstr ""
+
+#: ../../quickstart-front.rst:248
+msgid ""
+"It is also possible to fine tune View by overriding default computed "
+"properties and methods of existing mixins. For example, override "
+"breadcrumbs computed property to turn off breadcrumbs on Author list View"
+msgstr ""
+
+#: ../../quickstart-front.rst:265
+msgid ""
+"Sometimes you may need to hide detail page for some reason, but still "
+"want all actions and sublinks to be accessible from list page. To do it "
+"you also should listen signal `\"allViews.created\"` and change parameter"
+" `hidden` from default `false` to `true`, for example:"
+msgstr ""
+
+#: ../../quickstart-front.rst:277
+msgid "Changing title of the view"
+msgstr ""
+
+#: ../../quickstart-front.rst:279
+msgid ""
+"To change title and string displayed in the breadcrumbs change `title` "
+"property of the view or method `getTitle` for more complex logic."
+msgstr ""
+
+#: ../../quickstart-front.rst:293
+msgid "Basic Webpack configuration"
+msgstr ""
+
+#: ../../quickstart-front.rst:294
+msgid ""
+"To use webpack in you project rename `webpack.config.js.default` to "
+"`webpack.config.js`. Every project based on vst-utils contains `index.js`"
+" in `/frontend_src/app/` directory. This file is intended for your code. "
+"Run `yarn` command to install all dependencies. Then run `yarn devBuild` "
+"from root dir of your project to build static files. Final step is to add"
+" built file to `SPA_STATIC` in `settings.py`"
+msgstr ""
+
+#: ../../quickstart-front.rst:305
+msgid ""
+"Webpack configuration file allows to add more static files. In "
+"`webpack.config.js` add more entries"
+msgstr ""
+
+#: ../../quickstart-front.rst:316
+msgid ""
+"Output files will be built into "
+"`frontend_src/{AppName}/static/{AppName}/bundle` directory. Name of "
+"output file corresponds to name of entry in `config`. In the example "
+"above output files will have names `app.js` and `myapp.js`. Add all of "
+"these files to `STATIC_SPA` in `settings.py`. During vstutils "
+"installation trough `pip` frontend code are being build automatically, so"
+" you may need to add `bundle` directory to `gitignore`."
+msgstr ""
+
+#: ../../quickstart-front.rst:323
+msgid "Page store"
+msgstr ""
+
+#: ../../quickstart-front.rst:324
+msgid ""
+"Every page has store that can be accessed globally `app.store.page` or "
+"from page component using `this.store`."
+msgstr ""
+
+#: ../../quickstart-front.rst:326
+msgid "View method `extendStore` can be used to add custom logic to page's store."
+msgstr ""
+
+#: ../../quickstart-front.rst:352
+msgid "Overriding root component"
+msgstr ""
+
+#: ../../quickstart-front.rst:353
+msgid ""
+"Root component of the application can be overridden using "
+"`app.beforeInit` signal. This can be useful for such things as changing "
+"layout CSS classes, back button behaviour or main layout components."
+msgstr ""
+
+#: ../../quickstart-front.rst:356
+msgid "Example of customizing sidebar component:"
+msgstr ""
+
+#: ../../quickstart-front.rst:370
+msgid "Translating values of fields"
+msgstr ""
+
+#: ../../quickstart-front.rst:371
+msgid ""
+"Values tha displayed by `FKField` of `ChoicesField` can be translated "
+"using standard translations files."
+msgstr ""
+
+#: ../../quickstart-front.rst:373
+msgid ""
+"Translation key must be defined as "
+"`:model:<ModelName>:<fieldName>:<value>`. For example:"
+msgstr ""
+
+#: ../../quickstart-front.rst:381
+msgid ""
+"Translation of values can be taxing as every model on backend usually "
+"generates more than one model on frontend, To avoid this, add "
+"`_translate_model = 'Category'` attribute to model on backend. It "
+"shortens"
+msgstr ""
+
+#: ../../quickstart-front.rst:391
+msgid "to"
+msgstr ""
+
+#: ../../quickstart-front.rst:397
+msgid ""
+"For `FKField` name of the related model is used. And `fieldName` should "
+"be equal to `viewField`."
+msgstr ""
+
+#: ../../quickstart-front.rst:403
+msgid "Changing actions or sublinks"
+msgstr ""
+
+#: ../../quickstart-front.rst:405
+msgid ""
+"Sometimes using only schema for defining actions or sublinks is not "
+"enough."
+msgstr ""
+
+#: ../../quickstart-front.rst:407
+msgid ""
+"For example we have an action to make user a superuser "
+"(`/user/{id}/make_superuser/`) and we want to hide that action if user is"
+" already a superuser (`is_superuser` is `true`). `<${PATH}>filterActions`"
+" signal can be used to achieve such result."
+msgstr ""
+
+#: ../../quickstart-front.rst:419
+msgid "`<${PATH}>filterActions` recieves {actions, data}"
+msgstr ""
+
+#: ../../quickstart-front.rst:420
+msgid "`<${PATH}>filterSublinks` recieves {sublinks, data}"
+msgstr ""
+
+#: ../../quickstart-front.rst:422
+msgid ""
+"Data property will contain instance's data. Actions and sublinks "
+"properties will contain arrays with default items (not hidden action or "
+"sublinks), it can be changed or replaced completely."
+msgstr ""
+
+#: ../../quickstart-front.rst:428
+msgid "LocalSettings"
+msgstr ""
+
+#: ../../quickstart-front.rst:430
+msgid ""
+"This model's fields are displayed in the left sidebar. All data from this"
+" model saves in browser Local Storage. If you want to add another "
+"options, you can do it using `beforeInit` signal, for example:"
+msgstr ""
+
+#: ../../quickstart-front.rst:444
+msgid "Store"
+msgstr ""
+
+#: ../../quickstart-front.rst:446
+msgid "There are three ways to store data:"
+msgstr ""
+
+#: ../../quickstart-front.rst:448
+msgid ""
+"userSettingsStore - saves data on the server. By default, there are "
+"options for changing language and a button to turn on/off the dark mode. "
+"Data to userSettingsStore comes from schema."
+msgstr ""
+
+#: ../../quickstart-front.rst:450
+msgid ""
+"localSettingsStore - saves data in the browser Local Storage. This is "
+"where you can store your own fields, as described in "
+":ref:`localSettings`."
+msgstr ""
+
+#: ../../quickstart-front.rst:451
+msgid "store - stores current page data."
+msgstr ""
+
+#: ../../quickstart-front.rst:453
+msgid ""
+"To use any of this stores you need to run the following command: "
+":code:`app.[storeName]`, for example: :code:`app.userSettingsStore`."
+msgstr ""
+
+#: ../../quickstart-front.rst:455
+msgid ""
+"If you are accessing the userSettingsStore from within the component then"
+" you need to use :code:`this.$app` instead :code:`app`."
+msgstr ""
+
+#: ../../quickstart-front.rst:457
+msgid "From `app.store` you may need:"
+msgstr ""
+
+#: ../../quickstart-front.rst:459
+msgid ""
+"`vewsItems` and `viewItemsMap` - stores information about parent views "
+"for this page. It is used for example in breadcrumbs. The difference "
+"between them is only in the way information is stored: `viewItems` is an "
+"Array of Objects and `viewItemsMap` is a Map."
+msgstr ""
+
+#: ../../quickstart-front.rst:461
+msgid "`page` - saves all information about current page."
+msgstr ""
+
+#: ../../quickstart-front.rst:462
+msgid "`title` - title of current page."
+msgstr ""
+
+#~ msgid "sets `AppConfiguration` from openapi schema;"
+#~ msgstr ""
+
+#~ msgid "gets schema from backend and loads it. Emits 'openapi.loaded' signal;"
+#~ msgstr ""
+
+#~ msgid "if there is centrifugoClient in settings.py connects it;"
+#~ msgstr ""
+
+#~ msgid "loads translations;"
+#~ msgstr ""
+
+#~ msgid "`prepareFieldsClasses()` used to customize field class;"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "creates StoreConstructor from `this.views` and"
+#~ " emits 'app.beforeInitStore' with { "
+#~ "storeConstructor };"
+#~ msgstr ""
+
+#~ msgid "gets translations;"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "inits application `Vue()` from schema.info,"
+#~ " this.router, Vuex.Store args and emits "
+#~ "'app.afterInit' with {app: this};"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "There is a flowchart representing "
+#~ "application initialization process(signal names "
+#~ "have red font):"
+#~ msgstr ""
+
+#~ msgid "Basic data components"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you want to add on page "
+#~ "some component that gets data from "
+#~ "API and displays it in some way,"
+#~ " you can use "
+#~ "`spa.components.mixins.InstanceComponent` and "
+#~ "`spa.components.mixins.InstancesComponent`. Both mixins"
+#~ " expect you to define at least "
+#~ "`getQuerySet` method that will be called"
+#~ " on component creation before data "
+#~ "fetching."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Components based on mixins will have "
+#~ "computed property `instance` or `instances`"
+#~ " respectively. It will be refreshed "
+#~ "on every auto update."
+#~ msgstr ""
+
+#~ msgid "Example component:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In given example store module with "
+#~ "name `usersCounter` will be registered "
+#~ "so data can be accessed globally."
+#~ msgstr ""
+

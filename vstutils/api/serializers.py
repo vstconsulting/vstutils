@@ -145,7 +145,7 @@ class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer):
 class EmptySerializer(BaseSerializer):
     """
     Default serializer for empty responses.
-    In generated GUI this means that action button which will not show additional view before execution.
+    In generated GUI this means that action button won't show additional view before execution.
     """
 
 

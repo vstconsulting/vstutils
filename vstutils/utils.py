@@ -44,9 +44,13 @@ _gzip_object = GZipMiddleware(lambda *args, **kwargs: None)  # type: ignore
 
 
 def deprecated(func: tp.Callable):
-    """This is a decorator which can be used to mark functions
+    """
+    This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
-    when the function is used."""
+    when the function is used.
+
+    :param func: any callable that will be wrapped and will issue a deprecation warning when called.
+    """
 
     def new_func(*args, **kwargs):
         warnings.warn(f'Call to deprecated function {func.__name__}.',
@@ -115,7 +119,7 @@ def encode(key, clear):
 
     :param key: -- secret key for encoding
     :type key: str
-    :param clear: -- clear value  for encoding
+    :param clear: -- clear value for encoding
     :type clear: str
     :return: -- encoded string
     :rtype: str
@@ -231,7 +235,6 @@ def send_template_email_handler(
 def send_template_email(sync: bool = False, **kwargs):
     """
     Function executing sync or async email sending; according `sync` argument and settings variable "RPC_ENABLED".
-    You can use this function to send message, it sends message asynchronously or synchronously.
     If you don't set settings for celery or don't have celery it sends synchronously mail.
     If celery is installed and configured and `sync` argument of the function is set to `False`,
     it sends asynchronously email.
@@ -422,6 +425,9 @@ class classproperty(ClassPropertyDescriptor):
                 @value.setter
                 def value(cls, new_value):
                     cls.some_value = new_value
+
+    :param fget: function for getting an attribute value.
+    :param fset: function for setting an attribute value.
     """
 
 
@@ -430,8 +436,8 @@ class redirect_stdany:
     Context for redirect any output to own stream.
 
     .. note::
-        - On context return stream object.
-        - On exit return old streams
+        - On context returns stream object.
+        - On exit returns old streams.
     """
     __slots__ = ('stream', 'streams', '_old_streams')
 
@@ -483,7 +489,7 @@ class tmp_file:
     :type data: str
     :param mode: -- file open mode. Default 'w'.
     :type mode: str
-    :param bufsize: -- bufer size for tempfile.NamedTemporaryFile
+    :param bufsize: -- buffer size for tempfile.NamedTemporaryFile
     :type bufsize: int
     :param kwargs:  -- other kwargs for tempfile.NamedTemporaryFile
 
@@ -749,7 +755,7 @@ class Executor(BaseVstObject):
     """
     Command executor with realtime output write and line handling.
     By default and by design executor initialize string attribute ``output``
-    which will be modifyed by ``+=`` operator with new lines by :meth:`.Executor.write_output`
+    which will be modified by ``+=`` operator with new lines by :meth:`.Executor.write_output`
     procedure. Override the method if you want change behavior.
 
     Executor class supports periodically (0.01 sec) handling process and execute some checks
@@ -797,6 +803,7 @@ class Executor(BaseVstObject):
         """
         Additional handler for executions.
 
+        :arg proc: running process
         :type proc: subprocess.Popen
         """
 
@@ -828,7 +835,7 @@ class Executor(BaseVstObject):
 
     def execute(self, cmd: tp.List[tp.Text], cwd: tp.Union[tp.Text, Path]) -> tp.Text:
         """
-        Execute commands and output this.
+        Executes commands and outputs its result.
 
         :param cmd: -- list of cmd command and arguments
         :type cmd: list
@@ -961,7 +968,7 @@ class Lock(KVExchanger):
     SCHEDULER: tp.ClassVar[tp.Text] = "celery-beat"
 
     class AcquireLockException(Exception):
-        """ Exception which will raised on unreleased lock. """
+        """ Exception which will be raised on unreleased lock. """
 
     @classproperty
     def PREFIX(cls):
@@ -1102,6 +1109,9 @@ class ObjectHandlers(BaseVstObject):
             # Get object of backend 'two' with overriding constructor named arg
             two_obj_overrided = handlers.get_object(some_named_arg='another_value')
 
+    :param type_name: type name for backends.Like name in dict.
+    :type type_name: str
+
     """
 
     __slots__ = ('type', 'err_message', '__list__', '__loaded_backends__')
@@ -1110,10 +1120,6 @@ class ObjectHandlers(BaseVstObject):
     err_message: tp.Optional[tp.Text]
 
     def __init__(self, type_name: tp.Text, err_message: tp.Optional[tp.Text] = None):
-        """
-        :param type_name: -- type name for backends.Like name in dict.
-        :type type_name: str
-        """
         self.type = type_name
         self.err_message = err_message
         self.__list__: tp.Optional[tp.Dict[tp.Text, tp.Any]] = None
@@ -1220,6 +1226,7 @@ class ModelHandlers(ObjectHandlers):
     :type keys: list
     :param values: -- supported backends classes
     :type values: list
+    :param type_name: type name for backends.Like name in dict.
     """
 
     __slots__ = ()
@@ -1249,6 +1256,7 @@ class URLHandlers(ObjectHandlers):
 
             # By default gets from `GUI_VIEWS` in `settings.py`
             urlpatterns = list(URLHandlers())
+    :param type_name: type name for backends.Like name in dict.
     """
     __slots__ = ('additional_handlers', '__handlers__', 'default_namespace')
 
@@ -1291,8 +1299,8 @@ class URLHandlers(ObjectHandlers):
 
         :param name: url regexp from
         :type name: str
-        :param argv: overrided args
-        :param kwargs: overrided kwargs
+        :param argv: overridden args
+        :param kwargs: overridden kwargs
         :return: url object
         :rtype: django.urls.re_path
         """

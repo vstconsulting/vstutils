@@ -27,6 +27,7 @@ venv
 env
 yarn-error.log
 .run/
+*.mo
 
 # Visual Studio Code
 .history
