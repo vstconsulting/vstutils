@@ -440,18 +440,7 @@ kwargs = dict(
             for i in requirements
             if isinstance(i, str) and 'django-storages' in i
         ],
-        'sqs': [
-            i.replace('redis', 'sqs,redis')
-            if isinstance(i, str) and 'celery' in i
-            else i
-            for i in requirements_rpc
-        ],
-        'librabbitmq': [
-            i.replace('redis', 'librabbitmq,redis')
-            if isinstance(i, str) and 'celery' in i
-            else i
-            for i in requirements_rpc
-        ],
+        'sqs': requirements_rpc + ['pycurl~=7.45.2'],
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),
@@ -468,7 +457,7 @@ kwargs = dict(
 
 all_deps = []
 for key, deps in kwargs['extras_require'].items():
-    if key not in ('sqs', 'librabbitmq', 'stubs'):
+    if key not in ('stubs', 'sqs'):
         all_deps += deps
 
 kwargs['extras_require']['all'] = all_deps
