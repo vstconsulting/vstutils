@@ -1276,10 +1276,6 @@ class URLHandlers(ObjectHandlers):
     def view_handlers(self):
         if not self.__handlers__:
             self.__handlers__ = tuple(map(self.__class__, self.additional_handlers))
-            # self.__handlers__ = []
-            # handler_class = self.__class__
-            # for handler_settings_name in self.additional_handlers:
-            #     self.__handlers__.append(handler_class(handler_settings_name))
         return self.__handlers__
 
     def get_backend_data(self, name: tp.Text):

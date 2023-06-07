@@ -16,6 +16,7 @@ from .utils import URLHandlers
 from .api.views import HealthView, MetricsView
 
 static_serve = functools.partial(serve_static, insecure=True)
+gui_enabled = not getattr(settings, 'API_ONLY', False)
 
 
 def get_valid_url(*args):
@@ -38,6 +39,7 @@ admin.site.site_header = 'Admin panel'
 admin.site.site_title = settings.VST_PROJECT
 admin.site.index_title = f"{settings.VST_PROJECT.upper()} Settings Panel"
 admin.site.site_url = "/"
+# TODO: make it depends on 'gui_enabled' when auth migrate to API
 admin.site.login = AdminLoginLogoutRedirectView.as_view(  # type: ignore
     url=get_valid_url(settings.ACCOUNT_URL, settings.LOGIN_URL)
 )
@@ -46,7 +48,7 @@ admin.site.logout = AdminLoginLogoutRedirectView.as_view(  # type: ignore
 )
 doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 
-urlpatterns = list(URLHandlers())
+urlpatterns = list(URLHandlers()) if gui_enabled else []
 
 urlpatterns += [
     path(settings.ACCOUNT_URL, include(list(URLHandlers('ACCOUNT_URLS'))))

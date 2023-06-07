@@ -242,6 +242,7 @@ class LangMiddleware(BaseMiddleware):
 
 
 class TwoFaMiddleware(BaseMiddleware):
+    redirect_name = 'login'
     pass_names = (
         'login',
         'logout',
@@ -269,7 +270,7 @@ class TwoFaMiddleware(BaseMiddleware):
 
     def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
         if request.user.need_twofa and self.check_url_name(request):  # type: ignore
-            return redirect('login')
+            return redirect(self.redirect_name)
         return super().get_response_handler(request)
 
 
