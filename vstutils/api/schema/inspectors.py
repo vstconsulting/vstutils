@@ -406,7 +406,7 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
         if field.max_content_size:
             items['properties']['content']['maxLength'] = field.max_content_size
         if field.min_content_size:
-            items['properties']['content']['minLength'] = field.max_content_size
+            items['properties']['content']['minLength'] = field.min_content_size
 
         x_validators: Dict[str, Union[Set, int, str]]
         x_validators = items['x-validators'] = {

@@ -57,7 +57,7 @@ export function validateNamedFilesContentSize(field: Field, files: NamedFile[]) 
     if (minLength !== undefined) {
         for (const file of files) {
             if (file.content.length < minLength) {
-                guiPopUp.error(fileIsTooLarge(file.name));
+                guiPopUp.error(fileIsTooSmall(file.name));
                 ok = false;
             }
         }
@@ -66,7 +66,7 @@ export function validateNamedFilesContentSize(field: Field, files: NamedFile[]) 
     if (maxLength !== undefined) {
         for (const file of files) {
             if (file.content.length > maxLength) {
-                guiPopUp.error(fileIsTooSmall(file.name));
+                guiPopUp.error(fileIsTooLarge(file.name));
                 ok = false;
             }
         }
