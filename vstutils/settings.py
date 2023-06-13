@@ -192,7 +192,7 @@ class WebSection(BaseAppendSection):
     }
 
 
-class UvicornSection(cconfig.Section):
+class UvicornSection(BaseAppendSection):
     types_map = {
         'ws_max_size': ConfigIntType,
         'ws_ping_interval': ConfigFloatType,
@@ -244,6 +244,7 @@ class DBOptionsSection(cconfig.Section):
         'read_timeout': ConfigIntSecondsType,
         'write_timeout': ConfigIntSecondsType,
         'isolation_level': ConfigIntType,
+        'server_side_binding': ConfigBoolType,
     }
 
 
@@ -1436,6 +1437,14 @@ storages = config['storages']
 LIBCLOUD_PROVIDERS: _t.Dict[_t.Text, _t.Dict] = {}
 MEDIA_ROOT = storages['filesystem']['media_root']
 MEDIA_URL = storages['filesystem']['media_url']
+STORAGES = {
+    'filesystem': {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 if 'libcloud' in storages:
 
@@ -1448,10 +1457,16 @@ if 'libcloud' in storages:
     if LIBCLOUD_PROVIDERS and 'default' not in LIBCLOUD_PROVIDERS:
         DEFAULT_LIBCLOUD_PROVIDER = next(iter(LIBCLOUD_PROVIDERS))
 
+    STORAGES['libcloud'] = {"BACKEND": 'storages.backends.apache_libcloud.LibCloudStorage'}
+
 if 'boto3' in storages:
     globals().update( storages['boto3'].all())
+    STORAGES['libcloud'] = {"BACKEND": 'storages.backends.s3boto3.S3Boto3Storage'}
 
-DEFAULT_FILE_STORAGE = storages.get('default', fallback=get_default_storage_class())
+
+STORAGES['default'] = {
+    "BACKEND": get_default_storage_class()
+}
 
 DOCKERRUN_MIGRATE_LOCK_ID = config['docker'].get('migrate_lock_id', VST_PROJECT_LIB_NAME)
 
@@ -1477,7 +1492,8 @@ if TESTS_RUN:
     }
     BULK_THREADS = 10
     SEND_EMAIL_RETRIES = 10
-    DEFAULT_FILE_STORAGE = lazy(lambda: 'inmemorystorage.InMemoryStorage', str)()
+    for storage_name in filter('staticfiles'.__ne__, STORAGES):
+        STORAGES[storage_name] = {"BACKEND": 'django.core.files.storage.InMemoryStorage'}
     CENTRIFUGO_CLIENT_KWARGS = {}
 
 
