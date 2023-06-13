@@ -10,7 +10,7 @@ import typing as _t
 import orjson
 from django.db import models
 from django.http.request import QueryDict
-from rest_framework import serializers
+from rest_framework import serializers, fields as drf_fields
 from rest_framework.utils.field_mapping import get_relation_kwargs
 
 from . import fields
@@ -57,15 +57,37 @@ class DependFromFkSerializerMixin:
         return super().to_internal_value(data)
 
 
-class BaseSerializer(DependFromFkSerializerMixin, serializers.Serializer):
+class SerializerMetaClass(serializers.SerializerMetaclass):
+    @classmethod
+    def _get_declared_fields(
+            mcs,
+            bases: _t.Sequence[type],
+            attrs: _t.Dict[str, _t.Any]
+    ) -> _t.Dict[str, drf_fields.Field]:
+        if (meta := attrs.get('Meta')) and (generated_fields := getattr(meta, 'generated_fields', None)):
+            field_fabric = getattr(
+                meta,
+                'generated_field_factory',
+                lambda f: drf_fields.CharField(required=False, allow_blank=True, allow_null=True)
+            )
+            for field in generated_fields:
+                field_name = field.replace('.', '_')
+                if field_name not in attrs:
+                    attrs[field_name] = field_fabric(field)
+        return super()._get_declared_fields(bases=bases, attrs=attrs)
+
+
+class BaseSerializer(DependFromFkSerializerMixin, serializers.Serializer, metaclass=SerializerMetaClass):
     """
     Default serializer with logic to work with objects.
     Read more in `DRF serializer's documentation
     <https://www.django-rest-framework.org/api-guide/serializers/#serializers>`_
     how to create Serializers and work with them.
-    """
 
-    # pylint: disable=abstract-method
+    .. note::
+        You can also setup ``generated_fields`` in class attribute ``Meta`` to get serializer
+        with default CharField fields. Setup attribute ``generated_field_factory`` to change default fabric method.
+    """
 
     def create(self, validated_data):  # nocv
         return validated_data
@@ -79,7 +101,7 @@ class BaseSerializer(DependFromFkSerializerMixin, serializers.Serializer):
         return instance
 
 
-class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer):
+class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer, metaclass=SerializerMetaClass):
     """
     Default model serializer based on :class:`rest_framework.serializers.ModelSerializer`.
     Read more in `DRF documentation <https://www.django-rest-framework.org/api-guide/serializers/#modelserializer>`_

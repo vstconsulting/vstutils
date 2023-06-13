@@ -130,9 +130,7 @@ class RequestInfoTestView(NonModelsViewSet):
 
     def list(self, request):
         start_time = time.time()
-        headers = request._request.META
-        # Don't send wsgi.* headers
-        headers = {k: v for k, v in headers.items() if not k.startswith('wsgi.')}
+        headers = dict(request.headers)
         serializer = DataSerializer(data=json.dumps(
             dict(
                 headers=headers,

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.asgi import get_asgi_application
 from django.contrib.staticfiles import finders
 from fastapi import FastAPI, Request
-from fastapi.responses import PlainTextResponse, FileResponse
+from fastapi.responses import PlainTextResponse, FileResponse, ORJSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -63,6 +63,11 @@ async def well_known(file_path: str, request: Request):
 
 
 before_mount_app.send(sender=application, static=static)
+
+if not any(m.path == f'/{settings.API_URL}/live/' for m in application.routes):
+    @application.get(f'/{settings.API_URL}/live/')
+    async def api_live_check():
+        return ORJSONResponse({"status": "ok"})
 
 
 @application.middleware('http')

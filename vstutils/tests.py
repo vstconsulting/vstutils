@@ -4,6 +4,7 @@ import random  # noqa: F401
 import string  # noqa: F401
 import os  # noqa: F401
 import uuid
+import warnings
 from unittest.mock import patch, Mock
 import json  # noqa: F401
 
@@ -426,12 +427,21 @@ class BaseTestCase(TestCase):
         else:
             query = ''
 
+        headers = kwargs.pop('headers', {})
+        headers['accept-encoding'] = 'gzip'
+        oldstyle_headers = set(filter(lambda x: x.startswith('HTTP_'), kwargs.keys()))
+
+        if oldstyle_headers:
+            warnings.warn("You should setup 'headers' instead of kwargs", DeprecationWarning)  # nocv
+
+        for key in oldstyle_headers:
+            headers.setdefault(key[5:].replace('_', '-').lower(), kwargs[key])  # nocv
+
         return self.get_result(
             method,
             f'/{self._settings("VST_API_URL")}/endpoint/{query}',
             data=data,
             code=code,
-            HTTP_ACCEPT_ENCODING='gzip',
             **kwargs
         )
 

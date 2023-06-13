@@ -21,7 +21,6 @@ from django.db.models.query import QuerySet
 from django.db import transaction, models
 from django.utils.functional import cached_property, lazy
 from django.utils.http import urlencode
-from django.contrib.contenttypes.fields import GenericForeignKey
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, mixins as drf_mixins, exceptions, status
 from rest_framework.serializers import BaseSerializer
@@ -345,7 +344,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
                 fk_related_fields = {
                     f.name
                     for f in _fields
-                    if isinstance(f, (models.ForeignKey, models.ManyToManyField, GenericForeignKey))
+                    if isinstance(f, models.ForeignKey)
                 }
                 deferable_fields = (
                         model_fields -
