@@ -3991,6 +3991,12 @@ class ProjectTestCase(BaseTestCase):
             ["fas", "fa-calculator"]
         )
 
+        # Check hidden view and action
+        self.assertTrue(data['paths']['/testfk/']['get']['x-hidden'])
+        self.assertTrue(data['paths']['/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hidden_on_frontend_hosts/']['get']['x-hidden'])
+        self.assertTrue(data['paths']['/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hidden_on_frontend_hosts/']['post']['x-hidden'])
+        self.assertTrue(data['paths']['/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hidden_on_frontend_hosts/{hidden_on_frontend_hosts_id}/hidden_action/']['post']['x-hidden'])
+
     def test_manifest_json(self):
         result = self.get_result('get', '/manifest.json')
         self.assertEqual(result['name'], 'Example project')

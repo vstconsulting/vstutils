@@ -79,6 +79,7 @@ class Action:
         'title',
         'icons',
         'is_list',
+        'hidden',
     )
     method_response_mapping = {
         "HEAD": HTTP_200_OK,
@@ -100,6 +101,7 @@ class Action:
         title: _t.Text = None,
         icons: _t.Union[_t.Text, _t.Iterable] = None,
         is_list: bool = False,
+        hidden: bool = False,
         **kwargs,
     ):
         # pylint: disable=too-many-arguments
@@ -112,6 +114,7 @@ class Action:
         self.title = title
         self.icons = icons
         self.is_list = is_list
+        self.hidden = hidden
         self.action_kwargs = kwargs
         if self.query_serializer:
             self.action_kwargs['query_serializer'] = self.query_serializer
@@ -134,6 +137,7 @@ class Action:
             'methods': self.methods,
             'x-multiaction': self.multi if not self.is_page else False,
             'x-title': self.title or (None if self.is_page else name),
+            'x-hidden': self.hidden,
         }
         if self.query_serializer:
             swagger_kwargs['query_serializer'] = self.query_serializer

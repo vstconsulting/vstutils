@@ -1,6 +1,6 @@
 import { effectScope } from 'vue';
 import { isNavigationFailure, NavigationFailureType } from 'vue-router';
-import { getApp } from '@/vstutils/utils';
+import { getApp, NOT_FOUND_ROUTE_NAME } from '@/vstutils/utils';
 import type { IView } from '@/vstutils/views';
 import type { RawLocation } from 'vue-router';
 
@@ -14,7 +14,7 @@ export async function openPage(to: RawLocation) {
             throw Error('Navigation failed', { cause: e });
         }
     }
-    if (route?.name === '404') {
+    if (route?.name === NOT_FOUND_ROUTE_NAME) {
         throw new Error(`Location not found ${JSON.stringify(to)}`);
     }
     const view = app.router.currentRoute.meta!.view as IView;

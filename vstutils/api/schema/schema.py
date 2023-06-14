@@ -196,6 +196,9 @@ class VSTAutoSchema(SwaggerAutoSchema):
             # pylint: disable=protected-access
             result['x-allow-append'] = issubclass(_nested_wrapped_view, NestedWithAppendMixin)
 
+        if getattr(self.view, 'hidden', None) or self.overrides.get('x-hidden'):
+            result['x-hidden'] = True
+
         params_to_override = ('x-title', 'x-icons')
         if self.method.lower() == 'get':
             subscribe_view = self.__get_nested_view_and_subaction(self.view)[0]

@@ -110,6 +110,8 @@ default_extra_metadata: dict = {
     # additional view's settings
     **dict(reduce(operator.add, [((f'pre_{i}', None), (i, None), (f'override_{i}', False)) for i in view_settings])),
     "extra_view_attributes": None,
+    # if true - view will be hidden on frontend
+    "hidden": False,
 }
 
 
@@ -546,6 +548,8 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         detail_fields = _ensure_pk_in_fields(cls, metadata['detail_fields'] or list_fields)
 
         view_attributes = {'model': cls, **(metadata['extra_view_attributes'] or {})}
+        if metadata['hidden']:
+            view_attributes['hidden'] = True
 
         serializer_class = metadata['serializer_class']
         serializers = {
