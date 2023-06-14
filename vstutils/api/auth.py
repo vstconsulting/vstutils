@@ -13,7 +13,7 @@ from django_filters import BooleanFilter, CharFilter
 from rest_framework import serializers, exceptions, request as drf_request
 from vstutils.api import fields, base, permissions, responses, decorators as deco
 from vstutils.api.filters import DefaultIDFilter, name_filter, name_help
-from vstutils.api.serializers import VSTSerializer, DataSerializer, BaseSerializer, update_declared_fields
+from vstutils.api.serializers import VSTSerializer, BaseSerializer, update_declared_fields
 from vstutils.api.models import TwoFactor, RecoveryCode, UserSettings
 from vstutils.utils import raise_context_decorator_with_default, translate, lazy_translate as __
 
@@ -122,7 +122,7 @@ class CreateUserSerializer(OneUserSerializer):
         return validated_data
 
 
-class ChangePasswordSerializer(DataSerializer):
+class ChangePasswordSerializer(BaseSerializer):
     old_password = fields.PasswordField(required=True)
     password = fields.PasswordField(required=True, label='New password')
     password2 = fields.PasswordField(required=True, label='Confirm new password')
@@ -245,7 +245,7 @@ class UserViewSet(base.ModelViewSet):
     serializer_class_create: _t.Type[CreateUserSerializer] = update_declared_fields(  # type: ignore
         CreateUserSerializer
     )
-    serializer_class_change_password: _t.Type[DataSerializer] = ChangePasswordSerializer
+    serializer_class_change_password: _t.Type[BaseSerializer] = ChangePasswordSerializer
     serializer_class_twofa: _t.Type[serializers.BaseSerializer] = update_declared_fields(  # type: ignore
         TwoFASerializer
     )
