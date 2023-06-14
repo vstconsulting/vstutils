@@ -30,12 +30,14 @@
     import { computed, toRef } from 'vue';
     import { ensureValueFetched, useQuerySets } from './composables';
     import { FieldReadonlyPropsDef } from '@/vstutils/fields/base';
+    import { getApp } from '@/vstutils/utils';
 
     import type { Model } from '@/vstutils/models';
     import type { FieldReadonlyPropsDefType } from '@/vstutils/fields/base';
     import type { FKField } from './FKField';
 
     const props = defineProps(FieldReadonlyPropsDef as FieldReadonlyPropsDefType<FKField>);
+    const app = getApp();
 
     const { queryset } = useQuerySets(props.field, props.data);
 
@@ -45,9 +47,6 @@
         return representField?.fkLinkable;
     });
 
-    const withLink = computed<boolean>(
-        () => props.field.makeLink && (!props.value || !(props.value as Model).__notFound),
-    );
     const fk = computed(() => {
         return props.field.getValueFieldValue(props.value);
     });
@@ -61,6 +60,24 @@
             }
         }
         return '';
+    });
+    const withLink = computed<boolean>(() => {
+        if (!props.field.makeLink) {
+            return false;
+        }
+        if (!props.value || (props.value as Model).__notFound) {
+            return false;
+        }
+
+        const pattern = queryset.value?.pattern;
+        if (pattern) {
+            const view = app.views.get(pattern);
+            if (!view || view.hidden) {
+                return false;
+            }
+        }
+
+        return true;
     });
     const text = computed(() => {
         if (props.value) {

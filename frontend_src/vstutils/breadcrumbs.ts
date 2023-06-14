@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import { getApp } from '@/vstutils/utils';
+import { getApp, isNotFoundView } from '@/vstutils/utils';
 
 export interface Breadcrumb {
     link?: string;
@@ -17,6 +17,9 @@ export const useBreadcrumbs = () => {
 
         const crumbs: Breadcrumb[] = [{ iconClasses: 'fas fa-home', link: '/' }];
         for (const { view, path, state } of app.store.viewItems) {
+            if (isNotFoundView(view)) {
+                continue;
+            }
             let link = path;
             let iconClasses = '';
             // @ts-expect-error Same as view.getTitle(view.getSavedState()) so will be ok

@@ -9,6 +9,7 @@ from vstutils.api.base import NonModelsViewSet
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
 from vstutils.api.serializers import DataSerializer
 from vstutils.api.auth import UserViewSet
+from vstutils.api.actions import Action
 from vstutils.utils import create_view
 
 from .models import Host, HostList, HostGroup, ModelWithBinaryFiles, ModelWithFK, CachableProxyModel
@@ -64,8 +65,17 @@ def queryset_nested_filter(parent, qs):
     return qs
 
 
+HiddenOnFrontendHostsViewSet = create_view(
+    Host,
+    hidden=True,
+    extra_view_attributes ={
+        'empty_action': Action(name='hidden_action', hidden=True)(lambda *a, **k: None),
+    }
+)
+
 @nested_view('subgroups', 'id', view=_HostGroupViewSet, subs=None)
 @nested_view('hosts', 'id', view=HostViewSet)
+@nested_view('hidden_on_frontend_hosts', 'id', view=HiddenOnFrontendHostsViewSet)
 @nested_view('hidden_hosts', 'id', view=HostViewSet, schema=None)
 @nested_view('subhosts', methods=["get"], manager_name='hosts', view=HostViewSet)
 @nested_view(

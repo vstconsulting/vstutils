@@ -5,6 +5,7 @@ import type { ParameterType } from 'swagger-schema-official';
 import type { defineStore } from 'pinia';
 import type { Field } from '../fields/base/';
 import type { Route, Location } from 'vue-router';
+import type { IView } from '../views';
 
 export * from './todo.js';
 export * from './app-helpers';
@@ -231,7 +232,7 @@ export function openPage(
         if (options.path && options.params) {
             const route = router.resolve(options as Location).route;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if (route.name && route.name !== '404' && !route.meta?.view?.isDeepNested) {
+            if (route.name && route.name !== NOT_FOUND_ROUTE_NAME && !route.meta?.view?.isDeepNested) {
                 options.name = route.name;
                 delete options.path;
             }
@@ -268,4 +269,10 @@ export async function saveAllSettings() {
     }
 
     return saved;
+}
+
+export const NOT_FOUND_ROUTE_NAME = '404';
+
+export function isNotFoundView(view: IView) {
+    return view.routeName === NOT_FOUND_ROUTE_NAME;
 }

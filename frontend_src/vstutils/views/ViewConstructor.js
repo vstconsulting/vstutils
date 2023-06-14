@@ -4,6 +4,7 @@ import {
     HttpMethods,
     joinPaths,
     mergeDeep,
+    NOT_FOUND_ROUTE_NAME,
     pathToArray,
     RequestTypes,
     ViewTypes,
@@ -566,7 +567,12 @@ export default class ViewConstructor {
     _setParents(views) {
         for (const [path, view] of views) {
             const parent = views.get(path.replace(/[^/]+\/$/, ''));
-            if (parent) view.parent = parent;
+            if (parent) {
+                view.parent = parent;
+                if (parent.hidden) {
+                    view.hidden = true;
+                }
+            }
         }
     }
 
@@ -585,7 +591,7 @@ export default class ViewConstructor {
         }
 
         if (!views.has('*')) {
-            const notFoundView = new View({ path: '*', routeName: '404' }, null, [NotFound]);
+            const notFoundView = new View({ path: '*', routeName: NOT_FOUND_ROUTE_NAME }, null, [NotFound]);
             notFoundView.showOperationButtons = false;
             views.set('*', notFoundView);
         }
