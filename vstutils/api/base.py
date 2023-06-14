@@ -1,7 +1,7 @@
 """
 Default ViewSets for web-api.
 """
-
+import hashlib
 import re
 import io
 import json
@@ -482,6 +482,10 @@ class CachableHeadMixin(GenericViewSet):
         default_detail = ''
         default_code = 'cached'
 
+    class PreconditionFailedException(exceptions.APIException):
+        status_code = 412
+        default_detail = ''
+
     @cached_property
     def model_class(self):
         return getattr(self, 'model', None) or self.queryset.model
@@ -494,8 +498,15 @@ class CachableHeadMixin(GenericViewSet):
         return self.action in main_actions or getattr(getattr(self, self.action, None), '_nested_view', None) is None
 
     def get_etag_value(self, model_class, request):
+        pk = self.kwargs.get(self.lookup_url_kwarg or self.lookup_field)
+        if isinstance(model_class, (list, tuple, set)):
+            etag_value = hashlib.md5(
+                "_".join(mc.get_etag_value(pk) for mc in model_class).encode('utf-8')
+            ).hexdigest()
+        else:
+            etag_value = model_class.get_etag_value(pk)
         return (
-            f'{model_class.get_etag_value()}'
+            f'{etag_value}'
             f'_'
             f'{request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, settings.LANGUAGE_CODE)}'
         )
@@ -504,19 +515,32 @@ class CachableHeadMixin(GenericViewSet):
         return f'"{self.get_etag_value(model_class, request)}"'
 
     def check_etag(self, request, model_class=None):
-        if request.method == "GET":
-            header = request.headers.get("If-None-Match", None)
-            if not header:
-                return
-            data = self._get_etag(model_class or self.model_class, request)
-            header = str(header)
-            if header[:2] in ('W/', "w/"):
-                header = header[2:]
-            if header[0] != '"':
-                header = f'"{header}"'
-            if data == header:
-                raise self.NotModifiedException("")
-        # TODO: Workflow with ETag on PUT/PATCH/DELETE
+        should_check, header_name, exception, operation_handler = False, "", Exception(), str.__eq__
+        if request.method in {"GET", "HEAD"}:
+            should_check = True
+            exception = self.NotModifiedException("")
+            header_name = "If-None-Match"
+        elif request.method in getattr(self, 'etag_match_methods', {request.method}):
+            should_check = True
+            exception = self.PreconditionFailedException("")
+            header_name = "If-Match"
+            operation_handler = str.__ne__
+
+        if not should_check:
+            # For non-standart request methods
+            return  # nocv
+
+        header = request.headers.get(header_name, None)
+        if not header:
+            return
+        data = self._get_etag(model_class or self.model_class, request)
+        header = str(header)
+        if header[:2] in ('W/', "w/"):
+            header = header[2:]
+        if header[0] != '"':
+            header = f'"{header}"'
+        if operation_handler(data, header):
+            raise exception
 
     def finalize_response(self, request: Request, response: RestResponse, *args, **kwargs) -> RestResponse:
         result_response = super().finalize_response(request, response, *args, **kwargs)
