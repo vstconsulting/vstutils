@@ -11,7 +11,7 @@ from vstutils.api.serializers import DataSerializer
 from vstutils.api.auth import UserViewSet
 from vstutils.utils import create_view
 
-from .models import Host, HostList, HostGroup, ModelWithBinaryFiles, ModelWithFK
+from .models import Host, HostList, HostGroup, ModelWithBinaryFiles, ModelWithFK, CachableProxyModel
 
 
 class TestFilterBackend(filter_backends.VSTFilterBackend):
@@ -205,3 +205,10 @@ HostWithoutAuthViewSet = create_view(
     view_class=(HostCreateDummyMixin, 'read_only'),
     override_authentication_classes=None,
 )
+
+CacheableView = create_view(CachableProxyModel)
+
+
+class CacheableViewSet(CacheableView):
+    def get_etag_value(self, model_class, request):
+        return super().get_etag_value((model_class,), request)

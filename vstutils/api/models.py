@@ -27,10 +27,10 @@ class Language(ListModel):
     name = CharField(max_length=128)
 
     @classmethod
-    def get_etag_value(cls):
-        hashable_str = '_'.join(c for c, _ in settings.LANGUAGES)
+    def get_etag_value(cls, pk=None):
+        hashable_str = '_'.join(c for c, _ in settings.LANGUAGES) + (f'_{pk}' if pk is not None else '')
         if settings.ENABLE_CUSTOM_TRANSLATIONS:
-            hashable_str += CustomTranslations.get_etag_value()
+            hashable_str += CustomTranslations.get_etag_value(pk)
         return hashlib.md5(hashable_str.encode('utf-8')).hexdigest()
 
     def _get_translation_data(self, module_path_string, code, for_server=False):

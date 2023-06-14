@@ -1881,7 +1881,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertNotIn('put', hosts_list)
 
         # Test inherit actions or methods
-        self.assertIn('/cachable/empty_action/', api['paths'])
+        self.assertIn('/cacheable/empty_action/', api['paths'])
 
         # Check depend fields
         self.assertEqual(api['definitions']['Variable']['properties']['key']['format'], 'fk')
@@ -3498,41 +3498,63 @@ class ProjectTestCase(BaseTestCase):
             HTTP_ACCEPT_ENCODING='gzip',
         )
 
-    def test_cachable_model(self):
+    def test_cacheable_model(self):
         CachableModel = self.get_model_class('test_proj.CachableModel')
         results = self.bulk([
-            {"method": 'get', "path": ['cachable']},
+            {"method": 'get', "path": ['cacheable']},
         ])
         self.assertEqual(results[0]['status'], 200)
 
         instance = CachableModel.objects.create(name='1')
+        instance2 = CachableModel.objects.create(name='2')
         results = self.bulk([
-            {"method": 'get', "path": ['cachable']},
-            {"method": 'get', "path": ['cachable'], 'headers': {"If-None-Match": 'W/<<0[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable']},
+            {"method": 'get', "path": ['cacheable'], 'headers': {"If-None-Match": 'W/<<0[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable', instance.id]},
+            {"method": 'get', "path": ['cacheable', instance.id], 'headers': {"If-None-Match": 'W/<<2[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable', instance2.id]},
+            {"method": 'get', "path": ['cacheable', instance2.id], 'headers': {"If-None-Match": 'W/<<4[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable', instance2.id], 'headers': {"If-None-Match": 'W/<<2[headers][ETag]>>'}},
         ])
         self.assertEqual(results[0]['status'], 200)
-        self.assertEqual(results[0]['data']['count'], 1)
+        self.assertEqual(results[0]['data']['count'], 2)
         self.assertEqual(results[1]['status'], 304)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['data']['id'], instance.id)
+        self.assertEqual(results[3]['status'], 304)
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[4]['data']['id'], instance2.id)
+        self.assertEqual(results[5]['status'], 304)
+        self.assertEqual(results[6]['status'], 200)
 
         instance.save()
         results = self.bulk([
-            {"method": 'get', "path": ['cachable'], 'headers': {"If-None-Match": results[0]['headers']['ETag']}},
-            {"method": 'get', "path": ['cachable'], 'headers': {"If-None-Match": '<<0[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable'], 'headers': {"If-None-Match": results[0]['headers']['ETag']}},
+            {"method": 'get', "path": ['cacheable'], 'headers': {"If-None-Match": '<<0[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable', instance.id], 'headers': {"If-None-Match": results[2]['headers']['ETag']}},
+            {"method": 'get', "path": ['cacheable', instance.id], 'headers': {"If-None-Match": '<<2[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable', instance2.id], 'headers': {"If-None-Match": results[4]['headers']['ETag']}},
+            {"method": 'patch', "path": ['cacheable', instance.id], 'headers': {"If-Match": results[2]['headers']['ETag']}, 'data': {}},
         ])
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[1]['status'], 304)
+        self.assertEqual(results[2]['status'], 200, results[2]['data'])
+        self.assertEqual(results[3]['status'], 304)
+        self.assertEqual(results[4]['status'], 304)
+        self.assertEqual(results[4]['status'], 304)
+        self.assertEqual(results[5]['status'], 412)
 
         self.client.cookies['lang'] = 'ru'
         results_ru = self.bulk([
-            {'method': 'get', 'path': ['cachable'], 'headers': {'If-None-Match': results[0]['headers']['ETag']}},
-            {'method': 'get', 'path': ['cachable'], 'headers': {'If-None-Match': '<<0[headers][ETag]>>'}},
+            {'method': 'get', 'path': ['cacheable'], 'headers': {'If-None-Match': results[0]['headers']['ETag']}},
+            {'method': 'get', 'path': ['cacheable'], 'headers': {'If-None-Match': '<<0[headers][ETag]>>'}},
         ])
         self.assertEqual(results_ru[0]['status'], 200)
         self.assertEqual(results_ru[1]['status'], 304)
         self.assertNotEqual(results[0]['headers']['ETag'], results_ru[0]['headers']['ETag'])
 
         results = self.bulk([
-            {'method': 'get', 'path': ['cachable', 'non_cached']},
+            {'method': 'get', 'path': ['cacheable', 'non_cached']},
         ])
         self.assertEqual(results[0]['status'], 200)
         self.assertNotIn('ETag', results[0]['headers'])

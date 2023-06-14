@@ -138,7 +138,8 @@ def get_parents_append_to_view(mro_items):
 
 
 def update_cache_for_model(instance, **kwargs):
-    kwargs.get('cached_model_class', instance.__class__).set_etag_value()
+    cached_model_class = kwargs.get('cached_model_class', instance.__class__)
+    cached_model_class.set_etag_value(instance.pk if isinstance(instance, cached_model_class) else None)
 
 
 def get_first_match_name(field_names, default=None):
@@ -268,17 +269,23 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
     def get_proxy_labels(cls):
         return get_proxy_labels(cls)  # nocv
 
-    def get_api_cache_name(cls):
-        return f'api_caching_table_{cls._meta.db_table}'
+    def get_api_cache_name(cls, pk=None):
+        return f'api_caching_table_{cls._meta.db_table}' + (f'_{pk}' if pk is not None else "")
 
-    def get_etag_value(cls):
+    def get_etag_value(cls, pk=None):
         # pylint: disable=no-value-for-parameter
-        return str(django_caches['etag'].get_or_set(cls.get_api_cache_name(), str(uuid.uuid4())))
+        if pk and django_caches['etag'].get(f'clear_{cls.get_api_cache_name()}') == 1:
+            return cls.set_etag_value(pk)
+        return str(django_caches['etag'].get_or_set(cls.get_api_cache_name(pk), str(uuid.uuid4())))
 
-    def set_etag_value(cls):
+    def set_etag_value(cls, pk=None):
         # pylint: disable=no-value-for-parameter
         new_value = str(uuid.uuid4())
         django_caches['etag'].set(cls.get_api_cache_name(), new_value)
+        if pk:
+            django_caches['etag'].set(cls.get_api_cache_name(pk), new_value)
+        else:
+            django_caches['etag'].set(f'clear_{cls.get_api_cache_name()}', 1)
         return new_value
 
     @classproperty

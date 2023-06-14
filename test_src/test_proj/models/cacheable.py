@@ -2,6 +2,7 @@ from django.db.models import CharField
 from vstutils.api.responses import HTTP_200_OK
 from vstutils.models import BaseModel
 from vstutils.models.decorators import register_view_action
+from rest_framework.mixins import UpdateModelMixin
 
 
 class SomeViewMixin:
@@ -25,7 +26,7 @@ class CachableModel(BaseModel):
 class CachableProxyModel(CachableModel):
     class Meta(CachableModel.OriginalMeta):
         proxy = True
-        _view_class = (SomeViewMixin, 'read_only')
+        _view_class = (SomeViewMixin, UpdateModelMixin, 'read_only')
 
     @register_view_action(methods=['get'], detail=False)
     def non_cached(self, request, *args, **kwargs):
