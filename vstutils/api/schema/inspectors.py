@@ -1,3 +1,4 @@
+import warnings
 from copy import deepcopy
 from typing import Dict, Type, Text, Any, Union, Set
 from collections import OrderedDict
@@ -5,7 +6,7 @@ from collections import OrderedDict
 from django.http import FileResponse
 from django.db import models
 from django.utils.functional import cached_property
-from drf_yasg.inspectors.base import FieldInspector, NotHandled
+from drf_yasg.inspectors.base import FieldInspector, FilterInspector, NotHandled
 from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_field_type
 from drf_yasg import openapi
 from drf_yasg.inspectors.query import CoreAPICompatInspector, force_real_str, coreschema  # type: ignore
@@ -225,6 +226,7 @@ class FkFieldInspector(FieldInspector):
         )
 
         field_format = FORMAT_FK
+        in_ = kw.get('in_')
         options = {
             'model': openapi.SchemaRef(
                 self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
@@ -232,8 +234,8 @@ class FkFieldInspector(FieldInspector):
             ),
             'value_field': field.autocomplete_property,
             'view_field': field.autocomplete_represent,
-            'usePrefetch': field.use_prefetch,
-            'makeLink': field.make_link,
+            'usePrefetch': field.use_prefetch if in_ != 'query' else False,
+            'makeLink': field.make_link if in_ != 'query' else False,
             'dependence': field.dependence,
             'filters': field.filters,
         }
@@ -544,34 +546,50 @@ class DecimalFieldInspector(FieldInspector):
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
-class NestedFilterInspector(CoreAPICompatInspector):
-    def get_filter_parameters(self, filter_backend):  # nocv
-        subaction_list_actions = [
-            f'{name}_list'
-            for name in getattr(self.view, '_nested_args', {}).keys()
-        ]
-        if self.view.action not in subaction_list_actions:
+class SerializedFilterBackendsInspector(FilterInspector):
+    def get_filter_parameters(self, filter_backend):
+        if getattr(filter_backend, 'serializer_class', None) is None or \
+                getattr(filter_backend, 'no_schema_serializer', False):
             return NotHandled
-        if self.method != 'GET':
-            return NotHandled
-        nested_view = getattr(self.view, self.view.action, None)
-        nested_view_filter_class = getattr(nested_view, '_nested_filter_class', None)
-        filter_class = getattr(self.view, 'filterset_class', getattr(self.view, 'filter_class', None))
-        self.view.filter_class = nested_view_filter_class
-        result = super().get_filter_parameters(filter_backend)
-        self.view.filter_class = filter_class
-        return result
+        # pylint: disable=protected-access
+        return self.request._schema.serializer_to_parameters(
+            serializer=filter_backend.serializer_class(),
+            in_=openapi.IN_QUERY
+        )
 
 
 class ArrayFilterQueryInspector(CoreAPICompatInspector):
     @cached_property
-    def fields_map(self):
+    def fields_map(self):  # nocv
+        warnings.warn(
+            "CoreAPI and coreschema is deprecated and will removed in 6.x.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
         return {
             f.name: f
             for f in self.view.get_queryset().model._meta.fields
         }
 
-    def coreapi_field_to_parameter(self, field, schema=None):
+    def param_to_schema(self, param):
+        return openapi.Parameter(
+            name=param['name'],
+            in_=param['in'],
+            description=param.get('description'),
+            **param['schema'],
+        )
+
+    def get_paginator_parameters(self, paginator):
+        if hasattr(paginator, 'get_schema_operation_parameters'):
+            return list(map(self.param_to_schema, paginator.get_schema_operation_parameters(self.view)))
+        return super().get_paginator_parameters(paginator)  # nocv
+
+    def get_filter_parameters(self, filter_backend):
+        if hasattr(filter_backend, 'get_schema_operation_parameters'):
+            return list(map(self.param_to_schema, filter_backend.get_schema_operation_parameters(self.view)))
+        return super().get_filter_parameters(filter_backend)
+
+    def coreapi_field_to_parameter(self, field, schema=None):  # nocv
         """
         Convert an instance of `coreapi.Field` to a swagger :class:`.Parameter` object.
 
@@ -579,6 +597,11 @@ class ArrayFilterQueryInspector(CoreAPICompatInspector):
         :param coreschema..Schema schema:
         :rtype: openapi.Parameter
         """
+        warnings.warn(
+            "CoreAPI and coreschema is deprecated and will removed in 6.x.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
         location_to_in = {
             'query': openapi.IN_QUERY,
             'path': openapi.IN_PATH,
@@ -625,6 +648,25 @@ class ArrayFilterQueryInspector(CoreAPICompatInspector):
             **OrderedDict((attr, getattr(schema_field, attr, None)) for attr in coreschema_attrs),
             **attributes
         )
+
+
+class NestedFilterInspector(ArrayFilterQueryInspector):
+    def get_filter_parameters(self, filter_backend):  # nocv
+        subaction_list_actions = [
+            f'{name}_list'
+            for name in getattr(self.view, '_nested_args', {}).keys()
+        ]
+        if self.view.action not in subaction_list_actions:
+            return NotHandled
+        if self.method != 'GET':
+            return NotHandled
+        nested_view = getattr(self.view, self.view.action, None)
+        nested_view_filter_class = getattr(nested_view, '_nested_filter_class', None)
+        filter_class = getattr(self.view, 'filterset_class', getattr(self.view, 'filter_class', None))
+        self.view.filter_class = nested_view_filter_class
+        result = super().get_filter_parameters(filter_backend)
+        self.view.filter_class = filter_class
+        return result
 
 
 class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
