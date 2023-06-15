@@ -4,9 +4,24 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from rest_framework import fields as drf_fields
 from vstutils.models import BModel
+from vstutils.api.filter_backends import VSTFilterBackend
 from vstutils.api.serializers import BaseSerializer
 from vstutils.api.fields import FkModelField, DependFromFkField
 from vstutils.api.base import ModelViewSet
+
+
+class TestFilterSerializer(BaseSerializer):
+    test = drf_fields.IntegerField(required=False, default=None, allow_null=True)
+
+
+class TestFilterBackendWithSerializer(VSTFilterBackend):
+    serializer_class = TestFilterSerializer
+
+    def filter_queryset(self, request, queryset, view):
+        return queryset.annotate(**{
+            k: models.Value(v, output_field=models.IntegerField(null=True))
+            for k,v in self.get_serialized_query_params(request, view).items()
+        },)
 
 
 class VariableType(BModel):
@@ -24,6 +39,18 @@ class VariableType(BModel):
             'name',
             'val_type',
         )
+
+
+class TestFkFilterSerializer(BaseSerializer):
+    key_query = FkModelField(select=VariableType, required=False)
+
+
+class TestFkFilterBackend(VSTFilterBackend):
+    serializer_class = TestFkFilterSerializer
+
+    def filter_queryset(self, request, queryset, view):
+        key = self.get_serialized_query_params(request, view).get('key_query')
+        return queryset if not key else queryset.filter(key=key)
 
 
 class Variable(BModel):
@@ -44,6 +71,7 @@ class Variable(BModel):
             'value': DependFromFkField(field='key', field_attribute='val_type'),
         }
         _view_class = 'vstutils.api.base.ModelViewSet'
+        _filter_backends = [TestFilterBackendWithSerializer, TestFkFilterBackend]
         _search_fields = _list_fields
 
 

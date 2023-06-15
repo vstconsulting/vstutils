@@ -2284,6 +2284,13 @@ class OpenapiEndpointTestCase(BaseTestCase):
             '#/definitions/PhoneBook',
         )
 
+        path = '/testcontenttype/{id}/vars/'
+        self.assertEqual(api['paths'][path]['get']['parameters'][6]['name'], 'test')
+        self.assertEqual(api['paths'][path]['get']['parameters'][6]['type'], 'integer')
+        self.assertEqual(api['paths'][path]['get']['parameters'][7]['name'], 'key_query')
+        self.assertEqual(api['paths'][path]['get']['parameters'][7]['type'], 'integer')
+        self.assertEqual(api['paths'][path]['get']['parameters'][7]['format'], 'fk')
+
         user = self._create_user(is_super_user=False, is_staff=False)
         with self.user_as(self, user):
             schema = self.endpoint_schema()
@@ -4863,6 +4870,11 @@ class ProjectTestCase(BaseTestCase):
                     'key': '<<5[data][id]>>',
                 }
             },
+            {
+                'method': 'get',
+                'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
+                'query': 'key_query=non-valid'
+            },
         ]
         results = self.bulk(bulk_data)
         self.assertEqual(results[1]['status'], 201, results[1])
@@ -4880,6 +4892,8 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[10]['status'], 201, results[10])
         self.assertEqual(results[11]['status'], 400, results[11])
         self.assertEqual(results[11]['data'], {'value': ['A valid integer is required.']})
+        self.assertEqual(results[12]['status'], 400, results[11])
+        self.assertEqual(results[12]['data']['detail'], "Field 'id' expected a number but got 'non-valid'.")
 
     @override_settings(CASE_SENSITIVE_API_FILTER=False)
     def test_filters_case_insensitive(self):

@@ -1,10 +1,13 @@
 import typing as _t
+import warnings
 
 from django.utils.encoding import force_str
 from django.db import models
+from drf_yasg import openapi
+from rest_framework.serializers import Serializer
 from rest_framework.filters import BaseFilterBackend, OrderingFilter
 from django_filters.rest_framework.backends import DjangoFilterBackend as BaseDjangoFilterBackend
-from django_filters import compat, filters, filterset
+from django_filters import filters, filterset
 from vstutils.utils import raise_context, translate as _
 
 from .filters import extra_filter
@@ -18,30 +21,73 @@ def get_serializer_readable_fields(serializer):
     }
 
 
+def get_field_type_from_queryset(field):
+    field_type, kwargs = openapi.TYPE_STRING, {}
+    if isinstance(field, (models.AutoField, models.IntegerField)):
+        field_type = openapi.TYPE_INTEGER
+    elif isinstance(field, models.UUIDField):
+        kwargs['format'] = openapi.FORMAT_UUID
+    return field_type, kwargs
+
+
 class DjangoFilterBackend(BaseDjangoFilterBackend):
-    def get_coreschema_field(self, field):
-        kwargs = {
-            'description': str(field.extra.get('help_text', '')),
-        }
+    def get_openapi_field_schema(self, field_name, field, queryset):
+        # pylint: disable=unused-variable,comparison-with-callable
+        field_type: str = openapi.TYPE_STRING
+        kwargs: dict = {}
+
         if isinstance(field, filters.NumberFilter):
-            field_cls = compat.coreschema.Number
+            field_type = openapi.TYPE_NUMBER
         elif isinstance(field, filters.BooleanFilter):
-            field_cls = compat.coreschema.Boolean
+            field_type = openapi.TYPE_BOOLEAN
         elif isinstance(field, filters.ChoiceFilter):
-            field_cls = compat.coreschema.Enum
             kwargs['enum'] = tuple(dict(field.field.choices).keys())
-        else:
-            field_cls = compat.coreschema.String
-        if field.method == extra_filter:  # pylint: disable=comparison-with-callable
-            result = compat.coreschema.Array(
-                items=field_cls(),
-                min_items=1,
-                unique_items=True,
-                **kwargs
+        elif field_name in {'id', 'id__not'}:
+            m_field = next((f for f in queryset.model._meta.fields if f.name == field_name), None)
+            field_type, kwargs_update = get_field_type_from_queryset(m_field)
+
+        if field.method == extra_filter:
+            kwargs = {
+                'items': {
+                    'type': field_type,
+                    **kwargs,
+                },
+                'minItems': 1,
+                'uniqueItems': True,
+                'collectionFormat': 'csv',
+            }
+            field_type = openapi.TYPE_ARRAY
+
+        return {
+            **kwargs,
+            'type': field_type
+        }
+
+    def get_schema_operation_parameters(self, view):
+        try:
+            queryset = view.queryset
+        except Exception:  # nocv
+            queryset = None
+            warnings.warn(
+                "{} is not compatible with schema generation".format(view.__class__)
             )
-        else:
-            result = field_cls(**kwargs)
-        return result
+
+        filterset_class = self.get_filterset_class(view, queryset)
+
+        if not filterset_class:
+            return []
+
+        parameters = []
+        for field_name, field in filterset_class.base_filters.items():
+            parameter = {
+                "name": field_name,
+                "required": field.extra["required"],
+                "in": openapi.IN_QUERY,
+                "description": str(field.extra.get('help_text', '')),
+                "schema": self.get_openapi_field_schema(field_name, field, queryset),
+            }
+            parameters.append(parameter)
+        return parameters
 
 
 class OrderingFilterBackend(OrderingFilter):
@@ -50,21 +96,26 @@ class OrderingFilterBackend(OrderingFilter):
             yield field[0]
             yield f'-{field[0]}'
 
-    def get_schema_fields(self, view):
-        fields = tuple(self._get_fields_for_schema(view))
+    def get_schema_operation_parameters(self, view):
         return [
-            compat.coreapi.Field(
-                name=self.ordering_param,
-                required=False,
-                location='query',
-                schema=compat.coreschema.Array(
-                    title=_(force_str(self.ordering_title)),
-                    description=_(force_str(self.ordering_description)),
-                    items=compat.coreschema.Enum(enum=fields),
-                    min_items=1,
-                    unique_items=True,
-                )
-            )
+            {
+                'name': self.ordering_param,
+                'required': False,
+                'in': openapi.IN_QUERY,
+                'description': force_str(self.ordering_description),
+                'minItems': 1,
+                'uniqueItems': True,
+                'collectionFormat': 'csv',
+                'schema': {
+                    'type': openapi.TYPE_ARRAY,
+                    'title': _(force_str(self.ordering_title)),
+                    'items': {
+                        'type': openapi.TYPE_STRING,
+                        'format': 'ordering_choices',
+                        'enum': tuple(self._get_fields_for_schema(view)),
+                    },
+                },
+            },
         ]
 
 
@@ -89,7 +140,7 @@ class VSTFilterBackend(BaseFilterBackend):
         model's queryset.
 
     In some cases it may be necessary to provide a parameter from a query of request.
-    To define this parameter in the schema, you must overload the get_schema_fields
+    To define this parameter in the schema, you must overload the get_schema_operation_parameters
     function and specify a list of parameters to use.
 
     Example:
@@ -111,30 +162,42 @@ class VSTFilterBackend(BaseFilterBackend):
                         })
                     return queryset
 
-                    def get_schema_fields(self, view):
+                    def get_schema_operation_parameters(self, view):
                         return [
-                            compat.coreapi.Field(
-                                name=self.query_param,
-                                required=False,
-                                location='query',
-                                schema=compat.coreschema.String(
-                                    description='Annotate value to queryset'
-                                ),
-                            )
+                            {
+                                "name": self.query_param,
+                                "required": False,
+                                "in": openapi.IN_QUERY,
+                                "description": "Annotate value to queryset",
+                                "schema": {
+                                    "type": openapi.TYPE_STRING,
+                                }
+                            },
                         ]
 
         In this example Filter Backend annotates time in current timezone to any connected
         model's queryset with field name from query `constant`.
     """
-    required = False
+    required: bool = False
+    serializer_class: _t.Optional[_t.Type[Serializer]] = None
+
+    def get_serialized_query_params(self, request, view):
+        # pylint: disable=not-callable
+        serializer = self.serializer_class(
+            data=request.query_params,
+            context={'request': request, 'filter_backend': self, 'view': view},
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        return serializer.validated_data
 
     def filter_queryset(self, request, queryset, view):
         raise NotImplementedError  # nocv
 
-    def get_schema_fields(self, view):
+    def get_schema_operation_parameters(self, view):
         """
         You can also make the filter controls available to the schema autogeneration that REST framework provides,
-        by implementing this method. The method should return a list of coreapi.Field instances.
+        by implementing this method. The method should return a list of OpenAPI schema mappings.
         """
         # pylint: disable=unused-argument
         return []
@@ -241,8 +304,9 @@ class DeepViewFilterBackend(VSTFilterBackend):
     """
     field_name = '__deep_parent'
     field_types = {
-        compat.coreschema.Integer: filters.NumberFilter,  # type: ignore
-        compat.coreschema.String: filters.CharFilter,  # type: ignore
+        openapi.TYPE_INTEGER: filters.NumberFilter,
+        openapi.TYPE_NUMBER: filters.NumberFilter,
+        openapi.TYPE_STRING: filters.CharFilter,
     }
 
     def filter_queryset(self, request, queryset, view):
@@ -270,28 +334,22 @@ class DeepViewFilterBackend(VSTFilterBackend):
 
     def get_filter_class_with_data(self, model: _t.Type[models.Model], data: _t.Mapping):
         # pylint: disable=protected-access
-        filterset_type = self.field_types[type(self.get_coreschema_field(model))]
+        filterset_type = self.field_types[get_field_type_from_queryset(model._meta.pk)[0]]
         filterset_class = type('FilterSet', (filterset.FilterSet,), {self.field_name: filterset_type()})
         filterset_object = filterset_class(data, model._default_manager.all())
         filterset_object.is_valid()
         return filterset_object.form.cleaned_data[self.field_name], filterset_type
 
-    def get_coreschema_field(self, model: _t.Type[models.Model]):
-        primary_key_field: _t.Optional[models.Field] = model._meta.pk
-        if isinstance(primary_key_field, models.IntegerField):
-            field_cls = compat.coreschema.Integer  # type: ignore
-        else:  # nocv
-            field_cls = compat.coreschema.String  # type: ignore
-        return field_cls(
-            description=''
-        )
-
-    def get_schema_fields(self, view):
+    def get_schema_operation_parameters(self, view):
+        field_type, kwargs = get_field_type_from_queryset(view.get_queryset().model._meta.pk)
         return [
-            compat.coreapi.Field(
-                name=self.field_name,
-                required=False,
-                location='query',
-                schema=self.get_coreschema_field(view.get_queryset().model),
-            )
+            {
+                "name": self.field_name,
+                "required": False,
+                "in": openapi.IN_QUERY,
+                "schema": {
+                    "type": field_type,
+                    **kwargs,
+                }
+            }
         ]
