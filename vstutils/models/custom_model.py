@@ -102,6 +102,9 @@ class Query(dict):
 
     def get_count(self, using):
         # pylint: disable=unused-argument
+        model = self.model
+        if hasattr(model, 'get_data_generator_count'):
+            return model.get_data_generator_count(self)
         return len(self.queryset.all())
 
     def can_filter(self):
@@ -140,29 +143,35 @@ class CustomModelIterable(ModelIterable):
         queryset = self.queryset
         model = queryset.model
         query = queryset.query
-        model_data = model._get_data(
-            chunked_fetch=self.chunked_fetch,
-            **query.get('custom_queryset_kwargs', {})
-        )
-        if isinstance(model._meta.pk, AutoField):
-            for idx, item in enumerate(model_data, 1):
-                item[model._meta.pk.attname] = idx
-        model_data = list(filter(query.check_in_query, model_data))
-        ordering = query.order_by
-        if ordering:
-            ordering = list(ordering)
-            for idx, value in enumerate(ordering):
-                if value in ('pk', '-pk'):
-                    ordering[idx] = value.replace('pk', model._meta.pk.name)
-            model_data = multikeysort(
-                model_data,
-                ordering,
-                not query.standard_ordering
+
+        if hasattr(model, 'get_data_generator'):
+            model_data = model.get_data_generator(query=query)
+        else:
+            model_data = model._get_data(
+                chunked_fetch=self.chunked_fetch,
+                **query.get('custom_queryset_kwargs', {})
             )
-        elif not query.standard_ordering:
-            model_data.reverse()
-        low = query.get('low_mark', 0)
-        high = query.get('high_mark', len(model_data))
+            if isinstance(model._meta.pk, AutoField):
+                for idx, item in enumerate(model_data, 1):
+                    item[model._meta.pk.attname] = idx
+            model_data = list(filter(query.check_in_query, model_data))
+            ordering = query.order_by
+            if ordering:
+                ordering = list(ordering)
+                for idx, value in enumerate(ordering):
+                    if value in ('pk', '-pk'):
+                        ordering[idx] = value.replace('pk', model._meta.pk.name)
+                model_data = multikeysort(
+                    model_data,
+                    ordering,
+                    not query.standard_ordering
+                )
+            elif not query.standard_ordering:
+                model_data.reverse()
+            low = query.get('low_mark', 0)
+            high = query.get('high_mark', len(model_data))
+            model_data = model_data[low:high]
+
         fields = getattr(self, 'fields', None)
         if fields is None:
             handler = partial(
@@ -177,7 +186,7 @@ class CustomModelIterable(ModelIterable):
                 fields=tuple(fields) or {f.name for f in model._meta.get_fields()},
                 pk_name=model._meta.pk.name,
             )
-        for data in model_data[low:high]:
+        for data in model_data:
             yield handler(data)
 
 
@@ -347,3 +356,48 @@ class FileModel(ListModel):
     @classmethod
     def _get_data(cls, chunked_fetch=False):
         return load(cls.load_file_data(), Loader=Loader)
+
+
+class ExternalCustomModel(ListModel):
+    """
+    This custom model is intended for self-implementation of requests to external services.
+    The model allows you to pass filtering, limiting and sorting parameters to an external request,
+    receiving already limited data.
+
+    To start using this model, it is enough to implement the ``get_data_generator()`` class method,
+    which receives the query object with the necessary parameters as an argument.
+    """
+    class Meta:
+        abstract = True
+
+    @classmethod
+    def get_data_generator(cls, query):
+        raise NotImplementedError
+
+
+class ViewCustomModel(ExternalCustomModel):
+    """
+    This model implements the SQL View programming mechanism over other models.
+    In the ``get_view_queryset()`` method, a query is prepared, and all further actions are implemented on top of it.
+    """
+
+    class Meta:
+        abstract = True
+
+    @classmethod
+    def get_view_queryset(cls):
+        raise NotImplementedError
+
+    @classmethod
+    def get_data_generator(cls, query):
+        qs = cls.get_view_queryset()\
+            .filter(**query.get('filter', {}))\
+            .exclude(**query.get('exclude', {}))\
+            .order_by(*query.order_by)
+        if query.is_sliced:
+            qs = qs[query.get('low_mark'):query.get('high_mark')]
+        return qs.values(*{f.name for f in cls._meta.get_fields()})
+
+    @classmethod
+    def get_data_generator_count(cls, query):
+        return cls.get_data_generator(query).count()

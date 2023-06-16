@@ -1,11 +1,14 @@
 import datetime
 import os
 from django.db import models
+from django.db.models.functions import Now
 from rest_framework import permissions, fields as drf_fields
 from vstutils.api.serializers import BaseSerializer, DataSerializer
 from vstutils.models.decorators import register_view_action
-from vstutils.models.custom_model import ListModel, FileModel
+from vstutils.models.custom_model import ListModel, FileModel, ViewCustomModel
 from vstutils.api import fields, base, responses
+
+from .cacheable import CachableModel
 
 
 class TestQuerySerializer(BaseSerializer):
@@ -122,3 +125,17 @@ class ListOfFiles(ListModel):
     @property
     def filename(self):
         return f"File_{self.id}.txt"
+
+
+class TestExternalCustomModel(ViewCustomModel):
+    name = models.CharField(max_length=128)
+    test_date = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        _list_fields = ['name']
+        _view_class = 'read_only'
+
+
+    @classmethod
+    def get_view_queryset(cls):
+        return CachableModel.objects.annotate(test_date=Now())
