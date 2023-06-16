@@ -1495,6 +1495,8 @@ if TESTS_RUN:
     for storage_name in filter('staticfiles'.__ne__, STORAGES):
         STORAGES[storage_name] = {"BACKEND": 'django.core.files.storage.InMemoryStorage'}
     CENTRIFUGO_CLIENT_KWARGS = {}
+    __import__('pysqlite3')
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 
 if not TESTSERVER_RUN and TESTS_RUN:
