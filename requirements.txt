@@ -6,7 +6,7 @@ django-environ~=0.10.0
 
 # REST API packages
 djangorestframework~=3.14.0
-drf-yasg==1.21.5
+drf-yasg==1.21.6
 MarkupSafe==2.0.1  # Fix coreschema
 django-filter==23.2
 django-crispy-forms~=1.14.0

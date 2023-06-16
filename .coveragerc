@@ -32,3 +32,4 @@ exclude_lines =
     nocv
     noprj
     noce
+    raise NotImplementedError

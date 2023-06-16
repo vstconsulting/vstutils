@@ -75,6 +75,7 @@ class FileModel(ListModel):
 
 class Query(_t.Dict):
     distinct_fields: _t.ClassVar[bool]
+    is_sliced: _t.ClassVar[bool]
     queryset: CustomQuerySet
     standard_ordering: _t.Union[bool, property]
     model: _t.Union[ListModel, property]
@@ -113,4 +114,26 @@ class Query(_t.Dict):
         ...
 
     def add_ordering(self, *ordering) -> None:
+        ...
+
+
+class ExternalCustomModel(ListModel):
+    @classmethod
+    def get_data_generator(cls, query: Query):
+        raise NotImplementedError
+
+
+class ViewCustomModel(ExternalCustomModel):
+    view_queryset: BQuerySet
+
+    @classmethod
+    def get_view_queryset(cls) -> BQuerySet:
+        ...
+
+    @classmethod
+    def get_data_generator(cls, query: Query) -> BQuerySet:
+        ...
+
+    @classmethod
+    def get_data_generator_count(cls, query: Query) -> int:
         ...

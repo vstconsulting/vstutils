@@ -75,6 +75,7 @@ from .models import (
     HostGroup,
     List,
     ListOfFiles,
+    TestExternalCustomModel,
     Author,
     Post,
     OverridenModelWithBinaryFiles,
@@ -5380,6 +5381,43 @@ class CustomModelTestCase(BaseTestCase):
         self.assertEqual(results[-1]['status'], 200, results[-1]['data'])
         self.assertEqual(results[-1]['data']['test_value'], 'TEST1')
         self.assertEqual(results[-1]['headers']['X-Query-Data'], 'test_value=TEST1')
+
+    def test_external_custom_models(self):
+        CachableModel = self.get_model_class('test_proj.CachableModel')
+        CachableModel.objects.create(name=f'Test 1')
+        CachableModel.objects.create(name=f'Test 2')
+        for i in range(10):
+            CachableModel.objects.create(name=f'Cachable {i}')
+
+        self.assertEqual(
+            CachableModel.objects.count(),
+            TestExternalCustomModel.objects.count(),
+        )
+        self.assertEqual(
+            CachableModel.objects.filter(name__startswith='Cachable').count(),
+            TestExternalCustomModel.objects.filter(name__startswith='Cachable').count(),
+        )
+        self.assertEqual(
+            CachableModel.objects.all()[1:9].count(),
+            TestExternalCustomModel.objects.all()[1:9].count(),
+        )
+        self.assertEqual(
+            CachableModel.objects.all()[:9].count(),
+            TestExternalCustomModel.objects.all()[:9].count(),
+        )
+        self.assertEqual(
+            CachableModel.objects.all()[3:].count(),
+            TestExternalCustomModel.objects.all()[3:].count(),
+        )
+        self.assertEqual(
+            CachableModel.objects.first().name,
+            TestExternalCustomModel.objects.first().name,
+        )
+        self.assertEqual(
+            CachableModel.objects.order_by('-name').first().name,
+            TestExternalCustomModel.objects.order_by('-name').first().name,
+        )
+        CachableModel.objects.all().delete()
 
     def test_additional_urls(self):
         response = self.client.get('/suburls/admin/login/')
