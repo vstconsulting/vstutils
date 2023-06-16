@@ -21,10 +21,9 @@ as BModel provides plenty of Meta attributes to autogenerate serializers and vie
 
 
 You can also use custom models without using database:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: vstutils.models.custom_model
-    :members: ListModel,FileModel
+    :members: ListModel,FileModel,ExternalCustomModel,ViewCustomModel
 
 Model Fields
 ~~~~~~~~~~~~

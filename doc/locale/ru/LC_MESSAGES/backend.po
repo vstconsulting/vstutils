@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-01 04:28+0000\n"
+"POT-Creation-Date: 2023-06-16 03:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -489,9 +489,31 @@ msgstr ""
 "сериализатор :class:`vstutils.api.serializers.EmptySerializer`. по "
 "умолчанию."
 
-#: ../../backend.rst:24
+#: ../../backend.rst:23
 msgid "You can also use custom models without using database:"
 msgstr "Вы также можете использовать модели, не нуждающиеся в базе данных:"
+
+#: of vstutils.models.custom_model.ExternalCustomModel:1
+msgid ""
+"This custom model is intended for self-implementation of requests to "
+"external services. The model allows you to pass filtering, limiting and "
+"sorting parameters to an external request, receiving already limited "
+"data."
+msgstr ""
+"Данная кастомная модель предназначена для самостоятельной реализации "
+"запросов к внешним сервисам. Модель позволяет вам передавать параметры "
+"фильтрации, лимитирования и сортировки к внешним запросам, "
+"получая уже ограниченные данные."
+
+#: of vstutils.models.custom_model.ExternalCustomModel:5
+msgid ""
+"To start using this model, it is enough to implement the "
+"``get_data_generator()`` class method, which receives the query object "
+"with the necessary parameters as an argument."
+msgstr ""
+"Чтобы начать использовать эту модель, достаточно реализовать метод класса "
+"``get_data_generator()``, который получает объект запроса с необходимыми "
+"параметрами, как аргумент."
 
 #: of vstutils.models.custom_model.FileModel:1
 msgid ""
@@ -559,7 +581,17 @@ msgstr ""
 msgid "List with data dicts. Empty by default."
 msgstr "Список кортежей данных. Пустой по умолчанию."
 
-#: ../../backend.rst:30
+#: of vstutils.models.custom_model.ViewCustomModel:1
+msgid ""
+"This model implements the SQL View programming mechanism over other "
+"models. In the ``get_view_queryset()`` method, a query is prepared, and "
+"all further actions are implemented on top of it."
+msgstr ""
+"Эта модель реализует механизм программирования SQL View над другими "
+"моделями. В методе ``get_view_queryset()`` подготавливается запрос, "
+"и все остальные действия осуществляются поверх него."
+
+#: ../../backend.rst:29
 msgid "Model Fields"
 msgstr "Поля Модели"
 
@@ -699,11 +731,11 @@ msgstr ""
 ":class:`vstutils.models.BModel`, чтобы получить "
 "`vstutils.api.NamedBinaryImageInJSONField` в сериализаторе."
 
-#: ../../backend.rst:37
+#: ../../backend.rst:36
 msgid "Web API"
 msgstr "Веб-API"
 
-#: ../../backend.rst:39
+#: ../../backend.rst:38
 msgid ""
 "Web API is based on Django Rest Framework with additional nested "
 "functions."
@@ -711,11 +743,11 @@ msgstr ""
 "Веб-API основано на Django Rest Framework. Предоставляет дополнительные "
 "вложенные функции."
 
-#: ../../backend.rst:42
+#: ../../backend.rst:41
 msgid "Fields"
 msgstr "Поля"
 
-#: ../../backend.rst:44
+#: ../../backend.rst:43
 msgid ""
 "The Framework includes a list of convenient serializer fields. Some of "
 "them take effect only in generated admin interface."
@@ -790,13 +822,15 @@ msgstr ""
 #: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.list_test
 #: vstutils.tests.BaseTestCase.patch_field_default
 #: vstutils.tests.BaseTestCase.user_as
-#: vstutils.utils.BaseVstObject.get_django_settings
-#: vstutils.utils.Executor.execute vstutils.utils.Executor.working_handler
-#: vstutils.utils.Executor.write_output vstutils.utils.Lock
-#: vstutils.utils.ModelHandlers vstutils.utils.ModelHandlers.get_object
-#: vstutils.utils.ObjectHandlers vstutils.utils.ObjectHandlers.backend
-#: vstutils.utils.SecurePickling vstutils.utils.URLHandlers
-#: vstutils.utils.URLHandlers.get_object vstutils.utils.classproperty
+#: vstutils.utils.BaseVstObject.get_django_settings vstutils.utils.Executor
+#: vstutils.utils.Executor.aexecute vstutils.utils.Executor.execute
+#: vstutils.utils.Executor.post_execute vstutils.utils.Executor.pre_execute
+#: vstutils.utils.Executor.working_handler vstutils.utils.Executor.write_output
+#: vstutils.utils.Lock vstutils.utils.ModelHandlers
+#: vstutils.utils.ModelHandlers.get_object vstutils.utils.ObjectHandlers
+#: vstutils.utils.ObjectHandlers.backend vstutils.utils.SecurePickling
+#: vstutils.utils.URLHandlers vstutils.utils.URLHandlers.get_object
+#: vstutils.utils.UnhandledExecutor vstutils.utils.classproperty
 #: vstutils.utils.create_view vstutils.utils.decode vstutils.utils.deprecated
 #: vstutils.utils.encode vstutils.utils.get_render
 #: vstutils.utils.lazy_translate vstutils.utils.list_to_choices
@@ -1779,11 +1813,11 @@ msgstr ""
 "На фронтенде отображается https://ui.toast.com/tui-editor. Сохраняет "
 "данные в формате markdown, экранируя все html-теги."
 
-#: ../../backend.rst:50
+#: ../../backend.rst:49
 msgid "Validators"
 msgstr "Валидаторы"
 
-#: ../../backend.rst:52
+#: ../../backend.rst:51
 msgid "There are validation classes for fields."
 msgstr "Классы для валидации полей."
 
@@ -1938,8 +1972,8 @@ msgstr "Необходимая высота"
 #: vstutils.tests.BaseTestCase.get_model_class
 #: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.get_url
 #: vstutils.utils.BaseVstObject.get_django_settings
-#: vstutils.utils.Executor.execute vstutils.utils.Executor.write_output
-#: vstutils.utils.ModelHandlers.get_object
+#: vstutils.utils.Executor.aexecute vstutils.utils.Executor.execute
+#: vstutils.utils.Executor.write_output vstutils.utils.ModelHandlers.get_object
 #: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
 #: vstutils.utils.decode vstutils.utils.encode vstutils.utils.get_render
 #: vstutils.utils.list_to_choices vstutils.utils.send_template_email_handler
@@ -1972,8 +2006,8 @@ msgstr "Возвращает"
 #: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.get_url
 #: vstutils.tests.BaseTestCase.patch
 #: vstutils.tests.BaseTestCase.patch_field_default
-#: vstutils.tests.BaseTestCase.random_name vstutils.utils.Executor.execute
-#: vstutils.utils.Executor.working_handler vstutils.utils.Executor.write_output
+#: vstutils.tests.BaseTestCase.random_name vstutils.utils.Executor.aexecute
+#: vstutils.utils.Executor.execute vstutils.utils.Executor.write_output
 #: vstutils.utils.ModelHandlers.get_object
 #: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
 #: vstutils.utils.create_view vstutils.utils.decode vstutils.utils.encode
@@ -2002,7 +2036,7 @@ msgstr ""
 "Словарь с максимальным/минимальным ограничениями, например ``{'width': "
 "{'min': 300, 'max: 600'}, 'height':  {'min': 400, 'max: 800'}}``"
 
-#: ../../backend.rst:58
+#: ../../backend.rst:57
 msgid "Serializers"
 msgstr "Сериализаторы"
 
@@ -2027,6 +2061,17 @@ msgstr ""
 "в `документации сериализатора <https://www.django-rest-framework.org/api-"
 "guide/serializers/#serializers>`_ как создавать сериализаторы и работать "
 "с ними."
+
+#: of vstutils.api.serializers.BaseSerializer:7
+msgid ""
+"You can also setup ``generated_fields`` in class attribute ``Meta`` to "
+"get serializer with default CharField fields. Setup attribute "
+"``generated_field_factory`` to change default fabric method."
+msgstr ""
+"Вы также можете настроить ``generated_fields`` в атрибуте класса "
+"``Meta``, чтобы получить сериализатор с полями CharField по умолчанию. "
+"Настройте атрибут ``generated_field_factory`` чтобы изменить фабричный "
+"метод по умолчанию."
 
 #: of vstutils.api.serializers.EmptySerializer:1
 msgid ""
@@ -2059,7 +2104,7 @@ msgstr ""
 ":class:`vstutils.api.fields.FkModelField` в сериализаторе, задайте "
 ":class:`vstutils.models.fields.FkModelField` в модели."
 
-#: ../../backend.rst:64
+#: ../../backend.rst:63
 msgid "Views"
 msgstr "Представления"
 
@@ -2436,11 +2481,11 @@ msgstr "Заменить заголовок действия."
 msgid "Setup action icon classes."
 msgstr "Настроить классы иконок действия."
 
-#: ../../backend.rst:74
+#: ../../backend.rst:73
 msgid "Actions"
 msgstr "Actions (Действия)"
 
-#: ../../backend.rst:76
+#: ../../backend.rst:75
 msgid ""
 "Vstutils has the advanced system of working with actions. REST API works "
 "with data through verbs, which are called methods. However, to work with "
@@ -2450,7 +2495,7 @@ msgstr ""
 "данными через глаголы, которые называются методами. Однако для работы с "
 "одной или списком сущностей этих действий может быть недостаточно."
 
-#: ../../backend.rst:80
+#: ../../backend.rst:79
 msgid ""
 "To expand the set of actions, you need to create an action that will work"
 " with some aspect of the described model. For these purposes, there is a "
@@ -2465,7 +2510,7 @@ msgstr ""
 "также можно расширить с помощью схемы. Но для большего удобства в "
 "vstutils есть набор декораторов, которые позволяют избежать написания "
 
-#: ../../backend.rst:84
+#: ../../backend.rst:83
 msgid ""
 "The main philosophy for these wrappers is that the developer writes "
 "business logic without being distracted by the boilerplate code. Often, "
@@ -2637,11 +2682,11 @@ msgstr ""
 "При назначении действия на объект список методов также заполняется "
 "необходимыми методами."
 
-#: ../../backend.rst:93
+#: ../../backend.rst:92
 msgid "Filtersets"
 msgstr "Filterset'ы"
 
-#: ../../backend.rst:95
+#: ../../backend.rst:94
 msgid ""
 "For greater development convenience, the framework provides additional "
 "classes and functions for filtering elements by fields."
@@ -2727,11 +2772,11 @@ msgstr ""
 msgid "searching part of name."
 msgstr "часть названия для поиска."
 
-#: ../../backend.rst:103
+#: ../../backend.rst:102
 msgid "Responses"
 msgstr "Ответы (responses)"
 
-#: ../../backend.rst:105
+#: ../../backend.rst:104
 msgid ""
 "DRF provides a standard set of variables whose names correspond to the "
 "human-readable name of the HTTP code. For convenience, we have "
@@ -2743,7 +2788,7 @@ msgstr ""
 "оборачиваем их в набор классов с соответствующими именами и дополнительно"
 " обеспечиваем следующие возможности:"
 
-#: ../../backend.rst:110
+#: ../../backend.rst:109
 msgid ""
 "String responses are wrapped in json like ``{ \"detail\": \"string "
 "response\" }``."
@@ -2751,11 +2796,11 @@ msgstr ""
 "Строковые ответы оборачиваются в json, например ``{ \"detail\": \"string "
 "response\" }``."
 
-#: ../../backend.rst:111
+#: ../../backend.rst:110
 msgid "Attribute timings are kept for further processing in middleware."
 msgstr "Тайминги атрибутов сохраняются для дальнейшей обработки в middleware."
 
-#: ../../backend.rst:112
+#: ../../backend.rst:111
 msgid ""
 "Status code is set by class name (e.g. ``HTTP_200_OK`` or ``Response200``"
 " has code 200)."
@@ -2763,7 +2808,7 @@ msgstr ""
 "Код состояния задается именем класса (например ``HTTP_200_OK`` или "
 "``Response200`` имеют код 200)."
 
-#: ../../backend.rst:114
+#: ../../backend.rst:113
 msgid "All classes inherit from:"
 msgstr "Все классы наследуются от:"
 
@@ -2780,11 +2825,11 @@ msgstr "Код состояния HTTP."
 msgid "Response timings."
 msgstr "Тайминги ответов."
 
-#: ../../backend.rst:121
+#: ../../backend.rst:120
 msgid "Middleware"
 msgstr "Middleware"
 
-#: ../../backend.rst:123
+#: ../../backend.rst:122
 msgid ""
 "By default, Django `supposes "
 "<https://docs.djangoproject.com/en/4.1/topics/http/middleware/#writing-"
@@ -2895,11 +2940,11 @@ msgstr "Handler запроса. Вызывается перед обработк
 msgid "Handled request object."
 msgstr "Обработанный объект запроса."
 
-#: ../../backend.rst:132
+#: ../../backend.rst:131
 msgid "Filter Backends"
 msgstr "Filter Backend'ы"
 
-#: ../../backend.rst:133
+#: ../../backend.rst:132
 msgid ""
 "`Filter Backends <https://www.django-rest-framework.org/api-"
 "guide/filtering/#djangofilterbackend>`_ are used to modify model "
@@ -3018,14 +3063,15 @@ msgstr ""
 msgid ""
 "In some cases it may be necessary to provide a parameter from a query of "
 "request. To define this parameter in the schema, you must overload the "
-"get_schema_fields function and specify a list of parameters to use."
+"get_schema_operation_parameters function and specify a list of parameters"
+" to use."
 msgstr ""
 "В некоторых случаях может быть необходимо передать параметр из query "
 "запроса. Чтобы определить этот параметр в схеме, вы должны перегрузить "
-"функцию get_schema_fields и указать список параметров, которые нужно "
-"использовать."
+"функцию get_schema_operation_parameters и указать список параметров, "
+"которые нужно использовать."
 
-#: of vstutils.api.filter_backends.VSTFilterBackend:53
+#: of vstutils.api.filter_backends.VSTFilterBackend:54
 msgid ""
 "In this example Filter Backend annotates time in current timezone to any "
 "connected model's queryset with field name from query `constant`."
@@ -3033,21 +3079,22 @@ msgstr ""
 "В данном примере Filter Backend аннотирует время в текущем часовом поясе "
 "в queryset'е используемой модели именем поля из query `constant`."
 
-#: of vstutils.api.filter_backends.VSTFilterBackend.get_schema_fields:1
+#: of
+#: vstutils.api.filter_backends.VSTFilterBackend.get_schema_operation_parameters:1
 msgid ""
 "You can also make the filter controls available to the schema "
 "autogeneration that REST framework provides, by implementing this method."
-" The method should return a list of coreapi.Field instances."
+" The method should return a list of OpenAPI schema mappings."
 msgstr ""
 "Вы также можете создать элементы управления фильтрами доступными для "
 "автогенерации схемы, предоставляемой REST-фреймворком, реализуя этот "
-"метод. Метод должен возвращать список экземпляров coreapi.Field."
+"метод. Метод должен возвращать список OpenAPI сопоставлений схемы."
 
-#: ../../backend.rst:142
+#: ../../backend.rst:141
 msgid "Celery"
 msgstr "Celery"
 
-#: ../../backend.rst:144
+#: ../../backend.rst:143
 msgid ""
 "Celery is a distributed task queue. It's used to execute some actions "
 "asynchronously in a separate worker. For more details on Celery, check "
@@ -3066,7 +3113,7 @@ msgstr ""
 "settings>`_ в settings.ini. Также вам понадобится установить "
 "дополнительные [rpc] зависимости."
 
-#: ../../backend.rst:150
+#: ../../backend.rst:149
 msgid "Tasks"
 msgstr "Tasks"
 
@@ -3128,11 +3175,11 @@ msgstr ""
 msgid "The body of the task executed by workers."
 msgstr "Тело задачи выполняется worker'ами."
 
-#: ../../backend.rst:156
+#: ../../backend.rst:155
 msgid "Endpoint"
 msgstr "Endpoint"
 
-#: ../../backend.rst:158
+#: ../../backend.rst:157
 msgid ""
 "Endpoint view has two purposes: bulk requests execution and providing "
 "OpenAPI schema."
@@ -3140,7 +3187,7 @@ msgstr ""
 "Endpoint-view имеет две цели: выполнение bulk-запросов и предоставление "
 "схемы OpenAPI."
 
-#: ../../backend.rst:160
+#: ../../backend.rst:159
 msgid ""
 "Endpoint url is ``/{API_URL}/endpoint/``, for example value with default "
 "settings is ``/api/endpoint/``."
@@ -3148,7 +3195,7 @@ msgstr ""
 "URL endpoint'а - ``/{API_URL}/endpoint/``, например значение с "
 "настройками по умолчанию - ``/api/endpoint/``."
 
-#: ../../backend.rst:162
+#: ../../backend.rst:161
 msgid "``API_URL`` can be changed in ``settings.py``."
 msgstr "``API_URL`` может быть изменен в ``settings.py``."
 
@@ -3217,11 +3264,11 @@ msgstr "Выполнить нетранзакционный bulk-запрос"
 msgid "One operation serializer class."
 msgstr "Класс сериализатора одной операции."
 
-#: ../../backend.rst:169
+#: ../../backend.rst:168
 msgid "Bulk requests"
 msgstr "Bulk-запросы"
 
-#: ../../backend.rst:171
+#: ../../backend.rst:170
 msgid ""
 "Bulk request allows you send multiple requests to api at once, it accepts"
 " json list of operations."
@@ -3229,39 +3276,39 @@ msgstr ""
 "Bulk-запрос позволяет вам отсылать несколько запросов к api в одном. Он "
 "принимает json-список операций."
 
-#: ../../backend.rst:174
+#: ../../backend.rst:173
 msgid "Method"
 msgstr "Метод"
 
-#: ../../backend.rst:174
+#: ../../backend.rst:173
 msgid "Transactional (all operations in one transaction)"
 msgstr "Транзакционный (все операции в одной транзакции)"
 
-#: ../../backend.rst:174
+#: ../../backend.rst:173
 msgid "Synchronous (operations executed one by one in given order)"
 msgstr "Синхронный (операции выполняются одна за другой в указанном порядке)"
 
-#: ../../backend.rst:178
+#: ../../backend.rst:177
 msgid "``PUT /{API_URL}/endpoint/``"
 msgstr "``PUT /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:178 ../../backend.rst:182
+#: ../../backend.rst:177 ../../backend.rst:181
 msgid "NO"
 msgstr "НЕТ"
 
-#: ../../backend.rst:178 ../../backend.rst:180
+#: ../../backend.rst:177 ../../backend.rst:179
 msgid "YES"
 msgstr "ДА"
 
-#: ../../backend.rst:180
+#: ../../backend.rst:179
 msgid "``POST /{API_URL}/endpoint/``"
 msgstr "``POST /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:182
+#: ../../backend.rst:181
 msgid "``PATCH /{API_URL}/endpoint/``"
 msgstr "``PATCH /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:185
+#: ../../backend.rst:184
 msgid ""
 "Parameters of one operation (required parameter marked by "
 ":superscript:`*`):"
@@ -3269,25 +3316,25 @@ msgstr ""
 "Параметры одной операции (обязательный параметр помечается "
 ":superscript:`*`):"
 
-#: ../../backend.rst:187
+#: ../../backend.rst:186
 msgid "``method``:superscript:`*` - http method of request"
 msgstr "``method``:superscript:`*` - http-метод запроса"
 
-#: ../../backend.rst:188
+#: ../../backend.rst:187
 msgid "``path``:superscript:`*` - path of request, can be ``str`` or ``list``"
 msgstr ""
 "``path``:superscript:`*` - путь запроса, может быть типа ``str`` или  "
 "``list``"
 
-#: ../../backend.rst:189
+#: ../../backend.rst:188
 msgid "``data`` - data to send"
 msgstr "``data`` - данные для отправки"
 
-#: ../../backend.rst:190
+#: ../../backend.rst:189
 msgid "``query`` - query parameters as ``str``"
 msgstr "``query`` - query-параметры типа ``str``"
 
-#: ../../backend.rst:191
+#: ../../backend.rst:190
 msgid ""
 "``let`` - string with name of variable (used for access to response "
 "result in templates)"
@@ -3295,7 +3342,7 @@ msgstr ""
 "``let`` - строка с именем переменной (используется для доступа к "
 "результату ответа в шаблонах)"
 
-#: ../../backend.rst:192
+#: ../../backend.rst:191
 msgid ""
 "``headers`` - ``dict`` with headers which will be sent, names of headers "
 "must follow `CGI specification <https://www.w3.org/CGI/>`_ (e.g., "
@@ -3306,7 +3353,7 @@ msgstr ""
 "<https://www.w3.org/CGI/>`_ (например ``CONTENT_TYPE``, "
 "``GATEWAY_INTERFACE``, ``HTTP_*``)."
 
-#: ../../backend.rst:194
+#: ../../backend.rst:193
 msgid ""
 "``version`` - ``str`` with specified version of api, if not provided then"
 " ``VST_API_VERSION`` will be used"
@@ -3314,7 +3361,7 @@ msgstr ""
 "``version`` - ``str`` с указанной версией api, если не задано, то "
 "используется ``VST_API_VERSION``"
 
-#: ../../backend.rst:196
+#: ../../backend.rst:195
 msgid ""
 "In any request parameter you can insert result value of previous "
 "operations (``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), "
@@ -3324,27 +3371,27 @@ msgstr ""
 " операции (``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), "
 "например:"
 
-#: ../../backend.rst:206
+#: ../../backend.rst:205
 msgid "Result of bulk request is json list of objects for operation:"
 msgstr "Результат bulk-запроса - это список json-объектов, описывающих операцию:"
 
-#: ../../backend.rst:208
+#: ../../backend.rst:207
 msgid "``method`` - http method"
 msgstr "``method`` - http-метод"
 
-#: ../../backend.rst:209
+#: ../../backend.rst:208
 msgid "``path`` - path of request, always str"
 msgstr "``path`` - путь запроса, всегда строка"
 
-#: ../../backend.rst:210
+#: ../../backend.rst:209
 msgid "``data`` - data that needs to be sent"
 msgstr "``data`` - данные, которые нужно отправить"
 
-#: ../../backend.rst:211
+#: ../../backend.rst:210
 msgid "``status`` - response status code"
 msgstr "``status`` - код состояния ответа"
 
-#: ../../backend.rst:213
+#: ../../backend.rst:212
 msgid ""
 "Transactional bulk request returns ``502 BAG GATEWAY`` and does rollback "
 "after first failed request."
@@ -3352,7 +3399,7 @@ msgstr ""
 "Транзакционный bulk-запрос возвращает ``502 BAG GATEWAY`` и делает откат "
 "к состоянию до запроса после первого неудачного запроса."
 
-#: ../../backend.rst:216
+#: ../../backend.rst:215
 msgid ""
 "If you send non-transactional bulk request, you will get ``200`` status "
 "and must validate statuses on each operation responses."
@@ -3360,15 +3407,15 @@ msgstr ""
 "Если вы отправили нетранзакционный bulk-запрос, вы получите код 200 и "
 "должны будете проверить статус каждого ответа операции отдельно."
 
-#: ../../backend.rst:220
+#: ../../backend.rst:219
 msgid "OpenAPI schema"
 msgstr "Схема OpenAPI"
 
-#: ../../backend.rst:222
+#: ../../backend.rst:221
 msgid "Request on ``GET /{API_URL}/endpoint/`` returns Swagger UI."
 msgstr "Запрос на ``GET /{API_URL}/endpoint/`` возвращает Swagger UI."
 
-#: ../../backend.rst:224
+#: ../../backend.rst:223
 msgid ""
 "Request on ``GET /{API_URL}/endpoint/?format=openapi`` returns OpenAPI "
 "schema in json format. Also you can specify required version of schema "
@@ -3379,7 +3426,7 @@ msgstr ""
 "OpenAPI в формате json. Также вы можете указать нужную версию схемы, "
 "используя query-параметр ``version`` "
 
-#: ../../backend.rst:227
+#: ../../backend.rst:226
 msgid ""
 "To change the schema after generating and before sending to user use "
 "hooks. Define one or more function, each taking 2 named arguments:"
@@ -3388,15 +3435,15 @@ msgstr ""
 "используйте хуки. Напишите одну или несколько функций, каждая из которых "
 "принимает 2 именованных аргумента:"
 
-#: ../../backend.rst:230
+#: ../../backend.rst:229
 msgid "``request`` - user request object."
 msgstr "``request`` - объект запроса пользователя."
 
-#: ../../backend.rst:231
+#: ../../backend.rst:230
 msgid "``schema`` - ordered dict with OpenAPI schema."
 msgstr "``schema`` - ordered dict, содержащий схему OpenAPI."
 
-#: ../../backend.rst:234
+#: ../../backend.rst:233
 msgid ""
 "Sometimes hooks may raise an exception; in order to keep a chain of data "
 "modification, such exceptions are handled. The changes made to the schema"
@@ -3406,11 +3453,11 @@ msgstr ""
 "модификации данных, такие исключения обрабатываются. Изменения, сделанные"
 " в схеме перед выбросом исключения, в любом случае сохраняются."
 
-#: ../../backend.rst:243
+#: ../../backend.rst:242
 msgid "Example hook:"
 msgstr "Пример хука:"
 
-#: ../../backend.rst:245
+#: ../../backend.rst:244
 msgid ""
 "To connect hook(s) to your app add function import name to the "
 "``OPENAPI_HOOKS`` list in ``settings.py``"
@@ -3418,11 +3465,11 @@ msgstr ""
 "Чтобы присоединить хук(-и) к вашему приложению, добавьте строку импорта "
 "вашей функции в список ``OPENAPI_HOOKS`` в ``settings.py``"
 
-#: ../../backend.rst:255
+#: ../../backend.rst:254
 msgid "Testing Framework"
 msgstr "Фреймворк для тестирования"
 
-#: ../../backend.rst:257
+#: ../../backend.rst:256
 msgid ""
 "VST Utils Framework includes a helper in base test case class and "
 "improves support for making API requests. That means if you want make "
@@ -3434,11 +3481,11 @@ msgstr ""
 " что для отправления bulk-запроса на endpoint нет необходимости создавать"
 " и инициализировать test client, а можно сразу делать запрос."
 
-#: ../../backend.rst:268
+#: ../../backend.rst:267
 msgid "Creating test case"
 msgstr "Создание тест-кейса"
 
-#: ../../backend.rst:269
+#: ../../backend.rst:268
 msgid ""
 "``test.py`` module contains test case classes based on "
 ":class:`vstutils.tests.BaseTestCase`. At the moment, we officially "
@@ -3452,11 +3499,11 @@ msgstr ""
 "оберток запросов с проверкой выполнения и runtime-оптимизацией "
 "bulk-запросов с ручной проверкой значений."
 
-#: ../../backend.rst:276
+#: ../../backend.rst:275
 msgid "Simple example with classic tests"
 msgstr "Простой пример с классическими тестами"
 
-#: ../../backend.rst:278
+#: ../../backend.rst:277
 msgid ""
 "For example, if you have api endpoint like ``/api/v1/project/`` and model"
 " Project you can write test case like this:"
@@ -3464,7 +3511,7 @@ msgstr ""
 "Например, если у вас endpoint вида ``/api/v1/project/`` и модель Project,"
 " вы можете написать такой тест:"
 
-#: ../../backend.rst:313
+#: ../../backend.rst:312
 msgid ""
 "This example demonstrates functionality of default test case class. "
 "Default projects are initialized for the fastest and most efficient "
@@ -3478,11 +3525,11 @@ msgstr ""
 " в разные классы. В данном примере показан классический подход к "
 "тестированию, однако вы можете использовать bulk-запросы в ваших тестах."
 
-#: ../../backend.rst:321
+#: ../../backend.rst:320
 msgid "Bulk requests in tests"
 msgstr "Bulk-запросы в тестах"
 
-#: ../../backend.rst:323
+#: ../../backend.rst:322
 msgid ""
 "Bulk query system is well suited for testing and executing valid queries."
 " Previous example could be rewritten as follows:"
@@ -3490,7 +3537,7 @@ msgstr ""
 "Система bulk-запросов хорошо подходит для тестирования и запуска валидных"
 " запросов. Предыдущий пример может быть переписан так:"
 
-#: ../../backend.rst:373
+#: ../../backend.rst:372
 msgid ""
 "In this case, you have more code, but your tests are closer to GUI "
 "workflow, because vstutils-projects uses ``/api/endpoint/`` for requests."
@@ -3505,7 +3552,7 @@ msgstr ""
 " котором используется bulk меньше по сравнению с тестом, использующим "
 "стандартный механизм."
 
-#: ../../backend.rst:380
+#: ../../backend.rst:379
 msgid "Test case API"
 msgstr "API тест-кейса"
 
@@ -3801,7 +3848,8 @@ msgstr ""
 "умолчанию."
 
 #: of vstutils.tests.BaseTestCase.get_url:4
-#: vstutils.tests.BaseTestCase.random_name:4 vstutils.utils.lazy_translate:9
+#: vstutils.tests.BaseTestCase.random_name:4 vstutils.utils.Executor.aexecute:9
+#: vstutils.utils.Executor.execute:9 vstutils.utils.lazy_translate:9
 #: vstutils.utils.translate:10
 msgid ":py:class:`str`"
 msgstr ":py:class:`str`"
@@ -3878,11 +3926,11 @@ msgstr ""
 msgid "new user object for execution."
 msgstr "новый объект пользователя, от которого будет выполнение."
 
-#: ../../backend.rst:387
+#: ../../backend.rst:386
 msgid "Utils"
 msgstr "Утилиты"
 
-#: ../../backend.rst:389
+#: ../../backend.rst:388
 msgid ""
 "This is tested set of development utilities. Utilities include a "
 "collection of code that will be useful in one way or another for "
@@ -3987,21 +4035,46 @@ msgstr "cmd, returncode, stdout, stderr, output"
 msgid "Alias for output attribute, to match stderr"
 msgstr "Псевдоним для выходного атрибута, чтобы соответствовать stderr"
 
-#: of vstutils.utils.Executor.execute:1
-msgid "Executes commands and outputs its result."
-msgstr "Выполняет команды и выводит их."
+#: of vstutils.utils.Executor.aexecute:1
+msgid "Executes commands and outputs its result. Asynchronous implementation."
+msgstr "Выполняет команды и выводит их результат. Асинхронная реализация."
 
-#: of vstutils.utils.Executor.execute:4
+#: of vstutils.utils.Executor.aexecute:4 vstutils.utils.Executor.execute:4
+#: vstutils.utils.Executor.post_execute:4 vstutils.utils.Executor.pre_execute:4
 msgid "-- list of cmd command and arguments"
 msgstr "-- список cmd-команд и аргументов"
 
-#: of vstutils.utils.Executor.execute:7
+#: of vstutils.utils.Executor.aexecute:6 vstutils.utils.Executor.execute:6
+#: vstutils.utils.Executor.post_execute:6 vstutils.utils.Executor.pre_execute:6
 msgid "-- workdir for executions"
 msgstr "-- рабочая директория"
 
-#: of vstutils.utils.Executor.execute:9
+#: of vstutils.utils.Executor.aexecute:8 vstutils.utils.Executor.execute:8
+#: vstutils.utils.Executor.post_execute:8 vstutils.utils.Executor.pre_execute:8
+msgid "-- extra environment variables which overrides defaults"
+msgstr ""
+"-- дополнительные переменные окружения, которые перезаписывают "
+"переменные по умолчанию"
+
+#: of vstutils.utils.Executor.aexecute:10 vstutils.utils.Executor.execute:10
 msgid "-- string with full output"
 msgstr "-- строка, содержащая полный вывод"
+
+#: of vstutils.utils.Executor.execute:1
+msgid "Executes commands and outputs its result."
+msgstr "Выполняет команды и выводит их результат."
+
+#: of vstutils.utils.Executor.post_execute:1
+msgid "Runs after execution end."
+msgstr "Запускается после завершения выполнения."
+
+#: of vstutils.utils.Executor.post_execute:10
+msgid "-- return code of executed process"
+msgstr "-- код возврата выполненного процесса"
+
+#: of vstutils.utils.Executor.pre_execute:1
+msgid "Runs before execution starts."
+msgstr "Запускатеся перед началом выполнения."
 
 #: of vstutils.utils.Executor.working_handler:1
 msgid "Additional handler for executions."
@@ -4010,10 +4083,6 @@ msgstr "Дополнительный обработчик для запуско�
 #: of vstutils.utils.Executor.working_handler:4
 msgid "running process"
 msgstr "запущенный процесс"
-
-#: of vstutils.utils.Executor.working_handler:7
-msgid ":py:obj:`None`"
-msgstr ":py:obj:`None`"
 
 #: of vstutils.utils.Executor.write_output:2
 msgid "-- line from command output"
