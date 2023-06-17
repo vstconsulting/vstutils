@@ -169,7 +169,6 @@ class WebSection(BaseAppendSection):
         'session_timeout': ConfigIntSecondsType,
         'page_limit': ConfigIntType,
         'rest_page_limit': ConfigIntType,
-        'public_openapi': ConfigBoolType,
         'openapi_cache_timeout': ConfigIntType,
         'enable_gravatar': ConfigBoolType,
         'rest_swagger': ConfigBoolType,
@@ -446,7 +445,6 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'rest_swagger_description': (
                     vst_project_module.__doc__ or vst_lib_module.__doc__ or ''
             ).replace('\n', '\\n').replace('\r', '\\r'),
-            'public_openapi': False,
             'openapi_cache_timeout': env.int(f'{ENV_NAME}_WEB_OPENAPI_CACHE_TIMEOUT', default=120),
             'enable_gravatar': env.bool(f'{ENV_NAME}_WEB_ENABLE_GRAVATAR', default=True),
             'request_max_size': env.int(f'{ENV_NAME}_WEB_REQUEST_MAX_SIZE', default=2621440),
@@ -549,8 +547,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         },
         'uvicorn': {
             'loop': 'auto',
-            'limit_concurrency': 256,
-            'backlog': 256,
+            'limit_concurrency': 512,
+            'backlog': 512,
         }
     },
     section_overload={
