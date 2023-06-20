@@ -23,7 +23,7 @@ const BaseFieldContentMixin = {
          * Property, that returns value of 'aria-label' attribute.
          */
         aria_label() {
-            return this.field.options.title || this.field.options.name + 'field';
+            return this.field.title;
         },
     },
 };

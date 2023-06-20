@@ -1,7 +1,6 @@
 import type { IApp, IAppInitialized } from '@/vstutils/app';
 import { guiPopUp, pop_up_msg } from './popUp';
-import type { HttpMethod, InnerData } from './utils';
-import { emptyInnerData } from './utils';
+import { downloadResponse, emptyInnerData } from './utils';
 import {
     formatPath,
     parseResponseMessage,
@@ -15,6 +14,7 @@ import { i18n } from './translation';
 import type { Model } from './models';
 import type { Route } from 'vue-router';
 import type { APIResponse } from './api';
+import type { HttpMethod, InnerData } from './utils';
 
 export class ActionsManager {
     app: IAppInitialized;
@@ -113,14 +113,25 @@ export class ActionsManager {
         const path = formatPath(action.path!, this.app.router.currentRoute.params, instance);
 
         try {
-            const response = await this.app.api.makeRequest({ useBulk: true, method: action.method!, path });
+            let response: APIResponse<InnerData> | undefined;
+
+            if (action.isFileResponse) {
+                const response = await this.app.api.makeRequest({
+                    method: action.method!,
+                    path,
+                    rawResponse: true,
+                });
+                await downloadResponse(response);
+            } else {
+                response = await this.app.api.makeRequest({ useBulk: true, method: action.method!, path });
+            }
 
             if (!disablePopUp) {
                 guiPopUp.success(
                     i18n.t(pop_up_msg.instance.success.executeEmpty, [
                         i18n.t(action.title),
                         instance?.getViewFieldString() || i18n.t(this.currentView.title),
-                        parseResponseMessage(response.data),
+                        parseResponseMessage(response?.data),
                     ]) as string,
                 );
             }
@@ -195,24 +206,36 @@ export class ActionsManager {
         }
 
         try {
-            const response = await this.app.api.makeRequest({
-                method,
-                path: path ?? formatPath(action.path!, this.app.router.currentRoute.params),
-                data,
-                useBulk: instance.shouldUseBulk(method),
-            });
+            let response: APIResponse<T> | undefined;
+            if (action.isFileResponse) {
+                const response = await this.app.api.makeRequest({
+                    method,
+                    path: path ?? formatPath(action.path!, this.app.router.currentRoute.params),
+                    data,
+                    rawResponse: true,
+                });
+                await downloadResponse(response);
+            } else {
+                response = await this.app.api.makeRequest({
+                    method,
+                    path: path ?? formatPath(action.path!, this.app.router.currentRoute.params),
+                    data,
+                    useBulk: instance.shouldUseBulk(method),
+                });
+            }
+
             if (!disablePopUp) {
                 guiPopUp.success(
                     i18n.t(pop_up_msg.instance.success.execute, [
                         i18n.t(this.currentView.title),
-                        parseResponseMessage(response.data),
+                        parseResponseMessage(response?.data),
                     ]) as string,
                 );
             }
             if (action.onAfter) {
                 action.onAfter({ app: this.app, action, instance, response });
             }
-            return response as APIResponse<T>;
+            return response;
         } catch (error) {
             const modelValidationError = instance.parseModelError((error as APIResponse).data);
             this.app.error_handler.showError(

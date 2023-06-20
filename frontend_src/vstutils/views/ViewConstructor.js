@@ -200,6 +200,7 @@ export default class ViewConstructor {
                 const responseCode = Object.keys(operationSchema.responses).find(isSuccessful);
                 const response = operationSchema.responses[responseCode];
                 const responseSchemaType = response.schema?.type;
+                const isFileResponse = responseSchemaType === 'file';
                 const responseModel = this._getOperationModel(response);
 
                 const operationOptions = mergeDeep(
@@ -238,7 +239,7 @@ export default class ViewConstructor {
                 }
 
                 if (operationOptions.type === ViewTypes.PAGE) {
-                    operationOptions.isFileResponse = responseSchemaType === 'file';
+                    operationOptions.isFileResponse = isFileResponse;
                     pageView = new PageView(operationOptions, null);
                     pageView.filtersModelClass = this.getDetailFiltersModelClass(operationOptions.parameters);
                     if (pageView.filtersModelClass) {
@@ -272,6 +273,7 @@ export default class ViewConstructor {
                         responseModel,
                         isMultiAction,
                         isEmpty,
+                        isFileResponse,
                         hidden: operationOptions['x-hidden'],
                         iconClasses: operationOptions['x-icons'] || operationOptions.iconClasses,
                     };
@@ -282,6 +284,7 @@ export default class ViewConstructor {
                             ...this.dictionary.paths.operations.action.execute,
                             title: operationOptions[ACTION_NAME] || operationOptions.title,
                             confirmationRequired,
+                            isFileResponse,
                         };
                         view.actions.set(executeAction.name, executeAction);
                         params.appendFragment = pathToArray(view.path).last;
@@ -363,10 +366,11 @@ export default class ViewConstructor {
 
             // Set nested page view
             if (isNested && isDetailWithoutList && !pageView.hidden) {
-                parent.sublinks.set(pageView.params.name, {
-                    name: pageView.params.name,
-                    title: pageView.params.title,
+                parent.sublinks.set(pageView.name, {
+                    name: pageView.name,
+                    title: pageView.title,
                     href: pageView.path,
+                    isFileResponse: pageView.isFileResponse,
                 });
             }
 
