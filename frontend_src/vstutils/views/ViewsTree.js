@@ -98,8 +98,9 @@ export class ViewsTree {
      */
 
     /**
-     * @param {ViewMatcher} matcher
-     * @return {*}
+     * @param {(view: import('./View').IView) => T} matcher
+     * @return {Exclude<T, false> | null}
+     * @template T
      */
     findInAllPaths(matcher) {
         for (const view of this.views.values()) {

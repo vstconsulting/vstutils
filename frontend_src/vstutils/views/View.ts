@@ -9,6 +9,7 @@ import {
     getApp,
     HttpMethods,
     joinPaths,
+    openSublink,
     pathToArray,
     RequestTypes,
     ViewTypes,
@@ -59,10 +60,12 @@ export interface Operation {
     hidden?: boolean;
     doNotShowOnList?: boolean;
     doNotGroup?: boolean;
+    isFileResponse?: boolean;
 }
 
 export interface Sublink extends Operation {
-    href?: string;
+    href?: string | (() => string);
+    external?: boolean;
 }
 
 type ViewMixin = unknown;
@@ -174,7 +177,7 @@ export interface IView<
     _createStore(): TStore;
 
     getRoutePath(): string;
-    toRoute(): RouteConfig;
+    toRoute(): RouteConfig | undefined;
 
     isEditPage(): this is PageEditView;
     isDetailPage(): this is PageView;
@@ -317,7 +320,10 @@ export abstract class BaseView<
         return props;
     }
 
-    toRoute(): RouteConfig {
+    toRoute() {
+        if (this.hidden) {
+            return;
+        }
         return {
             name: this.routeName,
             path: this.getRoutePath(),
@@ -387,7 +393,6 @@ export class ListView extends BaseView<ListViewStore, ListViewParams> {
             return;
         }
 
-        const app = getApp();
         const router = getApp().router;
         const route = router.currentRoute;
 
@@ -396,13 +401,15 @@ export class ListView extends BaseView<ListViewStore, ListViewParams> {
         }
         const pageView = this.pageView;
         if (pageView) {
-            const link = formatPath(pageView.path, route.params, instance);
-            if (pageView.isFileResponse) {
-                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                window.open(`${app.api.baseURL}/${app.api.defaultVersion}${link}`);
-            } else {
-                void router.push(link);
-            }
+            void openSublink(
+                {
+                    name: '',
+                    title: '',
+                    isFileResponse: pageView.isFileResponse,
+                    href: pageView.path,
+                },
+                instance,
+            );
         }
         return;
     }
@@ -469,6 +476,13 @@ export class PageView extends DetailView<PageViewStore, PageViewParams, PageView
             return joinPaths(this.parent?.getRoutePath(), `:${this.pkParamName ?? ''}`);
         }
         return super.getRoutePath();
+    }
+
+    toRoute() {
+        if (this.isFileResponse) {
+            return;
+        }
+        return super.toRoute();
     }
 
     getModel() {
@@ -585,12 +599,14 @@ export class ActionView extends DetailView<ActionStore, ActionViewParams> {
     hideReadonlyFields = true;
     method: HttpMethod;
     action: NotEmptyAction;
+    isFileResponse: boolean;
 
     constructor(params: ActionViewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);
 
         this.method = params.method;
         this.action = params.action;
+        this.isFileResponse = params.isFileResponse ?? false;
     }
 
     _createStore(): ActionStore {

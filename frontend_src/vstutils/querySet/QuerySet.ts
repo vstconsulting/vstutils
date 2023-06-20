@@ -485,9 +485,9 @@ export class QuerySet {
     async execute<T>(req: InternalRequest) {
         const data = req.data;
         const dataIsModel = this._isModelInstance(data);
+        const useBulk = req.useBulk ?? (dataIsModel ? data.shouldUseBulk(req.method) : true);
 
-        const preparedReq: Parameters<typeof apiConnector.makeRequest>[0] = {
-            useBulk: req.useBulk ?? (dataIsModel ? data.shouldUseBulk(req.method) : true),
+        const baseReq = {
             method: req.method,
             path: req.path,
             query: req.query,
@@ -497,13 +497,14 @@ export class QuerySet {
 
         if (data !== undefined) {
             const rawData = dataIsModel ? data._getInnerData() : data;
-            if (preparedReq.useBulk) {
-                preparedReq.data = rawData;
+            if (useBulk) {
+                return apiConnector.makeRequest<T>({ ...baseReq, useBulk, data: rawData });
             } else {
-                preparedReq.data = objectToFormData(rawData);
+                return apiConnector.makeRequest<T>({ ...baseReq, useBulk, data: objectToFormData(rawData) });
             }
         }
-        return apiConnector.makeRequest<T>(preparedReq);
+
+        return apiConnector.makeRequest<T>({ ...baseReq, useBulk });
     }
 
     /**
