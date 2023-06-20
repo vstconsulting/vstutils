@@ -100,8 +100,8 @@ API[VST_API_VERSION][r'testcontenttype'] = dict(
 API[VST_API_VERSION][r'vartype'] = dict(
     model='test_proj.models.VariableType'
 )
-API[VST_API_VERSION][r'cachable'] = dict(
-    model='test_proj.models.CachableProxyModel'
+API[VST_API_VERSION][r'cacheable'] = dict(
+    view='test_proj.views.CacheableViewSet'
 )
 API[VST_API_VERSION][r'dynamic_fields'] = dict(
     model='test_proj.models.dynamic_fields.DynamicFields'

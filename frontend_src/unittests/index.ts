@@ -11,7 +11,13 @@ export * from './open-page';
 
 export function mount(component: ComponentOptions<Vue>, options?: Parameters<typeof vueMount>[1]) {
     const app = getApp();
-    return vueMount(component, { localVue: app.vue, i18n: app.i18n, router: app.router, ...options });
+    return vueMount(component, {
+        localVue: app.vue,
+        i18n: app.i18n,
+        router: app.router,
+        attachTo: document.body,
+        ...options,
+    });
 }
 
 export async function mountApp() {

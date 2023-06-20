@@ -305,6 +305,12 @@ class OperationSerializer(serializers.Serializer):
         data = validated_data['data']
         if data and method_name != 'get':
             data = self.renderer.render(data, media_type=self.renderer.media_type)
+
+        headers: dict = validated_data['headers']  # type: ignore
+        # Fixing oldstyle headers
+        for old_style_header in tuple(filter(lambda x: x.startswith('HTTP_'), headers.keys())):
+            headers[old_style_header[5:].replace('_', '-').lower()] = headers.pop(old_style_header)  # nocv
+
         result = ParseResponseDict(
             path=url,
             method=method_name,
@@ -313,7 +319,7 @@ class OperationSerializer(serializers.Serializer):
                 content_type=self.renderer.media_type,
                 secure=self.context['request']._request.is_secure(),
                 data=data,
-                **validated_data['headers']
+                headers=headers,
             )
         )
         if 'let' in validated_data:

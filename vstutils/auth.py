@@ -1,5 +1,6 @@
 import logging
 import traceback
+import warnings
 
 from django.core.cache import cache
 from django.contrib.auth import get_user_model, backends
@@ -23,6 +24,12 @@ secure_serializer = SecurePickling()
 
 
 if settings.CACHE_AUTH_USER:
+    warnings.warn(
+        "This feature is deprecated and will removed in 6.x version",
+        category=DeprecationWarning,
+        stacklevel=2
+    )
+
     @receiver(signals.post_save, sender=UserModel)
     @receiver(signals.post_delete, sender=UserModel)
     def invalidate_user_from_cache(instance: UserModel, created=False, *args, **kwargs):

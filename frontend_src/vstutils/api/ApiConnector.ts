@@ -120,7 +120,11 @@ interface FetchRequest extends BaseRequest {
     data?: Record<string, unknown> | FormData;
 }
 
-export type MakeRequestParams = ({ useBulk: true } & BulkRequest) | ({ useBulk?: false } & FetchRequest);
+type MakeRequestParamsBulk = { useBulk: true; rawResponse?: false } & BulkRequest;
+type MakeRequestParamsFetch = { useBulk?: false; rawResponse?: false } & FetchRequest;
+type MakeRequestParamsFetchRaw = { useBulk?: false; rawResponse: true } & FetchRequest;
+
+export type MakeRequestParams = MakeRequestParamsBulk | MakeRequestParamsFetch | MakeRequestParamsFetchRaw;
 
 /**
  * Class, that sends API requests.
@@ -140,9 +144,12 @@ export class ApiConnector {
      * Constructor of ApiConnector class.
      */
     constructor() {
-        this.headers = {
-            'X-CSRFToken': getCookie('csrftoken') ?? '',
-        };
+        this.headers = {};
+
+        const csrftoken = getCookie('csrftoken');
+        if (csrftoken) {
+            this.headers['X-CSRFToken'] = csrftoken;
+        }
     }
 
     /**
@@ -175,7 +182,11 @@ export class ApiConnector {
         }
     }
 
-    async makeRequest<T = unknown>(req: MakeRequestParams): Promise<APIResponse<T>> {
+    async makeRequest<T = unknown>(
+        req: MakeRequestParamsBulk | MakeRequestParamsFetch,
+    ): Promise<APIResponse<T>>;
+    async makeRequest(req: MakeRequestParamsFetchRaw): Promise<Response>;
+    async makeRequest<T = unknown>(req: MakeRequestParams): Promise<APIResponse<T> | Response> {
         if (req.useBulk) {
             const realBulk: RealBulkRequest = {
                 method: req.method,
@@ -197,8 +208,6 @@ export class ApiConnector {
             const response = await this.bulkQuery<T>(realBulk);
             return new APIResponse(response);
         } else {
-            const pathStr = Array.isArray(req.path) ? req.path.join('/') : req.path.replace(/^\/|\/$/g, '');
-
             const headers = { ...this.headers, ...req.headers } as Record<string, string>;
             let preparedData: RequestInit['body'];
 
@@ -211,12 +220,8 @@ export class ApiConnector {
                 }
             }
 
-            const pathToSend = [
-                this.baseURL!,
-                req.version ?? this.defaultVersion!,
-                pathStr,
-                makeQueryString(req.query),
-            ].join('/');
+            const pathStr = Array.isArray(req.path) ? req.path.join('/') : req.path.replace(/^\//, '');
+            const pathToSend = `${this.getFullUrl(pathStr)}${makeQueryString(req.query)}`;
 
             const response = await fetch(pathToSend, {
                 method: req.method,
@@ -224,8 +229,17 @@ export class ApiConnector {
                 body: preparedData,
             });
 
+            if (req.rawResponse) {
+                return response;
+            }
+
             return await APIResponse.fromFetchResponse(response, req.method, pathToSend);
         }
+    }
+
+    getFullUrl(path: string) {
+        path = path.replace(/^\/|\/$/g, '');
+        return `${this.baseURL!}/${this.defaultVersion!}/${path}/`;
     }
 
     _bulkItemToRequest({ version = this.defaultVersion!, method, path, query = '', headers }: BulkRequest) {

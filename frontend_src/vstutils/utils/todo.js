@@ -772,25 +772,6 @@ export const FieldViews = {
     EDIT: 'edit',
 };
 
-/**
- * Function that formats path from params and replaces last param with instance's id
- * @param {string} path
- * @param {Object} params
- * @param {Model} instance
- * @return {string}
- */
-export function formatPath(path, params, instance = null) {
-    for (const [name, value] of Object.entries(params)) {
-        path = path.replace(`{${name}}`, value);
-    }
-
-    if (instance) {
-        return path.replace(/{.+}/, instance.getPkValue());
-    }
-
-    return path;
-}
-
 export function copyToClipboard(value) {
     if (typeof navigator.clipboard == 'undefined') {
         // navigator.clipboard available only in secure context
@@ -968,10 +949,6 @@ export function pathToArray(path) {
     return path.replace(/^\/|\/$/g, '').split('/');
 }
 
-export function joinPaths(...paths) {
-    return paths.reduce((value, path) => value + '/' + String(path).replace(/^\/|\/$/g, ''), '') + '/';
-}
-
 /**
  * Function that checks if instances in two lists are the same
  * @param {Model[]} a
@@ -1000,21 +977,6 @@ export function mapObjectValues(obj, f) {
         }
     }
     return newObj;
-}
-
-/**
- * Function that returns first item from iterator for which callbackFn will return true
- * @param {Iterator<T>} iterator
- * @param {Function} callbackFn
- * @returns {T|undefined}
- * @template T
- */
-export function iterFind(iterator, callbackFn) {
-    for (const item of iterator) {
-        if (callbackFn(item)) {
-            return item;
-        }
-    }
 }
 
 /**
@@ -1048,43 +1010,6 @@ export function chunkArray(array, chunkSize) {
 export function stringToCssClass(str) {
     if (typeof str !== 'string') str = String(str);
     return str.replace(/\s/g, '');
-}
-
-export function getRedirectUrlFromResponse(responseData, modelClass) {
-    if (!responseData || typeof responseData !== 'object' || !modelClass) return;
-
-    const app = getApp();
-
-    const field = iterFind(modelClass.fields.values(), (field) => field.redirect);
-    if (!field) return;
-
-    const redirect = field.redirect;
-
-    let operationId = '';
-
-    if (redirect.depend_field) {
-        operationId += responseData[redirect.depend_field].toLowerCase();
-    }
-    if (!operationId || redirect.concat_field_name) {
-        operationId = operationId + redirect.operation_name;
-    }
-
-    operationId += '_get';
-
-    const matcher = (view) => view.operationId === operationId && view;
-    const view = app.viewsTree.findInAllPaths(matcher);
-
-    if (!view) {
-        console.warn(`Can't find redirect view for operationId: ${operationId}`, field, responseData);
-        return;
-    }
-
-    if ([null, undefined].includes(responseData[field.name])) return;
-
-    return formatPath(view.path, {
-        ...app.router.currentRoute.params,
-        [view.pkParamName]: responseData[field.name],
-    });
 }
 
 /**
@@ -1138,12 +1063,4 @@ export function mapStoreActions(names) {
         };
     }
     return mapped;
-}
-
-export function openSublink(sublink, instance = undefined) {
-    const router = getApp().router;
-    const path = sublink.appendFragment
-        ? joinPaths(router.currentRoute.path, sublink.appendFragment)
-        : sublink.href;
-    return router.push(formatPath(path, router.currentRoute.params, instance));
 }

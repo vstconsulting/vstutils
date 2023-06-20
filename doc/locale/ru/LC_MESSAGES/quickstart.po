@@ -430,7 +430,6 @@ msgstr ""
 "``/{{app_dir}}/{{app_name}}/{{app_name}}/models``."
 
 #: ../../quickstart.rst:201
-#, fuzzy
 msgid "Let make out an example from **BModel**:"
 msgstr "Давайте рассмотрим пример с моделью **BModel**:"
 

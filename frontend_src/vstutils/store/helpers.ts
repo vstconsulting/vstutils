@@ -15,7 +15,6 @@ import {
     watch,
 } from 'vue';
 
-import type { APIResponse } from '@/vstutils/api';
 import { useAutoUpdate } from '@/vstutils/autoupdate';
 import { useBreadcrumbs } from '@/vstutils/breadcrumbs';
 import { ModelValidationError } from '@/vstutils/models';
@@ -469,7 +468,7 @@ export const createActionStore = (view: ActionView) => {
                 );
             } else {
                 void openPage(
-                    getRedirectUrlFromResponse((response as APIResponse).data, view.action.responseModel) ??
+                    getRedirectUrlFromResponse(response?.data, view.action.responseModel) ??
                         view.getRedirectUrl(app.router.currentRoute),
                 );
             }

@@ -16,6 +16,9 @@ from . import inspectors as vst_inspectors
 
 
 class VSTAutoSchema(SwaggerAutoSchema):
+    paginator_inspectors = [
+        vst_inspectors.ArrayFilterQueryInspector,
+    ] + swagger_settings.DEFAULT_PAGINATOR_INSPECTORS
     field_inspectors = [
         vst_inspectors.CommaMultiSelectFieldInspector,
         vst_inspectors.FkFieldInspector,
@@ -35,6 +38,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
 
     filter_inspectors = [
         vst_inspectors.NestedFilterInspector,
+        vst_inspectors.SerializedFilterBackendsInspector,
         vst_inspectors.ArrayFilterQueryInspector,
     ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
 
@@ -47,6 +51,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
         super().__init__(*args, **kwargs)
         self._sch = args[0].schema
         self._sch.view = args[0]
+        self.request._schema = self
 
     def _get_nested_view_class(self, nested_view, view_action_func):
         # pylint: disable=protected-access
@@ -195,6 +200,9 @@ class VSTAutoSchema(SwaggerAutoSchema):
         if result['operationId'].endswith('_add') and _nested_wrapped_view:
             # pylint: disable=protected-access
             result['x-allow-append'] = issubclass(_nested_wrapped_view, NestedWithAppendMixin)
+
+        if getattr(self.view, 'hidden', None) or self.overrides.get('x-hidden'):
+            result['x-hidden'] = True
 
         params_to_override = ('x-title', 'x-icons')
         if self.method.lower() == 'get':

@@ -2,7 +2,6 @@
 Default Django model classes overrides in `vstutils.models` module.
 """
 import logging
-import orjson
 
 from django.apps import apps
 from django.db import models
@@ -20,7 +19,7 @@ from .fields import (
     FkModelField
 )
 from ..utils import raise_context
-from .custom_model import ListModel, FileModel, CustomQuerySet
+from .custom_model import ListModel, FileModel, ExternalCustomModel, ViewCustomModel, CustomQuerySet
 
 
 logger = logging.getLogger('vstutils')

@@ -4,6 +4,7 @@ import gzip
 import mimetypes
 import os
 import pathlib
+import subprocess
 import sys
 import shutil
 import re
@@ -74,6 +75,7 @@ from .models import (
     HostGroup,
     List,
     ListOfFiles,
+    TestExternalCustomModel,
     Author,
     Post,
     OverridenModelWithBinaryFiles,
@@ -175,12 +177,12 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
     def test_executors(self):
         dir_name = os.path.dirname(__file__)
         cmd = utils.UnhandledExecutor(stderr=utils.UnhandledExecutor.DEVNULL)
-        self.assertEqual('yes', cmd.execute('echo yes'.split(' '), dir_name))
+        self.assertEqual('yes', cmd.execute('echo -n yes'.split(' '), dir_name))
         cmd = utils.Executor(stderr=utils.Executor.DEVNULL)
-        self.assertEqual('yes', cmd.execute('echo yes'.split(' '), dir_name))
+        self.assertEqual('yes', cmd.execute('echo -n yes'.split(' '), dir_name, {'CC': 'clang'}))
         cmd = utils.Executor()
-        with utils.raise_context():
-            cmd.execute('bash -c "python0.0 --version"'.split(' '), dir_name)
+        with self.assertRaises(subprocess.CalledProcessError):
+            cmd.execute('bash -c "exit 1"'.split(' '), dir_name)
 
     def test_startproject(self):
         # Easy create
@@ -698,6 +700,25 @@ class VSTUtilsTestCase(BaseTestCase):
                 related_models,
             )
 
+    def test_generated_serializer_fields(self):
+        generated_fields_list = ('one', 'two', 'three')
+
+        class TestSerializer(BaseSerializer):
+            class Meta:
+                generated_fields = generated_fields_list
+                generated_field_factory = lambda name: fields.VSTCharField(required=False, default=name)
+
+        serializer = TestSerializer(data={})
+        serializer_fields = serializer.get_fields()
+        for field in generated_fields_list:
+            self.assertIn(field, serializer_fields)
+            self.assertFalse(serializer_fields[field].required)
+            self.assertEqual(serializer_fields[field].default, field)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        self.assertDictEqual(serializer.data, {i:i for i in generated_fields_list})
+
 
 class ViewsTestCase(BaseTestCase):
     use_msgpack = True
@@ -749,6 +770,10 @@ class ViewsTestCase(BaseTestCase):
 
         response = fclient.get('/test/view/json')
         self.assertEqual(response.status_code, 418)
+
+        response = fclient.get('/api/live/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content), {'status': "ok"})
 
         # 404
         self.get_result('get', '/api/v1/some/', code=404)
@@ -1519,7 +1544,11 @@ class DefaultBulkTestCase(BaseTestCase):
         ]
         self.bulk_transactional(bulk_request_data, 502)
         self.client.post(f'{self.login_url}?lang=ru', self.user.data)
-        result = self.bulk(bulk_request_data, HTTP_ACCEPT_LANGUAGE='ru,en-US;q=0.9,en;q=0.8,ru-RU;q=0.7,es;q=0.6', relogin=False)
+        result = self.bulk(
+            bulk_request_data,
+            headers={'accept-language': 'ru,en-US;q=0.9,en;q=0.8,ru-RU;q=0.7,es;q=0.6'},
+            relogin=False
+        )
         self._logout(self.client)
 
         self.assertEqual(result[0]['status'], 204)
@@ -1853,7 +1882,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertNotIn('put', hosts_list)
 
         # Test inherit actions or methods
-        self.assertIn('/cachable/empty_action/', api['paths'])
+        self.assertIn('/cacheable/empty_action/', api['paths'])
 
         # Check depend fields
         self.assertEqual(api['definitions']['Variable']['properties']['key']['format'], 'fk')
@@ -2256,6 +2285,13 @@ class OpenapiEndpointTestCase(BaseTestCase):
             '#/definitions/PhoneBook',
         )
 
+        path = '/testcontenttype/{id}/vars/'
+        self.assertEqual(api['paths'][path]['get']['parameters'][6]['name'], 'test')
+        self.assertEqual(api['paths'][path]['get']['parameters'][6]['type'], 'integer')
+        self.assertEqual(api['paths'][path]['get']['parameters'][7]['name'], 'key_query')
+        self.assertEqual(api['paths'][path]['get']['parameters'][7]['type'], 'integer')
+        self.assertEqual(api['paths'][path]['get']['parameters'][7]['format'], 'fk')
+
         user = self._create_user(is_super_user=False, is_staff=False)
         with self.user_as(self, user):
             schema = self.endpoint_schema()
@@ -2606,7 +2642,7 @@ class EndpointTestCase(BaseTestCase):
             'string_filter_applied': True
         })
         self.assertEqual(len(response[5]['data']['results']), 5)
-        self.assertEqual(response[6]['data']['headers']['TEST_HEADER'], 5)
+        self.assertEqual(response[6]['data']['headers']['Test-Header'], 5)
         self.assertEqual(response[7]['data'], {
             'integer': 1,
             'float': 1.0,
@@ -2922,14 +2958,14 @@ class ValidatorsTestCase(BaseTestCase):
                 'method': 'post',
                 'path': ['somethingwithimage'],
                 'data': {'name': 'Resized img', 'invalidimage': resize_png_image_content_dict},
-                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+                'headers': {"Auto-Resize-Image": 'true'},
             },
             # 1
             {
                 'method': 'post',
                 'path': ['somethingwithimage'],
                 'data': {'name': 'Unresized invalid img 1', 'invalidimage': resize_png_image_content_dict},
-                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'tqwt'},
+                'headers': {"Auto-Resize-Image": 'tqwt'},
             },
             # 2
             {
@@ -2942,21 +2978,21 @@ class ValidatorsTestCase(BaseTestCase):
                 'method': 'post',
                 'path': ['somethingwithimage'],
                 'data': {'name': 'Unresized valid img 1', 'validimage': resize_png_image_content_dict},
-                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'tqwt'},
+                'headers': {"Auto-Resize-Image": 'tqwt'},
             },
             # 4
             {
                 'method': 'post',
                 'path': ['somethingwithimage'],
                 'data': {'name': 'Unresized valid img 2', 'validimage': resize_png_image_content_dict},
-                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+                'headers': {"Auto-Resize-Image": 'true'},
             },
             # 5
             {
                 'method': 'post',
                 'path': ['somethingwithimage'],
                 'data': {'name': 'JPEG checking format saving', 'invalidimage': resize_jpeg_image_content_dict},
-                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+                'headers': {"Auto-Resize-Image": 'true'},
             },
             # 6
             {
@@ -2983,7 +3019,7 @@ class ValidatorsTestCase(BaseTestCase):
                 'method': 'post',
                 'path': ['somethingwithimage'],
                 'data': {'name': 'Resized img with horizontal margin', 'imagewithmarginapplying': resize_png_image_content_dict},
-                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+                'headers': {"Auto-Resize-Image": 'true'},
             },
             # 11
             {
@@ -2995,7 +3031,7 @@ class ValidatorsTestCase(BaseTestCase):
                 'method': 'post',
                 'path': ['somethingwithimage'],
                 'data': {'name': 'Resized img with vertical margin', 'imagewithmarginapplying': tall_image_content_dict},
-                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+                'headers': {"Auto-Resize-Image": 'true'},
             },
             # 13
             {
@@ -3007,7 +3043,7 @@ class ValidatorsTestCase(BaseTestCase):
                 'method': 'post',
                 'path': ['somethingwithimage'],
                 'data': {'name': 'Resized small img', 'imagewithmarginapplying': small_image_content_dict},
-                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+                'headers': {"Auto-Resize-Image": 'true'},
             },
             # 15
             {
@@ -3079,13 +3115,13 @@ class ValidatorsTestCase(BaseTestCase):
                 'method': 'post',
                 'path': ['somethingwithimage'],
                 'data': {'name': 'Картинка с русскими буквами', 'invalidimage': image_with_letters_to_encode},
-                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+                'headers': {"Auto-Resize-Image": 'true'},
             },
             {
                 'method': 'post',
                 'path': ['somethingwithimage'],
                 'data': {'name': 'Картинка которая не должна валидироваться', 'invalidimage': image_from_media_with_encoded_letters},
-                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+                'headers': {"Auto-Resize-Image": 'true'},
             },
             {
                 'method': 'get',
@@ -3118,7 +3154,7 @@ class ValidatorsTestCase(BaseTestCase):
                 'method': 'post',
                 'path': ['somethingwithimage'],
                 'data': {'name': 'Resized img', 'invalidimage': resize_png_image_content_dict},
-                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+                'headers': {"Auto-Resize-Image": 'true'},
             }
         ])
         self.assertEqual(''.join(results[0]['data']['invalidimage']),
@@ -3470,41 +3506,63 @@ class ProjectTestCase(BaseTestCase):
             HTTP_ACCEPT_ENCODING='gzip',
         )
 
-    def test_cachable_model(self):
+    def test_cacheable_model(self):
         CachableModel = self.get_model_class('test_proj.CachableModel')
         results = self.bulk([
-            {"method": 'get', "path": ['cachable']},
+            {"method": 'get', "path": ['cacheable']},
         ])
         self.assertEqual(results[0]['status'], 200)
 
         instance = CachableModel.objects.create(name='1')
+        instance2 = CachableModel.objects.create(name='2')
         results = self.bulk([
-            {"method": 'get', "path": ['cachable']},
-            {"method": 'get', "path": ['cachable'], 'headers': {"HTTP_IF_NONE_MATCH": 'W/<<0[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable']},
+            {"method": 'get', "path": ['cacheable'], 'headers': {"If-None-Match": 'W/<<0[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable', instance.id]},
+            {"method": 'get', "path": ['cacheable', instance.id], 'headers': {"If-None-Match": 'W/<<2[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable', instance2.id]},
+            {"method": 'get', "path": ['cacheable', instance2.id], 'headers': {"If-None-Match": 'W/<<4[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable', instance2.id], 'headers': {"If-None-Match": 'W/<<2[headers][ETag]>>'}},
         ])
         self.assertEqual(results[0]['status'], 200)
-        self.assertEqual(results[0]['data']['count'], 1)
+        self.assertEqual(results[0]['data']['count'], 2)
         self.assertEqual(results[1]['status'], 304)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['data']['id'], instance.id)
+        self.assertEqual(results[3]['status'], 304)
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[4]['data']['id'], instance2.id)
+        self.assertEqual(results[5]['status'], 304)
+        self.assertEqual(results[6]['status'], 200)
 
         instance.save()
         results = self.bulk([
-            {"method": 'get', "path": ['cachable'], 'headers': {"HTTP_IF_NONE_MATCH": results[0]['headers']['ETag']}},
-            {"method": 'get', "path": ['cachable'], 'headers': {"HTTP_IF_NONE_MATCH": '<<0[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable'], 'headers': {"If-None-Match": results[0]['headers']['ETag']}},
+            {"method": 'get', "path": ['cacheable'], 'headers': {"If-None-Match": '<<0[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable', instance.id], 'headers': {"If-None-Match": results[2]['headers']['ETag']}},
+            {"method": 'get', "path": ['cacheable', instance.id], 'headers': {"If-None-Match": '<<2[headers][ETag]>>'}},
+            {"method": 'get', "path": ['cacheable', instance2.id], 'headers': {"If-None-Match": results[4]['headers']['ETag']}},
+            {"method": 'patch', "path": ['cacheable', instance.id], 'headers': {"If-Match": results[2]['headers']['ETag']}, 'data': {}},
         ])
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[1]['status'], 304)
+        self.assertEqual(results[2]['status'], 200, results[2]['data'])
+        self.assertEqual(results[3]['status'], 304)
+        self.assertEqual(results[4]['status'], 304)
+        self.assertEqual(results[4]['status'], 304)
+        self.assertEqual(results[5]['status'], 412)
 
         self.client.cookies['lang'] = 'ru'
         results_ru = self.bulk([
-            {'method': 'get', 'path': ['cachable'], 'headers': {'HTTP_IF_NONE_MATCH': results[0]['headers']['ETag']}},
-            {'method': 'get', 'path': ['cachable'], 'headers': {'HTTP_IF_NONE_MATCH': '<<0[headers][ETag]>>'}},
+            {'method': 'get', 'path': ['cacheable'], 'headers': {'If-None-Match': results[0]['headers']['ETag']}},
+            {'method': 'get', 'path': ['cacheable'], 'headers': {'If-None-Match': '<<0[headers][ETag]>>'}},
         ])
         self.assertEqual(results_ru[0]['status'], 200)
         self.assertEqual(results_ru[1]['status'], 304)
         self.assertNotEqual(results[0]['headers']['ETag'], results_ru[0]['headers']['ETag'])
 
         results = self.bulk([
-            {'method': 'get', 'path': ['cachable', 'non_cached']},
+            {'method': 'get', 'path': ['cacheable', 'non_cached']},
         ])
         self.assertEqual(results[0]['status'], 200)
         self.assertNotIn('ETag', results[0]['headers'])
@@ -3651,6 +3709,8 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(FieldChoices.LOWER_VALUE.value, 'lower_value')
         self.assertEqual(FieldChoices.upper_value.value, 'UPPER_VALUE')
         self.assertEqual(FieldChoices.SAME_VALUE.value, 'SAME_VALUE')
+
+        self.assertEqual(FieldChoices.max_len, max(len(i[1]) for i in FieldChoices.to_choices()))
 
     @override_settings(SESSION_ENGINE='django.contrib.sessions.backends.db')
     def test_hierarchy(self):
@@ -3939,6 +3999,12 @@ class ProjectTestCase(BaseTestCase):
             ["fas", "fa-calculator"]
         )
 
+        # Check hidden view and action
+        self.assertTrue(data['paths']['/testfk/']['get']['x-hidden'])
+        self.assertTrue(data['paths']['/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hidden_on_frontend_hosts/']['get']['x-hidden'])
+        self.assertTrue(data['paths']['/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hidden_on_frontend_hosts/']['post']['x-hidden'])
+        self.assertTrue(data['paths']['/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hidden_on_frontend_hosts/{hidden_on_frontend_hosts_id}/hidden_action/']['post']['x-hidden'])
+
     def test_manifest_json(self):
         result = self.get_result('get', '/manifest.json')
         self.assertEqual(result['name'], 'Example project')
@@ -4050,9 +4116,9 @@ class ProjectTestCase(BaseTestCase):
         results = self.bulk([
             {"method": "get", "path": ['author']},
             {"method": "get", "path": ['post'], "query": "__authors=<<0[headers][Pagination-Identifiers]>>"},
-            {"method": "get", "path": ['author'], "headers": {"HTTP_IDENTIFIERS_LIST-NAME": "id"}, "query": f"id={expected_authors_identifiers}"},
+            {"method": "get", "path": ['author'], "headers": {"Identifiers-List-Name": "id"}, "query": f"id={expected_authors_identifiers}"},
             {"method": "get", "path": ['post'], "query": "__authors=<<2[headers][Pagination-Identifiers]>>"},
-            {"method": "get", "path": ['author'], "headers": {"HTTP_IDENTIFIERS_LIST-NAME": "id"}, "query": f"id={author_2.id}"},
+            {"method": "get", "path": ['author'], "headers": {"Identifiers-List-Name": "id"}, "query": f"id={author_2.id}"},
             {"method": "get", "path": ['post'], "query": "__authors=<<4[headers][Pagination-Identifiers]>>"},
         ])
         self.assertEqual(results[0]['status'], 200)
@@ -4783,12 +4849,12 @@ class ProjectTestCase(BaseTestCase):
             {
                 'method': 'get',
                 'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
-                'headers': {"HTTP_IF_NONE_MATCH": '<<3[headers][ETag]>>'},
+                'headers': {"If-None-Match": '<<3[headers][ETag]>>'},
             },
             {
                 'method': 'get',
                 'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
-                'headers': {"HTTP_IF_NONE_MATCH": '<<6[headers][ETag]>>'},
+                'headers': {"If-None-Match": '<<6[headers][ETag]>>'},
             },
             {
                 'method': 'post',
@@ -4804,6 +4870,11 @@ class ProjectTestCase(BaseTestCase):
                 'data': {
                     'key': '<<5[data][id]>>',
                 }
+            },
+            {
+                'method': 'get',
+                'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
+                'query': 'key_query=non-valid'
             },
         ]
         results = self.bulk(bulk_data)
@@ -4822,6 +4893,8 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[10]['status'], 201, results[10])
         self.assertEqual(results[11]['status'], 400, results[11])
         self.assertEqual(results[11]['data'], {'value': ['A valid integer is required.']})
+        self.assertEqual(results[12]['status'], 400, results[11])
+        self.assertEqual(results[12]['data']['detail'], "Field 'id' expected a number but got 'non-valid'.")
 
     @override_settings(CASE_SENSITIVE_API_FILTER=False)
     def test_filters_case_insensitive(self):
@@ -5044,7 +5117,7 @@ class ProjectTestCase(BaseTestCase):
             {
                 'method': 'delete',
                 'path': ['group', '<<2[data][id]>>', 'childrens', '<<8[data][id]>>'],
-                'headers': {"HTTP_X_Purge_Nested": '123'}
+                'headers': {"X-Purge-Nested": '123'}
             },
             {
                 'method': 'get',
@@ -5063,7 +5136,7 @@ class ProjectTestCase(BaseTestCase):
             {
                 'method': 'delete',
                 'path': ['groupwithfk', '<<5[data][id]>>', 'child', '<<7[data][id]>>'],
-                'headers': {"HTTP_X_Purge_Nested": 'true'}
+                'headers': {"X-Purge-Nested": 'true'}
             },
             {
                 'method': 'get',
@@ -5074,7 +5147,7 @@ class ProjectTestCase(BaseTestCase):
             {
                 'method': 'delete',
                 'path': ['modelwithnested', '<<0[data][id]>>', 'groups', '<<21[data][id]>>'],
-                'headers': {"HTTP_X_Purge_Nested": 'true'}
+                'headers': {"X-Purge-Nested": 'true'}
             },
             {
                 'method': 'get',
@@ -5123,7 +5196,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertIn('2.2.2', str(deep_results[14]['data']))
 
         # Nested header tests
-        self.assertEqual(deep_results[15]['status'], 204)
+        self.assertEqual(deep_results[15]['status'], 204, deep_results[15]['data'])
         self.assertEqual(deep_results[16]['status'], 200)
 
         self.assertEqual(deep_results[17]['status'], 204)
@@ -5159,7 +5232,7 @@ class ProjectTestCase(BaseTestCase):
             {
                 'method': 'delete',
                 'path': ['modelwithnested', model_with_nested_1.id, 'protected', protected.id],
-                'headers': {'HTTP_X_Purge_Nested': 'true'}
+                'headers': {'X-Purge-Nested': 'true'}
             },
             # [1] remove protected instance from model_with_nested_2
             {
@@ -5170,7 +5243,7 @@ class ProjectTestCase(BaseTestCase):
             {
                 'method': 'delete',
                 'path': ['modelwithnested', model_with_nested_1.id, 'protected', protected.id],
-                'headers': {'HTTP_X_Purge_Nested': 'true'}
+                'headers': {'X-Purge-Nested': 'true'}
             },
         ])
         self.assertEqual(results[0]['status'], 400)
@@ -5308,6 +5381,43 @@ class CustomModelTestCase(BaseTestCase):
         self.assertEqual(results[-1]['status'], 200, results[-1]['data'])
         self.assertEqual(results[-1]['data']['test_value'], 'TEST1')
         self.assertEqual(results[-1]['headers']['X-Query-Data'], 'test_value=TEST1')
+
+    def test_external_custom_models(self):
+        CachableModel = self.get_model_class('test_proj.CachableModel')
+        CachableModel.objects.create(name=f'Test 1')
+        CachableModel.objects.create(name=f'Test 2')
+        for i in range(10):
+            CachableModel.objects.create(name=f'Cachable {i}')
+
+        self.assertEqual(
+            CachableModel.objects.count(),
+            TestExternalCustomModel.objects.count(),
+        )
+        self.assertEqual(
+            CachableModel.objects.filter(name__startswith='Cachable').count(),
+            TestExternalCustomModel.objects.filter(name__startswith='Cachable').count(),
+        )
+        self.assertEqual(
+            CachableModel.objects.all()[1:9].count(),
+            TestExternalCustomModel.objects.all()[1:9].count(),
+        )
+        self.assertEqual(
+            CachableModel.objects.all()[:9].count(),
+            TestExternalCustomModel.objects.all()[:9].count(),
+        )
+        self.assertEqual(
+            CachableModel.objects.all()[3:].count(),
+            TestExternalCustomModel.objects.all()[3:].count(),
+        )
+        self.assertEqual(
+            CachableModel.objects.first().name,
+            TestExternalCustomModel.objects.first().name,
+        )
+        self.assertEqual(
+            CachableModel.objects.order_by('-name').first().name,
+            TestExternalCustomModel.objects.order_by('-name').first().name,
+        )
+        CachableModel.objects.all().delete()
 
     def test_additional_urls(self):
         response = self.client.get('/suburls/admin/login/')

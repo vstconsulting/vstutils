@@ -5,6 +5,8 @@ import type { ParameterType } from 'swagger-schema-official';
 import type { defineStore } from 'pinia';
 import type { Field } from '../fields/base/';
 import type { Route, Location } from 'vue-router';
+import type { Model, ModelConstructor } from '@/vstutils/models';
+import type { IView, PageView, Sublink } from '@/vstutils/views';
 
 export * from './todo.js';
 export * from './app-helpers';
@@ -231,7 +233,7 @@ export function openPage(
         if (options.path && options.params) {
             const route = router.resolve(options as Location).route;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if (route.name && route.name !== '404' && !route.meta?.view?.isDeepNested) {
+            if (route.name && route.name !== NOT_FOUND_ROUTE_NAME && !route.meta?.view?.isDeepNested) {
                 options.name = route.name;
                 delete options.path;
             }
@@ -268,4 +270,167 @@ export async function saveAllSettings() {
     }
 
     return saved;
+}
+
+export const NOT_FOUND_ROUTE_NAME = '404';
+
+export function isNotFoundView(view: IView) {
+    return view.routeName === NOT_FOUND_ROUTE_NAME;
+}
+
+export function joinPaths(...paths: (string | number | undefined | null)[]) {
+    return (
+        paths.reduce<string>((value, path) => value + '/' + String(path ?? '').replace(/^\/|\/$/g, ''), '') +
+        '/'
+    );
+}
+
+/**
+ * Function that formats path from params and replaces last param with instance's id
+ * @param {string} path
+ * @param {Object} params
+ * @param {Model} instance
+ * @return {string}
+ */
+export function formatPath(path: string, params: Record<string, unknown>, instance?: Model) {
+    for (const [name, value] of Object.entries(params)) {
+        path = path.replace(`{${name}}`, String(value));
+    }
+
+    if (instance) {
+        return path.replace(/{.+}/, String(instance.getPkValue()));
+    }
+
+    return path;
+}
+
+export async function openSublink(sublink: Sublink, instance?: Model) {
+    const { router, api, error_handler } = getApp();
+
+    let path = sublink.appendFragment
+        ? joinPaths(router.currentRoute.path, sublink.appendFragment)
+        : sublink.href!;
+    if (typeof path === 'function') {
+        path = path();
+    }
+    path = formatPath(path, router.currentRoute.params, instance);
+
+    if (sublink.isFileResponse) {
+        try {
+            const response = sublink.external
+                ? await fetch(path)
+                : await api.makeRequest({ rawResponse: true, method: 'get', path: path });
+            await downloadResponse(response);
+        } catch (e) {
+            error_handler.defineErrorAndShow(e);
+        }
+        return;
+    }
+
+    if (sublink.external) {
+        window.open(path, '_blank');
+        return;
+    }
+
+    return router.push(path);
+}
+
+export function getRedirectUrlFromResponse(responseData: any, modelClass: ModelConstructor | undefined) {
+    if (!responseData || typeof responseData !== 'object' || !modelClass) return;
+
+    const app = getApp();
+
+    const field = iterFind(modelClass.fields.values(), (field) => field.redirect);
+    if (!field) return;
+
+    const redirect = field.redirect!;
+
+    let operationId = '';
+
+    if (redirect.depend_field) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        const dependFieldValue = responseData[redirect.depend_field];
+        const dependFieldStrValue = dependFieldValue ? String(dependFieldValue) : '';
+        operationId += dependFieldStrValue.toLowerCase();
+    }
+    if (!operationId || redirect.concat_field_name) {
+        operationId = operationId + (redirect.operation_name ?? '');
+    }
+
+    operationId += '_get';
+
+    const view: IView | null = app.viewsTree.findInAllPaths(
+        (view) => view.operationId === operationId && view,
+    );
+
+    if (!view) {
+        console.warn(`Can't find redirect view for operationId: ${operationId}`, field, responseData);
+        return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const value = responseData[field.name];
+
+    if (value === undefined || value === null) {
+        return;
+    }
+
+    return formatPath(view.path, {
+        ...app.router.currentRoute.params,
+        [(view as PageView).pkParamName!]: value as string,
+    });
+}
+
+/**
+ * Function that returns first item from iterator for which callbackFn will return true
+ */
+export function iterFind<T>(iterable: Iterable<T>, callbackFn: (item: T) => unknown) {
+    for (const item of iterable) {
+        if (callbackFn(item)) {
+            return item;
+        }
+    }
+    return undefined;
+}
+
+export function parseFileResponseName(response: Response) {
+    const contentDisposition = response.headers.get('Content-Disposition');
+    if (!contentDisposition) {
+        return '';
+    }
+
+    const fileNameMatch = /filename="(.+)"/.exec(contentDisposition);
+    if (!fileNameMatch) {
+        return '';
+    }
+
+    return fileNameMatch[1];
+}
+
+let responseDownloadHandler = defaultDownloadResponseHandler;
+export function setFileDownloadHandler(handler: (response: Response) => Promise<void>) {
+    responseDownloadHandler = handler;
+}
+
+export async function defaultDownloadResponseHandler(response: Response) {
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    const fileName = parseFileResponseName(response);
+
+    const a = document.createElement('a');
+    a.href = url;
+    if (fileName) {
+        a.download = fileName;
+    }
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+}
+
+export function downloadResponse(response: Response) {
+    return responseDownloadHandler(response);
 }

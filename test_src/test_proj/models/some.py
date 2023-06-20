@@ -67,6 +67,7 @@ class ModelWithFK(BModel):
         _override_list_fields = {
             'some_fk': fields.FkModelField(select=Host)
         }
+        _hidden = True
 
 
 class ModelWithBinaryFiles(BModel):

@@ -7,6 +7,7 @@ import os
 import pickle
 import random
 import subprocess
+import asyncio
 import sys
 import tempfile
 import time
@@ -18,9 +19,9 @@ import uuid
 import warnings
 from functools import lru_cache, wraps
 from pathlib import Path
-from threading import Thread
 from enum import Enum, EnumMeta
 
+from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.middleware.gzip import GZipMiddleware
 from django.urls import re_path, path, include
@@ -765,19 +766,18 @@ class Executor(BaseVstObject):
     __slots__ = ('output', '__stdout__', '__stderr__', 'env')
 
     CANCEL_PREFIX: tp.ClassVar[tp.Text] = "CANCEL_EXECUTE_"
-    newlines: tp.ClassVar[tp.List[tp.Text]] = ['\n', '\r\n', '\r']
     STDOUT: tp.ClassVar[int] = subprocess.PIPE
     STDERR: tp.ClassVar[int] = subprocess.STDOUT
     DEVNULL: tp.ClassVar[int] = subprocess.DEVNULL
     CalledProcessError: tp.ClassVar[tp.Type[subprocess.CalledProcessError]] = subprocess.CalledProcessError
+    env: tp.Dict[str, str]
 
-    env: tp.Dict[tp.Text, tp.Text]
-
-    def __init__(self, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **environ_variables):
-        """
-        :type stdout: BinaryIO,int
-        :type stderr: BinaryIO,int
-        """
+    def __init__(
+            self,
+            stdout: tp.Union[tp.BinaryIO, int] = subprocess.PIPE,
+            stderr: tp.Union[tp.BinaryIO, int] = subprocess.STDOUT,
+            **environ_variables: str,
+    ):
         self.output = ''
         self.__stdout__ = stdout
         self.__stderr__ = stderr
@@ -792,75 +792,128 @@ class Executor(BaseVstObject):
         """
         self.output += str(line)
 
-    def _handle_process(self, proc: subprocess.Popen, stream: tp.Text):
-        stream_object = getattr(proc, stream)
-        while not stream_object.closed:
-            self.working_handler(proc)
-            time.sleep(0.01)
-
-    def working_handler(self, proc: subprocess.Popen) -> None:
+    async def working_handler(self, proc: asyncio.subprocess.Process):
         # pylint: disable=unused-argument
         """
         Additional handler for executions.
 
         :arg proc: running process
-        :type proc: subprocess.Popen
+        :type proc: asyncio.subprocess.Process
         """
 
-    def _unbuffered(self, proc: subprocess.Popen, stream: tp.Text = 'stdout'):
-        """
-        Unbuffered output handler.
-
-        :type proc: subprocess.Popen
-        :type stream: str
-        :return:
-        """
-        if self.working_handler is not None:
-            t = Thread(target=self._handle_process, args=(proc, stream))
-            t.start()
-        out = getattr(proc, stream)
-        try:
-            retcode = None
-            while retcode is None:
-                for line in iter(out.readline, ""):
-                    yield line.rstrip()
-                retcode = proc.poll()
-        finally:
-            out.close()
-
-    def line_handler(self, line: tp.Text) -> None:
+    async def line_handler(self, line: tp.Text) -> None:
+        write_output = self.write_output
+        if not asyncio.iscoroutinefunction(write_output):
+            write_output = sync_to_async(write_output, thread_sensitive=True)
         if line is not None:  # pragma: no branch
             with raise_context():
-                self.write_output(line)
+                await write_output(line)
 
-    def execute(self, cmd: tp.List[tp.Text], cwd: tp.Union[tp.Text, Path]) -> tp.Text:
+    async def _handle_process(self, proc: asyncio.subprocess.Process, stream: tp.Text = 'stdout'):
+        stream_object: asyncio.StreamReader = getattr(proc, stream)
+        working_handler = self.working_handler
+        if not asyncio.iscoroutinefunction(working_handler):
+            working_handler = sync_to_async(working_handler, thread_sensitive=True)  # nocv
+
+        # Run handler periodically until stream object is closed
+        while not stream_object.at_eof():
+            await working_handler(proc)
+            await asyncio.sleep(0.01)
+
+    async def _unbuffered_read(self, proc: asyncio.subprocess.Process, stream: tp.Text = 'stdout'):
+        async for line in getattr(proc, stream):
+            await self.line_handler(line.decode('utf-8'))
+
+    async def _run_subprocess(self, cmd, cwd, env_vars=None):
+        # Run pre execution hook.
+        await self.pre_execute(
+            cmd=cmd,
+            cwd=cwd,
+            env=env_vars,
+        )
+        # Cleanup output variable
+        self.output = ""
+        # Setup environment variables
+        env = os.environ.copy()
+        env.update(self.env)
+        if env_vars:
+            env.update(env_vars)
+
+        # Start execution process
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=self.__stdout__,
+            stderr=self.__stderr__,
+            env=env,
+            cwd=str(cwd),
+            bufsize=0,
+            close_fds=ON_POSIX,
+        )
+
+        # Setup process output handlers
+        # and wait until it ends
+        tasks = [self._unbuffered_read(proc)]
+        if self.working_handler is not None:
+            tasks.append(self._handle_process(proc))
+        await asyncio.gather(*tasks)
+
+        # Parse return code and handle post execution hook
+        return_code = proc.returncode
+        try:
+            if return_code:
+                logger.error(self.output)
+                raise self.CalledProcessError(
+                    return_code, cmd, output=str(self.output)
+                )
+        finally:
+            await self.post_execute(
+                cmd=cmd,
+                cwd=cwd,
+                env=env_vars,
+                return_code=return_code,
+            )
+
+    async def pre_execute(self, cmd: tp.Iterable[tp.Text], cwd: tp.Union[tp.Text, Path], env: dict):
+        """
+        Runs before execution starts.
+
+        :param cmd: -- list of cmd command and arguments
+        :param cwd: -- workdir for executions
+        :param env: -- extra environment variables which overrides defaults
+        """
+
+    async def post_execute(self, cmd: tp.Iterable[tp.Text], cwd: tp.Union[tp.Text, Path], env: dict, return_code: int):
+        """
+        Runs after execution end.
+
+        :param cmd: -- list of cmd command and arguments
+        :param cwd: -- workdir for executions
+        :param env: -- extra environment variables which overrides defaults
+        :param return_code: -- return code of executed process
+        """
+
+    async def aexecute(self, cmd: tp.Iterable[tp.Text], cwd: tp.Union[tp.Text, Path], env: dict = None) -> tp.Text:
+        """
+        Executes commands and outputs its result. Asynchronous implementation.
+
+        :param cmd: -- list of cmd command and arguments
+        :param cwd: -- workdir for executions
+        :param env: -- extra environment variables which overrides defaults
+        :return: -- string with full output
+        """
+        await self._run_subprocess(cmd, cwd, env)
+        return self.output
+
+    def execute(self, cmd: tp.Iterable[tp.Text], cwd: tp.Union[tp.Text, Path], env: dict = None) -> tp.Text:
         """
         Executes commands and outputs its result.
 
         :param cmd: -- list of cmd command and arguments
-        :type cmd: list
         :param cwd: -- workdir for executions
-        :type cwd: str
+        :param env: -- extra environment variables which overrides defaults
         :return: -- string with full output
-        :rtype: str
         """
-        self.output = ""
-        env = os.environ.copy()
-        env.update(self.env)
-        with subprocess.Popen(
-            cmd, stdout=self.__stdout__, stderr=self.__stderr__,
-            bufsize=0, universal_newlines=True,
-            cwd=str(cwd), env=env,
-            close_fds=ON_POSIX
-        ) as proc:
-            for line in self._unbuffered(proc):
-                self.line_handler(line)
-            return_code = proc.poll()
-            if return_code:
-                logger.error(self.output)
-                raise subprocess.CalledProcessError(
-                    return_code, cmd, output=str(self.output)
-                )
+        asyncio.run(self.aexecute(cmd, cwd, env))
         return self.output
 
 
@@ -869,7 +922,7 @@ class UnhandledExecutor(Executor):
     Class based on :class:`.Executor` but disables `working_handler`.
     """
     __slots__ = ()
-    working_handler = None  # type: ignore
+    working_handler = None
 
 
 class KVExchanger(BaseVstObject):
@@ -1358,7 +1411,10 @@ class VstEnumMeta(EnumMeta):
                 dict.__setitem__(classdict, key, key)
                 mutated_types[key] = str
         classdict['__mutated_types__'] = mutated_types
-        return super().__new__(metacls, cls, bases, classdict)
+        result = super().__new__(metacls, cls, bases, classdict)
+        if result.__members__:
+            result.max_len = max(len(i) for i in result.__members__)
+        return result
 
 
 class VstEnum(Enum, metaclass=VstEnumMeta):
@@ -1383,7 +1439,7 @@ class BaseEnum(str, VstEnum):
 
 
             class MyDjangoModel(BModel):
-                item_class = models.CharField(max_length=1024, choices=ItemCLasses.to_choices())
+                item_class = models.CharField(max_length=ItemCLasses.max_len, choices=ItemCLasses.to_choices())
 
                 @property
                 def is_second(self):
