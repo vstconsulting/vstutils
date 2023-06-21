@@ -139,7 +139,7 @@ release_pypi:
     - when: never
   script:
     - tox -e build
-    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
+    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/* -type f -name '*.tar.gz') $(find dist/* -type f -name '*.whl')
     - echo MILESTONE=${CI_COMMIT_TAG%.*} > variables.env
   allow_failure: true
 

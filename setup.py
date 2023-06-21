@@ -36,7 +36,7 @@ PY_MAJOR, PY_MINOR = sys.version_info[0:2]
 ignored_keys = ['-h', '--help', '--version']
 is_help = any([a for a in ignored_keys if a in sys.argv])
 is_develop = 'develop' in sys.argv
-is_build = (any([a for a in ['compile', 'bdist_wheel', 'bdist'] if a in sys.argv]) or is_develop) and not is_help
+is_build = (any([a for a in ['compile', 'bdist_wheel', 'bdist', 'sdist'] if a in sys.argv]) or is_develop) and not is_help
 
 
 def get_discription(file_path='README.rst', folder=os.getcwd()):
@@ -416,7 +416,7 @@ requirements = load_requirements('requirements.txt')
 requirements_rpc = load_requirements('requirements-rpc.txt')
 
 kwargs = dict(
-    packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
+    packages=find_packages(include=['vstutils', 'vstutils.*']),
     ext_modules_list=ext_list,
     static_exclude_min=[
         'vstutils/templates/.*\.js$',
