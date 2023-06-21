@@ -82,7 +82,6 @@ functional_test:
     matrix:
       - TOX_ENVS:
           - py38-django42-install
-        BUILD_OPTIMIZATION: 'true'
       - TOX_ENVS:
           - py311-django42-coverage
 
