@@ -547,8 +547,6 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         },
         'uvicorn': {
             'loop': 'auto',
-            'limit_concurrency': 512,
-            'backlog': 512,
         }
     },
     section_overload={
