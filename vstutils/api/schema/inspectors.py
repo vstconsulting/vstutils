@@ -576,6 +576,7 @@ class ArrayFilterQueryInspector(CoreAPICompatInspector):
             name=param['name'],
             in_=param['in'],
             description=param.get('description'),
+            required=param.get('required', False),
             **param['schema'],
         )
 

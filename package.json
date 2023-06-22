@@ -9,10 +9,10 @@
   },
   "repository": "gitlab:vstconsulting/vstutils",
   "browserslist": [
-    "> 0.25% and not dead and not IE 11"
+    "> 0.25% and not dead"
   ],
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "build": "APP_ENV=prod webpack --json vstutils/static/bundle/output.json",

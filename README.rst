@@ -1,9 +1,9 @@
 VSTUtils Framework
 ==================
 
-Small framework for easy generates web-applications
+A platform for easy web application generation
 (PWA/Progressive Web Application and SPA/Single Page Application).
-It uses OpenAPI schema for GUI rendering based over the REST API
+It uses OpenAPI (Swagger 2.0) schema for GUI rendering based over the REST API
 and also provides the ability to generate documentation for the API based on the schema.
 By default GUI based on AdminLTE dashboard and Vue templates.
 
@@ -53,7 +53,7 @@ Development Status
 
 Browser support
 ---------------
-Supported `browserslist <https://browserl.ist/?q=%3E+0.25%25+and+not+dead+and+not+IE+11>`_.
+Supported `browserslist <https://browsersl.ist/#q=%3E+0.25%25+and+not+dead>`_.
 
 
 Implemented Projects
