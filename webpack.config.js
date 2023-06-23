@@ -39,6 +39,7 @@ module.exports = {
     resolve: {
         alias: {
             vue$: 'vue/dist/vue.esm.js',
+            'moment-timezone$': 'moment-timezone/builds/moment-timezone-with-data-10-year-range.min.js',
             '@': path.resolve(__dirname, 'frontend_src'),
         },
         extensions: ['.tsx', '.ts', '.js', '.vue'],
