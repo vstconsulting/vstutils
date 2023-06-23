@@ -3,7 +3,7 @@ import posixpath
 import time
 
 from django.conf import settings
-from django.core.asgi import get_asgi_application
+from django.core.handlers.asgi import ASGIHandler
 from django.contrib.staticfiles import finders
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse, FileResponse, ORJSONResponse
@@ -79,4 +79,4 @@ async def add_server_timing_header(request: Request, call_next):
 
 
 if not any(m.path == '/' for m in application.routes):
-    application.mount("/", get_asgi_application())
+    application.mount("/", ASGIHandler())

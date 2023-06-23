@@ -201,6 +201,7 @@ class UvicornSection(BaseAppendSection):
         'use_colors': ConfigBoolType,
         'reload': ConfigBoolType,
         'reload_dirs': ConfigListType,
+        'forwarded_allow_ips': ConfigListType,
         'workers': ConfigIntType,
         'proxy_headers': ConfigBoolType,
         'server_header': ConfigBoolType,
@@ -208,7 +209,10 @@ class UvicornSection(BaseAppendSection):
         'limit_concurrency': ConfigIntType,
         'limit_max_requests': ConfigIntType,
         'backlog': cconfig.BytesSizeType(),
+        'h11_max_incomplete_event_size': cconfig.BytesSizeType(),
         'timeout_keep_alive': ConfigIntSecondsType,
+        'timeout_graceful_shutdown': ConfigIntSecondsType,
+        'timeout_notify': ConfigIntSecondsType,
         'factory': ConfigBoolType,
     }
 
@@ -824,6 +828,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = web['request_max_size']
 X_FRAME_OPTIONS = web['x_frame_options']
 USE_X_FORWARDED_HOST = web['use_x_forwarded_host']
 USE_X_FORWARDED_PORT = web['use_x_forwarded_port']
+WEB_SERVER_HEADERS: _t.List[_t.Tuple[str, str]] = []
 
 
 # Templates settings

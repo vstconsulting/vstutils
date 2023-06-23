@@ -10,14 +10,19 @@ import uwsgi  # pylint: disable=import-error
 import django
 from django.conf import settings
 from django.utils.module_loading import import_string
-django.setup()
+
+django.setup(set_prefix=False)
+
+# Import application
+application = import_string(settings.ASGI_APPLICATION)
 
 
-async def init(servers_list, fds):
+async def init(servers_list, fds, app):
     config = uvicorn.Config(
-        app=import_string(settings.ASGI_APPLICATION),
+        app=app,
         interface='asgi3',
         log_level=settings.LOG_LEVEL.lower(),
+        headers=settings.WEB_SERVER_HEADERS or None,
         **settings.CONFIG['uvicorn'].all(),
     )
     server = uvicorn.Server(config)
@@ -57,7 +62,7 @@ if __name__ == '__main__':
 
     # Spawn a handler for every uWSGI socket
     uwsgi.log(f'start uvicorn worker {uwsgi.worker_id()}')
-    loop.run_until_complete(init(servers, uwsgi.sockets))
+    loop.run_until_complete(init(servers, uwsgi.sockets, application))
 
     # Start accepting requests via socket
     uwsgi.accepting()

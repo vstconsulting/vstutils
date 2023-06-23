@@ -46,6 +46,7 @@ def settings_constants(request: HttpRequest) -> Dict:
         "timezone": getattr(settings, 'TIME_ZONE', 'UTC'),
         "debug": debug_enabled,
         "languages": settings.LANGUAGES,
+        "name": '',
     }
 
 
