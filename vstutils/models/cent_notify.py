@@ -1,6 +1,7 @@
 # cython: binding=True
 import typing as _t
 import logging
+import contextlib
 import json
 
 import orjson
@@ -10,7 +11,7 @@ from django.contrib.auth import get_user_model
 from cent import Client as CentrifugoClient  # type: ignore
 
 from .base import get_proxy_labels
-from ..utils import raise_context_decorator_with_default, raise_context
+from ..utils import raise_context_decorator_with_default
 from .model import BaseModel
 from ..api.renderers import ORJSONRenderer
 
@@ -33,12 +34,15 @@ class Notificator:
 
     def __init__(self, queue=None, client=None, label=None):
         self.queue = queue or []
-        self.cent_client = client or self.get_client()
+        self.cent_client = client
         self.label = label
         self._signals: _t.List[signals.ModelSignal] = []
-        if self.cent_client is not None:
+        if self.is_usable():
             self.connect_signal(signals.post_save)
             self.connect_signal(signals.post_delete)
+
+    def is_usable(self):
+        return bool(settings.CENTRIFUGO_CLIENT_KWARGS) or self.cent_client  # nocv
 
     def connect_signal(self, signal: signals.ModelSignal):
         if signal not in self._signals:
@@ -88,8 +92,12 @@ class Notificator:
 
         sent_channels = set()
         provided_label = self.label
+
+        if objects and self.cent_client is None:
+            self.cent_client = self.get_client()
+
         for obj_labels, data in objects:
-            with raise_context():
+            with contextlib.suppress(Exception):
                 for obj_label in obj_labels:
                     channel = self.get_subscription_channel(provided_label or obj_label)
                     self.cent_client.add("publish", self.cent_client.get_publish_params(
@@ -115,5 +123,6 @@ class Notificator:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.send()
-        self.disconnect_all()
+        if self.is_usable():
+            self.send()
+            self.disconnect_all()

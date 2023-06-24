@@ -2,7 +2,9 @@ import os
 import posixpath
 import time
 
+import django
 from django.conf import settings
+from django.apps import apps
 from django.core.handlers.asgi import ASGIHandler
 from django.contrib.staticfiles import finders
 from fastapi import FastAPI, Request
@@ -14,9 +16,11 @@ from starlette.staticfiles import NotModifiedResponse
 
 from .signals import before_mount_app
 
+if not apps.apps_ready:
+    django.setup(set_prefix=False)  # nocv
 
 NOT_FOUND_RESPONSE = PlainTextResponse('Not found', status_code=404)
-static_app = FastAPI(openapi_url=None, docs_url=None, redoc_url=None)
+static_app = FastAPI(root_path=settings.STATIC_URL, openapi_url=None, docs_url=None, redoc_url=None)
 static_app.add_middleware(GZipMiddleware)
 
 application = FastAPI(openapi_url=None, docs_url=None, redoc_url=None)

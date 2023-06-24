@@ -41,12 +41,19 @@ class BaseBackend(BaseVstObject):
 
 
 class DefaultBackend(BaseBackend):
+    db_check_sql = 'SELECT 1;'
+
     def check_health_db(self):
         """
         Checking if some database server is unavailable.
         """
         for db_name in self.get_django_settings('DATABASES', {}).keys():
             connections[db_name].ensure_connection()
+            if not connections[db_name].is_usable():
+                raise Exception(f'Database {db_name} is not usable.')  # nocv
+            with connections[db_name].cursor() as cursor:
+                cursor.execute(self.db_check_sql)
+                cursor.fetchall()
 
     def check_health_cache(self):
         """
@@ -54,6 +61,10 @@ class DefaultBackend(BaseBackend):
         """
         for cache_name in self.get_django_settings('CACHES', {}).keys():
             self.get_django_cache(cache_name).get('test', 0)
+
+    def celery_check(self, celery_app):
+        # Also can be ``celery_app.control.ping()``
+        return celery_app.pool.connection.connected and "ok"
 
     def check_health_rpc(self):
         """
@@ -68,4 +79,4 @@ class DefaultBackend(BaseBackend):
         except ImportError:  # nocv
             return "disabled"
         else:
-            celery_app.pool.connection.connect()
+            return self.celery_check(celery_app)

@@ -12,3 +12,6 @@ class Client(CentrifugoClient):
 
 class DummyNotificator(Notificator):
     client_class = Client
+
+    def is_usable(self):
+        return True
