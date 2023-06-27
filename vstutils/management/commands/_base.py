@@ -13,7 +13,6 @@ from django.core.management.base import (
     BaseCommand as _BaseCommand,
     CommandError as CmdError,
 )
-from configparserc.config import ConfigParserC
 from vstutils.utils import Lock
 
 logger = logging.getLogger(settings.VST_PROJECT)
@@ -121,8 +120,7 @@ class DockerCommand(BaseCommand):
         logger.debug(f'Prefix={self.prefix} | Project={self.project_name}')
 
         self.env = os.environ.copy()
-        config = self.prepare_config()
-        self.env[self._settings('CONFIG_ENV_DATA_NAME')] = config.generate_config_string()
+        self.config = self.prepare_config()
         self.env[f'{settings.ENV_NAME}_DAEMON'] = 'false'
         default_envs = {
             'UWSGI_PROCESSES': 'UWSGI_WORKERS',
@@ -133,9 +131,9 @@ class DockerCommand(BaseCommand):
             if value:
                 self.env[default_envs[key]] = value  # nocv
 
-        if config['main']['debug'] or self._settings('TESTS_RUN', False):
+        if self.config['main']['debug'] or self._settings('TESTS_RUN', False):
             logger.debug(f'Env:\n{json.dumps(self.env, indent=4)}')
-            logger.debug(f'Config:\n{self.env[self._settings("CONFIG_ENV_DATA_NAME")]}')
+            logger.debug(f'Config:\n{self.config.generate_config_string()}')
 
     @property
     def databases_to_migrate(self):
@@ -185,24 +183,13 @@ class DockerCommand(BaseCommand):
         return success, error
 
     def prepare_config(self):
-        # pylint: disable=too-many-locals,too-many-branches,too-many-statements
-        prefix = self.prefix
-
         # Start configuring config file
-        self.config = ConfigParserC(
-            format_kwargs=self._settings('KWARGS', {}),
-            format_exclude_sections=('uwsgi',)
-        )
-        config = self.config
-        config.parse_text(settings.CONFIG.generate_config_string())
-
-        # Set log level
-        self.log_level = os.getenv(f'{prefix}_LOG_LEVEL', 'WARNING')
+        config = settings.CONFIG
 
         # Set secret key
         os.environ.setdefault('SECRET_KEY', 'DISABLE')
         if os.environ['SECRET_KEY'] != 'DISABLE':  # nocv
-            with open(f'/etc/{prefix.lower()}/secret', 'w', encoding='utf-8') as secretfile:
+            with open(f'/etc/{self.prefix.lower()}/secret', 'w', encoding='utf-8') as secretfile:
                 secretfile.write(os.environ['SECRET_KEY'])
 
         return config

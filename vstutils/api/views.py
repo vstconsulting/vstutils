@@ -111,10 +111,10 @@ class HealthView(base.ListNonModelViewSet):
     permission_classes = (rest_permissions.AllowAny,)
     authentication_classes = ()
     throttle_classes = (HealthThrottle,)
-    health_backend = import_class(settings.HEALTH_BACKEND_CLASS)()
+    health_backend = import_class(settings.HEALTH_BACKEND_CLASS)
 
     def list(self, request, *args, **kwargs):
-        return responses.HTTP_200_OK(*self.health_backend.get())
+        return responses.HTTP_200_OK(*self.health_backend(request).get())
 
 
 class MetricsView(base.ListNonModelViewSet):

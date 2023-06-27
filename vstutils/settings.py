@@ -118,9 +118,14 @@ class FloatType(cconfig.BaseType):
 class LocationsType(cconfig.ListType):
     def convert(self, value: _t.Any) -> _t.Union[_t.Iterable, _t.Text]:  # type: ignore
         result: _t.Iterable[_t.Text] = super().convert(value)
-        if any(filter(lambda x: x.startswith('redis'), result)):  # type: ignore
+        if len(result) > 1:  # type: ignore
             return result
         return value
+
+    def str_convert(self, value):
+        if isinstance(value, str):
+            return value
+        return super().str_convert(value)
 
 
 ConfigBoolType = cconfig.BoolType()
@@ -265,19 +270,23 @@ class CacheOptionsSection(BackendSection):
         'no_delay': ConfigBoolType,
         'ignore_exc': ConfigBoolType,
         'ignore_exceptions': ConfigBoolType,
+        'socket_keepalive': ConfigBoolType,
+        'retry_on_timeout': ConfigBoolType,
         'use_pooling': ConfigBoolType,
         'close_connection': ConfigBoolType,
+        'single_connection_client': ConfigBoolType,
         'max_entries': ConfigIntType,
         'cull_frequency': ConfigIntType,
         'max_pool_size': ConfigIntType,
         'pickle_version': ConfigIntType,
         'socket_connect_timeout': ConfigIntSecondsType,
         'socket_timeout': ConfigIntSecondsType,
+        'health_check_interval': ConfigIntSecondsType,
     }
 
     def key_handler_to_all(self, key):
         backend = self.parent['backend']
-        if backend.split('.')[-1] in ('PyLibMCCache', 'PyMemcacheCache'):
+        if key not in {'max_entries', 'cull_frequency', }:
             return key
         return super(CacheOptionsSection, self).key_handler_to_all(key)
 
@@ -401,7 +410,6 @@ class Boto3Subsection(BackendSection):
             return f'AWS_{key_uppercase}'
         return key_uppercase
 
-environ.environ.REDIS_DRIVER = 'django.core.cache.backends.redis.RedisCache'
 
 class DjangoEnv(environ.Env):
     BOOLEAN_TRUE_STRINGS = environ.Env.BOOLEAN_TRUE_STRINGS + ('enable', 'ENABLE')
@@ -965,9 +973,6 @@ CACHES: SIMPLE_OBJECT_SETTINGS_TYPE = {
     "session": session_cache,
     "etag": etag_cache,
 }
-
-if any([True for c in CACHES.values() if 'OPTIONS' in c and c['OPTIONS'].get('SENTINELS')]):
-    DJANGO_REDIS_CONNECTION_FACTORY = 'django_redis.pool.SentinelConnectionFactory'
 
 
 # E-Mail settings

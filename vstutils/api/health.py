@@ -1,40 +1,48 @@
-from typing import Text, Iterable, Callable, Dict, Tuple
+from typing import Dict, Tuple, ClassVar, Callable
+from functools import wraps
 
 from django.db import connections
-from rest_framework import status as st
+from rest_framework import status as st, request as req
 
 from ..utils import BaseVstObject, import_class
 
 
-class BaseBackend(BaseVstObject):
-    __slots__ = ('__health_methods',)
-
-    def __init__(self):
-        self.__health_methods = {}  # typing: Dict
-
-    def __health_method_wrapper(self, method: Callable):
+def health_wrapper(method):
+    @wraps(method)
+    def wrapper(self):
         try:
-            return method() or 'ok', st.HTTP_200_OK
+            return method(self) or 'ok', st.HTTP_200_OK
         except BaseException as exception:
             code = getattr(exception, 'status', st.HTTP_500_INTERNAL_SERVER_ERROR)
             return str(exception), code
 
-    def __health_types_filter(self, attr_name: Text) -> bool:
-        return attr_name.startswith('check_health_')
+    return wrapper
 
-    def __get_health_methods_iterator(self) -> Iterable[Tuple[Text, Callable]]:
-        for method_name in filter(self.__health_types_filter, dir(self)):
-            method = getattr(self, method_name)
-            if callable(method):
-                yield method_name.replace('check_health_', '', 1), method
+
+class HealthBackendMeta(type):
+    def __new__(mcs, name, bases, attrs):
+        backend = super().__new__(mcs, name, bases, attrs)
+        checks = {}
+        for attr_name, attr in attrs.items():
+            if attr_name.startswith('check_health_') and callable(attr):
+                checks[attr_name.replace('check_health_', '', 1)] = health_wrapper(attr)
+        if checks:
+            original_checks = getattr(backend, 'health_checks', {})
+            backend.health_checks = {**original_checks, **checks}
+        return backend
+
+
+class BaseBackend(BaseVstObject, metaclass=HealthBackendMeta):
+    __slots__ = ('request',)
+    health_checks: ClassVar[Dict[str, Callable]]
+
+    def __init__(self, request: req.Request):
+        self.request = request
 
     def get(self) -> Tuple[Dict, int]:
-        if not self.__health_methods:
-            self.__health_methods = dict(self.__get_health_methods_iterator())
         result, status = {}, st.HTTP_200_OK
-        for key, method in self.__health_methods.items():
-            method_result, method_status = self.__health_method_wrapper(method)
-            result[key] = method_result
+        for key, method in self.health_checks.items():
+            result[key], method_status = method(self)
             if method_status > status:
                 status = method_status
         return result, status
@@ -80,3 +88,8 @@ class DefaultBackend(BaseBackend):
             return "disabled"
         else:
             return self.celery_check(celery_app)
+
+    def check_health_session_engine(self):
+        # pylint: disable=pointless-statement
+        tuple(self.request.session.values())
+        self.request.user.is_active
