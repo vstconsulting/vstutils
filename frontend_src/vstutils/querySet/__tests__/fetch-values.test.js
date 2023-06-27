@@ -111,6 +111,64 @@ test('fk fetching', async () => {
     ]);
 });
 
+test('dynamic with fk fetching', async () => {
+    const DynamicModel = app.modelsResolver.bySchemaObject({
+        type: 'object',
+        properties: {
+            id: { type: 'integer' },
+            field_type: { type: 'string' },
+            dynamic: {
+                type: 'integer',
+                format: 'dynamic',
+                'x-options': {
+                    field: 'field_type',
+                    types: {
+                        user_foreign_key: userFkField,
+                    },
+                },
+            },
+        },
+    });
+
+    const instances = [
+        new DynamicModel({
+            id: 1,
+            field_type: 'user_foreign_key',
+            dynamic: 1337,
+        }),
+    ];
+
+    fetchMock.mockResponseOnce(
+        JSON.stringify([
+            {
+                status: 200,
+                data: {
+                    count: 1,
+                    results: [{ id: 1337, username: 'user1337' }],
+                },
+            },
+        ]),
+    );
+
+    await fetchInstances(instances);
+
+    expect(fetchMock).toBeCalledTimes(1);
+    const [, request] = fetchMock.mock.calls[0];
+    const body = JSON.parse(request.body);
+
+    expect(body).toStrictEqual([
+        {
+            method: 'get',
+            path: ['user'],
+            query: new URLSearchParams({ id: '1337', limit: '1' }).toString(),
+        },
+    ]);
+
+    // Fk should become instances
+    expect(instances[0].dynamic).toBeInstanceOf(User);
+    expect(instances[0].dynamic.username).toBe('user1337');
+});
+
 test('related list with array with dynamic with fk fetching', async () => {
     const dynamicWithFk = {
         type: 'integer',
@@ -130,6 +188,7 @@ test('related list with array with dynamic with fk fetching', async () => {
                 type: 'array',
                 format: 'table',
                 items: {
+                    type: 'object',
                     properties: {
                         field_type: { type: 'string' },
                         list: {

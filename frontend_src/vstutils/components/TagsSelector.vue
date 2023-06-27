@@ -1,7 +1,16 @@
 <template>
     <ul class="tags-selector">
         <li v-for="(item, idx) in value" :key="`${idx}-${item}`" class="selected-item">
-            <span class="remove" :aria-label="$t('Remove')" @click="remove(idx)">×</span>
+            <button
+                type="button"
+                tabindex="-1"
+                :title="$t('Remove')"
+                :aria-label="$t('Remove')"
+                class="remove"
+                @click="remove(idx)"
+            >
+                <span aria-hidden>×</span>
+            </button>
             {{ item }}
         </li>
         <input ref="input" class="field" type="text" @keyup.enter="add($refs.input.value)" />
@@ -50,7 +59,7 @@
         flex-wrap: wrap;
         align-items: flex-start;
         margin: 0;
-        padding: 0;
+        padding: 0 0.35rem;
         list-style: none;
         border-radius: 0.25rem;
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
@@ -64,17 +73,36 @@
         margin: 0.375rem 0 0 0.375rem;
     }
     .selected-item {
-        padding: 0 0.3rem;
-        color: #495057;
-        background: #e9ecef;
-        border: 1px solid #6c757d;
+        display: flex;
+        align-items: center;
+        padding: 0.35em 0.65em;
+        margin-left: 0.375rem;
+        font-size: 1rem;
+        color: #212529;
+        cursor: auto;
+        border: 1px solid #ced4da;
         border-radius: 0.25rem;
-        white-space: nowrap;
     }
     .selected-item .remove {
-        cursor: pointer;
-        user-select: none;
+        width: 0.75rem;
+        height: 0.75rem;
+        padding: 0.25em;
+        margin-right: 0.25rem;
+        overflow: hidden;
+        text-indent: 100%;
+        white-space: nowrap;
+        background: transparent
+            url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27 fill=%27%23676a6d%27%3e%3cpath d=%27M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z%27/%3e%3c/svg%3e')
+            50%/0.75rem auto no-repeat;
+        border: 0;
     }
+
+    .selected-item .remove:hover {
+        background: transparent
+            url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27 fill=%27%23000%27%3e%3cpath d=%27M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z%27/%3e%3c/svg%3e')
+            50%/0.75rem auto no-repeat;
+    }
+
     .field {
         flex: 2;
         border: 0;
@@ -83,6 +111,11 @@
         background-color: transparent;
         min-width: 6em;
     }
+
+    .selected-item + .field {
+        padding: 0.375rem;
+    }
+
     .field:focus-visible {
         outline: none;
     }

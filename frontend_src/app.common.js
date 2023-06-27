@@ -6,8 +6,8 @@ import './libs/jquery.js';
 
 import 'select2/dist/js/select2.full.min.js';
 import 'select2/dist/css/select2.css';
-import 'select2-theme-bootstrap4/dist/select2-bootstrap.css';
-window.SELECT2_THEME = 'bootstrap';
+import 'select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css';
+window.SELECT2_THEME = 'bootstrap-5';
 
 import 'jquery.scrollto';
 
