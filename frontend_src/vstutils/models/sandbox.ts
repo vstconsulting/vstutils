@@ -6,7 +6,7 @@ import { ModelValidationError, type FieldValidationErrorInfo } from './errors';
 
 import type { RepresentData } from '@/vstutils/utils';
 import type { SetFieldValueOptions } from '@/vstutils/fields/base';
-import type { Model, ModelConstructor } from './Model';
+import type { Model } from './Model';
 
 type ReadonlySet<T> = Omit<Set<T>, 'add' | 'clear' | 'delete'>;
 
@@ -56,13 +56,28 @@ const refSet = <T>() => {
 export type ModelSandbox = ReturnType<typeof createModelSandbox>;
 
 export function createModelSandbox(instance: Model) {
-    function getInstanceRepresentData() {
-        return (instance.constructor as ModelConstructor).innerToRepresent(instance._data);
-    }
-
     const _data = ref<RepresentData>();
     const _changedFields = refSet<string>();
     const changed = computed(() => _changedFields.value.size > 0);
+    const prefetchedValues = new Map<string, unknown>();
+
+    function getInstanceRepresentData() {
+        const representData = emptyRepresentData();
+        // some fields depend on represent data of other fields so it necessary
+        const innerDataWithMaybeSomeRepresentData = {
+            ...instance._data,
+            ...Object.fromEntries(prefetchedValues),
+        };
+        for (const [name, field] of instance._fields) {
+            const prefetchedValue = prefetchedValues.get(name);
+            if (prefetchedValue !== undefined) {
+                representData[name] = prefetchedValue;
+            } else {
+                representData[name] = field.toRepresent(innerDataWithMaybeSomeRepresentData);
+            }
+        }
+        return representData;
+    }
 
     function getData() {
         if (!_data.value) {
@@ -76,6 +91,14 @@ export function createModelSandbox(instance: Model) {
         if (markChanged && !_changedFields.value.has(field)) {
             _changedFields.value.add(field);
         }
+    }
+
+    /**
+     * Saves prefetched value to use it for representing instance data later.
+     * @internal
+     */
+    function setPrefetchedValue(fieldName: string, value: unknown) {
+        prefetchedValues.set(fieldName, value);
     }
 
     function reset() {
@@ -123,6 +146,7 @@ export function createModelSandbox(instance: Model) {
 
     return markRaw({
         set,
+        setPrefetchedValue,
         reset,
         validate,
         markUnchanged,

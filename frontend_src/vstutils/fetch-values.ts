@@ -104,7 +104,8 @@ async function fetchFieldValues(field: IFetchableField, instances: Model[]) {
     const fetchedInstances = await fetchPKs(pks, field);
 
     for (let i = 0; i < fetchedInstances.length; i++) {
-        instances[i].sandbox.set({ field: field.name, value: fetchedInstances[i], markChanged: false });
+        const value = fetchedInstances[i];
+        instances[i].sandbox.setPrefetchedValue(field.name, value);
     }
 }
 
@@ -135,11 +136,10 @@ async function fetchArrayFieldValues(
 
     // Put processed items back into original instances
     for (const [instance, itemInstances] of itemInstancesMap) {
-        instance.sandbox.set({
-            field: field.name,
-            value: itemInstances.map((itemInstance) => field.getValue(itemInstance.sandbox.value)),
-            markChanged: false,
-        });
+        instance.sandbox.setPrefetchedValue(
+            field.name,
+            itemInstances.map((itemInstance) => field.getValue(itemInstance.sandbox.value)),
+        );
     }
 }
 
@@ -151,7 +151,7 @@ async function fetchDynamicFieldValues(
     const fields = new Map<Field, Model[]>();
 
     for (const instance of instances) {
-        const realField = field.getRealField(instance.sandbox.value);
+        const realField = field.getRealField(instance._data);
         const sameField = Array.from(fields.keys()).find((field) => realField.isEqual(field));
 
         if (sameField) {
@@ -175,15 +175,17 @@ async function fetchRelatedListFieldValues(
 ): Promise<void> {
     const model = field.itemsModel!;
 
-    for (const instance of instances) {
+    const instancesValues = instances.map((instance) => {
         const value = field.getValue(instance._data) ?? [];
-        instance.sandbox.set({
-            field: field.name,
-            value: value.map((item) => new model(item)),
-            markChanged: false,
-        });
-    }
-    const allInstancesValues = instances.flatMap((instance) => field.getValue(instance.sandbox.value));
+        return value.map((item) => new model(item));
+    });
+    const allInstancesValues = instancesValues.flat();
+    await fetchInstances(allInstancesValues as unknown as Model[], options);
 
-    return fetchInstances(allInstancesValues as unknown as Model[], options);
+    for (let idx = 0; idx < instances.length; idx++) {
+        const instance = instances[idx];
+        const values = instancesValues[idx];
+
+        instance.sandbox.setPrefetchedValue(field.name, values);
+    }
 }
