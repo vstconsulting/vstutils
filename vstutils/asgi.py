@@ -1,8 +1,11 @@
+import typing
 import os
 import posixpath
+import functools
 import time
 
 import django
+import aiofiles.os
 from django.conf import settings
 from django.apps import apps
 from django.core.handlers.asgi import ASGIHandler
@@ -19,7 +22,6 @@ from .signals import before_mount_app
 if not apps.apps_ready:
     django.setup(set_prefix=False)  # nocv
 
-NOT_FOUND_RESPONSE = PlainTextResponse('Not found', status_code=404)
 static_app = FastAPI(root_path=settings.STATIC_URL, openapi_url=None, docs_url=None, redoc_url=None)
 static_app.add_middleware(GZipMiddleware)
 
@@ -50,12 +52,17 @@ if os.path.exists(settings.MEDIA_ROOT) and settings.MEDIA_URL:
     )
 
 
+@functools.lru_cache(maxsize=512, typed=True)
+def find_absolute_path(file_path: str) -> typing.Optional[str]:
+    return finders.find(posixpath.normpath(file_path).lstrip("/"))
+
+
 @static_app.get('/{file_path:path}')
 async def static(file_path: str, request: Request = None):
-    absolute_path = finders.find(posixpath.normpath(file_path).lstrip("/"))
-    if not absolute_path or os.path.isdir(absolute_path):
-        return NOT_FOUND_RESPONSE
-    response = FileResponse(absolute_path, stat_result=os.stat(absolute_path))
+    absolute_path = find_absolute_path(file_path)
+    if not absolute_path or await aiofiles.os.path.isdir(absolute_path):
+        return PlainTextResponse('Not found', status_code=404)
+    response = FileResponse(absolute_path, stat_result=await aiofiles.os.stat(absolute_path))
     if request is not None and StaticFiles.is_not_modified(None, response.headers, request.headers):  # type: ignore
         return NotModifiedResponse(response.headers)
     return response

@@ -27,10 +27,21 @@ async def init(servers_list, fds, app):
     )
     server = uvicorn.Server(config)
     servers_list.append(server)
-    await server.serve(sockets=[
+    sockets = [
         socket.fromfd(fd, socket.AF_INET, socket.SOCK_STREAM)
         for fd in fds
-    ])
+    ]
+    try:
+        await server.serve(sockets=sockets)
+        uwsgi.log('uvicorn server stopped after {0} requests.'.format(server.server_state.total_requests))
+    except BaseException as exc:
+        uwsgi.log("uvicorn say: {0}".format(str(exc)))
+        raise
+    finally:
+        for sock in sockets:
+            # pylint: disable=protected-access
+            if not sock._closed:
+                sock.close()
 
 
 def destroy():
@@ -38,6 +49,7 @@ def destroy():
     for server in servers:
         server.handle_exit(sig=signal.SIGINT, frame=None)
     time.sleep(1)
+    uwsgi.log("exit worker {0}".format(uwsgi.worker_id()))
     sys.exit(0)
 
 
@@ -45,6 +57,7 @@ def graceful_reload():
     uwsgi.log("graceful reload for worker {0}".format(uwsgi.worker_id()))
     for server in servers:
         server.handle_exit(sig=signal.SIGTERM, frame=None)
+    time.sleep(1)
     loop.stop()
     loop.close()
     sys.exit(0)

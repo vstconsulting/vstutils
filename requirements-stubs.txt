@@ -6,3 +6,4 @@ django-filter-stubs~=0.1.2
 types-PyMySQL==1.0.19.7
 types-Markdown==3.4.2.9
 types-docutils==0.20.0.1
+types-aiofiles~=23.1.0
