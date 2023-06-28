@@ -275,16 +275,18 @@ class TwoFaMiddleware(BaseMiddleware):
 
 
 class FrontendChangesNotifications(BaseMiddleware):
-    __slots__ = ('notificator_class',)
+    __slots__ = ('notificator',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
+        self.notificator = apps.get_app_config('vstutils_api').module.notificator_class([])
 
-    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
-        # pylint: disable=invalid-overridden-method
-        if settings.CENTRIFUGO_CLIENT_KWARGS and request.path != f'/{settings.API_URL}/health/':
-            with self.notificator_class([]) as notificator:
-                request.notificator = notificator  # type: ignore
-                return super().get_response_handler(request)
-        return super().get_response_handler(request)
+    def request_handler(self, request: HttpRequest) -> HttpRequest:
+        if self.notificator.is_usable():
+            request.notificator = self.notificator
+        return request
+
+    def handler(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
+        if self.notificator.is_usable():
+            request.notificator.send()
+        return response
