@@ -39,11 +39,11 @@ class QueryTimingLogger:
         self.queries_time = 0
 
     def __call__(self, execute, sql, params, many, context):
-        start = time.time()
+        start = time.monotonic()
         try:
             return execute(sql, params, many, context)
         finally:
-            self.queries_time += time.time() - start
+            self.queries_time += time.monotonic() - start
 
 
 class BaseMiddleware(BaseVstObject):

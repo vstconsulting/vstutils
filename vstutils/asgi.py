@@ -83,9 +83,9 @@ if not any(m.path == f'/{settings.API_URL}/live/' for m in application.routes):
 
 @application.middleware('http')
 async def add_server_timing_header(request: Request, call_next):
-    start_time = time.time()
+    start_time = time.monotonic()
     response = await call_next(request)
-    response.headers['Server-Timing'] = f'total;dur={round((time.time()-start_time)*1000, 2)}'
+    response.headers['Server-Timing'] = f'total;dur={round((time.monotonic()-start_time)*1000, 2)}'
     return response
 
 
