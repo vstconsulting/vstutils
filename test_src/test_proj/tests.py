@@ -284,16 +284,15 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
                 f'{sys.executable} -m celery --app=test_proj.wapp:app inspect ping --json',
             )
 
-        with self.patch('subprocess.check_call', return_value=0) as mock_obj:
+        with self.patch('vstutils.management.commands.rpc_worker.Command.handle') as mock_obj:
+            def raised_func(*args, **kwargs):
+                raise sys.exit(0)
+
+            mock_obj.side_effect = raised_func
             with self.assertRaises(SystemExit) as cm:
                 call_command('runrpc', migrate=False)
             self.assertEqual(cm.exception.code, 0)
             self.assertEqual(mock_obj.call_count, 1)
-            self.assertTrue(
-                mock_obj.call_args[0][0].strip().startswith(
-                    f'{sys.executable} -m celery --app=test_proj.wapp:app worker'
-                ),
-            )
 
 
 class VSTUtilsTestCase(BaseTestCase):

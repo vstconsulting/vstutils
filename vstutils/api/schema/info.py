@@ -5,7 +5,12 @@ import django
 from django.conf import settings
 from django.urls import reverse_lazy
 from rest_framework import __version__ as drf_version  # type: ignore
+from fastapi import __version__ as fastapi_version  # type: ignore
 from drf_yasg import openapi, __version__ as drf_yasg_version  # type: ignore
+try:
+    import celery
+except ImportError:  # nocv
+    celery = None
 
 from ... import __version__ as vstutils_version
 
@@ -17,6 +22,10 @@ x_versions['vstutils'] = vstutils_version
 x_versions['django'] = django.__version__
 x_versions['djangorestframework'] = drf_version
 x_versions['drf_yasg'] = drf_yasg_version
+x_versions['fastapi'] = fastapi_version
+
+if celery is not None:
+    x_versions['celery'] = celery.__version__  # type: ignore
 
 api_info_dict = OrderedDict(
     title=settings.PROJECT_GUI_NAME,

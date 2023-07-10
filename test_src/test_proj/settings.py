@@ -164,3 +164,4 @@ DATABASE_ROUTERS = ['test_proj.db_router.TestDbRouter']
 DOCKER_DATABASES_TO_MIGRATE = ('primary1',)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.BasicAuthentication',)
