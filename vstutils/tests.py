@@ -354,10 +354,13 @@ class BaseTestCase(TestCase):
 
         request_handler = getattr(client, rtype)
 
-        if kwargs.get("data", False):
-            if isinstance(kwargs["data"], str):
+        if data := kwargs.get("data", False):
+            if isinstance(data, str):
                 kwargs["content_type"] = "application/json"
-            elif isinstance(kwargs["data"], (bytes, bytearray)):
+            elif isinstance(data, (dict, list, tuple, set)):
+                kwargs["content_type"] = "application/json"
+                kwargs['data'] = json.dumps(data)
+            elif isinstance(data, (bytes, bytearray)):
                 kwargs["content_type"] = "application/msgpack"
 
         if 'content_type' in kwargs and kwargs["content_type"].startswith('application/'):

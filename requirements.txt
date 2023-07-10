@@ -1,6 +1,6 @@
 # Main packages
 configparser~=5.3.0
-configparserc~=1.4.1
+configparserc~=1.4.2
 Markdown~=3.4.3
 django-environ~=0.10.0
 
@@ -11,12 +11,12 @@ django-filter==23.2
 django-crispy-forms~=1.14.0
 drf_orjson_renderer~=1.7.1
 ormsgpack==1.2.6
-pyyaml~=5.4.1
+pyyaml~=6.0.0
 
 # web server
 uvicorn~=0.22.0
 pyuwsgi==2.0.21
-fastapi~=0.98.0
+fastapi==0.100.0
 aiofiles~=23.1.0
 
 # Notifications

@@ -1,8 +1,8 @@
-import sys
-from subprocess import check_call
+import warnings
+
+from django.core.management import call_command
 
 from ._base import DockerCommand
-from .web import get_celery_command
 
 
 class Command(DockerCommand):
@@ -22,22 +22,13 @@ class Command(DockerCommand):
         )
 
     def handle(self, *args, **opts):
+        warnings.warn('This command is deprecated and will removed in 6.x releases. Use "run_worker" instead.',
+                      category=DeprecationWarning,
+                      stacklevel=2)
         super().handle(*args, **opts)
-
-        if opts['migrate']:
-            self.migrate(opts)  # nocv
 
         cmd_args = dict(
             arg.split('=')
             for arg in args
         )
-
-        cmd = f'{sys.executable} -m {get_celery_command(**cmd_args)}'
-        self._print(f'Execute: {cmd}')
-        sys.exit(check_call(
-            cmd,
-            stdout=sys.stdout,
-            stderr=sys.stderr,
-            stdin=sys.stdin,
-            shell=True,  # nosec
-        ))
+        call_command('rpc_worker', migrate=opts['migrate'], **cmd_args)

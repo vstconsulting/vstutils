@@ -1065,20 +1065,14 @@ PAGE_LIMIT: int = web["page_limit"]
 REST_FRAMEWORK: _t.Dict = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
         "vstutils.api.renderers.ORJSONRenderer",
         "vstutils.api.renderers.MsgpackRenderer",
-        'rest_framework.renderers.BrowsableAPIRenderer',
-        'rest_framework.renderers.MultiPartRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
         "drf_orjson_renderer.parsers.ORJSONParser",
         "vstutils.api.parsers.MsgpackParser",
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser'
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'vstutils.api.permissions.IsAuthenticatedOpenApiRequest'
