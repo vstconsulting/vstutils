@@ -10,13 +10,7 @@
 
 <script setup lang="ts">
     import { watch, ref } from 'vue';
-    import { getApp } from '@/vstutils/utils';
-    import {
-        type Field,
-        type FieldPropsDefType,
-        type SetFieldValueOptions,
-        FieldPropsDef,
-    } from '@/vstutils/fields/base';
+    import { type FieldPropsDefType, type SetFieldValueOptions, FieldPropsDef } from '@/vstutils/fields/base';
     import type { DependFromFkField } from './DependFromFkField';
 
     const props = defineProps(FieldPropsDef as FieldPropsDefType<DependFromFkField>);
@@ -24,8 +18,7 @@
         (e: 'set-value', payload: SetFieldValueOptions<DependFromFkField>): void;
     }>();
 
-    const app = getApp();
-    const realField = ref<Field>(app.fieldsResolver.resolveField({ type: 'string', name: props.field.name }));
+    const realField = ref(props.field.getRealField(props.data));
 
     watch(
         () => props.data[props.field.dependField],
@@ -39,6 +32,5 @@
                 });
             }
         },
-        { immediate: true },
     );
 </script>
