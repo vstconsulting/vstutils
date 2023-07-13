@@ -28,6 +28,26 @@ const schema = createSchema({
                     },
                 },
             },
+            patch: {
+                operationId: 'attribute_edit',
+                parameters: [
+                    {
+                        name: 'data',
+                        in: 'body',
+                        required: true,
+                        schema: {
+                            $ref: '#/definitions/Attribute',
+                        },
+                    },
+                ],
+                responses: {
+                    200: {
+                        schema: {
+                            $ref: '#/definitions/Attribute',
+                        },
+                    },
+                },
+            },
         },
         '/predefined_attribute/': {
             get: {
@@ -44,10 +64,10 @@ const schema = createSchema({
     },
     definitions: {
         Attribute: {
-            required: ['id', 'key', 'value'],
+            required: ['key', 'value'],
             type: 'object',
             properties: {
-                id: { type: 'integer' },
+                id: { type: 'integer', readOnly: true },
                 key: {
                     type: 'integer',
                     format: 'fk',
@@ -75,7 +95,7 @@ const schema = createSchema({
                 id: { type: 'integer' },
                 field_type: {
                     type: 'string',
-                    enum: ['multiplenamedbinimage'],
+                    enum: ['multiplenamedbinimage', 'boolean'],
                 },
             },
         },
@@ -171,5 +191,43 @@ describe('DependFromFkField', () => {
 
         // check that 'value' parsed
         expect(Array.isArray(app.store.page.sandbox.value)).toBe(true);
+    });
+
+    test('boolean field initial value on edit page', async () => {
+        fetchMock.mockResponses(
+            [
+                JSON.stringify([
+                    {
+                        status: 200,
+                        path: '/attribute/1/',
+                        data: {
+                            id: 1,
+                            key: 1,
+                            value: 'true',
+                        },
+                    },
+                ]),
+            ],
+            [
+                JSON.stringify([
+                    {
+                        status: 200,
+                        data: {
+                            count: 1,
+                            results: [
+                                {
+                                    id: 1,
+                                    field_type: 'boolean',
+                                },
+                            ],
+                        },
+                    },
+                ]),
+            ],
+        );
+        await app.router.push('/attribute/1/edit/');
+        await waitForPageLoading();
+        expect(fetchMock).toBeCalledTimes(2);
+        expect(app.store.page.sandbox.value).toBe(true);
     });
 });
