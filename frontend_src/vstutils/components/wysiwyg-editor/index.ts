@@ -1,5 +1,5 @@
 import type { Editor as VueEditor } from '@toast-ui/vue-editor';
-import type { Editor } from '@toast-ui/editor';
+import type { Editor, EditorOptions } from '@toast-ui/editor';
 import { i18n } from '@/vstutils/translation';
 import { computed, defineAsyncComponent, defineComponent, h } from 'vue';
 import { getApp } from '@/vstutils/utils';
@@ -42,6 +42,52 @@ const realComponent = (readOnly: boolean, lang?: LangInfo) =>
         return readOnly ? ToastUIEditorVue.Viewer : ToastUIEditorVue.Editor;
     });
 
+type ToastUIPlugin = Exclude<EditorOptions['plugins'], undefined>[number];
+
+const selectFilePlugin: ToastUIPlugin = (ctx) => {
+    ctx.eventEmitter.addEventType('select-file');
+    return {
+        toolbarItems: [
+            {
+                groupIndex: 0,
+                itemIndex: 0,
+                item: {
+                    name: 'select-file',
+                    tooltip: i18n.ts('Select file'),
+                    command: 'select-file',
+                    className: 'btn fas fa-file-alt',
+                },
+            },
+        ],
+        wysiwygCommands: {
+            'select-file': () => {
+                ctx.eventEmitter.emit('select-file');
+                return true;
+            },
+        },
+    };
+};
+
+function selectMarkdownFile() {
+    return new Promise<string>((resolve, reject) => {
+        const input = document.createElement('input');
+        input.accept = '.md,text/markdown';
+        input.type = 'file';
+
+        input.addEventListener('change', () => {
+            const file = input.files?.[0];
+
+            if (file) {
+                file.text()
+                    .then((result) => resolve(result))
+                    .catch((err) => reject(err));
+            }
+        });
+
+        input.click();
+    });
+}
+
 export const WYSIWYGEditor = defineComponent({
     name: 'WYSIWYGEditor',
     props: {
@@ -54,7 +100,7 @@ export const WYSIWYGEditor = defineComponent({
     setup(props, { emit }) {
         let editor: VueEditor | null = null;
 
-        const options = {
+        const options: Omit<EditorOptions, 'el'> = {
             minHeight: '200px',
             language: langs.get(i18n.locale)?.code,
             useCommandShortcut: true,
@@ -67,6 +113,15 @@ export const WYSIWYGEditor = defineComponent({
                 ['table', 'link'],
             ],
             theme: getApp().darkModeEnabled ? 'dark' : 'light',
+            plugins: [selectFilePlugin],
+            hooks: {
+                // @ts-expect-error Custom hook
+                'select-file': async () => {
+                    const content = await selectMarkdownFile();
+                    emit('change', content);
+                    editor?.invoke('setMarkdown', content);
+                },
+            },
         };
 
         const component = computed(() => realComponent(props.readOnly, langs.get(i18n.locale)));
