@@ -249,6 +249,7 @@ TRANSLATION = {
     'Index': 'Индекс',
     'Download with headers': 'Скачать с заголовками столбцов',
     'Changes you made may not be saved.': 'Внесенные изменения могут быть не сохранены.',
+    'The data has been changed on the server. Do you want to overwrite it?': 'Данные были изменены на сервере. Вы хотите их перезаписать?',
 }
 
 SERVER_TRANSLATION = {

@@ -250,6 +250,7 @@ TRANSLATION = {
     'Index': 'Mục lục',
     'Download with headers': 'Tải xuống với tiêu đề',
     'Changes you made may not be saved.': 'Những thay đổi bạn đã thực hiện có thể không được lưu.',
+    'The data has been changed on the server. Do you want to overwrite it?': 'Dữ liệu đã được thay đổi trên máy chủ. Bạn có muốn ghi đè lên chúng?',
 }
 
 SERVER_TRANSLATION = {

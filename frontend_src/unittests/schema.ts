@@ -9,25 +9,25 @@ export function createSchema(override: Partial<AppSchema> = {}) {
 export function schemaListOf<T>(items: T) {
     return {
         required: ['count', 'results'],
-        type: 'object',
+        type: 'object' as const,
         properties: {
             count: {
-                type: 'integer',
+                type: 'integer' as const,
             },
             next: {
-                type: 'string',
+                type: 'string' as const,
                 format: 'uri',
                 'x-nullable': true,
             },
             previous: {
-                type: 'string',
+                type: 'string' as const,
                 format: 'uri',
                 'x-nullable': true,
             },
             results: {
-                type: 'array',
+                type: 'array' as const,
                 items: items,
             },
         },
-    } as const;
+    };
 }

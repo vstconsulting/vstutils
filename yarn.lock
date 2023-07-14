@@ -1588,6 +1588,11 @@
     lz-string "^1.5.0"
     pretty-format "^27.0.2"
 
+"@testing-library/user-event@^14.4.3":
+  version "14.4.3"
+  resolved "https://registry.yarnpkg.com/@testing-library/user-event/-/user-event-14.4.3.tgz#af975e367743fa91989cd666666aec31a8f50591"
+  integrity sha512-kCUc5MEwaEMakkO5x7aoD+DLi02ehmEM2QCGWvNqAS1dV/fAvORWEjnjsEIvml59M7Y5kCkWN6fCCyPOe8OL6Q==
+
 "@toast-ui/editor@^3.2.2":
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/@toast-ui/editor/-/editor-3.2.2.tgz#1f2837271c5c9c3e29e090d7440bfc6ab23fb4c4"

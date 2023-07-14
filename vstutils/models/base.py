@@ -271,13 +271,13 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
     def get_proxy_labels(cls):
         return get_proxy_labels(cls)  # nocv
 
-    def get_api_cache_name(cls, pk=None):
-        return f'api_caching_table_{cls._meta.db_table}' + (f'_{pk}' if pk is not None else "")
+    def get_api_cache_name(cls, postfix=None):
+        if postfix not in {None, '__postfix__'}:
+            postfix = f'{cls.get_etag_value("__postfix__")}_{postfix}'
+        return f'etag_table_{cls._meta.db_table}' + (f'_{postfix}' if postfix is not None else "")
 
     def get_etag_value(cls, pk=None):
         # pylint: disable=no-value-for-parameter
-        if pk and django_caches['etag'].get(f'clear_{cls.get_api_cache_name()}') == 1:
-            return cls.set_etag_value(pk)
         return str(django_caches['etag'].get_or_set(cls.get_api_cache_name(pk), str(uuid.uuid4())))
 
     def set_etag_value(cls, pk=None):
@@ -287,7 +287,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if pk:
             django_caches['etag'].set(cls.get_api_cache_name(pk), new_value)
         else:
-            django_caches['etag'].set(f'clear_{cls.get_api_cache_name()}', 1)
+            django_caches['etag'].set(cls.get_api_cache_name("__postfix__"), new_value)
         return new_value
 
     @classproperty

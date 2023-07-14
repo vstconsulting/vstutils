@@ -53,7 +53,7 @@ export interface Model {
     parseModelError(data: unknown): ModelValidationError | undefined;
 
     create(method?: HttpMethod): Promise<Model>;
-    update(method?: HttpMethod, fields?: string[]): Promise<Model>;
+    update(method?: HttpMethod, fields?: string[], ignoreEtag?: boolean): Promise<Model>;
     delete(purge?: boolean): Promise<APIResponse<unknown>>;
 }
 
@@ -275,8 +275,8 @@ export class BaseModel implements Model {
         return this._c.shouldUseBulk(method);
     }
 
-    async update(method?: HttpMethod, fields?: string[]): Promise<Model> {
-        return (await this._queryset!.update(this, [this], method, fields))[0];
+    async update(method?: HttpMethod, fields?: string[], ignoreEtag?: boolean): Promise<Model> {
+        return (await this._queryset!.update(this, [this], method, fields, ignoreEtag))[0];
     }
 
     async delete(purge = false) {
