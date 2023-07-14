@@ -108,7 +108,7 @@ class OrderingFilterBackend(OrderingFilter):
                 'collectionFormat': 'csv',
                 'schema': {
                     'type': openapi.TYPE_ARRAY,
-                    'title': _(force_str(self.ordering_title)),
+                    'x-title': _(force_str(self.ordering_title)),
                     'items': {
                         'type': openapi.TYPE_STRING,
                         'format': 'ordering_choices',
