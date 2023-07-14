@@ -10,6 +10,7 @@ from drf_yasg.inspectors.base import FieldInspector, FilterInspector, NotHandled
 from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_field_type
 from drf_yasg import openapi
 from drf_yasg.inspectors.query import CoreAPICompatInspector, force_real_str, coreschema  # type: ignore
+from rest_framework.pagination import BasePagination
 from rest_framework.fields import Field, JSONField, DecimalField, ListField, empty
 from rest_framework.serializers import Serializer
 
@@ -571,7 +572,30 @@ class ArrayFilterQueryInspector(CoreAPICompatInspector):
             for f in self.view.get_queryset().model._meta.fields
         }
 
+    def build_paginated_property(self, value: dict):
+        # Need to remove useless params from schema
+        value.pop('example', None)
+        if 'nullable' in value:
+            value['x-nullable'] = value.pop('nullable')
+        return openapi.Schema(**value)
+
+    def get_paginated_response(self, paginator: BasePagination, response_schema: Any):
+        try:
+            paginator_schema = paginator.get_paginated_response_schema(response_schema)
+            properties = {
+                k: self.build_paginated_property(v)
+                for k, v in paginator_schema.pop('properties').items()
+            }
+            return openapi.Schema(
+                **paginator_schema,
+                properties=properties
+            )
+        except:  # nocv
+            return NotHandled
+
     def param_to_schema(self, param):
+        if 'title' in param:
+            param['x-title'] = param.pop('title')  # nocv
         return openapi.Parameter(
             name=param['name'],
             in_=param['in'],
@@ -732,6 +756,14 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
             schema['x-hide-not-required'] = bool(hide_not_required)
 
         schema._handled = True  # pylint: disable=protected-access
+
+        # TODO: return it when swagger become openapi 3.0.1
+        # if isinstance(field, ModelSerializer) \
+        #         and hasattr(field, 'Meta') \
+        #         and hasattr(field.Meta, 'model') \
+        #         and field.Meta.model._meta.pk.name in schema_properties:
+        #     schema.setdefault('required', [])
+        #     schema['required'].insert(0, field.Meta.model._meta.pk.name)
 
     def field_to_swagger_object(self, field: Any, swagger_object_type: Any, use_references: Any, **kwargs: Any):
         if isinstance(field, FileResponse):

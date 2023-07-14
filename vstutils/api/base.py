@@ -514,13 +514,16 @@ class CachableHeadMixin(GenericViewSet):
     def _get_etag(self, model_class, request):
         return f'"{self.get_etag_value(model_class, request)}"'
 
+    def should_check_action(self, method):
+        return method in getattr(self, 'etag_match_methods', {method})
+
     def check_etag(self, request, model_class=None):
         should_check, header_name, exception, operation_handler = False, "", Exception(), str.__eq__
         if request.method in {"GET", "HEAD"}:
             should_check = True
             exception = self.NotModifiedException("")
             header_name = "If-None-Match"
-        elif request.method in getattr(self, 'etag_match_methods', {request.method}):
+        elif self.should_check_action(request.method):
             should_check = True
             exception = self.PreconditionFailedException("")
             header_name = "If-Match"

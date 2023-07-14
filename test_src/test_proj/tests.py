@@ -4004,6 +4004,25 @@ class ProjectTestCase(BaseTestCase):
         self.assertTrue(data['paths']['/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hidden_on_frontend_hosts/']['post']['x-hidden'])
         self.assertTrue(data['paths']['/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hidden_on_frontend_hosts/{hidden_on_frontend_hosts_id}/hidden_action/']['post']['x-hidden'])
 
+        cache_header = [
+            v
+            for v in data['paths']['/cacheable/{id}/']['get']['parameters']
+            if v['in'] == 'header'
+        ][0]
+        self.assertEqual(cache_header['name'], 'If-None-Match')
+        self.assertIn('Etag', data['paths']['/cacheable/{id}/']['get']['responses']['200']['headers'])
+        self.assertIn('304', data['paths']['/cacheable/{id}/']['get']['responses'])
+
+        cache_headers = [
+            v
+            for v in data['paths']['/cacheable/{id}/']['put']['parameters']
+            if v['in'] == 'header'
+        ]
+        self.assertEqual(len(cache_headers), 1)
+        self.assertEqual(cache_headers[0]['name'], 'If-Match')
+        self.assertIn('Etag', data['paths']['/cacheable/{id}/']['put']['responses']['200']['headers'])
+        self.assertIn('412', data['paths']['/cacheable/{id}/']['put']['responses'])
+
     def test_manifest_json(self):
         result = self.get_result('get', '/manifest.json')
         self.assertEqual(result['name'], 'Example project')
