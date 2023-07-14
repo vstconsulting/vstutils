@@ -19,6 +19,11 @@ export function createAppConfig({ schema = testSchema } = {}) {
     });
 }
 
+/**
+ *
+ * @param {{schema: AppSchema}} options
+ * @returns {Promise<App>}
+ */
 export async function createApp({ schema = testSchema } = {}) {
     const config = createAppConfig({ schema });
     const cache = new DummyCache();

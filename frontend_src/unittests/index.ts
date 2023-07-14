@@ -1,6 +1,7 @@
 import { expect } from '@jest/globals';
 import { mount as vueMount } from '@vue/test-utils';
-import { waitFor as _waitFor } from '@testing-library/dom';
+import { waitFor as _waitFor, within } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
 import { getApp } from '@/vstutils/utils';
 
 import type { ComponentOptions } from 'vue';
@@ -20,11 +21,17 @@ export function mount(component: ComponentOptions<Vue>, options?: Parameters<typ
     });
 }
 
+let currentWrapper: ReturnType<typeof mount> | undefined;
+
 export async function mountApp() {
     const app = globalThis.__currentApp;
 
     if (!app) {
         throw new Error('App is not initialized, use createApp() first');
+    }
+
+    if (currentWrapper) {
+        throw new Error('Mounting of multiple apps is not supported');
     }
 
     const wrapper = mount(
@@ -43,7 +50,20 @@ export async function mountApp() {
 
     await waitForPageLoading();
 
+    currentWrapper = wrapper;
+
     return wrapper;
+}
+
+export function useTestCtx() {
+    if (!currentWrapper) {
+        throw new Error('App must be mounted first');
+    }
+    const doc = currentWrapper.vm.$el.ownerDocument;
+    const user = userEvent.setup({ document: doc });
+    const screen = within(doc.body);
+
+    return { app: getApp(), screen, user, wrapper: currentWrapper };
 }
 
 export function waitFor<T>(callback: () => T, options?: Parameters<typeof _waitFor>[1]) {
@@ -58,6 +78,9 @@ export function waitFor<T>(callback: () => T, options?: Parameters<typeof _waitF
     });
 }
 
+const isLoading = () => __currentApp!.rootVm!.$el.querySelector('.in-loading');
+
 export async function waitForPageLoading() {
-    await waitFor(() => expect(__currentApp?.rootVm?.$el.querySelector('.in-loading')).toBeFalsy());
+    await waitFor(() => expect(isLoading()).toBeTruthy());
+    await waitFor(() => expect(isLoading()).toBeFalsy());
 }

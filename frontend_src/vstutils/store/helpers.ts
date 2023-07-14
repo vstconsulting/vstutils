@@ -158,6 +158,7 @@ export const useBasePageData = (view: IView) => {
     const response = ref<unknown>(null);
     const title = computed<string>(() => view.getTitle(view.getSavedState()));
     const breadcrumbs = useBreadcrumbs();
+    const app = getApp();
 
     const {
         start: startAutoUpdate,
@@ -196,6 +197,18 @@ export const useBasePageData = (view: IView) => {
         return Promise.resolve();
     }
 
+    function executeMainAction() {
+        if (view.mainAction) {
+            const action = view.actions.get(view.mainAction);
+            if (action) {
+                void app.actions.execute({
+                    action,
+                    instance: app.store.page.instance as Model | undefined,
+                });
+            }
+        }
+    }
+
     return {
         ...useOperations({ view, isListItem: false }),
         view: ref(view),
@@ -212,6 +225,7 @@ export const useBasePageData = (view: IView) => {
         stopAutoUpdate,
         setAutoUpdateCallback,
         setAutoUpdatePk,
+        executeMainAction,
     };
 };
 
