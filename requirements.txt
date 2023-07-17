@@ -14,9 +14,9 @@ ormsgpack==1.2.6
 pyyaml~=6.0.0
 
 # web server
-uvicorn~=0.22.0
+uvicorn~=0.23.0
 pyuwsgi==2.0.21
-fastapi==0.100.0
+fastapi~=0.100.0
 aiofiles~=23.1.0
 
 # Notifications
