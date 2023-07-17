@@ -5,7 +5,7 @@ if (process.env.APP_ENV === 'prod') {
                 '@babel/preset-env',
                 {
                     useBuiltIns: 'usage',
-                    corejs: { version: '3.31.0', proposals: true },
+                    corejs: { version: '3.31.1', proposals: true },
                 },
             ],
         ],
@@ -15,7 +15,7 @@ if (process.env.APP_ENV === 'prod') {
                 {
                     'corejs': false,
                     'regenerator': false,
-                    'version': '^7.22.5'
+                    'version': '^7.22.9'
                 }
             ],
         ],
@@ -27,7 +27,7 @@ if (process.env.APP_ENV === 'prod') {
                 '@babel/preset-env',
                 {
                     useBuiltIns: 'usage',
-                    corejs: { version: '3.20.3', proposals: true },
+                    corejs: { version: '3.31.1', proposals: true },
                     targets: 'last 1 Chrome versions',
                 },
             ],
