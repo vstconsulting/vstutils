@@ -22,7 +22,7 @@ class Command(DockerCommand):
         )
 
     def handle(self, *args, **opts):
-        warnings.warn('This command is deprecated and will removed in 6.x releases. Use "run_worker" instead.',
+        warnings.warn('This command is deprecated and will be removed in 6.x releases. Use "rpc_worker" instead.',
                       category=DeprecationWarning,
                       stacklevel=2)
         super().handle(*args, **opts)

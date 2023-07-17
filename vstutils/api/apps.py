@@ -9,9 +9,12 @@ class VSTUtilsAppConfig(AppConfig):
     label = 'vstutils_api'
     verbose_name = "vstutils"
 
-    def ready(self):
-        super().ready()
-        self.module.autodiscover()
+    def import_models(self):
+        super().import_models()
         self.module.notificator_class = import_class(
             settings.NOTIFICATOR_CLIENT_CLASS
         )
+
+    def ready(self):
+        super().ready()
+        self.module.autodiscover()
