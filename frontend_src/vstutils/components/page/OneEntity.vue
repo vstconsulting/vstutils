@@ -1,7 +1,7 @@
 <template>
     <div class="row">
         <component :is="beforeFieldsGroups" v-if="beforeFieldsGroups" :page="self" />
-        <div :class="view.wrapperClasses">
+        <form :class="view.wrapperClasses" @submit.prevent="store.executeMainAction">
             <ModelFields
                 v-if="response"
                 :data="sandbox"
@@ -13,7 +13,8 @@
                 :fields-groups="fieldsGroups"
                 @set-value="store.setFieldValue"
             />
-        </div>
+            <input type="submit" hidden />
+        </form>
         <component :is="afterFieldsGroups" v-if="afterFieldsGroups" :page="self" />
     </div>
 </template>

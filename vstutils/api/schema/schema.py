@@ -6,16 +6,60 @@ from django.http import FileResponse
 from rest_framework import status
 from drf_yasg.inspectors.view import SwaggerAutoSchema
 from drf_yasg.app_settings import swagger_settings
-from drf_yasg.openapi import Operation
+from drf_yasg.openapi import Schema, Response, Operation, Parameter, IN_HEADER, TYPE_STRING
 
 from ... import utils
 from ...models.base import get_proxy_labels
 from ..decorators import NestedWithAppendMixin
-from ..base import detail_actions
+from ..base import detail_actions, CachableHeadMixin
 from . import inspectors as vst_inspectors
 
 
-class VSTAutoSchema(SwaggerAutoSchema):
+class ExtendedSwaggerAutoSchema(SwaggerAutoSchema):
+    def get_query_parameters(self):
+        result = super().get_query_parameters()
+        if isinstance(self.view, CachableHeadMixin):
+            if self.method == 'GET':
+                result += [
+                    Parameter(
+                        name='If-None-Match',
+                        in_=IN_HEADER,
+                        required=False,
+                        type=TYPE_STRING,
+                    )
+                ]
+
+            elif self.view.should_check_action(self.method):
+                result += [
+                    Parameter(
+                        name='If-Match',
+                        in_=IN_HEADER,
+                        required=False,
+                        type=TYPE_STRING,
+                    )
+                ]
+
+        return result
+
+    def get_response_schemas(self, response_serializers):
+        responses = super().get_response_schemas(response_serializers)
+        if isinstance(self.view, CachableHeadMixin) and self.view.is_main_action:
+            for response in responses:
+                if response.startswith('2') or response == 'default':
+                    responses[response]['headers'] = responses[response].get('headers', {})
+                    responses[response]['headers'].setdefault(
+                        'Etag', Schema(type=TYPE_STRING)
+                    )
+            if self.method == 'GET' and (st := str(self.view.NotModifiedException.status_code)) not in responses:
+                responses[st] = Response(description="Not Modified")
+            elif self.view.should_check_action(self.method):
+                responses[str(self.view.PreconditionFailedException.status_code)] = Response(
+                    description="Precondition Failed"
+                )
+        return responses
+
+
+class VSTAutoSchema(ExtendedSwaggerAutoSchema):
     paginator_inspectors = [
         vst_inspectors.ArrayFilterQueryInspector,
     ] + swagger_settings.DEFAULT_PAGINATOR_INSPECTORS

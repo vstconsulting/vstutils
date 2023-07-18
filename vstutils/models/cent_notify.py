@@ -24,6 +24,7 @@ class JsonEncoder(json.JSONEncoder):
 
 
 class Notificator:
+    __slots__ = ('queue', 'cent_client', 'label', '_signals', '__weakref__')
     client_class = CentrifugoClient
 
     queue: _t.List[_t.Tuple[_t.Sequence[_t.Text], _t.Any]]
@@ -125,4 +126,3 @@ class Notificator:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.is_usable():
             self.send()
-            self.disconnect_all()

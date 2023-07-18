@@ -154,6 +154,7 @@ export interface IView<
 
     sublinks: Map<string, Sublink>;
     actions: Map<string, Action>;
+    mainAction?: string;
 
     autoupdate?: boolean;
     subscriptionLabels?: string[] | null;
@@ -534,6 +535,7 @@ export class PageNewView extends DetailView<PageNewStore, PageNewParams> {
     multiActions = new Map<string, Action>();
     listView: ListView | null = null;
     hideReadonlyFields = true;
+    mainAction = 'save';
 
     constructor(params: PageNewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);
@@ -564,6 +566,7 @@ export class PageEditView extends DetailView<PageEditStore> {
     isEditStyleOnly = false;
     isPartial: boolean;
     hideReadonlyFields = true;
+    mainAction = 'save';
 
     constructor(params: PageViewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);
@@ -600,6 +603,7 @@ export class ActionView extends DetailView<ActionStore, ActionViewParams> {
     method: HttpMethod;
     action: NotEmptyAction;
     isFileResponse: boolean;
+    mainAction = 'execute';
 
     constructor(params: ActionViewParams, objects: QuerySet, mixins = [OneEntity]) {
         super(params, objects, mixins);

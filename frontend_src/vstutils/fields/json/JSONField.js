@@ -7,6 +7,7 @@ import JsonMapper from './JsonMapper.js';
  */
 class JSONField extends BaseField {
     static fkLinkable = false;
+    allowedMediaTypes = ['application/json'];
 
     constructor(options = {}, jsonMapper = undefined) {
         super(options);

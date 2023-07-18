@@ -1,15 +1,15 @@
 import $ from 'jquery';
+import { readonly } from 'vue';
 
 import { apiConnector, APIResponse, StatusError } from '@/vstutils/api';
 import { createInstancesList } from '@/vstutils/models';
 import { BulkType, HttpMethods, makeQueryString, objectToFormData, RequestTypes } from '@/vstutils/utils';
+import { fetchInstances } from '@/vstutils/fetch-values';
 
 import type { RequestType, HttpMethod, InnerData, RepresentData } from '@/vstutils/utils';
 import type { InstancesList, Model, ModelConstructor } from '@/vstutils/models';
 import type { Field } from '@/vstutils/fields/base';
 import type { ListResponseData } from './types';
-import { fetchInstances } from '@/vstutils/fetch-values';
-import { readonly } from 'vue';
 
 const REQUEST_MODEL = 0;
 const RESPONSE_MODEL = 1;
@@ -399,6 +399,7 @@ export class QuerySet {
         instances?: Model[],
         method: HttpMethod = HttpMethods.PATCH,
         fields?: string[],
+        ignoreEtag?: boolean,
     ) {
         if (instances === undefined) instances = await this.items();
 
@@ -432,12 +433,17 @@ export class QuerySet {
         } else {
             return Promise.all(
                 instances.map(async (instance) => {
+                    const headers: Record<string, string> = {};
+                    if (!ignoreEtag && instance._response?.headers.ETag) {
+                        headers['If-Match'] = instance._response.headers.ETag;
+                    }
                     const response = await this.execute<InnerData>({
                         method,
                         data,
                         path: this._getDetailPath(instance.getPkValue()!),
                         query: this.query,
                         useBulk: modelUpdate.shouldUseBulk(method),
+                        headers: Object.keys(headers).length > 0 ? headers : undefined,
                     });
                     return new modelUpdate(response.data, this);
                 }),

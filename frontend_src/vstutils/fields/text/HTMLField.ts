@@ -1,6 +1,7 @@
 import { defineComponent } from 'vue';
 import HTMLFieldContentReadonly from './HTMLFieldContentReadonly.vue';
 import { TextAreaField, TextAreaFieldMixin } from './TextAreaField';
+import type { IFileField } from '../files/file/utils';
 
 export function replaceHashLinks(el: Element, linkPath: string) {
     const links = el.querySelectorAll('a');
@@ -56,7 +57,9 @@ export const HTMLFieldMixin = defineComponent({
     },
 });
 
-export class HTMLField extends TextAreaField {
+export class HTMLField extends TextAreaField implements IFileField {
+    allowedMediaTypes = ['text/html'];
+
     static get mixins() {
         return [HTMLFieldMixin];
     }

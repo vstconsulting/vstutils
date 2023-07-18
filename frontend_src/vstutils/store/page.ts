@@ -432,7 +432,7 @@ export const createEditViewStore = (view: PageEditView) => {
         pageViewStore.setInstance(instance);
     }
 
-    async function save() {
+    async function save(opts?: { ignoreEtag?: boolean; allFields?: boolean }): Promise<void> {
         try {
             pageViewStore.validateAndSetInstanceData();
         } catch (e) {
@@ -453,9 +453,10 @@ export const createEditViewStore = (view: PageEditView) => {
 
             const providedInstance = await instance.update(
                 method,
-                (view as unknown as PageEditView).isPartial
+                (view as unknown as PageEditView).isPartial && !opts?.allFields
                     ? Array.from(pageViewStore.instance.value!.sandbox.changedFields)
                     : undefined,
+                opts?.ignoreEtag,
             );
 
             instance.sandbox.markUnchanged();
@@ -471,6 +472,15 @@ export const createEditViewStore = (view: PageEditView) => {
             const modelValidationError = instance.parseModelError((error as any).data);
             if (modelValidationError) {
                 pageViewStore.fieldsErrors.value = modelValidationError.toFieldsErrors();
+            } else if (error && typeof error === 'object' && 'status' in error && error.status === 412) {
+                const override = confirm(
+                    i18n.ts('The data has been changed on the server. Do you want to overwrite it?'),
+                );
+                if (override) {
+                    return save({ ignoreEtag: true, allFields: true });
+                } else {
+                    return;
+                }
             }
             app.error_handler.showError(
                 i18n.t(pop_up_msg.instance.error.save, [

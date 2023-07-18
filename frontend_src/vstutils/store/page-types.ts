@@ -24,6 +24,7 @@ export interface BaseViewStore extends StoreGeneric {
     stopAutoUpdate: () => void;
     setAutoUpdateCallback: (callback: () => Promise<void>) => void;
     setAutoUpdatePk: (pk: number | string | undefined) => void;
+    executeMainAction: () => void;
     breadcrumbs?: Breadcrumb[];
     entityViewClasses?: string[];
     updateData?: () => Promise<void>;

@@ -13,6 +13,7 @@ from .utils import import_class, send_template_email_handler, Lock, translate as
 celery_app: Celery = import_class(
     settings.WORKER_OPTIONS['app'].replace(':', '.')  # type: ignore
 )
+notificator = apps.get_app_config('vstutils_api').module.notificator_class([])
 
 
 class TaskMeta(type):
@@ -36,12 +37,8 @@ class TaskMeta(type):
 
         @wraps(func, assigned=WRAPPER_ASSIGNMENTS+('__notify_wrapped__',))
         def wrapper(self, *args, **kwargs):
-            notifier = (
-                getattr(self, '__notifier__', None) or
-                apps.get_app_config('vstutils_api').module.notificator_class([])
-            )
-            with notifier:
-                self.__notifier__ = notifier
+            with notificator:
+                self.__notifier__ = notificator
                 result = func(self, *args, **kwargs)
             self.__notifier__ = None
             return result

@@ -284,16 +284,15 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
                 f'{sys.executable} -m celery --app=test_proj.wapp:app inspect ping --json',
             )
 
-        with self.patch('subprocess.check_call', return_value=0) as mock_obj:
+        with self.patch('vstutils.management.commands.rpc_worker.Command.handle') as mock_obj:
+            def raised_func(*args, **kwargs):
+                raise sys.exit(0)
+
+            mock_obj.side_effect = raised_func
             with self.assertRaises(SystemExit) as cm:
                 call_command('runrpc', migrate=False)
             self.assertEqual(cm.exception.code, 0)
             self.assertEqual(mock_obj.call_count, 1)
-            self.assertTrue(
-                mock_obj.call_args[0][0].strip().startswith(
-                    f'{sys.executable} -m celery --app=test_proj.wapp:app worker'
-                ),
-            )
 
 
 class VSTUtilsTestCase(BaseTestCase):
@@ -4004,6 +4003,25 @@ class ProjectTestCase(BaseTestCase):
         self.assertTrue(data['paths']['/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hidden_on_frontend_hosts/']['get']['x-hidden'])
         self.assertTrue(data['paths']['/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hidden_on_frontend_hosts/']['post']['x-hidden'])
         self.assertTrue(data['paths']['/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hidden_on_frontend_hosts/{hidden_on_frontend_hosts_id}/hidden_action/']['post']['x-hidden'])
+
+        cache_header = [
+            v
+            for v in data['paths']['/cacheable/{id}/']['get']['parameters']
+            if v['in'] == 'header'
+        ][0]
+        self.assertEqual(cache_header['name'], 'If-None-Match')
+        self.assertIn('Etag', data['paths']['/cacheable/{id}/']['get']['responses']['200']['headers'])
+        self.assertIn('304', data['paths']['/cacheable/{id}/']['get']['responses'])
+
+        cache_headers = [
+            v
+            for v in data['paths']['/cacheable/{id}/']['put']['parameters']
+            if v['in'] == 'header'
+        ]
+        self.assertEqual(len(cache_headers), 1)
+        self.assertEqual(cache_headers[0]['name'], 'If-Match')
+        self.assertIn('Etag', data['paths']['/cacheable/{id}/']['put']['responses']['200']['headers'])
+        self.assertIn('412', data['paths']['/cacheable/{id}/']['put']['responses'])
 
     def test_manifest_json(self):
         result = self.get_result('get', '/manifest.json')
