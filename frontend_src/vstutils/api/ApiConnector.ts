@@ -285,7 +285,7 @@ export class ApiConnector {
                     })),
                 );
                 if (!item.headers) item.headers = {};
-                item.headers.HTTP_IF_NONE_MATCH = cached.headers.get('ETag');
+                item.headers['If-None-Match'] = cached.headers.get('ETag');
             }
         }
 

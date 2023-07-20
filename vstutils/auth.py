@@ -120,7 +120,7 @@ class LdapBackend(BaseAuthBackend):  # nocv
 
 class AuthPluginsBackend(BaseAuthBackend):
     auth_handlers = ObjectHandlers('AUTH_PLUGINS')
-    auth_header = 'HTTP_X_AUTH_PLUGIN'
+    auth_header = 'X-Auth-Plugin'
 
     @raise_context()
     def auth_with_plugin(self, plugin, request, username, password):
@@ -129,9 +129,9 @@ class AuthPluginsBackend(BaseAuthBackend):
     @raise_context()
     def authenticate(self, request, username=None, password=None):
         # pylint: disable=protected-access,unused-argument
-        if request and self.auth_header in request.META:
+        if request and self.auth_header in request.headers:
             return self.auth_with_plugin(
-                request.META[self.auth_header], request, username, password
+                request.headers[self.auth_header], request, username, password
             )
         for plugin_name in self.auth_handlers.list():
             result = self.auth_with_plugin(plugin_name, request, username, password)

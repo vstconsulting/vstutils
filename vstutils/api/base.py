@@ -633,7 +633,7 @@ class FileResponseRetrieveMixin(GenericViewSet):
             instance_edit: datetime.datetime = getattr(instance, self.instance_field_timestamp, None)  # type: ignore
             instance_edit_timestamp = instance_edit.timestamp() if instance_edit else None
 
-        if instance_edit_timestamp and instance_edit_timestamp == float(request.META.get('HTTP_IF_NONE_MATCH', '0.0')):
+        if instance_edit_timestamp and instance_edit_timestamp == float(request.headers.get('If-None-Match', '0.0')):
             return HttpResponseNotModified()
 
         response: FileResponse = self.get_serializer(**self.get_file_response_kwargs(instance))  # type: ignore

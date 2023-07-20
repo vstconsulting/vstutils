@@ -463,7 +463,7 @@ export class QuerySet {
 
         const headers: Record<string, unknown> = {};
         if (purge) {
-            headers.HTTP_X_Purge_Nested = String(purge);
+            headers['X-Purge-Nested'] = String(purge);
         }
 
         return Promise.all(
