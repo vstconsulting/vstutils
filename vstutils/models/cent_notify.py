@@ -33,12 +33,12 @@ class Notificator:
 
     _json_renderer = ORJSONRenderer()
 
-    def __init__(self, queue=None, client=None, label=None):
+    def __init__(self, queue=None, client=None, label=None, autoconnect=True):
         self.queue = queue or []
         self.cent_client = client
         self.label = label
         self._signals: _t.List[signals.ModelSignal] = []
-        if self.is_usable():
+        if autoconnect and self.is_usable():
             self.connect_signal(signals.post_save)
             self.connect_signal(signals.post_delete)
 
@@ -53,6 +53,7 @@ class Notificator:
     def disconnect_signal(self, signal: signals.ModelSignal):
         if signal in self._signals:
             signal.disconnect(self.signal_handler)
+            self._signals.remove(signal)
 
     def signal_handler(self, instance, *args, **kwargs):
         if isinstance(instance, (BaseModel, get_user_model())) and getattr(instance, '_notify_update', True):
@@ -71,12 +72,16 @@ class Notificator:
         return self.client_class(**centrifugo_client_kwargs)
 
     def create_notification_from_instance(self, instance):  # pylint: disable=invalid-name
+        if not self.is_usable():
+            return  # nocv
         model = instance.__class__
         self.queue.append(
             ((model._meta.label, *get_proxy_labels(model)), {'pk': instance.pk})
         )
 
     def create_notification(self, labels, data):
+        if not self.is_usable():
+            return  # nocv
         if isinstance(labels, str):
             labels = (labels,)
         data = orjson.loads(self._json_renderer.render(data) or '{}')
@@ -106,7 +111,7 @@ class Notificator:
                         data=data,
                     ))
                     sent_channels.add(channel)
-        if objects:
+        if objects and sent_channels:
             logger.debug(f'Send notifications about {len(objects)} updates to channel(s) {sent_channels}.')
             return self.cent_client.send()
 
@@ -118,9 +123,9 @@ class Notificator:
         return f'{settings.SUBSCRIPTIONS_PREFIX}.{label}'
 
     def __del__(self):
-        logger.debug('Disconnect all notification signals.')
+        logger.log(logging.NOTSET, 'Disconnect all notification signals.')
         self.disconnect_all()
-        logger.debug('Disconnected all notification signals.')
+        logger.log(logging.NOTSET, 'Disconnected all notification signals.')
 
     def __enter__(self):
         return self
