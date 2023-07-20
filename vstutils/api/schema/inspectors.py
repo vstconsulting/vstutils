@@ -1,16 +1,12 @@
-import warnings
 from copy import deepcopy
 from typing import Dict, Type, Text, Any, Union, Set
 from collections import OrderedDict
 
 from django.http import FileResponse
-from django.db import models
-from django.utils.functional import cached_property
 from drf_yasg.inspectors.base import FieldInspector, FilterInspector, NotHandled
 from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_field_type
+from drf_yasg.inspectors.query import DrfAPICompatInspector, force_real_str  # type: ignore
 from drf_yasg import openapi
-from drf_yasg.inspectors.query import CoreAPICompatInspector, force_real_str, coreschema  # type: ignore
-from rest_framework.pagination import BasePagination
 from rest_framework.fields import Field, JSONField, DecimalField, ListField, empty
 from rest_framework.serializers import Serializer
 
@@ -559,123 +555,7 @@ class SerializedFilterBackendsInspector(FilterInspector):
         )
 
 
-class ArrayFilterQueryInspector(CoreAPICompatInspector):
-    @cached_property
-    def fields_map(self):  # nocv
-        warnings.warn(
-            "CoreAPI and coreschema is deprecated and will removed in 6.x.",
-            category=DeprecationWarning,
-            stacklevel=2,
-        )
-        return {
-            f.name: f
-            for f in self.view.get_queryset().model._meta.fields
-        }
-
-    def build_paginated_property(self, value: dict):
-        # Need to remove useless params from schema
-        value.pop('example', None)
-        if 'nullable' in value:
-            value['x-nullable'] = value.pop('nullable')
-        return openapi.Schema(**value)
-
-    def get_paginated_response(self, paginator: BasePagination, response_schema: Any):
-        try:
-            paginator_schema = paginator.get_paginated_response_schema(response_schema)
-            properties = {
-                k: self.build_paginated_property(v)
-                for k, v in paginator_schema.pop('properties').items()
-            }
-            return openapi.Schema(
-                **paginator_schema,
-                properties=properties
-            )
-        except:  # nocv
-            return NotHandled
-
-    def param_to_schema(self, param):
-        if 'title' in param:
-            param['x-title'] = param.pop('title')  # nocv
-        return openapi.Parameter(
-            name=param['name'],
-            in_=param['in'],
-            description=param.get('description'),
-            required=param.get('required', False),
-            **param['schema'],
-        )
-
-    def get_paginator_parameters(self, paginator):
-        if hasattr(paginator, 'get_schema_operation_parameters'):
-            return list(map(self.param_to_schema, paginator.get_schema_operation_parameters(self.view)))
-        return super().get_paginator_parameters(paginator)  # nocv
-
-    def get_filter_parameters(self, filter_backend):
-        if hasattr(filter_backend, 'get_schema_operation_parameters'):
-            return list(map(self.param_to_schema, filter_backend.get_schema_operation_parameters(self.view)))
-        return super().get_filter_parameters(filter_backend)
-
-    def coreapi_field_to_parameter(self, field, schema=None):  # nocv
-        """
-        Convert an instance of `coreapi.Field` to a swagger :class:`.Parameter` object.
-
-        :param coreapi.Field field:
-        :param coreschema..Schema schema:
-        :rtype: openapi.Parameter
-        """
-        warnings.warn(
-            "CoreAPI and coreschema is deprecated and will removed in 6.x.",
-            category=DeprecationWarning,
-            stacklevel=2,
-        )
-        location_to_in = {
-            'query': openapi.IN_QUERY,
-            'path': openapi.IN_PATH,
-            'form': openapi.IN_FORM,
-            'body': openapi.IN_FORM,
-        }
-        coreapi_types = {
-            coreschema.Integer: openapi.TYPE_INTEGER,
-            coreschema.Number: openapi.TYPE_NUMBER,
-            coreschema.String: openapi.TYPE_STRING,
-            coreschema.Boolean: openapi.TYPE_BOOLEAN,
-            coreschema.Array: openapi.TYPE_ARRAY,
-        }
-
-        coreschema_attrs = ['format', 'pattern', 'enum', 'min_length', 'max_length']
-        schema_field = schema or field.schema
-        attributes = {}
-        if isinstance(schema_field, coreschema.Array):
-            attributes['collectionFormat'] = 'csv'
-            param = self.coreapi_field_to_parameter(field, schema_field.items)
-            attributes['items'] = openapi.Items(**OrderedDict(
-                (attr, getattr(param, attr, None))
-                for attr in coreschema_attrs + ['type']
-            ))
-            attributes['minItems'] = schema_field.min_items
-            attributes['maxItems'] = schema_field.max_items
-            attributes['uniqueItems'] = schema_field.unique_items
-            coreschema_attrs = ()
-
-        schema_type = coreapi_types.get(type(schema_field), openapi.TYPE_STRING)
-        if schema is not None and \
-           field.name in ('id', 'id__not') and \
-           isinstance(self.fields_map.get(field.name.split('__')[0]), (models.AutoField, models.IntegerField)):
-            schema_type = openapi.TYPE_INTEGER
-        if field.name == 'ordering' and hasattr(schema_field, 'enum'):
-            schema_field.format = 'ordering_choices'
-
-        return openapi.Parameter(
-            name=field.name,
-            in_=location_to_in[field.location],
-            required=field.required,
-            description=force_real_str(schema_field.description) if schema_field else None,
-            type=schema_type,
-            **OrderedDict((attr, getattr(schema_field, attr, None)) for attr in coreschema_attrs),
-            **attributes
-        )
-
-
-class NestedFilterInspector(ArrayFilterQueryInspector):
+class NestedFilterInspector(DrfAPICompatInspector):
     def get_filter_parameters(self, filter_backend):  # nocv
         subaction_list_actions = [
             f'{name}_list'

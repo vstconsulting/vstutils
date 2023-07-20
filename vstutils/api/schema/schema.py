@@ -60,9 +60,6 @@ class ExtendedSwaggerAutoSchema(SwaggerAutoSchema):
 
 
 class VSTAutoSchema(ExtendedSwaggerAutoSchema):
-    paginator_inspectors = [
-        vst_inspectors.ArrayFilterQueryInspector,
-    ] + swagger_settings.DEFAULT_PAGINATOR_INSPECTORS
     field_inspectors = [
         vst_inspectors.CommaMultiSelectFieldInspector,
         vst_inspectors.FkFieldInspector,
@@ -83,7 +80,6 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
     filter_inspectors = [
         vst_inspectors.NestedFilterInspector,
         vst_inspectors.SerializedFilterBackendsInspector,
-        vst_inspectors.ArrayFilterQueryInspector,
     ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
 
     default_status_messages: dict = {
@@ -264,7 +260,7 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
         else:
             params_to_override = params_to_override + ('x-multiaction', 'x-require-confirmation')
 
-        for param in set(params_to_override):
+        for param in params_to_override:
             if param in self.overrides and self.overrides[param] is not None:
                 result[param] = self.overrides[param]
 

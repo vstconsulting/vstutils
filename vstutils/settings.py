@@ -1039,6 +1039,11 @@ SWAGGER_SETTINGS: _t.Dict = {
     'DEFAULT_INFO': 'vstutils.api.schema.info.api_info',
     'DEFAULT_AUTO_SCHEMA_CLASS': 'vstutils.api.schema.schema.VSTAutoSchema',
     'DEFAULT_GENERATOR_CLASS': 'vstutils.api.schema.generators.VSTSchemaGenerator',
+    'DEFAULT_SPEC_RENDERERS': [
+        'drf_yasg.renderers.SwaggerYAMLRenderer',
+        'vstutils.api.schema.renderers.SwaggerJSONRenderer',
+        'vstutils.api.schema.renderers.OpenAPIRenderer',
+    ],
     'DEEP_LINKING': True,
     'SECURITY_DEFINITIONS': {
         'basic': {
