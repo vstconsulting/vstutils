@@ -118,7 +118,9 @@ class Notificator:
         return f'{settings.SUBSCRIPTIONS_PREFIX}.{label}'
 
     def __del__(self):
+        logger.debug('Disconnect all notification signals.')
         self.disconnect_all()
+        logger.debug('Disconnected all notification signals.')
 
     def __enter__(self):
         return self
