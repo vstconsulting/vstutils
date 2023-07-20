@@ -14,15 +14,18 @@ from .utils import import_class, send_template_email_handler, Lock, translate as
 celery_app: Celery = import_class(
     settings.WORKER_OPTIONS['app'].replace(':', '.')  # type: ignore
 )
-notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
 notificator = None
+
+
+def get_notificator():
+    return apps.get_app_config('vstutils_api').module.notificator_class([])
 
 
 @worker_process_init.connect
 def init_notificator(*_, **__):
     # pylint: disable=global-statement
     global notificator
-    notificator = notificator_class([])  # nocv
+    notificator = get_notificator()  # nocv
 
 
 @worker_process_shutdown.connect
@@ -54,7 +57,7 @@ class TaskMeta(type):
 
         @wraps(func, assigned=WRAPPER_ASSIGNMENTS+('__notify_wrapped__',))
         def wrapper(self, *args, **kwargs):
-            with notificator or notificator_class([]):
+            with notificator or get_notificator():
                 self.__notifier__ = notificator
                 result = func(self, *args, **kwargs)
             self.__notifier__ = None

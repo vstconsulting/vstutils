@@ -43,7 +43,8 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
         elif isinstance(field, filters.ChoiceFilter):
             kwargs['enum'] = tuple(dict(field.field.choices).keys())
         elif field_name in {'id', 'id__not'}:
-            m_field = next((f for f in queryset.model._meta.fields if f.name == field_name), None)
+            search_field = field_name.split('__')[0]
+            m_field = next((f for f in queryset.model._meta.fields if f.name == search_field), None)
             field_type, kwargs_update = get_field_type_from_queryset(m_field)
 
         if field.method == extra_filter:

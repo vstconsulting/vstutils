@@ -21,7 +21,7 @@ from functools import lru_cache, wraps
 from pathlib import Path
 from enum import Enum, EnumMeta
 
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
 from django.conf import settings
 from django.middleware.gzip import GZipMiddleware
 from django.urls import re_path, path, include
@@ -913,8 +913,7 @@ class Executor(BaseVstObject):
         :param env: -- extra environment variables which overrides defaults
         :return: -- string with full output
         """
-        asyncio.run(self.aexecute(cmd, cwd, env))
-        return self.output
+        return async_to_sync(self.aexecute)(cmd, cwd, env)
 
 
 class UnhandledExecutor(Executor):
