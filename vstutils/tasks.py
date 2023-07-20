@@ -2,6 +2,7 @@ from functools import wraps, WRAPPER_ASSIGNMENTS
 from smtplib import SMTPException
 
 from celery import Celery
+from celery.signals import worker_process_init, worker_process_shutdown
 from celery.exceptions import Reject
 from celery.app.task import BaseTask
 from celery.result import AsyncResult
@@ -13,7 +14,23 @@ from .utils import import_class, send_template_email_handler, Lock, translate as
 celery_app: Celery = import_class(
     settings.WORKER_OPTIONS['app'].replace(':', '.')  # type: ignore
 )
-notificator = apps.get_app_config('vstutils_api').module.notificator_class([])
+notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
+notificator = None
+
+
+@worker_process_init.connect
+def init_notificator(*_, **__):
+    # pylint: disable=global-statement
+    global notificator
+    notificator = notificator_class([])  # nocv
+
+
+@worker_process_shutdown.connect
+def destruct_notificator(*_, **__):
+    # pylint: disable=global-statement
+    global notificator
+    if notificator is not None:  # nocv
+        del notificator
 
 
 class TaskMeta(type):
@@ -37,7 +54,7 @@ class TaskMeta(type):
 
         @wraps(func, assigned=WRAPPER_ASSIGNMENTS+('__notify_wrapped__',))
         def wrapper(self, *args, **kwargs):
-            with notificator:
+            with notificator or notificator_class([]):
                 self.__notifier__ = notificator
                 result = func(self, *args, **kwargs)
             self.__notifier__ = None
