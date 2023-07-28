@@ -1215,6 +1215,7 @@ if RPC_ENABLED:
             "data_folder_in": __broker_folder,
             "data_folder_out": __broker_folder,
             "data_folder_processed": __broker_folder,
+            "control_folder": os.path.join(__broker_folder, f'celery_control'),
         })
         CELERY_RESULT_BACKEND = __broker_url
     else:  # nocv
