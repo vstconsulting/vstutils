@@ -14,6 +14,14 @@ class _AbstractRouter(routers.DefaultRouter):
         self.permission_classes = kwargs.pop("perms", None)
         super().__init__(*args, **kwargs)
 
+    def get_method_map(self, viewset, method_map):
+        # TODO: Remove it after 3.15 release with https://github.com/encode/django-rest-framework/pull/9057
+        bound_methods = {}
+        for method, action in method_map.items():
+            if getattr(viewset, action, None) is not None:
+                bound_methods[method] = action
+        return bound_methods
+
     def _get_api_root_dict(self):
         return {
             reg[0]: self.routes[0].name.format(basename=reg[2])
