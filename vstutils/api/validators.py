@@ -65,7 +65,7 @@ def resize_image_from_to(img, limits):
 
     best_size = apply_ratio(best_size, rounded=True)
 
-    resized_image = img.resize((best_size['width'], best_size['height']), Image.NEAREST)
+    resized_image = img.resize((best_size['width'], best_size['height']), Image.Resampling.NEAREST)
     broken_orientation = next(iter(find_broken_orientation(best_size, limits)), None)
     if not broken_orientation:
         return resized_image
@@ -198,7 +198,7 @@ class ImageValidator(FileMediaTypeValidator):
 
     def __call__(self, value):
         if not self.has_pillow:
-            warnings.warn(self.warning_msg, ImportWarning)
+            warnings.warn(self.warning_msg, ImportWarning, stacklevel=2)
             return
         super().__call__(value)
 
@@ -221,7 +221,7 @@ class ImageOpenValidator(ImageValidator):
 
     def __call__(self, value):
         if not self.has_pillow:
-            warnings.warn(self.warning_msg, ImportWarning)
+            warnings.warn(self.warning_msg, ImportWarning, stacklevel=2)
             return
         super().__call__(value)
         try:
@@ -244,7 +244,7 @@ class ImageBaseSizeValidator(ImageOpenValidator):
 
     def __call__(self, value, serializer_field=None):
         if not self.has_pillow:
-            warnings.warn(self.warning_msg, ImportWarning)
+            warnings.warn(self.warning_msg, ImportWarning, stacklevel=2)
             return
         super().__call__(value)
         should_resize_image = False

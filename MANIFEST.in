@@ -1,6 +1,5 @@
-include README.rst LICENSE
+include README.rst LICENSE pyproject.toml
 include vstutils/settings.ini vstutils/web.ini
-include setup.cfg
 include requirements.txt
 include requirements-git.txt
 include requirements-test.txt

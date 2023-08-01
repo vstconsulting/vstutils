@@ -709,7 +709,10 @@ class ListNonModelViewSet(NonModelsViewSet, drf_mixins.ListModelMixin):
                 return False
             return True
 
-        return map(lambda x: x[0].replace('_', "-"), inspect.getmembers(self.__class__, is_list_action))
+        return (
+            x[0].replace('_', "-")
+            for x in inspect.getmembers(self.__class__, is_list_action)
+        )
 
     def list(self, request: Request, *args, **kwargs) -> responses.BaseResponseClass:
         routes = {

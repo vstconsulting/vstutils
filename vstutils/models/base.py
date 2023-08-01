@@ -251,7 +251,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             meta = attrs['Meta']
             extra_metadata['proxy'] = getattr(meta, 'proxy', False)
             if not getattr(meta, 'abstract', False):
-                for extra_name in filter(lambda y: hasattr(meta, y), map(lambda x: f'_{x}', extra_metadata.keys())):
+                for extra_name in filter(lambda y: hasattr(meta, y), (f'_{x}' for x in extra_metadata.keys())):
                     extra_metadata[extra_name[1:]] = getattr(meta, extra_name)
         attrs['__extra_metadata__'] = deepcopy(extra_metadata)
         model_class = super(ModelBaseClass, mcs).__new__(mcs, name, bases, attrs, **kwargs)
@@ -588,7 +588,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             view_class.insert(0, api_base.CachableHeadMixin)
 
         if metadata['copy_attrs']:
-            view_attributes.update(map(lambda r: (f'copy_{r[0]}', r[1]), metadata['copy_attrs'].items()))
+            view_attributes.update(((f'copy_{r[0]}', r[1]) for r in metadata['copy_attrs'].items()))
             view_class.append(api_base.CopyMixin)
 
         filterset_class = cls._get_filterset_class(metadata['filterset_fields'], serializers)

@@ -261,7 +261,7 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
         filter_arg = f'{nested_append_arg}__in'
         request_data = [ensure_is_object(d) for d in request_data]
         objects = self.get_queryset().model.objects.filter(**{
-            filter_arg: map(lambda i: i.get(nested_append_arg), request_data)
+            filter_arg: (i.get(nested_append_arg) for i in request_data)
         })
         self._check_permission_obj(objects)
         self.nested_manager.add(*objects)
@@ -426,7 +426,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         actions = getmembers(self.view, _is_extra_action)
         if self.arg is None:
             actions = filter(lambda x: not x[1].detail, actions)
-        extra_acts = map(lambda x: x[0], actions)
+        extra_acts = (x[0] for x in actions)
         filter_subs = self.filter_subs
         return filter(lambda name: name not in filter_subs, extra_acts)
 

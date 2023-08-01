@@ -1,0 +1,146 @@
+[build-system]
+requires = ["setuptools>=61.2", "vstcompile~=2.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vstutils"
+authors = [
+    { name = "Sergei Kliuikov", email = "sergey.k@vstconsulting.net" },
+    { name = "Dmitriy Ovcharenko ", email = "ovcharenkodd@gmail.com" },
+]
+maintainers = [
+    { name = "VST Consulting", email = "sergey.k@vstconsulting.net" }
+]
+keywords = ["spa", "vue", "pwa", "framework", "openapi"]
+license = {text = "Apache License 2.0" }
+description = "VST Utils Framework for fast create web-application"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Operating System :: POSIX",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Internet :: WWW/HTTP :: ASGI",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: User Interfaces",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.8"
+dynamic = ["version", "dependencies", "optional-dependencies"]
+
+[project.urls]
+"Issue Tracker" = "https://gitlab.com/vstconsulting/vstutils/issues"
+Source = "https://gitlab.com/vstconsulting/vstutils"
+Releases = "https://pypi.org/project/vstutils/#history"
+Documentation = "https://vstutils.vstconsulting.net/"
+
+[project.readme]
+file = "README.rst"
+content-type = "text/x-rst"
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = true
+license-files = ["LICENSE", "NOTICE"]
+
+[tool.setuptools.dynamic]
+version = { attr = "vstutils.__version__" }
+
+[tool.setuptools.packages.find]
+include = ['vstutils', 'vstutils.*']
+namespaces = false
+
+[tool.flake8]
+ignore = "E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741,W504,B001,B008,B023,C812,C815,CFQ004,B019,I100"
+exclude = "./vstutils/*/migrations/*,./vstutils/settings*.py,.tox/*,./etc/*,./*/__init__.py,./t_openstack.py,./vstutils/projects/*,vstutils/__main__.py,vstutils/compile.py"
+max-line-length = 120
+import-order-style = 'pep8'
+
+[tool.coverage.run]
+# branch = true
+source = [
+    'vstutils',
+    'test_proj',
+]
+parallel = true
+concurrency = [
+    'thread',
+    'multiprocessing',
+]
+omit = [
+    '*.tox/*',
+    '*/management/commands/web.py',
+    '*/management/commands/_base.py',
+    '*ihsctl',
+    '*setup.py',
+    'test.py',
+    'upload_big.py',
+    '*/vstutils/__main__.py',
+    '*/vstutils/asgi_worker.py',
+    '*/vstutils/celery_beat_scheduler.py',
+    '*/vstutils/wsgi.py',
+    '*/vstutils/compile.py',
+    '*/vstutils/api/admin.py',
+    '*/vstutils/api/doc_generator.py',
+]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+exclude_lines = [
+    'pragma: no cover',
+    'nocv',
+    'noprj',
+    'noce',
+    'raise NotImplementedError',
+]
+
+[tool.bandit]
+skips = [
+    "B403",
+    "B404",
+    "B603",
+    "B303",
+    "B101",
+    "B110",
+    "B311",
+]
+
+[tool.mypy]
+python_version = 3.8
+allow_redefinition = true
+check_untyped_defs = true
+disable_error_code = "attr-defined,assignment,index,operator,arg-type,misc,call-overload,union-attr,valid-type,func-returns-value"
+plugins = [
+    "mypy_django_plugin.main",
+    "mypy_drf_plugin.main",
+]
+
+[tool.django-stubs]
+django_settings_module = "vstutils.settings"
+
+[[tool.mypy.overrides]]
+module = [
+    "django_celery_beat.*",
+    "ldap.*",
+    "uwsgi.*",
+    "jsmin.*",
+    "PIL.*",
+    "environ.*",
+    "ruamel.*",
+    "mysql.*",
+]
+ignore_missing_imports = true

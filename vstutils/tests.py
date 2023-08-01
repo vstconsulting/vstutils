@@ -271,7 +271,7 @@ class BaseTestCase(TestCase):
 
     @transaction.atomic
     def result(self, request, url, code=200, *args, **kwargs):
-        response = request(url, secure=True, *args, **kwargs)
+        response = request(url, *args, secure=True, **kwargs)
         self.last_response = response
         self.assertRCode(response, code, url)
         return self.render_api_response(response)
@@ -435,7 +435,11 @@ class BaseTestCase(TestCase):
         oldstyle_headers = set(filter(lambda x: x.startswith('HTTP_'), kwargs.keys()))
 
         if oldstyle_headers:
-            warnings.warn("You should setup 'headers' instead of kwargs", DeprecationWarning)  # nocv
+            warnings.warn(  # nocv
+                "You should setup 'headers' instead of kwargs",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         for key in oldstyle_headers:
             headers.setdefault(key[5:].replace('_', '-').lower(), kwargs[key])  # nocv

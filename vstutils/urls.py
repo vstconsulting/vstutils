@@ -20,7 +20,7 @@ gui_enabled = not getattr(settings, 'API_ONLY', False)
 
 
 def get_valid_url(*args):
-    return os.path.join('/', *map(lambda x: x.lstrip('^/'), filter(bool, args + ('/',))))
+    return os.path.join('/', *(x.lstrip('^/') for x in filter(bool, args + ('/',))))
 
 
 class AdminLoginLogoutRedirectView(RedirectView):
