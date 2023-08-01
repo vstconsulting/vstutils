@@ -669,7 +669,6 @@ if has_django_celery_beat:
     INSTALLED_APPS.append('django_celery_beat')
 
 INSTALLED_APPS += [
-    'crispy_forms',
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',

@@ -70,7 +70,7 @@ def list_to_choices(items_list: tp.Iterable, response_type: tp.Callable = list) 
     :param response_type: casting type of returned mapping
     :return: list of tuples from `items_list` values
     """
-    return response_type(map(lambda x: (x, x), items_list))
+    return response_type(((x, x) for x in items_list))
 
 
 def is_member_descriptor(obj):
@@ -1236,7 +1236,7 @@ class ObjectHandlers(BaseVstObject):
             if backend is None:
                 raise ex.VSTUtilsException("Backend is 'None'.")  # pragma: no cover
             return self._get_backend(backend)
-        except KeyError or ImportError as err:  # type: ignore[truthy-function]
+        except (KeyError, ImportError) as err:
             msg = f"{name} ({self.err_message})" if self.err_message else name
             raise ex.UnknownTypeException(msg) from err
 

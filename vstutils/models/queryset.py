@@ -159,7 +159,7 @@ class BQuerySet(models.QuerySet):
                             ON {sql_table}.{sql_deep_column} = nested.{sql_column_to_get}
             )
             SELECT {sql_column_to_get} from nested
-        '''
+        '''  # nosec
         if with_current:
             sql += with_current_sql
         return self.model.objects.filter(id__in=RawSQL(sql, []))  # nosec

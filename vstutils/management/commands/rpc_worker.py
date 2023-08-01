@@ -91,7 +91,7 @@ class Command(DockerCommand):
                     try:
                         proc.wait(options['graceful_timeout'])
                     except subprocess.TimeoutExpired:
-                        with contextlib.suppress():
+                        with contextlib.suppress(Exception):
                             self._print('Killing process', 'CRITICAL')
                             proc.kill()
                     proc.wait()

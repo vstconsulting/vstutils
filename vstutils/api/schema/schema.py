@@ -84,7 +84,7 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
 
     default_status_messages: dict = {
         s[1]: ' '.join(s[2:])
-        for s in map(lambda j: j.split('_'), filter(lambda x: x.startswith("HTTP_"), dir(status)))
+        for s in (j.split('_') for j in filter(lambda x: x.startswith("HTTP_"), dir(status)))
     }
 
     def __init__(self, *args, **kwargs):

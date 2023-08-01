@@ -70,4 +70,4 @@ License
 VSTUtils is licensed under the terms of the Apache License 2.0.
 See the file "LICENSE" for more information.
 
-Copyright 2018-2022 VST Consulting
+Copyright 2018-2023 VST Consulting

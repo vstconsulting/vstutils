@@ -70,7 +70,8 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
         except Exception:  # nocv
             queryset = None
             warnings.warn(
-                "{} is not compatible with schema generation".format(view.__class__)
+                "{} is not compatible with schema generation".format(view.__class__),
+                stacklevel=2,
             )
 
         filterset_class = self.get_filterset_class(view, queryset)
