@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-16 03:34+0000\n"
+"POT-Creation-Date: 2023-08-05 01:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -502,8 +502,8 @@ msgid ""
 msgstr ""
 "Данная кастомная модель предназначена для самостоятельной реализации "
 "запросов к внешним сервисам. Модель позволяет вам передавать параметры "
-"фильтрации, лимитирования и сортировки к внешним запросам, "
-"получая уже ограниченные данные."
+"фильтрации, лимитирования и сортировки к внешним запросам, получая уже "
+"ограниченные данные."
 
 #: of vstutils.models.custom_model.ExternalCustomModel:5
 msgid ""
@@ -511,9 +511,9 @@ msgid ""
 "``get_data_generator()`` class method, which receives the query object "
 "with the necessary parameters as an argument."
 msgstr ""
-"Чтобы начать использовать эту модель, достаточно реализовать метод класса "
-"``get_data_generator()``, который получает объект запроса с необходимыми "
-"параметрами, как аргумент."
+"Чтобы начать использовать эту модель, достаточно реализовать метод класса"
+" ``get_data_generator()``, который получает объект запроса с необходимыми"
+" параметрами, как аргумент."
 
 #: of vstutils.models.custom_model.FileModel:1
 msgid ""
@@ -588,8 +588,8 @@ msgid ""
 "all further actions are implemented on top of it."
 msgstr ""
 "Эта модель реализует механизм программирования SQL View над другими "
-"моделями. В методе ``get_view_queryset()`` подготавливается запрос, "
-"и все остальные действия осуществляются поверх него."
+"моделями. В методе ``get_view_queryset()`` подготавливается запрос, и все"
+" остальные действия осуществляются поверх него."
 
 #: ../../backend.rst:29
 msgid "Model Fields"
@@ -607,6 +607,18 @@ msgstr ""
 "`vstutils.api.FkModelField` в сериализаторе. Чтобы установить Foreign Key"
 " отношение, задайте значение `to` - класс модели или строка для импорта, "
 "как в :class:`django.db.models.ForeignKey`"
+
+#: of vstutils.models.fields.HTMLField:1
+msgid ""
+"Extends :class:`django.db.models.TextField`. A simple field for storing "
+"HTML markup. The field is based on :class:`django.db.models.TextField`, "
+"therefore it does not support indexing and is not recommended for use in "
+"filters."
+msgstr ""
+"Расширяет класс :class:`django.db.models.TextField`. Простое поле для "
+"хранения HTML-разметки. Поле основано на базе "
+":class:`django.db.models.TextField`, поэтому не поддерживает индексацию и"
+" не рекомендовано для использования в фильтрах."
 
 #: of vstutils.models.fields.MultipleFieldFile:1
 msgid ""
@@ -731,6 +743,18 @@ msgstr ""
 ":class:`vstutils.models.BModel`, чтобы получить "
 "`vstutils.api.NamedBinaryImageInJSONField` в сериализаторе."
 
+#: of vstutils.models.fields.WYSIWYGField:1
+msgid ""
+"Extends :class:`django.db.models.TextField`. A simple field for storing "
+"Markdown data. The field is based on :class:`django.db.models.TextField`,"
+" therefore it does not support indexing and is not recommended for use in"
+" filters."
+msgstr ""
+"Расширяет :class:`django.db.models.TextField`. Простое поле для хранения "
+"строк в формате Markdown. Поле основано на "
+":class:`django.db.models.TextField`, поэтому не поддерживает индексацию и"
+" не рекомендовано для использования в фильтрах."
+
 #: ../../backend.rst:36
 msgid "Web API"
 msgstr "Веб-API"
@@ -791,8 +815,9 @@ msgstr ""
 #: vstutils.api.fields.NamedBinaryImageInJsonField
 #: vstutils.api.fields.RatingField vstutils.api.fields.RedirectFieldMixin
 #: vstutils.api.fields.RelatedListField vstutils.api.fields.SecretFileInString
-#: vstutils.api.filters.FkFilterHandler vstutils.api.filters.extra_filter
-#: vstutils.api.filters.name_filter vstutils.api.responses.BaseResponseClass
+#: vstutils.api.fields.WYSIWYGField vstutils.api.filters.FkFilterHandler
+#: vstutils.api.filters.extra_filter vstutils.api.filters.name_filter
+#: vstutils.api.responses.BaseResponseClass
 #: vstutils.api.validators.FileMediaTypeValidator
 #: vstutils.api.validators.ImageBaseSizeValidator
 #: vstutils.api.validators.ImageHeightValidator
@@ -1812,6 +1837,10 @@ msgid ""
 msgstr ""
 "На фронтенде отображается https://ui.toast.com/tui-editor. Сохраняет "
 "данные в формате markdown, экранируя все html-теги."
+
+#: of vstutils.api.fields.WYSIWYGField:4
+msgid "html-escape input. Enabled by default."
+msgstr "экранирование входящих html-символов. Включено по умолчанию."
 
 #: ../../backend.rst:49
 msgid "Validators"
@@ -4053,8 +4082,8 @@ msgstr "-- рабочая директория"
 #: vstutils.utils.Executor.post_execute:8 vstutils.utils.Executor.pre_execute:8
 msgid "-- extra environment variables which overrides defaults"
 msgstr ""
-"-- дополнительные переменные окружения, которые перезаписывают "
-"переменные по умолчанию"
+"-- дополнительные переменные окружения, которые перезаписывают переменные"
+" по умолчанию"
 
 #: of vstutils.utils.Executor.aexecute:10 vstutils.utils.Executor.execute:10
 msgid "-- string with full output"

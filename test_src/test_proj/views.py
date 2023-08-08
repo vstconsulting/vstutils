@@ -11,6 +11,7 @@ from vstutils.api.serializers import DataSerializer
 from vstutils.api.auth import UserViewSet
 from vstutils.api.actions import Action
 from vstutils.utils import create_view
+from vstutils.gui.context import gui_version
 
 from .models import Host, HostList, HostGroup, ModelWithBinaryFiles, ModelWithFK, CachableProxyModel
 
@@ -221,4 +222,4 @@ CacheableView = create_view(CachableProxyModel)
 
 class CacheableViewSet(CacheableView):
     def get_etag_value(self, model_class, request):
-        return super().get_etag_value((model_class,), request)
+        return super().get_etag_value((model_class, gui_version), request)

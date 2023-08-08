@@ -22,7 +22,9 @@ from ..models.fields import (
     MultipleNamedBinaryImageInJSONField,
     MultipleFileField,
     MultipleImageField,
-    FkModelField
+    FkModelField,
+    HTMLField,
+    WYSIWYGField,
 )
 
 VALID_FK_KWARGS = (
@@ -124,7 +126,9 @@ class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer, me
         MultipleNamedBinaryFileInJSONField: fields.MultipleNamedBinaryFileInJsonField,  # type: ignore
         MultipleNamedBinaryImageInJSONField: fields.MultipleNamedBinaryImageInJsonField,  # type: ignore
         MultipleFileField: fields.MultipleNamedBinaryFileInJsonField,  # type: ignore
-        MultipleImageField: fields.MultipleNamedBinaryImageInJsonField  # type: ignore
+        MultipleImageField: fields.MultipleNamedBinaryImageInJsonField,  # type: ignore
+        HTMLField: fields.HtmlField,  # type: ignore
+        WYSIWYGField: fields.WYSIWYGField,  # type: ignore
     })
 
     def build_standard_field(self, field_name, model_field):

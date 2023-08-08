@@ -4,11 +4,12 @@ from PIL import Image
 from django_filters import CharFilter
 from django.db import models
 
+from vstutils.api.base import EtagDependency
 from vstutils.api.fields import RelatedListField, RedirectIntegerField
 from vstutils.api.responses import HTTP_200_OK
 from vstutils.api.serializers import BaseSerializer, VSTSerializer
-from vstutils.models import BModel, register_view_action, LAZY_MODEL
 from vstutils.api import fields, filter_backends, validators as vst_validators
+from vstutils.models import BModel, register_view_action, LAZY_MODEL
 from vstutils.models.fields import (
     NamedBinaryFileInJSONField,
     NamedBinaryImageInJSONField,
@@ -105,6 +106,7 @@ class ModelWithBinaryFiles(BModel):
 class ModelForCheckFileAndImageField(BModel):
     _cache_responses = True
     _cache_related_labels = (ModelWithBinaryFiles._meta.label,)
+    _cache_response_dependencies = EtagDependency.LANG | EtagDependency.SESSION
 
     some_image_field = models.ImageField(default='')
     some_file_field = models.FileField(default='')

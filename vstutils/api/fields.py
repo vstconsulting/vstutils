@@ -1186,10 +1186,18 @@ class WYSIWYGField(TextareaField):
     """
     On frontend renders https://ui.toast.com/tui-editor.
     Saves data as markdown and escapes all html tags.
+
+    :param escape: html-escape input. Enabled by default.
+    :type escape: bool
     """
 
+    def __init__(self, *args, **kwargs):
+        self.escape_html = kwargs.pop('escape', True)
+        super().__init__(*args, **kwargs)
+
     def to_internal_value(self, data):
-        return escape(strip_tags(super().to_internal_value(data)))
+        val = super().to_internal_value(data)
+        return escape(strip_tags(val)) if self.escape_html else val
 
 
 class CrontabField(CharField):

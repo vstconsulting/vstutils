@@ -1,5 +1,6 @@
 from django.db.models import CharField
 from vstutils.api.responses import HTTP_200_OK
+from vstutils.api.base import EtagDependency
 from vstutils.models import BaseModel
 from vstutils.models.decorators import register_view_action
 from rest_framework.mixins import UpdateModelMixin
@@ -24,6 +25,8 @@ class CachableModel(BaseModel):
 
 
 class CachableProxyModel(CachableModel):
+    _cache_response_dependencies = EtagDependency.LANG | EtagDependency.USER
+
     class Meta(CachableModel.OriginalMeta):
         proxy = True
         _view_class = (SomeViewMixin, UpdateModelMixin, 'read_only')
