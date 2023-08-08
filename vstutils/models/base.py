@@ -8,6 +8,7 @@ from copy import deepcopy
 
 from django_filters import rest_framework as filters, filterset
 from django.core.cache import caches as django_caches
+from django.core.cache.backends.base import DEFAULT_TIMEOUT as DEFAULT_CACHE_TIMEOUT
 from django.db.models.base import ModelBase
 from django.db.models import fields as django_model_fields
 from django.db.models.fields.related import ManyToManyField, OneToOneField, ForeignKey
@@ -18,6 +19,7 @@ from rest_framework.fields import ModelField, JSONField, CharField as drfCharFie
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from vstutils.utils import translate as _
 
+from ..gui.context import gui_version
 from ..api.fields import (
     NamedBinaryFileInJsonField,
     NamedBinaryImageInJsonField,
@@ -278,16 +280,26 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
 
     def get_etag_value(cls, pk=None):
         # pylint: disable=no-value-for-parameter
-        return str(django_caches['etag'].get_or_set(cls.get_api_cache_name(pk), str(uuid.uuid4())))
+        return str(
+            django_caches['etag'].get_or_set(
+                cls.get_api_cache_name(pk),
+                str(uuid.uuid4()),
+                timeout=getattr(cls, '_cache_responses_timeout', DEFAULT_CACHE_TIMEOUT),
+                version=gui_version,
+            )
+        )
 
     def set_etag_value(cls, pk=None):
         # pylint: disable=no-value-for-parameter
         new_value = str(uuid.uuid4())
-        django_caches['etag'].set(cls.get_api_cache_name(), new_value)
-        if pk:
-            django_caches['etag'].set(cls.get_api_cache_name(pk), new_value)
-        else:
-            django_caches['etag'].set(cls.get_api_cache_name("__postfix__"), new_value)
+        django_caches['etag'].set_many(
+            {
+                cls.get_api_cache_name(pk) if pk else cls.get_api_cache_name("__postfix__"): new_value,
+                cls.get_api_cache_name(): new_value,
+            },
+            timeout=getattr(cls, '_cache_responses_timeout', DEFAULT_CACHE_TIMEOUT),
+            version=gui_version,
+        )
         return new_value
 
     @classproperty

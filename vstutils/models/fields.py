@@ -245,3 +245,19 @@ class FkModelField(ForeignKey):
     `vstutils.api.FkModelField` in serializer. To set Foreign Key relation set `to` argument to string path to model
     or to Model Class as in :class:`django.db.models.ForeignKey`
     """
+
+
+class HTMLField(TextField):
+    """
+    Extends :class:`django.db.models.TextField`. A simple field for storing HTML markup.
+    The field is based on :class:`django.db.models.TextField`, therefore it does not support indexing
+    and is not recommended for use in filters.
+    """
+
+
+class WYSIWYGField(TextField):
+    """
+    Extends :class:`django.db.models.TextField`. A simple field for storing Markdown data.
+    The field is based on :class:`django.db.models.TextField`, therefore it does not support indexing
+    and is not recommended for use in filters.
+    """

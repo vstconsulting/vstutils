@@ -1,5 +1,4 @@
 # Main packages
-configparser~=6.0.0
 configparserc~=1.4.2
 Markdown~=3.4.4
 django-environ~=0.10.0
@@ -15,7 +14,7 @@ pyyaml~=6.0.1
 # web server
 uvicorn~=0.23.2
 pyuwsgi==2.0.21
-fastapi~=0.100.1
+fastapi~=0.101.0
 aiofiles~=23.1.0
 
 # Notifications

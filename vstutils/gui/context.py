@@ -15,7 +15,7 @@ project_version = getattr(settings, 'PROJECT_VERSION', '')
 vstutils_version = settings.VSTUTILS_VERSION
 gui_version = "_".join(map(str, [project_version, project_lib_version, vstutils_version]))
 static_path = getattr(settings, 'STATIC_URL', '/static/')
-static_list = SPA_STATIC_FILES_PROVIDERS.get_sorted_list()
+static_list = lazy(SPA_STATIC_FILES_PROVIDERS.get_sorted_list, tuple)()
 debug_enabled = getattr(settings, 'DEBUG', False)
 ignore_errors_decorator = raise_context_decorator_with_default(default={})
 

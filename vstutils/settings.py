@@ -34,6 +34,9 @@ class Env(dict):
 
 # MAIN Variables
 ##############################################################
+TESTS_RUN: bool = any([True for i in sys.argv if i in ['testserver', 'test']])
+LOCALRUN: bool = any([True for i in sys.argv if i not in ['collectstatic', 'runserver']]) or TESTS_RUN
+TESTSERVER_RUN: bool = 'testserver' in sys.argv
 interpreter_dir: _t.Text = os.path.dirname(sys.executable or 'python')
 PYTHON_INTERPRETER: _t.Text = '/'.join([interpreter_dir, 'python'] if interpreter_dir else 'python')
 VSTUTILS_DIR: _t.Text = os.path.dirname(os.path.abspath(vstutils_file))
@@ -87,7 +90,7 @@ PROJECT_LIB_DEFAULTS_CONFIG = os.path.join(VST_PROJECT_LIB_DIR, 'settings.ini')
 PROJECT_DEFAULTS_CONFIG = os.path.join(VST_PROJECT_DIR, 'settings.ini')
 CONFIG_ENV_DATA_NAME: _t.Text = f"{ENV_NAME}_SETTINGS_DATA"
 
-CONFIG_FILES = tuple(filter(bool, (
+config_files = (
     PROJECT_LIB_DEFAULTS_CONFIG,
     PROJECT_DEFAULTS_CONFIG if PROJECT_DEFAULTS_CONFIG != PROJECT_LIB_DEFAULTS_CONFIG else None,
     '/etc/vstutils/settings.ini' if VST_PROJECT != 'test_proj' else None,
@@ -98,8 +101,11 @@ CONFIG_FILES = tuple(filter(bool, (
     os.path.splitext(PROJECT_CONFIG_FILE)[0] + '.yml' if PROJECT_CONFIG_FILE else None,
     DEV_SETTINGS_FILE,
     os.path.splitext(DEV_SETTINGS_FILE)[0] + '.yml' if DEV_SETTINGS_FILE else None,
-)))
+)
+if TESTS_RUN:
+    config_files = config_files[:2] + config_files[-2:]
 
+CONFIG_FILES: tuple = tuple(filter(bool, config_files))
 
 class BoolOrStringType(cconfig.BaseType):
     def convert(self, value: _t.Any) -> _t.Optional[_t.Union[bool, _t.Text]]:
@@ -632,9 +638,6 @@ SECRET_KEY_FALLBACKS: _t.List[str] = [
 # Main settings
 ##############################################################
 # SECURITY WARNING: don't run with debug turned on in production!
-TESTS_RUN: bool = any([True for i in sys.argv if i in ['testserver', 'test']])
-LOCALRUN: bool = any([True for i in sys.argv if i not in ['collectstatic', 'runserver']]) or TESTS_RUN
-TESTSERVER_RUN: bool = 'testserver' in sys.argv
 DEBUG: bool = ConfigBoolType(os.getenv('DJANGO_DEBUG', main["debug"]))
 ALLOWED_HOSTS: _t.Iterable = main["allowed_hosts"]
 SECURE_PROXY_SSL_HEADER: _t.Tuple[_t.Text, _t.Text] = (
