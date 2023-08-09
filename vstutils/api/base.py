@@ -402,7 +402,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
             request: Request,
             query_serializer: _t.Type[BaseSerializer] = None,
             raise_exception: bool = True,
-    ) -> _t.Dict:
+    ) -> _t.Union[dict, 'collections.OrderedDict']:
         """
         Get request query data and serialize values if `query_serializer_class` attribute exists
         or attribute was send.
