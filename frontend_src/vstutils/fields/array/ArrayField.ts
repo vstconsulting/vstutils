@@ -92,7 +92,7 @@ export class ArrayField<TRealField extends Field = Field> extends BaseField<
             this.itemField.constructor as new (options: any) => Field,
         );
         if (customComponent) {
-            this.component.mixins = [customComponent];
+            this.component = customComponent;
         }
     }
 

@@ -54,7 +54,7 @@ describe('DateTimeField', () => {
         const wrapper = mount(
             {
                 template: `<date-time-field :field="field" :data="data" :type="type" />`,
-                components: { DateTimeField: newDateTimeField.component },
+                components: { DateTimeField: newDateTimeField.getComponent() },
                 data() {
                     return {
                         field: newDateTimeField,

@@ -8,13 +8,17 @@
             @set-value="setValue"
         />
         <template v-else>
-            <FieldLabel
+            <component
+                :is="field.getLabelComponent()"
                 v-if="!hideTitle"
                 :type="type"
                 :value="value"
                 :field="field"
                 :data="data"
                 :error="error"
+                @replace-key="replaceKey"
+                @delete-key="deleteKey"
+                @add-key="addKey"
             />
             <field_content_readonly
                 v-if="field.readOnly || type === 'readonly'"
@@ -39,7 +43,6 @@
 </template>
 
 <script>
-    import BaseFieldLabel from './BaseFieldLabel.vue';
     import BaseFieldContentReadonlyMixin from './BaseFieldContentReadonlyMixin.vue';
     import BaseFieldContentEdit from './BaseFieldContentEdit.vue';
     import BaseFieldListView from './BaseFieldListView.vue';
@@ -49,10 +52,6 @@
     export default {
         name: 'BaseFieldMixin',
         components: {
-            /**
-             * Component for label (title) of field.
-             */
-            FieldLabel: BaseFieldLabel,
             /**
              * Component for area, that shows value of field with readOnly == true.
              */
@@ -100,6 +99,22 @@
             },
             setValue(value, { markChanged = true } = {}) {
                 this._emitSetValueSignal(value, { markChanged });
+            },
+            replaceKey({ oldKey, newKey }) {
+                this.$emit('set-value', {
+                    field: oldKey,
+                    value: this.value,
+                    replaceKeyWith: newKey,
+                });
+            },
+            deleteKey(key) {
+                this.$emit('set-value', {
+                    field: key,
+                    deleteKey: true,
+                });
+            },
+            addKey(key) {
+                this.$emit('add-key', key);
             },
             _emitSetValueSignal(value, { markChanged = true } = {}) {
                 this.$emit('set-value', {

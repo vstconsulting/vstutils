@@ -7,7 +7,7 @@
                 <i class="fas fa-ban" />
             </button>
             <component
-                :is="field.itemField.component"
+                :is="field.itemField.getComponent()"
                 :field="field.itemField"
                 :data="newValueData"
                 type="edit"

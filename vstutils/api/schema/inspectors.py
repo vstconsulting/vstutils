@@ -54,7 +54,7 @@ basic_type_info[fields.HtmlField] = {
 }
 basic_type_info[serializers.JsonObjectSerializer] = {
     'type': openapi.TYPE_OBJECT,
-    'format': FORMAT_JSON
+    'additionalProperties': True,
 }
 basic_type_info[JSONField] = {
     'type': openapi.TYPE_STRING,

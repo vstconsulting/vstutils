@@ -7,10 +7,11 @@ from vstutils.api import responses, filter_backends, fields
 from vstutils.api.views import SettingsViewSet
 from vstutils.api.base import NonModelsViewSet
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
-from vstutils.api.serializers import DataSerializer
+from vstutils.api.serializers import DataSerializer, JsonObjectSerializer
 from vstutils.api.auth import UserViewSet
 from vstutils.api.actions import Action
 from vstutils.utils import create_view
+from vstutils.gui.context import gui_version
 
 from .models import Host, HostList, HostGroup, ModelWithBinaryFiles, ModelWithFK, CachableProxyModel
 
@@ -46,7 +47,7 @@ class HostViewSet(Host.generated_view):
         return responses.HTTP_201_CREATED("OK")  # nocv
 
 
-@extend_filterbackends(list(HostGroup.generated_view.filter_backends)+[TestFilterBackend], override=True)
+@extend_filterbackends(list(HostGroup.generated_view.filter_backends) + [TestFilterBackend], override=True)
 class _HostGroupViewSet(HostGroup.generated_view):
     """
     Host group operations.
@@ -68,10 +69,11 @@ def queryset_nested_filter(parent, qs):
 HiddenOnFrontendHostsViewSet = create_view(
     Host,
     hidden=True,
-    extra_view_attributes ={
+    extra_view_attributes={
         'empty_action': Action(name='hidden_action', hidden=True)(lambda *a, **k: None),
     }
 )
+
 
 @nested_view('subgroups', 'id', view=_HostGroupViewSet, subs=None)
 @nested_view('hosts', 'id', view=HostViewSet)
@@ -114,7 +116,6 @@ try:
         pass
 except nested_view.NoView:
     pass
-
 
 try:
     class ErrorView(_HostGroupViewSet):
@@ -209,6 +210,10 @@ class HostCreateDummyMixin:
     def create(self, request, *args, **kwargs):
         return responses.HTTP_201_CREATED("OK")
 
+    @action(methods=['POST'], detail=False, serializer_class=JsonObjectSerializer)
+    def test_json_serializer(self, request, *_, **__):
+        return responses.HTTP_201_CREATED(self.get_serializer(request.data).data)
+
 
 HostWithoutAuthViewSet = create_view(
     Host,
@@ -221,4 +226,4 @@ CacheableView = create_view(CachableProxyModel)
 
 class CacheableViewSet(CacheableView):
     def get_etag_value(self, model_class, request):
-        return super().get_etag_value((model_class,), request)
+        return super().get_etag_value((model_class, gui_version), request)

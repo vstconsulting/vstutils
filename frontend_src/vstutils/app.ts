@@ -445,7 +445,7 @@ export class App implements IApp {
     }
 
     get darkModeEnabled() {
-        return (this.userSettingsStore?.settings.main.dark_mode as boolean | undefined) ?? false;
+        return (this.userSettingsStore?.settings.main?.dark_mode as boolean | undefined) ?? false;
     }
 
     mount(target: HTMLElement | string = '#RealBody') {

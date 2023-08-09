@@ -6,9 +6,9 @@ import type {
     FieldOptions,
     FieldPropsDefType,
     FieldXOptions,
+    ReplaceAdditionalPropertyKeyParams,
     SetFieldValueOptions,
 } from '@/vstutils/fields/base';
-import { BaseFieldLabel } from '@/vstutils/fields/base';
 import { BaseField, FieldPropsDef, useFieldWrapperClasses } from '@/vstutils/fields/base';
 import { onAppBeforeInit } from '@/vstutils/signals';
 import { emptyInnerData, emptyRepresentData, mapObjectValues } from '@/vstutils/utils';
@@ -22,7 +22,7 @@ type TRepresent = RepresentData;
 
 export const NestedObjectFieldMixin = defineComponent({
     props: FieldPropsDef as FieldPropsDefType<NestedObjectField>,
-    emits: ['set-value'],
+    emits: ['set-value', 'replace-key', 'add-key'],
     setup(props, { emit }) {
         const modelClass = props.field.nestedModel!;
         const value = computed(() => {
@@ -42,10 +42,35 @@ export const NestedObjectFieldMixin = defineComponent({
             return [h('div', val)];
         }
 
-        function setFieldValue({ field, value: newVal, ...options }: SetFieldValueOptions) {
+        function setFieldValue({
+            field,
+            value: newVal,
+            replaceKeyWith,
+            deleteKey,
+            ...options
+        }: SetFieldValueOptions) {
+            let newValue = { ...sandbox.value };
+
+            if (deleteKey) {
+                newValue = Object.fromEntries(
+                    Object.entries(newValue).filter(([k]) => k !== field),
+                ) as RepresentData;
+            }
+
+            if (replaceKeyWith) {
+                newValue = Object.fromEntries(
+                    Object.entries(newValue).filter(([k]) => k !== field),
+                ) as RepresentData;
+                field = replaceKeyWith;
+            }
+
+            if (!deleteKey) {
+                newValue[field] = newVal;
+            }
+
             emit('set-value', {
                 field: props.field.name,
-                value: { ...value.value, [field]: newVal },
+                value: newValue,
                 ...options,
             });
         }
@@ -61,13 +86,36 @@ export const NestedObjectFieldMixin = defineComponent({
                         hideNotRequired:
                             props.field.hideNotRequired ?? props.field.nestedModel?.hideNotRequired,
                     },
-                    on: { 'set-value': setFieldValue },
+                    on: {
+                        'set-value': setFieldValue,
+                        'add-key': (key: string) => emit('add-key', key),
+                    },
                 }),
             ];
             if (!props.hideTitle) {
                 children.unshift(
-                    h(BaseFieldLabel, {
-                        props: { field: props.field, error: props.error, type: props.type },
+                    h(props.field.getLabelComponent(), {
+                        props: {
+                            field: props.field,
+                            error: props.error,
+                            type: props.type,
+                            value: props.field.name,
+                            data: props.data,
+                        },
+                        on: {
+                            'replace-key': (options: ReplaceAdditionalPropertyKeyParams) =>
+                                emit('set-value', {
+                                    field: options.newKey,
+                                    value: sandbox.value,
+                                    replaceKeyWith: options.oldKey,
+                                }),
+                            'add-key': (key: string) => emit('add-key', key),
+                            'delete-key': (key: string) =>
+                                emit('set-value', {
+                                    field: key,
+                                    deleteKey: true,
+                                }),
+                        },
                     }),
                 );
             }
@@ -129,5 +177,13 @@ export class NestedObjectField
             ) as Record<string, unknown>;
         }
         return super.parseFieldError(data, instanceData);
+    }
+    override validateValue(data: RepresentData): TRepresent | null | undefined {
+        const validatedValue = super.validateValue(data);
+        if (this.nestedModel && validatedValue) {
+            const instance = new this.nestedModel();
+            instance._validateAndSetData(validatedValue);
+        }
+        return validatedValue;
     }
 }

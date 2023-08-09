@@ -8,6 +8,7 @@ from copy import deepcopy
 
 from django_filters import rest_framework as filters, filterset
 from django.core.cache import caches as django_caches
+from django.core.cache.backends.base import DEFAULT_TIMEOUT as DEFAULT_CACHE_TIMEOUT
 from django.db.models.base import ModelBase
 from django.db.models import fields as django_model_fields
 from django.db.models.fields.related import ManyToManyField, OneToOneField, ForeignKey
@@ -18,6 +19,7 @@ from rest_framework.fields import ModelField, JSONField, CharField as drfCharFie
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from vstutils.utils import translate as _
 
+from ..gui.context import gui_version
 from ..api.fields import (
     NamedBinaryFileInJsonField,
     NamedBinaryImageInJsonField,
@@ -139,11 +141,6 @@ def get_parents_append_to_view(mro_items):
     return result
 
 
-def update_cache_for_model(instance, **kwargs):
-    cached_model_class = kwargs.get('cached_model_class', instance.__class__)
-    cached_model_class.set_etag_value(instance.pk if isinstance(instance, cached_model_class) else None)
-
-
 def get_first_match_name(field_names, default=None):
     return next(
         (i for i in field_names if i in DEFAULT_VIEW_FIELD_NAMES),
@@ -259,35 +256,65 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if hasattr(model_class, '__prepare_model__'):
             model_class.__prepare_model__()
         if getattr(model_class, '_cache_responses', False):
-            receiver(post_save, sender=model_class)(update_cache_for_model)
-            receiver(post_delete, sender=model_class)(update_cache_for_model)
+            receiver(post_save, sender=model_class)(model_class.update_cache_for_model_signal)
+            receiver(post_delete, sender=model_class)(model_class.update_cache_for_model_signal)
             cache_related_labels = getattr(model_class, '_cache_related_labels', ())
-            update_cache_for_model_related = partial(update_cache_for_model, cached_model_class=model_class)
+            update_cache_for_model_related = partial(
+                model_class.update_cache_for_model_signal,
+                cached_model_class=model_class
+            )
             for label in cache_related_labels:
                 receiver(post_save, sender=label)(update_cache_for_model_related)
                 receiver(post_delete, sender=label)(update_cache_for_model_related)
         return model_class
 
+    def update_cache_for_model_signal(cls, instance, **kwargs):
+        # pylint: disable=no-value-for-parameter
+        cached_model_class = kwargs.get('cached_model_class', instance.__class__)
+        cached_model_class.set_etag_value(cls.get_keys_for_etag_update(instance, cached_model_class))
+
+    def get_keys_for_etag_update(cls, instance, signal_model_class):
+        if isinstance(instance, signal_model_class):
+            return {instance.pk}
+
     def get_proxy_labels(cls):
         return get_proxy_labels(cls)  # nocv
 
-    def get_api_cache_name(cls, postfix=None):
+    def get_api_cache_name(cls, postfix=None, _postfix=None):
         if postfix not in {None, '__postfix__'}:
-            postfix = f'{cls.get_etag_value("__postfix__")}_{postfix}'
+            postfix = f'{cls.get_etag_value("__postfix__") if _postfix is None else _postfix}_{postfix}'
         return f'etag_table_{cls._meta.db_table}' + (f'_{postfix}' if postfix is not None else "")
 
     def get_etag_value(cls, pk=None):
         # pylint: disable=no-value-for-parameter
-        return str(django_caches['etag'].get_or_set(cls.get_api_cache_name(pk), str(uuid.uuid4())))
+        return str(
+            django_caches['etag'].get_or_set(
+                cls.get_api_cache_name(pk),
+                str(uuid.uuid4()),
+                timeout=getattr(cls, '_cache_responses_timeout', DEFAULT_CACHE_TIMEOUT),
+                version=gui_version,
+            )
+        )
 
     def set_etag_value(cls, pk=None):
         # pylint: disable=no-value-for-parameter
         new_value = str(uuid.uuid4())
-        django_caches['etag'].set(cls.get_api_cache_name(), new_value)
-        if pk:
-            django_caches['etag'].set(cls.get_api_cache_name(pk), new_value)
+        keys = [cls.get_api_cache_name()]
+        if pk is None:
+            keys.append(cls.get_api_cache_name("__postfix__"))
         else:
-            django_caches['etag'].set(cls.get_api_cache_name("__postfix__"), new_value)
+            _postfix = cls.get_etag_value("__postfix__")
+            keys += [
+                cls.get_api_cache_name(i, _postfix=_postfix)
+                for i in (pk if isinstance(pk, (tuple, list, set)) else (pk,))
+                if i is not None
+            ]
+
+        django_caches['etag'].set_many(
+            {k: new_value for k in keys},
+            timeout=getattr(cls, '_cache_responses_timeout', DEFAULT_CACHE_TIMEOUT),
+            version=gui_version,
+        )
         return new_value
 
     @classproperty

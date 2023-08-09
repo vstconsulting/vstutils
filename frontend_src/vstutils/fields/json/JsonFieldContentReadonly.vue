@@ -4,12 +4,12 @@
             :is="jsonMapper.getComponent(parsedValue)"
             :value="parsedValue"
             :levels="[0]"
-            :title="field.description"
+            :title="field.name"
         />
     </div>
 </template>
 
-<script>
+<script lang="ts">
     import { BaseFieldContentReadonlyMixin } from '../base';
 
     export default {

@@ -1,6 +1,7 @@
 """
 Default ViewSets for web-api.
 """
+import enum
 import hashlib
 import re
 import io
@@ -468,6 +469,42 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         return super().as_view(actions, **initkwargs)
 
 
+def _get_etag_value(view, model_class, request, pk=None):
+    should_hash = False
+
+    if isinstance(model_class, (list, tuple, set)):
+        pk = pk or {view.model_class: view.kwargs.get(view.lookup_url_kwarg or view.lookup_field)}
+        return hashlib.blake2s(
+            "_".join(_get_etag_value(view, mc, request, pk.get(mc, 0)) for mc in model_class).encode('utf-8'),
+            digest_size=8,
+        ).hexdigest()
+    elif (get_etag_value := getattr(model_class, 'get_etag_value', None)) is not None:
+        pk = pk or view.kwargs.get(view.lookup_url_kwarg or view.lookup_field)
+        etag_value = get_etag_value(pk)
+        dependencies = getattr(model_class, '_cache_response_dependencies', (EtagDependency.LANG,))
+
+        if EtagDependency.LANG in dependencies:
+            etag_value += f'_{request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, settings.LANGUAGE_CODE)}'
+        if EtagDependency.USER in dependencies:
+            etag_value += f'_{request.user.id or 0}'
+            should_hash = True
+        if EtagDependency.SESSION in dependencies:
+            etag_value += f'_{request.session.session_key}'
+            should_hash = True
+    else:
+        etag_value = model_class
+
+    return hashlib.blake2s(etag_value.encode(settings.DEFAULT_CHARSET), digest_size=8).hexdigest() \
+        if should_hash \
+        else etag_value
+
+
+class EtagDependency(enum.Flag):
+    USER = enum.auto()
+    SESSION = enum.auto()
+    LANG = enum.auto()
+
+
 class CachableHeadMixin(GenericViewSet):
     """
     Mixin which cache GET responses.
@@ -497,19 +534,8 @@ class CachableHeadMixin(GenericViewSet):
             return False
         return self.action in main_actions or getattr(getattr(self, self.action, None), '_nested_view', None) is None
 
-    def get_etag_value(self, model_class, request):
-        pk = self.kwargs.get(self.lookup_url_kwarg or self.lookup_field)
-        if isinstance(model_class, (list, tuple, set)):
-            etag_value = hashlib.md5(
-                "_".join(mc.get_etag_value(pk) for mc in model_class).encode('utf-8')
-            ).hexdigest()
-        else:
-            etag_value = model_class.get_etag_value(pk)
-        return (
-            f'{etag_value}'
-            f'_'
-            f'{request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, settings.LANGUAGE_CODE)}'
-        )
+    def get_etag_value(self, model_class, request, pk=None):
+        return _get_etag_value(view=self, model_class=model_class, request=request, pk=pk)
 
     def _get_etag(self, model_class, request):
         return f'"{self.get_etag_value(model_class, request)}"'

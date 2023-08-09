@@ -1,6 +1,11 @@
 import type { ObjectEmitsOptions } from 'vue/types/v3-setup-context';
 import type { Field } from './BaseField';
-import type { SetFieldValueOptions, ExtractRepresent, SetFieldValueParams } from './types';
+import type {
+    SetFieldValueOptions,
+    ExtractRepresent,
+    SetFieldValueParams,
+    ReplaceAdditionalPropertyKeyParams,
+} from './types';
 
 // --- Component emits ---
 
@@ -46,3 +51,14 @@ export type FieldReadonlyEmitsDefType<T extends Field = Field> = ReturnType<
 export const FieldReadonlyEmitsNames = Object.keys(
     FieldReadonlyEmitsDef,
 ) as unknown as (keyof FieldReadonlyEmitsDefType)[];
+
+function fieldLabelEmitsDef() {
+    return {
+        'replace-key': ({ oldKey, newKey }: ReplaceAdditionalPropertyKeyParams) => true,
+        'add-key': (key: string) => true,
+        'delete-key': (key: string) => true,
+    } satisfies ObjectEmitsOptions;
+}
+
+export const FieldLabelEmitsDef = fieldLabelEmitsDef();
+export type FieldLabelEmitsDefType = ReturnType<typeof fieldLabelEmitsDef>;
