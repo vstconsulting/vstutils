@@ -10,6 +10,7 @@ import logging
 import inspect
 import traceback
 import datetime
+import collections
 import typing as _t
 from functools import partial
 from copy import deepcopy
@@ -402,7 +403,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
             request: Request,
             query_serializer: _t.Type[BaseSerializer] = None,
             raise_exception: bool = True,
-    ) -> _t.Union[dict, 'collections.OrderedDict']:
+    ) -> _t.Union[dict, collections.OrderedDict]:
         """
         Get request query data and serialize values if `query_serializer_class` attribute exists
         or attribute was send.
