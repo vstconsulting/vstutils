@@ -3493,9 +3493,12 @@ class ProjectTestCase(BaseTestCase):
     def test_authentication_classes_none(self):
         results = self.bulk([
             {"method": 'get', "path": ['hosts_without_auth']},
+            {"method": 'post', "path": ['hosts_without_auth', 'test_json_serializer'], "data": {"any": "data"}},
         ])
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[0]['data']['count'], Host.objects.count())
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[1]['data'], {"any": "data"})
 
         self.get_result(
             'post',

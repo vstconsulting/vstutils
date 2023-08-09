@@ -36,7 +36,7 @@
                 'tr',
                 parent.fieldsInstances.map((field) =>
                     h('td', { key: field.name, class: tableColumnClasses(field) }, [
-                        h(field.component, { props: { type: 'list', field, data } }),
+                        h(field.getComponent(), { props: { type: 'list', field, data } }),
                     ]),
                 ),
             );

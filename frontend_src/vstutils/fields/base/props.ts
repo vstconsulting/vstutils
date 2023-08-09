@@ -16,6 +16,22 @@ export const FieldPropsDef = {
     error: { type: [String, Object, Array], default: null },
 };
 
+export const FieldLabelPropsDef = {
+    id: { type: String, default: undefined },
+    field: { type: Object as PropType<Field>, required: true as const },
+    value: { required: false },
+    type: { type: String as PropType<FieldComponentType>, required: true as const },
+    data: { type: Object as PropType<RepresentData> },
+    error: { type: [String, Object, Array], default: null },
+};
+
+export type FieldLabelPropsDefType<TField extends Field = Field> = Omit<
+    typeof FieldLabelPropsDef,
+    'field'
+> & {
+    field: { type: PropType<TField>; required: true };
+};
+
 export type FieldPropsDefType<T> = Omit<typeof FieldPropsDef, 'field'> & {
     field: { type: PropType<T>; required: true };
 };

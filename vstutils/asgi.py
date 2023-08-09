@@ -35,6 +35,7 @@ application.add_middleware(
     allow_methods=getattr(settings, 'CORS_ALLOW_METHODS', ("GET",)) if not settings.CORS_ORIGIN_ALLOW_ALL else ['*'],
     allow_headers=getattr(settings, 'CORS_ALLOW_HEADERS', ()) if not settings.CORS_ORIGIN_ALLOW_ALL else ['*'],
     allow_credentials=getattr(settings, 'CORS_ALLOWED_CREDENTIALS', settings.CORS_ORIGIN_ALLOW_ALL),
+    max_age=getattr(settings, 'CORS_PREFLIGHT_MAX_AGE', 600),
 )
 
 if settings.HAS_DOCS:

@@ -4,6 +4,7 @@ import type { Ref } from 'vue';
 import type { FieldsGroup, FieldsInstancesGroup, ModelConstructor } from '@/vstutils/models';
 import type { RepresentData } from '@/vstutils/utils';
 import type { Field } from '@/vstutils/fields/base';
+import { getAdditionalPropertiesField, hasAdditionalProperties } from './additionalProperties';
 
 export function getFieldsInstancesGroups(model: ModelConstructor, groups: FieldsGroup[]) {
     const instancesGroups: FieldsInstancesGroup[] = [];
@@ -14,8 +15,11 @@ export function getFieldsInstancesGroups(model: ModelConstructor, groups: Fields
                 fields.push(fieldName);
                 continue;
             }
-            const field = model.fields.get(fieldName);
+            let field = model.fields.get(fieldName);
             if (field) {
+                fields.push(field);
+            } else if (hasAdditionalProperties(model)) {
+                field = getAdditionalPropertiesField(model, { name: fieldName, title: fieldName });
                 fields.push(field);
             } else {
                 console.warn(`Unknown field ${model.name}.${fieldName} in group ${group.title}`);

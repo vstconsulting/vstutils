@@ -10,6 +10,17 @@
             </Card>
         </div>
         <template v-if="displayFlat">
+            <template v-if="fieldsType === 'edit' && model.additionalProperties">
+                <component
+                    :is="model.additionalProperties.getComponent()"
+                    :field="model.additionalProperties"
+                    :type="fieldsType"
+                    :data="{ [model.additionalProperties.name]: additionalItemData }"
+                    style="margin-bottom: 1rem"
+                    @set-value="updateAdditionalItem"
+                    @add-key="addAdditionalItem"
+                />
+            </template>
             <component
                 :is="field.getComponent()"
                 v-for="field in visibleFieldsGroups[0].fields"
@@ -23,9 +34,28 @@
                 style="margin-bottom: 1rem"
                 @hide-field="hideField(field)"
                 @set-value="emit('set-value', $event)"
+                @delete-key="deleteKey"
             />
         </template>
         <template v-else>
+            <div
+                v-if="fieldsType === 'edit' && model.additionalProperties"
+                :class="
+                    fieldsGroupClasses({ fields: [model.additionalProperties], title: 'Additional fields' })
+                "
+            >
+                <Card :class="groupsClasses">
+                    <component
+                        :is="model.additionalProperties.getComponent()"
+                        :field="model.additionalProperties"
+                        :type="fieldsType"
+                        :data="{ [model.additionalProperties.name]: additionalItemData }"
+                        style="margin-bottom: 1rem"
+                        @set-value="updateAdditionalItem"
+                        @add-key="addAdditionalItem"
+                    />
+                </Card>
+            </div>
             <div v-for="(group, idx) in visibleFieldsGroups" :key="idx" :class="fieldsGroupClasses(group)">
                 <Card :class="groupsClasses" :title="$ts(group.title)">
                     <component
@@ -40,6 +70,7 @@
                         style="margin-bottom: 1rem"
                         @hide-field="hideField(field)"
                         @set-value="emit('set-value', $event)"
+                        @delete-key="deleteKey"
                     />
                 </Card>
             </div>
@@ -48,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, provide, toRefs } from 'vue';
+    import { computed, provide, ref, toRefs } from 'vue';
     import {
         getFieldsInstancesGroups,
         getModelFieldsInstancesGroups,
@@ -86,6 +117,20 @@
     provide('requireValueOnClear', props.requireValueOnClear);
 
     const { model, data } = toRefs(props);
+
+    const additionalItemData = ref(model.value.additionalProperties?.getInitialValue());
+
+    function updateAdditionalItem<T extends Field>(options: SetFieldValueOptions<T>) {
+        additionalItemData.value = options.value;
+    }
+
+    function addAdditionalItem(key: string) {
+        emit('set-value', {
+            field: key,
+            value: additionalItemData.value,
+        });
+        additionalItemData.value = model.value.additionalProperties?.getInitialValue();
+    }
 
     const hideNotRequired = computed(() => {
         return model.value.hideNotRequired;
@@ -144,6 +189,13 @@
 
     function fieldsGroupClasses({ title, wrapperClasses }: FieldsGroup) {
         return [wrapperClasses || 'col-md-6', 'fields-group', `fields-group-${title.replace(/ /g, '_')}`];
+    }
+
+    function deleteKey(key: string) {
+        emit('set-value', {
+            field: key,
+            deleteKey: true,
+        });
     }
 </script>
 

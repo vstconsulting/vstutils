@@ -1,4 +1,4 @@
-import Vue, { computed, customRef, markRaw, readonly, ref } from 'vue';
+import Vue, { computed, customRef, markRaw, ref } from 'vue';
 
 import { emptyRepresentData } from '@/vstutils/utils';
 import { emptyInnerData } from '@/vstutils/utils';
@@ -6,7 +6,8 @@ import { ModelValidationError, type FieldValidationErrorInfo } from './errors';
 
 import type { RepresentData } from '@/vstutils/utils';
 import type { SetFieldValueOptions } from '@/vstutils/fields/base';
-import type { Model } from './Model';
+import type { Model, ModelConstructor } from './Model';
+import { getAdditionalPropertiesField, hasAdditionalProperties } from '../additionalProperties';
 
 type ReadonlySet<T> = Omit<Set<T>, 'add' | 'clear' | 'delete'>;
 
@@ -68,12 +69,27 @@ export function createModelSandbox(instance: Model) {
             ...instance._data,
             ...Object.fromEntries(prefetchedValues),
         };
+
         for (const [name, field] of instance._fields) {
             const prefetchedValue = prefetchedValues.get(name);
             if (prefetchedValue !== undefined) {
                 representData[name] = prefetchedValue;
             } else {
                 representData[name] = field.toRepresent(innerDataWithMaybeSomeRepresentData);
+            }
+        }
+        for (const key of Object.keys(instance._data)) {
+            if (instance._fields.has(key)) {
+                continue;
+            }
+            if (hasAdditionalProperties(instance.constructor as ModelConstructor)) {
+                const field = getAdditionalPropertiesField(instance.constructor as ModelConstructor, {
+                    name: key,
+                    title: undefined,
+                });
+                representData[key] = field.toRepresent(innerDataWithMaybeSomeRepresentData);
+            } else {
+                representData[key] = innerDataWithMaybeSomeRepresentData[key];
             }
         }
         return representData;
@@ -86,8 +102,23 @@ export function createModelSandbox(instance: Model) {
         return _data.value;
     }
 
-    function set({ field, value, markChanged = true }: SetFieldValueOptions): void {
-        Vue.set(getData(), field, value);
+    function set({
+        field,
+        value,
+        markChanged = true,
+        replaceKeyWith,
+        deleteKey = false,
+    }: SetFieldValueOptions): void {
+        const data = getData();
+        if (deleteKey) {
+            Vue.delete(data, field);
+            return;
+        }
+        if (replaceKeyWith) {
+            Vue.delete(data, field);
+            field = replaceKeyWith;
+        }
+        Vue.set(data, field, value);
         if (markChanged && !_changedFields.value.has(field)) {
             _changedFields.value.add(field);
         }
@@ -120,6 +151,23 @@ export function createModelSandbox(instance: Model) {
             }
         }
 
+        // Validate additional properties
+        if (instance._additionalProperties) {
+            for (const key of Object.keys(data)) {
+                if (!instance._fields.has(key)) {
+                    const field = getAdditionalPropertiesField(instance.constructor as ModelConstructor, {
+                        name: key,
+                        title: undefined,
+                    });
+                    try {
+                        validatedData[key] = field.validateValue(data);
+                    } catch (e) {
+                        errors.push({ field, message: (e as Error).message });
+                    }
+                }
+            }
+        }
+
         // Create inner data
         const newData = emptyInnerData();
         for (const field of instance._fields.values()) {
@@ -132,6 +180,22 @@ export function createModelSandbox(instance: Model) {
                 field.validateInner(newData);
             } catch (e) {
                 errors.push({ field, message: (e as Error).message });
+            }
+        }
+
+        if (instance._additionalProperties) {
+            for (const key of Object.keys(newData)) {
+                if (!instance._fields.has(key)) {
+                    const field = getAdditionalPropertiesField(instance.constructor as ModelConstructor, {
+                        name: key,
+                        title: undefined,
+                    });
+                    try {
+                        field.validateInner(newData);
+                    } catch (e) {
+                        errors.push({ field, message: (e as Error).message });
+                    }
+                }
             }
         }
 
@@ -157,7 +221,12 @@ export function createModelSandbox(instance: Model) {
             return _changedFields.value;
         },
         get value() {
-            return readonly(getData());
+            // TODO: make it readonly in Vue 3
+            // now readonly cannot be used because
+            // > readonly() does create a separate object, but it won't track
+            // > newly added properties and does not work on arrays.
+            // (https://blog.vuejs.org/posts/vue-2-7-naruto)
+            return getData();
         },
     });
 }

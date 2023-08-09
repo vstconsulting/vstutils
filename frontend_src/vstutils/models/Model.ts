@@ -12,6 +12,7 @@ import {
 } from '@/vstutils/utils';
 import { createModelSandbox, type ModelSandbox } from './sandbox';
 import { ModelValidationError } from './errors';
+import { getAdditionalPropertiesField, hasAdditionalProperties } from '../additionalProperties';
 
 export interface FieldsGroup {
     title: string;
@@ -31,6 +32,7 @@ export interface Model {
     __notFound?: true;
 
     _fields: Map<string, Field>;
+    _additionalProperties: Field | undefined;
     _pkField?: Field;
     _viewField?: Field;
     _queryset?: QuerySet;
@@ -67,6 +69,8 @@ export class BaseModel implements Model {
     static pkField?: Field;
     static viewField?: Field;
     static hideNotRequired?: boolean;
+    static additionalProperties?: Field | undefined;
+    static additionalPropertiesGroup = '';
 
     _queryset?: QuerySet;
     _parentInstance?: Model;
@@ -101,6 +105,10 @@ export class BaseModel implements Model {
         return this._c.fields;
     }
 
+    get _additionalProperties() {
+        return this._c.additionalProperties;
+    }
+
     get _pkField() {
         return this._c.pkField;
     }
@@ -131,13 +139,33 @@ export class BaseModel implements Model {
     }
 
     static getFieldsGroups({ data }: { data: RepresentData }): FieldsGroup[] {
+        const additionalProperties = Object.keys(data).filter((key) => !this.fields.has(key));
+        const additionalPropertiesGroup = this.additionalPropertiesGroup;
         if (this.fieldsGroups) {
             if (typeof this.fieldsGroups === 'function') {
                 return this.fieldsGroups({ data });
             }
-            return Object.entries(this.fieldsGroups).map(([title, fields]) => ({ title, fields }));
+            let additionalPropertiesAreGrouped = false;
+            const groups = Object.entries(this.fieldsGroups).map(([title, fields]) => {
+                if (title === additionalPropertiesGroup) {
+                    fields.push(...additionalProperties);
+                    additionalPropertiesAreGrouped = true;
+                }
+                return { title, fields };
+            });
+            if (!additionalPropertiesAreGrouped) {
+                groups.push({ title: additionalPropertiesGroup, fields: additionalProperties });
+            }
+            return groups;
         }
-        return [{ title: '', fields: Array.from(this.fields.keys()) }];
+        if (additionalPropertiesGroup === '') {
+            return [{ title: '', fields: [...Array.from(this.fields.keys()), ...additionalProperties] }];
+        } else {
+            return [
+                { title: '', fields: Array.from(this.fields.keys()) },
+                { title: additionalPropertiesGroup, fields: additionalProperties },
+            ];
+        }
     }
 
     static representToInner(representData: RepresentData): InnerData {
@@ -148,6 +176,14 @@ export class BaseModel implements Model {
                 data[field.name] = value;
             }
         }
+        if (hasAdditionalProperties(this)) {
+            for (const key of Object.keys(representData)) {
+                if (!this.fields.has(key)) {
+                    const field = getAdditionalPropertiesField(this, { name: key, title: undefined });
+                    data[key] = field.toInner(representData);
+                }
+            }
+        }
         return data;
     }
 
@@ -155,6 +191,19 @@ export class BaseModel implements Model {
         const representData = emptyRepresentData();
         for (const [name, field] of this.fields) {
             representData[name] = field.toRepresent(data);
+        }
+        for (const key of Object.keys(data)) {
+            if (this.fields.has(key)) {
+                continue;
+            }
+            if (hasAdditionalProperties(this)) {
+                const field = getAdditionalPropertiesField(this, { name: key, title: undefined });
+                representData[key] = field.toRepresent(data);
+            } else {
+                // NOTE: `false` value of additionalProperties is not supported yet
+                // and interpreted the same as `true`
+                representData[key] = data[key];
+            }
         }
         return representData;
     }

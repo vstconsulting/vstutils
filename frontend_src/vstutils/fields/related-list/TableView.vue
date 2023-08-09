@@ -16,7 +16,7 @@
                         :class="$u.tableColumnClasses(field)"
                     >
                         <component
-                            :is="field.component"
+                            :is="field.getComponent()"
                             :field="field"
                             :data="item"
                             hide-title
