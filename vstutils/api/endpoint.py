@@ -287,7 +287,7 @@ class OperationSerializer(serializers.Serializer):
                                       default=settings.VST_API_VERSION,
                                       write_only=True)
 
-    def to_representation(self, instance: _t.Dict[_t.Text, _t.Any]) -> Dict:
+    def to_representation(self, instance: ParseResponseDict) -> Dict:
         return Dict(super().to_representation(instance))
 
     def get_operation_method(self, method: _t.Text) -> _t.Callable:
