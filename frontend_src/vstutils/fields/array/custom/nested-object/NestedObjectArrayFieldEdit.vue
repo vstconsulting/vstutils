@@ -7,7 +7,7 @@
                 editable
                 flat-if-possible
                 flat-fields-classes="col-12"
-                @set-value="({ field, value }) => $set(newItemData, field, value)"
+                @set-value="(options) => setValue(options)"
             />
 
             <div class="d-flex">
@@ -26,7 +26,7 @@
                 editable
                 flat-if-possible
                 flat-fields-classes="col-12"
-                @set-value="({ field, value }) => changeItem(idx, field, value)"
+                @set-value="(options) => changeItem(idx, options)"
             />
 
             <button type="button" class="btn btn-danger" @click="removeItem(idx)">
@@ -38,13 +38,13 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref } from 'vue';
+    import { computed, ref, set } from 'vue';
     import Card from '@/vstutils/components/Card.vue';
     import ModelFields from '@/vstutils/components/page/ModelFields.vue';
     import { emptyRepresentData } from '@/vstutils/utils';
     import type { NestedObjectField } from '@/vstutils/fields/nested-object';
     import type ArrayField from '../../ArrayField';
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type { ExtractRepresent, SetFieldValueOptions } from '@/vstutils/fields/base';
     import { HideButton } from '@/vstutils/fields/buttons';
 
     type Value = ExtractRepresent<ArrayField<NestedObjectField>>;
@@ -88,10 +88,19 @@
         }
     }
 
-    function changeItem(idx: number, field: string, value: unknown) {
-        const newData = { ...items.value[idx].data, [field]: value };
+    function changeItem(idx: number, options: SetFieldValueOptions) {
+        if (!options.field) {
+            return;
+        }
+        const newData = { ...items.value[idx].data, [options.field]: options.value };
         const newValue = props.value!.slice();
         newValue[idx] = newData;
         emit('set-value', newValue);
+    }
+
+    function setValue(options: SetFieldValueOptions) {
+        if (options.field) {
+            set(newItemData, options.field, options.value);
+        }
     }
 </script>

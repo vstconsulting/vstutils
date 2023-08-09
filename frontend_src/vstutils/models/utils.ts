@@ -1,4 +1,10 @@
-import type { Field } from '@/vstutils/fields/base';
+import type {
+    DefaultXOptions,
+    ExtractInner,
+    Field,
+    FieldConstructor,
+    FieldOptions,
+} from '@/vstutils/fields/base';
 import type { BaseModel } from './Model';
 
 const pkFields = ['id', 'pk'];
@@ -86,4 +92,14 @@ export function makeModel(cls: RawModel, name: string): typeof BaseModel {
     }
 
     return cls;
+}
+
+export function instantiateFieldFromAnother<TField extends Field>(
+    field: TField,
+    options: FieldOptions<DefaultXOptions, ExtractInner<TField>>,
+) {
+    return new (field.constructor as FieldConstructor)({
+        ...field.options,
+        ...options,
+    }) as unknown as TField;
 }

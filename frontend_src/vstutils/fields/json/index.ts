@@ -1,8 +1,7 @@
 import { globalComponentsRegistrator } from '../../ComponentsRegistrator.js';
-import JSONField from './JSONField.js';
+import JSONField from './JSONField';
 import JsonMapper from './JsonMapper.js';
 import JsonFieldContentReadonly from './JsonFieldContentReadonly.vue';
-import JSONFieldMixin from './JSONFieldMixin.js';
 import * as components from './components';
 
 import JsonObject from './components/JsonObject.vue';
@@ -14,4 +13,4 @@ globalComponentsRegistrator.add(JsonArray);
 globalComponentsRegistrator.add(StringJsonArray);
 globalComponentsRegistrator.add(JsonString);
 
-export { JSONField, JsonFieldContentReadonly, JSONFieldMixin, JsonMapper, components };
+export { JSONField, JsonFieldContentReadonly, JsonMapper, components };

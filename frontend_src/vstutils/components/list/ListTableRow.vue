@@ -14,7 +14,7 @@
             @click="$emit('row-clicked', instance)"
         >
             <component
-                :is="field.component"
+                :is="field.getComponent()"
                 :field="field"
                 :data="sandbox"
                 type="list"

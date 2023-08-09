@@ -1,4 +1,5 @@
 import { signals } from '@/vstutils/signals';
+import type { Field } from '@/vstutils/fields/base';
 import { BaseField } from '@/vstutils/fields/base';
 
 import type { ModelConstructor } from './Model';
@@ -7,8 +8,12 @@ import { makeModel } from './utils';
 
 import type { AppSchema, ModelDefinition } from '@/vstutils/AppConfiguration';
 import type { FieldsResolver } from '@/vstutils/fields';
+import AddKeyField from '../additionalProperties/AddKeyField.vue';
+import type { FieldDefinition } from '../fields/FieldsResolver';
+import { getUniqueId } from '../utils';
 
 const REF_PROPERTY = '$ref';
+const ADDITIONAL_PROPERTIES_FIELD_NAME = 'ADDITIONAL_PROPERTIES_FIELD' as const;
 
 export class ModelsResolver {
     _definitionsModels = new Map<string, ModelConstructor>();
@@ -82,9 +87,31 @@ export class ModelsResolver {
             return field;
         });
 
+        if (modelSchema.additionalProperties === false) {
+            console.warn(
+                '"additionalProperties === false" is not supported and will be interpreted as "additionalProperties === true".',
+            );
+        }
+
+        let additionalProperties: Field | undefined;
+        if (modelSchema.additionalProperties) {
+            if (typeof modelSchema.additionalProperties === 'object') {
+                additionalProperties = this.fieldsResolver.resolveField(
+                    Object.assign({}, modelSchema.additionalProperties as FieldDefinition),
+                    `${ADDITIONAL_PROPERTIES_FIELD_NAME}_${getUniqueId()}`,
+                );
+            } else {
+                additionalProperties = new BaseField({
+                    name: `${ADDITIONAL_PROPERTIES_FIELD_NAME}_${getUniqueId()}`,
+                });
+            }
+            additionalProperties.getLabelComponent = () => AddKeyField;
+        }
+
         const model = makeModel(
             class extends BaseModel {
                 static declaredFields = fields;
+                static additionalProperties = additionalProperties;
                 static fieldsGroups = modelSchema['x-properties-groups'];
                 static viewFieldName = modelSchema['x-view-field-name'] || null;
                 static nonBulkMethods = modelSchema['x-non-bulk-methods'] || null;

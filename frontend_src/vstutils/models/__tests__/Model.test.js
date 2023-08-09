@@ -2,7 +2,7 @@ import { expect, test, describe, it } from '@jest/globals';
 import { BaseModel, makeModel } from '../index.ts';
 import { StringField } from '../../fields/text';
 import { IntegerField } from '../../fields/numbers/integer.js';
-import JSONField from '../../fields/json/JSONField.js';
+import JSONField from '../../fields/json/JSONField';
 
 const emailField = new StringField({ name: 'email', maxLength: 60 });
 const firstNameField = new StringField({ name: 'firstName' });
@@ -69,8 +69,8 @@ describe('Model', () => {
         // Simple getting 'toRepresent' value
         expect(user.firstName).toBeUndefined();
         expect(user.age).toBe(22);
-        expect(user.settings).toStrictEqual({ param1: 'value1', param2: 2 });
         expect(user.email).toBe('name@domain.com');
+        expect(user.settings).toBe(JSON.stringify({ param1: 'value1', param2: 2 }, undefined, 2));
         expect(user['email']).toBe('name@domain.com');
 
         // Set value and check that 'toInner' is invoked

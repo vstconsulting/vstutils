@@ -1,5 +1,5 @@
 import type { Schema, ParameterType, ParameterCollectionFormat } from 'swagger-schema-official';
-import { toRaw } from 'vue';
+import { defineComponent, markRaw, toRaw } from 'vue';
 import type { InnerData, RepresentData } from '../../utils';
 import { _translate, capitalize, deepEqual, nameToTitle, X_OPTIONS } from '../../utils';
 import { pop_up_msg } from '../../popUp';
@@ -10,6 +10,9 @@ import type { IApp } from '@/vstutils/app';
 import type { Component, ComponentOptions } from 'vue';
 import type Vue from 'vue';
 import type { ComponentOptionsMixin } from 'vue/types/v3-component-options';
+import { BaseFieldLabel } from '@/vstutils/fields/base';
+
+const componentsCache = new WeakMap<FieldConstructor, Component>();
 
 interface ModelPropertyDescriptor<Represent> extends PropertyDescriptor {
     get(this: Model): Represent | null | undefined;
@@ -27,6 +30,7 @@ export interface FieldXOptions {
     appendText?: string;
     redirect?: RedirectOptions;
     translateFieldName?: string;
+    disableLabelTranslation?: boolean;
     [key: string]: unknown;
 }
 
@@ -84,9 +88,11 @@ export interface Field<
     model?: ModelConstructor;
 
     translateFieldName: string;
+    disableLabelTranslation: boolean;
     fkLinkable: boolean;
 
     getComponent(): Component;
+    getLabelComponent(): Component;
 
     toInner(data: RepresentData): Inner | null | undefined;
     toRepresent(data: InnerData): Represent | null | undefined;
@@ -121,7 +127,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
 
     options: FieldOptions<XOptions, Inner>;
     props: XOptions;
-    component: ComponentOptions<Vue>;
+    component?: ComponentOptions<Vue>;
 
     type: ParameterType;
     format?: string;
@@ -146,6 +152,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
     model?: ModelConstructor;
 
     translateFieldName: string;
+    disableLabelTranslation: boolean;
 
     constructor(options: FieldOptions<XOptions, Inner>) {
         this.options = options;
@@ -173,11 +180,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
         this.redirect = this.props?.redirect;
 
         this.translateFieldName = this.props?.translateFieldName ?? this.name;
-
-        this.component = {
-            name: `${this.constructor.name || capitalize(this.name)}Component`,
-            mixins: (this.constructor as typeof BaseField).mixins,
-        };
+        this.disableLabelTranslation = this.props?.disableLabelTranslation ?? false;
     }
 
     static get app(): IApp {
@@ -193,7 +196,11 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
     }
 
     getComponent(): Component {
-        return this.component;
+        return this.component ?? (this.constructor as FieldConstructor)._component;
+    }
+
+    getLabelComponent(): Component {
+        return BaseFieldLabel;
     }
 
     translateValue(value: Represent) {
@@ -341,6 +348,23 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
         return [BaseFieldMixin];
     }
 
+    protected static __component: Component | undefined;
+
+    protected static get _component() {
+        if (!componentsCache.has(this)) {
+            componentsCache.set(
+                this,
+                markRaw(
+                    defineComponent({
+                        // @ts-expect-error ts does not understand constructor name
+                        name: this.name,
+                        mixins: this.mixins,
+                    }),
+                ),
+            );
+        }
+        return componentsCache.get(this)!;
+    }
     /**
      * Method that creates property descriptor from current field
      */
@@ -385,5 +409,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
         return errorData as Record<string, unknown>;
     }
 }
+
+export type FieldConstructor = typeof BaseField;
 
 export default BaseField;

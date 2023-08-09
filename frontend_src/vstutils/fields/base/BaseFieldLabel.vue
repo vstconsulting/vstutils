@@ -11,19 +11,17 @@
     import { computed } from 'vue';
     import Popover from '@/vstutils/components/Popover.vue';
     import { i18n } from '@/vstutils/translation';
-    import type { Field } from './BaseField';
-    import type { FieldComponentType } from './props';
+    import type { FieldLabelPropsDefType } from './props';
+    import { FieldLabelPropsDef } from './props';
 
-    const props = defineProps<{
-        id?: string;
-        field: Field;
-        value?: unknown;
-        type: FieldComponentType;
-        data?: Record<string, unknown>;
-        error?: string | object | unknown[];
-    }>();
+    const props = defineProps(FieldLabelPropsDef as FieldLabelPropsDefType);
 
-    const label = computed(() => i18n.ts(props.field.title));
+    const label = computed(() => {
+        if (props.field.disableLabelTranslation) {
+            return props.field.title;
+        }
+        return i18n.ts(props.field.title);
+    });
 
     const requiredText = computed(() => i18n.ts('Required field'));
     const showRequired = computed(() => props.type === 'edit' && props.field.required);

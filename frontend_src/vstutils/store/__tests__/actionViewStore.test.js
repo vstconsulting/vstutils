@@ -1,5 +1,5 @@
 import { test, expect, beforeAll } from '@jest/globals';
-import { createApp, createSchema, mountApp, openPage } from '@/unittests';
+import { createApp, createSchema, mountApp, waitForPageLoading } from '@/unittests';
 import detailPageSchema from './detailPage-schema.json';
 import { ActionView } from '../../views';
 import fetchMock from 'jest-fetch-mock';
@@ -13,13 +13,13 @@ test('createActionViewStore', async () => {
     const app = await createApp({
         schema: createSchema(detailPageSchema),
     });
-
     await mountApp();
 
     const actionView = app.views.get('/some_list/some_action/');
     expect(actionView).toBeInstanceOf(ActionView);
 
-    await openPage('/some_list/some_action/');
+    app.router.push('/some_list/some_action/');
+    await waitForPageLoading();
 
     const store = app.store.page;
     expect(store).not.toBeNull();
@@ -27,7 +27,7 @@ test('createActionViewStore', async () => {
     expect(store.sandbox).toStrictEqual({
         bool: undefined,
         text: undefined,
-        choice: undefined,
+        choice: 'one',
     });
 
     // No data entered (error should appear because 'text' field is required)
@@ -56,6 +56,8 @@ test('createActionViewStore', async () => {
         let bulk = JSON.parse(request.body);
         expect(bulk[0].method).toBe('post');
         expect(bulk[0].path).toStrictEqual('/some_list/some_action/');
+        // expecting that 'choices' is sent too because it's required and has
+        // enum, so the first value of this enum should be sent
         expect(bulk[0].data).toStrictEqual({ text: 'Mshvill', choice: 'one' });
     }
 });
