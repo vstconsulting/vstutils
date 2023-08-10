@@ -1079,11 +1079,15 @@ class RelatedListField(VSTCharField):
         return {f.name: f for f in model._meta.fields}
 
     def _prep_data(self, value):
-        data = getattr(value, self.related_name).values(*self.fields)
+        # pylint: disable=protected-access
+        queryset: models.QuerySet = getattr(value, self.related_name).all()
+        if not (queryset.query.deferred_loading[0] or queryset._result_cache is not None):
+            fields_mapping = self.get_model_fields_mapping(queryset.model).keys()
+            queryset = queryset.only(*filter(fields_mapping.__contains__, self.fields))
         if self.has_serializer:
-            return self.get_serializer(data, many=True).data
-        queryset = getattr(value, self.related_name).all()
+            return self.get_serializer(queryset, many=True).data
 
+        data = queryset.values(*self.fields)
         handler = functools.partial(
             self.handle_values_item,
             fields_mapping=self.get_model_fields_mapping(queryset.model),

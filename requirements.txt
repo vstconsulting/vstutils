@@ -15,7 +15,7 @@ pyyaml~=6.0.1
 uvicorn~=0.23.2
 pyuwsgi==2.0.21
 fastapi~=0.101.0
-aiofiles~=23.1.0
+aiofiles==23.2.1
 
 # Notifications
 cent~=4.1.0
