@@ -20,6 +20,7 @@ from django.utils.module_loading import import_string
 from fastapi.testclient import TestClient
 
 from .utils import import_class, raise_context_decorator_with_default
+from .api.renderers import ORJSONRenderer
 
 User = get_user_model()
 
@@ -421,9 +422,9 @@ class BaseTestCase(TestCase):
 
         if data is not None:
             if self.use_msgpack:
-                data = ormsgpack.packb(data)
+                data = ormsgpack.packb(data, default=ORJSONRenderer.default)
             else:
-                data = json.dumps(data)
+                data = json.dumps(data, default=ORJSONRenderer.default)
 
         if method == 'get' and 'query' in kwargs and kwargs['query']:
             query = f'?{"&".join(map("=".join, kwargs.pop("query").items()))}'

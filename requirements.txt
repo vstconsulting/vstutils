@@ -14,7 +14,7 @@ pyyaml~=6.0.1
 # web server
 uvicorn~=0.23.2
 pyuwsgi==2.0.21
-fastapi~=0.101.0
+fastapi~=0.101.1
 aiofiles==23.2.1
 
 # Notifications

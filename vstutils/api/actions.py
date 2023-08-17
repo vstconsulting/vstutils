@@ -1,5 +1,6 @@
 import typing as _t
 
+from django.db import transaction
 from django.http.response import FileResponse
 from rest_framework import serializers, viewsets
 from rest_framework.request import Request
@@ -10,6 +11,19 @@ from drf_yasg.utils import swagger_auto_schema
 
 from .responses import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from .serializers import EmptySerializer, DataSerializer
+
+
+class DummyAtomic:
+    __slots__ = ()
+
+    def __init__(self, *args, **kwargs):
+        ...
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        ...
 
 
 class Action:
@@ -319,12 +333,18 @@ class SimpleAction(Action):
                 instance.phone = ''
                 instance.save(update_fields=['phone'])
     """
-    __slots__ = ('extra_actions',)
+    __slots__ = ('extra_actions', 'atomic')
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('methods', ['GET'])
+        self.atomic = bool(kwargs.pop('atomic', False))
         super().__init__(*args, **kwargs)
         self.extra_actions = {}
+
+    def _get_transaction_context(self, request, *args, **kwargs):
+        if self.atomic and request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+            return transaction.atomic(*args, **kwargs)
+        return DummyAtomic(*args, **kwargs)
 
     def __call__(self, getter=None):
         self.extra_actions['get'] = getter
@@ -337,39 +357,40 @@ class SimpleAction(Action):
 
             get_instance_method = self.extra_actions.get('get')
 
-            if get_instance_method:
-                method_kwargs: _t.Dict[_t.Text, _t.Any] = {'query_data': {}}
-                if request.method == "GET":
-                    try:
-                        method_kwargs['query_data'] = view.get_query_serialized_data(request)  # type: ignore
-                    except (AttributeError, AssertionError):
-                        pass
-                instance = get_instance_method(view, request, **method_kwargs)
-            else:
-                instance = view.get_object() if not self.is_list else view.get_queryset()
-
-            if request.method in {'POST', 'PUT', 'PATCH'}:
-                serializer = view.get_serializer(
-                    instance,
-                    data=request.data,
-                    partial=request.method == 'PATCH',
-                    many=self.is_list
-                )
-                serializer.is_valid(raise_exception=True)
-            else:
-                serializer = view.get_serializer(instance, many=self.is_list)
-
-            if request.method in {'POST', 'PUT', 'PATCH'}:
-                serializer.save()
-                if 'set' in self.extra_actions:
-                    self.extra_actions['set'](view, instance, request, serializer, *args, **kwargs)
+            with self._get_transaction_context(request):
+                if get_instance_method:
+                    method_kwargs: _t.Dict[_t.Text, _t.Any] = {'query_data': {}}
+                    if request.method == "GET":
+                        try:
+                            method_kwargs['query_data'] = view.get_query_serialized_data(request)  # type: ignore
+                        except (AttributeError, AssertionError):
+                            pass
+                    instance = get_instance_method(view, request, **method_kwargs)
                 else:
-                    instance.save()
-            elif request.method == "DELETE":
-                if 'del' in self.extra_actions:
-                    self.extra_actions['del'](view, instance, request, *args, **kwargs)
+                    instance = view.get_object() if not self.is_list else view.get_queryset()
+
+                if request.method in {'POST', 'PUT', 'PATCH'}:
+                    serializer = view.get_serializer(
+                        instance,
+                        data=request.data,
+                        partial=request.method == 'PATCH',
+                        many=self.is_list
+                    )
+                    serializer.is_valid(raise_exception=True)
                 else:
-                    instance.delete()
+                    serializer = view.get_serializer(instance, many=self.is_list)
+
+                if request.method in {'POST', 'PUT', 'PATCH'}:
+                    serializer.save()
+                    if 'set' in self.extra_actions:
+                        self.extra_actions['set'](view, instance, request, serializer, *args, **kwargs)
+                    else:
+                        instance.save()
+                elif request.method == "DELETE":
+                    if 'del' in self.extra_actions:
+                        self.extra_actions['del'](view, instance, request, *args, **kwargs)
+                    else:
+                        instance.delete()
 
             return serializer.data
 

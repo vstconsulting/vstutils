@@ -71,7 +71,7 @@ class PropertyAuthorSerializer(BaseSerializer):
     phone = PhoneField(allow_null=True, required=False)
 
 
-@actions.SimpleAction(serializer_class=PropertyAuthorSerializer)
+@actions.SimpleAction(serializer_class=PropertyAuthorSerializer, atomic=True)
 def simple_property_action(self, request, *args, **kwargs):
     """
     Simple property description

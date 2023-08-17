@@ -83,6 +83,7 @@ from .models import (
     ModelForCheckFileAndImageField,
     ModelWithNestedModels,
     ProtectedBySignal,
+    ModelWithUuidPk,
 )
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
@@ -3348,18 +3349,24 @@ class ProjectTestCase(BaseTestCase):
         ]
 
     def test_model_with_fk_uuid(self):
+        obj = ModelWithUuidPk.objects.create()
         results = self.bulk([
             {'method': "post", 'path': ['uuid_as_pk']}
             for _ in range(3)
         ] + [
             {'method': "post", 'path': ['uuid_as_fk'], 'data': {'fk': f'<<{i}[data][id]>>'}}
             for i in range(3)
-        ] + [{'method': "get", 'path': ['uuid_as_fk']}])
-        for result in results[:-1]:
+        ] + [
+            {'method': "get", 'path': ['uuid_as_fk']},
+            {'method': "get", 'path': ['uuid_as_pk', obj.id]},
+        ])
+        for result in results[:-2]:
             self.assertEqual(result['status'], 201)
 
-        self.assertEqual(results[-1]['status'], 200)
-        self.assertEqual(results[-1]['data']['count'], 3)
+        self.assertEqual(results[-2]['status'], 200)
+        self.assertEqual(results[-2]['data']['count'], 3)
+        self.assertEqual(results[-1]['status'], 200, results[-1])
+        self.assertEqual(results[-1]['data']['id'], str(obj.id))
 
     def test_make_action(self):
         author1 = Author.objects.create(name='Author1', phone='')
@@ -3400,7 +3407,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual(results[1]['data'], {"detail": "OK"})
 
-        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['status'], 200, results[2]['data'])
         self.assertEqual(results[2]['data'], {"phone": "", "referer": None})
         self.assertEqual(results[3]['status'], 200)
         self.assertEqual(results[3]['data'], {"phone": "88008008880", "referer": author2.id})
