@@ -1,9 +1,10 @@
+import contextlib
 import typing as _t
 from copy import copy
 from warnings import warn
 
 from django.http import FileResponse
-from rest_framework import status
+from rest_framework import status, serializers
 from drf_yasg.inspectors.view import SwaggerAutoSchema
 from drf_yasg.app_settings import swagger_settings
 from drf_yasg.openapi import Schema, Response, Operation, Parameter, IN_HEADER, TYPE_STRING
@@ -11,7 +12,7 @@ from drf_yasg.openapi import Schema, Response, Operation, Parameter, IN_HEADER, 
 from ... import utils
 from ...models.base import get_proxy_labels
 from ..decorators import NestedWithAppendMixin
-from ..base import detail_actions, CachableHeadMixin
+from ..base import detail_actions, main_actions, CachableHeadMixin
 from . import inspectors as vst_inspectors
 
 
@@ -57,6 +58,16 @@ class ExtendedSwaggerAutoSchema(SwaggerAutoSchema):
                     description="Precondition Failed"
                 )
         return responses
+
+    def get_default_response_serializer(self):
+        result = None
+        if self.view.action not in main_actions:
+            with contextlib.suppress(AttributeError):
+                action = getattr(self.view, self.view.action).action
+                if action.result_serializer_class and \
+                        issubclass(action.result_serializer_class, serializers.BaseSerializer):
+                    result = action.result_serializer_class(many=action.is_list)
+        return result or super().get_default_response_serializer()
 
 
 class VSTAutoSchema(ExtendedSwaggerAutoSchema):

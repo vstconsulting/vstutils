@@ -1,7 +1,7 @@
 # Main packages
 configparserc~=1.4.2
 Markdown~=3.4.4
-django-environ~=0.10.0
+django-environ~=0.11.2
 
 # REST API packages
 djangorestframework~=3.14.0
@@ -13,8 +13,8 @@ pyyaml~=6.0.1
 
 # web server
 uvicorn~=0.23.2
-pyuwsgi==2.0.21
-fastapi~=0.101.1
+pyuwsgi==2.0.22
+fastapi~=0.103.1
 aiofiles==23.2.1
 
 # Notifications
@@ -29,4 +29,4 @@ django-htmlmin~=0.11.0
 pyotp~=2.9.0
 
 # Storage
-django-storages[libcloud]==1.13.2
+django-storages[libcloud]==1.14.0

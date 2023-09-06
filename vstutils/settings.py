@@ -1436,7 +1436,7 @@ def get_default_storage_class():
     if LIBCLOUD_PROVIDERS.get('default'):
         return 'storages.backends.apache_libcloud.LibCloudStorage'  # nocv
     elif all([i in globals() for i in ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_STORAGE_BUCKET_NAME']]):
-        return 'storages.backends.s3boto3.S3Boto3Storage'
+        return 'storages.backends.s3.S3Storage'
 
     return 'django.core.files.storage.FileSystemStorage'  # nocv
 
@@ -1469,7 +1469,7 @@ if 'libcloud' in storages:
 
 if 'boto3' in storages:
     globals().update( storages['boto3'].all())
-    STORAGES['libcloud'] = {"BACKEND": 'storages.backends.s3boto3.S3Boto3Storage'}
+    STORAGES['s3'] = {"BACKEND": 'storages.backends.s3.S3Storage'}
 
 
 STORAGES['default'] = {
