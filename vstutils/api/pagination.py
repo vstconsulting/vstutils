@@ -1,8 +1,39 @@
 from collections import OrderedDict
 
-from rest_framework.pagination import LimitOffsetPagination as DRFLimitOffsetPagination
+from rest_framework.pagination import LimitOffsetPagination as DRFLimitOffsetPagination, BasePagination
 
 from .responses import HTTP_200_OK
+
+
+class SimpleListPagination(BasePagination):
+    def to_html(self) -> str:
+        return ''  # nocv
+
+    def paginate_queryset(self, queryset, request, view=None):
+        return queryset
+
+    def get_paginated_response(self, data):
+        return HTTP_200_OK(data)
+
+
+class SimpleCountedListPagination(SimpleListPagination):
+    def get_paginated_response(self, data):
+        return super().get_paginated_response({
+            "count": len(data),
+            "results": data,
+        })
+
+    def get_paginated_response_schema(self, schema):
+        return {
+            'type': 'object',
+            'properties': {
+                'count': {
+                    'type': 'integer',
+                    'example': 123,
+                },
+                'results': schema,
+            },
+        }
 
 
 class LimitOffsetPagination(DRFLimitOffsetPagination):

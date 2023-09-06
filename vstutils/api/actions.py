@@ -11,6 +11,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from .responses import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from .serializers import EmptySerializer, DataSerializer
+from .pagination import SimpleCountedListPagination
 
 
 class DummyAtomic:
@@ -130,6 +131,7 @@ class Action:
         self.is_list = is_list
         self.hidden = hidden
         self.action_kwargs = kwargs
+        self.action_kwargs.setdefault('pagination_class', SimpleCountedListPagination if is_list else None)
         if self.query_serializer:
             self.action_kwargs['query_serializer'] = self.query_serializer
 
@@ -159,11 +161,6 @@ class Action:
             swagger_kwargs['x-icons'] = self.icons.split(' ') if isinstance(self.icons, _t.Text) else list(self.icons)
         if self.is_page:
             swagger_kwargs['x-list'] = self.is_list
-        if self.result_serializer_class and issubclass(self.result_serializer_class, serializers.Serializer):
-            swagger_kwargs['responses'] = {
-                self.method_response_mapping[method].status_code: self.result_serializer_class
-                for method in self.methods
-            }
 
         res = swagger_auto_schema(**swagger_kwargs)(res)
         res.action = self
@@ -199,11 +196,8 @@ class Action:
             elif isinstance(result, FileResponse):
                 return result
 
-            if self.is_list and result:
-                result = {
-                    'count': len(result),
-                    'results': result,
-                }
+            if self.is_list and (paginator := view.paginator):
+                result = paginator.get_paginated_response(result).data
             return response_class(result)
 
         action_method.__name__ = self.action_kwargs.get('name', method.__name__)
@@ -378,6 +372,8 @@ class SimpleAction(Action):
                     )
                     serializer.is_valid(raise_exception=True)
                 else:
+                    if self.is_list and (paginator := view.paginator):
+                        instance = paginator.paginate_queryset(queryset=instance, request=request, view=view)
                     serializer = view.get_serializer(instance, many=self.is_list)
 
                 if request.method in {'POST', 'PUT', 'PATCH'}:
