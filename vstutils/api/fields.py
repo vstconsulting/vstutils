@@ -389,7 +389,7 @@ class DependFromFkField(DynamicJsonTypeField):
             return value  # nocv
 
         parent_field = self.parent.fields[self.field]  # type: ignore
-        related_object: models.Model = parent_field.get_value(dictionary)  # type: ignore
+        related_object: models.Model = parent_field.get_value(dictionary)
         if not isinstance(related_object, models.Model) and isinstance(parent_field, FkModelField):  # nocv
             # TODO: write test to it
             model_class = get_if_lazy(parent_field.model_class)
@@ -408,9 +408,9 @@ class DependFromFkField(DynamicJsonTypeField):
         try:
             value = related_field.run_validation(primitive_value)
         except ValidationError as exc:
-            errors[related_field.field_name] = exc.detail  # type: ignore
+            errors[related_field.field_name] = exc.detail
         except DjangoValidationError as exc:  # nocv
-            errors[related_field.field_name] = get_error_detail(exc)  # type: ignore
+            errors[related_field.field_name] = get_error_detail(exc)
         except SkipField:  # nocv
             pass
 
@@ -622,7 +622,7 @@ class FkModelField(FkField):
             return self.field_type(getattr(value, self.autocomplete_property))
         else:  # nocv
             # Uses only if value got from `.values()`
-            return value  # type: ignore
+            return value
 
 
 class DeepFkField(FkModelField):
@@ -885,7 +885,7 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
         return self.to_internal_value(data)
 
     @raise_context_decorator_with_default(default=[])
-    def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:  # type: ignore
+    def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:
         if self.file:
             return [
                 {'content': file.url, 'name': file.name, 'mediaType': ''}
@@ -1240,10 +1240,10 @@ class CrontabField(CharField):
     """
 
     default_error_messages = {
-        'invalid_time_range': lazy_translate('Invalid {period} range. Valid choices in {valid} range.'),  # type: ignore
-        'invalid_delimiter': lazy_translate('Invalid delimiter value in {interval}. Must be integer.'),  # type: ignore
-        'to_many_columns': lazy_translate('There are to many columns with crontab values.'),  # type: ignore
-        'invalid': lazy_translate('Invalid crontab syntax.'),  # type: ignore
+        'invalid_time_range': lazy_translate('Invalid {period} range. Valid choices in {valid} range.'),
+        'invalid_delimiter': lazy_translate('Invalid delimiter value in {interval}. Must be integer.'),
+        'to_many_columns': lazy_translate('There are to many columns with crontab values.'),
+        'invalid': lazy_translate('Invalid crontab syntax.'),
     }
     intervals = {
         'minute': tuple(map(str, range(60))),

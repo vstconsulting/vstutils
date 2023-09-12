@@ -93,11 +93,11 @@ class RegistrationForm(UserCreationForm):
     email = forms.EmailField(
         label=__('Email'),
         max_length=254,
-        help_text=__('Required. Inform a valid email address.')  # type: ignore
+        help_text=__('Required. Inform a valid email address.')
     )
     if settings.SEND_CONFIRMATION_EMAIL:
         uid = forms.CharField(max_length=256, required=False, widget=EmptyWidget(), label='')
-        email.help_text = __('A confirmation will be sent to your e-mail')  # type: ignore
+        email.help_text = __('A confirmation will be sent to your e-mail')
 
     class Meta(UserCreationForm.Meta):
         model = UserModel

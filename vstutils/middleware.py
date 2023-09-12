@@ -197,7 +197,7 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
         else:
             response = get_response_handler(request)
 
-        response_durations = getattr(response, 'timings', None)  # type: ignore
+        response_durations = getattr(response, 'timings', None)
         total_time = self._round_time(time.time() - start_time)
 
         if getattr(request, 'is_bulk', False):
@@ -223,7 +223,7 @@ class LangMiddleware(BaseMiddleware):
             code = request.COOKIES[settings.LANGUAGE_COOKIE_NAME]
             set_cookie = False
         else:
-            code = translation.get_language_from_request(request)  # type: ignore
+            code = translation.get_language_from_request(request)
         obj = Language.objects.filter(code=code).first()
         if obj is not None:
             return obj, set_cookie
@@ -232,7 +232,7 @@ class LangMiddleware(BaseMiddleware):
     def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
         request.language, set_cookie = self.get_lang_object(request)  # type: ignore
         translation.activate(request.language.code)  # type: ignore
-        request.LANGUAGE_CODE = translation.get_language()  # type: ignore
+        request.LANGUAGE_CODE = translation.get_language()
         response = super().get_response_handler(request)
         if set_cookie:
             response.set_cookie('lang', request.language.code, domain=settings.SESSION_COOKIE_DOMAIN)  # type: ignore

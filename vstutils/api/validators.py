@@ -149,7 +149,7 @@ class FileMediaTypeValidator:
             assert isinstance(extensions, (tuple, list)), "extensions must be list or tuple"
         else:
             extensions = self.default_extensions
-        self.extensions = tuple(sorted(  # type: ignore
+        self.extensions = tuple(sorted(
             filter(
                 bool,
                 {

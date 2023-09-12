@@ -5,7 +5,7 @@ import django
 from django.conf import settings
 from django.urls import reverse_lazy
 from rest_framework import __version__ as drf_version  # type: ignore
-from fastapi import __version__ as fastapi_version  # type: ignore
+from fastapi import __version__ as fastapi_version
 from drf_yasg import openapi, __version__ as drf_yasg_version  # type: ignore
 try:
     import celery

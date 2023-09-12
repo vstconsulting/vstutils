@@ -8,7 +8,7 @@ import yaml
 from docutils.statemachine import ViewList
 from docutils.parsers.rst import Directive, directives
 from docutils import nodes
-from sphinx.util.nodes import nested_parse_with_titles  # type: ignore
+from sphinx.util.nodes import nested_parse_with_titles
 from sphinxcontrib.httpdomain import HTTP_STATUS_CODES  # type: ignore
 
 

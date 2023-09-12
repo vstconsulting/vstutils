@@ -12,7 +12,7 @@ from django.apps import apps
 from .utils import import_class, send_template_email_handler, Lock, translate as _
 
 celery_app: Celery = import_class(
-    settings.WORKER_OPTIONS['app'].replace(':', '.')  # type: ignore
+    settings.WORKER_OPTIONS['app'].replace(':', '.')
 )
 notificator = None
 
@@ -166,4 +166,4 @@ class SendEmailMessage(TaskClass):
             )
 
 
-celery_app.register_task(SendEmailMessage())  # type: ignore
+celery_app.register_task(SendEmailMessage())

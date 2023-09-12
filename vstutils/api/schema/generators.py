@@ -116,7 +116,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
     def get_schema(self, request: drf_request.Request = None, *args, **kwargs):  # type: ignore
         # pylint: disable=signature-differs
         if not getattr(request, 'version', ''):
-            request.version = self.version  # type: ignore
+            request.version = self.version
         result = super().get_schema(request, *args, **kwargs)
         if request and getattr(request, 'accepted_media_type', None) == 'application/openapi+json':
             result['info']['x-user-id'] = request.user.pk

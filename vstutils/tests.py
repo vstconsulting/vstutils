@@ -197,7 +197,7 @@ class BaseTestCase(TestCase):
         """
         Simple :func:`unittest.mock.patch` class-method wrapper.
         """
-        return patch(*args, **kwargs)  # type: ignore
+        return patch(*args, **kwargs)
 
     @classmethod
     def patch_field_default(cls, model: django_models.Model, field_name: str, value: _t.Any) -> _t.ContextManager[Mock]:

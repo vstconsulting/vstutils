@@ -102,7 +102,7 @@ def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
     :return: -- rendered string
     :rtype: str
     """
-    cur_language: str = translation.get_language()  # type: ignore
+    cur_language: str = translation.get_language()
     try:
         if trans != cur_language:
             translation.activate(trans)
@@ -295,7 +295,7 @@ def lazy_translate(text: tp.Text) -> str:
 
     :param text: Text message which should be translated.
     """
-    return tp.cast(str, functional.lazy(translate, str)(text))
+    return functional.lazy(translate, str)(text)
 
 
 def create_view(model, **meta_options):

@@ -117,18 +117,18 @@ class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer, me
 
     serializer_field_mapping = serializers.ModelSerializer.serializer_field_mapping
     serializer_field_mapping.update({
-        models.CharField: fields.VSTCharField,  # type: ignore
-        models.TextField: fields.VSTCharField,  # type: ignore
-        models.FileField: fields.NamedBinaryFileInJsonField,  # type: ignore
-        models.ImageField: fields.NamedBinaryImageInJsonField,  # type: ignore
-        NamedBinaryFileInJSONField: fields.NamedBinaryFileInJsonField,  # type: ignore
-        NamedBinaryImageInJSONField: fields.NamedBinaryImageInJsonField,  # type: ignore
-        MultipleNamedBinaryFileInJSONField: fields.MultipleNamedBinaryFileInJsonField,  # type: ignore
-        MultipleNamedBinaryImageInJSONField: fields.MultipleNamedBinaryImageInJsonField,  # type: ignore
-        MultipleFileField: fields.MultipleNamedBinaryFileInJsonField,  # type: ignore
-        MultipleImageField: fields.MultipleNamedBinaryImageInJsonField,  # type: ignore
-        HTMLField: fields.HtmlField,  # type: ignore
-        WYSIWYGField: fields.WYSIWYGField,  # type: ignore
+        models.CharField: fields.VSTCharField,
+        models.TextField: fields.VSTCharField,
+        models.FileField: fields.NamedBinaryFileInJsonField,
+        models.ImageField: fields.NamedBinaryImageInJsonField,
+        NamedBinaryFileInJSONField: fields.NamedBinaryFileInJsonField,
+        NamedBinaryImageInJSONField: fields.NamedBinaryImageInJsonField,
+        MultipleNamedBinaryFileInJSONField: fields.MultipleNamedBinaryFileInJsonField,
+        MultipleNamedBinaryImageInJSONField: fields.MultipleNamedBinaryImageInJsonField,
+        MultipleFileField: fields.MultipleNamedBinaryFileInJsonField,
+        MultipleImageField: fields.MultipleNamedBinaryImageInJsonField,
+        HTMLField: fields.HtmlField,
+        WYSIWYGField: fields.WYSIWYGField,
     })
 
     def build_standard_field(self, field_name, model_field):
