@@ -120,8 +120,15 @@ skips = [
 
 [tool.mypy]
 python_version = 3.8
+#strict = true
 allow_redefinition = true
 check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+disallow_untyped_decorators = true
+implicit_reexport = true
+show_error_codes = true
 disable_error_code = "attr-defined,assignment,index,operator,arg-type,misc,call-overload,union-attr,valid-type,func-returns-value"
 plugins = [
     "mypy_django_plugin.main",

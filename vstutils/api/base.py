@@ -207,10 +207,10 @@ class AutoSchema(DRFAutoSchema):
             action = 'partial_update'
         elif method == 'DELETE':
             action = 'destroy'
-        method_view_obj.action = action  # type: ignore
+        method_view_obj.action = action
         if method_view_obj.schema is None:
             return 'No description'  # nocv
-        return method_view_obj.schema.get_description(path, method)  # type: ignore
+        return method_view_obj.schema.get_description(path, method)
 
 
 class QuerySetMixin(rvs.APIView):
@@ -723,7 +723,7 @@ class NonModelsViewSet(GenericViewSet):
 
 class ListNonModelViewSet(NonModelsViewSet, drf_mixins.ListModelMixin):
     # pylint: disable=abstract-method
-    schema = None  # type: ignore
+    schema = None
 
     @property
     def methods(self) -> _t.Iterable[_t.Text]:

@@ -17,10 +17,10 @@ from vstutils.api.serializers import VSTSerializer, BaseSerializer, update_decla
 from vstutils.api.models import TwoFactor, RecoveryCode, UserSettings
 from vstutils.utils import raise_context_decorator_with_default, translate, lazy_translate as __
 
-User: _t.Type[AbstractUser] = get_user_model()  # type: ignore[override]
+User: _t.Type[AbstractUser] = get_user_model()
 
 
-class ChangePasswordPermission(permissions.IsAuthenticatedOpenApiRequest):  # type: ignore
+class ChangePasswordPermission(permissions.IsAuthenticatedOpenApiRequest):
     def has_object_permission(self, request: drf_request.Request, view: base.GenericViewSet, obj: User):  # type: ignore
         return (
             request.user.is_superuser or
@@ -154,8 +154,8 @@ class TwoFASerializer(VSTSerializer):
     recovery = serializers.CharField(write_only=True, required=False)
 
     default_error_messages = {
-        'invalid_pin': __('Invalid authentication code'),  # type: ignore
-        'no_secret_provided': __('Secret string must be provided'),  # type: ignore
+        'invalid_pin': __('Invalid authentication code'),
+        'no_secret_provided': __('Secret string must be provided'),
     }
 
     class Meta:
@@ -186,7 +186,7 @@ class TwoFASerializer(VSTSerializer):
 
     def update(self, instance, validated_data):
         instance.delete()
-        instance.secret = None  # type: ignore
+        instance.secret = None
         return instance
 
 
@@ -246,7 +246,7 @@ class UserViewSet(base.ModelViewSet):
         CreateUserSerializer
     )
     serializer_class_change_password: _t.Type[BaseSerializer] = ChangePasswordSerializer
-    serializer_class_twofa: _t.Type[serializers.BaseSerializer] = update_declared_fields(  # type: ignore
+    serializer_class_twofa: _t.Type[serializers.BaseSerializer] = update_declared_fields(
         TwoFASerializer
     )
     serializer_class__settings: _t.Type[serializers.BaseSerializer] = UserSettingsSerializer
@@ -319,7 +319,7 @@ class UserViewSet(base.ModelViewSet):
     def _settings(self, request: drf_request.Request, *args, **kwargs):
         instance, _ = UserSettings.objects.get_or_create(
             user=self.get_object(),
-            defaults=SimpleLazyObject(lambda: {'value': self.get_serializer({}).data})  # type: ignore
+            defaults=SimpleLazyObject(lambda: {'value': self.get_serializer({}).data})
         )
 
         if request.method.upper() == 'PUT':  # type: ignore

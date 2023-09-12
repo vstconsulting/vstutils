@@ -148,7 +148,7 @@ class BulkMiddleware(BaseMiddleware):
         if 'language' in request.META:
             request.language = request.META.pop('language')  # type: ignore
         if 'session' in request.META:
-            request.session = request.META.pop('session')  # type: ignore
+            request.session = request.META.pop('session')
         if 'notificator' in request.META:
             request.notificator = request.META.pop('notificator')  # type: ignore
         return request
@@ -314,7 +314,7 @@ class OperationSerializer(serializers.Serializer):
         result = ParseResponseDict(
             path=url,
             method=method_name,
-            response=method(  # type: ignore
+            response=method(
                 url,
                 content_type=self.renderer.media_type,
                 secure=self.context['request']._request.is_secure(),
@@ -332,9 +332,9 @@ class EndpointViewSet(views.APIView):
     Default API-endpoint viewset.
     """
 
-    throttle_classes = []  # type: ignore
-    schema = None  # type: ignore
-    versioning_class = versioning.QueryParameterVersioning  # type: ignore
+    throttle_classes = []
+    schema = None
+    versioning_class = versioning.QueryParameterVersioning
     renderer_classes = list(views.APIView.renderer_classes) + list(SPEC_RENDERERS)
     session_cookie_name: _t.ClassVar[_t.Text] = settings.SESSION_COOKIE_NAME
     client_environ_keys_copy: _t.List[_t.Text] = [
@@ -371,7 +371,7 @@ class EndpointViewSet(views.APIView):
                 kwargs['HTTP_COOKIE'] = str(request.META.get('HTTP_COOKIE'))
             elif isinstance(request.successful_authenticator, (BasicAuthentication, TokenAuthentication)):
                 kwargs['HTTP_AUTHORIZATION'] = str(request.META.get('HTTP_AUTHORIZATION'))
-            kwargs['user'] = request.user  # type: ignore
+            kwargs['user'] = request.user
         kwargs['language'] = getattr(request, 'language', None)
         kwargs['session'] = getattr(request, 'session', None)
         kwargs['notificator'] = getattr(request, 'notificator', None)
@@ -440,7 +440,7 @@ class EndpointViewSet(views.APIView):
 
         url = f'/api/{getattr(request, "version", DEFAULT_VERSION) or DEFAULT_VERSION}/_openapi/'
 
-        if request.query_params.get('format') == 'openapi':  # type: ignore
+        if request.query_params.get('format') == 'openapi':
             url += '?format=openapi'
             should_gzip = True
         else:

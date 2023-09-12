@@ -176,10 +176,10 @@ class Action:
                 **kwargs,
         ) -> _t.Union[Response, FileResponse]:
 
-            result_serializer_class: _t.Type[serializers.Serializer] = self.result_serializer_class  # type: ignore
+            result_serializer_class: _t.Type[serializers.Serializer] = self.result_serializer_class
             identical = False
             if result_serializer_class is None:
-                result_serializer_class = view.get_serializer_class()  # type: ignore
+                result_serializer_class = view.get_serializer_class()
                 identical = True
 
             result = method(view, request, *args, **kwargs)
