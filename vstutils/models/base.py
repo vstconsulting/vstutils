@@ -195,7 +195,7 @@ def _result_with_arg_decorator(func):
 
 
 def _bool_first(item):
-    return item and item[0]
+    return item and item[0] is not None
 
 
 def _get_decorator(data):

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-09 22:00+0000\n"
+"POT-Creation-Date: 2023-09-14 05:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -537,7 +537,7 @@ msgstr ""
 #: vstutils.middleware.BaseMiddleware:37
 #: vstutils.models.custom_model.FileModel:13 vstutils.tasks.TaskClass:4
 #: vstutils.utils.BaseEnum:4 vstutils.utils.Lock:35
-#: vstutils.utils.ObjectHandlers:31 vstutils.utils.SecurePickling:24
+#: vstutils.utils.ObjectHandlers:31 vstutils.utils.SecurePickling:22
 #: vstutils.utils.URLHandlers:10 vstutils.utils.apply_decorators:18
 #: vstutils.utils.classproperty:20 vstutils.utils.create_view:17
 #: vstutils.utils.raise_context_decorator_with_default:19
@@ -853,13 +853,12 @@ msgstr ""
 #: vstutils.utils.Executor.working_handler vstutils.utils.Executor.write_output
 #: vstutils.utils.Lock vstutils.utils.ModelHandlers
 #: vstutils.utils.ModelHandlers.get_object vstutils.utils.ObjectHandlers
-#: vstutils.utils.ObjectHandlers.backend vstutils.utils.SecurePickling
-#: vstutils.utils.URLHandlers vstutils.utils.URLHandlers.get_object
-#: vstutils.utils.UnhandledExecutor vstutils.utils.classproperty
-#: vstutils.utils.create_view vstutils.utils.decode vstutils.utils.deprecated
-#: vstutils.utils.encode vstutils.utils.get_render
-#: vstutils.utils.lazy_translate vstutils.utils.list_to_choices
-#: vstutils.utils.send_template_email
+#: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers
+#: vstutils.utils.URLHandlers.get_object vstutils.utils.UnhandledExecutor
+#: vstutils.utils.classproperty vstutils.utils.create_view
+#: vstutils.utils.decode vstutils.utils.deprecated vstutils.utils.encode
+#: vstutils.utils.get_render vstutils.utils.lazy_translate
+#: vstutils.utils.list_to_choices vstutils.utils.send_template_email
 #: vstutils.utils.send_template_email_handler vstutils.utils.tmp_file
 #: vstutils.utils.tmp_file.write vstutils.utils.translate
 msgid "Parameters"
@@ -2035,14 +2034,11 @@ msgstr "Возвращает"
 #: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.get_url
 #: vstutils.tests.BaseTestCase.patch
 #: vstutils.tests.BaseTestCase.patch_field_default
-#: vstutils.tests.BaseTestCase.random_name vstutils.utils.Executor.aexecute
-#: vstutils.utils.Executor.execute vstutils.utils.Executor.write_output
+#: vstutils.tests.BaseTestCase.random_name vstutils.utils.Executor.write_output
 #: vstutils.utils.ModelHandlers.get_object
 #: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
 #: vstutils.utils.create_view vstutils.utils.decode vstutils.utils.encode
-#: vstutils.utils.get_render vstutils.utils.lazy_translate
-#: vstutils.utils.list_to_choices vstutils.utils.send_template_email_handler
-#: vstutils.utils.tmp_file.write vstutils.utils.translate
+#: vstutils.utils.get_render vstutils.utils.tmp_file.write
 msgid "Return type"
 msgstr "Тип возвращаемого значения"
 
@@ -3881,9 +3877,7 @@ msgstr ""
 "умолчанию."
 
 #: of vstutils.tests.BaseTestCase.get_url:4
-#: vstutils.tests.BaseTestCase.random_name:4 vstutils.utils.Executor.aexecute:9
-#: vstutils.utils.Executor.execute:9 vstutils.utils.lazy_translate:9
-#: vstutils.utils.translate:10
+#: vstutils.tests.BaseTestCase.random_name:4
 msgid ":py:class:`str`"
 msgstr ":py:class:`str`"
 
@@ -4089,7 +4083,7 @@ msgstr ""
 "-- дополнительные переменные окружения, которые перезаписывают переменные"
 " по умолчанию"
 
-#: of vstutils.utils.Executor.aexecute:10 vstutils.utils.Executor.execute:10
+#: of vstutils.utils.Executor.aexecute:9 vstutils.utils.Executor.execute:9
 msgid "-- string with full output"
 msgstr "-- строка, содержащая полный вывод"
 
@@ -4436,14 +4430,6 @@ msgid "casting type of returned mapping"
 msgstr "тип приведения возвращаемого сопоставления"
 
 #: of vstutils.utils.list_to_choices:7
-msgid ""
-":py:class:`typing.Iterable`\\[:py:data:`typing.Tuple`\\[:py:class:`str`, "
-":py:class:`str`]]"
-msgstr ""
-":py:class:`typing.Iterable`\\[:py:data:`typing.Tuple`\\[:py:class:`str`, "
-":py:class:`str`]]"
-
-#: of vstutils.utils.list_to_choices:8
 msgid "list of tuples from `items_list` values"
 msgstr "список кортежей из значений `items_list`"
 
@@ -4553,10 +4539,6 @@ msgid "additional named arguments for `send_mail`"
 msgstr "дополнительные именованные аргументы для `send_mail`."
 
 #: of vstutils.utils.send_template_email_handler:16
-msgid ":py:class:`typing.SupportsInt`"
-msgstr ""
-
-#: of vstutils.utils.send_template_email_handler:17
 msgid "Number of emails sent."
 msgstr "Количество отправленных электронных писем."
 
@@ -4617,4 +4599,3 @@ msgid ""
 msgstr ""
 "Использует функцию :func:`django.utils.translation.get_language` для "
 "получения кода языка и пытается получить перевод из списка доступных."
-

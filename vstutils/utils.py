@@ -44,7 +44,7 @@ ON_POSIX = 'posix' in sys.builtin_module_names
 _gzip_object = GZipMiddleware(lambda *args, **kwargs: None)  # type: ignore
 
 
-def deprecated(func: tp.Callable):
+def deprecated(func):
     """
     This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
@@ -62,7 +62,7 @@ def deprecated(func: tp.Callable):
     return new_func
 
 
-def list_to_choices(items_list: tp.Iterable, response_type: tp.Callable = list) -> tp.Iterable[tp.Tuple[str, str]]:
+def list_to_choices(items_list, response_type=list):
     """
     Method to create django model choices from flat list of values.
 
@@ -89,7 +89,7 @@ def current_lang(lang=None):
         return Language.objects.all().first()
 
 
-def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
+def get_render(name, data, trans='en'):
     """
     Render string from template.
 
@@ -191,13 +191,13 @@ def send_mail(subject, message, from_email, recipient_list,  # noqa: CFQ002
 
 
 def send_template_email_handler(
-        subject: tp.Text,
-        email_from: tp.Text,
-        email: tp.Union[tp.List, tp.Text],
-        template_name: tp.Text,
-        context_data: tp.Optional[tp.Dict] = None,
+        subject,
+        email_from,
+        email,
+        template_name,
+        context_data=None,
         **kwargs,
-) -> tp.SupportsInt:
+):
     """
     Function for email sending.
     The function convert recipient to list and set context before sending if it possible.
@@ -233,7 +233,7 @@ def send_template_email_handler(
     )
 
 
-def send_template_email(sync: bool = False, **kwargs):
+def send_template_email(sync=False, **kwargs):
     """
     Function executing sync or async email sending; according `sync` argument and settings variable "RPC_ENABLED".
     If you don't set settings for celery or don't have celery it sends synchronously mail.
@@ -270,7 +270,7 @@ def patch_gzip_response_decorator(func):
     return gzip_response_wrapper
 
 
-def translate(text: tp.Text) -> tp.Text:
+def translate(text):
     """
     The ``translate`` function supports translation message dynamically
     with standard i18n vstutils'es mechanisms usage.
@@ -286,7 +286,7 @@ def translate(text: tp.Text) -> tp.Text:
         return text
 
 
-def lazy_translate(text: tp.Text) -> str:
+def lazy_translate(text):
     """
     The ``lazy_translate`` function has the same behavior as :func:`.translate`, but wraps it in a lazy promise.
 
@@ -376,7 +376,7 @@ class ClassPropertyDescriptor:
 
     meta = ClassPropertyMeta
 
-    def __init__(self, fget: tp.Callable, fset: tp.Optional[tp.Callable] = None):
+    def __init__(self, fget, fset=None):
         self.fget, self.fset = self._fix_function(fget), self._fix_function(fset)
 
     def __get__(self, obj, klass=None):
@@ -384,14 +384,14 @@ class ClassPropertyDescriptor:
             return self.fget.__get__(obj, obj)()
         return self.fget.__get__(obj, type(obj) if klass is None else klass)()
 
-    def __set__(self, obj: tp.Any, value: tp.Any):
+    def __set__(self, obj, value):
         if not self.fset:
             raise AttributeError("can't set attribute")
         if obj is not None:
             return self.fset.__get__(obj, obj)(value)
         return self.fset.__get__(obj, type(obj))(value)  # nocv
 
-    def setter(self, func: tp.Union[tp.Callable, classmethod]):
+    def setter(self, func):
         self.fset = self._fix_function(func)
         return self
 
@@ -442,7 +442,7 @@ class redirect_stdany:
     """
     __slots__ = ('stream', 'streams', '_old_streams')
 
-    _streams: tp.ClassVar[tp.List[tp.Text]] = ["stdout", "stderr"]
+    _streams = ["stdout", "stderr"]
 
     def __init__(self, new_stream=io.StringIO(), streams=None):
         """
@@ -497,14 +497,14 @@ class tmp_file:
     """
     __slots__ = ('fd', 'path')
 
-    def __init__(self, data: tp.Text = "", mode: tp.Text = "w", bufsize: int = -1, **kwargs):
+    def __init__(self, data="", mode="w", bufsize=-1, **kwargs):
         # pylint: disable=consider-using-with
         self.fd = tempfile.NamedTemporaryFile(mode, buffering=bufsize, **kwargs)
         self.path = Path(self.fd.name)
         if data:
             self.write(data)
 
-    def write(self, wr_string: tp.Text):
+    def write(self, wr_string):
         """
         Write to file and flush
 
@@ -517,7 +517,7 @@ class tmp_file:
         self.fd.flush()
         return result
 
-    def __getattr__(self, name: tp.Text):
+    def __getattr__(self, name):
         return getattr(self.fd, name)
 
     def __del__(self):
@@ -603,7 +603,7 @@ class raise_context(assertRaises):
 
     __slots__ = ()
 
-    def execute(self, func: tp.Callable, *args, **kwargs):
+    def execute(self, func, *args, **kwargs):
         self.cleanup_fails()
         with self.__class__(self._excepts, **self._kwargs):
             try:
@@ -619,7 +619,7 @@ class raise_context(assertRaises):
     def __enter__(self):
         return self.execute
 
-    def __call__(self, original_function: tp.Callable):
+    def __call__(self, original_function):
         def wrapper(*args, **kwargs):
             return self.execute(original_function, *args, **kwargs)
         return wrapper
@@ -655,7 +655,7 @@ class raise_context_decorator_with_default(raise_context):
         self.default_value = kwargs.pop('default', None)
         super().__init__(*args, **kwargs)
 
-    def execute(self, func: tp.Callable, *args, **kwargs):
+    def execute(self, func, *args, **kwargs):
         result = super().execute(func, *args, **kwargs)
         if self.is_failed:
             return self.default_value
@@ -681,7 +681,7 @@ class BaseVstObject:
     __slots__ = ()
 
     @classmethod
-    def get_django_settings(cls, name: tp.Text, default: tp.Any = None):
+    def get_django_settings(cls, name, default=None):
         # pylint: disable=access-member-before-definition
         """
         Get params from Django settings.
@@ -695,7 +695,7 @@ class BaseVstObject:
         return getattr(settings, name, default)
 
     @classmethod
-    def get_django_cache(cls, cache_name: tp.Text = 'default'):
+    def get_django_cache(cls, cache_name='default'):
         try:
             return caches[cache_name]
         except InvalidCacheBackendError:  # nocv
@@ -731,7 +731,7 @@ class SecurePickling(BaseVstObject):
     """
     __slots__ = ('secure_key',)
 
-    def __init__(self, secure_key: tp.Optional[tp.Text] = None):
+    def __init__(self, secure_key=None):
         """
         :param secure_key: Secret key for encoding.
         """
@@ -739,16 +739,16 @@ class SecurePickling(BaseVstObject):
             secure_key = self.get_django_settings('SECRET_KEY')
         self.secure_key = str(secure_key)
 
-    def _encode(self, value: tp.Text):
+    def _encode(self, value):
         return encode(self.secure_key, value)
 
-    def _decode(self, value: tp.Text):
+    def _decode(self, value):
         return decode(self.secure_key, value)
 
-    def loads(self, value: tp.Any):
+    def loads(self, value):
         return pickle.loads(codecs.decode(self._decode(value).encode(), "base64"))  # nosec
 
-    def dumps(self, value: tp.Any):
+    def dumps(self, value):
         return self._encode(codecs.encode(pickle.dumps(value), "base64").decode())
 
 
@@ -765,17 +765,17 @@ class Executor(BaseVstObject):
     """
     __slots__ = ('output', '__stdout__', '__stderr__', 'env')
 
-    CANCEL_PREFIX: tp.ClassVar[tp.Text] = "CANCEL_EXECUTE_"
-    STDOUT: tp.ClassVar[int] = subprocess.PIPE
-    STDERR: tp.ClassVar[int] = subprocess.STDOUT
-    DEVNULL: tp.ClassVar[int] = subprocess.DEVNULL
-    CalledProcessError: tp.ClassVar[tp.Type[subprocess.CalledProcessError]] = subprocess.CalledProcessError
+    CANCEL_PREFIX = "CANCEL_EXECUTE_"
+    STDOUT = subprocess.PIPE
+    STDERR = subprocess.STDOUT
+    DEVNULL = subprocess.DEVNULL
+    CalledProcessError = subprocess.CalledProcessError
     env: tp.Dict[str, str]
 
     def __init__(
             self,
-            stdout: tp.Union[tp.BinaryIO, int] = subprocess.PIPE,
-            stderr: tp.Union[tp.BinaryIO, int] = subprocess.STDOUT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             **environ_variables: str,
     ):
         self.output = ''
@@ -783,7 +783,7 @@ class Executor(BaseVstObject):
         self.__stderr__ = stderr
         self.env = environ_variables
 
-    def write_output(self, line: tp.Text) -> None:
+    def write_output(self, line) -> None:
         """
         :param line: -- line from command output
         :type line: str
@@ -801,7 +801,7 @@ class Executor(BaseVstObject):
         :type proc: asyncio.subprocess.Process
         """
 
-    async def line_handler(self, line: tp.Text) -> None:
+    async def line_handler(self, line) -> None:
         write_output = self.write_output
         if not asyncio.iscoroutinefunction(write_output):
             write_output = sync_to_async(write_output, thread_sensitive=True)
@@ -809,7 +809,7 @@ class Executor(BaseVstObject):
             with raise_context():
                 await write_output(line)
 
-    async def _handle_process(self, proc: asyncio.subprocess.Process, stream: tp.Text = 'stdout'):
+    async def _handle_process(self, proc: asyncio.subprocess.Process, stream='stdout'):
         stream_object: asyncio.StreamReader = getattr(proc, stream)
         working_handler = self.working_handler
         if not asyncio.iscoroutinefunction(working_handler):
@@ -820,7 +820,7 @@ class Executor(BaseVstObject):
             await working_handler(proc)
             await asyncio.sleep(0.01)
 
-    async def _unbuffered_read(self, proc: asyncio.subprocess.Process, stream: tp.Text = 'stdout'):
+    async def _unbuffered_read(self, proc: asyncio.subprocess.Process, stream='stdout'):
         async for line in getattr(proc, stream):
             await self.line_handler(line.decode('utf-8'))
 
@@ -873,7 +873,7 @@ class Executor(BaseVstObject):
                 return_code=return_code,
             )
 
-    async def pre_execute(self, cmd: tp.Iterable[tp.Text], cwd: tp.Union[tp.Text, Path], env: dict):
+    async def pre_execute(self, cmd, cwd, env):
         """
         Runs before execution starts.
 
@@ -882,7 +882,7 @@ class Executor(BaseVstObject):
         :param env: -- extra environment variables which overrides defaults
         """
 
-    async def post_execute(self, cmd: tp.Iterable[tp.Text], cwd: tp.Union[tp.Text, Path], env: dict, return_code: int):
+    async def post_execute(self, cmd, cwd, env, return_code):
         """
         Runs after execution end.
 
@@ -892,7 +892,7 @@ class Executor(BaseVstObject):
         :param return_code: -- return code of executed process
         """
 
-    async def aexecute(self, cmd: tp.Iterable[tp.Text], cwd: tp.Union[tp.Text, Path], env: dict = None) -> tp.Text:
+    async def aexecute(self, cmd, cwd, env=None):
         """
         Executes commands and outputs its result. Asynchronous implementation.
 
@@ -904,7 +904,7 @@ class Executor(BaseVstObject):
         await self._run_subprocess(cmd, cwd, env)
         return self.output
 
-    def execute(self, cmd: tp.Iterable[tp.Text], cwd: tp.Union[tp.Text, Path], env: dict = None) -> tp.Text:
+    def execute(self, cmd, cwd, env=None):
         """
         Executes commands and outputs its result.
 
@@ -930,7 +930,7 @@ class KVExchanger(BaseVstObject):
     services. Uses same cache-backend as Lock.
     """
     __slots__ = ('key', 'timeout', '__djangocache__')
-    TIMEOUT: tp.ClassVar[int] = 60
+    TIMEOUT = 60
     __djangocache__: tp.Any
 
     @classproperty
@@ -1015,9 +1015,9 @@ class Lock(KVExchanger):
 
     """
     __slots__ = ('id', 'payload_data')
-    TIMEOUT: tp.ClassVar[int] = 60 * 60 * 24
-    GLOBAL: tp.ClassVar[tp.Text] = "global-deploy"
-    SCHEDULER: tp.ClassVar[tp.Text] = "celery-beat"
+    TIMEOUT = 60 * 60 * 24
+    GLOBAL = "global-deploy"
+    SCHEDULER = "celery-beat"
 
     class AcquireLockException(Exception):
         """ Exception which will be raised on unreleased lock. """
@@ -1168,14 +1168,14 @@ class ObjectHandlers(BaseVstObject):
 
     __slots__ = ('type', 'err_message', '__list__', '__loaded_backends__')
 
-    type: tp.Text
-    err_message: tp.Optional[tp.Text]
+    type: str
+    err_message: tp.Optional[str]
 
-    def __init__(self, type_name: tp.Text, err_message: tp.Optional[tp.Text] = None):
+    def __init__(self, type_name, err_message=None):
         self.type = type_name
         self.err_message = err_message
-        self.__list__: tp.Optional[tp.Dict[tp.Text, tp.Any]] = None
-        self.__loaded_backends__: tp.Dict[tp.Text, tp.Any] = {}
+        self.__list__ = None
+        self.__loaded_backends__ = {}
 
     @property
     def objects(self):
@@ -1187,7 +1187,7 @@ class ObjectHandlers(BaseVstObject):
     def __iter__(self):
         return iter(self.items())
 
-    def __getitem__(self, name: tp.Text) -> tp.Any:
+    def __getitem__(self, name):
         return self.backend(name)
 
     def __call__(self, name, obj):
@@ -1196,16 +1196,16 @@ class ObjectHandlers(BaseVstObject):
     def __dict__(self):  # pragma: no cover
         return self.items()
 
-    def keys(self) -> tp.Iterable[tp.Text]:
+    def keys(self):
         return self.objects.keys()
 
-    def values(self) -> tp.Iterable:  # pragma: no cover
+    def values(self):  # pragma: no cover
         return dict(self).values()
 
     def items(self):
         return self.objects.items()
 
-    def list(self) -> tp.Dict[tp.Text, tp.Dict[tp.Text, tp.Any]]:
+    def list(self):
         if self.__list__ is None:
             self.__list__ = self.get_django_settings(self.type, {})
         return self.__list__
@@ -1216,13 +1216,13 @@ class ObjectHandlers(BaseVstObject):
         self.__loaded_backends__[backend] = import_class(backend)
         return self.__loaded_backends__[backend]
 
-    def get_backend_data(self, name: tp.Text):
+    def get_backend_data(self, name):
         return self.list()[name]
 
-    def get_backend_handler_path(self, name: tp.Text):
+    def get_backend_handler_path(self, name):
         return self.get_backend_data(name).get('BACKEND', None)
 
-    def backend(self, name: tp.Text):
+    def backend(self, name):
         """
         Get backend class
 
@@ -1240,10 +1240,10 @@ class ObjectHandlers(BaseVstObject):
             msg = f"{name} ({self.err_message})" if self.err_message else name
             raise ex.UnknownTypeException(msg) from err
 
-    def opts(self, name: tp.Text):
+    def opts(self, name):
         return self.get_backend_data(name).get('OPTIONS', {})
 
-    def get_object(self, name: tp.Text, *args, **kwargs):
+    def get_object(self, name, *args, **kwargs):
         opts = self.opts(name)
         opts.update(kwargs)
         return self[name](*args, **opts)
@@ -1283,7 +1283,7 @@ class ModelHandlers(ObjectHandlers):
 
     __slots__ = ()
 
-    def get_object(self, name: tp.Text, obj) -> tp.Any:  # type: ignore
+    def get_object(self, name, obj):
         """
         :param name: -- string name of backend
         :param name: str
@@ -1312,13 +1312,13 @@ class URLHandlers(ObjectHandlers):
     """
     __slots__ = ('additional_handlers', '__handlers__', 'default_namespace')
 
-    settings_urls: tp.ClassVar[tp.List[tp.Text]] = [
+    settings_urls = [
         'LOGIN_URL',
         'LOGOUT_URL'
     ]
     additional_handlers: tp.List[tp.Text]
 
-    def __init__(self, type_name: tp.Text = 'URLS', *args, **kwargs):
+    def __init__(self, type_name='URLS', *args, **kwargs):
         self.additional_handlers = kwargs.pop('additional_handlers', ['VIEWS']) + [type_name]
         self.default_namespace = kwargs.pop('namespace', None)
         self.__handlers__ = None
@@ -1330,7 +1330,7 @@ class URLHandlers(ObjectHandlers):
             self.__handlers__ = tuple(map(self.__class__, self.additional_handlers))
         return self.__handlers__
 
-    def get_backend_data(self, name: tp.Text):
+    def get_backend_data(self, name):
         data = super().get_backend_data(name)
         if isinstance(data, str):
             for handler in self.view_handlers:
@@ -1341,7 +1341,7 @@ class URLHandlers(ObjectHandlers):
             raise ex.VSTUtilsException(f'Invalid handler name "{data}"')  # nocv
         return data
 
-    def get_object(self, name: tp.Text, *argv, **kwargs):
+    def get_object(self, name, *argv, **kwargs):
         """
         Get url object tuple for urls.py
 
@@ -1362,7 +1362,7 @@ class URLHandlers(ObjectHandlers):
             regexp = f'{self.get_django_settings(regexp)[1:]}'
         view_class = self[name]
         namespace = view_kwargs.pop('namespace', self.default_namespace)
-        result: tp.Union[tp.Tuple, types.ModuleType]
+        result: tp.Union[tuple, types.ModuleType]
 
         if any(s in regexp for s in (r'^', r'$', r'(', r'?')):
             path_handler = re_path
@@ -1383,7 +1383,7 @@ class URLHandlers(ObjectHandlers):
             result = (view_class, 'gui')
         return path_handler(regexp, include(result, namespace=namespace), *args, **view_kwargs)
 
-    def urls(self) -> tp.Iterable:
+    def urls(self):
         for regexp in self.list():
             yield self.get_object(regexp)
 

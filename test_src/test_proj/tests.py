@@ -66,7 +66,8 @@ from vstutils.tests import BaseTestCase, json, override_settings
 from vstutils.tools import get_file_value
 from vstutils.urls import router
 from vstutils.api import serializers, fields
-from vstutils.utils import SecurePickling, BaseEnum, get_render
+from vstutils.api.filter_backends import VSTFilterBackend
+from vstutils.utils import SecurePickling, BaseEnum, get_render, create_view
 from vstutils.api.validators import resize_image
 
 from .models import (
@@ -5888,3 +5889,51 @@ class TasksTestCase(BaseTestCase):
 
         with utils.Lock(f'uniq-celery-task-{InheritNonUniqCreateHostTask().name}'):
             InheritNonUniqCreateHostTask.do(name='testlock123')
+
+
+class CreateViewTestCase(BaseTestCase):
+    def test_override_attribute(self):
+        # create view without overrides
+        HostView = create_view(Host)
+        self.assertGreater(len(HostView.authentication_classes), 0)
+        self.assertGreater(len(HostView.permission_classes), 0)
+        self.assertGreater(len(HostView.throttle_classes), 0)
+        self.assertGreater(len(HostView.renderer_classes), 0)
+        self.assertGreater(len(HostView.parser_classes), 0)
+
+        # override everything to empty
+        HostView = create_view(
+            Host,
+            filter_backends=(),
+            override_filter_backends=True,
+            permission_classes=(),
+            override_permission_classes=True,
+            throttle_classes=(),
+            override_throttle_classes=True,
+            renderer_classes=(),
+            override_renderer_classes=True,
+            parser_classes=(),
+            override_parser_classes=True,
+        )
+        self.assertEqual(tuple(HostView.filter_backends), ())
+        self.assertEqual(tuple(HostView.permission_classes), ())
+        self.assertEqual(tuple(HostView.throttle_classes), ())
+        self.assertEqual(tuple(HostView.renderer_classes), ())
+        self.assertEqual(tuple(HostView.parser_classes), ())
+
+        # append filter_backends
+        HostView = create_view(
+            Host,
+            filter_backends=(VSTFilterBackend,),
+        )
+        filter_backends = tuple(HostView.filter_backends)
+        self.assertGreater(len(filter_backends), 1)
+        self.assertIn(VSTFilterBackend, filter_backends)
+
+        # override filter_backends to non-empty
+        HostView = create_view(
+            Host,
+            filter_backends=(VSTFilterBackend,),
+            override_filter_backends=True,
+        )
+        self.assertEqual(tuple(HostView.filter_backends), (VSTFilterBackend,))
