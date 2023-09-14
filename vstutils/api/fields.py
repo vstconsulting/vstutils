@@ -757,7 +757,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
                 self.fail('missing key', missing_key=key)
 
     @raise_context_decorator_with_default(default=DEFAULT_NAMED_FILE_DATA)
-    def to_representation(self, value) -> _t.Dict[_t.Text, _t.Optional[_t.Any]]:
+    def to_representation(self, value) -> _t.Dict[_t.Text, _t.Optional[_t.Any]]:  # type: ignore[override]
         if self.file:
             return {'content': value.url, 'name': value.name, 'mediaType': ''}
         else:
@@ -885,7 +885,7 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
         return self.to_internal_value(data)
 
     @raise_context_decorator_with_default(default=[])
-    def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:
+    def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:  # type: ignore[override]
         if self.file:
             return [
                 {'content': file.url, 'name': file.name, 'mediaType': ''}

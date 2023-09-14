@@ -105,6 +105,7 @@ exclude_lines = [
     'noprj',
     'noce',
     'raise NotImplementedError',
+    'if _t.TYPE_CHECKING:',
 ]
 
 [tool.bandit]

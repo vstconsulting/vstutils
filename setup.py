@@ -29,6 +29,7 @@ elif os.environ.get('BUILD_OPTIMIZATION', 'false') == 'true':
         'vstutils.environment',
         'vstutils.middleware',
         'vstutils.tasks',
+        'vstutils.utils',
         'vstutils.tools',
     ]
 

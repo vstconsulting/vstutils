@@ -4,7 +4,7 @@ from copy import copy
 from warnings import warn
 
 from django.http import FileResponse
-from rest_framework import status, serializers
+from rest_framework import status, serializers, views
 from drf_yasg.inspectors.view import SwaggerAutoSchema
 from drf_yasg.app_settings import swagger_settings
 from drf_yasg.openapi import Schema, Response, Operation, Parameter, IN_HEADER, TYPE_STRING
@@ -14,6 +14,9 @@ from ...models.base import get_proxy_labels
 from ..decorators import NestedWithAppendMixin
 from ..base import detail_actions, main_actions, CachableHeadMixin
 from . import inspectors as vst_inspectors
+
+if _t.TYPE_CHECKING:
+    View = _t.Type[views.APIView]
 
 
 class ExtendedSwaggerAutoSchema(SwaggerAutoSchema):
@@ -104,7 +107,7 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
         self._sch.view = args[0]
         self.request._schema = self
 
-    def _get_nested_view_class(self, nested_view, view_action_func):
+    def _get_nested_view_class(self, nested_view: 'View', view_action_func):
         # pylint: disable=protected-access
         if not hasattr(view_action_func, '_nested_name'):
             return nested_view
@@ -126,10 +129,10 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
 
         return self._get_nested_view_class(nested_view_class, view_action_func)
 
-    def __get_nested_view_obj(self, nested_view, view_action_func):
+    def __get_nested_view_obj(self, nested_view: 'View', view_action_func):
         # pylint: disable=protected-access
         # Get nested view recursively
-        nested_view = utils.get_if_lazy(self._get_nested_view_class(nested_view, view_action_func))
+        nested_view: 'View' = utils.get_if_lazy(self._get_nested_view_class(nested_view, view_action_func))
         # Get action suffix
         replace_pattern = view_action_func._nested_subname + '_'
         replace_index = self.view.action.index(replace_pattern) + len(replace_pattern)
