@@ -226,7 +226,7 @@ class BaseTestCase(TestCase):
         )
 
         if isinstance(model, str):
-            for handler in map(raise_context_decorator_with_default(default=None), handlers):  # type: ignore
+            for handler in map(raise_context_decorator_with_default(default=None), handlers):
                 result = handler(model)
                 if result:
                     model = result

@@ -13,6 +13,7 @@ include vstutils/api/routers.pyi
 include vstutils/api/responses.pyi
 include vstutils/api/decorators.pyi
 include vstutils/auth.pyi
+include vstutils/utils.pyi
 include vstutils/environment.pyi
 include vstutils/models/custom_model.pyi
 include vstutils/py.typed
