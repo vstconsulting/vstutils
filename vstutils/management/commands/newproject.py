@@ -1,3 +1,4 @@
+import typing as _t
 import os
 from pathlib import Path
 
@@ -11,7 +12,7 @@ class Command(BaseCommand):
     help = "Creates new project with all needed for build application."
     default_help = 'Specify the {} of project'
 
-    _values_parser = {
+    _values_parser: _t.Dict[str, _t.Dict[str, _t.Any]] = {
         "name": {'required': True},
         "dir": {'help': 'Specify the directory where project will be.', 'default': './'},
         "guiname": {'default': ''}
@@ -56,7 +57,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         super().add_arguments(parser)
         for name, data in self._values_parser.items():
-            kwargs: dict = dict(**data)
+            kwargs: dict = {**data}
             if not kwargs.get('help', None):
                 kwargs['help'] = self.default_help.format(name)
             parser.add_argument(
@@ -93,7 +94,7 @@ class Command(BaseCommand):
     def allow_create(self, path):
         root_dir_path = self.get_path(*path) if not isinstance(path, Path) else path
         if root_dir_path.exists() and len(list(root_dir_path.iterdir())) != 0:
-            raise Exception(f'{root_dir_path} is not empty')
+            raise IOError(f'{root_dir_path} is not empty')
 
     def recursive_create(self, root, node, node_chain=None):
         if node_chain is None:

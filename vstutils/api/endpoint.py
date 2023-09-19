@@ -74,7 +74,10 @@ def _iter_request(request, operation_handler, context):
     executor_class = _DummyExecutor
     if request.method not in ('POST', 'PUT'):
         executor_class = ThreadPoolExecutor if THREADS_COUNT else executor_class
-    handler = lambda o: operation_handler(o, context)
+
+    def handler(operation):
+        return operation_handler(operation, context)
+
     with executor_class(max_workers=THREADS_COUNT) as executor:
         for operation_result in executor.map(handler, _get_request_data(request.data)):
             yield operation_result
@@ -352,6 +355,9 @@ class EndpointViewSet(views.APIView):
     #: One operation serializer class.
     serializer_class: _t.ClassVar[_t.Type[OperationSerializer]] = OperationSerializer
 
+    class TransactionStop(Exception):
+        pass
+
     def get_client(self, request: BulkRequestType) -> BulkClient:
         """
         Returns test client and guarantees that if bulk request comes
@@ -398,9 +404,8 @@ class EndpointViewSet(views.APIView):
         (Eg. admins get full serialization, others get basic serialization)
         """
         assert self.serializer_class is not None, (
-            "'%s' should either include a `serializer_class` attribute, "
+            f"'{self.__class__.__name__}' should either include a `serializer_class` attribute, "
             "or override the `get_serializer_class()` method."
-            % self.__class__.__name__
         )
 
         return self.serializer_class
@@ -476,7 +481,7 @@ class EndpointViewSet(views.APIView):
             append_to_list(self.results, result)
             append_to_list(timings, timing)
             if not allow_fail and not (100 <= result.get('status', 500) < 400):
-                raise Exception(f'Execute transaction stopped. Error message: {str(result)}')
+                raise self.TransactionStop(f'Execute transaction stopped. Error message: {str(result)}')
         response = responses.HTTP_200_OK(self.results, timings={f'op{i}': float(j) for i, j in enumerate(timings)})
         for cookie_name, cookie_value in context['client'].cookies.items():  # type: ignore
             if cookie_value.value != request.COOKIES.get(cookie_name, None):

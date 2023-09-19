@@ -30,7 +30,7 @@ class IniTag(template.Node):
 
         if len(bits) < 2:  # nocv
             raise template.TemplateSyntaxError(
-                "'%s' takes at least one argument (dict with empty sections)" % bits[0])
+                f"'{bits[0]}' takes at least one argument (dict with empty sections)")
 
         return cls(parser.compile_filter(bits[1]))
 

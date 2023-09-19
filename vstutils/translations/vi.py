@@ -1,4 +1,5 @@
 # flake8: noqa: E501
+# pylint: disable=invalid-character-zero-width-space
 TRANSLATION = {
     'new': 'Mới',
     'Create': 'Tạo',

@@ -3,7 +3,6 @@ from pathlib import Path
 from logging import getLogger
 
 from orjson import loads
-from configparserc.tools import File
 from django.conf import settings
 from django.utils.functional import cached_property
 from vstutils.utils import StaticFilesHandlers
@@ -59,7 +58,7 @@ class WebpackJsonStaticObjectHandler(BaseStaticObjectHandler):
             }
 
     def get_static_files(self):
-        with File(self.json_file) as fd:
+        with open(self.json_file, encoding='utf-8') as fd:
             try:
                 return loads(fd.read())['entrypoints'][self.entrypoint_name]['assets']
             except:  # nocv

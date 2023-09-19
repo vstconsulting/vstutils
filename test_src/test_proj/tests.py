@@ -1647,6 +1647,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         expected['some_imagefield']['properties']['content']['minLength'] = from_api['some_imagefield']['properties']['content']['minLength'] = 7000
         expected['some_namedbinimage']['x-options'] = {'backgroundFillColor': 'pink'}
         expected['some_multiplenamedbinimage']['items']['x-options'] = {'backgroundFillColor': 'white'}
+        del expected['some_imagefield_qr_code_url']
         self.assertDictEqual(expected, from_api)
         # Test swagger ui
         client = self._login()
@@ -1832,6 +1833,16 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertDictEqual(
             api['definitions']['ModelWithBinaryFiles']['properties']['some_validatedmultiplenamedbinimage']['items']['x-validators'],
             img_res_validator_data
+        )
+
+        # Check property format for qrcode field
+        self.assertEqual(
+            api['definitions']['ModelWithBinaryFiles']['properties']['some_imagefield_qr_code_url']['type'],
+            'string',
+        )
+        self.assertEqual(
+            api['definitions']['ModelWithBinaryFiles']['properties']['some_imagefield_qr_code_url']['format'],
+            'qrcode',
         )
 
         # Check fields with uuid as fk
@@ -4705,6 +4716,10 @@ class ProjectTestCase(BaseTestCase):
             'mediaType': ''
         },
             results[1]['data']['some_imagefield'])
+        self.assertEqual(
+            f'https://{self.server_name}{instance.some_imagefield.url}',
+            results[1]['data']['some_imagefield_qr_code_url'],
+        )
         with open(os.path.join(DIR_PATH, 'cat.jpeg'), 'rb') as cat1:
             self.assertEqual(instance.some_filefield.file.read(), cat1.read())
 

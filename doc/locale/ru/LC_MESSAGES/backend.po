@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-14 05:05+0000\n"
+"POT-Creation-Date: 2023-09-19 05:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -813,11 +813,11 @@ msgstr ""
 #: vstutils.api.fields.FkModelField vstutils.api.fields.MaskedField
 #: vstutils.api.fields.MultipleNamedBinaryImageInJsonField
 #: vstutils.api.fields.NamedBinaryImageInJsonField
-#: vstutils.api.fields.RatingField vstutils.api.fields.RedirectFieldMixin
-#: vstutils.api.fields.RelatedListField vstutils.api.fields.SecretFileInString
-#: vstutils.api.fields.WYSIWYGField vstutils.api.filters.FkFilterHandler
-#: vstutils.api.filters.extra_filter vstutils.api.filters.name_filter
-#: vstutils.api.responses.BaseResponseClass
+#: vstutils.api.fields.QrCodeField vstutils.api.fields.RatingField
+#: vstutils.api.fields.RedirectFieldMixin vstutils.api.fields.RelatedListField
+#: vstutils.api.fields.SecretFileInString vstutils.api.fields.WYSIWYGField
+#: vstutils.api.filters.FkFilterHandler vstutils.api.filters.extra_filter
+#: vstutils.api.filters.name_filter vstutils.api.responses.BaseResponseClass
 #: vstutils.api.validators.FileMediaTypeValidator
 #: vstutils.api.validators.ImageBaseSizeValidator
 #: vstutils.api.validators.ImageHeightValidator
@@ -1250,11 +1250,11 @@ msgstr "атрибут связанного экземпляра модели с
 #: of vstutils.api.fields.DependFromFkField:15
 msgid ""
 "``field_attribute`` in related model must be "
-":class:`rest_framework.ChoicesField` or GUI will show field as simple "
-"text."
+":class:`rest_framework.fields.ChoicesField` or GUI will show field as "
+"simple text."
 msgstr ""
 "``field_attribute`` в связанной модели должно быть типа "
-":class:`rest_framework.ChoicesField`, иначе в графическом интерфейсе поле"
+":class:`rest_framework.fields.ChoicesField`, иначе в графическом интерфейсе поле"
 " будет отображаться как обычное текстовое."
 
 #: of vstutils.api.fields.DynamicJsonTypeField:1
@@ -1463,10 +1463,10 @@ msgstr ""
 #: vstutils.api.fields.RedirectIntegerField:4 vstutils.api.fields.UptimeField:4
 msgid ""
 "Effective only in GUI. Works similar to "
-":class:`rest_framework.IntegerField` in API."
+":class:`rest_framework.fields.IntegerField` in API."
 msgstr ""
 "Действует только в графическом интерфейсе. Работает аналогично "
-":class:`rest_framework.IntegerField` в API."
+":class:`rest_framework.fields.IntegerField` в API."
 
 #: of vstutils.api.fields.FkModelField:1
 msgid ""
@@ -1640,6 +1640,22 @@ msgid ""
 msgstr ""
 "Расширяет класс 'rest_framework.serializers.CharField'. Поле для ввода "
 "номера телефона в международном формате"
+
+#: of vstutils.api.fields.QrCodeField:1
+msgid ""
+"Simple string field. The field is going to represent as QrCode in user "
+"interface."
+msgstr ""
+"Простое строковое поле. В пользовательском интерфейсе оно будет "
+"отображено как QR-код."
+
+#: of vstutils.api.fields.QrCodeField:4
+msgid ""
+"original data field for serialization or deserialization. Default: "
+":class:`rest_framework.fields.CharField`"
+msgstr ""
+"поле для сериализации или десериализации оригинальных данных."
+"По умолчанию: :class:`rest_framework.fields.CharField`"
 
 #: of vstutils.api.fields.RatingField:1
 msgid ""
@@ -4599,3 +4615,4 @@ msgid ""
 msgstr ""
 "Использует функцию :func:`django.utils.translation.get_language` для "
 "получения кода языка и пытается получить перевод из списка доступных."
+

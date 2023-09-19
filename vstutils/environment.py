@@ -69,7 +69,7 @@ def get_celery_app(name=None, **kwargs):  # nocv
         content_type=ORJSONRenderer.media_type
     )
 
-    celery_app = Celery(name)
+    celery_app = Celery(name, task_cls='vstutils.tasks:TaskClass')
     celery_app.config_from_object('django.conf:settings', namespace='CELERY')
     celery_app.autodiscover_tasks()
     return celery_app

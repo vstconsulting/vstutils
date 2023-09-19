@@ -33,9 +33,9 @@ async def init(servers_list, fds, app):
     ]
     try:
         await server.serve(sockets=sockets)
-        uwsgi.log('uvicorn server stopped after {0} requests.'.format(server.server_state.total_requests))
+        uwsgi.log(f'uvicorn server stopped after {server.server_state.total_requests} requests.')
     except BaseException as exc:
-        uwsgi.log("uvicorn say: {0}".format(str(exc)))
+        uwsgi.log(f"uvicorn say: {str(exc)}")
         raise
     finally:
         for sock in sockets:
@@ -45,16 +45,16 @@ async def init(servers_list, fds, app):
 
 
 def destroy():
-    uwsgi.log("destroy worker {0}".format(uwsgi.worker_id()))
+    uwsgi.log(f"destroy worker {uwsgi.worker_id()}")
     for server in servers:
         server.handle_exit(sig=signal.SIGINT, frame=None)
     time.sleep(1)
-    uwsgi.log("exit worker {0}".format(uwsgi.worker_id()))
+    uwsgi.log(f"exit worker {uwsgi.worker_id()}")
     sys.exit(0)
 
 
 def graceful_reload():
-    uwsgi.log("graceful reload for worker {0}".format(uwsgi.worker_id()))
+    uwsgi.log(f"graceful reload for worker {uwsgi.worker_id()}")
     for server in servers:
         server.handle_exit(sig=signal.SIGTERM, frame=None)
     time.sleep(1)

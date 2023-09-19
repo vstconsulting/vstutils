@@ -1,6 +1,7 @@
 """
 Additional serializer fields for generating OpenAPI and GUI.
 """
+import inspect
 # pylint: disable=too-many-lines
 import logging
 import typing as _t
@@ -18,7 +19,7 @@ from django.apps import apps
 from django.db import models
 from django.utils.html import escape, strip_tags
 from django.utils.functional import SimpleLazyObject, lazy, cached_property
-from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.exceptions import ValidationError as DjangoValidationError, ImproperlyConfigured
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.fields.files import FieldFile
 
@@ -371,7 +372,7 @@ class DependFromFkField(DynamicJsonTypeField):
     :type field_attribute: str
 
     .. warning::
-        ``field_attribute`` in related model must be :class:`rest_framework.ChoicesField` or
+        ``field_attribute`` in related model must be :class:`rest_framework.fields.ChoicesField` or
         GUI will show field as simple text.
 
     """
@@ -444,6 +445,36 @@ class HtmlField(VSTCharField):
     """
 
 
+class QrCodeField(Field):
+    """
+    Simple string field.
+    The field is going to represent as QrCode in user interface.
+
+    :param child: original data field for serialization or deserialization.
+                  Default: :class:`rest_framework.fields.CharField`
+    :type child: rest_framework.fields.Field
+    """
+
+    child: Field = CharField(allow_blank=True, allow_null=True)
+
+    def __init__(self, **kwargs):
+        self.child = kwargs.pop('child', copy.deepcopy(self.child))
+        assert not inspect.isclass(self.child), '`child` has not been instantiated.'
+        assert self.child.source is None, (
+            "The `source` argument is not meaningful when applied to a `child=` field. "
+            "Remove `source=` from the field declaration."
+        )
+
+        super().__init__(**kwargs)
+        self.child.bind(field_name='', parent=self)
+
+    def to_representation(self, value):
+        return self.child.to_representation(value) if value is not None else None
+
+    def to_internal_value(self, data):
+        return self.child.to_internal_value(data)  # nocv
+
+
 class FkField(IntegerField):
     """
     Implementation of ForeignKeyField. You can specify which field of a related model will be
@@ -502,7 +533,7 @@ class FkField(IntegerField):
     .. note::
         Intersection of `dependence.values()` and `filters.keys()` will throw error to prevent ambiguous filtering.
     .. note::
-        Effective only in GUI. Works similar to :class:`rest_framework.IntegerField` in API.
+        Effective only in GUI. Works similar to :class:`rest_framework.fields.IntegerField` in API.
     """
 
     select_model: _t.Text
@@ -581,7 +612,7 @@ class FkModelField(FkField):
             self.model_class = select.Meta.model
             kwargs['select'] = getattr(select.Meta, 'ref_name', '') or select.__name__.replace('Serializer', '')
         else:  # nocv
-            raise Exception(
+            raise ImproperlyConfigured(
                 'Argument "select" must be '
                 'rest_framework.serializers.ModelSerializer or '
                 'vstutils.models.BModel subclass or '
@@ -649,7 +680,7 @@ class UptimeField(IntegerField):
     Time duration field, in seconds. May be used to compute some uptime.
 
     .. note::
-        Effective only in GUI. Works similar to :class:`rest_framework.IntegerField` in API.
+        Effective only in GUI. Works similar to :class:`rest_framework.fields.IntegerField` in API.
 
     """
 
@@ -680,7 +711,7 @@ class RedirectIntegerField(RedirectFieldMixin, IntegerField):
     Field for redirect by id. Often used in actions for redirect after execution.
 
     .. note::
-        Effective only in GUI. Works similar to :class:`rest_framework.IntegerField` in API.
+        Effective only in GUI. Works similar to :class:`rest_framework.fields.IntegerField` in API.
 
     """
 
@@ -690,7 +721,7 @@ class RedirectCharField(RedirectFieldMixin, CharField):
     Field for redirect by string. Often used in actions for redirect after execution.
 
     .. note::
-        Effective only in GUI. Works similar to :class:`rest_framework.IntegerField` in API.
+        Effective only in GUI. Works similar to :class:`rest_framework.fields.IntegerField` in API.
 
     """
 

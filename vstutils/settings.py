@@ -13,7 +13,7 @@ import rest_framework
 import orjson
 import ormsgpack
 
-from configparserc import config as cconfig
+import configparserc as cconfig
 from .tools import get_file_value
 
 from . import __version__, __file__ as vstutils_file
@@ -122,7 +122,7 @@ class FloatType(cconfig.BaseType):
 
 
 class LocationsType(cconfig.ListType):
-    def convert(self, value: _t.Any) -> _t.Union[_t.Iterable, _t.Text]:  # type: ignore
+    def convert(self, value: _t.Any) -> _t.Union[_t.Iterable, _t.Text]:
         result: _t.Iterable[_t.Text] = super().convert(value)
         if len(result) > 1:  # type: ignore
             return result
@@ -298,7 +298,7 @@ class CacheOptionsSection(BackendSection):
 
 
 class SentinelsSection(cconfig.Section):
-    def all(self) -> _t.List[_t.Tuple[_t.Text, _t.SupportsInt]]:  # type: ignore
+    def all(self) -> _t.List[_t.Tuple[_t.Text, _t.SupportsInt]]:
         return list((k, int(v)) for k, v in super().all().items())
 
 
@@ -831,8 +831,8 @@ ASGI_APPLICATION: _t.Text = f'{ASGI}.application'
 
 uwsgi_settings: cconfig.Section = config['uwsgi']
 WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)
-WEB_DAEMON_LOGFILE: _t.Text = uwsgi_settings.get('log_file', fallback='/dev/null')  # type: ignore
-WEB_ADDRPORT: _t.Text = uwsgi_settings.get('addrport', fallback=':8080')  # type: ignore
+WEB_DAEMON_LOGFILE: _t.Text = uwsgi_settings.get('log_file', fallback='/dev/null')
+WEB_ADDRPORT: _t.Text = uwsgi_settings.get('addrport', fallback=':8080')
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = web['request_max_size']
 X_FRAME_OPTIONS = web['x_frame_options']

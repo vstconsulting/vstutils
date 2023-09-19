@@ -43,7 +43,7 @@ class TranslateTag(template.Node):
 
         if len(bits) < 2:
             raise template.TemplateSyntaxError(
-                "'%s' takes at least one argument (phrase to translate)" % bits[0])  # nocv
+                f"'{bits[0]}' takes at least one argument (phrase to translate)")  # nocv
 
         return cls(parser.compile_filter(bits[1]), bits[2:])
 
