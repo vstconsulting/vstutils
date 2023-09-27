@@ -44,7 +44,7 @@ export {
 };
 
 import { PasswordField } from './password';
-import { QRCodeField } from './qr';
+import { QRCodeField, Barcode128Field } from './barcode';
 import { EmailField } from './email.js';
 import { ColorField } from './color.js';
 import { CrontabField } from './crontab';
@@ -70,10 +70,11 @@ export function addDefaultFields(fieldsResolver: FieldsResolver) {
     for (const [format, field] of [
         [FieldsResolver.DEFAULT_FIELD_KEY, text.StringField],
         ['autocomplete', AutocompleteField],
+        ['barcode128', Barcode128Field],
         ['binfile', files.binaryFile.BinaryFileField],
         ['choices', ChoicesField],
         ['color', ColorField], // CANT_CREATE_ON_BACKEND
-        ['crontab', CrontabField], // CANT_CREATE_ON_BACKEND
+        ['crontab', CrontabField],
         ['csvfile', files.csvFile.CsvFileField],
         ['date', datetime.DateField],
         ['date-time', datetime.DateTimeField],

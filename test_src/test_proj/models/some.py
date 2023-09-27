@@ -106,6 +106,7 @@ class ModelWithBinaryFiles(BModel):
             'some_multipleimage',
             'some_multiplefile_none',
             'some_imagefield_qr_code_url',
+            'some_barcode128',
         )
         _override_list_fields = dict(
             some_binfile=fields.BinFileInStringField(required=False, max_length=2*1024*1024, min_length=1),
@@ -114,7 +115,8 @@ class ModelWithBinaryFiles(BModel):
                 required=False,
                 validators=validators,
             ),
-            some_imagefield_qr_code_url=fields.QrCodeField(read_only=True, child=FileField(use_url=True), source='some_imagefield')
+            some_imagefield_qr_code_url=fields.QrCodeField(read_only=True, child=FileField(use_url=True), source='some_imagefield'),
+            some_barcode128=fields.Barcode128Field(source='some_imagefield', required=False),
         )
         _filterset_fields = {
             'some_binfile': CharFilter(label='Some label for binfile')

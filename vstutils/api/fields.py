@@ -22,6 +22,7 @@ from django.utils.functional import SimpleLazyObject, lazy, cached_property
 from django.core.exceptions import ValidationError as DjangoValidationError, ImproperlyConfigured
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.fields.files import FieldFile
+from vstutils.api.validators import ascii_string_validator
 
 from .renderers import ORJSONRenderer
 from ..models import fields as vst_model_fields
@@ -445,16 +446,7 @@ class HtmlField(VSTCharField):
     """
 
 
-class QrCodeField(Field):
-    """
-    Simple string field.
-    The field is going to represent as QrCode in user interface.
-
-    :param child: original data field for serialization or deserialization.
-                  Default: :class:`rest_framework.fields.CharField`
-    :type child: rest_framework.fields.Field
-    """
-
+class _BaseBarcodeField(Field):
     child: Field = CharField(allow_blank=True, allow_null=True)
 
     def __init__(self, **kwargs):
@@ -473,6 +465,32 @@ class QrCodeField(Field):
 
     def to_internal_value(self, data):
         return self.child.to_internal_value(data)  # nocv
+
+
+class QrCodeField(_BaseBarcodeField):
+    """
+    Simple string field.
+    The field is going to represent as QrCode in user interface.
+
+    :param child: original data field for serialization or deserialization.
+                  Default: :class:`rest_framework.fields.CharField`
+    :type child: rest_framework.fields.Field
+    """
+
+
+class Barcode128Field(_BaseBarcodeField):
+    """
+    Simple string field. Value must always be a valid ASCII-string.
+    The field is going to represent as Barcode (Code 128) in user interface.
+
+    :param child: original data field for serialization or deserialization.
+                  Default: :class:`rest_framework.fields.CharField`
+    :type child: rest_framework.fields.Field
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.validators.append(ascii_string_validator)
 
 
 class FkField(IntegerField):

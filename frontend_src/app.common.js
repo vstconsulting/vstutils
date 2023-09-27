@@ -61,6 +61,7 @@ import * as store from './vstutils/store';
 import * as router from './vstutils/router';
 import * as api from './vstutils/api';
 import * as users from './vstutils/users';
+import './vstutils/local-settings';
 
 export * from './vstutils/ComponentsRegistrator.js';
 export * from './vstutils/AppConfiguration.ts';

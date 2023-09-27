@@ -42,6 +42,7 @@ FORMAT_DEEP_FK = 'deep_fk'
 FORMAT_WYSIWYG = 'wysiwyg'
 FORMAT_CRONTAB = 'crontab'
 FORMAT_QRCODE = 'qrcode'
+FORMAT_BARCODE128 = 'barcode128'
 
 X_OPTIONS = 'x-options'
 
@@ -94,6 +95,10 @@ basic_type_info[fields.CrontabField] = {
 basic_type_info[fields.QrCodeField] = {
     'type': openapi.TYPE_STRING,
     'format': FORMAT_QRCODE,
+}
+basic_type_info[fields.Barcode128Field] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_BARCODE128,
 }
 
 

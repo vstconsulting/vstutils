@@ -1,0 +1,85 @@
+{
+    "definitions": {
+        "SomeModel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "qrcode": {
+                    "type": "string",
+                    "format": "qrcode"
+                },
+                "barcode128": {
+                    "type": "string",
+                    "format": "barcode128"
+                }
+            }
+        }
+    },
+    "paths": {
+        "/some/": {
+            "get": {
+                "operationId": "some_list",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": { "$ref": "#/definitions/SomeModel" }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "parameters": []
+        },
+        "/some/{id}/": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path"
+                }
+            ],
+            "get": {
+                "operationId": "some_get",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": { "$ref": "#/definitions/SomeModel" }
+                    }
+                }
+            },
+            "put": {
+                "operationId": "some_update",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "data",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SomeModel" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": { "$ref": "#/definitions/SomeModel" }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -104,6 +104,13 @@ def resize_image(img, width, height):
     })
 
 
+def ascii_string_validator(value: str):
+    try:
+        value.encode('ascii', errors='strict')
+    except ValueError as exc:
+        raise serializers.ValidationError(translate('"{}" is not a valid ASCII string.')) from exc
+
+
 class RegularExpressionValidator:
     """
     Class for regular expression based validation
