@@ -28,7 +28,6 @@ elif os.environ.get('BUILD_OPTIMIZATION', 'false') == 'true':
         'vstutils.celery_beat_scheduler',
         'vstutils.environment',
         'vstutils.middleware',
-        'vstutils.tasks',
         'vstutils.utils',
         'vstutils.tools',
     ]
