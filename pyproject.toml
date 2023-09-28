@@ -149,5 +149,6 @@ module = [
     "environ.*",
     "ruamel.*",
     "mysql.*",
+    "configparserc.*",
 ]
 ignore_missing_imports = true

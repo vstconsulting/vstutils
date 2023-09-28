@@ -1,16 +1,18 @@
 import typing as _t
 import warnings
+import contextlib
 
-from django.utils.encoding import force_str
 from django.db import models
-from drf_yasg import openapi
-from rest_framework.serializers import Serializer
-from rest_framework.filters import BaseFilterBackend, OrderingFilter
-from django_filters.rest_framework.backends import DjangoFilterBackend as BaseDjangoFilterBackend
+from django.utils.encoding import force_str
 from django_filters import filters, filterset
-from vstutils.utils import raise_context, translate as _
+from django_filters.rest_framework.backends import DjangoFilterBackend as BaseDjangoFilterBackend
+from drf_yasg import openapi
+from rest_framework.filters import BaseFilterBackend, OrderingFilter
+from rest_framework.serializers import Serializer
 
 from .filters import extra_filter
+from .fields import FkField, RelatedListField
+from ..utils import translate as _
 
 
 def get_serializer_readable_fields(serializer):
@@ -70,7 +72,7 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
         except Exception:  # nocv
             queryset = None
             warnings.warn(
-                "{} is not compatible with schema generation".format(view.__class__),
+                f"{view.__class__} is not compatible with schema generation",
                 stacklevel=2,
             )
 
@@ -217,6 +219,15 @@ class HideHiddenFilterBackend(VSTFilterBackend):
         return getattr(queryset, 'cleared', queryset.all)()
 
 
+def _get_fields_mapping(serializer, readable_fields, field_types):
+    for m_field in filter(lambda f: isinstance(f, field_types), serializer.Meta.model()._meta.get_fields()):
+        for r_field in readable_fields:
+            if (r_field.source and r_field.source == m_field.name) or (r_field.field_name == m_field.name):
+                yield m_field, r_field
+            elif isinstance(r_field, RelatedListField) and r_field.related_name == m_field.name:
+                yield m_field, r_field
+
+
 class SelectRelatedFilterBackend(VSTFilterBackend):
     """
     Filter Backend that will automatically call prefetch_related and select_related on all relations in queryset.
@@ -227,14 +238,37 @@ class SelectRelatedFilterBackend(VSTFilterBackend):
         'prefetch': (models.ManyToManyField, models.ManyToManyField.rel_class)
     }
 
-    def filter_model_fields(self, view, field_types):
-        serializer = view.get_serializer_class()()
-        readable_fields = get_serializer_readable_fields(serializer)
-        return tuple(
-            f.name
-            for f in serializer.Meta.model()._meta.fields
-            if isinstance(f, field_types) and f.name in readable_fields
+    def filter_model_fields(self, view, field_types, filter_type):
+        # pylint: disable=protected-access
+        fields = _get_fields_mapping(
+            serializer := view.get_serializer_class()(),
+            tuple(serializer._readable_fields),
+            field_types,
         )
+
+        if filter_type == 'select':
+            return {f[0] for f in fields}
+
+        prefetches = []
+        for m_field, s_field in fields:
+            if s_field.__class__ in {FkField}:
+                continue  # nocv
+            if isinstance(s_field, RelatedListField):
+                related_model_fields = tuple(f.name for f in m_field.related_model._meta.get_fields())
+                prefetches.append(
+                    models.Prefetch(
+                        m_field.name,
+                        queryset=m_field.related_model._default_manager.only(
+                            *[
+                                f.source if f.source and f.source in related_model_fields else f.field_name
+                                for f in s_field.serializer_class()._readable_fields
+                            ]
+                        ),
+                    )
+                )
+            else:
+                prefetches.append(m_field.name)  # nocv
+        return prefetches
 
     def filter_by_func(self, queryset, queryset_func_name, related):
         if related:
@@ -242,11 +276,15 @@ class SelectRelatedFilterBackend(VSTFilterBackend):
         return queryset
 
     def prefetch(self, queryset_func_name, view, queryset):
-        with raise_context():
+        with contextlib.suppress(BaseException):
             queryset = self.filter_by_func(
                 queryset,
                 f'{queryset_func_name}_related',
-                self.filter_model_fields(view, self.fields_fetch_map[queryset_func_name])
+                self.filter_model_fields(
+                    view,
+                    self.fields_fetch_map[queryset_func_name],
+                    filter_type=queryset_func_name,
+                )
             )
         return queryset
 

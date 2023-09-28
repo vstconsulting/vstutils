@@ -17,7 +17,7 @@ from .utils import BaseVstObject
 
 
 logger = logging.getLogger(settings.VST_PROJECT)
-ResponseType = _t.TypeVar("ResponseType", bound=HttpResponse)
+ResponseType = _t.TypeVar("ResponseType", bound=HttpResponse)  # pylint: disable=invalid-name
 ResponseHandlerType = _t.Union[_t.Awaitable[ResponseType], ResponseType]
 
 

@@ -1,4 +1,4 @@
-# pylint: disable=unused-import
+# pylint: disable=unused-import,consider-using-f-string
 import typing as _t
 import random  # noqa: F401
 import string  # noqa: F401
@@ -12,6 +12,7 @@ import ormsgpack
 from django.apps import apps
 from django.http import StreamingHttpResponse
 from django.db import transaction, models as django_models
+from django.core.exceptions import BadRequest
 from django.urls import reverse
 from django.conf import settings
 from django.test import TestCase, override_settings  # noqa: F401
@@ -134,7 +135,7 @@ class BaseTestCase(TestCase):
             try:
                 if media_type in ('application/json', 'application/openapi+json'):
                     return json.loads(rendered_content)
-                raise Exception
+                raise BadRequest
             except:
                 return str(rendered_content)
         except ValueError:  # nocv

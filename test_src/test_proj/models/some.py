@@ -3,6 +3,7 @@ from io import BytesIO
 from PIL import Image
 from django_filters import CharFilter
 from django.db import models
+from rest_framework.fields import FileField
 
 from vstutils.api.base import EtagDependency
 from vstutils.api.fields import RelatedListField, RedirectIntegerField
@@ -90,6 +91,23 @@ class ModelWithBinaryFiles(BModel):
     class Meta:
         _view_field_name = 'some_namedbinfile'
         default_related_name = 'rel_model'
+        _list_fields = (
+            'some_binfile',
+            'some_namedbinfile',
+            'some_namedbinimage',
+            'some_validatednamedbinimage',
+            'some_multiplenamedbinfile',
+            'some_multiplenamedbinimage',
+            'some_validatedmultiplenamedbinimage',
+            'some_filefield',
+            'some_imagefield',
+            'some_FkModelfield',
+            'some_multiplefile',
+            'some_multipleimage',
+            'some_multiplefile_none',
+            'some_imagefield_qr_code_url',
+            'some_barcode128',
+        )
         _override_list_fields = dict(
             some_binfile=fields.BinFileInStringField(required=False, max_length=2*1024*1024, min_length=1),
             some_validatednamedbinimage=fields.NamedBinaryImageInJsonField(required=False, validators=validators),
@@ -97,6 +115,8 @@ class ModelWithBinaryFiles(BModel):
                 required=False,
                 validators=validators,
             ),
+            some_imagefield_qr_code_url=fields.QrCodeField(read_only=True, child=FileField(use_url=True), source='some_imagefield'),
+            some_barcode128=fields.Barcode128Field(source='some_imagefield', required=False),
         )
         _filterset_fields = {
             'some_binfile': CharFilter(label='Some label for binfile')
@@ -143,7 +163,7 @@ class ModelForCheckFileAndImageField(BModel):
                 fields_custom_handlers={
                     'some_binfile': bin_file_handler
                 }
-            )
+            ),
         }
 
 
@@ -164,7 +184,7 @@ class OverridenModelWithBinaryFiles(ModelWithBinaryFiles):
                 validators=validators,
             ),
             some_filefield=fields.NamedBinaryFileInJsonField(required=False, file=True, allow_null=True, max_length=100, max_content_size=10000),
-            some_imagefield=fields.NamedBinaryImageInJsonField(required=False, file=True, allow_null=True, max_length=100, min_content_size=7000)
+            some_imagefield=fields.NamedBinaryImageInJsonField(required=False, file=True, allow_null=True, max_length=100, min_content_size=7000),
         )
         _filterset_fields = {
             'some_binfile': CharFilter(label='Some label for binfile')

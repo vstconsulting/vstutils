@@ -1,7 +1,7 @@
 from typing import Dict, Tuple, ClassVar, Callable
 from functools import wraps
 
-from django.db import connections
+from django.db import connections, DatabaseError
 from rest_framework import status as st, request as req
 
 from ..utils import BaseVstObject, import_class
@@ -58,7 +58,7 @@ class DefaultBackend(BaseBackend):
         for db_name in self.get_django_settings('DATABASES', {}).keys():
             connections[db_name].ensure_connection()
             if not connections[db_name].is_usable():
-                raise Exception(f'Database {db_name} is not usable.')  # nocv
+                raise DatabaseError(f'Database {db_name} is not usable.')  # nocv
             with connections[db_name].cursor() as cursor:
                 cursor.execute(self.db_check_sql)
                 cursor.fetchall()

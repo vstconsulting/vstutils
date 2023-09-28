@@ -1,4 +1,5 @@
 # flake8: noqa: E501
+# pylint: disable=invalid-character-zero-width-space
 TRANSLATION = {
     'new': 'Mới',
     'Create': 'Tạo',
@@ -220,6 +221,7 @@ TRANSLATION = {
     'Max length: {0}': 'Độ dài tối đa: {0}',
     'Minimum filename length: {0}': 'Độ dài tên tệp tối thiểu: {0}',
     'Maximum filename length: {0}': 'Độ dài tên tệp tối đa: {0}',
+    '"{}" is not a valid ASCII string.': '"{}" không phải là chuỗi ASCII hợp lệ.',
 
     # instance operation success
     # add
@@ -251,6 +253,14 @@ TRANSLATION = {
     'Download with headers': 'Tải xuống với tiêu đề',
     'Changes you made may not be saved.': 'Những thay đổi bạn đã thực hiện có thể không được lưu.',
     'The data has been changed on the server. Do you want to overwrite it?': 'Dữ liệu đã được thay đổi trên máy chủ. Bạn có muốn ghi đè lên chúng?',
+
+    # barcode & scanner
+    'Select scanner camera at sidebar': 'Chọn camera quét ở thanh bên',
+    'Toggle camera': 'Chuyển đổi máy ảnh',
+    'Edit manually': 'Chỉnh sửa thủ công',
+    'Scanner camera': 'Máy quét',
+    'Not supported by this device': 'Không được thiết bị này hỗ trợ',
+    'Allow using camera in browser': 'Cho phép sử dụng máy ảnh trong trình duyệt',
 }
 
 SERVER_TRANSLATION = {

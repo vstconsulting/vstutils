@@ -220,6 +220,7 @@ TRANSLATION = {
     'Max length: {0}': 'Максимальная длина: {0}',
     'Minimum filename length: {0}': 'Минимальная длина имени файла: {0}',
     'Maximum filename length: {0}': 'Максимальная длина имени файла: {0}',
+    '"{}" is not a valid ASCII string.': '"{}" не является допустимой ASCII-строкой.',
 
     # instance operation success
     # add
@@ -250,6 +251,14 @@ TRANSLATION = {
     'Download with headers': 'Скачать с заголовками столбцов',
     'Changes you made may not be saved.': 'Внесенные изменения могут быть не сохранены.',
     'The data has been changed on the server. Do you want to overwrite it?': 'Данные были изменены на сервере. Вы хотите их перезаписать?',
+
+    # barcode & scanner
+    'Select scanner camera at sidebar': 'Выберете сканирующую камеру в боковой панели',
+    'Toggle camera': 'Включить/выключить камеру',
+    'Edit manually': 'Редактировать вручную',
+    'Scanner camera': 'Сканирующая камера',
+    'Not supported by this device': 'Не поддерживается текущим устройством',
+    'Allow using camera in browser': 'Разрешите использование камеры в браузере',
 }
 
 SERVER_TRANSLATION = {

@@ -66,8 +66,8 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
             return None  # nocv
         type_info.update({
             'description':
-                ('A unique {} value identifying '
-                 'instance of this {} sublist.').format(type_info['type'], query_name),
+                (f'A unique {type_info["type"]} value identifying '
+                 f'instance of this {query_name} sublist.'),
         })
         return type_info
 

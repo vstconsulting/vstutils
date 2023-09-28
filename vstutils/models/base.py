@@ -252,7 +252,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                     extra_metadata[extra_name[1:]] = getattr(meta, extra_name)
         attrs['__extra_metadata__'] = deepcopy(extra_metadata)
         model_class = super(ModelBaseClass, mcs).__new__(mcs, name, bases, attrs, **kwargs)
-        model_class.OriginalMeta = meta if meta is not None else model_class.Meta
+        model_class.OriginalMeta = meta if meta is not None else model_class.Meta  # pylint: disable=invalid-name
         if hasattr(model_class, '__prepare_model__'):
             model_class.__prepare_model__()
         if getattr(model_class, '_cache_responses', False):
@@ -383,7 +383,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         translate_model = getattr(cls, '_translate_model', None)
 
         if properties_groups:
-            attributes['_schema_properties_groups'] = dict(**properties_groups)
+            attributes['_schema_properties_groups'] = {**properties_groups}
 
         if non_bulk_methods:
             attributes['_non_bulk_methods'] = non_bulk_methods
@@ -496,9 +496,9 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             if not filter_base_classes:
                 filter_base_classes.append(filters.FilterSet)
 
-            iteration_filter_handler = (
-                lambda f: f.name not in filterset_fields_types and f.name in filterset_fields_list
-            )
+            def iteration_filter_handler(field_object):
+                return field_object.name not in filterset_fields_types and field_object.name in filterset_fields_list
+
             serializer = serializers['serializer_class']()
             for field_name, field in cls.get_model_fields_mapping(iteration_filter_handler).items():
                 if isinstance(field, ForeignKey):

@@ -75,7 +75,7 @@ class VSTOpenApiBase(Directive):
         self.paths = spec[self.path_path]
         self.definitions = spec[self.models_path]
         self.openapi_version = spec.get('swagger', None) or spec['openapi']
-        self.options.setdefault('uri', 'file://%s' % abspath)
+        self.options.setdefault('uri', f'file://{abspath}')
 
     def write(self, value, indent_depth=0):
         """

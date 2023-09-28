@@ -1,6 +1,7 @@
 # pylint: disable=no-member,redefined-outer-name,unused-argument
 from django.urls.conf import include, re_path, path
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from rest_framework import routers, permissions, versioning
 
 from . import responses
@@ -100,7 +101,7 @@ class _AbstractRouter(routers.DefaultRouter):
             elif view_type == 'view':  # nocv
                 self.register_view(*args)
             else:  # nocv
-                raise Exception('Unknown type of view')
+                raise ImproperlyConfigured(f'Unknown type of view for "{prefix}" with options: {options}')
 
 
 class APIRouter(_AbstractRouter):

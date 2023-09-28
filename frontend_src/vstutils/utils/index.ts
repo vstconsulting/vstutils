@@ -434,3 +434,55 @@ export async function defaultDownloadResponseHandler(response: Response) {
 export function downloadResponse(response: Response) {
     return responseDownloadHandler(response);
 }
+
+/**
+ * Calculates width and height of inner box which should be inside a wrapper box
+ * with wrapperWidth and wrapperHeight size. If aspectRatio isn't given,
+ * than it will be inherited from wrapper box. If padding is not given, than
+ * at least one side of inner box will aligned with side of wrapper box.
+ */
+export function fitToWrapper({
+    wrapperWidth,
+    wrapperHeight,
+    aspectRatio = undefined,
+    padding = 0,
+}: {
+    wrapperWidth: number;
+    wrapperHeight: number;
+    aspectRatio?: number;
+    padding?: number;
+}): { width: number; height: number } {
+    if (!(padding >= 0 && padding < 1)) {
+        throw Error('padding must be within [0, 1).');
+    }
+    if (aspectRatio === undefined) {
+        aspectRatio = wrapperWidth / wrapperHeight;
+    }
+    if (aspectRatio <= 0) {
+        throw Error('aspectRatio must be greater than 0.');
+    }
+
+    let width = 0;
+    let height = 0;
+    const factor = 1 - padding;
+
+    if (aspectRatio > 1) {
+        if (wrapperWidth > wrapperHeight && wrapperHeight * factor * aspectRatio <= wrapperWidth) {
+            height = wrapperHeight * factor;
+            width = height * aspectRatio;
+        } else {
+            width = wrapperWidth * factor;
+            height = width / aspectRatio;
+        }
+    } else {
+        if (wrapperWidth < wrapperHeight && (wrapperWidth * factor) / aspectRatio <= wrapperHeight) {
+            width = wrapperWidth * factor;
+            height = width / aspectRatio;
+        } else {
+            height = wrapperHeight * factor;
+            width = height * aspectRatio;
+        }
+    }
+
+    return { width, height };
+}

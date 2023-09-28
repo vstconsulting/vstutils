@@ -33,7 +33,7 @@ export const ClearButton = defineComponent({
     name: 'ClearButton',
     mixins: [BaseFieldButton],
     data() {
-        return { helpText: 'Clean value', iconClasses: ['fa', 'fa-times'] };
+        return { helpText: 'Clear field', iconClasses: ['fa', 'fa-times'] };
     },
 });
 

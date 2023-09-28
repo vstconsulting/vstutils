@@ -1,4 +1,4 @@
-from configparserc import tools
+import pathlib
 
 
 def multikeysort(items, columns, reverse=False):
@@ -21,5 +21,15 @@ def multikeysort(items, columns, reverse=False):
     return items
 
 
-get_file_value = tools.get_file_value
-File = tools.File
+def get_file_value(filename, default='', raise_error=False, strip=True):
+    result = default
+
+    try:
+        result = pathlib.Path(filename).read_text(encoding='utf-8')
+        if strip:
+            result = result.strip()
+    except IOError:
+        if raise_error:
+            raise  # nocv
+
+    return result

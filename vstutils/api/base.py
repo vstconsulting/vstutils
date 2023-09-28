@@ -234,9 +234,8 @@ class QuerySetMixin(rvs.APIView):
 
     def _base_get_queryset(self) -> QuerySet:
         assert self.queryset is not None, (
-            "'%s' should either include a `queryset` attribute, "
+            f"'{self.__class__.__name__}' should either include a `queryset` attribute, "
             "or override the `get_queryset()` method."
-            % self.__class__.__name__
         )
 
         queryset = self.queryset
@@ -251,9 +250,8 @@ class QuerySetMixin(rvs.APIView):
     def get_queryset(self) -> QuerySet:
         if self.queryset is None:  # nocv
             assert self.model is not None, (
-                "'%s' should either include a `queryset` or `model` attribute,"
+                f"'{self.__class__.__name__}' should either include a `queryset` or `model` attribute,"
                 " or override the `get_queryset()` method."
-                % self.__class__.__name__
             )
             self.queryset = _get_cleared(self.model.objects.all())
         self.queryset = self.get_extra_queryset()

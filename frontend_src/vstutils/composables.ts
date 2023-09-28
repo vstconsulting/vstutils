@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue';
+import { useResizeObserver } from '@vueuse/core';
 
 import type { Ref } from 'vue';
 import type { FieldsGroup, FieldsInstancesGroup, ModelConstructor } from '@/vstutils/models';
@@ -69,4 +70,18 @@ export function useHideableFieldsGroups(
     });
 
     return { hiddenFields, visibleFieldsGroups, showField, hideField };
+}
+
+export function useWidthResizeObserver(
+    target: Parameters<typeof useResizeObserver>[0],
+    callback: (width: number | undefined) => void,
+) {
+    let prevWidth: number | undefined = undefined;
+    useResizeObserver(target, (entries) => {
+        const entry = entries[0];
+        if (entry.borderBoxSize?.[0].inlineSize !== prevWidth) {
+            prevWidth = entry.borderBoxSize?.[0].inlineSize;
+            callback(prevWidth);
+        }
+    });
 }

@@ -569,7 +569,7 @@ class assertRaises:
         :param verbose: -- logging
         :type verbose: bool
         """
-        self._kwargs = dict(**kwargs)
+        self._kwargs = {**kwargs}
         self._verbose = kwargs.pop("verbose", settings.DEBUG)
         self._exclude = kwargs.pop("exclude", False)
         self._excepts = tuple(args)

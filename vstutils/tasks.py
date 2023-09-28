@@ -57,8 +57,8 @@ class TaskMeta(type):
 
         @wraps(func, assigned=WRAPPER_ASSIGNMENTS+('__notify_wrapped__',))
         def wrapper(self, *args, **kwargs):
-            with notificator or get_notificator():
-                self.__notifier__ = notificator
+            with notificator or get_notificator() as notifier:
+                self.__notifier__ = notifier
                 result = func(self, *args, **kwargs)
             self.__notifier__ = None
             return result

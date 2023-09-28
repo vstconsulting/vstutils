@@ -221,6 +221,7 @@ TRANSLATION = {
     'Max length: {0}': '最大长度: {0}',
     'Minimum filename length: {0}': '最小文件名长度: {0}',
     'Maximum filename length: {0}': '最大文件名长度: {0}',
+    '"{}" is not a valid ASCII string.': '“{}”不是有效的 ASCII 字符串。',
 
     # instance operation success
     # add
@@ -252,6 +253,14 @@ TRANSLATION = {
     'Download with headers': '帶標題下載',
     'Changes you made may not be saved.': '您所做的更改可能不会保存。',
     'The data has been changed on the server. Do you want to overwrite it?': '服务器上的数据已更改。 您想覆盖它们吗？',
+
+    # barcode & scanner
+    'Select scanner camera at sidebar': 'C在侧边栏选择扫描仪相机',
+    'Toggle camera': '切换相机',
+    'Edit manually': '手动编辑',
+    'Scanner camera': '扫描相机',
+    'Not supported by this device': '该设备不支持',
+    'Allow using camera in browser': '允许在浏览器中使用相机',
 }
 
 SERVER_TRANSLATION = {

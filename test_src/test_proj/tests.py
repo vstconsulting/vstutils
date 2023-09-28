@@ -56,6 +56,7 @@ from vstutils.api.validators import (
     ImageWidthValidator,
     ImageResolutionValidator
 )
+from vstutils.api import fields as vstfields
 from vstutils.api.auth import UserViewSet
 from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
@@ -1647,6 +1648,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
         expected['some_imagefield']['properties']['content']['minLength'] = from_api['some_imagefield']['properties']['content']['minLength'] = 7000
         expected['some_namedbinimage']['x-options'] = {'backgroundFillColor': 'pink'}
         expected['some_multiplenamedbinimage']['items']['x-options'] = {'backgroundFillColor': 'white'}
+        del expected['some_imagefield_qr_code_url']
+        del expected['some_barcode128']
         self.assertDictEqual(expected, from_api)
         # Test swagger ui
         client = self._login()
@@ -1832,6 +1835,26 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertDictEqual(
             api['definitions']['ModelWithBinaryFiles']['properties']['some_validatedmultiplenamedbinimage']['items']['x-validators'],
             img_res_validator_data
+        )
+
+        # Check property format for qrcode field
+        self.assertEqual(
+            api['definitions']['ModelWithBinaryFiles']['properties']['some_imagefield_qr_code_url']['type'],
+            'string',
+        )
+        self.assertEqual(
+            api['definitions']['ModelWithBinaryFiles']['properties']['some_imagefield_qr_code_url']['format'],
+            'qrcode',
+        )
+
+        # Check property format for barcode128 field
+        self.assertEqual(
+            api['definitions']['ModelWithBinaryFiles']['properties']['some_barcode128']['type'],
+            'string',
+        )
+        self.assertEqual(
+            api['definitions']['ModelWithBinaryFiles']['properties']['some_barcode128']['format'],
+            'barcode128',
         )
 
         # Check fields with uuid as fk
@@ -4682,7 +4705,7 @@ class ProjectTestCase(BaseTestCase):
                 'data': {'some_filefield': short_content_image_content_dict, 'some_imagefield': short_content_image_content_dict}
             },
         ])
-        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[0]['status'], 201, results[0])
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[3]['status'], 400)
@@ -4705,6 +4728,10 @@ class ProjectTestCase(BaseTestCase):
             'mediaType': ''
         },
             results[1]['data']['some_imagefield'])
+        self.assertEqual(
+            f'https://{self.server_name}{instance.some_imagefield.url}',
+            results[1]['data']['some_imagefield_qr_code_url'],
+        )
         with open(os.path.join(DIR_PATH, 'cat.jpeg'), 'rb') as cat1:
             self.assertEqual(instance.some_filefield.file.read(), cat1.read())
 
@@ -5937,3 +5964,36 @@ class CreateViewTestCase(BaseTestCase):
             override_filter_backends=True,
         )
         self.assertEqual(tuple(HostView.filter_backends), (VSTFilterBackend,))
+
+
+class BarcodeFieldsTestCase(BaseTestCase):
+    def test_instantiation(self):
+        msg_to_check = (
+            "The `source` argument is not meaningful when applied to a `child=` field. "
+            "Remove `source=` from the field declaration."
+        )
+
+        with self.assertRaises(AssertionError, msg=msg_to_check):
+            vstfields.QrCodeField(child=fields.CharField(source='some_source'))
+
+        with self.assertRaises(AssertionError, msg=msg_to_check):
+            vstfields.Barcode128Field(child=fields.CharField(source='some_source'))
+
+        msg_to_check = '`child` has not been instantiated.'
+
+        with self.assertRaises(AssertionError, msg=msg_to_check):
+            vstfields.QrCodeField(child=fields.CharField)
+
+        with self.assertRaises(AssertionError, msg=msg_to_check):
+            vstfields.Barcode128Field(child=fields.CharField)
+
+    def test_barcode128_validation(self):
+        f = vstfields.Barcode128Field(child=fields.CharField(default=''))
+
+        # set valid value
+        value = f.run_validation(data='123/abc')
+        self.assertEqual(value, '123/abc')
+
+        # try to set value with non-ASCII characters
+        with self.assertRaises(ValidationError, msg='"невалидная строка" is not a valid ASCII string.'):
+            f.run_validation(data='невалидная строка')

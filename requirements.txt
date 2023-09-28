@@ -1,12 +1,12 @@
 # Main packages
-configparserc~=1.4.2
+configparserc~=2.0.0
 Markdown~=3.4.4
 django-environ~=0.11.2
 
 # REST API packages
 djangorestframework~=3.14.0
 drf-yasg==1.21.7
-django-filter==23.2
+django-filter==23.3
 drf_orjson_renderer~=1.7.1
 ormsgpack==1.2.6
 pyyaml~=6.0.1
