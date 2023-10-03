@@ -46,7 +46,7 @@
     import EntityView from './components/common/EntityView.vue';
     import AppModals from './components/common/AppModals.vue';
 
-    import type { PropType } from 'vue';
+    import type { Component, PropType } from 'vue';
     import type { XMenu } from './AppConfiguration';
 
     const DARK_MODE_CLASS = 'dark-mode';
@@ -84,10 +84,10 @@
             };
         },
         computed: {
-            sidebarTopComponent() {
+            sidebarTopComponent(): Component | null {
                 return null;
             },
-            sidebarBottomComponent() {
+            sidebarBottomComponent(): Component | null {
                 return null;
             },
             menuItems() {
@@ -142,7 +142,7 @@
             classes() {
                 return [];
             },
-            additionalComponents() {
+            additionalComponents(): Record<string, Component> {
                 return {};
             },
         },

@@ -15,7 +15,7 @@
                     <i class="fas fa-plus" />
                     {{ $t('Add') }}
                 </button>
-                <HideButton v-if="hideable" class="ml-1" @click.native="$emit('hide-field', field)" />
+                <HideButton v-if="hideable" class="ml-1" @click.native="$emit('hide-field')" />
             </div>
         </Card>
 
@@ -44,20 +44,20 @@
     import { emptyRepresentData } from '@/vstutils/utils';
     import type { NestedObjectField } from '@/vstutils/fields/nested-object';
     import type ArrayField from '../../ArrayField';
-    import type { ExtractRepresent, SetFieldValueOptions } from '@/vstutils/fields/base';
+    import type { FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import {
+        FieldEditPropsDef,
+        type ExtractRepresent,
+        type SetFieldValueOptions,
+    } from '@/vstutils/fields/base';
     import { HideButton } from '@/vstutils/fields/buttons';
 
     type Value = ExtractRepresent<ArrayField<NestedObjectField>>;
 
-    const props = defineProps<{
-        field: ArrayField<NestedObjectField>;
-        data: Record<string, unknown>;
-        value?: Value;
-        hideable?: boolean;
-    }>();
-
+    const props = defineProps(FieldEditPropsDef as FieldEditPropsDefType<ArrayField<NestedObjectField>>);
     const emit = defineEmits<{
         (e: 'set-value', value?: Value): void;
+        (e: 'hide-field'): void;
     }>();
 
     const newItemData = ref(emptyRepresentData());
