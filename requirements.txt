@@ -14,7 +14,7 @@ pyyaml~=6.0.1
 # web server
 uvicorn~=0.23.2
 pyuwsgi==2.0.22
-fastapi~=0.103.1
+fastapi~=0.103.2
 aiofiles==23.2.1
 
 # Notifications
@@ -29,4 +29,4 @@ django-htmlmin~=0.11.0
 pyotp~=2.9.0
 
 # Storage
-django-storages[libcloud]==1.14.0
+django-storages[libcloud]==1.14.1
