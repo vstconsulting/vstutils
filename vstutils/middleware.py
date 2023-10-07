@@ -1,13 +1,11 @@
 import time
 import logging
-import typing as _t
+from typing import Generator
 from contextlib import contextmanager
 
 from django.db import connections
 from django.apps import apps
 from django.conf import settings
-from django.http.request import HttpRequest
-from django.http.response import HttpResponse
 from django.utils import translation
 from django.urls import resolve
 from django.shortcuts import redirect
@@ -17,8 +15,6 @@ from .utils import BaseVstObject
 
 
 logger = logging.getLogger(settings.VST_PROJECT)
-ResponseType = _t.TypeVar("ResponseType", bound=HttpResponse)  # pylint: disable=invalid-name
-ResponseHandlerType = _t.Union[_t.Awaitable[ResponseType], ResponseType]
 
 
 @contextmanager
@@ -88,17 +84,15 @@ class BaseMiddleware(BaseVstObject):
     """
     __slots__ = 'get_response', 'logger'
 
-    logger: logging.Logger
-
-    def __init__(self, get_response: _t.Callable):
+    def __init__(self, get_response):
         self.get_response = get_response
         self.logger = logger
         super().__init__()
 
-    def get_setting(self, value: _t.Text):
+    def get_setting(self, value):
         return self.get_django_settings(value)
 
-    def handler(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:  # nocv
+    def handler(self, request, response):  # nocv
         # pylint: disable=unused-argument
 
         """
@@ -114,7 +108,7 @@ class BaseMiddleware(BaseVstObject):
 
         return response
 
-    def request_handler(self, request: HttpRequest) -> HttpRequest:
+    def request_handler(self, request):
         # pylint: disable=unused-argument
 
         """
@@ -128,7 +122,7 @@ class BaseMiddleware(BaseVstObject):
 
         return request
 
-    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
+    def get_response_handler(self, request):
         """
         Entrypoint for breaking or continuing request handling.
         This function must return `django.http.HttpResponse` object
@@ -150,7 +144,7 @@ class BaseMiddleware(BaseVstObject):
         """
         return self.get_response(request)
 
-    def __call__(self, request: HttpRequest) -> ResponseHandlerType:
+    def __call__(self, request):
         return self.handler(
             self.request_handler(request),
             self.get_response_handler(request)
@@ -160,7 +154,7 @@ class BaseMiddleware(BaseVstObject):
 class TimezoneHeadersMiddleware(BaseMiddleware):
     __slots__ = ()
 
-    def handler(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
+    def handler(self, request, response):
         response['Server-Timezone'] = self.get_setting('TIME_ZONE')
         response['VSTutils-Version'] = self.get_setting('VSTUTILS_VERSION')
         return response
@@ -171,7 +165,7 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
 
     def __duration_handler(self, data):
         key, value = data
-        if isinstance(value, (list, tuple, map, filter, _t.Generator)):
+        if isinstance(value, (list, tuple, map, filter, Generator)):
             value = ''.join((self.__duration_handler(('', v)) for v in value))
         elif isinstance(value, (int, float)):
             value = f';dur={float(value)}'
@@ -183,10 +177,10 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
             value = ''
         return f'{key}{value}'
 
-    def _round_time(self, seconds: _t.Union[int, float]):
+    def _round_time(self, seconds):
         return round(seconds * 1000, 2)
 
-    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
+    def get_response_handler(self, request):
         start_time = time.time()
         get_response_handler = super().get_response_handler
         ql = QueryTimingLogger()
@@ -215,7 +209,7 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
 class LangMiddleware(BaseMiddleware):
     __slots__ = ()
 
-    def get_lang_object(self, request: HttpRequest) -> _t.Tuple[Language, bool]:
+    def get_lang_object(self, request):
         set_cookie = True
         if 'lang' in request.GET:
             code = request.GET['lang']
@@ -229,7 +223,7 @@ class LangMiddleware(BaseMiddleware):
             return obj, set_cookie
         return Language.objects.get(code=settings.LANGUAGE_CODE), set_cookie  # nocv
 
-    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
+    def get_response_handler(self, request):
         request.language, set_cookie = self.get_lang_object(request)  # type: ignore
         translation.activate(request.language.code)  # type: ignore
         request.LANGUAGE_CODE = translation.get_language()
@@ -253,7 +247,7 @@ class TwoFaMiddleware(BaseMiddleware):
         'terms',
     )
 
-    def request_handler(self, request: HttpRequest) -> HttpRequest:
+    def request_handler(self, request):
         request.user.need_twofa = False  # type: ignore
         if request.user.is_authenticated:
             twofa = getattr(request.user, 'twofa', None)
@@ -268,7 +262,7 @@ class TwoFaMiddleware(BaseMiddleware):
             url_name is not None and url_name.startswith('password_reset')
         ])
 
-    def get_response_handler(self, request: HttpRequest) -> ResponseHandlerType:
+    def get_response_handler(self, request):
         if request.user.need_twofa and self.check_url_name(request):  # type: ignore
             return redirect(self.redirect_name)
         return super().get_response_handler(request)
@@ -281,12 +275,12 @@ class FrontendChangesNotifications(BaseMiddleware):
         super().__init__(*args, **kwargs)
         self.notificator = apps.get_app_config('vstutils_api').module.notificator_class([])
 
-    def request_handler(self, request: HttpRequest) -> HttpRequest:
+    def request_handler(self, request):
         if self.notificator.is_usable():
             request.notificator = self.notificator
         return request
 
-    def handler(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
+    def handler(self, request, response):
         if self.notificator.is_usable():
             request.notificator.send()
         return response

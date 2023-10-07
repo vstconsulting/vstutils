@@ -1,8 +1,9 @@
 from typing import List, Dict
+from rest_framework import views
 from . import base
 
 
-class BulkViewSet(base.rvs.APIView):
+class BulkViewSet(views.APIView):
     client_environ_keys_copy: List
     type_to_bulk: Dict
 

@@ -26,11 +26,6 @@ class JsonEncoder(json.JSONEncoder):
 class Notificator:
     __slots__ = ('queue', 'cent_client', 'label', '_signals', '__weakref__')
     client_class = CentrifugoClient
-
-    queue: _t.List[_t.Tuple[_t.Sequence[_t.Text], _t.Any]]
-    cent_client: CentrifugoClient
-    label: _t.Text
-
     _json_renderer = ORJSONRenderer()
 
     def __init__(self, queue=None, client=None, label=None, autoconnect=True):
@@ -45,12 +40,12 @@ class Notificator:
     def is_usable(self):
         return bool(settings.CENTRIFUGO_CLIENT_KWARGS) or self.cent_client  # nocv
 
-    def connect_signal(self, signal: signals.ModelSignal):
+    def connect_signal(self, signal):
         if signal not in self._signals:
             signal.connect(self.signal_handler)
             self._signals.append(signal)
 
-    def disconnect_signal(self, signal: signals.ModelSignal):
+    def disconnect_signal(self, signal):
         if signal in self._signals:
             signal.disconnect(self.signal_handler)
             self._signals.remove(signal)
@@ -119,7 +114,7 @@ class Notificator:
         for signal in self._signals:
             self.disconnect_signal(signal)
 
-    def get_subscription_channel(self, label: str):
+    def get_subscription_channel(self, label):
         return f'{settings.SUBSCRIPTIONS_PREFIX}.{label}'
 
     def __del__(self):

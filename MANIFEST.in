@@ -8,14 +8,25 @@ include requirements-rpc.txt
 include requirements-ldap.txt
 include requirements-prod.txt
 include requirements-stubs.txt
+include vstutils/api/actions.pyi
+include vstutils/api/base.pyi
+include vstutils/api/decorators.pyi
 include vstutils/api/views.pyi
 include vstutils/api/routers.pyi
 include vstutils/api/responses.pyi
-include vstutils/api/decorators.pyi
 include vstutils/auth.pyi
+include vstutils/tasks.pyi
+include vstutils/middleware.pyi
 include vstutils/utils.pyi
 include vstutils/environment.pyi
+include vstutils/models/__init__.pyi
+include vstutils/models/base.pyi
+include vstutils/models/cent_notify.pyi
 include vstutils/models/custom_model.pyi
+include vstutils/models/decorators.pyi
+include vstutils/models/fields.pyi
+include vstutils/models/model.pyi
+include vstutils/models/queryset.pyi
 include vstutils/py.typed
 recursive-include vstutils/*/templates *
 recursive-include vstutils/templates *

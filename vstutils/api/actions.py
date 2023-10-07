@@ -1,10 +1,6 @@
-import typing as _t
-
 from django.db import transaction
 from django.http.response import FileResponse
-from rest_framework import serializers, viewsets
-from rest_framework.request import Request
-from rest_framework.response import Response
+from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.utils.serializer_helpers import ReturnDict, ReturnList
 from drf_yasg.utils import swagger_auto_schema
@@ -107,16 +103,16 @@ class Action:
 
     def __init__(  # noqa: CFQ002
         self,
-        detail: bool = True,
-        methods: _t.List[_t.Text] = None,
-        serializer_class: _t.Type[serializers.Serializer] = DataSerializer,
-        result_serializer_class: _t.Type[serializers.Serializer] = None,
-        query_serializer: _t.Type[serializers.Serializer] = None,
-        multi: bool = False,
-        title: _t.Text = None,
-        icons: _t.Union[_t.Text, _t.Iterable] = None,
-        is_list: bool = False,
-        hidden: bool = False,
+        detail=True,
+        methods=None,
+        serializer_class=DataSerializer,
+        result_serializer_class=None,
+        query_serializer=None,
+        multi=False,
+        title=None,
+        icons=None,
+        is_list=False,
+        hidden=False,
         **kwargs,
     ):
         # pylint: disable=too-many-arguments
@@ -158,7 +154,7 @@ class Action:
         if self.query_serializer:
             swagger_kwargs['query_serializer'] = self.query_serializer
         if self.icons:
-            swagger_kwargs['x-icons'] = self.icons.split(' ') if isinstance(self.icons, _t.Text) else list(self.icons)
+            swagger_kwargs['x-icons'] = self.icons.split(' ') if isinstance(self.icons, str) else list(self.icons)
         if self.is_page:
             swagger_kwargs['x-list'] = self.is_list
 
@@ -170,20 +166,20 @@ class Action:
     def __call__(self, method):
 
         def action_method(
-                view: viewsets.GenericViewSet,
-                request: Request,
+                view,
+                request,
                 *args,
                 **kwargs,
-        ) -> _t.Union[Response, FileResponse]:
+        ):
 
-            result_serializer_class: _t.Type[serializers.Serializer] = self.result_serializer_class
+            result_serializer_class = self.result_serializer_class
             identical = False
             if result_serializer_class is None:
                 result_serializer_class = view.get_serializer_class()
                 identical = True
 
             result = method(view, request, *args, **kwargs)
-            response_class = self.method_response_mapping[_t.cast(_t.Text, request.method)]
+            response_class = self.method_response_mapping[request.method]
 
             if issubclass(result_serializer_class, serializers.Serializer):
                 if not (isinstance(result, (ReturnDict, ReturnList)) and identical):
@@ -343,20 +339,16 @@ class SimpleAction(Action):
     def __call__(self, getter=None):
         self.extra_actions['get'] = getter
 
-        def action_method(
-                view: viewsets.GenericViewSet,
-                request: Request,
-                *args, **kwargs,
-        ) -> Response:
+        def action_method(view, request, *args, **kwargs):
 
             get_instance_method = self.extra_actions.get('get')
 
             with self._get_transaction_context(request):
                 if get_instance_method:
-                    method_kwargs: _t.Dict[_t.Text, _t.Any] = {'query_data': {}}
+                    method_kwargs = {'query_data': {}}
                     if request.method == "GET":
                         try:
-                            method_kwargs['query_data'] = view.get_query_serialized_data(request)  # type: ignore
+                            method_kwargs['query_data'] = view.get_query_serialized_data(request)
                         except (AttributeError, AssertionError):
                             pass
                     instance = get_instance_method(view, request, **method_kwargs)

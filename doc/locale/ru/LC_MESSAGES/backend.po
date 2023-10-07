@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-26 06:23+0000\n"
+"POT-Creation-Date: 2023-10-07 05:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.13.0\n"
 
 #: ../../backend.rst:2
 msgid "Backend API manual"
@@ -534,7 +534,7 @@ msgstr ""
 #: vstutils.api.filter_backends.DeepViewFilterBackend:25
 #: vstutils.api.filter_backends.VSTFilterBackend:22
 #: vstutils.api.filters.FkFilterHandler:15
-#: vstutils.middleware.BaseMiddleware:37
+#: vstutils.middleware.BaseMiddleware:38
 #: vstutils.models.custom_model.FileModel:13 vstutils.tasks.TaskClass:4
 #: vstutils.utils.BaseEnum:4 vstutils.utils.Lock:35
 #: vstutils.utils.ObjectHandlers:31 vstutils.utils.SecurePickling:22
@@ -794,10 +794,9 @@ msgstr ""
 "Поле, предоставляющее автодополнение на фронтенде. Использует указанный "
 "список объектов."
 
-#: of vstutils.api.actions.Action vstutils.api.base.CopyMixin.copy
+#: of vstutils.api.actions.Action
 #: vstutils.api.base.GenericViewSet.create_action_serializer
 #: vstutils.api.base.GenericViewSet.get_query_serialized_data
-#: vstutils.api.base.GenericViewSet.get_serializer
 #: vstutils.api.decorators.nested_view vstutils.api.decorators.subaction
 #: vstutils.api.endpoint.EndpointViewSet.get
 #: vstutils.api.endpoint.EndpointViewSet.get_client
@@ -829,7 +828,6 @@ msgstr ""
 #: vstutils.api.validators.UrlQueryStringValidator
 #: vstutils.api.validators.resize_image
 #: vstutils.api.validators.resize_image_from_to
-#: vstutils.middleware.BaseMiddleware
 #: vstutils.middleware.BaseMiddleware.get_response_handler
 #: vstutils.middleware.BaseMiddleware.handler
 #: vstutils.middleware.BaseMiddleware.request_handler
@@ -914,8 +912,9 @@ msgid ""
 "Simple string field. Value must always be a valid ASCII-string. The field"
 " is going to represent as Barcode (Code 128) in user interface."
 msgstr ""
-"Простое строковое поле. Значение всегда должно быть допустимой строкой ASCII. "
-"В пользовательском интерфейсе оно будет отображено как штрихкод (код 128)."
+"Простое строковое поле. Значение всегда должно быть допустимой строкой "
+"ASCII. В пользовательском интерфейсе оно будет отображено как штрихкод "
+"(код 128)."
 
 #: of vstutils.api.fields.Barcode128Field:4 vstutils.api.fields.QrCodeField:4
 msgid ""
@@ -2033,10 +2032,7 @@ msgstr "Необходимая высота"
 msgid "Returns"
 msgstr "Возвращает"
 
-#: of vstutils.api.base.CopyMixin.copy
-#: vstutils.api.base.GenericViewSet.create_action_serializer
-#: vstutils.api.base.GenericViewSet.get_query_serialized_data
-#: vstutils.api.base.GenericViewSet.get_serializer
+#: of vstutils.api.base.GenericViewSet.create_action_serializer
 #: vstutils.api.endpoint.EndpointViewSet.get
 #: vstutils.api.endpoint.EndpointViewSet.get_client
 #: vstutils.api.endpoint.EndpointViewSet.get_serializer
@@ -2168,12 +2164,6 @@ msgstr "Миксина для viewset'ов, добавляющая `copy` endpoi
 #: of vstutils.api.base.CopyMixin.copy:1
 msgid "Endpoint which copy instance with deps."
 msgstr "Endpoint, который копирует экземпляр с его зависимостями."
-
-#: of vstutils.api.base.CopyMixin.copy:5
-#: vstutils.api.endpoint.EndpointViewSet.post:5
-#: vstutils.api.endpoint.EndpointViewSet.put:5
-msgid ":py:class:`vstutils.api.responses.BaseResponseClass`"
-msgstr ":py:class:`vstutils.api.responses.BaseResponseClass`"
 
 #: ../../docstring of vstutils.api.base.CopyMixin.copy_field_name:1
 msgid "Name of field which will get a prefix."
@@ -2307,14 +2297,6 @@ msgstr ""
 "флаг, который говорит о том нужно ли выбросить исключение при валидации в"
 " сериализаторе или нет."
 
-#: of vstutils.api.base.GenericViewSet.get_query_serialized_data:12
-msgid ""
-":py:data:`typing.Union`\\[:py:class:`dict`, "
-":py:class:`collections.OrderedDict`]"
-msgstr ""
-":py:data:`typing.Union`\\[:py:class:`dict`, "
-":py:class:`collections.OrderedDict`]"
-
 #: of vstutils.api.base.GenericViewSet.get_serializer:1
 #: vstutils.api.endpoint.EndpointViewSet.get_serializer:1
 msgid ""
@@ -2332,10 +2314,6 @@ msgid ""
 msgstr ""
 "Позволяет использовать :class:`django.http.StreamingHttpResponse` в "
 "качестве инициализации сериализатора."
-
-#: of vstutils.api.base.GenericViewSet.get_serializer:10
-msgid ":py:class:`rest_framework.serializers.BaseSerializer`"
-msgstr ":py:class:`rest_framework.serializers.BaseSerializer`"
 
 #: of vstutils.api.base.GenericViewSet.get_serializer_class:1
 msgid "Provides to setup serializer class for each action."
@@ -3308,6 +3286,11 @@ msgstr ""
 #: of vstutils.api.endpoint.EndpointViewSet.post:1
 msgid "Execute transactional bulk request"
 msgstr "Выполнить транзакционный bulk-запрос"
+
+#: of vstutils.api.endpoint.EndpointViewSet.post:5
+#: vstutils.api.endpoint.EndpointViewSet.put:5
+msgid ":py:class:`vstutils.api.responses.BaseResponseClass`"
+msgstr ":py:class:`vstutils.api.responses.BaseResponseClass`"
 
 #: of vstutils.api.endpoint.EndpointViewSet.put:1
 msgid "Execute non transaction bulk request"
@@ -4623,3 +4606,14 @@ msgid ""
 msgstr ""
 "Использует функцию :func:`django.utils.translation.get_language` для "
 "получения кода языка и пытается получить перевод из списка доступных."
+
+#~ msgid ""
+#~ ":py:data:`typing.Union`\\[:py:class:`dict`, "
+#~ ":py:class:`collections.OrderedDict`]"
+#~ msgstr ""
+#~ ":py:data:`typing.Union`\\[:py:class:`dict`, "
+#~ ":py:class:`collections.OrderedDict`]"
+
+#~ msgid ":py:class:`rest_framework.serializers.BaseSerializer`"
+#~ msgstr ":py:class:`rest_framework.serializers.BaseSerializer`"
+

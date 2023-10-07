@@ -10,7 +10,6 @@ import logging
 import inspect
 import traceback
 import datetime
-import collections
 import typing as _t
 from functools import partial
 from copy import deepcopy
@@ -26,8 +25,6 @@ from django.utils.http import urlencode
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, mixins as drf_mixins, exceptions, status
 from rest_framework.serializers import BaseSerializer
-from rest_framework.response import Response as RestResponse
-from rest_framework.request import Request
 from rest_framework.decorators import action
 from rest_framework.schemas import AutoSchema as DRFAutoSchema
 from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
@@ -42,7 +39,7 @@ from .serializers import (
     serializers
 )
 
-default_methods: _t.List[_t.Text] = [
+default_methods = [
     'get',
     'post',
     'put',
@@ -51,13 +48,13 @@ default_methods: _t.List[_t.Text] = [
     'options',
     'head'
 ]
-detail_actions: _t.Tuple[_t.Text, _t.Text, _t.Text, _t.Text] = (
+detail_actions = (
     'create',
     'retrieve',
     'update',
     'partial_update'
 )
-main_actions: _t.Tuple[_t.Text, _t.Text, _t.Text, _t.Text, _t.Text] = ('list',) + detail_actions
+main_actions = ('list',) + detail_actions
 query_check_params = (
     'extra_select',
     'annotations_select'
@@ -69,7 +66,7 @@ non_optimizeable_fields = (
     serializers.BaseSerializer,
     serializers.SerializerMethodField,
 )
-logger: logging.Logger = logging.getLogger(settings.VST_PROJECT)
+logger = logging.getLogger(settings.VST_PROJECT)
 http404_re_translate = re.compile(r"^No\s(.+)\smatches the given query.$", re.MULTILINE)
 
 
@@ -77,7 +74,7 @@ def _get_cleared(qs):
     return getattr(qs, 'cleared', lambda: qs)()
 
 
-def apply_translation(obj: _t.Any, trans_function: _t.Callable):
+def apply_translation(obj, trans_function):
     recursive_call = partial(apply_translation, trans_function=trans_function)
     if isinstance(obj, dict):
         return {
@@ -93,7 +90,7 @@ def apply_translation(obj: _t.Any, trans_function: _t.Callable):
     return trans_function(obj)
 
 
-def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestResponse]:
+def exception_handler(exc, context):
     # pylint: disable=too-many-branches
     traceback_str: _t.Text = traceback.format_exc()
     default_exc = (exceptions.APIException, djexcs.PermissionDenied)
@@ -171,7 +168,7 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
 
 class AutoSchema(DRFAutoSchema):
 
-    def get_description(self, path: _t.Text, method: _t.Text) -> _t.Text:
+    def get_description(self, path, method):
         # pylint: disable=simplifiable-if-statement,redefined-outer-name
         method_name: _t.Text = getattr(self.view, 'action', method.lower())
         method_obj: _t.Optional[_t.Callable] = getattr(self.view, method_name, None)
@@ -217,37 +214,36 @@ class QuerySetMixin(rvs.APIView):
     """
     Instance REST operations.
     """
-    queryset: _t.Optional[_t.Union[QuerySet, models.Manager]]
-    _queryset: _t.Optional[_t.Union[QuerySet, models.Manager]] = None
-    model: _t.Optional[_t.Type[models.Model]] = None
+    _queryset = None
+    model = None
 
-    @classproperty  # type: ignore
-    def queryset(self) -> QuerySet:
+    @classproperty
+    def queryset(self):
         # pylint: disable=method-hidden,function-redefined
         if self._queryset is not None:
             return _get_cleared(self._queryset)
         return _get_cleared(self.model.objects.all())
 
-    @queryset.setter  # type: ignore
+    @queryset.setter
     def queryset(self, value):
         self._queryset = value
 
-    def _base_get_queryset(self) -> QuerySet:
+    def _base_get_queryset(self):
         assert self.queryset is not None, (
             f"'{self.__class__.__name__}' should either include a `queryset` attribute, "
             "or override the `get_queryset()` method."
         )
 
         queryset = self.queryset
-        if isinstance(queryset, QuerySet):  # type: ignore
+        if isinstance(queryset, QuerySet):
             # Ensure queryset is re-evaluated on each request.
             queryset = queryset.all()
-        return queryset  # type: ignore
+        return queryset
 
-    def get_extra_queryset(self) -> QuerySet:
-        return self.queryset  # type: ignore
+    def get_extra_queryset(self):
+        return self.queryset
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self):
         if self.queryset is None:  # nocv
             assert self.model is not None, (
                 f"'{self.__class__.__name__}' should either include a `queryset` or `model` attribute,"
@@ -258,7 +254,7 @@ class QuerySetMixin(rvs.APIView):
         return self._base_get_queryset()
 
 
-class GenericViewSetMeta(type(vsets.GenericViewSet)):  # type: ignore
+class GenericViewSetMeta(type(vsets.GenericViewSet)):
 
     def __new__(mcs, name, bases, attrs):
         new_class = super().__new__(mcs, name, bases, attrs)
@@ -285,11 +281,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
     optimize_get_by_values = settings.OPTIMIZE_GET_BY_VALUES
     optimize_get_by_values_actions = ()
     select_related = False
-    serializer_class: _t.Type[serializers.Serializer]
-    _serializer_class_one: _t.Optional[_t.Type[serializers.Serializer]] = None
-    query_serializer: _t.Optional[_t.Type[serializers.Serializer]] = None
-    model: _t.Optional[_t.Type[models.Model]] = None
-    action_serializers: _t.Dict[_t.Text, serializers.Serializer] = {}
+    _serializer_class_one = None
+    query_serializer = None
+    model = None
+    action_serializers = {}
 
     def create_action_serializer(self, *args, **kwargs):
         """
@@ -325,9 +320,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
     def filter_for_filter_backends(self, backend):
         return getattr(backend, 'required', False)
 
-    def filter_queryset(self, queryset: QuerySet):
+    def filter_queryset(self, queryset):
         if hasattr(self, 'nested_name'):
-            self.filter_backends = filter(  # type: ignore
+            self.filter_backends = filter(
                 self.filter_for_filter_backends,
                 self.filter_backends
             )
@@ -396,12 +391,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
             return self.serializer_class_one  # pylint: disable=no-member
         return super().get_serializer_class()
 
-    def get_query_serialized_data(
-            self,
-            request: Request,
-            query_serializer: _t.Type[BaseSerializer] = None,
-            raise_exception: bool = True,
-    ) -> _t.Union[dict, collections.OrderedDict]:
+    def get_query_serialized_data(self, request, query_serializer=None, raise_exception=True):
         """
         Get request query data and serialize values if `query_serializer_class` attribute exists
         or attribute was send.
@@ -412,7 +402,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
                                 the serializer or not.
         """
         serializer_class: _t.Optional[_t.Type[BaseSerializer]] = (
-                query_serializer or getattr(self, 'query_serializer', None)
+            query_serializer or getattr(self, 'query_serializer', None)
         )
         assert serializer_class is not None, "You must setup 'query_serializer_class' in arguments or view attribute."
 
@@ -422,7 +412,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
             self.headers['X-Query-Data'] = urlencode(serializer.validated_data, doseq=True)
         return serializer.validated_data
 
-    def get_serializer(self, *args: _t.Any, **kwargs: _t.Any) -> BaseSerializer:
+    def get_serializer(self, *args, **kwargs):
         """
         Return the serializer instance that should be used for validating and
         deserializing input, and for serializing output.
@@ -440,7 +430,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         """
 
     @classmethod
-    def get_view_methods(cls, detail=False) -> _t.List[_t.Text]:
+    def get_view_methods(cls, detail=False):
         attr_name = ''.join(['__', 'detail' if detail else 'list', 'http_methods', '__'])
         methods = getattr(cls, attr_name, None)
         if methods is not None:
@@ -570,13 +560,13 @@ class CachableHeadMixin(GenericViewSet):
         if operation_handler(data, header):
             raise exception
 
-    def finalize_response(self, request: Request, response: RestResponse, *args, **kwargs) -> RestResponse:
+    def finalize_response(self, request, response, *args, **kwargs):
         result_response = super().finalize_response(request, response, *args, **kwargs)
         if self.is_main_action and 'ETag' not in result_response.headers:
             result_response.headers['ETag'] = lazy(self._get_etag, str)(self.model_class, request)
         return result_response
 
-    def initial(self, request: Request, *args: _t.Any, **kwargs: _t.Any) -> None:
+    def initial(self, request, *args, **kwargs):
         super().initial(request, *args, **kwargs)
 
         if self.is_main_action:
@@ -591,7 +581,7 @@ class CopyMixin(GenericViewSet):
     #: Name of field which will get a prefix.
     copy_field_name = 'name'
     #: List of related names which will be copied to new instance.
-    copy_related: _t.Iterable[_t.Text] = ()
+    copy_related = ()
 
     def copy_instance(self, instance):
         new_instance = deepcopy(instance)
@@ -609,7 +599,7 @@ class CopyMixin(GenericViewSet):
 
     @action(methods=['post'], detail=True)
     @transaction.atomic()
-    def copy(self, request: Request, **kwargs) -> responses.BaseResponseClass:
+    def copy(self, request, **kwargs):
         # pylint: disable=unused-argument
         """
         Endpoint which copy instance with deps.
@@ -631,10 +621,9 @@ class FileResponseRetrieveMixin(GenericViewSet):
            :lines: 1-22,59-77
     """
 
-    instance_field_data: _t.Text
-    instance_field_filename: _t.Text = 'filename'
-    instance_field_timestamp: _t.Optional[_t.Text] = None
-    cache_control_header_data: _t.Optional[_t.Text] = None
+    instance_field_filename = 'filename'
+    instance_field_timestamp = None
+    cache_control_header_data = None
     serializer_class_retrieve = FileResponse
 
     def get_file_response_kwargs(self, instance):
@@ -650,18 +639,18 @@ class FileResponseRetrieveMixin(GenericViewSet):
         }
 
     @patch_gzip_response_decorator
-    def retrieve(self, request: Request, *args, **kwargs) -> _t.Union[FileResponse, HttpResponseNotModified]:
+    def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
 
         instance_edit_timestamp = None
         if self.instance_field_timestamp:
-            instance_edit: datetime.datetime = getattr(instance, self.instance_field_timestamp, None)  # type: ignore
+            instance_edit: datetime.datetime = getattr(instance, self.instance_field_timestamp, None)
             instance_edit_timestamp = instance_edit.timestamp() if instance_edit else None
 
         if instance_edit_timestamp and instance_edit_timestamp == float(request.headers.get('If-None-Match', '0.0')):
             return HttpResponseNotModified()
 
-        response: FileResponse = self.get_serializer(**self.get_file_response_kwargs(instance))  # type: ignore
+        response: FileResponse = self.get_serializer(**self.get_file_response_kwargs(instance))
 
         if self.instance_field_timestamp and instance_edit_timestamp:
             cache_control_header_data = getattr(self, 'cache_control_header_data', None)
@@ -715,8 +704,8 @@ class ModelViewSet(GenericViewSet, vsets.ModelViewSet):
 class NonModelsViewSet(GenericViewSet):
     base_name = None
 
-    def get_queryset(self) -> QuerySet:
-        return QuerySet()  # nocv
+    def get_queryset(self):
+        return QuerySet()
 
 
 class ListNonModelViewSet(NonModelsViewSet, drf_mixins.ListModelMixin):
@@ -724,7 +713,7 @@ class ListNonModelViewSet(NonModelsViewSet, drf_mixins.ListModelMixin):
     schema = None
 
     @property
-    def methods(self) -> _t.Iterable[_t.Text]:
+    def methods(self):
         def is_list_action(attr):
             if not inspect.isfunction(attr):
                 return False
@@ -739,7 +728,7 @@ class ListNonModelViewSet(NonModelsViewSet, drf_mixins.ListModelMixin):
             for x in inspect.getmembers(self.__class__, is_list_action)
         )
 
-    def list(self, request: Request, *args, **kwargs) -> responses.BaseResponseClass:
+    def list(self, request, *args, **kwargs):
         routes = {
             method: reverse(f"{request.version}:{self.base_name}-{method}", request=request)
             for method in self.methods
