@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-07 05:31+0000\n"
+"POT-Creation-Date: 2023-10-11 16:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3380,16 +3380,13 @@ msgstr ""
 
 #: ../../backend.rst:191
 msgid ""
-"``headers`` - ``dict`` with headers which will be sent, names of headers "
-"must follow `CGI specification <https://www.w3.org/CGI/>`_ (e.g., "
-"``CONTENT_TYPE``, ``GATEWAY_INTERFACE``, ``HTTP_*``)."
+"``headers`` - ``dict`` with headers which will be sent (key - header's "
+"name, value - header's value string)."
 msgstr ""
-"``headers`` - ``dict`` с заголовками, которые будут установлены, названия"
-" заголовков должны соблюдать `спецификацию CGI "
-"<https://www.w3.org/CGI/>`_ (например ``CONTENT_TYPE``, "
-"``GATEWAY_INTERFACE``, ``HTTP_*``)."
+"``headers`` - словарь с заголовками, которые будут переданы в запрос (ключ - имя заголовка,"
+" значение - строка со значением заголовка."
 
-#: ../../backend.rst:193
+#: ../../backend.rst:192
 msgid ""
 "``version`` - ``str`` with specified version of api, if not provided then"
 " ``VST_API_VERSION`` will be used"
@@ -3397,7 +3394,25 @@ msgstr ""
 "``version`` - ``str`` с указанной версией api, если не задано, то "
 "используется ``VST_API_VERSION``"
 
-#: ../../backend.rst:195
+#: ../../backend.rst:196
+msgid ""
+"In previous versions header's names must follow `CGI specification "
+"<https://www.w3.org/CGI/>`_ (e.g., ``CONTENT_TYPE``, "
+"``GATEWAY_INTERFACE``, ``HTTP_*``)"
+msgstr ""
+"В предыдущих версиях имена заголовков должны были соответствовать `спецификации CGI "
+"<https://www.w3.org/CGI/>`_ (например, ``CONTENT_TYPE``, "
+"``GATEWAY_INTERFACE``, ``HTTP_*``)."
+
+#: ../../backend.rst:200
+msgid ""
+"Since version 5.3 and after migrate to Django 4 names must follow HTTP "
+"specification instead of CGI."
+msgstr ""
+"Начиная с версии 5.3 и после миграции на Django 4 имена должны соответствовать HTTP "
+"спецификации вместо CGI."
+
+#: ../../backend.rst:202
 msgid ""
 "In any request parameter you can insert result value of previous "
 "operations (``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), "
@@ -3407,27 +3422,27 @@ msgstr ""
 " операции (``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), "
 "например:"
 
-#: ../../backend.rst:205
+#: ../../backend.rst:212
 msgid "Result of bulk request is json list of objects for operation:"
 msgstr "Результат bulk-запроса - это список json-объектов, описывающих операцию:"
 
-#: ../../backend.rst:207
+#: ../../backend.rst:214
 msgid "``method`` - http method"
 msgstr "``method`` - http-метод"
 
-#: ../../backend.rst:208
+#: ../../backend.rst:215
 msgid "``path`` - path of request, always str"
 msgstr "``path`` - путь запроса, всегда строка"
 
-#: ../../backend.rst:209
+#: ../../backend.rst:216
 msgid "``data`` - data that needs to be sent"
 msgstr "``data`` - данные, которые нужно отправить"
 
-#: ../../backend.rst:210
+#: ../../backend.rst:217
 msgid "``status`` - response status code"
 msgstr "``status`` - код состояния ответа"
 
-#: ../../backend.rst:212
+#: ../../backend.rst:219
 msgid ""
 "Transactional bulk request returns ``502 BAG GATEWAY`` and does rollback "
 "after first failed request."
@@ -3435,7 +3450,7 @@ msgstr ""
 "Транзакционный bulk-запрос возвращает ``502 BAG GATEWAY`` и делает откат "
 "к состоянию до запроса после первого неудачного запроса."
 
-#: ../../backend.rst:215
+#: ../../backend.rst:222
 msgid ""
 "If you send non-transactional bulk request, you will get ``200`` status "
 "and must validate statuses on each operation responses."
@@ -3443,15 +3458,15 @@ msgstr ""
 "Если вы отправили нетранзакционный bulk-запрос, вы получите код 200 и "
 "должны будете проверить статус каждого ответа операции отдельно."
 
-#: ../../backend.rst:219
+#: ../../backend.rst:226
 msgid "OpenAPI schema"
 msgstr "Схема OpenAPI"
 
-#: ../../backend.rst:221
+#: ../../backend.rst:228
 msgid "Request on ``GET /{API_URL}/endpoint/`` returns Swagger UI."
 msgstr "Запрос на ``GET /{API_URL}/endpoint/`` возвращает Swagger UI."
 
-#: ../../backend.rst:223
+#: ../../backend.rst:230
 msgid ""
 "Request on ``GET /{API_URL}/endpoint/?format=openapi`` returns OpenAPI "
 "schema in json format. Also you can specify required version of schema "
@@ -3462,7 +3477,7 @@ msgstr ""
 "OpenAPI в формате json. Также вы можете указать нужную версию схемы, "
 "используя query-параметр ``version`` "
 
-#: ../../backend.rst:226
+#: ../../backend.rst:233
 msgid ""
 "To change the schema after generating and before sending to user use "
 "hooks. Define one or more function, each taking 2 named arguments:"
@@ -3471,15 +3486,15 @@ msgstr ""
 "используйте хуки. Напишите одну или несколько функций, каждая из которых "
 "принимает 2 именованных аргумента:"
 
-#: ../../backend.rst:229
+#: ../../backend.rst:236
 msgid "``request`` - user request object."
 msgstr "``request`` - объект запроса пользователя."
 
-#: ../../backend.rst:230
+#: ../../backend.rst:237
 msgid "``schema`` - ordered dict with OpenAPI schema."
 msgstr "``schema`` - ordered dict, содержащий схему OpenAPI."
 
-#: ../../backend.rst:233
+#: ../../backend.rst:240
 msgid ""
 "Sometimes hooks may raise an exception; in order to keep a chain of data "
 "modification, such exceptions are handled. The changes made to the schema"
@@ -3489,11 +3504,11 @@ msgstr ""
 "модификации данных, такие исключения обрабатываются. Изменения, сделанные"
 " в схеме перед выбросом исключения, в любом случае сохраняются."
 
-#: ../../backend.rst:242
+#: ../../backend.rst:249
 msgid "Example hook:"
 msgstr "Пример хука:"
 
-#: ../../backend.rst:244
+#: ../../backend.rst:251
 msgid ""
 "To connect hook(s) to your app add function import name to the "
 "``OPENAPI_HOOKS`` list in ``settings.py``"
@@ -3501,11 +3516,11 @@ msgstr ""
 "Чтобы присоединить хук(-и) к вашему приложению, добавьте строку импорта "
 "вашей функции в список ``OPENAPI_HOOKS`` в ``settings.py``"
 
-#: ../../backend.rst:254
+#: ../../backend.rst:261
 msgid "Testing Framework"
 msgstr "Фреймворк для тестирования"
 
-#: ../../backend.rst:256
+#: ../../backend.rst:263
 msgid ""
 "VST Utils Framework includes a helper in base test case class and "
 "improves support for making API requests. That means if you want make "
@@ -3517,11 +3532,11 @@ msgstr ""
 " что для отправления bulk-запроса на endpoint нет необходимости создавать"
 " и инициализировать test client, а можно сразу делать запрос."
 
-#: ../../backend.rst:267
+#: ../../backend.rst:274
 msgid "Creating test case"
 msgstr "Создание тест-кейса"
 
-#: ../../backend.rst:268
+#: ../../backend.rst:275
 msgid ""
 "``test.py`` module contains test case classes based on "
 ":class:`vstutils.tests.BaseTestCase`. At the moment, we officially "
@@ -3535,11 +3550,11 @@ msgstr ""
 "оберток запросов с проверкой выполнения и runtime-оптимизацией "
 "bulk-запросов с ручной проверкой значений."
 
-#: ../../backend.rst:275
+#: ../../backend.rst:282
 msgid "Simple example with classic tests"
 msgstr "Простой пример с классическими тестами"
 
-#: ../../backend.rst:277
+#: ../../backend.rst:284
 msgid ""
 "For example, if you have api endpoint like ``/api/v1/project/`` and model"
 " Project you can write test case like this:"
@@ -3547,7 +3562,7 @@ msgstr ""
 "Например, если у вас endpoint вида ``/api/v1/project/`` и модель Project,"
 " вы можете написать такой тест:"
 
-#: ../../backend.rst:312
+#: ../../backend.rst:319
 msgid ""
 "This example demonstrates functionality of default test case class. "
 "Default projects are initialized for the fastest and most efficient "
@@ -3561,11 +3576,11 @@ msgstr ""
 " в разные классы. В данном примере показан классический подход к "
 "тестированию, однако вы можете использовать bulk-запросы в ваших тестах."
 
-#: ../../backend.rst:320
+#: ../../backend.rst:327
 msgid "Bulk requests in tests"
 msgstr "Bulk-запросы в тестах"
 
-#: ../../backend.rst:322
+#: ../../backend.rst:329
 msgid ""
 "Bulk query system is well suited for testing and executing valid queries."
 " Previous example could be rewritten as follows:"
@@ -3573,7 +3588,7 @@ msgstr ""
 "Система bulk-запросов хорошо подходит для тестирования и запуска валидных"
 " запросов. Предыдущий пример может быть переписан так:"
 
-#: ../../backend.rst:372
+#: ../../backend.rst:379
 msgid ""
 "In this case, you have more code, but your tests are closer to GUI "
 "workflow, because vstutils-projects uses ``/api/endpoint/`` for requests."
@@ -3588,7 +3603,7 @@ msgstr ""
 " котором используется bulk меньше по сравнению с тестом, использующим "
 "стандартный механизм."
 
-#: ../../backend.rst:379
+#: ../../backend.rst:386
 msgid "Test case API"
 msgstr "API тест-кейса"
 
@@ -3960,11 +3975,11 @@ msgstr ""
 msgid "new user object for execution."
 msgstr "новый объект пользователя, от которого будет выполнение."
 
-#: ../../backend.rst:386
+#: ../../backend.rst:393
 msgid "Utils"
 msgstr "Утилиты"
 
-#: ../../backend.rst:388
+#: ../../backend.rst:395
 msgid ""
 "This is tested set of development utilities. Utilities include a "
 "collection of code that will be useful in one way or another for "

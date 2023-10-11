@@ -188,9 +188,16 @@ Parameters of one operation (required parameter marked by :superscript:`*`):
 * ``data`` - data to send
 * ``query`` - query parameters as ``str``
 * ``let`` - string with name of variable (used for access to response result in templates)
-* ``headers`` - ``dict`` with headers which will be sent, names of headers must
-  follow `CGI specification <https://www.w3.org/CGI/>`_ (e.g., ``CONTENT_TYPE``, ``GATEWAY_INTERFACE``, ``HTTP_*``).
+* ``headers`` - ``dict`` with headers which will be sent (key - header's name, value - header's value string).
 * ``version`` - ``str`` with specified version of api, if not provided then ``VST_API_VERSION`` will be used
+
+
+.. warning::
+    In previous versions header's names must
+    follow `CGI specification <https://www.w3.org/CGI/>`_
+    (e.g., ``CONTENT_TYPE``, ``GATEWAY_INTERFACE``, ``HTTP_*``)
+
+    Since version 5.3 and after migrate to Django 4 names must follow HTTP specification instead of CGI.
 
 In any request parameter you can insert result value of previous operations
 (``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), for example:
