@@ -507,7 +507,7 @@ export default class ViewConstructor {
         const filters = {};
 
         const parametersCopy = Object.values($.extend(true, {}, parameters)).filter(
-            (f) => !FILTERS_TO_EXCLUDE.includes(f.name),
+            (f) => !FILTERS_TO_EXCLUDE.includes(f.name) && f.in === 'query',
         );
 
         signals.emit(`views[${path}].filters.beforeInit`, parametersCopy);

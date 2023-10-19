@@ -43,9 +43,6 @@ Development Status
     :target: https://pypi.org/project/vstutils/
     :alt: PyPI - Python Version
 
-.. image:: https://img.shields.io/tokei/lines/gitlab/vstconsulting/vstutils?color=green
-    :alt: Lines of code
-
 .. image:: https://img.shields.io/github/last-commit/vstconsulting/vstutils
     :target: https://github.com/vstconsulting/vstutils/commits/master
     :alt: GitHub last commit

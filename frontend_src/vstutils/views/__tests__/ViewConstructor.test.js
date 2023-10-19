@@ -329,6 +329,12 @@ describe('ViewConstructor', () => {
 
         expect(parentsPaths).toStrictEqual(expectedPaths);
     });
+
+    test('headers in filters', () => {
+        const view = views.get('/all_fields/');
+
+        expect(view.filters['If-None-Match']).toBeUndefined();
+    });
 });
 
 test('detail view filters', async () => {
