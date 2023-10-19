@@ -835,6 +835,7 @@ WEB_DAEMON_LOGFILE: _t.Text = uwsgi_settings.get('log_file', fallback='/dev/null
 WEB_ADDRPORT: _t.Text = uwsgi_settings.get('addrport', fallback=':8080')
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = web['request_max_size']
+FILE_UPLOAD_TEMP_DIR = TMP_DIR
 X_FRAME_OPTIONS = web['x_frame_options']
 USE_X_FORWARDED_HOST = web['use_x_forwarded_host']
 USE_X_FORWARDED_PORT = web['use_x_forwarded_port']
