@@ -68,7 +68,8 @@
     "jquery.scrollto/jquery": "3.7.1",
     "admin-lte/jquery-validation": "^1.19.5",
     "admin-lte/jszip": "^3.10.1",
-    "admin-lte/**/jquery": "3.7.1"
+    "admin-lte/**/jquery": "3.7.1",
+    "admin-lte/sweetalert2": "10.16.9"
   },
   "devDependencies": {
     "@babel/core": "^7.16.7",

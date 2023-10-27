@@ -4,6 +4,7 @@ import { i18n } from '@/vstutils/translation';
 import type { FieldOptions, FieldXOptions } from '../base';
 import { StringField } from '../text';
 import ChoicesFieldMixin from './ChoicesFieldMixin.js';
+import type { RepresentData } from '@/vstutils/utils';
 
 export type RawEnumItem = string | [string, string] | { value: string; prefetch_value: string } | Model;
 
@@ -95,5 +96,13 @@ export class ChoicesField extends StringField<ChoicesFieldXOptions> {
      */
     static get mixins() {
         return [ChoicesFieldMixin];
+    }
+
+    getContainerCssClasses(data: RepresentData) {
+        const value = this.getValue(data);
+        if (value) {
+            return [this.formatContainerCssClass(value)];
+        }
+        return [];
     }
 }

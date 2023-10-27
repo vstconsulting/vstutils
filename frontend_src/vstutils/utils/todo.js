@@ -906,17 +906,24 @@ export function generateBase32String(length = 32) {
     return generateRandomString(length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567');
 }
 
+/**
+ * @param {Iterable<import('@/vstutils/fields/base').Field>} fields
+ * @param {RepresentData} data
+ * @return {string[]}
+ */
 export function classesFromFields(fields, data) {
-    return fields
-        .filter((f) => f.format === 'choices' || f.type === 'boolean')
-        .map((f) => {
-            let cls = `field-${f.name}`;
-            const value = f._getValueFromData(data);
-            if (value !== undefined) {
-                cls += `-${stringToCssClass(value)}`;
+    const classes = new Set();
+
+    for (const field of fields) {
+        const classNames = field.getContainerCssClasses(data);
+        if (classNames) {
+            for (const cls of classNames) {
+                classes.add(cls);
             }
-            return cls;
-        });
+        }
+    }
+
+    return Array.from(classes);
 }
 
 export function parseResponseMessage(data) {
@@ -1007,6 +1014,10 @@ export function chunkArray(array, chunkSize) {
     }, []);
 }
 
+/**
+ * @param {unknown} str
+ * @returns {string}
+ */
 export function stringToCssClass(str) {
     if (typeof str !== 'string') str = String(str);
     return str.replace(/\s/g, '');

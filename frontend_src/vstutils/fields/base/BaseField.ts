@@ -1,7 +1,7 @@
 import type { Schema, ParameterType, ParameterCollectionFormat } from 'swagger-schema-official';
 import { defineComponent, markRaw, toRaw } from 'vue';
 import type { InnerData, RepresentData } from '../../utils';
-import { _translate, capitalize, deepEqual, nameToTitle, X_OPTIONS } from '../../utils';
+import { _translate, capitalize, deepEqual, nameToTitle, X_OPTIONS, stringToCssClass } from '../../utils';
 import { pop_up_msg } from '../../popUp';
 import type { Model, ModelConstructor } from '../../models';
 import BaseFieldMixin from './BaseFieldMixin.vue';
@@ -116,6 +116,8 @@ export interface Field<
     isSameValues(data1: RepresentData, data2: RepresentData): boolean;
 
     parseFieldError(errorData: unknown, instanceData: InnerData): unknown;
+
+    getContainerCssClasses(data: RepresentData): string[] | undefined;
 }
 
 export type FieldMixin = ComponentOptionsMixin | ComponentOptions<Vue> | typeof Vue;
@@ -407,6 +409,17 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
                 .join(' ');
         }
         return errorData as Record<string, unknown>;
+    }
+
+    protected formatContainerCssClass(value: string | null | undefined) {
+        if (value === undefined) {
+            return `field-${this.name}`;
+        }
+        return `field-${this.name}-${stringToCssClass(value)}`;
+    }
+
+    getContainerCssClasses(_data: RepresentData): string[] | undefined {
+        return undefined;
     }
 }
 
