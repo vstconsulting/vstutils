@@ -1,4 +1,4 @@
-django-stubs[compatible-mypy]~=4.2.5
+django-stubs[compatible-mypy]~=4.2.6
 djangorestframework-stubs[compatible-mypy]~=3.14.4
 celery-stubs~=0.1.3
 drf-yasg-stubs~=0.1.3
