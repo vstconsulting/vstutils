@@ -22,7 +22,6 @@ import { filterOperations, signals } from '@/vstutils/signals';
 import { i18n } from '@/vstutils/translation';
 import { useRoute } from 'vue-router/composables';
 import {
-    classesFromFields,
     getApp,
     getRedirectUrlFromResponse,
     IGNORED_FILTERS,
@@ -33,6 +32,7 @@ import {
     pathToArray,
     emptyRepresentData,
     emptyInnerData,
+    classesFromFields,
 } from '@/vstutils/utils';
 
 import type { Ref } from 'vue';
@@ -126,7 +126,7 @@ export const useQuerySet = (view: IView) => {
     return { queryset, setQuerySet };
 };
 
-export const useEntityViewClasses = (modelClass: Ref<ModelConstructor>, data: Ref<Record<string, any>>) => {
+export const useEntityViewClasses = (modelClass: Ref<ModelConstructor>, data: Ref<RepresentData>) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
     const flatFields = computed(() => Array.from(modelClass.value.fields.values()));
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return

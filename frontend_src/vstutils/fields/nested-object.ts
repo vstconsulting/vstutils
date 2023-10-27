@@ -186,4 +186,19 @@ export class NestedObjectField
         }
         return validatedValue;
     }
+
+    getContainerCssClasses(data: RepresentData) {
+        const value = this.getValue(data);
+        const classes = [];
+        for (const field of this.nestedModel!.fields.values()) {
+            const fieldClasses = field.getContainerCssClasses(value ?? emptyRepresentData());
+            if (fieldClasses) {
+                const prefix = `field-${this.name}-`;
+                for (const fieldClass of fieldClasses) {
+                    classes.push(fieldClass.replace(/^field-/, prefix));
+                }
+            }
+        }
+        return classes;
+    }
 }

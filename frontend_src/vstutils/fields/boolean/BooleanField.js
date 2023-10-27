@@ -59,6 +59,13 @@ class BooleanField extends BaseField {
     static get mixins() {
         return [BooleanFieldMixin];
     }
+
+    getContainerCssClasses(data) {
+        const value = this.getValue(data);
+        if (value !== undefined) {
+            return [this.formatContainerCssClass(String(value))];
+        }
+    }
 }
 
 export default BooleanField;
