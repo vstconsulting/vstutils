@@ -460,11 +460,13 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
 
 def _get_etag_value(view, model_class, request, pk=None):
     should_hash = False
+    ver = settings.FULL_VERSION
 
     if isinstance(model_class, (list, tuple, set)):
         pk = pk or {view.model_class: view.kwargs.get(view.lookup_url_kwarg or view.lookup_field)}
         return hashlib.blake2s(
-            "_".join(_get_etag_value(view, mc, request, pk.get(mc, 0)) for mc in model_class).encode('utf-8'),
+            "_".join(_get_etag_value(view, mc, request, pk.get(mc, 0)) for mc in model_class)
+            .encode(settings.DEFAULT_CHARSET),
             digest_size=8,
         ).hexdigest()
     elif (get_etag_value := getattr(model_class, 'get_etag_value', None)) is not None:
@@ -481,9 +483,9 @@ def _get_etag_value(view, model_class, request, pk=None):
             etag_value += f'_{request.session.session_key}'
             should_hash = True
     else:
-        etag_value = model_class
+        etag_value = f'{model_class}_{hashlib.blake2s(ver.encode(settings.DEFAULT_CHARSET), digest_size=4).hexdigest()}'
 
-    return hashlib.blake2s(etag_value.encode(settings.DEFAULT_CHARSET), digest_size=8).hexdigest() \
+    return hashlib.blake2s(f'{etag_value}_{ver}'.encode(settings.DEFAULT_CHARSET), digest_size=8).hexdigest() \
         if should_hash \
         else etag_value
 

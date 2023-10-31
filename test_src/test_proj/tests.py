@@ -3594,6 +3594,16 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results_ru[1]['status'], 304)
         self.assertNotEqual(results[0]['headers']['ETag'], results_ru[0]['headers']['ETag'])
 
+        with override_settings(FULL_VERSION='123_345_678'):
+            results_new_ru = self.bulk([
+                {'method': 'get', 'path': ['cacheable'], 'headers': {'If-None-Match': results_ru[0]['headers']['ETag']}},
+                {'method': 'get', 'path': ['cacheable'], 'headers': {'If-None-Match': '<<0[headers][ETag]>>'}},
+            ])
+            self.assertEqual(results_new_ru[0]['status'], 200)
+            self.assertEqual(results_new_ru[1]['status'], 304)
+            self.assertNotEqual(results_ru[0]['headers']['ETag'], results_new_ru[0]['headers']['ETag'])
+            self.assertNotEqual(results[0]['headers']['ETag'], results_new_ru[0]['headers']['ETag'])
+
         results = self.bulk([
             {'method': 'get', 'path': ['cacheable', 'non_cached']},
         ])
