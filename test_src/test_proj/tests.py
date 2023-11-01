@@ -3559,7 +3559,7 @@ class ProjectTestCase(BaseTestCase):
         ])
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[0]['data']['count'], 2)
-        self.assertEqual(results[1]['status'], 304)
+        self.assertEqual(results[1]['status'], 304, results[1]['data'])
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['id'], instance.id)
         self.assertEqual(results[3]['status'], 304)

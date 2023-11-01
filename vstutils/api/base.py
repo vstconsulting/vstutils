@@ -496,6 +496,28 @@ class EtagDependency(enum.Flag):
     LANG = enum.auto()
 
 
+def check_request_etag(request, etag_value, header_name="If-None-Match", operation_handler=str.__eq__):
+    header = request.headers.get(header_name)
+
+    if not header:
+        return etag_value, False
+
+    header = str(header)
+    if header[:2] in {'W/', "w/"}:
+        header = header[2:]
+
+    if header[0] != '"':
+        header = f'"{header}"'
+
+    if etag_value[0] != '"':
+        etag_value = f'"{etag_value}"'
+
+    if operation_handler(etag_value, header):
+        return etag_value, True
+
+    return etag_value, False
+
+
 class CachableHeadMixin(GenericViewSet):
     """
     Mixin which cache GET responses.
@@ -550,16 +572,14 @@ class CachableHeadMixin(GenericViewSet):
             # For non-standart request methods
             return  # nocv
 
-        header = request.headers.get(header_name, None)
-        if not header:
-            return
-        data = self._get_etag(model_class or self.model_class, request)
-        header = str(header)
-        if header[:2] in ('W/', "w/"):
-            header = header[2:]
-        if header[0] != '"':
-            header = f'"{header}"'
-        if operation_handler(data, header):
+        _, match = check_request_etag(
+            request,
+            self.get_etag_value(model_class or self.model_class, request),
+            header_name,
+            operation_handler,
+        )
+
+        if match:
             raise exception
 
     def finalize_response(self, request, response, *args, **kwargs):
