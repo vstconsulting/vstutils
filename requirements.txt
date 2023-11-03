@@ -1,5 +1,5 @@
 # Main packages
-configparserc~=2.0.0
+configparserc~=2.0.2
 Markdown~=3.5.1
 django-environ~=0.11.2
 

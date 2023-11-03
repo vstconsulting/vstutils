@@ -1,5 +1,5 @@
 default:
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v3
   cache: &global_cache
     paths:
       - node_modules/
@@ -25,7 +25,7 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v3
   coverage: '/\d+\%\s*$/'
   variables:
     TOX_ENVS: ""
@@ -83,7 +83,7 @@ functional_test:
       - TOX_ENVS:
           - py38-django42-install
       - TOX_ENVS:
-          - py311-django42-coverage
+          - py312-django42-coverage
 
 js_tests:
   <<: *branch_js_tests
@@ -128,7 +128,7 @@ release:
 
 release_pypi:
   stage: release
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v3
   artifacts:
     reports:
       dotenv: variables.env
