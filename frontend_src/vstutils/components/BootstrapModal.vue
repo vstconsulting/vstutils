@@ -1,7 +1,7 @@
 <template>
     <div style="display: contents">
         <slot name="activator" :open-modal="open" :close-modal="close" />
-        <portal v-if="isOpen" to="root-bottom">
+        <portal v-if="isOpen" :disabled="disablePortal" to="root-bottom">
             <div
                 ref="modal"
                 v-element-bound="onModalCreated"
@@ -90,6 +90,7 @@
              * If true, modal body will be rendered only when animation has ended and modal is fully visible
              */
             renderBodyWhenShown: { type: Boolean, default: false },
+            disablePortal: { type: Boolean, default: false },
         },
         emits: ['shown', 'exit'],
         data() {
