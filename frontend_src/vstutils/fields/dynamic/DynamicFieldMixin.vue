@@ -38,15 +38,20 @@
             }
 
             watch(parentValues, (newValues, oldValues) => {
-                if (!deepEqual(newValues, oldValues)) {
-                    realField.value = props.field.getRealField(newValues);
-                    setValue({
-                        field: props.field.name,
-                        value: savedValues.has(realField.value)
-                            ? savedValues.get(realField.value)
-                            : realField.value.getInitialValue(),
-                    });
+                if (deepEqual(newValues, oldValues)) {
+                    return;
                 }
+                const newField = props.field.getRealField(newValues);
+                if (newField.isEqual(realField.value)) {
+                    return;
+                }
+                realField.value = newField;
+                setValue({
+                    field: props.field.name,
+                    value: savedValues.has(realField.value)
+                        ? savedValues.get(realField.value)
+                        : realField.value.getInitialValue(),
+                });
             });
 
             return { realField, setValue };
