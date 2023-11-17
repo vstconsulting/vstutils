@@ -3,7 +3,7 @@ import hashlib
 import pyotp
 from django.conf import settings
 from django.db import models
-from django.utils.module_loading import import_string as import_class
+from django.utils.module_loading import import_string
 from django.utils.functional import cached_property
 
 from ..models import BaseModel, Manager, BQuerySet
@@ -37,7 +37,7 @@ class Language(ListModel):
         data = {}
         for dict_name in filter(bool, ['TRANSLATION'] + ['SERVER_TRANSLATION' if for_server else None]):
             try:
-                translation_data = import_class(module_path_string + '.translations.' + code + f'.{dict_name}')
+                translation_data = import_string(module_path_string + '.translations.' + code + f'.{dict_name}')
                 if not isinstance(translation_data, dict):
                     continue
                 data.update(translation_data.copy())

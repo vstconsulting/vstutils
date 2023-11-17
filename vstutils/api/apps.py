@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.apps import AppConfig
-
-from ..utils import import_class
+from django.utils.module_loading import import_string
 
 
 class VSTUtilsAppConfig(AppConfig):
@@ -11,7 +10,7 @@ class VSTUtilsAppConfig(AppConfig):
 
     def import_models(self):
         super().import_models()
-        self.module.notificator_class = import_class(
+        self.module.notificator_class = import_string(
             settings.NOTIFICATOR_CLIENT_CLASS
         )
 

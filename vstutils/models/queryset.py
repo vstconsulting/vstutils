@@ -141,27 +141,28 @@ class BQuerySet(models.QuerySet):
             # then deep_parents
             sql_column_to_get, sql_deep_column = sql_deep_column, sql_column_to_get
 
-        with_current_sql = f'''
-            UNION
-            {self.values(origin_model_pk).order_by().query}
-        '''
+        initial_qs = self.filter()
+        initial_qs.query.clear_ordering(True)
+        initial_qs.query.clear_select_fields()
+        initial_qs.query.clear_select_clause()
+        initial_qs = initial_qs.values(origin_model_pk)
+        sql = ' '.join((
+            'WITH RECURSIVE NRQ777 as (',
+                    f'SELECT NU777.{sql_column_to_get}, NU777.{sql_deep_column}',  # noqa: E131
+                    f'FROM {sql_table} NU777',
+                    f'WHERE NU777.{sql_deep_column}',
+                        f'IN ({str(initial_qs.query)})',  # noqa: E131
+                'UNION',  # noqa: E131
+                    f'SELECT NU777_1.{sql_column_to_get}, NU777_1.{sql_deep_column}',
+                    f'FROM {sql_table} NU777_1',
+                        'JOIN NRQ777',
+                            f'ON NU777_1.{sql_deep_column} = NRQ777.{sql_column_to_get}',  # noqa: E131
+            ')',
+            f'SELECT {sql_column_to_get} from NRQ777',  # nosec
+        ))
 
-        sql = f'''
-            WITH RECURSIVE nested as (
-                    SELECT {sql_table}.{sql_column_to_get}, {sql_table}.{sql_deep_column}
-                    FROM {sql_table}
-                    WHERE {sql_table}.{sql_deep_column}
-                        IN ({str(self.values(origin_model_pk).order_by().query)})
-                UNION
-                    SELECT {sql_table}.{sql_column_to_get}, {sql_table}.{sql_deep_column}
-                    FROM {sql_table}
-                        JOIN nested
-                            ON {sql_table}.{sql_deep_column} = nested.{sql_column_to_get}
-            )
-            SELECT {sql_column_to_get} from nested
-        '''  # nosec
         if with_current:
-            sql += with_current_sql
+            sql += f' UNION {initial_qs.query}'
         return self.model.objects.filter(id__in=RawSQL(sql, []))  # nosec
 
     def _deep_nested_ids_without_cte(self, accumulated=None, deep_children=True):

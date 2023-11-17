@@ -1,10 +1,11 @@
-from typing import Dict, Tuple, ClassVar, Callable
 from functools import wraps
+from typing import Dict, Tuple, ClassVar, Callable
 
 from django.db import connections, DatabaseError
+from django.utils.module_loading import import_string
 from rest_framework import status as st, request as req
 
-from ..utils import BaseVstObject, import_class
+from ..utils import BaseVstObject
 
 
 def health_wrapper(method):
@@ -81,7 +82,7 @@ class DefaultBackend(BaseBackend):
         if not self.get_django_settings('RPC_ENABLED'):
             return 'disabled'
         try:
-            celery_app = import_class(
+            celery_app = import_string(
                 self.get_django_settings('WORKER_OPTIONS')['app'].replace(':', '.')
             )
         except ImportError:  # nocv

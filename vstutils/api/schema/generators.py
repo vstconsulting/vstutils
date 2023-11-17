@@ -5,9 +5,10 @@ import copy
 import jwt
 from rest_framework import request as drf_request
 from django.conf import settings
+from django.utils.module_loading import import_string
 from drf_yasg import generators
 from drf_yasg.inspectors import field as field_insp
-from vstutils.utils import import_class, raise_context_decorator_with_default
+from vstutils.utils import raise_context_decorator_with_default
 
 
 def get_centrifugo_public_address(request: drf_request.Request):
@@ -42,7 +43,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
             filter(
                 bool,
                 map(
-                    raise_context_decorator_with_default()(import_class),
+                    raise_context_decorator_with_default()(import_string),
                     getattr(settings, 'OPENAPI_HOOKS', ())
                 )
             )

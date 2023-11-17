@@ -4,12 +4,13 @@ from django.urls import reverse
 from django.conf import settings
 from django.http.request import HttpRequest
 from django.utils.functional import lazy, SimpleLazyObject
+from django.utils.module_loading import import_string
 
-from ..utils import import_class, raise_context_decorator_with_default
+from ..utils import raise_context_decorator_with_default
 from ..static_files import SPA_STATIC_FILES_PROVIDERS
 
 
-manifest_object = import_class(settings.MANIFEST_CLASS)()
+manifest_object = import_string(settings.MANIFEST_CLASS)()
 project_lib_version = getattr(settings, 'PROJECT_LIB_VERSION', '')
 project_version = getattr(settings, 'PROJECT_VERSION', '')
 vstutils_version = settings.VSTUTILS_VERSION

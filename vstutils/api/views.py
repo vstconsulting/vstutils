@@ -3,6 +3,7 @@ import typing as _t
 
 from django.conf import settings
 from django.http import Http404, StreamingHttpResponse
+from django.utils.module_loading import import_string
 from rest_framework import (
     permissions as rest_permissions,
     throttling,
@@ -12,7 +13,6 @@ from rest_framework import (
 
 from . import base, serializers, decorators as deco, responses, models
 from .decorators import subaction
-from ..utils import import_class
 
 
 class LanguageSerializer(serializers.VSTSerializer):
@@ -111,7 +111,7 @@ class HealthView(base.ListNonModelViewSet):
     permission_classes = (rest_permissions.AllowAny,)
     authentication_classes = ()
     throttle_classes = (HealthThrottle,)
-    health_backend = import_class(settings.HEALTH_BACKEND_CLASS)
+    health_backend = import_string(settings.HEALTH_BACKEND_CLASS)
 
     def list(self, request, *args, **kwargs):
         return responses.HTTP_200_OK(*self.health_backend(request).get())
@@ -121,7 +121,7 @@ class MetricsView(base.ListNonModelViewSet):
     permission_classes = (rest_permissions.AllowAny,)
     authentication_classes = ()
     throttle_classes = (MetricsThrottle,)
-    metrics_backend = import_class(settings.METRICS_BACKEND_CLASS)()
+    metrics_backend = import_string(settings.METRICS_BACKEND_CLASS)()
 
     def list(self, request, *args, **kwargs):
         return StreamingHttpResponse(

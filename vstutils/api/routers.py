@@ -2,10 +2,10 @@
 from django.urls.conf import include, re_path, path
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.module_loading import import_string
 from rest_framework import routers, permissions, versioning
 
 from . import responses
-from ..utils import import_class
 
 
 class _AbstractRouter(routers.DefaultRouter):
@@ -87,9 +87,9 @@ class _AbstractRouter(routers.DefaultRouter):
     def generate(self, views_list):
         for prefix, options in views_list.items():
             if 'view' in options:
-                view = import_class(options['view'])
+                view = import_string(options['view'])
             elif 'model' in options:
-                view = import_class(options['model']).generated_view
+                view = import_string(options['model']).generated_view
             args = [prefix, view]
             if 'name' in options:
                 args.append(options['name'])
@@ -114,7 +114,7 @@ class APIRouter(_AbstractRouter):
         self.__register_openapi()
 
     def __register_openapi(self):
-        schema_view = import_class(settings.OPENAPI_VIEW_CLASS)
+        schema_view = import_string(settings.OPENAPI_VIEW_CLASS)
         cache_timeout = settings.SCHEMA_CACHE_TIMEOUT
         swagger_kwargs = {'cache_timeout': 0 if settings.DEBUG or settings.TESTS_RUN else cache_timeout}
         self.register_view(
@@ -243,6 +243,6 @@ class MainRouter(_AbstractRouter):
         # Register view for new bulk requests
         self.register_view(
             r'endpoint',
-            import_class(settings.ENDPOINT_VIEW_CLASS),
+            import_string(settings.ENDPOINT_VIEW_CLASS),
             'endpoint'
         )

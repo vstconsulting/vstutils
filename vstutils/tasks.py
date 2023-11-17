@@ -8,10 +8,11 @@ from celery.app.task import BaseTask
 from celery.result import AsyncResult
 from django.conf import settings
 from django.apps import apps
+from django.utils.module_loading import import_string
 
-from .utils import import_class, send_template_email_handler, Lock, translate as _
+from .utils import send_template_email_handler, Lock, translate as _
 
-celery_app: Celery = import_class(
+celery_app: Celery = import_string(
     settings.WORKER_OPTIONS['app'].replace(':', '.')
 )
 notificator = None

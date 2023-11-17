@@ -31,7 +31,7 @@ from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation, functional
 from django.utils.translation import get_language
-from django.utils.module_loading import import_string as import_class
+from django.utils.module_loading import import_string
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 
@@ -1213,7 +1213,7 @@ class ObjectHandlers(BaseVstObject):
     def _get_backend(self, backend):
         if backend in self.__loaded_backends__:
             return self.__loaded_backends__[backend]
-        self.__loaded_backends__[backend] = import_class(backend)
+        self.__loaded_backends__[backend] = import_string(backend)
         return self.__loaded_backends__[backend]
 
     def get_backend_data(self, name):

@@ -14,6 +14,7 @@ from django.db.models import fields as django_model_fields
 from django.db.models.fields.related import ManyToManyField, OneToOneField, ForeignKey
 from django.utils.functional import SimpleLazyObject, lazy
 from django.db.models.signals import post_save, post_delete
+from django.utils.module_loading import import_string
 from django.dispatch import receiver
 from rest_framework.fields import ModelField, JSONField, CharField as drfCharField, ChoiceField
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
@@ -30,7 +31,6 @@ from ..api.fields import (
     RelatedListField,
 )
 from ..utils import (
-    import_class,
     apply_decorators,
     classproperty,
     get_if_lazy,
@@ -164,7 +164,7 @@ def _ensure_pk_in_fields(model_class, fields):
 
 def _import_class_if_string(value):
     if isinstance(value, str):
-        return SimpleLazyObject(lambda: import_class(value))
+        return SimpleLazyObject(lambda: import_string(value))
     return value
 
 
@@ -561,7 +561,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         elif view_base_class == 'history':
             return api_base.HistoryModelViewSet  # nocv
         elif isinstance(view_base_class, str):
-            return import_class(view_base_class)
+            return import_string(view_base_class)
         return view_base_class
 
     def get_view_class(cls, **extra_options):  # noqa: CFQ001

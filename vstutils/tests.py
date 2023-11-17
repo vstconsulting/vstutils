@@ -20,7 +20,7 @@ from django.contrib.auth import get_user_model
 from django.utils.module_loading import import_string
 from fastapi.testclient import TestClient
 
-from .utils import import_class, raise_context_decorator_with_default
+from .utils import raise_context_decorator_with_default
 from .api.renderers import ORJSONRenderer
 
 User = get_user_model()
@@ -222,7 +222,7 @@ class BaseTestCase(TestCase):
 
         handlers = (
             lambda x: getattr(self.models, x, None) if self.models is not None else None,
-            import_class,
+            import_string,
             apps.get_model
         )
 
