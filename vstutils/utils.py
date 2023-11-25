@@ -321,6 +321,9 @@ def create_view(model, **meta_options):
     .. note::
         This method is also recommended in cases where there is a problem of recursive imports.
 
+    .. warning::
+        This function is oldstyle and will be deprecated in future versions.
+        Use native call of method :method:`vstutils.models.BModel.get_view_class`.
 
     :type model: Type[vstutils.models.BaseModel]
     :param model: Model class with `.get_view_class` method. This method also has :class:`vstutils.models.BModel`.

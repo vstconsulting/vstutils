@@ -13,7 +13,6 @@ from django.urls.resolvers import URLResolver, URLPattern
 from rest_framework import request as drf_request
 from enum import Enum, EnumMeta
 from pathlib import Path
-from .api.base import GenericViewSet
 from .api.models import Language
 from .models.base import ModelBaseClass
 
@@ -103,8 +102,8 @@ def lazy_translate(text: tp.Text) -> str:
     ...
 
 
-def create_view(model: ModelBaseClass, **meta_options) -> type[GenericViewSet]:
-    ...
+def create_view(model: ModelBaseClass, **meta_options):
+    return model.get_view_class(**meta_options)
 
 
 class apply_decorators:

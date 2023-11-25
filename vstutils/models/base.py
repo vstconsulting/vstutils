@@ -78,7 +78,7 @@ view_settings = (
     'parser_classes',
 )
 
-default_extra_metadata: dict = {
+default_extra_metadata = {
     # list or class which is base for view
     "view_class": None,
     # base class for serializers
@@ -210,7 +210,8 @@ def _get_decorator(data):
         assert isinstance(model, ModelBaseClass), (
             f"Invalid model type {type(model)} for path [{path}]."
         )
-        deco_kwargs['view'] = model.lazy_generated_view
+        override_params = deco_kwargs.pop('override_params', {})
+        deco_kwargs['view'] = model.get_lazy_generated_view(**override_params)
         if 'arg' not in deco_kwargs:
             deco_kwargs['arg'] = model._meta.pk.name
     else:
@@ -323,11 +324,15 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         # pylint: disable=no-value-for-parameter
         return cls.get_view_class()
 
-    @classproperty
     @lru_cache()
+    def get_lazy_generated_view(cls, **extra_metadata):
+        # pylint: disable=unnecessary-lambda
+        return SimpleLazyObject(lambda: cls.get_view_class(**extra_metadata))
+
+    @classproperty
     def lazy_generated_view(cls, **extra_metadata):
         # pylint: disable=unnecessary-lambda,no-value-for-parameter
-        return SimpleLazyObject(lambda: cls.get_view_class(**extra_metadata))
+        return cls.get_lazy_generated_view(**extra_metadata)  # nocv
 
     def get_model_fields_mapping(cls, filter_handler=lambda f: True, fields_getter=None):
         fields_getter = fields_getter if fields_getter is not None else lambda: cls._meta.fields

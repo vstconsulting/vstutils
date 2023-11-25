@@ -154,7 +154,8 @@ class BModel(BaseModel):
         - ``_copy_attrs`` - list of model-instance attributes indicates that object is copyable with this attrs.
         - ``_nested`` - key-value mapping with nested views (key - nested name,
           kwargs for :class:`vstutils.api.decorators.nested_view` decorator but supports
-          ``model`` attribute as nested). ``model`` can be string for import.
+          ``model`` attribute as nested). ``model`` can be string for import.  Use ``override_params``
+          when you need to override generated view parameters for nested view (works only with ``model`` as view).
         - ``_extra_view_attributes`` - key-value mapping with additional view attributes,
           but has less priority over generated attributes.
 
@@ -194,6 +195,36 @@ class BModel(BaseModel):
 
                 another_action:
                     Description for another action.
+
+
+    The ``get_view_class()`` method is a utility method in the Django ORM model designed to facilitate
+    the configuration and instantiation of Django Rest Framework (DRF) Generic ViewSets.
+    It allows developers to define and customize various aspects of the associated DRF view class.
+
+    Examples:
+        .. sourcecode:: python
+
+            # Create simple list view with same fields
+            TaskViewSet = Task.get_view_class(view_class='list_only')
+
+            # Create view with overriding nested view params
+            from rest_framework.mixins import CreateModelMixin
+
+            TaskViewSet = Task.get_view_class(
+                nested={
+                    "milestones": {
+                        "model": Stage,
+                        "override_params": {
+                            "view_class": ("history", CreateModelMixin)
+                        },
+                    },
+                },
+            )
+
+
+    Developers can use this method to customize various aspects of the associated view, such as serializer classes,
+    field configurations, filter backends, permission classes, etc. It uses attributes declared in meta attributes,
+    but allows individual parts to be overriden.
     """
 
     #: Primary field for select and search in API.

@@ -125,7 +125,7 @@ class BaseClassDecorator(metaclass=abc.ABCMeta):
 
 class nested_view(BaseClassDecorator):
     arg: Optional[str]  # type: ignore
-    view: GenericViewSet
+    view: generics.GenericAPIView
     allow_append: bool
     append_arg: Optional[str]
     manager_name: Union[str, Callable[[Model], Union[QuerySet, Manager]]]
@@ -143,7 +143,7 @@ class nested_view(BaseClassDecorator):
             self,
             name: str,
             arg: Optional[str],
-            view: GenericViewSet,
+            view: generics.GenericAPIView,
             allow_append: bool = False,
             manager_name: Union[str, Callable[[Model], Union[QuerySet, Manager]]] = '',
             queryset_filters: Iterable[QuerySetFiltersMethodsType] = (),

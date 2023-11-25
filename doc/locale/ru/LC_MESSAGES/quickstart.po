@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-01 08:13+0000\n"
+"POT-Creation-Date: 2023-11-25 04:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.13.1\n"
 
 #: ../../quickstart.rst:2
 msgid "Quick Start"
@@ -442,7 +442,7 @@ msgstr ""
 "сериализаторы для list() и retrieve(), фильтры, эндпоинты API и вложенные"
 " view"
 
-#: of vstutils.models.BModel:159
+#: of vstutils.models.BModel:162 vstutils.models.BModel:187
 msgid "Examples:"
 msgstr "Примеры:"
 
@@ -684,15 +684,18 @@ msgid ""
 "``_nested`` - key-value mapping with nested views (key - nested name, "
 "kwargs for :class:`vstutils.api.decorators.nested_view` decorator but "
 "supports ``model`` attribute as nested). ``model`` can be string for "
-"import."
+"import.  Use ``override_params`` when you need to override generated view"
+" parameters for nested view (works only with ``model`` as view)."
 msgstr ""
-"``_nested`` - отображение ключ-значение с вложенными view (ключ - имя "
+"``_nested`` - сопоставление ключ-значение вложенных view (ключ - имя "
 "вложенного view, kwargs для декоратора "
 ":class:`vstutils.api.decorators.nested_view`, но поддерживает атрибут "
-"``model``  в качестве вложенного view). ``model``  может быть строкой для"
-" импорта."
+"``model`` в качестве вложенного). ``model`` может быть строкой для "
+"импорта. Используйте параметр ``override_params`` в тех случаях, когда необходимо перегрузить"
+"параметры генерируемого представления в качестве вложенного (работает только когда задан ``model`` "
+"как вложенное представление)."
 
-#: of vstutils.models.BModel:122
+#: of vstutils.models.BModel:123
 msgid ""
 "``_extra_view_attributes`` - key-value mapping with additional view "
 "attributes, but has less priority over generated attributes."
@@ -701,7 +704,7 @@ msgstr ""
 "атрибутами view, но имеет меньший приоритет перед сгенерированными "
 "атрибутами."
 
-#: of vstutils.models.BModel:126
+#: of vstutils.models.BModel:127
 msgid ""
 "In common, you can also add custom attributes to override or extend the "
 "default list of processing classes. Supported view attributes are "
@@ -716,17 +719,17 @@ msgstr ""
 " ``renderer_classes`` и ``parser_classes``. Список мета-атрибутов для "
 "настроек view выглядит следующим образом:"
 
-#: of vstutils.models.BModel:131
+#: of vstutils.models.BModel:132
 msgid "``_pre_{attribute}`` - List of classes included before defaults."
 msgstr ""
 "``_pre_{attribute}`` - список классов, включаемых перед значениями по "
 "умолчанию."
 
-#: of vstutils.models.BModel:132
+#: of vstutils.models.BModel:133
 msgid "``_{attribute}`` - List of classes included after defaults."
 msgstr "``_{attribute}`` - список классов, включаемых после значений по умолчанию."
 
-#: of vstutils.models.BModel:133
+#: of vstutils.models.BModel:134
 msgid ""
 "``_override_{attribute}`` - boolean flag indicates that attribute "
 "override default viewset (otherwise appends). Default is ``False``."
@@ -735,7 +738,7 @@ msgstr ""
 "переопределяет ли атрибут view по умолчанию (в противном случае "
 "добавляется). По умолчанию False."
 
-#: of vstutils.models.BModel:137
+#: of vstutils.models.BModel:138
 msgid ""
 "You may need to create an `action <https://www.django-rest-framework.org"
 "/api-guide/viewsets/#marking-extra-actions-for-routing>`_ on generated "
@@ -752,7 +755,7 @@ msgstr ""
 "В этом случае декорированный метод будет принимать объект view в качестве"
 " атрибута ``self``."
 
-#: of vstutils.models.BModel:144
+#: of vstutils.models.BModel:145
 msgid ""
 "In some cases, inheriting models may require to inherit Meta class from "
 "the base model. If the Meta is explicitly declared in the base class, "
@@ -764,7 +767,7 @@ msgstr ""
 "базовом классе, вы можете получить ее через атрибут `OriginalMeta` и "
 "использовать для наследования."
 
-#: of vstutils.models.BModel:149
+#: of vstutils.models.BModel:150
 msgid ""
 "Docstring of model will be reused for view descriptions. It is possible "
 "to write both a general description for all actions and description for "
@@ -773,6 +776,30 @@ msgstr ""
 "Docstring модели будет использоваться для описания view. Можно написать "
 "как общее описание для всех действий, так и описание для каждого "
 "действия, используя следующий синтаксис:"
+
+#: of vstutils.models.BModel:164
+msgid ""
+"The ``get_view_class()`` method is a utility method in the Django ORM "
+"model designed to facilitate the configuration and instantiation of "
+"Django Rest Framework (DRF) Generic ViewSets. It allows developers to "
+"define and customize various aspects of the associated DRF view class."
+msgstr ""
+"Метод ``get_view_class()`` — это служебный метод в ORM Django "
+"моделях, предназначенный для облегчения настройки и создания экземпляров"
+"представлений Django Rest Framework (DRF). Это позволяет разработчикам "
+"определить и настроить различные аспекты класса представления DRF."
+
+#: of vstutils.models.BModel:189
+msgid ""
+"Developers can use this method to customize various aspects of the "
+"associated view, such as serializer classes, field configurations, filter"
+" backends, permission classes, etc. It uses attributes declared in meta "
+"attributes, but allows individual parts to be overriden."
+msgstr ""
+"Разработчики могут использовать этот метод для изменения различных аспектов "
+"получаемого представления, таких как классы сериализаторов, конфигурацию полей, фильтры,"
+"классы разрешений и т.п. Этот метод использует такие же атрибуты, которые были объявлены"
+"в мета-атрибутах, но позволяет перегружать отдельные части."
 
 #: ../../quickstart.rst:208
 msgid ""

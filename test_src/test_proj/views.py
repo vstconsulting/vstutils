@@ -187,10 +187,7 @@ class SettingsViewSetV2(SettingsViewSet):
     localization = None
 
 
-HostListViewSet = create_view(
-    HostList,
-    view_class='list_only'
-)
+HostListViewSet = HostList.get_view_class(view_class='list_only')
 
 ModelWithFKViewSet = create_view(
     ModelWithFK,

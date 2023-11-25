@@ -51,6 +51,9 @@ Documentation = "https://vstutils.vstconsulting.net/"
 file = "README.rst"
 content-type = "text/x-rst"
 
+[project.scripts]
+vstutilsctl = "vstutils.__main__:cmd_execution"
+
 [tool.setuptools]
 zip-safe = false
 include-package-data = true

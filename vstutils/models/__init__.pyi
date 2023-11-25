@@ -34,10 +34,10 @@ class BModel(BaseModel):
 
 
 def bulk_notify_clients(
-        objects: _t.Iterable[_t.Tuple[_t.Text, _t.Any]] = (),
+        objects: _t.Iterable[_t.Tuple[_t.Union[_t.Text, _t.Iterable[_t.Text]], _t.Any]] = (),
         label: _t.Text = None,
 ) -> _t.Optional[_t.List]:
     ...
 
-def notify_clients(model: _t.Union[BModel, models.Model], data: _t.Optional[_t.Any] = None) -> None:
+def notify_clients(model: _t.Union[models.base.ModelBase, models.Model], data: _t.Optional[_t.Any] = None) -> None:
     ...
