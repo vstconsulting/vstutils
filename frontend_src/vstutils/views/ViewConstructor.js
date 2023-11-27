@@ -279,10 +279,11 @@ export default class ViewConstructor {
                     };
                     if (!isEmpty) {
                         operationOptions.action = params;
+                        operationOptions.title = params.title;
                         const view = new ActionView(operationOptions, null);
                         const executeAction = {
                             ...this.dictionary.paths.operations.action.execute,
-                            title: operationOptions[ACTION_NAME] || operationOptions.title,
+                            title: operationOptions[ACTION_NAME] || params.title,
                             confirmationRequired,
                             isFileResponse,
                         };
