@@ -230,4 +230,14 @@ describe('DependFromFkField', () => {
         expect(fetchMock).toBeCalledTimes(2);
         expect(app.store.page.sandbox.value).toBe(true);
     });
+
+    test('model is set', () => {
+        const Attribute = app.modelsResolver.get('Attribute');
+        const PredefinedAttribute = app.modelsResolver.get('PredefinedAttribute');
+        expect(
+            Attribute.fields
+                .get('value')
+                .getRealField({ key: new PredefinedAttribute({ id: 1, field_type: 'boolean' }) }).model,
+        ).toBe(Attribute);
+    });
 });
