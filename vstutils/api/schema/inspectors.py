@@ -201,17 +201,17 @@ class DynamicJsonTypeFieldInspector(FieldInspector):
         if isinstance(field, fields.DependFromFkField):
             field_format = FORMAT_DYN_FK
             options['field_attribute'] = field.field_attribute
-
         else:
             field_format = FORMAT_DYN
             if field.source_view:
                 options['source_view'] = field.source_view
             options['choices'] = field.choices
-            options['types'] = {}
-            for name, field_type in field.types.items():
-                if isinstance(field_type, Field):
-                    field_type = self.probe_field_inspectors(field_type, swagger_object_type, False)
-                options['types'][name] = field_type
+
+        options['types'] = {}
+        for name, field_type in field.types.items():
+            if isinstance(field_type, Field):
+                field_type = self.probe_field_inspectors(field_type, swagger_object_type, False)
+            options['types'][name] = field_type
 
         kwargs = {
             'type': openapi.TYPE_STRING,

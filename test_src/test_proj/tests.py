@@ -1929,7 +1929,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(api['definitions']['Variable']['properties']['value']['format'], 'dynamic_fk')
         self.assertEqual(
             api['definitions']['Variable']['properties']['value'][X_OPTIONS],
-            {"field": 'key', 'field_attribute': 'val_type'}
+            {"field": 'key', 'field_attribute': 'val_type', 'types': {}}
         )
 
         # Check that's schema is correct and fields are working

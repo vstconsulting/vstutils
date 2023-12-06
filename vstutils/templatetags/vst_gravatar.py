@@ -31,5 +31,5 @@ def get_user_gravatar(user_id):
     if not user.email:
         return static('img/anonymous.png')
     url_base = 'https://www.gravatar.com/avatar/{}?d=mp'
-    user_hash = hashlib.md5(user.email.lower().encode('utf-8')).hexdigest()
+    user_hash = hashlib.md5(user.email.lower().encode('utf-8')).hexdigest()  # nosec
     return url_base.format(user_hash)

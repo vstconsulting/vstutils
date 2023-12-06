@@ -31,7 +31,7 @@ class Language(ListModel):
         hashable_str = '_'.join(c for c, _ in settings.LANGUAGES) + (f'_{pk}' if pk is not None else '')
         if settings.ENABLE_CUSTOM_TRANSLATIONS:
             hashable_str += CustomTranslations.get_etag_value(pk)
-        return hashlib.md5(hashable_str.encode('utf-8')).hexdigest()
+        return hashlib.md5(hashable_str.encode('utf-8')).hexdigest()  # nosec
 
     def _get_translation_data(self, module_path_string, code, for_server=False):
         data = {}

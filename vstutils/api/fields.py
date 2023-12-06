@@ -261,7 +261,7 @@ class DynamicJsonTypeField(VSTCharField):
     :type field: str
     :param types: key-value mapping where key is value of subscribed field and
                   value is type (in OpenAPI format) of current field.
-    :type type: dict
+    :type types: dict
     :param choices: variants of choices for different subscribed field values.
                     Uses mapping where key is value of subscribed field and
                     value is list with values to choice.
@@ -371,6 +371,9 @@ class DependFromFkField(DynamicJsonTypeField):
     :type field: str
     :param field_attribute: attribute of related model instance with name of type.
     :type field_attribute: str
+    :param types: key-value mapping where key is value of subscribed field and
+        value is type (in OpenAPI format) of current field.
+    :type types: dict
 
     .. warning::
         ``field_attribute`` in related model must be :class:`rest_framework.fields.ChoicesField` or
@@ -381,9 +384,8 @@ class DependFromFkField(DynamicJsonTypeField):
     default_related_field = VSTCharField(allow_null=True, allow_blank=True, default='')
 
     def __init__(self, **kwargs):
-        self.field = kwargs.pop('field')
         self.field_attribute = kwargs.pop('field_attribute')
-        super(DynamicJsonTypeField, self).__init__(**kwargs)  # pylint: disable=bad-super-call
+        super().__init__(**kwargs)  # pylint: disable=bad-super-call
 
     def get_value(self, dictionary: _t.Any) -> _t.Any:
         value = super().get_value(dictionary)

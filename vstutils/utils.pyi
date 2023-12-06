@@ -474,7 +474,7 @@ class StaticFilesHandlers(ObjectHandlers):
 
 
 class ModelHandlers(ObjectHandlers):
-    def get_object(self, name: tp.Text, obj) -> tp.Any:  # type: ignore[override]
+    def get_object(self, name: tp.Text, obj) -> tp.Any:
         ...
 
 
