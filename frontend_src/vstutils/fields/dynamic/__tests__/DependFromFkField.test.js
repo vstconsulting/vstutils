@@ -84,6 +84,9 @@ const schema = createSchema({
                     'x-options': {
                         field: 'key',
                         field_attribute: 'field_type',
+                        types: {
+                            complex_field: { type: 'boolean' },
+                        },
                     },
                 },
             },
@@ -217,7 +220,7 @@ describe('DependFromFkField', () => {
                             results: [
                                 {
                                     id: 1,
-                                    field_type: 'boolean',
+                                    field_type: 'complex_field',
                                 },
                             ],
                         },

@@ -8,7 +8,7 @@ import type { FieldDefinition } from '@/vstutils/fields/FieldsResolver';
 import type { PageView, BaseView } from '@/vstutils/views';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
 
-interface DynamicFieldXOptions extends FieldXOptions {
+export interface DynamicFieldXOptions extends FieldXOptions {
     source_view?: string;
     field?: string | string[];
     types?: Record<string, FieldDefinition>;
@@ -16,15 +16,15 @@ interface DynamicFieldXOptions extends FieldXOptions {
     callback?: (data: Record<string, unknown>) => FieldDefinition | undefined;
 }
 
-export class DynamicField
-    extends BaseField<unknown, unknown, DynamicFieldXOptions>
-    implements Field<unknown, unknown, DynamicFieldXOptions>
+export class DynamicField<XOptions extends DynamicFieldXOptions = DynamicFieldXOptions>
+    extends BaseField<unknown, unknown, XOptions>
+    implements Field<unknown, unknown, XOptions>
 {
     types: Record<string, Field> | null = null;
     usedOnViews = new Set<string>();
     sourceView?: PageView | number;
 
-    constructor(options: FieldOptions<DynamicFieldXOptions, unknown>) {
+    constructor(options: FieldOptions<XOptions, unknown>) {
         super(options);
 
         onAppAfterInit(() => {

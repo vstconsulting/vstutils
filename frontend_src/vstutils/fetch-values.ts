@@ -87,6 +87,7 @@ function fetchInstancesFields(instances: Model[], fields: Field[], options?: Opt
         } else if (field instanceof ArrayField) {
             promises.push(fetchArrayFieldValues(field as ArrayField, instances, options));
         } else if (field instanceof DynamicField) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             promises.push(fetchDynamicFieldValues(field, instances, options));
         } else if (field instanceof RelatedListField) {
             promises.push(fetchRelatedListFieldValues(field, instances, options));
