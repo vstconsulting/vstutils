@@ -29,8 +29,9 @@ class LDAP:
         'username',
         'password',
         'domain',
-        '__conn',
+        '_conn',
         'user_format',
+        'search_scope',
     )
     fields = ['cn', 'sAMAccountName', 'accountExpires', 'name', 'memberOf']
     LdapError = ldap.LDAPError
@@ -52,6 +53,7 @@ class LDAP:
         :param domain: domain for easy use users
         """
         self.settings = settings
+        self.search_scope = getattr(ldap, f'SCOPE_{settings.LDAP_SEARCH_SCOPE}')
         self.user_format = settings.LDAP_FORMAT.replace('<', "{").replace('>', '}')
         self.logger = logging.getLogger(settings.VST_PROJECT_LIB)
         self.connection_string = connection_string
@@ -78,7 +80,7 @@ class LDAP:
         self.auth(self.username, self.password)
 
     def auth(self, username: Text = None, password: Text = None) -> None:
-        self.__conn = self.__authenticate(
+        self._conn = self.__authenticate(
             self.connection_string,
             str(username or self.username),
             str(password or self.password)
@@ -145,11 +147,11 @@ class LDAP:
         Indicates that object auth worked
         :return: True or False
         """
-        if isinstance(self.__conn, ldap.ldapobject.LDAPObject) or self.__conn:
+        if isinstance(self._conn, ldap.ldapobject.LDAPObject) or self._conn:
             return True
         return False
 
-    def __ldap_filter(self, *filters):
+    def _ldap_filter(self, *filters):
         dc_list = [f"dc={i}" for i in self.domain_name.split('.') if i]
         additinal_filter = "".join([f"({i})" for i in filters if i])
         s_filter = f'(&(objectCategory=user){additinal_filter})'
@@ -157,14 +159,14 @@ class LDAP:
         self.logger.debug(
             f'Search in LDAP: {json.dumps(odict(BASE_DN=base_dn, FILTER=s_filter, FIELDS=self.fields))}'
         )
-        return base_dn, ldap.SCOPE_SUBTREE, s_filter, self.fields
+        return base_dn, self.search_scope, s_filter, self.fields
 
     def group_list(self, *args) -> Text:
         if not self.isAuth():
             raise self.NotAuth("Invalid auth.")
         try:
             data = {
-                k: v for k, v in self.__conn.search_s(*self.__ldap_filter(*args)) if k
+                k: v for k, v in self._conn.search_s(*self._ldap_filter(*args)) if k
             }
             return json.dumps(data, indent=4, ensure_ascii=False, default=json_default)
         except Exception:  # nocv
@@ -182,5 +184,5 @@ class LDAP:
         return f'[ {msg} {self.connection_string} -> {self.username} ]'
 
     def __del__(self):
-        if isinstance(getattr(self, '__conn', None), ldap.ldapobject.LDAPObject):
-            self.__conn.unbind_s()  # nocv
+        if isinstance(getattr(self, '_conn', None), ldap.ldapobject.LDAPObject):
+            self._conn.unbind_s()  # nocv

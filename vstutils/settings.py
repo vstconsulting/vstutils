@@ -443,6 +443,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'ldap-server': env.str(f'{ENV_NAME}_LDAP_CONNECTION', default=None),
             'ldap-default-domain': env.str(f'{ENV_NAME}_LDAP_DOMAIN', default=''),
             'ldap-auth_format': env.str(f'{ENV_NAME}_LDAP_AUTH_FORMAT', default='cn=<username>,<domain>'),
+            'ldap-search-scope': env.str(f'{ENV_NAME}_LDAP_SEARCH_SCOPE', default='ONELEVEL'),
             'language_cookie_name': env.str(f'{ENV_NAME}_LANGUAGE_COOKIE_NAME', default='lang'),
             'agreement_terms_path': env.str(f'{ENV_NAME}_TERMS_PATH', default=f'/etc/{VST_PROJECT_LIB}/terms.md'),
             'consent_to_processing_path': env.str(
@@ -743,6 +744,7 @@ if 'cors_allow_headers' in web:
 LDAP_SERVER: _t.Optional[_t.Text] = main["ldap-server"]
 LDAP_DOMAIN: _t.Optional[_t.Text] = main["ldap-default-domain"]
 LDAP_FORMAT: _t.Text = main["ldap-auth_format"]
+LDAP_SEARCH_SCOPE: _t.Text = main["ldap-search-scope"]
 
 DEFAULT_AUTH_PLUGINS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     'LDAP': {
