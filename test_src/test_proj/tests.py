@@ -2331,6 +2331,29 @@ class OpenapiEndpointTestCase(BaseTestCase):
             ('name', 'phone', 'masked')
         )
 
+    def test_etag(self):
+        client = self.client
+
+        response1 = client.get('/api/endpoint/?format=openapi')
+        self.assertEqual(response1.status_code, 200)
+
+        headers = {'if-none-match': response1.headers['Etag']}
+
+        response2 = client.get('/api/endpoint/?format=openapi', headers=headers)
+        self.assertEqual(response2.status_code, 304)
+
+        response3 = client.get('/api/endpoint/?format=openapi&version=v2', headers=headers)
+        self.assertEqual(response3.status_code, 200)
+
+        self._login()
+        headers['Cookie'] = f'{settings.SESSION_COOKIE_NAME}={self.client.session.session_key}; lang=en'
+        response4 = client.get('/api/endpoint/?format=openapi', headers=headers)
+        self.assertEqual(response4.status_code, 200, response4.content)
+
+        headers['if-none-match'] = response4.headers['Etag']
+        response5 = client.get('/api/endpoint/?format=openapi', headers=headers)
+        self.assertEqual(response5.status_code, 304)
+
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
         paths_which_is_tech = (r'settings', r'_lang')

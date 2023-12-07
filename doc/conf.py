@@ -61,7 +61,6 @@ extensions = [
     'sphinx_autodoc_typehints',
     'sphinxcontrib.mermaid',
     'sphinxcontrib.httpdomain',
-    'vstutils.api.doc_generator',
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
 ]
