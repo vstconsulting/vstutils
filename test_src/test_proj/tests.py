@@ -373,8 +373,8 @@ class VSTUtilsTestCase(BaseTestCase):
         ldap_backend.auth(admin, admin_password)
         self.assertTrue(ldap_backend.isAuth())
         self.assertEqual(
-            json.loads(ldap_backend.group_list())["dc=test,dc=lan"],
-            tree["dc=test,dc=lan"]
+            json.loads(ldap_backend.group_list())['cn=admin,dc=test,dc=lan'],
+            tree["dc=test,dc=lan"]['cn=admin,dc=test,dc=lan']
         )
 
     def test_model_handler(self):

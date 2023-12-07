@@ -1,7 +1,7 @@
 -rrequirements.txt
 -rrequirements-doc.txt
 -rrequirements-rpc.txt
-django~=4.2.7
-httpx>=0.25.1
+django~=4.2.8
+httpx>=0.25.2
 typing-extensions
 sphinx-intl~=2.1.0
