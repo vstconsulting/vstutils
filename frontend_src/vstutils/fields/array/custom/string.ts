@@ -22,6 +22,7 @@ export const StringArrayFieldEdit = defineComponent({
     data() {
         return {
             itemsValidator: undefined,
+            inputmode: undefined,
         };
     },
     render() {
@@ -31,6 +32,7 @@ export const StringArrayFieldEdit = defineComponent({
                     value: this.value || [],
                     unique: this.field.uniqueItems,
                     validator: this.itemsValidator,
+                    inputmode: this.inputmode,
                 },
                 on: { change: (items: unknown[]) => this.$emit('set-value', items) },
                 class: 'tags-selector',

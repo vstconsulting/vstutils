@@ -16,6 +16,7 @@ export const NumberArrayFieldEdit = defineComponent({
     data() {
         return {
             itemsValidator: validateNumber,
+            inputmode: 'decimal',
         };
     },
 });
@@ -41,6 +42,7 @@ export const IntegerArrayFieldEdit = defineComponent({
     data() {
         return {
             itemsValidator: validateInteger,
+            inputmode: 'numeric',
         };
     },
 });

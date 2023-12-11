@@ -51,6 +51,9 @@
             $(this.selectEl!).off().select2('destroy');
         },
         methods: {
+            getSelectContainer() {
+                return this.$el;
+            },
             /**
              * Method, that mounts select2 to current field's select.
              */
@@ -66,6 +69,7 @@
                         },
                         allowClear: this.field.nullable,
                         placeholder: { id: undefined, text: '' },
+                        dropdownParent: $(this.getSelectContainer()),
                     })
                     .on('change', () => {
                         // @ts-expect-error Select2 has no types
