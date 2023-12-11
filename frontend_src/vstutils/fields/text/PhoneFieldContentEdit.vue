@@ -6,7 +6,7 @@
             </div>
         </div>
         <component
-            :is="countryCodeField.component"
+            :is="countryCodeField.getComponent()"
             class="code-selector"
             :field="countryCodeField"
             :data="{ [countryCodeField.name]: countryCode }"
