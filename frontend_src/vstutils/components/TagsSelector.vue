@@ -13,7 +13,14 @@
             </button>
             {{ item }}
         </li>
-        <input ref="input" class="field" type="text" @keyup.enter="add($refs.input.value)" />
+        <input
+            ref="input"
+            class="field"
+            type="text"
+            enterkeyhint="enter"
+            :inputmode="inputmode"
+            @keyup.enter="add($refs.input.value)"
+        />
     </ul>
 </template>
 
@@ -24,6 +31,7 @@
         value: { type: Array, default: () => [] },
         unique: { type: Boolean, default: false },
         validator: { type: Function, default: (value) => value || undefined },
+        inputmode: { type: String, default: 'text' },
     });
     const emit = defineEmits(['change']);
 

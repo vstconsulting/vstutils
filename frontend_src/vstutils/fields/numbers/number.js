@@ -7,7 +7,7 @@ export const NumberFieldContentMixin = {
             if (this.field.isValueValid(value)) {
                 this.$emit('set-value', value);
             } else {
-                this.$refs.input.value = this.value;
+                this.$refs.input.value = this.value ?? '';
             }
         },
     },
