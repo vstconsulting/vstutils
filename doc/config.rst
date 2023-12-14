@@ -11,8 +11,8 @@ vstutils-based application deeply by tweaking ``/etc/{{app_name or app_lib_name}
 The most important thing to keep in mind when planning your application
 architecture is that vstutils-based applications have a service-oriented structure.
 To build a distributed scalable system you only need to connect to a shared database_,
-shared cache_, locks_ and a shared rpc_ service (MQ such as RabbitMQ, Redis, etc.).
-A shared file storage may be required in some cases, a but vstutils does not require it.
+shared cache_, locks_ and a shared rpc_ service (MQ such as RabbitMQ, Redis, Tarantool, etc.).
+A shared file storage may be required in some cases, but vstutils does not require it.
 
 Let's cover the main sections of the config and its parameters:
 
@@ -173,6 +173,51 @@ additional plugins. You can find details about cache configs supported
 using client-server cache realizations.
 We recommend to use Redis in production environments.
 
+Tarantool Cache Backend for Django
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``TarantoolCache`` is a custom cache backend for Django that allows you to use Tarantool as a caching mechanism.
+To use this backend, you need to configure the following settings in your project's configuration:
+
+.. sourcecode:: bash
+
+    [cache]
+    location = localhost:3301
+    backend = vstutils.drivers.cache.TarantoolCache
+
+    [cache.options]
+    space = default
+    user = guest
+    password = guest
+
+Explanation of Settings:
+
+* **location** - The host name and port for connecting to the Tarantool server.
+* **backend** - The path to the TarantoolCache backend class.
+* **space** - The name of the space in Tarantool to use as the cache (default is ``DJANGO_CACHE``).
+* **user** - The username for connecting to the Tarantool server (default is ``guest``).
+* **password** - The password for connecting to the Tarantool server. Optional.
+
+Additionally, you can set the ``connect_on_start`` variable in the ``[cache.options]`` section.
+When set to ``true`` value, this variable triggers an initial connection to the Tarantool server
+to configure spaces and set up the service for automatic removal of outdated entries.
+
+.. warning::
+    Note that this requires the ``expirationd`` module to be installed on the Tarantool server.
+
+.. note::
+    When utilizing Tarantool as a cache backend in VST Utils, temporary spaces are automatically created to facilitate seamless operation.
+    These temporary spaces are dynamically generated as needed and are essential for storing temporary data efficiently.
+
+    It's important to mention that while temporary spaces are automatically handled, if you intend to use persistent spaces on disk,
+    it is necessary to pre-create them on the Tarantool server with schema settings similar to those used by the VST Utils configuration.
+    Ensure that any persistent spaces required for your application are appropriately set up on the Tarantool server
+    with the same schema configurations for consistent and reliable operation.
+
+.. note::
+    It's important to note that this cache driver is unique to vstutils and tailored to seamlessly
+    integrate with the VST Utils framework.
+
 
 .. _locks:
 
@@ -236,6 +281,27 @@ are also supported (with the corresponding types):
 * **task_send_sent_event** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE <userguide/configuration.html#task_send_sent_event>`
 * **worker_send_task_events** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE <userguide/configuration.html#worker_send_task_events>`
 
+VST Utils provides seamless support for using Tarantool as a transport for Celery, allowing efficient and reliable message passing between distributed components.
+To enable this feature, ensure that the Tarantool server has the `queue` module installed.
+
+To configure the connection, use the following example URL: ``tarantool://guest@localhost:3301/rpc``
+
+* ``tarantool://``: Specifies the transport.
+* ``guest``: Authentication parameters (in this case, no password).
+* ``localhost``: Server address.
+* ``3301``: Port for connection.
+* ``rpc``: Prefix for queue names and/or result storage.
+
+VST Utils also supports Tarantool as a backend for storing Celery task results. Connection string is similar to the transport.
+
+.. note::
+    When utilizing Tarantool as a result backend or transport in VST Utils, temporary spaces and queues are automatically created to facilitate seamless operation.
+    These temporary spaces are dynamically generated as needed and are essential for storing temporary data efficiently.
+
+    It's important to mention that while temporary spaces are automatically handled, if you intend to use persistent spaces on disk,
+    it is necessary to pre-create them on the Tarantool server with schema settings similar to those used by the VST Utils configuration.
+    Ensure that any persistent spaces required for your application are appropriately set up on the Tarantool server
+    with the same schema configurations for consistent and reliable operation.
 
 .. _worker:
 

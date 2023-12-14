@@ -272,6 +272,7 @@ class CacheSection(BackendSection):
 class CacheOptionsSection(BackendSection):
     parent: BaseAppendSection
     types_map = {
+        'connect_on_start': ConfigBoolType,
         'binary': ConfigBoolType,
         'no_delay': ConfigBoolType,
         'ignore_exc': ConfigBoolType,
