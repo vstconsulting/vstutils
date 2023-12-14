@@ -47,7 +47,7 @@ def cmd_execution(*args, **kwargs):
 
 
 def get_celery_app(name=None, **kwargs):  # nocv
-    # pylint: disable=import-error
+    # pylint: disable=import-error,unused-import
     """
     Function to return celery-app. Works only if celery installed.
     :param name: Application name
@@ -57,6 +57,8 @@ def get_celery_app(name=None, **kwargs):  # nocv
     from celery import Celery
     from kombu.serialization import register as serialize_registrator
     from .api.renderers import ORJSONRenderer
+    from . import drivers  # noqa: F401
+
     prepare_environment(**kwargs)
     name = name or os.getenv("VST_PROJECT")
 

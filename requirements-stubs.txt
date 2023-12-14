@@ -7,4 +7,4 @@ types-PyMySQL==1.1.0.1
 types-Markdown==3.5.0.3
 types-docutils==0.20.0.3
 types-aiofiles~=23.2.0.0
-typing-extensions~=4.8.0
+typing-extensions~=4.9.0
