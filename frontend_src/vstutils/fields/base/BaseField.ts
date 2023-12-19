@@ -328,10 +328,13 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
             }
         }
 
-        if (value === undefined && this.required && !this.options.default) {
+        if (
+            (value === undefined && this.required && !this.options.default) ||
+            (value === null && !this.nullable)
+        ) {
             throw {
                 error: 'validation',
-                message: $t(samples.required),
+                message: $t(samples.empty),
             };
         }
 

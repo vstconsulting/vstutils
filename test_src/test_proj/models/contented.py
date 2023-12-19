@@ -5,7 +5,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from rest_framework import fields as drf_fields
 from vstutils.models import BModel
 from vstutils.api.filter_backends import VSTFilterBackend
-from vstutils.api.serializers import BaseSerializer
+from vstutils.api.serializers import BaseSerializer, DisplayMode
 from vstutils.api.fields import FkModelField, DependFromFkField
 from vstutils.api.base import ModelViewSet
 
@@ -77,6 +77,7 @@ class Variable(BModel):
 
 class SubVariablesSerializer(BaseSerializer):
     _hide_not_required = True
+    _display_mode = DisplayMode.STEP
 
     key = drf_fields.CharField(read_only=True)
     value = drf_fields.CharField(read_only=True)

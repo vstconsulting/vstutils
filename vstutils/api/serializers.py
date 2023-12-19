@@ -45,6 +45,18 @@ def update_declared_fields(
     return serializer_class
 
 
+class DisplayMode(utils.BaseEnum):
+    """
+    For any serializer displayed on frontend property `_display_mode` can be set to one of this values.
+    """
+
+    DEFAULT = utils.BaseEnum.SAME
+    """Will be used if no mode provided."""
+
+    STEP = utils.BaseEnum.SAME
+    """Each properties group displayed as separate tab. On creation displayed as multiple steps."""
+
+
 class DependFromFkSerializerMixin:
     def to_internal_value(self, data):
         if self.instance is not None and self.partial and isinstance(data, _t.Dict):

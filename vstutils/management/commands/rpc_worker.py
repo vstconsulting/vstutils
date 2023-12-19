@@ -96,9 +96,9 @@ class Command(DockerCommand):
                             proc.kill()
                     proc.wait()
                     raise exc
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:  # nocv
             self._print('Exit by user...', 'WARNING')
-        except BaseException as err:
+        except BaseException as err:  # nocv
             self._print(traceback.format_exc())
             self._print(str(err), 'ERROR')
             sys.exit(1)
