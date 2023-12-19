@@ -2,6 +2,7 @@ import type { APIResponse } from '../api';
 import type { Field } from '../fields/base';
 import type { QuerySet } from '../querySet';
 import type { HttpMethod, InnerData, RepresentData } from '@/vstutils/utils';
+import type { MODEL_MODES } from '@/vstutils/AppConfiguration';
 import {
     deepEqual,
     escapeHtml,
@@ -71,6 +72,7 @@ export class BaseModel implements Model {
     static hideNotRequired?: boolean;
     static additionalProperties?: Field | undefined;
     static additionalPropertiesGroup = '';
+    static displayMode: typeof MODEL_MODES[number] = 'DEFAULT';
 
     _queryset?: QuerySet;
     _parentInstance?: Model;

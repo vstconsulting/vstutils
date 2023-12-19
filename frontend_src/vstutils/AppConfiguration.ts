@@ -45,6 +45,8 @@ export interface AppInfo extends Info {
     [key: string]: any;
 }
 
+export const MODEL_MODES = ['DEFAULT', 'STEP'] as const;
+
 export type ModelDefinition = Schema & {
     properties?: Record<string, FieldDefinition>;
     'x-properties-groups'?: Record<string, string[]>;
@@ -52,6 +54,7 @@ export type ModelDefinition = Schema & {
     'x-non-bulk-methods'?: HttpMethod[];
     'x-translate-model'?: string;
     'x-hide-not-required'?: boolean;
+    'x-display-mode'?: typeof MODEL_MODES[number];
 };
 
 export interface AppSchema extends Spec {

@@ -620,6 +620,7 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
 
         view_field_name = getattr(serializer_class, '_view_field_name', None)
         hide_not_required = getattr(serializer_class, '_hide_not_required', None)
+        display_mode = getattr(serializer_class, '_display_mode', None)
 
         if view_field_name is None and schema_properties:
             view_field_name = get_first_match_name(schema_properties, schema_properties[0])
@@ -644,6 +645,9 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
 
         if hide_not_required:
             schema['x-hide-not-required'] = bool(hide_not_required)
+
+        if display_mode:
+            schema['x-display-mode'] = display_mode
 
         schema._handled = True  # pylint: disable=protected-access
 
