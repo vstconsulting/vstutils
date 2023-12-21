@@ -4,6 +4,7 @@ import sys
 import functools
 
 import orjson
+import ormsgpack
 
 
 _default_settings = {
@@ -56,7 +57,7 @@ def get_celery_app(name=None, **kwargs):  # nocv
     """
     from celery import Celery
     from kombu.serialization import register as serialize_registrator
-    from .api.renderers import ORJSONRenderer
+    from .api.renderers import ORJSONRenderer, MsgpackRenderer
     from . import drivers  # noqa: F401
 
     prepare_environment(**kwargs)
@@ -64,11 +65,20 @@ def get_celery_app(name=None, **kwargs):  # nocv
 
     # Override json encoder/decoder for tasks
     json_encoder = functools.partial(ORJSONRenderer().render, media_type=ORJSONRenderer.media_type)
+    msgpack_encoder = functools.partial(MsgpackRenderer().render, accepted_media_type=MsgpackRenderer.media_type)
     serialize_registrator(
         'json',
-        encoder=lambda x: json_encoder(x).decode('utf-8'),
+        encoder=json_encoder,
         decoder=orjson.loads,
-        content_type=ORJSONRenderer.media_type
+        content_type=ORJSONRenderer.media_type,
+        content_encoding='binary',
+    )
+    serialize_registrator(
+        'msgpack',
+        encoder=msgpack_encoder,
+        decoder=ormsgpack.unpackb,
+        content_type='application/x-msgpack',
+        content_encoding='binary',
     )
 
     celery_app = Celery(name, task_cls='vstutils.tasks:TaskClass')
