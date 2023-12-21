@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-25 04:56+0000\n"
+"POT-Creation-Date: 2023-12-20 23:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.13.1\n"
+"Generated-By: Babel 2.14.0\n"
 
 #: ../../backend.rst:2
 msgid "Backend API manual"
@@ -315,9 +315,10 @@ msgstr ""
 "вложенного view, kwargs для декоратора "
 ":class:`vstutils.api.decorators.nested_view`, но поддерживает атрибут "
 "``model`` в качестве вложенного). ``model`` может быть строкой для "
-"импорта. Используйте параметр ``override_params`` в тех случаях, когда необходимо перегрузить"
-"параметры генерируемого представления в качестве вложенного (работает только когда задан ``model`` "
-"как вложенное представление)."
+"импорта. Используйте параметр ``override_params`` в тех случаях, когда "
+"необходимо перегрузить параметры генерируемого представления в качестве "
+"вложенного (работает только когда задан ``model`` как вложенное "
+"представление)."
 
 #: of vstutils.models.BModel:123
 msgid ""
@@ -404,10 +405,11 @@ msgid ""
 "Django Rest Framework (DRF) Generic ViewSets. It allows developers to "
 "define and customize various aspects of the associated DRF view class."
 msgstr ""
-"Метод ``get_view_class()`` — это служебный метод в ORM Django "
-"моделях, предназначенный для облегчения настройки и создания экземпляров"
-"представлений Django Rest Framework (DRF). Это позволяет разработчикам "
-"определить и настроить различные аспекты класса представления DRF."
+"Метод ``get_view_class()`` — это служебный метод в ORM Django моделях, "
+"предназначенный для облегчения настройки и создания "
+"экземпляров представлений Django Rest Framework (DRF). Это позволяет "
+"разработчикам определить и настроить различные аспекты класса "
+"представления DRF."
 
 #: of vstutils.models.BModel:189
 msgid ""
@@ -416,10 +418,11 @@ msgid ""
 " backends, permission classes, etc. It uses attributes declared in meta "
 "attributes, but allows individual parts to be overriden."
 msgstr ""
-"Разработчики могут использовать этот метод для изменения различных аспектов "
-"получаемого представления, таких как классы сериализаторов, конфигурацию полей, фильтры,"
-"классы разрешений и т.п. Этот метод использует такие же атрибуты, которые были объявлены"
-"в мета-атрибутах, но позволяет перегружать отдельные части."
+"Разработчики могут использовать этот метод для изменения различных "
+"аспектов получаемого представления, таких как классы сериализаторов, "
+"конфигурацию полей, фильтры,классы разрешений и т.п. Этот метод "
+"использует такие же атрибуты, которые были объявлены в мета-атрибутах, но "
+"позволяет перегружать отдельные части."
 
 #: ../../docstring of vstutils.models.BModel.hidden:1
 msgid "If hidden is set to True, entry will be excluded from query in BQuerySet."
@@ -1223,6 +1226,7 @@ msgstr ""
 "значения."
 
 #: of vstutils.api.fields.DependEnumField:6
+#: vstutils.api.fields.DependFromFkField:13
 #: vstutils.api.fields.DynamicJsonTypeField:6
 msgid ""
 "key-value mapping where key is value of subscribed field and value is "
@@ -1289,7 +1293,7 @@ msgstr ""
 msgid "attribute of related model instance with name of type."
 msgstr "атрибут связанного экземпляра модели с именем типа."
 
-#: of vstutils.api.fields.DependFromFkField:15
+#: of vstutils.api.fields.DependFromFkField:18
 msgid ""
 "``field_attribute`` in related model must be "
 ":class:`rest_framework.fields.ChoicesField` or GUI will show field as "
@@ -2144,6 +2148,26 @@ msgstr ""
 "``Meta``, чтобы получить сериализатор с полями CharField по умолчанию. "
 "Настройте атрибут ``generated_field_factory`` чтобы изменить фабричный "
 "метод по умолчанию."
+
+#: of vstutils.api.serializers.DisplayMode:1
+msgid ""
+"For any serializer displayed on frontend property `_display_mode` can be "
+"set to one of this values."
+msgstr ""
+"Для любого сериализатора, показанного на фронтенде, аттрибут `_display_mode` может принимать "
+"одно из следующих значений."
+
+#: ../../docstring of vstutils.api.serializers.DisplayMode.DEFAULT:1
+msgid "Will be used if no mode provided."
+msgstr "Используется, когда не задано никакого режима."
+
+#: ../../docstring of vstutils.api.serializers.DisplayMode.STEP:1
+msgid ""
+"Each properties group displayed as separate tab. On creation displayed as"
+" multiple steps."
+msgstr ""
+"Каждая группа параметров отображается на раздельных вкладках. "
+"При создании выглядит как пошаговый мастер."
 
 #: of vstutils.api.serializers.EmptySerializer:1
 msgid ""
@@ -4376,8 +4400,9 @@ msgid ""
 "This function is oldstyle and will be deprecated in future versions. Use "
 "native call of method :method:`vstutils.models.BModel.get_view_class`."
 msgstr ""
-"Эта функция олдскульная и будет объявлена устаревшей в будущих версиях. Используйте "
-"встроенный вызов метода :method:`vstutils.models.BModel.get_view_class`."
+"Эта функция олдскульная и будет объявлена устаревшей в будущих версиях. "
+"Используйте встроенный вызов метода "
+":method:`vstutils.models.BModel.get_view_class`."
 
 #: of vstutils.utils.create_view:28
 msgid ""
