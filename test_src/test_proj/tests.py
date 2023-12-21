@@ -1743,6 +1743,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['items']['type'], 'object')
         self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['items']['properties']['title']['description'], 'Some description')
 
+        # Check that minLength is set if field allow_null is False
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['decimal']['minLength'], 1)
 
         # Check properly format for RatingField
         self.assertEqual(
@@ -1751,9 +1753,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
                     'title': 'Rating',
                     'type': 'number',
                     'format': 'rating',
+                    'minimum': 0,
+                    'maximum': 10,
                     X_OPTIONS: {
-                        'min_value': 0,
-                        'max_value': 10,
                         'step': 1,
                         'style': 'slider',
                         'color': 'red',
@@ -1767,9 +1769,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'title': 'Fa icon rating',
                 'type': 'number',
                 'format': 'rating',
+                'minimum': 0,
+                'maximum': 5,
                 X_OPTIONS: {
-                    'min_value': 0,
-                    'max_value': 5,
                     'step': 1,
                     'style': 'fa_icon',
                     'color': None,
@@ -2063,6 +2065,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
             }
         )
 
+        # Check field without allow_blank will have minLength
+        self.assertEqual(api['definitions']['OnePost']['properties']['text']['minLength'], 1)
+
         # Check dynamic field with complex types
         nested_model = {
             'type': 'object',
@@ -2203,6 +2208,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'type': 'string',
                 'format': 'wysiwyg',
                 'title': 'Text',
+                'minLength': 1,
             }
         )
 

@@ -20,7 +20,7 @@
                         <a
                             :id="`tab-label-${idx}`"
                             class="nav-link"
-                            :class="{ active: tab.active }"
+                            :class="{ active: tab.active, disabled: tab.active }"
                             role="tab"
                             :aria-controls="`tab-${idx}`"
                             :aria-selected="tab.active"

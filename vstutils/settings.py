@@ -172,7 +172,7 @@ class WebSection(BaseAppendSection):
         'cors_allow_all_origins': ConfigBoolType,
         'cors_allowed_credentials': ConfigBoolType,
         'cors_allowed_origins': ConfigListType,
-        'cors_allowed_origins_regexes': ConfigListType,
+        'cors_allowed_origins_regex': ConfigStringType,
         'cors_expose_headers': ConfigListType,
         'cors_allow_methods': ConfigListType,
         'cors_allow_headers': ConfigListType,
@@ -455,7 +455,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'allow_cors': env.bool(f'{ENV_NAME}_WEB_ALLOW_CORS', default=False),
             'cors_allowed_credentials': env.bool(f'{ENV_NAME}_WEB_CORS_ALLOWED_CREDENTIALS', default=False),
             'cors_allowed_origins': env.list(f'{ENV_NAME}_WEB_CORS_ALLOWED_ORIGINS', default=[]),
-            'cors_allowed_origins_regexes': env.list(f'{ENV_NAME}_WEB_CORS_ALLOWED_ORIGINS_REGEXES', default=[]),
+            'cors_allowed_origins_regex': env.str(f'{ENV_NAME}_WEB_CORS_ALLOWED_ORIGINS_REGEX', default=''),
             'cors_expose_headers': env.list(f'{ENV_NAME}_WEB_CORS_EXPOSE_HEADERS', default=[]),
             'cors_preflight_max_age': env.str(f'{ENV_NAME}_WEB_CORS_PREFLIGHT_MAX_AGE', default='1d'),
             'session_timeout': env.str(f"{ENV_NAME}_SESSION_TIMEOUT", default='2w'),
@@ -734,7 +734,7 @@ MAX_TFA_ATTEMPTS: int = web['max_tfa_attempts']
 CORS_ORIGIN_ALLOW_ALL: bool = web['allow_cors']
 CORS_ALLOWED_ORIGINS: _t.Sequence[str] = web['cors_allowed_origins']
 CORS_ALLOWED_CREDENTIALS: bool = web['cors_allowed_credentials']
-CORS_ALLOWED_ORIGIN_REGEXES: _t.Sequence[_t.Union[str, _t.Pattern[str]]] = web['cors_allowed_origins_regexes'] or None
+CORS_ALLOWED_ORIGIN_REGEX: _t.Union[str, _t.Pattern[str]] = web['cors_allowed_origins_regex'] or None
 CORS_EXPOSE_HEADERS: _t.Sequence = web['cors_expose_headers']
 CORS_PREFLIGHT_MAX_AGE: int = web['cors_preflight_max_age']
 if 'cors_allow_methods' in web:
