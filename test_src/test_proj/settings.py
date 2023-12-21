@@ -68,6 +68,9 @@ API[VST_API_VERSION][r'group'] = dict(
 API[VST_API_VERSION][r'modelwithnested'] = dict(
     model='test_proj.models.ModelWithNestedModels'
 )
+API[VST_API_VERSION][r'stores'] = dict(
+    model='test_proj.models.Store'
+)
 API[VST_API_VERSION][r'modelwithcrontab'] = dict(
     model='test_proj.models.ModelWithCrontabField'
 )

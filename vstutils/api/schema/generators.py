@@ -10,6 +10,8 @@ from drf_yasg import generators
 from drf_yasg.inspectors import field as field_insp
 from vstutils.utils import raise_context_decorator_with_default
 
+from .schema import get_nested_view_obj, _get_nested_view_and_subaction
+
 
 def get_centrifugo_public_address(request: drf_request.Request):
     address = settings.CENTRIFUGO_PUBLIC_HOST
@@ -102,6 +104,12 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
             elif self._update_param_view(param, model, view_cls):
                 continue  # nocv
         return parameters
+
+    def should_include_endpoint(self, path, method, view, public):
+        nested_view, sub_action = _get_nested_view_and_subaction(view)
+        if nested_view and sub_action:
+            view = get_nested_view_obj(view, nested_view, sub_action, method)
+        return super().should_include_endpoint(path, method, view, public)
 
     def get_operation_keys(self, subpath, method, view):
         keys = super().get_operation_keys(subpath, method, view)
