@@ -66,5 +66,5 @@ class ModelWithNestedModels(BaseModel):
             'protected': {
                 'allow_append': True,
                 'model': ProtectedBySignal,
-            }
+            },
         }

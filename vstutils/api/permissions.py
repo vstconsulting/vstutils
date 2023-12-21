@@ -5,17 +5,17 @@ from rest_framework import permissions
 from ..utils import raise_context
 
 
+def is_openapi_request(request):
+    return (
+        request.path.startswith(f'/{settings.API_URL}/openapi/') or
+        request.path.startswith(f'/{settings.API_URL}/endpoint/') or
+        request.path == f'/{settings.API_URL}/{request.version}/_openapi/'
+    )
+
+
 class IsAuthenticatedOpenApiRequest(permissions.IsAuthenticated):
-
-    def is_openapi(self, request):
-        return (
-            request.path.startswith(f'/{settings.API_URL}/openapi/') or
-            request.path.startswith(f'/{settings.API_URL}/endpoint/') or
-            request.path == f'/{settings.API_URL}/{request.version}/_openapi/'
-        )
-
     def has_permission(self, request, view):
-        return self.is_openapi(request) or super().has_permission(request, view)
+        return is_openapi_request(request) or super().has_permission(request, view)
 
 
 class SuperUserPermission(IsAuthenticatedOpenApiRequest):
@@ -29,7 +29,7 @@ class SuperUserPermission(IsAuthenticatedOpenApiRequest):
                 issubclass(view.get_queryset().model, AbstractUser) and
                 str(view.kwargs['pk']) in (str(request.user.pk), 'profile')
             )
-        return self.is_openapi(request)
+        return is_openapi_request(request)
 
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:

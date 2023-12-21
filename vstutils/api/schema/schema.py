@@ -19,6 +19,79 @@ if _t.TYPE_CHECKING:
     View = _t.Type[views.APIView]
 
 
+def _get_nested_view_and_subaction(view, default=None):
+    sub_action = getattr(view, view.action, None)
+    return getattr(sub_action, '_nested_view', default), sub_action
+
+
+def _get_nested_view_class(nested_view, view_action_func):
+    # pylint: disable=protected-access
+    if not hasattr(view_action_func, '_nested_name'):
+        return nested_view
+
+    nested_action_name = '_'.join(view_action_func._nested_name.split('_')[1:])
+
+    if nested_view is None:
+        return nested_view  # nocv
+
+    if hasattr(view_action_func, '_nested_view'):
+        nested_view_class = view_action_func._nested_view
+        view_action_func = getattr(nested_view_class, nested_action_name, None)
+    else:  # nocv
+        nested_view_class = None
+        view_action_func = None
+
+    if view_action_func is None:
+        return nested_view
+
+    return _get_nested_view_class(nested_view_class, view_action_func)
+
+
+def get_nested_view_obj(view, nested_view: 'View', view_action_func, method):
+    # pylint: disable=protected-access
+    # Get nested view recursively
+    nested_view: 'View' = utils.get_if_lazy(_get_nested_view_class(nested_view, view_action_func))
+    # Get action suffix
+    replace_pattern = view_action_func._nested_subname + '_'
+    replace_index = view.action.index(replace_pattern) + len(replace_pattern)
+    action_suffix = view.action[replace_index:]
+    # Check detail or list action
+    is_detail = action_suffix.endswith('detail')
+    is_list = action_suffix.endswith('list')
+    # Create view object
+    method = method.lower()
+    nested_view_obj = nested_view()
+    nested_view_obj.request = view.request
+    nested_view_obj.kwargs = view.kwargs
+    nested_view_obj.lookup_field = view.lookup_field
+    nested_view_obj.lookup_url_kwarg = view.lookup_url_kwarg
+    nested_view_obj.format_kwarg = None
+    nested_view_obj.format_kwarg = None
+    nested_view_obj._nested_wrapped_view = getattr(view_action_func, '_nested_wrapped_view', None)
+    # Check operation action
+    if method == 'post' and is_list:
+        nested_view_obj.action = 'create'
+    elif method == 'get' and is_list:
+        nested_view_obj.action = 'list'
+    elif method == 'get' and is_detail:
+        nested_view_obj.action = 'retrieve'
+    elif method == 'put' and is_detail:
+        nested_view_obj.action = 'update'
+    elif method == 'patch' and is_detail:
+        nested_view_obj.action = 'partial_update'
+    elif method == 'delete' and is_detail:
+        nested_view_obj.action = 'destroy'
+    else:
+        nested_view_obj.action = action_suffix
+        new_view = getattr(nested_view_obj, action_suffix, None)
+        if new_view is not None:
+            serializer_class = new_view.kwargs.get('serializer_class', None)
+            if serializer_class:
+                nested_view_obj.serializer_class = serializer_class
+
+    return nested_view_obj
+
+
 class ExtendedSwaggerAutoSchema(SwaggerAutoSchema):
     def get_query_parameters(self):
         result = super().get_query_parameters()
@@ -107,72 +180,6 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
         self._sch.view = args[0]
         self.request._schema = self
 
-    def _get_nested_view_class(self, nested_view: 'View', view_action_func):
-        # pylint: disable=protected-access
-        if not hasattr(view_action_func, '_nested_name'):
-            return nested_view
-
-        nested_action_name = '_'.join(view_action_func._nested_name.split('_')[1:])
-
-        if nested_view is None:
-            return nested_view  # nocv
-
-        if hasattr(view_action_func, '_nested_view'):
-            nested_view_class = view_action_func._nested_view
-            view_action_func = getattr(nested_view_class, nested_action_name, None)
-        else:  # nocv
-            nested_view_class = None
-            view_action_func = None
-
-        if view_action_func is None:
-            return nested_view
-
-        return self._get_nested_view_class(nested_view_class, view_action_func)
-
-    def __get_nested_view_obj(self, nested_view: 'View', view_action_func):
-        # pylint: disable=protected-access
-        # Get nested view recursively
-        nested_view: 'View' = utils.get_if_lazy(self._get_nested_view_class(nested_view, view_action_func))
-        # Get action suffix
-        replace_pattern = view_action_func._nested_subname + '_'
-        replace_index = self.view.action.index(replace_pattern) + len(replace_pattern)
-        action_suffix = self.view.action[replace_index:]
-        # Check detail or list action
-        is_detail = action_suffix.endswith('detail')
-        is_list = action_suffix.endswith('list')
-        # Create view object
-        method = self.method.lower()
-        nested_view_obj = nested_view()
-        nested_view_obj.request = self.view.request
-        nested_view_obj.kwargs = self.view.kwargs
-        nested_view_obj.lookup_field = self.view.lookup_field
-        nested_view_obj.lookup_url_kwarg = self.view.lookup_url_kwarg
-        nested_view_obj.format_kwarg = None
-        nested_view_obj.format_kwarg = None
-        nested_view_obj._nested_wrapped_view = getattr(view_action_func, '_nested_wrapped_view', None)
-        # Check operation action
-        if method == 'post' and is_list:
-            nested_view_obj.action = 'create'
-        elif method == 'get' and is_list:
-            nested_view_obj.action = 'list'
-        elif method == 'get' and is_detail:
-            nested_view_obj.action = 'retrieve'
-        elif method == 'put' and is_detail:
-            nested_view_obj.action = 'update'
-        elif method == 'patch' and is_detail:
-            nested_view_obj.action = 'partial_update'
-        elif method == 'delete' and is_detail:
-            nested_view_obj.action = 'destroy'
-        else:
-            nested_view_obj.action = action_suffix
-            view = getattr(nested_view_obj, action_suffix, None)
-            if view is not None:
-                serializer_class = view.kwargs.get('serializer_class', None)
-                if serializer_class:
-                    nested_view_obj.serializer_class = serializer_class
-
-        return nested_view_obj
-
     def get_operation_id(self, operation_keys=None):
         new_operation_keys: _t.List[str] = []
         append_new_operation_keys = new_operation_keys.append
@@ -189,17 +196,13 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
                 response.description = self.default_status_messages.get(response_code, 'Action accepted.')
         return responses
 
-    def __get_nested_view_and_subaction(self, default=None):
-        sub_action = getattr(self.view, self.view.action, None)
-        return getattr(sub_action, '_nested_view', default), sub_action
-
     def __perform_with_nested(self, func_name, *args, **kwargs):
         # pylint: disable=protected-access
-        nested_view, sub_action = self.__get_nested_view_and_subaction()
+        nested_view, sub_action = _get_nested_view_and_subaction(self.view)
         if nested_view and sub_action:
             schema = copy(self)
             try:
-                schema.view = self.__get_nested_view_obj(nested_view, sub_action)
+                schema.view = get_nested_view_obj(self.view, nested_view, sub_action, self.method)
                 result = getattr(schema, func_name)(*args, **kwargs)
                 if result:
                     return result
@@ -260,7 +263,7 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
 
         params_to_override = ('x-title', 'x-icons')
         if self.method.lower() == 'get':
-            subscribe_view = self.__get_nested_view_and_subaction(self.view)[0]
+            subscribe_view = _get_nested_view_and_subaction(self.view, self.view)[0]
             queryset = getattr(subscribe_view, 'queryset', None)
             if queryset is not None:
                 # pylint: disable=protected-access
