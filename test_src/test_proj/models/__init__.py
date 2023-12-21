@@ -14,3 +14,4 @@ from .contented import VarBasedModel, Variable, VariableType
 from .fields_testing import Post, ExtraPost, Author, ModelWithChangedFk, ModelWithCrontabField, ModelWithUuidFK, ModelWithUuidPk
 from .cacheable import CachableModel, CachableProxyModel
 from .deep import Group, ModelWithNestedModels, GroupWithFK, AnotherDeepNested, ProtectedBySignal
+from .nested_models import Option, Attribute, Store, Product, Manufacturer

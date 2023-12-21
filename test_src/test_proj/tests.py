@@ -86,6 +86,11 @@ from .models import (
     ModelWithNestedModels,
     ProtectedBySignal,
     ModelWithUuidPk,
+    Store,
+    Manufacturer,
+    Option,
+    Attribute,
+    Product
 )
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
@@ -2320,6 +2325,23 @@ class OpenapiEndpointTestCase(BaseTestCase):
         with self.user_as(self, user):
             schema = self.endpoint_schema()
             self.assertTrue(schema['definitions']['User']['properties']['is_staff']['readOnly'])
+
+        # check that nested endponit's permissions took into account
+        user = self._create_user(is_super_user=False, is_staff=True)
+        with self.user_as(self, user):
+            schema = self.endpoint_schema()
+            schemas_differance = set(api['paths'].keys()) - set(schema['paths'].keys())
+            expected_differance = {
+                '/stores/{id}/products/{products_id}/attributes/',
+                '/stores/{id}/products/{products_id}/attributes/{attributes_id}/',
+                '/stores/{id}/manufacturers/{manufacturers_id}/products/{products_id}/attributes/{attributes_id}/',
+                '/stores/{id}/manufacturers/{manufacturers_id}/products/{products_id}/attributes/',
+            }
+            # Check that only expected endpoints were banned.
+            self.assertEqual(
+                schemas_differance,
+                expected_differance
+            )
 
     def test_search_fields(self):
         self.assertEqual(
@@ -5042,6 +5064,57 @@ class ProjectTestCase(BaseTestCase):
         # test generated serializer
         generated_serializer = ModelWithBinaryFiles.generated_view.serializer_class()
         serializer_test(generated_serializer)
+
+    def test_nested_views_permissions(self):
+        # Test nested model viewsets permissions.
+        store = Store.objects.create(
+            name='test'
+        )
+        manufacturer = Manufacturer.objects.create(
+            name='test man',
+            store=store
+        )
+        product = Product.objects.create(
+            name='test prod',
+            store=store,
+            price = 100,
+            manufacturer=manufacturer
+        )
+        attr = Attribute.objects.create(
+            name='test attr',
+            product=product
+        )
+        option = Option.objects.create(
+            name='test option',
+            product=product,
+        )
+
+        endpoints_to_test = [
+            {'method': 'get', 'path': f'/stores/{store.id}/products/{product.id}/attributes/'},
+            {'method': 'get', 'path': f'/stores/{store.id}/products/{product.id}/attributes/{attr.id}/'},
+            {'method': 'get', 'path': f'/stores/{store.id}/manufacturers/{manufacturer.id}/products/{product.id}/attributes/{attr.id}/'},
+            {'method': 'get', 'path': f'/stores/{store.id}/manufacturers/{manufacturer.id}/products/{product.id}/attributes/'},
+        ]
+
+        always_available = [
+            {'method': 'get', 'path': f'/stores/{store.id}/products/{product.id}/options/{option.id}/'},
+            {'method': 'get', 'path': f'/stores/{store.id}/products/{product.id}/options/'},
+        ]
+
+        results = self.bulk(endpoints_to_test + always_available)
+
+        for result in results:
+            self.assertEqual(result['status'], 200, result['path'])
+
+        user = self._create_user(is_super_user=False, is_staff=True)
+        with self.user_as(self, user):
+            results = self.bulk(endpoints_to_test)
+            for result in results:
+                self.assertEqual(result['status'], 403, result['path'])
+
+            results = self.bulk(always_available)
+            for result in results:
+                self.assertEqual(result['status'], 200, result['path'])
 
     def test_deep_nested(self):
         results = self.bulk([
