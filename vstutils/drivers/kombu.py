@@ -1,5 +1,7 @@
+import time
 import base64
 import logging
+from datetime import datetime
 from queue import Empty
 
 import tarantool
@@ -7,6 +9,7 @@ from ormsgpack import packb, unpackb
 from kombu.transport import virtual, base
 from kombu.utils.url import url_to_parts as parse_url
 from celery.backends.base import KeyValueStoreBackend
+from celery.utils.time import maybe_make_aware
 
 logger = logging.getLogger('kombu.transport.tarantool')
 
@@ -111,7 +114,23 @@ class TarantoolChannel(virtual.Channel):
     def _put(self, queue, message, **kwargs):
         """ Put `message` onto `queue`. """
 
-        self.client_eval(queue, f"put('{base64.b64encode(packb(message)).decode('utf-8')}')")
+        headers = message.get('headers', {})
+        properties = message.get('properties', {})
+        options = {'pri': properties.get('priority', 0)}
+
+        now = maybe_make_aware(datetime.now())
+        if (eta := headers.get('eta')) and (eta_date := datetime.fromisoformat(eta)) > now:
+            options['delay'] = max(round((eta_date - now).total_seconds() - 0.5), 0)
+        ops = [
+            f'{k} = {v}'
+            for k, v in options.items()
+            if v
+        ]
+
+        self.client_eval(
+            queue,
+            f"put('{base64.b64encode(packb(message)).decode('utf-8')}', {{ {','.join(ops)} }})"
+        )
 
     def _purge(self, queue):
         """ Remove all messages from `queue`. """
@@ -193,9 +212,10 @@ class TarantoolBackend(KeyValueStoreBackend):
     supports_native_join = True
     persistent = False
 
-    def __init__(self, url=None, *args, **kwargs):
+    def __init__(self, url=None, expires=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         _, host, port, username, password, vhost, _ = parse_url(url)
+        self.expires = self.prepare_expires(expires, type=int)
         self.client = tarantool.connect(host, port, user=username, password=password)
         self.space_name = f"{vhost + '_' if vhost else ''}celery_backend"
         self.client.eval(
@@ -207,12 +227,37 @@ class TarantoolBackend(KeyValueStoreBackend):
                     "format = {"
                         "{name = 'id', type = 'string'}, "  # noqa: E131
                         "{name = 'value', type = 'string'}, "
+                        "{name = 'exp', type = 'number'}, "
                     "} "
                 "}"
             ")"
         )
         self.client.eval(
             f"box.space.{self.space_name}:create_index('primary', {{ parts = {{ 'id' }}, if_not_exists = true }})"
+        )
+        lower_name = self.space_name.lower()
+        self.client.eval(
+            f"""
+            if {lower_name}_is_expired then return 0 end
+
+            clock = require('clock')
+            expirationd = require("expirationd")
+
+            function {lower_name}_is_expired(args, tuple)
+              return tuple[3] > -1 and tuple[3] < clock.realtime()
+            end
+
+            function {lower_name}_delete_tuple(space, args, tuple)
+              box.space[space]:delete{{tuple[1]}}
+            end
+
+            expirationd.start("{lower_name}_clean_results", '{self.space_name}', {lower_name}_is_expired, {{
+                process_expired_tuple = {lower_name}_delete_tuple,
+                args = nil,
+                tuples_per_iteration = 50,
+                full_scan_time = 3600
+            }})
+            """
         )
         self.space = self.client.space(self.space_name)
 
@@ -236,7 +281,7 @@ class TarantoolBackend(KeyValueStoreBackend):
         keys = (f"'{k.decode('utf-8')}'" for k in keys)
 
         data = self.client.execute(
-            f'select * from "{self.space_name}" where "id"  in ({", ".join(keys)})'  # nosec B608
+            f'select "id", "value" from "{self.space_name}" where "id"  in ({", ".join(keys)})'  # nosec B608
         ).data
         if not data:
             return []
@@ -250,7 +295,8 @@ class TarantoolBackend(KeyValueStoreBackend):
         :param value: The value to be stored.
         """
 
-        self.space.replace((key.decode('utf-8'), value))
+        exp = int(time.time() + self.expires + 0.5) if self.expires else -1
+        self.space.replace((key.decode('utf-8'), value, exp))
 
     def delete(self, key):
         """

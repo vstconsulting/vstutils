@@ -168,4 +168,3 @@ DOCKER_DATABASES_TO_MIGRATE = ('primary1',)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.BasicAuthentication',)
-CELERY_TASK_SERIALIZER = 'msgpack'

@@ -133,8 +133,10 @@ class TarantoolCache(BaseCache):
 
     def delete(self, key, version=None):
         key = self.make_and_validate_key(key, version=version)
-        _, value, _ = self.space.delete(key).data
-        return self._serializer.loads(value)
+        data = self.space.delete(key).data
+        if not data:
+            return
+        return self._serializer.loads(data[0][1])
 
     def has_key(self, key, version=None):
         key = self.make_and_validate_key(key, version=version)

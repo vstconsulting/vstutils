@@ -351,7 +351,7 @@ class RPCSection(BaseAppendSection):
         'prefetch_multiplier': ConfigIntType,
         'max_tasks_per_child': ConfigIntType,
         'heartbeat': ConfigIntType,
-        'results_expiry_days': ConfigIntType,
+        'results_expiry': ConfigIntSecondsType,
         'create_instance_attempts': ConfigIntType,
         'enable_worker': ConfigBoolType,
         'task_send_sent_event': ConfigBoolType,
@@ -538,7 +538,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'prefetch_multiplier': env.int(f'{ENV_NAME}_RPC_PREFETCH_MULTIPLIER', default=1),
             'max_tasks_per_child': env.int(f'{ENV_NAME}_RPC_MAX_TASKS_PER_CHILD', default=1),
             'heartbeat': env.int(f'{ENV_NAME}_RPC_HEARTBEAT', default=10),
-            'results_expiry_days': env.int(f'{ENV_NAME}_RPC_RESULTS_EXPIRY_DAYS', default=1),
+            'results_expiry': env.int(f'{ENV_NAME}_RPC_RESULTS_EXPIRY', default=24 * 60 * 60),
             'create_instance_attempts': env.int(f'{ENV_NAME}_RPC_CREATE_INSTANCE_ATTEMPTS', default=10),
             'default_delivery_mode': "persistent",
             'broker_transport_options': {},
@@ -1237,9 +1237,9 @@ if RPC_ENABLED:
     CELERYD_PREFETCH_MULTIPLIER = rpc["prefetch_multiplier"]
     CELERYD_MAX_TASKS_PER_CHILD = rpc["max_tasks_per_child"]
     CELERY_BROKER_HEARTBEAT = rpc["heartbeat"]
-    CELERY_ACCEPT_CONTENT = ['pickle', 'json']
-    CELERY_TASK_SERIALIZER = 'pickle'
-    CELERY_RESULT_EXPIRES = rpc["results_expiry_days"]
+    CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack']
+    CELERY_TASK_SERIALIZER = 'msgpack'
+    CELERY_RESULT_EXPIRES = rpc["results_expiry"]
     CELERY_SEND_SENT_EVENT = rpc["task_send_sent_event"]
     CELERY_SEND_EVENTS = rpc["worker_send_task_events"]
     CELERY_DEFAULT_DELIVERY_MODE = rpc["default_delivery_mode"]

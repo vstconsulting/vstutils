@@ -5721,7 +5721,7 @@ class ConfigParserCTestCase(BaseTestCase):
         self.assertEqual(settings.CELERYD_PREFETCH_MULTIPLIER, 1)
         self.assertEqual(settings.CELERYD_MAX_TASKS_PER_CHILD, 1)
         self.assertEqual(settings.CELERY_BROKER_HEARTBEAT, 10)
-        self.assertEqual(settings.CELERY_RESULT_EXPIRES, 1)
+        self.assertEqual(settings.CELERY_RESULT_EXPIRES, 86400)
         self.assertEqual(settings.CREATE_INSTANCE_ATTEMPTS, 10)
         self.assertEqual(settings.CONCURRENCY, 4)
 
