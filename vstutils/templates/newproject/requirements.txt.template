@@ -1,3 +1,12 @@
 # {{project_name}} requirements
 ###############################
 vstutils[prod]=={{vstutils_version}}
+
+# Add extra for features:
+# rpc - for celery ecosystem
+# sqs - for celery capability with AWS SQS
+# ldap - for support ldap authorization
+# pil - for auto resizing images via validators
+# boto3 - for s3 media storages (AWS S3, Minio, etc)
+# stubs - for mypy checks
+# doc - for standard sphinx requirements to build documentation

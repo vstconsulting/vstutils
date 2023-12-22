@@ -218,7 +218,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         self.assertTrue(os.path.exists(self.project_place + '/test_project/settings.py'))
         self.assertTrue(os.path.isfile(self.project_place + '/test_project/settings.py'))
         self.assertTrue(os.path.isfile(self.project_place + '/setup.py'))
-        self.assertTrue(os.path.isfile(self.project_place + '/setup.cfg'))
+        self.assertTrue(os.path.isfile(self.project_place + '/pyproject.toml'))
         self.assertTrue(os.path.isfile(self.project_place + '/requirements.txt'))
         self.assertTrue(os.path.isfile(self.project_place + '/README.rst'))
         self.assertTrue(os.path.isfile(self.project_place + '/MANIFEST.in'))

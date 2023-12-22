@@ -708,11 +708,11 @@ msgid ""
 "VST Utils provides seamless support for using Tarantool as a transport "
 "for Celery, allowing efficient and reliable message passing between "
 "distributed components. To enable this feature, ensure that the Tarantool"
-" server has the `queue` module installed."
+" server has the `queue` and `expirationd` modules installed."
 msgstr ""
 "VST Utils так же предоставляет поддержку для использования Tarantool сервера как транспорта "
 "в Celery, обеспечивая эффективную и надежную передачу сообщений между распределёнными компонентами. "
-"Для использования этой возможности на сервере Tarantool должен быть установлен модуль `queue`."
+"Для использования этой возможности на сервере Tarantool должны быть установлены модули `queue` и `expirationd`."
 
 #: ../../config.rst:287
 msgid ""

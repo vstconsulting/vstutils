@@ -282,7 +282,7 @@ are also supported (with the corresponding types):
 * **worker_send_task_events** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE <userguide/configuration.html#worker_send_task_events>`
 
 VST Utils provides seamless support for using Tarantool as a transport for Celery, allowing efficient and reliable message passing between distributed components.
-To enable this feature, ensure that the Tarantool server has the `queue` module installed.
+To enable this feature, ensure that the Tarantool server has the `queue` and `expirationd` modules installed.
 
 To configure the connection, use the following example URL: ``tarantool://guest@localhost:3301/rpc``
 
