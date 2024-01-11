@@ -49,16 +49,16 @@ class VSTCharField(CharField):
 
 class FileInStringField(VSTCharField):
     """
-    Field extends :class:`.VSTCharField` and saves file's content as string.
+    This field extends :class:`.VSTCharField` and stores the content of a file as a string.
 
-    Value must be text (not binary) and saves in model as is.
+    The value must be text (not binary) and is saved in the model as is.
 
-    :param media_types: List of MIME types to select on the user's side.
-                        Supported syntax using ``*``. Default: ``['*/*']``
-    :type media_types: tuple,list
+    :param media_types: A list of MIME types to filter on the user's side.
+                        Supports the use of ``*`` as a wildcard. Default: ``['*/*']``
+    :type media_types: tuple, list
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
+        This setting only takes effect in the GUI. In the API, it behaves like :class:`.VSTCharField`.
     """
 
     def __init__(self, **kwargs):
@@ -68,16 +68,16 @@ class FileInStringField(VSTCharField):
 
 class SecretFileInString(FileInStringField):
     """
-    Field extends :class:`.FileInStringField`, but hides it's value in admin interface.
+    This field extends :class:`.FileInStringField` but hides its value in the admin interface.
 
-    Value must be text (not binary) and saves in model as is.
+    The value must be text (not binary) and is saved in the model as is.
 
-    :param media_types: List of MIME types to select on the user's side.
-                        Supported syntax using ``*``. Default: ``['*/*']``
-    :type media_types: tuple,list
+    :param media_types: A list of MIME types to filter on the user's side.
+                        Supports the use of ``*`` as a wildcard. Default: ``['*/*']``
+    :type media_types: tuple, list
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
+        This setting only takes effect in the GUI. In the API, it behaves like :class:`.VSTCharField`.
     """
 
     def __init__(self, **kwargs):
@@ -87,14 +87,16 @@ class SecretFileInString(FileInStringField):
 
 class BinFileInStringField(FileInStringField):
     """
-    Field extends :class:`.FileInStringField`, but works with binary (base64) files.
+    This field extends :class:`.FileInStringField` and is specifically designed to handle binary files.
+    In the GUI, it functions as a file input field, accepting binary files from the user, which are then
+    converted to base64-encoded strings and stored in this field.
 
-    :param media_types: List of MIME types to select on the user's side.
-                        Supported syntax using ``*``. Default: `['*/*']`
-    :type media_types: tuple,list
+    :param media_types: A list of MIME types to filter on the user's side.
+                        Supports the use of ``*`` as a wildcard. Default: `['*/*']`
+    :type media_types: tuple, list
 
     .. note::
-        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
+        This functionality is effective only in the GUI. In the API, it behaves similarly to :class:`.VSTCharField`.
     """
 
 

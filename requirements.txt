@@ -1,6 +1,6 @@
 # Main packages
 configparserc~=2.0.2
-Markdown~=3.5.1
+Markdown~=3.5.2
 django-environ~=0.11.2
 
 # REST API packages
@@ -13,8 +13,10 @@ pyyaml~=6.0.1
 
 # web server
 uvicorn~=0.25.0
-uwsgi==2.0.23
-fastapi~=0.105.0
+pyuwsgi==2.0.23.post0
+# Restore it if some problems with pyuwsgi
+# uwsgi==2.0.23
+fastapi~=0.108.0
 aiofiles==23.2.1
 
 # Notifications

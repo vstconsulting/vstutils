@@ -1051,11 +1051,7 @@ SWAGGER_SETTINGS: _t.Dict = {
         'vstutils.api.schema.renderers.OpenAPIRenderer',
     ],
     'DEEP_LINKING': True,
-    'SECURITY_DEFINITIONS': {
-        'basic': {
-            'type': 'basic'
-        }
-    },
+    'SECURITY_DEFINITIONS': {},
     'LOGIN_URL': 'login',
     'LOGOUT_URL': 'logout',
 }

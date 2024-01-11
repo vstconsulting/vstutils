@@ -58,11 +58,13 @@ In the example above authorization logic will be the following:
 * **debug** - Enable debug mode. Default: false.
 * **allowed_hosts** - Comma separated list of domains, which allowed to serve. Default: ``*``.
 * **first_day_of_week** - Integer value with first day of week. Default: ``0``.
-* **ldap-server** - LDAP server connection.
+* **ldap-server** - LDAP server connection. For example: ``ldap://your_ldap_server:389``
 * **ldap-default-domain** - Default domain for auth.
 * **ldap-auth_format** - Default search request format for auth. Default: ``cn=<username>,<domain>``.
 * **timezone** - Timezone for web-application. Default: UTC.
-* **log_level** - Logging level. Default: WARNING.
+* **log_level** - Logging level. The verbosity level, configurable in Django and Celery, dictates the extent of log information,
+  with higher levels providing detailed debugging insights for development and lower levels streamlining
+  logs for production environments. Default: WARNING.
 * **enable_django_logs** - Enable or disable Django logger to output.
   Useful for debugging. Default: false.
 * **enable_admin_panel** - Enable or disable Django Admin panel. Default: false.
@@ -91,6 +93,12 @@ These settings are for all databases and are vendor-independent,
 with the exception of tablespace management.
 
 * **default_tablespace** - Default tablespace to use for models that don’t specify one, if the backend supports it.
+  A tablespace is a storage location on a database server where the physical data files corresponding to database tables are stored.
+  It allows you to organize and manage the storage of your database tables, specifying the location on disk where the table data is stored.
+  Configuring tablespaces can be beneficial for various reasons, such as optimizing performance by placing specific tables or indexes (with ``default_index_tablespace``)
+  on faster storage devices, managing disk space efficiently, or segregating data for administrative purposes.
+  It provides a level of control over the physical organization of data within the database,
+  allowing developers to tailor storage strategies based on the requirements and characteristics of their application.
   Read more at :django_topics:`Declaring tablespaces for tables <db/tablespaces/#declaring-tablespaces-for-tables>`.
 
 * **default_index_tablespace** - Default tablespace to use for indexes on fields that don’t specify one, if the backend supports it.
@@ -232,8 +240,8 @@ another bunch of same settings as cache_. And why there is another
 section for them, you may ask. Because cache backend is used for locking must
 provide some guarantees, which do not required to usual cache: it MUST
 be shared for all vstutils-based application threads and nodes. So, for example, in-memory backend is not suitable. In case of clusterization we strongly recommend
-to use Redis or Memcached as backend for that purpose. Cache and locks backend
-can be the same, but don't forget about requirement we said above.
+to use Tarantool, Redis or Memcached as backend because they have enough speed for this purposes.
+Cache and locks backend can be the same, but don't forget about requirement we said above.
 
 
 .. _session:
@@ -256,10 +264,21 @@ Rpc settings
 
 Section ``[rpc]``.
 
+Celery is a distributed task queue system for handling asynchronous tasks in web applications.
+Its primary role is to facilitate the execution of background or time-consuming tasks independently from the main application logic.
+Celery is particularly useful for offloading tasks that don't need to be processed immediately, improving the overall responsiveness and performance of an application.
+
+Key features and roles of Celery in an application with asynchronous tasks include:
+
+#. Asynchronous Task Execution: Celery allows developers to define tasks as functions or methods and execute them asynchronously. This is beneficial for tasks that might take a considerable amount of time, such as sending emails, processing data, or generating reports.
+#. Distributed Architecture: Celery operates in a distributed manner, making it suitable for large-scale applications. It can distribute tasks across multiple worker processes or even multiple servers, enhancing scalability and performance.
+#. Message Queue Integration: Celery relies on message brokers (such as RabbitMQ, Redis, Tarantool, SQS or others) to manage the communication between the main application and the worker processes. This decoupling ensures reliable task execution and allows for the efficient handling of task queues.
+#. Periodic Tasks: Celery includes a scheduler that enables the execution of periodic or recurring tasks. This is useful for automating tasks that need to run at specific intervals, like updating data or performing maintenance operations.
+#. Error Handling and Retry Mechanism: Celery provides mechanisms for handling errors in tasks and supports automatic retries. This ensures robustness in task execution, allowing the system to recover from transient failures.
+#. Task Result Storage: Celery supports storing the results of completed tasks, which can be useful for tracking task progress or retrieving results later. This feature is especially valuable for long-running tasks.
+
 vstutils-based application uses Celery for long-running async tasks.
-Celery is based on message queue concept,
-so between web-service and workers running under Celery must be some kind of
-message broker (RabbitMQ or something).  Those settings relate to this broker
+Those settings relate to this broker
 and Celery itself. Those kinds of settings: broker backend, number of
 worker-processes per node and some settings used for troubleshoot
 server-broker-worker interaction problems.
@@ -335,6 +354,10 @@ Django comes with several email sending backends. With the exception of the SMTP
 (default when ``host`` is set), these backends are useful only in testing and development.
 
 Applications based on vstutils uses only ``smtp`` and ``console`` backends.
+These two backends serve distinct purposes in different environments.
+The SMTP backend ensures the reliable delivery of emails in a production setting,
+while the console backend provides a convenient way to inspect emails during development without the risk of unintentional communication with external mail servers.
+Developers often switch between these backends based on the context of their work, choosing the appropriate one for the stage of development or testing.
 
 * **host** - IP or domain for smtp-server. If it not set vstutils uses ``console`` backends. Default: ``None``.
 * **port** - Port for smtp-server connection. Default: ``25``.
@@ -414,9 +437,23 @@ Centrifugo client settings
 
 Section ``[centrifugo]``.
 
+Centrifugo is employed to optimize real-time data updates within a Django application by orchestrating seamless communication among its various components.
+The operational paradigm involves the orchestrated generation of Django signals, specifically ``post_save`` and ``post_delete`` signals,
+dynamically triggered during HTTP requests or the execution of Celery tasks.
+These signals, when invoked on user or BaseModel-derived models within the vstutils framework,
+initiate the creation of messages destined for all subscribers keen on the activities related to these models.
+Subsequent to the completion of the HTTP request or Celery task,
+the notification mechanism dispatches tailored messages to all relevant subscribers.
+In effect, each active browser tab with a pertinent subscription promptly receives a notification,
+prompting an immediate data update request.
+Centrifugo's pivotal role lies in obviating the necessity for applications to engage in periodic REST API polling at fixed intervals (e.g., every 5 seconds).
+This strategic elimination of redundant requests significantly alleviates the REST API's operational load,
+rendering it more scalable to accommodate a larger user base.
+Importantly, this real-time communication model ensures prompt and synchronized data updates, fostering a highly responsive user experience.
+
 To install app with centrifugo client, ``[centrifugo]`` section must be set.
 Centrifugo is used by application to auto-update page data.
-When user change some data, other clients get notification on ``subscriptions_update`` channel
+When user change some data, other clients get notification on channel
 with model label and primary key. Without the service all GUI-clients get page data
 every 5 seconds (by default).
 
@@ -550,6 +587,216 @@ But keep in mind that uWSGI is deprecated and may be removed in future releases.
 Use the uvicorn settings to manage your app server.
 
 
+Working behind the proxy server with TLS
+----------------------------------------
+
+Nginx
+~~~~~
+
+To configure vstutils for operation behind Nginx with TLS, follow these steps:
+
+1. **Install Nginx:**
+
+Ensure that Nginx is installed on your server. You can install it using the package manager specific to your operating system.
+
+2. **Configure Nginx:**
+
+Create an Nginx configuration file for your vstutils application.
+Below is a basic example of an Nginx configuration. Adjust the values based on your specific setup.
+
+.. sourcecode:: nginx
+
+    server {
+        listen 80;
+        server_name your_domain.com;
+
+        return 301 https://$host$request_uri;
+    }
+
+    server {
+        listen 443 ssl;
+        server_name your_domain.com;
+
+        ssl_certificate /path/to/your/certificate.crt;
+        ssl_certificate_key /path/to/your/private.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384';
+
+        gzip            on;
+        gzip_types      text/plain application/xml application/json application/openapi+json text/css application/javascript;
+        gzip_min_length 1000;
+
+        charset utf-8;
+
+        location / {
+            proxy_pass http://127.0.0.1:8080;  # Assuming application is running on the default port
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;  # Set to 'https' since it's a secure connection
+            proxy_set_header X-Forwarded-Host   $host;
+            proxy_set_header X-Forwarded-Port   $server_port;
+        }
+    }
+
+
+Replace ``your_domain.com`` with your actual domain, and update the paths for SSL certificates.
+
+3. **Update vstutils settings:**
+
+Ensure that your vstutils settings have the correct configurations for HTTPS. In your ``/etc/vstutils/settings.ini`` (or project ``settings.ini``):
+
+.. sourcecode:: ini
+
+    [web]
+    secure_proxy_ssl_header_name = HTTP_X_FORWARDED_PROTO
+    secure_proxy_ssl_header_value = https
+
+This ensures that vstutils recognizes the HTTPS connection.
+
+4. **Restart Nginx:**
+
+After making these changes, restart Nginx to apply the new configurations:
+
+.. sourcecode:: bash
+
+    sudo systemctl restart nginx
+
+Now, your vstutils application should be accessible via HTTPS through Nginx. Adjust these instructions based on your specific environment and security considerations.
+
+
+Traefik
+~~~~~~~
+
+To configure vstutils for operation behind Traefik with TLS, follow these steps:
+
+1. **Install Traefik:**
+
+Ensure that Traefik is installed on your server. You can download the binary from the official website or use a package manager specific to your operating system.
+
+2. **Configure Traefik:**
+
+Create a Traefik configuration file ``/path/to/traefik.toml``. Here's a basic example:
+
+.. sourcecode:: toml
+    [experimental]
+      http3 = true
+
+    [entryPoints]
+      [entryPoints.web]
+        address = ":80"
+      [entryPoints.web.http.redirections]
+        [entryPoints.web.http.redirections.entryPoint]
+          to = "websecure"
+
+      [entryPoints.websecure]
+        address = ":443"
+        http3: {}
+
+    [api]
+
+    [providers.file]
+      filename = "/path/to/traefik_config.toml"
+
+3. **Create Traefik Toml Configuration:**
+
+Create the ``/path/to/traefik_config.toml`` file with the following content:
+
+.. sourcecode:: toml
+
+    [http.routers]
+      [http.routers.vstutils]
+        rule = "Host(`your_domain.com`)"
+        entryPoints = ["websecure"]
+        service = "vstutils"
+        middlewares = ["customheaders", "compress"]
+
+    [http.middlewares]
+      [http.middlewares.customheaders.headers.customRequestHeaders]
+        X-Forwarded-Proto = "https"
+
+      [http.middlewares.compress.compress]
+        compress = true
+
+    [http.services]
+      [http.services.vstutils.loadBalancer]
+        [[http.services.vstutils.loadBalancer.servers]]
+          url = "http://127.0.0.1:8080"  # Assuming application is running on the default port
+
+Make sure to replace ``your_domain.com`` with your actual domain.
+
+4. **Update vstutils settings:**
+
+Ensure that your vstutils settings have the correct configurations for HTTPS. In your ``/etc/vstutils/settings.ini`` (or project ``settings.ini``):
+
+.. sourcecode:: ini
+    [web]
+    secure_proxy_ssl_header_name = HTTP_X_FORWARDED_PROTO
+    secure_proxy_ssl_header_value = https
+
+5. **Start Traefik:**
+
+Start Traefik with the following command:
+
+.. sourcecode:: bash
+
+    traefik --configfile /path/to/traefik.toml
+
+Now, your vstutils application should be accessible via HTTPS through Traefik. Adjust these instructions based on your specific environment and requirements.
+
+
+HAProxy
+~~~~~~~
+
+1. **Install HAProxy:**
+
+Ensure that HAProxy is installed on your server. You can install it using the package manager specific to your operating system.
+
+2. **Configure HAProxy:**
+
+Create an HAProxy configuration file for your vstutils application. Below is a basic example of an HAProxy configuration. Adjust the values based on your specific setup.
+
+.. sourcecode:: haproxy
+
+    frontend http-in
+        bind *:80
+        mode http
+        redirect scheme https code 301 if !{ ssl_fc }
+
+    frontend https-in
+        bind *:443 ssl crt /path/to/your/certificate.pem
+        mode http
+        option forwardfor
+        http-request set-header X-Forwarded-Proto https
+
+        default_backend vstutils_backend
+
+    backend vstutils_backend
+        mode http
+        server vstutils-server 127.0.0.1:8080 check
+
+Replace ``your_domain.com`` with your actual domain and update the paths for SSL certificates.
+
+3. **Update vstutils settings:**
+
+Ensure that your vstutils settings have the correct configurations for HTTPS. In your ``/etc/vstutils/settings.ini`` (or project ``settings.ini``):
+
+.. sourcecode:: ini
+    [web]
+    secure_proxy_ssl_header_name = HTTP_X_FORWARDED_PROTO
+    secure_proxy_ssl_header_value = https
+
+4. **Restart HAProxy:**
+
+After making these changes, restart HAProxy to apply the new configurations:
+
+.. sourcecode:: bash
+
+    sudo systemctl restart haproxy
+
+Now, your vstutils application should be accessible via HTTPS through HAProxy. Adjust these instructions based on your specific environment and security considerations.
+
+
 Configuration options
 -----------------------------
 
@@ -587,3 +834,11 @@ This section contains additional information for configure additional elements.
    As you can see from the names, they are closely related to the keys and names of the corresponding config sections.
 
 #. We recommend to install ``uvloop`` to your environment and setup ``loop = uvloop`` in ``[uvicorn]`` section for performance reasons.
+
+In the context of vstutils, the adoption of ``uvloop`` is paramount for optimizing the performance of the application, especially because utilizing ``uvicorn`` as the ASGI server.
+``uvloop`` is an ultra-fast, drop-in replacement for the default event loop provided by Python.
+It is built on top of ``libuv``, a high-performance event loop library, and is specifically designed to optimize the execution speed of asynchronous code.
+
+By leveraging ``uvloop``, developers can achieve substantial performance improvements in terms of reduced latency and increased throughput.
+This is especially critical in scenarios where applications handle a large number of concurrent connections.
+The improved efficiency of event loop handling directly translates to faster response times and better overall responsiveness of the application.
