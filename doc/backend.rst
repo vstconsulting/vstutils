@@ -20,7 +20,14 @@ as BModel provides plenty of Meta attributes to autogenerate serializers and vie
     :members: register_view_action
 
 
-You can also use custom models without using database:
+Vstutils supports models that don't necessitate direct database interaction or aren't inherently tied to database tables.
+These models exhibit diverse behaviors, such as fetching data directly from class attributes, loading data from files,
+or implementing custom data retrieval mechanisms.
+Remarkably, there are models that, in a sense, implement the mechanism of SQL views with pre-defined queries.
+This flexibility allows developers to define a wide range of models that cater to specific data needs,
+from in-memory models to those seamlessly integrating external data sources.
+Vstutils' model system is not confined to traditional database-backed structures,
+providing a versatile foundation for crafting various data representations.
 
 .. automodule:: vstutils.models.custom_model
     :members: ListModel,FileModel,ExternalCustomModel,ViewCustomModel

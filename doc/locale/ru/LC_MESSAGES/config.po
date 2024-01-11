@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-14 02:43+0000\n"
+"POT-Creation-Date: 2024-01-11 03:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.13.1\n"
+"Generated-By: Babel 2.14.0\n"
 
 #: ../../config.rst:2
 msgid "Configuration manual"
@@ -46,17 +46,16 @@ msgid ""
 "structure. To build a distributed scalable system you only need to "
 "connect to a shared database_, shared cache_, locks_ and a shared rpc_ "
 "service (MQ such as RabbitMQ, Redis, Tarantool, etc.). A shared file "
-"storage may be required in some cases, but vstutils does not require "
-"it."
+"storage may be required in some cases, but vstutils does not require it."
 msgstr ""
 "Самое важное, о чем нужно помнить при планировании архитектуры вашего "
 "приложения, это то, что приложения, основанные на vstutils, имеют "
 "сервисно-ориентированную структуру. Чтобы построить распределенную "
 "масштабируемую систему, вам нужно только подключиться к :ref:`общей базе "
 "данных <database>`, :ref:`общему кэшу <cache>`, :ref:`блокировкам "
-"<locks>` и общей :ref:`службе rpc <rpc>` (MQ, такому как RabbitMQ, Redis, Tarantool "
-"и т. д.). В некоторых случаях может потребоваться общее файловое "
-"хранилище, но vstutils не требует его."
+"<locks>` и общей :ref:`службе rpc <rpc>` (MQ, такому как RabbitMQ, Redis,"
+" Tarantool и т. д.). В некоторых случаях может потребоваться общее "
+"файловое хранилище, но vstutils не требует его."
 
 #: ../../config.rst:17
 msgid "Let's cover the main sections of the config and its parameters:"
@@ -158,8 +157,12 @@ msgstr ""
 "умолчанию: ``0``."
 
 #: ../../config.rst:61
-msgid "**ldap-server** - LDAP server connection."
-msgstr "**ldap-server** - Подключение к серверу LDAP."
+msgid ""
+"**ldap-server** - LDAP server connection. For example: "
+"``ldap://your_ldap_server:389``"
+msgstr ""
+"**ldap-server** - Подключение к серверу LDAP.К примеру: "
+"``ldap://your_ldap_server:389``"
 
 #: ../../config.rst:62
 msgid "**ldap-default-domain** - Default domain for auth."
@@ -178,10 +181,19 @@ msgid "**timezone** - Timezone for web-application. Default: UTC."
 msgstr "**timezone** - часовой пояс для веб-приложения. По умолчанию: UTC."
 
 #: ../../config.rst:65
-msgid "**log_level** - Logging level. Default: WARNING."
-msgstr "**log_level** - Уровень логгирования. По умолчанию WARNING."
+msgid ""
+"**log_level** - Logging level. The verbosity level, configurable in "
+"Django and Celery, dictates the extent of log information, with higher "
+"levels providing detailed debugging insights for development and lower "
+"levels streamlining logs for production environments. Default: WARNING."
+msgstr ""
+"**log_level** - Уровень отображения логов. Этот уровень настраивается для"
+" Django и Celery, определяет объем информации в журнале. С более высокими"
+" уровнями предоставляет детальную информацию для целей отладки во время "
+"разработки и более низкие уровни выдают необходимую информацию для "
+"рабочих окружений. По умолчанию уровень: WARNING."
 
-#: ../../config.rst:66
+#: ../../config.rst:68
 msgid ""
 "**enable_django_logs** - Enable or disable Django logger to output. "
 "Useful for debugging. Default: false."
@@ -189,7 +201,7 @@ msgstr ""
 "**enable_django_logs** - Включить или выключить вывод логов Django. "
 "Полезно для отладки. По умолчанию: false."
 
-#: ../../config.rst:68
+#: ../../config.rst:70
 msgid ""
 "**enable_admin_panel** - Enable or disable Django Admin panel. Default: "
 "false."
@@ -197,7 +209,7 @@ msgstr ""
 "**enable_admin_panel** - Включить или выключить панели администратора "
 "Django. По умолчанию: false."
 
-#: ../../config.rst:69
+#: ../../config.rst:71
 msgid ""
 "**enable_registration** - Enable or disable user self-registration. "
 "Default: false."
@@ -205,7 +217,7 @@ msgstr ""
 "**enable_registration** - Включить или выключить самостоятельную "
 "регистрацию пользователей. По умолчанию: false."
 
-#: ../../config.rst:70
+#: ../../config.rst:72
 msgid ""
 "**enable_user_self_remove** - Enable or disable user self-removing. "
 "Default: false."
@@ -213,7 +225,7 @@ msgstr ""
 "**enable_user_self_remove** - Включить или выключить самоудаление "
 "пользователей. По умолчанию: false."
 
-#: ../../config.rst:71
+#: ../../config.rst:73
 msgid ""
 "**auth-plugins** - Comma separated list of django authentication "
 "backends. Authorization attempt is made until the first successful one in"
@@ -223,7 +235,7 @@ msgstr ""
 "разделенных запятыми. Попытка авторизации повторяется до первой успешной "
 "в соответствии с порядком, указанным в списке."
 
-#: ../../config.rst:73
+#: ../../config.rst:75
 msgid ""
 "**auth-cache-user** - Enable or disable user instance caching. It "
 "increases session performance on each request but saves model instance in"
@@ -241,15 +253,15 @@ msgstr ""
 "информацию можно найти в документации "
 ":class:`vstutils.utils.SecurePickling`. По умолчанию: false."
 
-#: ../../config.rst:83
+#: ../../config.rst:85
 msgid "Databases settings"
 msgstr "Настройки базы данных"
 
-#: ../../config.rst:85
+#: ../../config.rst:87
 msgid "Section ``[databases]``."
 msgstr "Раздел ``[databases]``."
 
-#: ../../config.rst:87
+#: ../../config.rst:89
 msgid ""
 "The main section that is designed to manage multiple databases connected "
 "to the project."
@@ -257,7 +269,7 @@ msgstr ""
 "Основной раздел, предназначенный для управления несколькими базами "
 "данных, которые подключены к проекту. "
 
-#: ../../config.rst:90
+#: ../../config.rst:92
 msgid ""
 "These settings are for all databases and are vendor-independent, with the"
 " exception of tablespace management."
@@ -265,20 +277,31 @@ msgstr ""
 "Эти настройки актуальны для всех баз данных за исключением пространства "
 "таблиц."
 
-#: ../../config.rst:93
+#: ../../config.rst:95
 msgid ""
 "**default_tablespace** - Default tablespace to use for models that don’t "
-"specify one, if the backend supports it. Read more at "
-":django_topics:`Declaring tablespaces for tables <db/tablespaces"
-"/#declaring-tablespaces-for-tables>`."
+"specify one, if the backend supports it. A tablespace is a storage "
+"location on a database server where the physical data files corresponding"
+" to database tables are stored. It allows you to organize and manage the "
+"storage of your database tables, specifying the location on disk where "
+"the table data is stored. Configuring tablespaces can be beneficial for "
+"various reasons, such as optimizing performance by placing specific "
+"tables or indexes (with ``default_index_tablespace``) on faster storage "
+"devices, managing disk space efficiently, or segregating data for "
+"administrative purposes. It provides a level of control over the physical"
+" organization of data within the database, allowing developers to tailor "
+"storage strategies based on the requirements and characteristics of their"
+" application. Read more at :django_topics:`Declaring tablespaces for "
+"tables <db/tablespaces/#declaring-tablespaces-for-tables>`."
 msgstr ""
-"**default_tablespace** - Табличное пространство по умолчанию, "
-"используемое для индексов полей, в которых оно не указано, если бэкенд "
-"это поддерживает. Дополнительную информацию можно найти в разделе "
-":django_topics:`Объявление табличных пространств для индексов "
-"<db/tablespaces/#declaring-tablespaces-for-indexes>`."
+"**default_tablespace** - Табличное пространство по умолчанию, которое "
+"используется когда соответствующий бэкенд это поддерживает. Табличное "
+"пространство — это место в файловой системе на сервере базы данных, где "
+"хранятся физические файлы данных, соответствующие таблицам базы данных. "
+"Это позволяет вам организовывать и управлять хранением таблиц вашей базы "
+"данных, указывая место на диске, где будут располагаться данные таблицы."
 
-#: ../../config.rst:96
+#: ../../config.rst:104
 msgid ""
 "**default_index_tablespace** - Default tablespace to use for indexes on "
 "fields that don’t specify one, if the backend supports it. Read more at "
@@ -291,7 +314,7 @@ msgstr ""
 ":django_topics:`Объявление табличных пространств для индексов "
 "<db/tablespaces/#declaring-tablespaces-for-indexes>`.\""
 
-#: ../../config.rst:99
+#: ../../config.rst:107
 msgid ""
 "**databases_without_cte_support** - A comma-separated list of database "
 "section names that do not support CTEs (Common Table Expressions)."
@@ -299,7 +322,7 @@ msgstr ""
 "**databases_without_cte_support** - Разделенный запятыми список разделов "
 "баз данных которые не поддерживают CTEs (Common Table Expressions)."
 
-#: ../../config.rst:103
+#: ../../config.rst:111
 msgid ""
 "Although MariaDB supports Common Table Expressions, but database "
 "connected to MariaDB still needs to be added to "
@@ -314,7 +337,7 @@ msgstr ""
 "стандартной форме. MySQL (начиная с версии 8.0) работает ожидаемым "
 "образом."
 
-#: ../../config.rst:108
+#: ../../config.rst:116
 msgid ""
 "Also, all subsections of this section are available connections to the "
 "DBMS. So the ``databases.default`` section will be used by django as the "
@@ -324,7 +347,7 @@ msgstr ""
 "подключения к СУБД. Таким образом, раздел ``databases.default`` будет "
 "использоваться Django в качестве подключения по умолчанию."
 
-#: ../../config.rst:111
+#: ../../config.rst:119
 msgid ""
 "Here you can change settings related to database, which vstutils-based "
 "application will use. vstutils-based application supports all databases "
@@ -345,7 +368,7 @@ msgstr ""
 "vstutils, на нескольких узлах (кластере) используйте клиент-серверную "
 "базу данных (SQLite не подходит), используемую всеми узлами."
 
-#: ../../config.rst:119
+#: ../../config.rst:127
 msgid ""
 "You can also set the base template for connecting to the database in the "
 "``database`` section."
@@ -353,11 +376,11 @@ msgstr ""
 "Вы также можете задать базовый шаблон для подключения к базе данныхв "
 "разделе ``database``."
 
-#: ../../config.rst:123
+#: ../../config.rst:131
 msgid "Section ``[database]``."
 msgstr "Раздел ``[database]``."
 
-#: ../../config.rst:125
+#: ../../config.rst:133
 msgid ""
 "This section is designed to define the basic template for connections to "
 "various databases. This can be useful to reduce the list of settings in "
@@ -373,11 +396,11 @@ msgstr ""
 "сведения можно найти в документации Django :django_topics:`о "
 "множественных базах данных <db/multi-db/#multiple-databases>`"
 
-#: ../../config.rst:130
+#: ../../config.rst:138
 msgid "There is a list of settings, required for MySQL/MariaDB database."
 msgstr "Здесь приведен список настроек, необходимых для базы данных MySQL/MariaDB"
 
-#: ../../config.rst:132
+#: ../../config.rst:140
 msgid ""
 "Firstly, if you use MySQL/MariaDB and you have set timezone different "
 "from \"UTC\" you should run command below:"
@@ -385,7 +408,7 @@ msgstr ""
 "Во-первых, если вы используете MySQL/MariaDB и установили часовой пояс, "
 "отличный от \"UTC\", вам следует выполнить следующую команду:"
 
-#: ../../config.rst:139
+#: ../../config.rst:147
 msgid ""
 "Secondly, to use MySQL/MariaDB set following options in ``settings.ini`` "
 "file:"
@@ -393,19 +416,19 @@ msgstr ""
 "Во-вторых, чтобы использовать MySQL/MariaDB установите следующие "
 "настройки в файле ``settings.ini``:"
 
-#: ../../config.rst:147
+#: ../../config.rst:155
 msgid "Finally, add some options to MySQL/MariaDB configuration:"
 msgstr "Наконец, добавьте некоторые настройки в конфигурацию MySQL/MariaDB"
 
-#: ../../config.rst:163
+#: ../../config.rst:171
 msgid "Cache settings"
 msgstr "Настройки кэша"
 
-#: ../../config.rst:165
+#: ../../config.rst:173
 msgid "Section ``[cache]``."
 msgstr "Раздел ``[cache]``."
 
-#: ../../config.rst:167
+#: ../../config.rst:175
 msgid ""
 "This section is cache backend related settings used by vstutils-based "
 "application. vstutils supports all cache backends that Django does. "
@@ -427,94 +450,93 @@ msgstr ""
 "клиент-серверного кэша. Мы рекомендуем использовать Redis в "
 "производственных окружениях."
 
-#: ../../config.rst:177
+#: ../../config.rst:185
 msgid "Tarantool Cache Backend for Django"
-msgstr ""
-"Tarantool в качестве сервера кеша для Django"
+msgstr "Tarantool в качестве сервера кеша для Django"
 
-#: ../../config.rst:179
+#: ../../config.rst:187
 msgid ""
 "The ``TarantoolCache`` is a custom cache backend for Django that allows "
 "you to use Tarantool as a caching mechanism. To use this backend, you "
 "need to configure the following settings in your project's configuration:"
 msgstr ""
-"``TarantoolCache`` это уникальный бэкенд для кеша Django, который позволяет "
-"использовать Tarantool как сервер-хранилище кешей. Чтобы использовать этот механизм "
-"необходимо выставить следующие настройки в конфигурации проекта:"
+"``TarantoolCache`` это уникальный бэкенд для кеша Django, который "
+"позволяет использовать Tarantool как сервер-хранилище кешей. Чтобы "
+"использовать этот механизм необходимо выставить следующие настройки в "
+"конфигурации проекта:"
 
-#: ../../config.rst:193
+#: ../../config.rst:201
 msgid "Explanation of Settings:"
 msgstr "Расшифровка настроек"
 
-#: ../../config.rst:195
+#: ../../config.rst:203
 msgid ""
 "**location** - The host name and port for connecting to the Tarantool "
 "server."
-msgstr ""
-"**location** - Имя хоста и порт для подключения к серверу Tarantool."
+msgstr "**location** - Имя хоста и порт для подключения к серверу Tarantool."
 
-#: ../../config.rst:196
+#: ../../config.rst:204
 msgid "**backend** - The path to the TarantoolCache backend class."
-msgstr ""
-"**backend** - Путь до класса TarantoolCache бэкенда."
+msgstr "**backend** - Путь до класса TarantoolCache бэкенда."
 
-#: ../../config.rst:197
+#: ../../config.rst:205
 msgid ""
 "**space** - The name of the space in Tarantool to use as the cache "
 "(default is ``DJANGO_CACHE``)."
 msgstr ""
-"**space** - Имя спейса в Tarantool для использования кешем "
-"(по умолчанию ``DJANGO_CACHE``)."
+"**space** - Имя спейса в Tarantool для использования кешем (по умолчанию "
+"``DJANGO_CACHE``)."
 
-#: ../../config.rst:198
+#: ../../config.rst:206
 msgid ""
 "**user** - The username for connecting to the Tarantool server (default "
 "is ``guest``)."
 msgstr ""
-"**user** - Имя пользователя для подключения к Tarantool-серверу. (По умолчанию:"
-" ``guest``)."
+"**user** - Имя пользователя для подключения к Tarantool-серверу. (По "
+"умолчанию: ``guest``)."
 
-#: ../../config.rst:199
+#: ../../config.rst:207
 msgid ""
 "**password** - The password for connecting to the Tarantool server. "
 "Optional."
 msgstr ""
-"**password** - Пароль для подключения к серверу Tarantool. "
-"Не обязательный."
+"**password** - Пароль для подключения к серверу Tarantool. Не "
+"обязательный."
 
-#: ../../config.rst:201
+#: ../../config.rst:209
 msgid ""
 "Additionally, you can set the ``connect_on_start`` variable in the "
 "``[cache.options]`` section. When set to ``true`` value, this variable "
 "triggers an initial connection to the Tarantool server to configure "
 "spaces and set up the service for automatic removal of outdated entries."
 msgstr ""
-"Можно дополнительно указать переменную ``connect_on_start`` в "
-"секции ``[cache.options]``. Когда задано значение ``true``, это указывает на "
+"Можно дополнительно указать переменную ``connect_on_start`` в секции "
+"``[cache.options]``. Когда задано значение ``true``, это указывает на "
 "вызов дополнительной инициализации на Tarantool сервере для настройки "
-"спейсов и настройки сервиса для автоматического удаления просроченных объектов."
+"спейсов и настройки сервиса для автоматического удаления просроченных "
+"объектов."
 
-#: ../../config.rst:206
+#: ../../config.rst:214
 msgid ""
 "Note that this requires the ``expirationd`` module to be installed on the"
 " Tarantool server."
 msgstr ""
-"Обратите внимание, что это требует установки модуля ``expirationd`` на"
-" сервере Tarantool."
+"Обратите внимание, что это требует установки модуля ``expirationd`` на "
+"сервере Tarantool."
 
-#: ../../config.rst:209
+#: ../../config.rst:217
 msgid ""
 "When utilizing Tarantool as a cache backend in VST Utils, temporary "
 "spaces are automatically created to facilitate seamless operation. These "
 "temporary spaces are dynamically generated as needed and are essential "
 "for storing temporary data efficiently."
 msgstr ""
-"Когда используется Tarantool в качестве кеша то, "
-"автоматически создаются временные (в памяти) спейсы для операций с кешем. "
-"Эти временные спейсы динамически создаются по необходимости и нужны, чтобы "
-"хранить временные данные максимально эффективно."
+"Когда используется Tarantool в качестве кеша то, автоматически создаются "
+"временные (в памяти) спейсы для операций с кешем. Эти временные спейсы "
+"динамически создаются по необходимости и нужны, чтобы хранить временные "
+"данные максимально эффективно."
 
-#: ../../config.rst:212 ../../config.rst:301
+#: ../../config.rst:220 ../../config.rst:320
 msgid ""
 "It's important to mention that while temporary spaces are automatically "
 "handled, if you intend to use persistent spaces on disk, it is necessary "
@@ -524,14 +546,15 @@ msgid ""
 "Tarantool server with the same schema configurations for consistent and "
 "reliable operation."
 msgstr ""
-"Это важно, что эти спейсы автоматически создаются в памяти, и если необходимо "
-"сделать, чтобы эти спейсы хранили данные на дисках, то необходимо "
-"заранее создать их на серевере Tarantool с такой же схемой и аналогичными "
-"настройками, которые используются в VST Utils. Убедитесь, что вам необходимо "
-"использовать устойчивые хранилища в вашем приложении, прежде чем создавать их "
-"на сервере Tarantool с аналогичными названиями. Это важно для стабильной и устойчивой работы."
+"Это важно, что эти спейсы автоматически создаются в памяти, и если "
+"необходимо сделать, чтобы эти спейсы хранили данные на дисках, то "
+"необходимо заранее создать их на серевере Tarantool с такой же схемой и "
+"аналогичными настройками, которые используются в VST Utils. Убедитесь, "
+"что вам необходимо использовать устойчивые хранилища в вашем приложении, "
+"прежде чем создавать их на сервере Tarantool с аналогичными названиями. "
+"Это важно для стабильной и устойчивой работы."
 
-#: ../../config.rst:218
+#: ../../config.rst:226
 msgid ""
 "It's important to note that this cache driver is unique to vstutils and "
 "tailored to seamlessly integrate with the VST Utils framework."
@@ -539,15 +562,15 @@ msgstr ""
 "Важно отметить, что этот драйвер кеша уникальный для vstutils и "
 "адаптирован для полной интеграции с фреймворком VST Utils."
 
-#: ../../config.rst:225
+#: ../../config.rst:233
 msgid "Locks settings"
 msgstr "Настройки блокировок"
 
-#: ../../config.rst:227
+#: ../../config.rst:235
 msgid "Section ``[locks]``."
 msgstr "Раздел ``[locks]``."
 
-#: ../../config.rst:229
+#: ../../config.rst:237
 msgid ""
 "Locks is a system that vstutils-based application uses to avoid damage "
 "from parallel actions working on the same entity simultaneously. It is "
@@ -556,9 +579,10 @@ msgid ""
 "cache backend is used for locking must provide some guarantees, which do "
 "not required to usual cache: it MUST be shared for all vstutils-based "
 "application threads and nodes. So, for example, in-memory backend is not "
-"suitable. In case of clusterization we strongly recommend to use Redis or"
-" Memcached as backend for that purpose. Cache and locks backend can be "
-"the same, but don't forget about requirement we said above."
+"suitable. In case of clusterization we strongly recommend to use "
+"Tarantool, Redis or Memcached as backend because they have enough speed "
+"for this purposes. Cache and locks backend can be the same, but don't "
+"forget about requirement we said above."
 msgstr ""
 "Блокировки - это система, которую приложение, основанное на vstutils, "
 "использует для предотвращения повреждения от параллельных действий, "
@@ -569,19 +593,20 @@ msgstr ""
 "некоторые гарантии, которые не требуются для обычного кэша: он ДОЛЖЕН "
 "быть общим для всех потоков и узлов приложения, основанного на vstutils. "
 "Например, бэкенд in-memory не подходит. В случае кластеризации "
-"настоятельно рекомендуется использовать Redis или Memcached в качестве "
-"бэкэнда для этой цели. Бэкэнд кэша и блокировок могут быть одним и тем "
-"же, но не забывайте о требованиях, о которых мы говорили выше."
+"настоятельно рекомендуется использовать Tarantool, Redis или Memcached в "
+"качестве бэкэнда, потому что они имеют достаточную производительность для"
+" этих целей. Бэкэнд кэша и блокировок могут быть одним и тем же, но не "
+"забывайте о требованиях, о которых мы говорили выше."
 
-#: ../../config.rst:242
+#: ../../config.rst:250
 msgid "Session cache settings"
 msgstr "Настройки кэша сессий"
 
-#: ../../config.rst:244
+#: ../../config.rst:252
 msgid "Section ``[session]``."
 msgstr "Раздел ``[session]``."
 
-#: ../../config.rst:246
+#: ../../config.rst:254
 msgid ""
 "vstutils-based application store sessions in database_, but for better "
 "performance, we use a cache-based session backend. It is based on Django "
@@ -594,38 +619,131 @@ msgstr ""
 "группа настроек, аналогичных настройкам cache_. По умолчанию настройки "
 "получаются из cache_."
 
-#: ../../config.rst:255
+#: ../../config.rst:263
 msgid "Rpc settings"
 msgstr "Настройки RPC"
 
-#: ../../config.rst:257
+#: ../../config.rst:265
 msgid "Section ``[rpc]``."
 msgstr "Раздел ``[rpc]``."
 
-#: ../../config.rst:259
+#: ../../config.rst:267
+msgid ""
+"Celery is a distributed task queue system for handling asynchronous tasks"
+" in web applications. Its primary role is to facilitate the execution of "
+"background or time-consuming tasks independently from the main "
+"application logic. Celery is particularly useful for offloading tasks "
+"that don't need to be processed immediately, improving the overall "
+"responsiveness and performance of an application."
+msgstr ""
+"Celery — это распределенная система очередей задач для обработки "
+"асинхронных задач в веб-приложениях. Его основная роль — облегчить "
+"выполнение фоновых или трудоемких задач независимо от основной логики "
+"приложения. Celery особенно полезен для разгрузки задач, которые не "
+"требуют немедленной обработки, что повышает общую скорость отклика и "
+"производительность приложения."
+
+#: ../../config.rst:271
+msgid ""
+"Key features and roles of Celery in an application with asynchronous "
+"tasks include:"
+msgstr ""
+"Ключевые функции и роли Celery в приложении с асинхронными задачами "
+"включают:"
+
+#: ../../config.rst:273
+msgid ""
+"Asynchronous Task Execution: Celery allows developers to define tasks as "
+"functions or methods and execute them asynchronously. This is beneficial "
+"for tasks that might take a considerable amount of time, such as sending "
+"emails, processing data, or generating reports."
+msgstr ""
+"Асинхронное выполнение задач: Celery позволяет разработчикам определять "
+"задачи как функции или методы и выполнять их асинхронно. Это полезно для "
+"задач, которые могут занять значительное время, таких как отправка "
+"электронных писем, обработка данных или создание отчетов."
+
+#: ../../config.rst:274
+msgid ""
+"Distributed Architecture: Celery operates in a distributed manner, making"
+" it suitable for large-scale applications. It can distribute tasks across"
+" multiple worker processes or even multiple servers, enhancing "
+"scalability and performance."
+msgstr ""
+"Распределенная архитектура: Celery работает распределенным образом, что "
+"делает его подходящим для крупномасштабных приложений. Он может "
+"распределять задачи между несколькими рабочими процессами или даже "
+"несколькими серверами, повышая масштабируемость и производительность."
+
+#: ../../config.rst:275
+msgid ""
+"Message Queue Integration: Celery relies on message brokers (such as "
+"RabbitMQ, Redis, Tarantool, SQS or others) to manage the communication "
+"between the main application and the worker processes. This decoupling "
+"ensures reliable task execution and allows for the efficient handling of "
+"task queues."
+msgstr ""
+"Интеграция очереди сообщений: Celery полагается на брокеров сообщений "
+"(таких как RabbitMQ, Redis, Tarantool, SQS или другие) для управления "
+"связью между основным приложением и рабочими процессами. Такое разделение"
+" обеспечивает надежное выполнение задач и позволяет эффективно "
+"обрабатывать очереди задач."
+
+#: ../../config.rst:276
+msgid ""
+"Periodic Tasks: Celery includes a scheduler that enables the execution of"
+" periodic or recurring tasks. This is useful for automating tasks that "
+"need to run at specific intervals, like updating data or performing "
+"maintenance operations."
+msgstr ""
+"Периодические задачи: Celery включает в себя планировщик, который "
+"позволяет выполнять периодические или повторяющиеся задачи. Это полезно "
+"для автоматизации задач, которые необходимо выполнять через определенные "
+"промежутки времени, например обновления данных или выполнения операций "
+"обслуживания."
+
+#: ../../config.rst:277
+msgid ""
+"Error Handling and Retry Mechanism: Celery provides mechanisms for "
+"handling errors in tasks and supports automatic retries. This ensures "
+"robustness in task execution, allowing the system to recover from "
+"transient failures."
+msgstr ""
+"Обработка ошибок и механизм повторных попыток: Celery предоставляет "
+"механизмы для обработки ошибок в задачах и поддерживает автоматические "
+"повторные попытки. Это обеспечивает надежность выполнения задач, позволяя"
+" системе восстанавливаться после временных сбоев."
+
+#: ../../config.rst:278
+msgid ""
+"Task Result Storage: Celery supports storing the results of completed "
+"tasks, which can be useful for tracking task progress or retrieving "
+"results later. This feature is especially valuable for long-running "
+"tasks."
+msgstr ""
+"Хранение результатов задач: Celery поддерживает хранение результатов "
+"выполненных задач, что может быть полезно для отслеживания хода "
+"выполнения задач или получения результатов позже. Эта функция особенно "
+"ценна для длительных задач."
+
+#: ../../config.rst:280
 msgid ""
 "vstutils-based application uses Celery for long-running async tasks. "
-"Celery is based on message queue concept, so between web-service and "
-"workers running under Celery must be some kind of message broker "
-"(RabbitMQ or something).  Those settings relate to this broker and Celery"
-" itself. Those kinds of settings: broker backend, number of worker-"
-"processes per node and some settings used for troubleshoot server-broker-"
-"worker interaction problems."
+"Those settings relate to this broker and Celery itself. Those kinds of "
+"settings: broker backend, number of worker-processes per node and some "
+"settings used for troubleshoot server-broker-worker interaction problems."
 msgstr ""
 "Приложение, основанное на vstutils, использует Celery для выполнения "
-"длительных асинхронных задач. Celery основан на концепции очереди "
-"сообщений, поэтому между веб-сервисом и рабочими процессами, работающими "
-"под управлением Celery, должен быть некий брокер сообщений (например, "
-"RabbitMQ). Эти настройки относятся к этому брокеру и самому Celery. В них"
-" указывается бэкэнд брокера, количество рабочих процессов на узел и "
-"некоторые настройки, используемые для устранения проблем взаимодействия "
-"сервера, брокера и рабочих процессов."
+"длительных асинхронных задач. Эти настройки относятся к этому брокеру и "
+"самому Celery. В них указывается бэкэнд брокера, количество рабочих "
+"процессов на узел и некоторые настройки, используемые для устранения "
+"проблем взаимодействия сервера, брокера и рабочих процессов."
 
-#: ../../config.rst:267
+#: ../../config.rst:286
 msgid "This section require vstutils with `rpc` extra dependency."
 msgstr "Для этого раздела требуется vstutils с дополнительной зависимостью rpc."
 
-#: ../../config.rst:269
+#: ../../config.rst:288
 msgid ""
 "**connection** - Celery :celery_docs:`broker connection "
 "<userguide/configuration.html#conf-broker-settings>`. Default: "
@@ -635,13 +753,13 @@ msgstr ""
 "<userguide/configuration.html#conf-broker-settings>`. По умолчанию: "
 "``filesystem:///var/tmp``."
 
-#: ../../config.rst:270
+#: ../../config.rst:289
 msgid "**concurrency** - Count of celery worker threads. Default: 4."
 msgstr ""
 "**concurrency** - Количество потоков рабочего процесса Celery. По "
 "умолчанию: 4."
 
-#: ../../config.rst:271
+#: ../../config.rst:290
 msgid ""
 "**heartbeat** - Interval between sending heartbeat packages, which says "
 "that connection still alive. Default: 10."
@@ -649,7 +767,7 @@ msgstr ""
 "**heartbeat** - Интервал между отправкой пакетов-сигналов, которые "
 "говорят, что соединение все еще активно. По умолчанию: 10."
 
-#: ../../config.rst:272
+#: ../../config.rst:291
 msgid ""
 "**enable_worker** - Enable or disable worker with webserver. Default: "
 "true."
@@ -657,7 +775,7 @@ msgstr ""
 "**enable_worker** - Включить или отключить рабочий процесс с "
 "веб-сервером. По умолчанию: true."
 
-#: ../../config.rst:274
+#: ../../config.rst:293
 msgid ""
 "The following variables from :celery_docs:`Django settings "
 "<userguide/configuration.html#new-lowercase-settings>` are also supported"
@@ -667,54 +785,56 @@ msgstr ""
 "Django <userguide/configuration.html#new-lowercase-settings>` (с "
 "соответствующими типами):"
 
-#: ../../config.rst:277
+#: ../../config.rst:296
 msgid ""
 "**prefetch_multiplier** - :celery_docs:`CELERYD_PREFETCH_MULTIPLIER "
 "<userguide/configuration.html#std-setting-worker_prefetch_multiplier>`"
 msgstr ""
 
-#: ../../config.rst:278
+#: ../../config.rst:297
 msgid ""
 "**max_tasks_per_child** - :celery_docs:`CELERYD_MAX_TASKS_PER_CHILD "
 "<userguide/configuration.html#std-setting-worker_max_tasks_per_child>`"
 msgstr ""
 
-#: ../../config.rst:279
+#: ../../config.rst:298
 msgid ""
 "**results_expiry_days** - :celery_docs:`CELERY_RESULT_EXPIRES "
 "<userguide/configuration.html#std-setting-result_expires>`"
 msgstr ""
 
-#: ../../config.rst:280
+#: ../../config.rst:299
 msgid ""
 "**default_delivery_mode** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE "
 "<userguide/configuration.html#task-default-delivery-mode>`"
 msgstr ""
 
-#: ../../config.rst:281
+#: ../../config.rst:300
 msgid ""
 "**task_send_sent_event** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE "
 "<userguide/configuration.html#task_send_sent_event>`"
 msgstr ""
 
-#: ../../config.rst:282
+#: ../../config.rst:301
 msgid ""
 "**worker_send_task_events** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE "
 "<userguide/configuration.html#worker_send_task_events>`"
 msgstr ""
 
-#: ../../config.rst:284
+#: ../../config.rst:303
 msgid ""
 "VST Utils provides seamless support for using Tarantool as a transport "
 "for Celery, allowing efficient and reliable message passing between "
 "distributed components. To enable this feature, ensure that the Tarantool"
 " server has the `queue` and `expirationd` modules installed."
 msgstr ""
-"VST Utils так же предоставляет поддержку для использования Tarantool сервера как транспорта "
-"в Celery, обеспечивая эффективную и надежную передачу сообщений между распределёнными компонентами. "
-"Для использования этой возможности на сервере Tarantool должны быть установлены модули `queue` и `expirationd`."
+"VST Utils так же предоставляет поддержку для использования Tarantool "
+"сервера как транспорта в Celery, обеспечивая эффективную и надежную "
+"передачу сообщений между распределёнными компонентами. Для использования "
+"этой возможности на сервере Tarantool должны быть установлены модули "
+"`queue` и `expirationd`."
 
-#: ../../config.rst:287
+#: ../../config.rst:306
 msgid ""
 "To configure the connection, use the following example URL: "
 "``tarantool://guest@localhost:3301/rpc``"
@@ -722,64 +842,66 @@ msgstr ""
 "Для настройки подключения используйте в качестве примера следующий URL: "
 "``tarantool://guest@localhost:3301/rpc``"
 
-#: ../../config.rst:289
+#: ../../config.rst:308
 msgid "``tarantool://``: Specifies the transport."
 msgstr "``tarantool://``: Указывает тип транспорта."
 
-#: ../../config.rst:290
+#: ../../config.rst:309
 msgid "``guest``: Authentication parameters (in this case, no password)."
 msgstr "`guest``: Параметры аутентификации (в данном случае без пароля)."
 
-#: ../../config.rst:291
+#: ../../config.rst:310
 msgid "``localhost``: Server address."
 msgstr "``localhost``: Адрес сервера."
 
-#: ../../config.rst:292
+#: ../../config.rst:311
 msgid "``3301``: Port for connection."
 msgstr "``3301``: Порт для подключения."
 
-#: ../../config.rst:293
+#: ../../config.rst:312
 msgid "``rpc``: Prefix for queue names and/or result storage."
 msgstr "``rpc``: Префикс для имён очередей и/или спейса хранилища результата"
 
-#: ../../config.rst:295
+#: ../../config.rst:314
 msgid ""
 "VST Utils also supports Tarantool as a backend for storing Celery task "
 "results. Connection string is similar to the transport."
 msgstr ""
-"VST Utils так же поддерживает Tarantool в качестве бэкенда для хранения результатов задач Celery. "
-"Строка подключения аналогична как и у транспорта."
+"VST Utils так же поддерживает Tarantool в качестве бэкенда для хранения "
+"результатов задач Celery. Строка подключения аналогична как и у "
+"транспорта."
 
-#: ../../config.rst:298
+#: ../../config.rst:317
 msgid ""
 "When utilizing Tarantool as a result backend or transport in VST Utils, "
 "temporary spaces and queues are automatically created to facilitate "
 "seamless operation. These temporary spaces are dynamically generated as "
 "needed and are essential for storing temporary data efficiently."
 msgstr ""
-"Когда Tarantool используется для хранения результатов или в качестве транспорта в VST Utils, "
-"то автоматически создаются спейсы и очереди для этих операций. "
-"Эти временные хранилища создаются динамически по мере необходимости и необходимы для эффективного хранения временных данных."
+"Когда Tarantool используется для хранения результатов или в качестве "
+"транспорта в VST Utils, то автоматически создаются спейсы и очереди для "
+"этих операций. Эти временные хранилища создаются динамически по мере "
+"необходимости и необходимы для эффективного хранения временных данных."
 
-#: ../../config.rst:309
+#: ../../config.rst:328
 msgid "Worker settings"
 msgstr "Настройки рабочего процесса (worker`a)"
 
-#: ../../config.rst:311
+#: ../../config.rst:330
 msgid "Section ``[worker]``."
 msgstr "Раздел ``[worker]``."
 
-#: ../../config.rst:314
+#: ../../config.rst:333
 msgid "These settings are needed only for rpc-enabled applications."
 msgstr ""
 "Эти настройки необходимы только для приложений с включенной поддержкой "
 "RPC."
 
-#: ../../config.rst:316
+#: ../../config.rst:335
 msgid "Celery worker options:"
 msgstr "Настройки рабочего процесса celery:"
 
-#: ../../config.rst:318
+#: ../../config.rst:337
 msgid ""
 "**loglevel** - Celery worker log level. Default: from main_ section "
 "``log_level``."
@@ -787,7 +909,7 @@ msgstr ""
 "**loglevel** - Уровень логгирования рабочего процесса. По умолчанию: из "
 "раздела main_ ``log_level``."
 
-#: ../../config.rst:319
+#: ../../config.rst:338
 msgid ""
 "**pidfile** - Celery worker pidfile. Default: "
 "``/run/{app_name}_worker.pid``"
@@ -795,7 +917,7 @@ msgstr ""
 "**pidfile** - Файл pid для рабочего процесса Celery. по умолчанию: "
 "``/run/{app_name}_worker.pid``\""
 
-#: ../../config.rst:320
+#: ../../config.rst:339
 msgid ""
 "**autoscale** - Options for autoscaling. Two comma separated numbers: "
 "max,min."
@@ -803,25 +925,25 @@ msgstr ""
 "**autoscale** - Параметры для автомасштабирования. Два числа, разделенных"
 " запятой: максимальное,минимальное."
 
-#: ../../config.rst:321
+#: ../../config.rst:340
 msgid "**beat** - Enable or disable celery beat scheduler. Default: ``true``."
 msgstr ""
 "**beat** - Включить или отключить планировщик celery beat. По умолчанию: "
 "``true``."
 
-#: ../../config.rst:323
+#: ../../config.rst:342
 msgid "See other settings via ``celery worker --help`` command."
 msgstr "Другие настройки можно увидеть с помощью команды ``celery worker --help``"
 
-#: ../../config.rst:330
+#: ../../config.rst:349
 msgid "SMTP settings"
 msgstr "SMTP-настройки"
 
-#: ../../config.rst:332
+#: ../../config.rst:351
 msgid "Section ``[mail]``."
 msgstr "Раздел ``[mail]``."
 
-#: ../../config.rst:334
+#: ../../config.rst:353
 msgid ""
 "Django comes with several email sending backends. With the exception of "
 "the SMTP backend (default when ``host`` is set), these backends are "
@@ -832,15 +954,28 @@ msgstr ""
 "установке ``host``), эти бэкэнды полезны только для тестирования и "
 "разработки."
 
-#: ../../config.rst:337
+#: ../../config.rst:356
 msgid ""
 "Applications based on vstutils uses only ``smtp`` and ``console`` "
-"backends."
+"backends. These two backends serve distinct purposes in different "
+"environments. The SMTP backend ensures the reliable delivery of emails in"
+" a production setting, while the console backend provides a convenient "
+"way to inspect emails during development without the risk of "
+"unintentional communication with external mail servers. Developers often "
+"switch between these backends based on the context of their work, "
+"choosing the appropriate one for the stage of development or testing."
 msgstr ""
 "Приложения, основанные на vstutils, используют только бэкэнды ``smtp`` и "
-"``console``."
+"``console``. Эти два бэкэнда служат разным целям в разных средах. SMTP "
+"обеспечивает надежную доставку электронной почты в производственных "
+"условиях, а консольный вариант обеспечивает удобный способ проверки "
+"электронной почты во время разработки без риска непреднамеренного "
+"взаимодействия с внешними почтовыми серверами. Разработчики часто "
+"переключаются между этими бэкэндами в зависимости от контекста своей "
+"работы, выбирая тот, который подходит для этапа разработки или "
+"тестирования."
 
-#: ../../config.rst:339
+#: ../../config.rst:362
 msgid ""
 "**host** - IP or domain for smtp-server. If it not set vstutils uses "
 "``console`` backends. Default: ``None``."
@@ -848,17 +983,17 @@ msgstr ""
 "**host** - IP-адрес или доменное имя smtp-сервера. Если не указано, "
 "vstutils использует бэкэнд ``console``. По умолчанию: ``None``."
 
-#: ../../config.rst:340
+#: ../../config.rst:363
 msgid "**port** - Port for smtp-server connection. Default: ``25``."
 msgstr "**port** - Порт для подключения к smtp-серверу. По умолчанию: ``25``."
 
-#: ../../config.rst:341
+#: ../../config.rst:364
 msgid "**user** - Username for smtp-server connection. Default: ``\"\"``."
 msgstr ""
 "**user** - Имя пользователя для подключения к SMTP-серверу. По умолчанию:"
 " ``\"\"``."
 
-#: ../../config.rst:342
+#: ../../config.rst:365
 msgid ""
 "**password** - Auth password for smtp-server connection. Default: "
 "``\"\"``."
@@ -866,7 +1001,7 @@ msgstr ""
 "**password** - Пароль для аутентификации на smtp-сервере. По умолчанию: "
 "``\"\"``."
 
-#: ../../config.rst:343
+#: ../../config.rst:366
 msgid ""
 "**tls** - Enable/disable tls for smtp-server connection. Default: "
 "``False``."
@@ -874,7 +1009,7 @@ msgstr ""
 "**tls** - Включить или отключить TLS для подключения к smtp-серверу. По "
 "умолчанию: ``False``"
 
-#: ../../config.rst:344
+#: ../../config.rst:367
 msgid ""
 "**send_confirmation** - Enable/disable confirmation message after "
 "registration. Default: ``False``."
@@ -882,7 +1017,7 @@ msgstr ""
 "**send_confirmation** - Включить или отключить отправку сообщения с "
 "подтверждением после регистрации. По умолчанию: ``False``."
 
-#: ../../config.rst:345
+#: ../../config.rst:368
 msgid ""
 "**authenticate_after_registration** - Enable/disable autologin after "
 "registration confirmation. Default: ``False``."
@@ -891,15 +1026,15 @@ msgstr ""
 "автоматический вход пользователя после подтверждения регистрации. По "
 "умолчанию: ``False``."
 
-#: ../../config.rst:351
+#: ../../config.rst:374
 msgid "Web settings"
 msgstr "Web-настройки"
 
-#: ../../config.rst:353
+#: ../../config.rst:376
 msgid "Section ``[web]``."
 msgstr "Раздел ``[web]``."
 
-#: ../../config.rst:355
+#: ../../config.rst:378
 msgid ""
 "These settings are related to web-server. Those settings includes: "
 "session_timeout, static_files_url and pagination limit."
@@ -907,13 +1042,13 @@ msgstr ""
 "Эти настройки относятся к веб-серверу. Среди них: session_timeout, "
 "static_files_url и лимит пагинации."
 
-#: ../../config.rst:358
+#: ../../config.rst:381
 msgid "**allow_cors** - enable cross-origin resource sharing. Default: ``False``."
 msgstr ""
 "**allow_cors** - включить cross-origin resource sharing. По умолчанию: "
 "``False``."
 
-#: ../../config.rst:359
+#: ../../config.rst:382
 msgid ""
 "**cors_allowed_origins**, **cors_allowed_origins_regexes**, "
 "**cors_expose_headers**, **cors_allow_methods**, **cors_allow_headers**, "
@@ -927,7 +1062,7 @@ msgstr ""
 "/django-cors-headers#configuration>`_ из библиотеки ``django-cors-"
 "headers`` со значениями по умолчанию."
 
-#: ../../config.rst:362
+#: ../../config.rst:385
 msgid ""
 "**enable_gravatar** - Enable/disable gravatar service using for users. "
 "Default: ``True``."
@@ -935,7 +1070,7 @@ msgstr ""
 "**enable_gravatar** - Включить/отключить использование сервиса Gravatar "
 "для пользователей. По умолчанию: ``True``."
 
-#: ../../config.rst:363
+#: ../../config.rst:386
 msgid ""
 "**rest_swagger_description** - Help string in Swagger schema. Useful for "
 "dev-integrations."
@@ -943,7 +1078,7 @@ msgstr ""
 "**rest_swagger_description** - Строка справки в схеме Swagger. Полезно "
 "для разработки интеграций."
 
-#: ../../config.rst:364
+#: ../../config.rst:387
 msgid ""
 "**openapi_cache_timeout** - Cache timeout for storing schema data. "
 "Default: ``120``."
@@ -951,7 +1086,7 @@ msgstr ""
 "**openapi_cache_timeout** - Время кэширования данных схемы. По умолчанию:"
 " ``120``."
 
-#: ../../config.rst:365
+#: ../../config.rst:388
 msgid ""
 "**health_throttle_rate** - Count of requests to ``/api/health/`` "
 "endpoint. Default: ``60``."
@@ -959,7 +1094,7 @@ msgstr ""
 "Количество запросов к конечной точке ``/api/health/``. По умолчанию: "
 "``60``."
 
-#: ../../config.rst:366
+#: ../../config.rst:389
 msgid ""
 "**bulk_threads** - Threads count for PATCH ``/api/endpoint/`` endpoint. "
 "Default: ``3``."
@@ -967,13 +1102,13 @@ msgstr ""
 "**bulk_threads** - Количество потоков для PATCH ``/api/endpoint/``. По "
 "умолчанию: ``3``."
 
-#: ../../config.rst:367
+#: ../../config.rst:390
 msgid "**session_timeout** - Session lifetime. Default: ``2w`` (two weeks)."
 msgstr ""
 "**session_timeout** - Время жизни сессии. По умолчанию: ``2w`` (две "
 "недели)."
 
-#: ../../config.rst:368
+#: ../../config.rst:391
 msgid ""
 "**etag_default_timeout** - Cache timeout for Etag headers to control "
 "models caching. Default: ``1d`` (one day)."
@@ -981,7 +1116,7 @@ msgstr ""
 "**etag_default_timeout** -  Время кэширования заголовков Etag для "
 "управления кэшированием моделей. По умолчанию: ``1d`` (один день)."
 
-#: ../../config.rst:369
+#: ../../config.rst:392
 msgid ""
 "**rest_page_limit** and **page_limit** - Default limit of objects in API "
 "list. Default: ``1000``."
@@ -989,7 +1124,7 @@ msgstr ""
 "**rest_page_limit** and **page_limit** - Максимальное количество объектов"
 " в списке API. По умолчанию: ``1000``."
 
-#: ../../config.rst:370
+#: ../../config.rst:393
 msgid ""
 "**session_cookie_domain** - The domain to use for session cookies. Read "
 ":django_docs:`more <settings/#std:setting-SESSION_COOKIE_DOMAIN>`. "
@@ -999,7 +1134,7 @@ msgstr ""
 ":django_docs:`Подробнее <settings/#std:setting-SESSION_COOKIE_DOMAIN>`. "
 "По умолчанию: ``None``."
 
-#: ../../config.rst:372
+#: ../../config.rst:395
 msgid ""
 "**csrf_trusted_origins** - A list of hosts which are trusted origins for "
 "unsafe requests. Read :django_docs:`more <settings/#csrf-trusted-"
@@ -1009,7 +1144,7 @@ msgstr ""
 " запросы. :django_docs:`Подробнее <settings/#csrf-trusted-origins>`. По "
 "умолчанию: значение из **session_cookie_domain**."
 
-#: ../../config.rst:374
+#: ../../config.rst:397
 msgid ""
 "**case_sensitive_api_filter** - Enables/disables case sensitive search "
 "for name filtering. Default: ``True``."
@@ -1017,7 +1152,7 @@ msgstr ""
 "**case_sensitive_api_filter** - Включить/отключить чувствительность к "
 "регистру при фильтрации по имени. По умолчанию: ``True``."
 
-#: ../../config.rst:376
+#: ../../config.rst:399
 msgid ""
 "**secure_proxy_ssl_header_name** - Header name which activates SSL urls "
 "in responses. Read :django_docs:`more <settings/#secure-proxy-ssl-"
@@ -1028,7 +1163,7 @@ msgstr ""
 "<settings/#secure-proxy-ssl-header>`. По умолчанию: "
 "``HTTP_X_FORWARDED_PROTOCOL``."
 
-#: ../../config.rst:378
+#: ../../config.rst:401
 msgid ""
 "**secure_proxy_ssl_header_value** - Header value which activates SSL urls"
 " in responses. Read :django_docs:`more <settings/#secure-proxy-ssl-"
@@ -1039,7 +1174,7 @@ msgstr ""
 ":django_docs:`Подробнее <settings/#secure-proxy-ssl-header>`. По "
 "умолчанию: ``https``."
 
-#: ../../config.rst:382
+#: ../../config.rst:405
 msgid ""
 "The following variables from Django settings are also supported (with the"
 " corresponding types):"
@@ -1047,70 +1182,70 @@ msgstr ""
 "Также поддерживаются следующие переменные из настроек Django (с "
 "соответствующими типами):"
 
-#: ../../config.rst:384
+#: ../../config.rst:407
 msgid ""
 "**secure_browser_xss_filter** - :django_docs:`SECURE_BROWSER_XSS_FILTER "
 "<settings/#secure-browser-xss-filter>`"
 msgstr ""
 
-#: ../../config.rst:385
+#: ../../config.rst:408
 msgid ""
 "**secure_content_type_nosniff** - "
 ":django_docs:`SECURE_CONTENT_TYPE_NOSNIFF <settings/#secure-content-type-"
 "nosniff>`"
 msgstr ""
 
-#: ../../config.rst:386
+#: ../../config.rst:409
 msgid ""
 "**secure_hsts_include_subdomains** - "
 ":django_docs:`SECURE_HSTS_INCLUDE_SUBDOMAINS <settings/#secure-hsts-"
 "include-subdomains>`"
 msgstr ""
 
-#: ../../config.rst:387
+#: ../../config.rst:410
 msgid ""
 "**secure_hsts_preload** - :django_docs:`SECURE_HSTS_PRELOAD <settings"
 "/#secure-hsts-preload>`"
 msgstr ""
 
-#: ../../config.rst:388
+#: ../../config.rst:411
 msgid ""
 "**secure_hsts_seconds** - :django_docs:`SECURE_HSTS_SECONDS <settings"
 "/#secure-hsts-seconds>`"
 msgstr ""
 
-#: ../../config.rst:389
+#: ../../config.rst:412
 msgid ""
 "**password_reset_timeout_days** - "
 ":django_docs:`PASSWORD_RESET_TIMEOUT_DAYS <settings/#std:setting-"
 "PASSWORD_RESET_TIMEOUT>`"
 msgstr ""
 
-#: ../../config.rst:390
+#: ../../config.rst:413
 msgid ""
 "**request_max_size** - :django_docs:`DATA_UPLOAD_MAX_MEMORY_SIZE "
 "<settings/#std:setting-DATA_UPLOAD_MAX_MEMORY_SIZE>`"
 msgstr ""
 
-#: ../../config.rst:391
+#: ../../config.rst:414
 msgid ""
 "**x_frame_options** - :django_docs:`X_FRAME_OPTIONS <settings/#x-frame-"
 "options>`"
 msgstr ""
 
-#: ../../config.rst:392
+#: ../../config.rst:415
 msgid ""
 "**use_x_forwarded_host** - :django_docs:`USE_X_FORWARDED_HOST "
 "<settings/#use-x-forwarded-host>`"
 msgstr ""
 
-#: ../../config.rst:393
+#: ../../config.rst:416
 msgid ""
 "**use_x_forwarded_port** - :django_docs:`USE_X_FORWARDED_PORT "
 "<settings/#use-x-forwarded-port>`"
 msgstr ""
 
-#: ../../config.rst:395
+#: ../../config.rst:418
 msgid ""
 "The following settings affects prometheus metrics endpoint (which can be "
 "used for monitoring application):"
@@ -1118,7 +1253,7 @@ msgstr ""
 "Следующие настройки влияют на эндпоинт метрик Prometheus (который может "
 "использоваться для мониторинга приложения):"
 
-#: ../../config.rst:397
+#: ../../config.rst:420
 msgid ""
 "**metrics_throttle_rate** - Count of requests to ``/api/metrics/`` "
 "endpoint. Default: ``120``."
@@ -1126,7 +1261,7 @@ msgstr ""
 "**metrics_throttle_rate** - Количество запросов к эндпоинту "
 "``/api/metrics/``. По умолчанию: ``120``."
 
-#: ../../config.rst:398
+#: ../../config.rst:421
 msgid ""
 "**enable_metrics** - Enable/disable ``/api/metrics/`` endpoint for app. "
 "Default: ``true``"
@@ -1134,7 +1269,7 @@ msgstr ""
 "**enable_metrics** - Включить/отключить эндпоинт ``/api/metrics/`` для "
 "приложения. По умолчанию: ``true``."
 
-#: ../../config.rst:399
+#: ../../config.rst:422
 msgid ""
 "**metrics_backend** - Python class path with metrics collector backend. "
 "Default: ``vstutils.api.metrics.DefaultBackend`` Default backend collects"
@@ -1144,11 +1279,11 @@ msgstr ""
 " умолчанию: ``vstutils.api.metrics.DefaultBackend``. Стандартный бэкенд "
 "собирает метрики из рабочих процессов uwsgi и информацию о версии Python."
 
-#: ../../config.rst:403
+#: ../../config.rst:426
 msgid "Section ``[uvicorn]``."
 msgstr "Раздел ``[uvicorn]``."
 
-#: ../../config.rst:405
+#: ../../config.rst:428
 msgid ""
 "You can configure the necessary settings to run the uvicorn server. "
 "``vstutils`` supports almost all options from the cli, except for those "
@@ -1158,58 +1293,100 @@ msgstr ""
 "``vstutils`` поддерживает практически все опции из командной строки, за "
 "исключением тех, которые настраивают приложение и соединение."
 
-#: ../../config.rst:408
+#: ../../config.rst:431
 msgid "See all available uvicorn settings via ``uvicorn --help`` command."
 msgstr ""
 "Вы можете посмотреть все доступные настройки uvicorn, введя команду "
 "``uvicorn --help``"
 
-#: ../../config.rst:413
+#: ../../config.rst:436
 msgid "Centrifugo client settings"
 msgstr "Настройки клиента Centrifugo"
 
-#: ../../config.rst:415
+#: ../../config.rst:438
 msgid "Section ``[centrifugo]``."
 msgstr "Раздел ``[centrifugo]``."
 
-#: ../../config.rst:417
+#: ../../config.rst:440
+msgid ""
+"Centrifugo is employed to optimize real-time data updates within a Django"
+" application by orchestrating seamless communication among its various "
+"components. The operational paradigm involves the orchestrated generation"
+" of Django signals, specifically ``post_save`` and ``post_delete`` "
+"signals, dynamically triggered during HTTP requests or the execution of "
+"Celery tasks. These signals, when invoked on user or BaseModel-derived "
+"models within the vstutils framework, initiate the creation of messages "
+"destined for all subscribers keen on the activities related to these "
+"models. Subsequent to the completion of the HTTP request or Celery task, "
+"the notification mechanism dispatches tailored messages to all relevant "
+"subscribers. In effect, each active browser tab with a pertinent "
+"subscription promptly receives a notification, prompting an immediate "
+"data update request. Centrifugo's pivotal role lies in obviating the "
+"necessity for applications to engage in periodic REST API polling at "
+"fixed intervals (e.g., every 5 seconds). This strategic elimination of "
+"redundant requests significantly alleviates the REST API's operational "
+"load, rendering it more scalable to accommodate a larger user base. "
+"Importantly, this real-time communication model ensures prompt and "
+"synchronized data updates, fostering a highly responsive user experience."
+msgstr ""
+"Centrifugo используется для оптимизации моментального обновления данных в"
+" приложении Django, обеспечивая беспрепятственное взаимодействие между "
+"его различными компонентами. Основной принцип работы заключается в "
+"оркестрированном создании сигналов Django, а именно ``post_save`` и "
+"``post_delete``, которые динамически вызываются во время HTTP-запросов "
+"или выполнения задач Celery. Эти сигналы, когда они вызываются на моделях"
+" пользователей или моделях, унаследованных от BaseModel в рамках "
+"фреймворка vstutils, инициируют создание сообщений для всех подписчиков, "
+"заинтересованных в событиях, связанных с этими моделями. После завершения"
+" HTTP-запроса или задачи Celery механизм уведомлений отправляет "
+"настроенные сообщения всем соответствующим подписчикам. Это означает, что"
+" каждая активная вкладка браузера с соответствующей подпиской мгновенно "
+"получает уведомление, стимулируя мгновенный запрос на обновление данных. "
+"Отсутствие необходимости для приложений в периодическом опросе REST API в"
+" фиксированные интервалы (например, каждые 5 секунд) существенно снижает "
+"операционную нагрузку REST API и обеспечивает его масштабируемость для "
+"более крупной базы пользователей. Важно отметить, что эту модель "
+"моментального обмена данными можно рассматривать как альтернативу по "
+"сравнению с периодическими запросами. Вместе с тем, она гарантирует "
+"мгновенное и синхронизированное обновление данных, способствуя "
+"высококачественному пользовательскому опыту."
+
+#: ../../config.rst:454
 msgid ""
 "To install app with centrifugo client, ``[centrifugo]`` section must be "
 "set. Centrifugo is used by application to auto-update page data. When "
-"user change some data, other clients get notification on "
-"``subscriptions_update`` channel with model label and primary key. "
-"Without the service all GUI-clients get page data every 5 seconds (by "
-"default)."
+"user change some data, other clients get notification on channel with "
+"model label and primary key. Without the service all GUI-clients get page"
+" data every 5 seconds (by default)."
 msgstr ""
 "Для установки приложения с клиентом Centrifugo должен быть задан раздел "
 "``[centrifugo]``. Centrifugo используется приложением для автоматического"
 " обновления данных на странице. Когда пользователь изменяет какие-либо "
-"данные, другие клиенты получают уведомление на канале "
-"``subscriptions_update`` с меткой модели и первичным ключом. Без этой "
-"службы все клиенты GUI получают данные страницы каждые 5 секунд (по "
-"умолчанию)."
+"данные, другие клиенты получают уведомление на канале с меткой модели и "
+"первичным ключом. Без этой службы все клиенты GUI получают данные "
+"страницы каждые 5 секунд (по умолчанию)."
 
-#: ../../config.rst:423
+#: ../../config.rst:460
 msgid "**address** - Centrifugo server address."
 msgstr "**address** - Адрес сервера Centrifugo."
 
-#: ../../config.rst:424
+#: ../../config.rst:461
 msgid "**api_key** - API key for clients."
 msgstr "**api_key** - Ключ API для клиентов."
 
-#: ../../config.rst:425
+#: ../../config.rst:462
 msgid "**token_hmac_secret_key** - API key for jwt-token generation."
 msgstr "**token_hmac_secret_key** - Ключ API для генерации JWT-токена."
 
-#: ../../config.rst:426
+#: ../../config.rst:463
 msgid "**timeout** - Connection timeout."
 msgstr "**timeout** - Таймаут подключения."
 
-#: ../../config.rst:427
+#: ../../config.rst:464
 msgid "**verify** - Connection verification."
 msgstr "**verify** - Проверка подключения."
 
-#: ../../config.rst:428
+#: ../../config.rst:465
 msgid ""
 "**subscriptions_prefix** - Prefix used for generating update channels, by"
 " default \"{VST_PROJECT}.update\"."
@@ -1217,7 +1394,7 @@ msgstr ""
 "**subscriptions_prefix** -  Префикс, используемый для генерации каналов "
 "обновления, по умолчанию \"{VST_PROJECT}.update\"."
 
-#: ../../config.rst:431
+#: ../../config.rst:468
 msgid ""
 "These settings also add parameters to the OpenAPI schema and change how "
 "the auto-update system works in the GUI. ``token_hmac_secret_key`` is "
@@ -1229,15 +1406,15 @@ msgstr ""
 "генерации JWT-токена (на основе времени истечения сессии). Токен будет "
 "использоваться для клиента Centrifugo-JS."
 
-#: ../../config.rst:439
+#: ../../config.rst:476
 msgid "Storage settings"
 msgstr "Настройки хранилища"
 
-#: ../../config.rst:441
+#: ../../config.rst:478
 msgid "Section ``[storages]``."
 msgstr "Раздел ``[storages]``."
 
-#: ../../config.rst:443
+#: ../../config.rst:480
 msgid ""
 "Applications based on ``vstutils`` supports filesystem storage out of "
 "box. Setup ``media_root`` and ``media_url`` in ``[storages.filesystem]`` "
@@ -1250,7 +1427,7 @@ msgstr ""
 "``media_url`` в разделе [storages.filesystem]. По умолчанию они будут "
 "равны ``{/path/to/project/module}/media`` и ``/media/``."
 
-#: ../../config.rst:448
+#: ../../config.rst:485
 msgid ""
 "Applications based on ``vstutils`` supports store files in external "
 "services with `Apache Libcloud <http://libcloud.apache.org/>`_ and `Boto3"
@@ -1261,7 +1438,7 @@ msgstr ""
 "<http://libcloud.apache.org/>`_ и `Boto3 "
 "<https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_."
 
-#: ../../config.rst:451
+#: ../../config.rst:488
 msgid ""
 "Apache Libcloud settings grouped by sections named "
 "``[storages.libcloud.provider]``, where ``provider`` is name of storage. "
@@ -1278,7 +1455,7 @@ msgstr ""
 "storages.readthedocs.io/en/latest/backends/apache_libcloud.html#libcloud-"
 "providers>`_."
 
-#: ../../config.rst:456
+#: ../../config.rst:493
 msgid ""
 "This setting is required to configure connections to cloud storage "
 "providers. Each entry corresponds to a single ‘bucket’ of storage. You "
@@ -1291,7 +1468,7 @@ msgstr ""
 "(например, несколько buckets S3), и вы можете определить buckets в "
 "нескольких провайдерах."
 
-#: ../../config.rst:461
+#: ../../config.rst:498
 msgid ""
 "For ``Boto3`` all settings grouped by section named ``[storages.boto3]``."
 " Section must contain following keys: ``access_key_id``, "
@@ -1306,7 +1483,7 @@ msgstr ""
 "amazon-S3 <https://django-"
 "storages.readthedocs.io/en/latest/backends/amazon-S3.html>`_."
 
-#: ../../config.rst:466
+#: ../../config.rst:503
 msgid ""
 "Storage has following priority to choose storage engine if multiple was "
 "provided:"
@@ -1314,19 +1491,19 @@ msgstr ""
 "При выборе движка хранилища используется следующий приоритет, если их "
 "было предоставлено несколько:"
 
-#: ../../config.rst:468
+#: ../../config.rst:505
 msgid "Libcloud store when config contains this section."
 msgstr "Хранилище Libcloud, когда конфигурация содержит этот раздел."
 
-#: ../../config.rst:470
+#: ../../config.rst:507
 msgid "Boto3 store, when you have section and has all required keys."
 msgstr "Хранилище Boto3, когда у вас есть раздел и имеются все необходимые ключи."
 
-#: ../../config.rst:472
+#: ../../config.rst:509
 msgid "FileSystem store otherwise."
 msgstr "В противном случае хранилище FileSystem."
 
-#: ../../config.rst:474
+#: ../../config.rst:511
 msgid ""
 "Once you have defined your Libcloud providers, you have an option of "
 "setting one provider as the default provider of Libcloud storage. You can"
@@ -1339,7 +1516,7 @@ msgstr ""
 "``[storages.libcloud.default]`` или же vstutils установит первое "
 "хранилище, как хранилище по умолчанию."
 
-#: ../../config.rst:479
+#: ../../config.rst:516
 msgid ""
 "If you configure default libcloud provider, vstutils will use it as "
 "global file storage. To override it set "
@@ -1360,7 +1537,7 @@ msgstr ""
 "``default=storages.backends.apache_libcloud.LibCloudStorage`` в разделе "
 "``[storages]`` и используйте провайдера Libcloud, как по умолчанию."
 
-#: ../../config.rst:487
+#: ../../config.rst:524
 msgid ""
 "Here is example for boto3 connection to minio cluster with public read "
 "permissions, external proxy domain and internal connection support:"
@@ -1368,15 +1545,15 @@ msgstr ""
 "Вот пример подключения boto3 к кластеру minio с публичными правами на "
 "чтение, внешним доменом прокси и поддержкой внутреннего подключения:"
 
-#: ../../config.rst:516
+#: ../../config.rst:553
 msgid "Throttle settings"
 msgstr "Настройки Throttle"
 
-#: ../../config.rst:518
+#: ../../config.rst:555
 msgid "Section ``[throttle]``."
 msgstr "Раздел ``[throttle]``."
 
-#: ../../config.rst:520
+#: ../../config.rst:557
 msgid ""
 "By including this section to your config, you can setup global and per-"
 "view throttle rates. Global throttle rates are specified under root "
@@ -1389,13 +1566,13 @@ msgstr ""
 "индивидуальные throttle rates для конкретного View, вам нужно добавить "
 "дочернюю секцию."
 
-#: ../../config.rst:524
+#: ../../config.rst:561
 msgid "For example, if you want to apply throttle to ``api/v1/author``:"
 msgstr ""
 "Например, если вы хотите применить ограничение количества запросов для "
 "``api/v1/author``:"
 
-#: ../../config.rst:532
+#: ../../config.rst:569
 msgid ""
 "**rate** - Throttle rate in format number_of_requests/time_period. "
 "Expected time_periods: second/minute/hour/day."
@@ -1404,7 +1581,7 @@ msgstr ""
 "number_of_requests/time_period. Expected time_periods: "
 "second/minute/hour/day."
 
-#: ../../config.rst:533
+#: ../../config.rst:570
 msgid ""
 "**actions** - Comma separated list of drf actions. Throttle will be "
 "applied only on specified here actions. Default: update, partial_update."
@@ -1413,7 +1590,7 @@ msgstr ""
 "количества запросов будет применяться только к указанным здесь действиям."
 " По умолчанию: update, partial_update."
 
-#: ../../config.rst:535
+#: ../../config.rst:572
 msgid ""
 "More on throttling at `DRF Throttle docs <https://www.django-rest-"
 "framework.org/api-guide/throttling/>`_."
@@ -1421,15 +1598,15 @@ msgstr ""
 "Подробнее об ограничении количества запросов в `документации DRF Throttle"
 " <https://www.django-rest-framework.org/api-guide/throttling/>`_."
 
-#: ../../config.rst:539
+#: ../../config.rst:576
 msgid "Production web settings"
 msgstr "Настройки для продакшн-сервера"
 
-#: ../../config.rst:541
+#: ../../config.rst:578
 msgid "Section ``[uwsgi]``."
 msgstr "Раздел ``[uwsgi]``."
 
-#: ../../config.rst:543
+#: ../../config.rst:580
 msgid ""
 "Settings related to web-server used by vstutils-based application in "
 "production (for deb and rpm packages by default). Most of them related to"
@@ -1442,7 +1619,7 @@ msgstr ""
 "т. д.). Дополнительные настройки смотрите в `документации uWSGI. <http"
 "://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_."
 
-#: ../../config.rst:549
+#: ../../config.rst:586
 msgid ""
 "But keep in mind that uWSGI is deprecated and may be removed in future "
 "releases. Use the uvicorn settings to manage your app server."
@@ -1450,12 +1627,225 @@ msgstr ""
 "Однако имейте в виду, что uWSGI устарел и может быть удален в будущих "
 "версиях. Используйте настройки uvicorn для управления сервером вашего "
 "приложения."
+#: ../../config.rst:591
+msgid "Working behind the proxy server with TLS"
+msgstr "Работа за прокси-сервером с поддержкой TLS"
 
-#: ../../config.rst:554
+#: ../../config.rst:594
+msgid "Nginx"
+msgstr "Nginx"
+
+#: ../../config.rst:596
+msgid ""
+"To configure vstutils for operation behind Nginx with TLS, follow these "
+"steps:"
+msgstr ""
+"Чтобы настроить vstutils для работы через Nginx с поддержкой TLS, выполните следующие шаги:"
+
+#: ../../config.rst:598
+msgid "**Install Nginx:**"
+msgstr "**Установка Nginx:**"
+
+#: ../../config.rst:600
+msgid ""
+"Ensure that Nginx is installed on your server. You can install it using "
+"the package manager specific to your operating system."
+msgstr ""
+"Убедитесь, что Nginx установлен на вашем сервере. Вы можете установить его с помощью "
+"менеджера пакетов, специфичного для вашей операционной системы."
+
+#: ../../config.rst:602
+msgid "**Configure Nginx:**"
+msgstr "**Настройка Nginx:**"
+
+#: ../../config.rst:604
+msgid ""
+"Create an Nginx configuration file for your vstutils application. Below "
+"is a basic example of an Nginx configuration. Adjust the values based on "
+"your specific setup."
+msgstr ""
+"Создайте файл конфигурации Nginx для вашего приложения vstutils. Ниже "
+"приведен базовый пример конфигурации Nginx. Измените значения в соответствии с "
+"вашей конкретной настройкой."
+
+#: ../../config.rst:643
+msgid ""
+"Replace ``your_domain.com`` with your actual domain, and update the paths"
+" for SSL certificates."
+msgstr ""
+"Замените ``your_domain.com`` на ваш реальный домен и обновите пути "
+"к SSL-сертификатам."
+
+#: ../../config.rst:645 ../../config.rst:728 ../../config.rst:779
+msgid "**Update vstutils settings:**"
+msgstr "**Обновление настроек vstutils:**"
+
+#: ../../config.rst:647 ../../config.rst:730 ../../config.rst:781
+msgid ""
+"Ensure that your vstutils settings have the correct configurations for "
+"HTTPS. In your ``/etc/vstutils/settings.ini`` (or project "
+"``settings.ini``):"
+msgstr ""
+"Убедитесь, что настройки vstutils содержат правильные конфигурации для "
+"HTTPS. В вашем ``/etc/vstutils/settings.ini`` (или в проекте "
+"``settings.ini``):"
+
+#: ../../config.rst:655
+msgid "This ensures that vstutils recognizes the HTTPS connection."
+msgstr "Это гарантирует, что vstutils распознает соединение по протоколу HTTPS."
+
+#: ../../config.rst:657
+msgid "**Restart Nginx:**"
+msgstr "**Перезапустите Nginx:**"
+
+#: ../../config.rst:659
+msgid "After making these changes, restart Nginx to apply the new configurations:"
+msgstr "После внесения этих изменений перезапустите Nginx, чтобы применить новые конфигурации:"
+
+#: ../../config.rst:665
+msgid ""
+"Now, your vstutils application should be accessible via HTTPS through "
+"Nginx. Adjust these instructions based on your specific environment and "
+"security considerations."
+msgstr ""
+"Теперь ваше приложение vstutils должно быть доступно через HTTPS через "
+"Nginx. Измените эти инструкции в зависимости от вашего конкретного окружения и "
+"требований к безопасности."
+
+#: ../../config.rst:669
+msgid "Traefik"
+msgstr "Traefik"
+
+#: ../../config.rst:671
+msgid ""
+"To configure vstutils for operation behind Traefik with TLS, follow these"
+" steps:"
+msgstr ""
+"Чтобы настроить vstutils для работы через Traefik с поддержкой TLS, выполните следующие шаги:"
+
+#: ../../config.rst:673
+msgid "**Install Traefik:**"
+msgstr "**Установка Traefik:**"
+
+#: ../../config.rst:675
+msgid ""
+"Ensure that Traefik is installed on your server. You can download the "
+"binary from the official website or use a package manager specific to "
+"your operating system."
+msgstr ""
+"Убедитесь, что Traefik установлен на вашем сервере. Вы можете скачать двоичный файл с "
+"официального сайта или использовать менеджер пакетов, специфичный для вашей "
+"операционной системы."
+
+#: ../../config.rst:677
+msgid "**Configure Traefik:**"
+msgstr "**Настройка Traefik:**"
+
+#: ../../config.rst:679
+msgid ""
+"Create a Traefik configuration file ``/path/to/traefik.toml``. Here's a "
+"basic example:"
+msgstr ""
+"Создайте файл конфигурации Traefik ``/path/to/traefik.toml``. Вот базовый пример:"
+
+#: ../../config.rst:701
+msgid "**Create Traefik Toml Configuration:**"
+msgstr "**Создайте конфигурацию Traefik Toml:**"
+
+#: ../../config.rst:703
+msgid ""
+"Create the ``/path/to/traefik_config.toml`` file with the following "
+"content:"
+msgstr ""
+"Создайте файл ``/path/to/traefik_config.toml`` с следующим "
+"содержимым:"
+
+#: ../../config.rst:726
+msgid "Make sure to replace ``your_domain.com`` with your actual domain."
+msgstr "Обязательно замените ``your_domain.com`` на ваш реальный домен."
+
+#: ../../config.rst:737
+msgid "**Start Traefik:**"
+msgstr "**Запустите Traefik:**"
+
+#: ../../config.rst:739
+msgid "Start Traefik with the following command:"
+msgstr "Запустите Traefik следующей командой:"
+
+#: ../../config.rst:745
+msgid ""
+"Now, your vstutils application should be accessible via HTTPS through "
+"Traefik. Adjust these instructions based on your specific environment and"
+" requirements."
+msgstr ""
+"Теперь ваше приложение vstutils должно быть доступно через HTTPS через "
+"Traefik. Измените эти инструкции в зависимости от вашего конкретного окружения и "
+"требований."
+
+#: ../../config.rst:749
+msgid "HAProxy"
+msgstr "HAProxy"
+
+#: ../../config.rst:751
+msgid "**Install HAProxy:**"
+msgstr "**Установка HAProxy:**"
+
+#: ../../config.rst:753
+msgid ""
+"Ensure that HAProxy is installed on your server. You can install it using"
+" the package manager specific to your operating system."
+msgstr ""
+"Убедитесь, что HAProxy установлен на вашем сервере. Вы можете установить его с помощью"
+" менеджера пакетов, специфичного для вашей операционной системы."
+
+#: ../../config.rst:755
+msgid "**Configure HAProxy:**"
+msgstr "**Настройка HAProxy:**"
+
+#: ../../config.rst:757
+msgid ""
+"Create an HAProxy configuration file for your vstutils application. Below"
+" is a basic example of an HAProxy configuration. Adjust the values based "
+"on your specific setup."
+msgstr ""
+"Создайте файл конфигурации HAProxy для вашего приложения vstutils. Вот базовый пример конфигурации"
+" HAProxy. Измените значения в соответствии с вашей конкретной настройкой."
+
+#: ../../config.rst:777
+msgid ""
+"Replace ``your_domain.com`` with your actual domain and update the paths "
+"for SSL certificates."
+msgstr ""
+"Замените ``your_domain.com`` на ваш реальный домен и обновите пути "
+"к SSL-сертификатам."
+
+#: ../../config.rst:788
+msgid "**Restart HAProxy:**"
+msgstr "**Перезапуск HAProxy:**"
+
+#: ../../config.rst:790
+msgid ""
+"After making these changes, restart HAProxy to apply the new "
+"configurations:"
+msgstr ""
+"После внесения этих изменений перезапустите HAProxy, чтобы применить новые "
+"конфигурации."
+
+#: ../../config.rst:796
+msgid ""
+"Now, your vstutils application should be accessible via HTTPS through "
+"HAProxy. Adjust these instructions based on your specific environment and"
+" security considerations."
+msgstr ""
+"Теперь ваше приложение vstutils должно быть доступно через HTTPS через "
+"HAProxy. Измените эти инструкции в зависимости от вашего конкретного окружения и "
+"требований к безопасности."
+
+#: ../../config.rst:800
 msgid "Configuration options"
 msgstr "Параметры конфигурации"
 
-#: ../../config.rst:556
+#: ../../config.rst:802
 msgid ""
 "This section contains additional information for configure additional "
 "elements."
@@ -1463,7 +1853,7 @@ msgstr ""
 "В этом разделе содержится дополнительная информация для настройки "
 "дополнительных элементов."
 
-#: ../../config.rst:558
+#: ../../config.rst:804
 msgid ""
 "If you need set ``https`` for your web settings, you can do it using "
 "HAProxy, Nginx, Traefik or configure it in ``settings.ini``."
@@ -1472,7 +1862,7 @@ msgstr ""
 " сделать это с помощью HAProxy, Nginx, Traefik или настроить в файле "
 "``settings.ini``."
 
-#: ../../config.rst:570
+#: ../../config.rst:816
 msgid ""
 "We strictly do not recommend running the web server from root. Use HTTP "
 "proxy to run on privileged ports."
@@ -1480,7 +1870,7 @@ msgstr ""
 "Мы настоятельно не рекомендуем запускать веб-сервер от имени root. "
 "Используйте HTTP-прокси, чтобы работать на привилегированных портах."
 
-#: ../../config.rst:572
+#: ../../config.rst:818
 msgid ""
 "You can use `{ENV[HOME:-value]}` (where `HOME` is environment variable, "
 "`value` is default value) in configuration values."
@@ -1488,7 +1878,7 @@ msgstr ""
 "Вы можете использовать `{ENV[HOME:-value]}` (где `HOME` - переменная "
 "окружения, `value` - значение по умолчанию) в значениях конфигурации."
 
-#: ../../config.rst:575
+#: ../../config.rst:821
 msgid ""
 "You can use environment variables for setup important settings. But "
 "config variables has more priority then env. Available settings are: "
@@ -1501,7 +1891,7 @@ msgstr ""
 "``DJANGO_LOG_LEVEL``, ``TIMEZONE`` и некоторые настройки с префиксом "
 "``[ENV_NAME]``."
 
-#: ../../config.rst:578
+#: ../../config.rst:824
 msgid ""
 "For project without special settings and project levels named ``project``"
 " these variables will start with ``PROJECT_`` prefix. There is a list of "
@@ -1525,7 +1915,7 @@ msgstr ""
 "``{ENV_NAME}_GLOBAL_THROTTLE_RATE``, и "
 "``{ENV_NAME}_GLOBAL_THROTTLE_ACTIONS``."
 
-#: ../../config.rst:585
+#: ../../config.rst:831
 msgid ""
 "There are also URI-specific variables for connecting to various services "
 "such as databases and caches. There are ``DATABASE_URL``, ``CACHE_URL``, "
@@ -1539,11 +1929,45 @@ msgstr ""
 "``SESSIONS_CACHE_URL`` и ``ETAG_CACHE_URL``. Как видно из названий, они "
 "тесно связаны с ключами и именами соответствующих секций конфигурации."
 
-#: ../../config.rst:589
+#: ../../config.rst:835
 msgid ""
 "We recommend to install ``uvloop`` to your environment and setup ``loop ="
 " uvloop`` in ``[uvicorn]`` section for performance reasons."
 msgstr ""
 "Мы рекомендуем установить ``uvloop`` в ваше окружение и настроить ``loop "
 "= uvloop`` в разделе ``[uvicorn]`` для повышения производительности."
+
+#: ../../config.rst:837
+msgid ""
+"In the context of vstutils, the adoption of ``uvloop`` is paramount for "
+"optimizing the performance of the application, especially because "
+"utilizing ``uvicorn`` as the ASGI server. ``uvloop`` is an ultra-fast, "
+"drop-in replacement for the default event loop provided by Python. It is "
+"built on top of ``libuv``, a high-performance event loop library, and is "
+"specifically designed to optimize the execution speed of asynchronous "
+"code."
+msgstr ""
+"В контексте vstutils внедрение ``uvloop`` играет ключевую роль в "
+"оптимизации производительности приложения, особенно при использовании "
+"``uvicorn`` в качестве ASGI-сервера. ``uvloop`` представляет собой "
+"ультра-быстрый, готовый к использованию заменитель стандартного цикла "
+"событий, предоставляемого Python. Он построен на базе ``libuv``, "
+"библиотеки высокопроизводительного цикла событий, и специально разработан"
+" для оптимизации скорости выполнения асинхронного кода."
+
+#: ../../config.rst:841
+msgid ""
+"By leveraging ``uvloop``, developers can achieve substantial performance "
+"improvements in terms of reduced latency and increased throughput. This "
+"is especially critical in scenarios where applications handle a large "
+"number of concurrent connections. The improved efficiency of event loop "
+"handling directly translates to faster response times and better overall "
+"responsiveness of the application."
+msgstr ""
+"Используя ``uvloop``, разработчики могут достичь значительного улучшения "
+"производительности за счет снижения задержек и увеличения пропускной "
+"способности. Это особенно важно в сценариях, где приложения обрабатывают "
+"большое количество одновременных подключений. Улучшенная эффективность "
+"обработки цикла событий напрямую переводится в более быстрое время ответа"
+" и лучшую общую отзывчивость приложения."
 

@@ -3,19 +3,18 @@
 # This file is distributed under the same license as the VST Utils package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-25 04:56+0000\n"
+"POT-Creation-Date: 2024-01-10 23:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.13.1\n"
+"Generated-By: Babel 2.14.0\n"
 
 #: ../../quickstart.rst:2
 msgid "Quick Start"
@@ -196,27 +195,27 @@ msgstr "Эта команда создает новый проект без по
 msgid "These commands create several files in ``project directory``."
 msgstr "Эти команды создают несколько файлов в ``project directory``:"
 
-#: ../../quickstart.rst:114
+#: ../../quickstart.rst:112
 msgid "where:"
 msgstr "где"
 
-#: ../../quickstart.rst:116
+#: ../../quickstart.rst:114
 msgid "**frontend_src** - directory that contains all sources for frontend;"
 msgstr ""
 "**frontend_src** - директория, содержащая все исходные файлы для "
 "фронтенда;"
 
-#: ../../quickstart.rst:117
+#: ../../quickstart.rst:115
 msgid "**MANIFEST.in** - this file is used for building installation package;"
 msgstr ""
 "**MANIFEST.in** - этот файл используется для создания установочного "
 "пакета;"
 
-#: ../../quickstart.rst:118
+#: ../../quickstart.rst:116
 msgid "**{{app_name}}** - directory with files of your application;"
 msgstr "**{{app_name}}** - директория с файлами вашего приложения;"
 
-#: ../../quickstart.rst:119
+#: ../../quickstart.rst:117
 msgid ""
 "**package.json** - this file contains list of frontend dependencies and "
 "commands to build;"
@@ -224,7 +223,7 @@ msgstr ""
 "**package.json** - этот файл содержит список зависимостей фронтенда и "
 "команд для сборки;"
 
-#: ../../quickstart.rst:120
+#: ../../quickstart.rst:118
 msgid ""
 "**README.rst** - default README file for your application (this file "
 "includes base commands for starting/stopping your application);"
@@ -232,7 +231,7 @@ msgstr ""
 "**README.rst** - стандартный README файл для вашего приложения (этот файл"
 " включает базовые команды для запуска/остановки вашего приложения);"
 
-#: ../../quickstart.rst:121
+#: ../../quickstart.rst:119
 msgid ""
 "**requirements-test.txt** - file with list of requirements for test "
 "environment;"
@@ -240,29 +239,29 @@ msgstr ""
 "**requirements-test.txt** - файл со списком зависимостей для тестирования"
 " вашего окружения;"
 
-#: ../../quickstart.rst:122
+#: ../../quickstart.rst:120
 msgid ""
 "**requirements.txt** - file with list of requirements for your "
 "application;"
 msgstr "**requirements.txt** - файл со списком зависимостей вашего приложения;"
 
-#: ../../quickstart.rst:123
-msgid "**setup.cfg** - this file is used for building installation package;"
-msgstr "**setup.cfg** - файл, используемый для сборки установочного пакета;"
+#: ../../quickstart.rst:121
+msgid "**pyproject.toml** - this file is used for building installation package;"
+msgstr "**pyproject.toml** - файл, используемый для сборки установочного пакета;"
 
-#: ../../quickstart.rst:124
+#: ../../quickstart.rst:122
 msgid "**setup.py** - this file is used for building installation package;"
 msgstr "**setup.py** - файл, используемый для сборки установочного пакета;"
 
-#: ../../quickstart.rst:125
+#: ../../quickstart.rst:123
 msgid "**test.py** - this file is used for tests creation;"
 msgstr "**test.py** - этот файл используется для создания тестов;"
 
-#: ../../quickstart.rst:126
+#: ../../quickstart.rst:124
 msgid "**tox.ini** - this file is used for tests execution;"
 msgstr "**tox.ini** - этот файл используется для выполнения тестов;"
 
-#: ../../quickstart.rst:127
+#: ../../quickstart.rst:125
 msgid ""
 "**webpack.config.js.default** - this file contain minimal script for "
 "webpack (replace '.default' if write smthg in 'app.js')."
@@ -270,7 +269,7 @@ msgstr ""
 "**webpack.config.js.default** - этот файл содержит минимальный скрипт для"
 " webpack (замените '.default', если пишите что-то в 'app.js')."
 
-#: ../../quickstart.rst:129
+#: ../../quickstart.rst:127
 msgid ""
 "You should execute below commands  from the "
 "``/{{app_dir}}/{{app_name}}/`` directory. It is good practice to use tox "
@@ -286,11 +285,11 @@ msgstr ""
 "``tox -e contrib`` в директории проекта, что автоматически создаст новое "
 "окружение с необходимыми зависимостями."
 
-#: ../../quickstart.rst:134
+#: ../../quickstart.rst:132
 msgid "**Apply migrations**"
 msgstr "**Применение миграций**"
 
-#: ../../quickstart.rst:136
+#: ../../quickstart.rst:134
 msgid ""
 "Let’s verify a newly created vstutils project does work. Change into the "
 "outer ``/{{app_dir}}/{{app_name}}`` directory, if you haven’t already, "
@@ -300,7 +299,7 @@ msgstr ""
 " каталог ``/{{app_dir}}/{{app_name}}``, если вы еще этого не сделали, и "
 "выполните следующую команду:"
 
-#: ../../quickstart.rst:144
+#: ../../quickstart.rst:142
 msgid ""
 "This command create SQLite (by default) database with default SQL-schema."
 " VSTUTILS supports all databases `Django does "
@@ -311,15 +310,15 @@ msgstr ""
 "`Django. "
 "<https://docs.djangoproject.com/en/4.1/ref/databases/#databases>`_"
 
-#: ../../quickstart.rst:147
+#: ../../quickstart.rst:145
 msgid "**Create superuser**"
 msgstr "**Создание суперпользователя**"
 
-#: ../../quickstart.rst:153
+#: ../../quickstart.rst:151
 msgid "**Start your application**"
 msgstr "**Запуск приложения**"
 
-#: ../../quickstart.rst:159
+#: ../../quickstart.rst:157
 msgid ""
 "Web-interface of your application has been started on the port 8080. "
 "You’ve started the vstutils production server based on `uWSGI <https"
@@ -329,7 +328,7 @@ msgstr ""
 " сервер vstutils для продакшена на основе `uWSGI <https://uwsgi-"
 "docs.readthedocs.io/>`_."
 
-#: ../../quickstart.rst:163
+#: ../../quickstart.rst:161
 msgid ""
 "Now’s a good time to note: if you want to run the web-server with a "
 "debugger, then you should run `the standard Django's dev-server "
@@ -341,11 +340,11 @@ msgstr ""
 " <https://docs.djangoproject.com/en/3.2/intro/tutorial01/#the-"
 "development-server>`_"
 
-#: ../../quickstart.rst:168
+#: ../../quickstart.rst:166
 msgid "If you need to stop the server, use following command:"
 msgstr "Если вам нужно остановить сервер, используйте следующую команду:"
 
-#: ../../quickstart.rst:175
+#: ../../quickstart.rst:173
 msgid ""
 "You've created the simplest application, based on VST Utils framework. "
 "This application only contains User Model. If you want to create your own"
@@ -355,11 +354,11 @@ msgstr ""
 " приложение содержит только модель пользователя. Если вы хотите создать "
 "свои собственные модели, обратитесь к разделу ниже."
 
-#: ../../quickstart.rst:180
+#: ../../quickstart.rst:178
 msgid "Adding new models to application"
 msgstr "Добавление новых моделей в приложение"
 
-#: ../../quickstart.rst:181
+#: ../../quickstart.rst:179
 msgid ""
 "If you want to add some new entities to your application, you need to do "
 "following on the back-end:"
@@ -367,35 +366,35 @@ msgstr ""
 "Если вы хотите добавить новые сущности в ваше приложение, вам необходимо "
 "выполнить следующие действия на серверной стороне: "
 
-#: ../../quickstart.rst:183
+#: ../../quickstart.rst:181
 msgid "Create Model;"
 msgstr "Создайте модель;"
 
-#: ../../quickstart.rst:184
+#: ../../quickstart.rst:182
 msgid "Create Serializer (optional);"
 msgstr "Создайте сериализатор (опционально);"
 
-#: ../../quickstart.rst:185
+#: ../../quickstart.rst:183
 msgid "Create View (optional);"
 msgstr "Создайте view (опционально);"
 
-#: ../../quickstart.rst:186
+#: ../../quickstart.rst:184
 msgid "Add created Model or View to the API;"
 msgstr "Добавьте созданную модель или view в API;"
 
-#: ../../quickstart.rst:187
+#: ../../quickstart.rst:185
 msgid "Make migrations;"
 msgstr "Создайте миграции;"
 
-#: ../../quickstart.rst:188
+#: ../../quickstart.rst:186
 msgid "Apply migrations;"
 msgstr "Примените миграции;"
 
-#: ../../quickstart.rst:189
+#: ../../quickstart.rst:187
 msgid "Restart your application."
 msgstr "Перезапустите ваше приложение."
 
-#: ../../quickstart.rst:191
+#: ../../quickstart.rst:189
 msgid ""
 "Let's look how you can do it on the AppExample - application, that has 2 "
 "custom models:"
@@ -403,13 +402,13 @@ msgstr ""
 "Давайте посмотрим, как это можно сделать на примере приложения AppExample"
 " которое содержит 2 пользовательские модели: "
 
-#: ../../quickstart.rst:193
+#: ../../quickstart.rst:191
 msgid "Task (abstraction for some tasks/activities, that user should do);"
 msgstr ""
 "Task (абстракция для некоторых задач/активностей, которые пользователь "
 "должен выполнить);"
 
-#: ../../quickstart.rst:194
+#: ../../quickstart.rst:192
 msgid ""
 "Stage (abstraction for some stages, that user should do to complete the "
 "task. This model is nested into the Task Model)."
@@ -417,11 +416,11 @@ msgstr ""
 "Stage (абстракция для некоторых этапов, которые пользователь должен "
 "пройти для выполнения задачи. Эта модель вложена в модель Task)."
 
-#: ../../quickstart.rst:198
+#: ../../quickstart.rst:196
 msgid "Models creation"
 msgstr "Создание моделей"
 
-#: ../../quickstart.rst:199
+#: ../../quickstart.rst:197
 msgid ""
 "Firstly, you need to create file ``{{model_name}}.py`` in the "
 "``/{{app_dir}}/{{app_name}}/{{app_name}}/models`` directory."
@@ -429,7 +428,7 @@ msgstr ""
 "Сначала вам необходимо создать файл ``{{model_name}}.py`` в директории "
 "``/{{app_dir}}/{{app_name}}/{{app_name}}/models``."
 
-#: ../../quickstart.rst:201
+#: ../../quickstart.rst:199
 msgid "Let make out an example from **BModel**:"
 msgstr "Давайте рассмотрим пример с моделью **BModel**:"
 
@@ -691,9 +690,10 @@ msgstr ""
 "вложенного view, kwargs для декоратора "
 ":class:`vstutils.api.decorators.nested_view`, но поддерживает атрибут "
 "``model`` в качестве вложенного). ``model`` может быть строкой для "
-"импорта. Используйте параметр ``override_params`` в тех случаях, когда необходимо перегрузить"
-"параметры генерируемого представления в качестве вложенного (работает только когда задан ``model`` "
-"как вложенное представление)."
+"импорта. Используйте параметр ``override_params`` в тех случаях, когда "
+"необходимо перегрузить параметры генерируемого представления в качестве "
+"вложенного (работает только когда задан ``model`` как вложенное "
+"представление)."
 
 #: of vstutils.models.BModel:123
 msgid ""
@@ -784,10 +784,11 @@ msgid ""
 "Django Rest Framework (DRF) Generic ViewSets. It allows developers to "
 "define and customize various aspects of the associated DRF view class."
 msgstr ""
-"Метод ``get_view_class()`` — это служебный метод в ORM Django "
-"моделях, предназначенный для облегчения настройки и создания экземпляров"
-"представлений Django Rest Framework (DRF). Это позволяет разработчикам "
-"определить и настроить различные аспекты класса представления DRF."
+"Метод ``get_view_class()`` — это служебный метод в ORM Django моделях, "
+"предназначенный для облегчения настройки и создания "
+"экземпляров представлений Django Rest Framework (DRF). Это позволяет "
+"разработчикам определить и настроить различные аспекты класса "
+"представления DRF."
 
 #: of vstutils.models.BModel:189
 msgid ""
@@ -796,12 +797,13 @@ msgid ""
 " backends, permission classes, etc. It uses attributes declared in meta "
 "attributes, but allows individual parts to be overriden."
 msgstr ""
-"Разработчики могут использовать этот метод для изменения различных аспектов "
-"получаемого представления, таких как классы сериализаторов, конфигурацию полей, фильтры,"
-"классы разрешений и т.п. Этот метод использует такие же атрибуты, которые были объявлены"
-"в мета-атрибутах, но позволяет перегружать отдельные части."
+"Разработчики могут использовать этот метод для изменения различных "
+"аспектов получаемого представления, таких как классы сериализаторов, "
+"конфигурацию полей, фильтры,классы разрешений и т.п. Этот метод "
+"использует такие же атрибуты, которые были объявлены в мета-атрибутах, но "
+"позволяет перегружать отдельные части."
 
-#: ../../quickstart.rst:208
+#: ../../quickstart.rst:206
 msgid ""
 "More information about Models you can find in `Django Models "
 "documentation "
@@ -811,7 +813,7 @@ msgstr ""
 "`Django Models "
 "<https://docs.djangoproject.com/en/3.2/topics/db/models/>`_."
 
-#: ../../quickstart.rst:210
+#: ../../quickstart.rst:208
 msgid ""
 "If you don't need to create custom "
 ":ref:`serializers<SerializerCreateTag>` or :ref:`view "
@@ -823,17 +825,17 @@ msgstr ""
 "sets<ViewSetCreateTag>`, вы можете перейти к этому "
 ":ref:`этапу<AddModelsToApiTag>`."
 
-#: ../../quickstart.rst:215
+#: ../../quickstart.rst:213
 msgid "Serializers creation"
 msgstr "Создание сериализаторов"
 
-#: ../../quickstart.rst:217
+#: ../../quickstart.rst:215
 msgid "*Note - If you don't need custom serializer you can skip this section*"
 msgstr ""
 "*Примечание - Если вам не нужен пользовательский сериализатор, вы можете "
 "пропустить этот раздел.*"
 
-#: ../../quickstart.rst:219
+#: ../../quickstart.rst:217
 msgid ""
 "Firstly, you need to create file ``serializers.py`` in the "
 "``/{{app_dir}}/{{app_name}}/{{app_name}}/`` directory."
@@ -841,13 +843,13 @@ msgstr ""
 "В первую очередь вам необходимо создать файл ``serializers.py`` в "
 "директории ``/{{app_dir}}/{{app_name}}/{{app_name}}/``."
 
-#: ../../quickstart.rst:221
+#: ../../quickstart.rst:219
 msgid "Then you need to add some code like this to ``serializers.py``:"
 msgstr ""
 "Затем вам нужно добавить некоторый код, подобный следующему, в файл "
 "``serializers.py``:"
 
-#: ../../quickstart.rst:244
+#: ../../quickstart.rst:242
 msgid ""
 "More information about Serializers you can find in `Django REST Framework"
 " documentation for Serializers <https://www.django-rest-framework.org"
@@ -857,17 +859,17 @@ msgstr ""
 "документации `Django REST Framework по сериализаторам <https://www"
 ".django-rest-framework.org/api-guide/serializers/#modelserializer>`_."
 
-#: ../../quickstart.rst:250
+#: ../../quickstart.rst:248
 msgid "Views creation"
 msgstr "Создание views"
 
-#: ../../quickstart.rst:252
+#: ../../quickstart.rst:250
 msgid "*Note - If you don't need custom view set you can skip this section*"
 msgstr ""
 "*Примечание - Если вам не нужен пользовательский view set, вы можете "
 "пропустить этот раздел.*"
 
-#: ../../quickstart.rst:254
+#: ../../quickstart.rst:252
 msgid ""
 "Firstly, you need to create file ``views.py`` in the "
 "``/{{app_dir}}/{{app_name}}/{{app_name}}/`` directory."
@@ -875,13 +877,13 @@ msgstr ""
 "В первую очередь вам необходимо создать файл ``views.py`` в директории "
 "``/{{app_dir}}/{{app_name}}/{{app_name}}/``."
 
-#: ../../quickstart.rst:256
+#: ../../quickstart.rst:254
 msgid "Then you need to add some code like this to ``views.py``:"
 msgstr ""
 "Затем вам нужно добавить некоторый код, подобный следующему, в файл "
 "``views.py``:"
 
-#: ../../quickstart.rst:285
+#: ../../quickstart.rst:283
 msgid ""
 "More information about Views and ViewSets you can find in `Django REST "
 "Framework documentation for views <https://www.django-rest-framework.org"
@@ -891,11 +893,11 @@ msgstr ""
 " REST Framework для view <https://www.django-rest-framework.org/api-"
 "guide/viewsets/>`_."
 
-#: ../../quickstart.rst:291
+#: ../../quickstart.rst:289
 msgid "Adding Models to API"
 msgstr "Добавление моделей в API"
 
-#: ../../quickstart.rst:293
+#: ../../quickstart.rst:291
 msgid ""
 "To add created Models to the API you need to write something like this at"
 " the end of your ``settings.py`` file:"
@@ -903,11 +905,11 @@ msgstr ""
 "Для добавления моделей в APi вам нужно написать код, подобный этому в в "
 "конце файла ``settings.py``:"
 
-#: ../../quickstart.rst:329
+#: ../../quickstart.rst:327
 msgid "Migrations creation"
 msgstr "Создание миграций"
 
-#: ../../quickstart.rst:330
+#: ../../quickstart.rst:328
 msgid ""
 "To make migrations open ``/{{app_dir}}/{{app_name}}/`` directory and "
 "execute following command:"
@@ -915,7 +917,7 @@ msgstr ""
 "Для создания миграций откройте директорию ``/{{app_dir}}/{{app_name}}/`` "
 "и выполните следующую команду:"
 
-#: ../../quickstart.rst:336
+#: ../../quickstart.rst:334
 msgid ""
 "More information about Migrations you can find in `Django Migrations "
 "documentation "
@@ -925,11 +927,11 @@ msgstr ""
 "Django Migrations "
 "<https://docs.djangoproject.com/en/3.2/topics/migrations/>`_."
 
-#: ../../quickstart.rst:340
+#: ../../quickstart.rst:338
 msgid "Migrations applying"
 msgstr "Применение миграций"
 
-#: ../../quickstart.rst:341
+#: ../../quickstart.rst:339
 msgid ""
 "To apply migrations you need to open ``/{{app_dir}}/{{app_name}}/`` "
 "directory and execute following command:"
@@ -937,11 +939,11 @@ msgstr ""
 "Для применения миграций вам необходимо открыть директорию "
 "``/{{app_dir}}/{{app_name}}/`` и выполнить следующую команду:"
 
-#: ../../quickstart.rst:349
+#: ../../quickstart.rst:347
 msgid "Restart of Application"
 msgstr "Перезапуск приложения"
 
-#: ../../quickstart.rst:350
+#: ../../quickstart.rst:348
 msgid ""
 "To restart your application, firstly, you need to stop it (if it was "
 "started before):"
@@ -949,15 +951,15 @@ msgstr ""
 "Для перезапуска вашего приложения вам сначала нужно остановить его (если "
 "оно было запущено ранее):"
 
-#: ../../quickstart.rst:356
+#: ../../quickstart.rst:354
 msgid "And then start it again:"
 msgstr "Затем запустите его снова:"
 
-#: ../../quickstart.rst:362
+#: ../../quickstart.rst:360
 msgid "After cache reloading you will see following page:"
 msgstr "После перезагрузки кэша вы увидите следующую страницу:"
 
-#: ../../quickstart.rst:366
+#: ../../quickstart.rst:364
 msgid ""
 "As you can see, link to new Task View has been added to the sidebar menu."
 " Let's click on it."
@@ -965,17 +967,17 @@ msgstr ""
 "Как вы можете видеть, ссылка на новое Task view добавлена в боковое меню."
 " Давайте нажмем на нее."
 
-#: ../../quickstart.rst:370
+#: ../../quickstart.rst:368
 msgid "There is no task instance in your app. Add it using 'new' button."
 msgstr ""
 "В вашем приложении нет экземпляра задачи. Добавьте его, используя кнопку "
 "'new'."
 
-#: ../../quickstart.rst:374
+#: ../../quickstart.rst:372
 msgid "After creating a new task you'll see a following page:"
 msgstr "После создания новой задачи вы увидите следующую страницу:"
 
-#: ../../quickstart.rst:378
+#: ../../quickstart.rst:376
 msgid ""
 "As you can see, there is 'stages' button, that opens page with this "
 "task's stages list. Let's click on it."
@@ -983,15 +985,15 @@ msgstr ""
 "Как видите, есть кнопка 'stages', которая открывает страницу со списком "
 "этапов этой задачи. Давайте на нее нажмем."
 
-#: ../../quickstart.rst:382
+#: ../../quickstart.rst:380
 msgid "There is no stage instances in your app. Let's create 2 new stages."
 msgstr "В вашем приложении нет экземпляров этапов. Давайте создадим 2 новых этапа."
 
-#: ../../quickstart.rst:387
+#: ../../quickstart.rst:385
 msgid "After stages creation page with stages list will looks like this:"
 msgstr "После создания этапов страница со списком этапов будет выглядеть так:"
 
-#: ../../quickstart.rst:391
+#: ../../quickstart.rst:389
 msgid ""
 "Sorting by 'order' field works, as we mentioned in the our ``models.py`` "
 "file for Stage Model."
@@ -999,7 +1001,7 @@ msgstr ""
 "Сортировка по полю `order` работает, как мы указали в нашем файле "
 "``models.py`` для модели Stage."
 
-#: ../../quickstart.rst:393
+#: ../../quickstart.rst:391
 msgid ""
 "Additional information about Django and Django REST Framework you can "
 "find in `Django documentation <https://docs.djangoproject.com/en/4.1/>`_ "
