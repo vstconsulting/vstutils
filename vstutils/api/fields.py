@@ -164,24 +164,53 @@ class CSVFileField(FileInStringField):
 
 class AutoCompletionField(VSTCharField):
     """
-    Field that provides autocompletion on frontend, using specified list of objects.
+    Serializer field that provides autocompletion on the frontend, using a specified list of objects.
 
-    :param autocomplete: Autocompletion reference. You can set list/tuple with
-                         values or set OpenAPI schema definition name.
-                         For definition name GUI will find optimal link and
-                         will show values based on ``autocomplete_property`` and
+    :param autocomplete: Autocompletion reference. You can set a list or tuple with
+                         values or specify the name of an OpenAPI schema definition.
+                         For a definition name, the GUI will find the optimal link and
+                         display values based on the ``autocomplete_property`` and
                          ``autocomplete_represent`` arguments.
-    :type autocomplete: list,tuple,str
-    :param autocomplete_property: this argument indicates which attribute will be
-                                  get from OpenAPI schema definition model as value.
+    :type autocomplete: list, tuple, str
+    :param autocomplete_property: Specifies which attribute to retrieve from the
+                                  OpenAPI schema definition model as the value.
+                                  Default is 'id'.
     :type autocomplete_property: str
-    :param autocomplete_represent: this argument indicates which attribute will be
-                                   get from OpenAPI schema definition model as represent value.
-    :param use_prefetch: prefetch values on frontend at list-view. Default is ``True``.
+    :param autocomplete_represent: Specifies which attribute to retrieve from the
+                                   OpenAPI schema definition model as the representational value.
+                                   Default is 'name'.
+    :param use_prefetch: Prefetch values on the frontend in list view. Default is ``True``.
     :type use_prefetch: bool
 
     .. note::
-        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
+        This functionality is effective only in the GUI. In the API, it behaves similarly to :class:`.VSTCharField`.
+
+    Usage:
+        This field is designed to be used in serializers where a user needs to input a value, and autocompletion
+        based on a predefined list or an OpenAPI schema definition is desired. If an OpenAPI schema is specified,
+        two additional parameters, ``autocomplete_property`` and ``autocomplete_represent``, can be configured to
+        customize the appearance of the dropdown list.
+
+        Example:
+
+            .. sourcecode:: python
+
+                from vstutils.api import serializers
+                from vstutils.api.fields import AutoCompletionField
+
+
+                class MyModelSerializer(serializers.BaseSerializer):
+                    name = AutoCompletionField(autocomplete=['Option 1', 'Option 2', 'Option 3'])
+
+                # or
+
+                class MyModelSerializer(serializers.BaseSerializer):
+                    name = AutoCompletionField(
+                        autocomplete='MyModelSchema',
+                        autocomplete_property='custom_property',
+                        autocomplete_represent='display_name'
+                    )
+
     """
 
     autocomplete: _t.Text
@@ -201,29 +230,50 @@ class AutoCompletionField(VSTCharField):
 
 class CommaMultiSelect(VSTCharField):
     """
-    Field containing a list of values with specified separator (default: ",").
-    Gets list of values from another model or custom list. Provides autocompletion as :class:`.AutoCompletionField`,
-    but with comma-lists.
-    Suited for property-fields in model where main logic is already implemented or
-    with :class:`model.CharField`.
+    Field that allows users to input multiple values, separated by a specified delimiter (default: ",").
+    It retrieves a list of values from another model or a custom list and provides autocompletion similar to :class:`.AutoCompletionField`.
+    This field is suitable for property fields in a model where the main logic is already implemented or for use with :class:`model.CharField`.
 
-    :param select: OpenAPI schema definition name or list with values.
-    :type select: str,tuple,list
-    :param select_separator: separator of values. Default is comma.
+    :param select: OpenAPI schema definition name or a list with values.
+    :type select: str, tuple, list
+    :param select_separator: The separator for values. The default is a comma.
     :type select_separator: str
-    :param select_property,select_represent: work as ``autocomplete_property`` and ``autocomplete_represent``.
-                                             Default is ``name``.
-    :param use_prefetch: prefetch values on frontend at list-view. Default is ``False``.
-    :param make_link: Show value as link to model. Default is ``True``.
-    :param dependence: Dictionary, where keys are name of field from the same model, and values are name of query
-                       filter. If at least one of the fields that we depend on is non nullable, required and set to
-                       null, autocompletion list will be empty and field will be disabled.
+    :param select_property, select_represent: These parameters function similarly to ``autocomplete_property`` and ``autocomplete_represent``.
+                                             The default is ``name``.
+    :param use_prefetch: Prefetch values on the frontend in list view. The default is ``False``.
+    :type use_prefetch: bool
+    :param make_link: Show values as links to the model. The default is ``True``.
+    :type make_link: bool
+    :param dependence: A dictionary where keys are the names of fields from the same model, and values are the names of query
+                       filters. If at least one of the fields we depend on is non-nullable, required, and set to
+                       null, the autocompletion list will be empty, and the field will be disabled.
     :type dependence: dict
 
+    Example:
+
+        .. sourcecode:: python
+
+            from vstutils.api import serializers
+            from vstutils.api.fields import CommaMultiSelect
+
+            class MyModelSerializer(serializers.BaseSerializer):
+                tags = CommaMultiSelect(
+                    select="TagsReferenceSchema",
+                    select_property='slug',
+                    select_represent='slug',
+                    use_prefetch=True,
+                    make_link=False,
+                    dependence={'some_field': 'value'},
+                )
+
+            # or
+
+            class MyModelSerializer(serializers.BaseSerializer):
+                tags = CommaMultiSelect(select=['tag1', 'tag2', 'tag3'])
 
     .. note::
-        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
-    """
+        This functionality is effective only in the GUI and works similarly to :class:`.VSTCharField` in the API.
+    """  # noqa: E501
 
     select_model: _t.Text
     select_separator: _t.Text
@@ -256,29 +306,48 @@ class CommaMultiSelect(VSTCharField):
 
 class DynamicJsonTypeField(VSTCharField):
     """
-    Field which type is based on another field. It converts value to internal string
-    and represent field as json object.
+    A versatile serializer field that dynamically adapts its type based on the value of another field in the model.
+    It facilitates complex scenarios where the type of data to be serialized depends on the value of a related field.
 
-    :param field: field in model which value change will change type of current value.
+    :param field: The field in the model whose value change will dynamically determine the type of the current field.
     :type field: str
-    :param types: key-value mapping where key is value of subscribed field and
-                  value is type (in OpenAPI format) of current field.
+    :param types: A key-value mapping where the key is the value of the subscribed field, and
+                  the value is the type (in OpenAPI format) of the current field.
     :type types: dict
-    :param choices: variants of choices for different subscribed field values.
-                    Uses mapping where key is value of subscribed field and
-                    value is list with values to choice.
+    :param choices: Variants of choices for different subscribed field values.
+                    Uses a mapping where the key is the value of the subscribed field, and
+                    the value is a list with values to choose from.
     :type choices: dict
-    :param source_view: Allows to use parent views data as source for field creation.
-                        Exact view path (`/user/{id}/`) or relative parent specifier
-                        (`<<parent>>.<<parent>>.<<parent>>`) can be provided. For example if current page is
-                        `/user/1/role/2/` and `source_view` is `<<parent>>.<<parent>>` then data
-                        from `/user/1/` will be used. Only detail views if supported.
+    :param source_view: Allows using parent views data as a source for field creation.
+                        The exact view path (`/user/{id}/`) or relative parent specifier
+                        (`<<parent>>.<<parent>>.<<parent>>`) can be provided.
+                        For example, if the current page is `/user/1/role/2/`
+                        and `source_view` is `<<parent>>.<<parent>>`,
+                        then data from `/user/1/` will be used. Only detail views are supported.
     :type source_view: str
 
+    Example:
+        Suppose you have a serializer `MySerializer` with a `field_type` (e.g., a `ChoiceField`)
+        and a corresponding `object_data`.
+        The `object_data` field can have different types based on the value of `field_type`.
+        Here's an example configuration:
 
-    .. note::
-        Effective only in GUI. In API works similar to :class:`.VSTCharField` without value modifications.
-    """
+        .. code-block:: python
+
+            class MySerializer(VSTSerializer):
+                field_type = serializers.ChoiceField(choices=['serializer', 'integer', 'boolean'])
+                object_data = DynamicJsonTypeField(
+                    field='field_type',
+                    types={
+                        'serializer': SomeSerializer(),
+                        'integer': IntegerField(max_value=1337),
+                        'boolean': 'boolean',
+                    },
+                )
+
+        In this example, the `object_data` field dynamically adapts its type based on the selected value of `field_type`.
+        The `types` argument defines different types for each possible value of `field_type`, allowing for flexible and dynamic serialization.
+    """  # noqa: E501
 
     field: _t.Text
     choices: _t.Dict
@@ -361,26 +430,61 @@ class DependEnumField(DynamicJsonTypeField):
 
 class DependFromFkField(DynamicJsonTypeField):
     """
-    Field extends :class:`DynamicJsonTypeField`. Validates field data by :attr:`.field_attribute`
-    chosen in related model. By default, any value of :attr:`.field_attribute` validates as :class:`.VSTCharField`.
-    To override this behavior set dict attribute ``{field_attribute value}_fields_mapping`` in related model where:
+    A specialized field that extends :class:`DynamicJsonTypeField` and
+    validates field data based on a :attr:`.field_attribute`
+    chosen in a related model. The field data is validated against
+    the type defined by the chosen value of :attr:`.field_attribute`.
 
-    - **key** - string representation of value type which is received from related instance :attr:`.field_attribute`.
-    - **value** - :class:`rest_framework.Field` instance for validation.
+    .. note::
+        By default, any value of :attr:`.field_attribute` validates as :class:`.VSTCharField`.
+        To override this behavior, set the class attribute ``{field_attribute}_fields_mapping`` in the related model.
+        The attribute should be a dictionary where keys are string representations
+        of the values of :attr:`.field_attribute`,
+        and values are instances of :class:`rest_framework.Field` for validation.
+        If a value is not found in the dictionary, the default type will be :class:`.VSTCharField`.
 
-    :param field: field in model which value change changes type of current value.
-                  Field must be :class:`.FkModelField`.
+    :param field: The field in the model whose value change determines the type of the current value.
+                  The field must be of type :class:`.FkModelField`.
     :type field: str
-    :param field_attribute: attribute of related model instance with name of type.
+    :param field_attribute: The attribute of the related model instance containing the name of the type.
     :type field_attribute: str
-    :param types: key-value mapping where key is value of subscribed field and
-        value is type (in OpenAPI format) of current field.
+    :param types: A key-value mapping where the key is the value of the subscribed field, and
+                  the value is the type (in OpenAPI format) of the current field.
     :type types: dict
 
     .. warning::
-        ``field_attribute`` in related model must be :class:`rest_framework.fields.ChoicesField` or
-        GUI will show field as simple text.
+        The ``field_attribute`` in the related model must be of type :class:`rest_framework.fields.ChoicesField`
+        to ensure proper functioning in the GUI; otherwise, the field will be displayed as simple text.
 
+
+    Example:
+        Suppose you have a model with a ForeignKey field `related_model` and a field `type_attribute` in `RelatedModel`
+        that determines the type of data. You can use `DependFromFkField` to dynamically adapt the serialization
+        based on the value of `type_attribute`:
+
+        .. code-block:: python
+
+            class RelatedModel(BModel):
+                # ... other fields ...
+                type_attribute = models.CharField(max_length=20, choices=[('type1', 'Type 1'), ('type2', 'Type 2')])
+
+                type_attribute_fields_mapping = {
+                    'type1': SomeSerializer(),
+                    'type2': IntegerField(max_value=1337),
+                }
+
+            class MyModel(BModel):
+                related_model = models.ForeignKey(RelatedModel, on_delete=models.CASCADE)
+
+            class MySerializer(VSTSerializer):
+                dynamic_field = DependFromFkField(
+                    field='related_model',
+                    field_attribute='type_attribute'
+                )
+
+                class Meta:
+                    model = MyModel
+                    fields = '__all__'
     """
 
     default_related_field = VSTCharField(allow_null=True, allow_blank=True, default='')
@@ -431,22 +535,58 @@ class DependFromFkField(DynamicJsonTypeField):
 
 class TextareaField(VSTCharField):
     """
-    Field containing multiline string.
+    A specialized field that allows the input and display of multiline text.
 
     .. note::
-        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
+        This field is designed for use in the graphical user interface (GUI) and functions similarly to
+        :class:`.VSTCharField` in the API.
+
+    Example:
+        Suppose you have a model with a `description` field that can contain multiline text.
+        You can use `TextareaField` in your serializer to enable users to input and view multiline text in the GUI:
+
+        .. code-block:: python
+
+            class MyModel(BModel):
+                description = models.TextField()
+
+            class MySerializer(VSTSerializer):
+                multiline_description = TextareaField(source='description')
+
+                class Meta:
+                    model = MyModel
+                    fields = '__all__'
     """
 
 
 class HtmlField(VSTCharField):
     """
-    Field contains html text and marked as format:html. The field does not validate whether its content is HTML.
+    A specialized field for handling HTML text content, marked with the format:html.
 
-    .. warning::
-        To avoid vulnerability, do not allow users to modify this data because users ate able to execute their scripts.
+    .. warning:
+        Exercise caution when using this field, as it does not validate whether the content is valid HTML.
+      Be aware of the potential security risks associated with allowing users to modify HTML content, as
+      they may execute scripts.
 
     .. note::
-        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
+        This field is designed for use in the graphical user interface (GUI) and functions similarly to
+        :class:`.VSTCharField` in the API.
+
+    Example:
+        If you have a model with an `html_content` field that stores HTML-formatted text, you can use `HtmlField`
+        in your serializer to handle this content in the GUI:
+
+        .. code-block:: python
+
+            class MyModel(BModel):
+                html_content = models.TextField()
+
+            class MySerializer(VSTSerializer):
+                formatted_html_content = HtmlField(source='html_content')
+
+                class Meta:
+                    model = MyModel
+                    fields = '__all__'
     """
 
 
@@ -473,23 +613,64 @@ class _BaseBarcodeField(Field):
 
 class QrCodeField(_BaseBarcodeField):
     """
-    Simple string field.
-    The field is going to represent as QrCode in user interface.
+    A versatile field for encoding various types of data into QR codes.
 
-    :param child: original data field for serialization or deserialization.
+    This field can encode a wide range of data into a QR code representation, making it useful for displaying
+    QR codes in the user interface. It works by serializing or deserializing data using the specified child field.
+
+    :param child: The original data field for serialization or deserialization.
                   Default: :class:`rest_framework.fields.CharField`
     :type child: rest_framework.fields.Field
+
+    Example:
+        Suppose you have a model with a `data` field, and you want to display its QR code representation in the GUI.
+        You can use `QrCodeField` in your serializer:
+
+        .. code-block:: python
+
+            class MyModel(BModel):
+                data = models.CharField(max_length=255)
+
+            class MySerializer(VSTSerializer):
+                qr_code_data = QrCodeField(child=serializers.CharField(source='data'))
+
+                class Meta:
+                    model = MyModel
+                    fields = '__all__'
+
+        In this example, the qr_code_data field will represent the QR code generated from the data field in the GUI.
+        Users can interact with this QR code, and if their device supports it,
+        they can scan the code for further actions.
     """
 
 
 class Barcode128Field(_BaseBarcodeField):
     """
-    Simple string field. Value must always be a valid ASCII-string.
-    The field is going to represent as Barcode (Code 128) in user interface.
+    A field for representing data as a Barcode (Code 128) in the user interface.
 
-    :param child: original data field for serialization or deserialization.
+    This field accepts and validates data in the form of a valid ASCII string. It is designed to display the data
+    as a Code 128 barcode in the graphical user interface. The underlying data is serialized or deserialized
+    using the specified child field.
+
+    :param child: The original data field for serialization or deserialization.
                   Default: :class:`rest_framework.fields.CharField`
     :type child: rest_framework.fields.Field
+
+    Example:
+        Suppose you have a model with a `product_code` field, and you want to display its Code 128 barcode
+        representation in the GUI. You can use `Barcode128Field` in your serializer:
+
+        .. code-block:: python
+
+            class Product(BModel):
+                product_code = models.CharField(max_length=20)
+
+            class ProductSerializer(VSTSerializer):
+                barcode = Barcode128Field(child=serializers.CharField(source='product_code'))
+
+                class Meta:
+                    model = Product
+                    fields = '__all__'
     """
 
     def __init__(self, **kwargs):
@@ -499,44 +680,37 @@ class Barcode128Field(_BaseBarcodeField):
 
 class FkField(IntegerField):
     """
-    Implementation of ForeignKeyField. You can specify which field of a related model will be
-    stored in field (default: "id"), and which will represent field on frontend.
+    An implementation of ForeignKeyField, designed for use in serializers. This field allows you to specify
+    which field of a related model will be stored in the field (default: "id"), and which field will represent
+    the value on the frontend.
 
     :param select: OpenAPI schema definition name.
     :type select: str
-    :param autocomplete_property: this argument indicates which attribute will be
-                                  get from OpenAPI schema definition model as value.
+    :param autocomplete_property: Specifies which attribute will be retrieved from the OpenAPI schema definition model as the value.
                                   Default is ``id``.
     :type autocomplete_property: str
-    :param autocomplete_represent: this argument indicates which attribute will be
-                                   get from OpenAPI schema definition model as represent value.
+    :param autocomplete_represent: Specifies which attribute will be retrieved from the OpenAPI schema definition model as the representational value.
                                    Default is ``name``.
-    :param field_type: defines the autocomplete_property type for further definition in the schema
-                       and casting to the type from the api. Default is passthroughs but require `int` or `str` objects.
+    :param field_type: Defines the type of the autocomplete_property for further definition in the schema
+                       and casting to the type from the API. Default is passthrough but requires `int` or `str` objects.
     :type field_type: type
-    :param use_prefetch: prefetch values on frontend at list-view. Default is ``True``.
+    :param use_prefetch: Prefetch values on the frontend at list-view. Default is ``True``.
     :type use_prefetch: bool
-    :param make_link: show value as link to model. Default is ``True``.
+    :param make_link: Show the value as a link to the related model. Default is ``True``.
     :type make_link: bool
-    :param dependence: dictionary, where keys are names of a field from the same model,
-                       and values are names of query filter.
-                       If at least one of the fields that we depend on is non nullable, required and set to null,
-                       autocompletion list will be empty and field will be disabled.
+    :param dependence: A dictionary where keys are names of fields from the same model,
+                       and values are names of query filters. If at least one of the fields that we depend on is non-nullable,
+                       required, and set to null, the autocompletion list will be empty, and the field will be disabled.
 
-                       There are some special keys for dependence dictionary to get data that is stored
-                       on frontend without additional database query:
+                       There are some special keys for the dependence dictionary to get data that is stored
+                       on the frontend without additional database query:
 
-                       ``'<<pk>>'`` gets primary key of current instance,
-
-                       ``'<<view_name>>'`` gets view name from Vue component,
-
-                       ``'<<parent_view_name>>'`` gets parent view name from Vue component,
-
-                       ``'<<view_level>>'`` gets view level,
-
-                       ``'<<operation_id>>'`` gets operation_id,
-
-                       ``'<<parent_operation_id'>>`` gets parent_operation_id.
+                       - ``'<<pk>>'`` gets the primary key of the current instance,
+                       - ``'<<view_name>>'`` gets the view name from the Vue component,
+                       - ``'<<parent_view_name>>'`` gets the parent view name from the Vue component,
+                       - ``'<<view_level>>'`` gets the view level,
+                       - ``'<<operation_id>>'`` gets the operation_id,
+                       - ``'<<parent_operation_id'>>`` gets the parent_operation_id.
     :type dependence: dict
 
     Examples:
@@ -544,19 +718,19 @@ class FkField(IntegerField):
 
             field = FkField(select=Category, dependence={'<<pk>>': 'my_filter'})
 
-    This filter will get pk of current object and make query on frontend '/category?my_filter=3'
-    where '3' is primary key of current instance.
+    This filter will get the primary key of the current object and
+    make a query on the frontend ``/category?my_filter=3``
+    where ``3`` is the primary key of the current instance.
 
-
-    :param filters: dictionary, where keys are names of a field from a related (by this FkField) model,
+    :param filters: A dictionary where keys are names of fields from a related model (specified by this FkField),
                     and values are values of that field.
     :type filters: dict
 
     .. note::
-        Intersection of `dependence.values()` and `filters.keys()` will throw error to prevent ambiguous filtering.
+        The intersection of `dependence.values()` and `filters.keys()` will throw an error to prevent ambiguous filtering.
     .. note::
-        Effective only in GUI. Works similar to :class:`rest_framework.fields.IntegerField` in API.
-    """
+        Effective only in the GUI. Works similarly to :class:`rest_framework.fields.IntegerField` in the API.
+    """  # noqa: E501
 
     select_model: _t.Text
     autocomplete_property: _t.Text
@@ -680,17 +854,50 @@ class FkModelField(FkField):
 
 class DeepFkField(FkModelField):
     """
-    Extends :class:`.FkModelField`, but displays as tree on frontend.
+    Extends :class:`.FkModelField`, specifically designed for hierarchical relationships in the frontend.
+
+    This field is intended for handling ForeignKey relationships within a hierarchical or tree-like structure.
+    It displays as a tree in the frontend, offering a clear visual representation of parent-child relationships.
 
     .. warning::
-        This field does not support ``dependence``.
-        Use ``filters`` at your own risk, as it would rather break the tree structure.
+        This field intentionally does not support the ``dependence`` parameter, as it operates in a tree structure.
+        Usage of ``filters`` should be approached with caution, as inappropriate filters may disrupt the tree hierarchy.
 
-    :param only_last_child: if True then only allows a value to be selected if it has no children. Default is `False`
+    :param only_last_child: If True, the field restricts the selection to nodes without children. Default is `False`.
+                            Useful when you want to enforce selection of leaf nodes.
     :type only_last_child: bool
-    :param parent_field_name: name of parent field in model. Default is `parent`
+    :param parent_field_name: The name of the parent field in the related model. Default is `parent`.
+                             Should be set to the ForeignKey field in the related model,
+                             representing the parent-child relationship.
+                             For example, if your related model has a ForeignKey like
+                             `parent = models.ForeignKey('self', ...)`,
+                             then `parent_field_name` should be set to `'parent'`.
     :type parent_field_name: str
+
+    Examples:
+        Consider a related model with a ForeignKey field representing parent-child relationships:
+
+        .. code-block:: python
+
+            class Category(BModel):
+                name = models.CharField(max_length=255)
+                parent = models.ForeignKey('self', null=True, default=None, on_delete=models.CASCADE)
+
+        To use the DeepFkField with this related model in a serializer, you would set the parent_field_name to 'parent':
+
+        .. code-block:: python
+
+            class MySerializer(VSTSerializer):
+                category = DeepFkField(select=Category, parent_field_name='parent')
+
+    This example assumes a Category related model with a ForeignKey 'parent' field.
+    The DeepFkField will then display the categories as a tree structure in the frontend,
+    providing an intuitive selection mechanism for hierarchical relationships.
+
+    .. note::
+        Effective only in GUI. Works similarly to :class:`rest_framework.fields.IntegerField` in API.
     """
+
     def __init__(self, only_last_child: bool = False, parent_field_name='parent', **kwargs):
         super().__init__(**kwargs)
         self.only_last_child = only_last_child
@@ -699,11 +906,32 @@ class DeepFkField(FkModelField):
 
 class UptimeField(IntegerField):
     """
-    Time duration field, in seconds. May be used to compute some uptime.
+    Time duration field, in seconds, specifically designed for computing and displaying system uptime.
+
+    This field is effective only in the GUI and behaves similarly
+    to :class:`rest_framework.fields.IntegerField` in the API.
+
+    The `UptimeField` class transforms time in seconds into a user-friendly representation on the frontend.
+    It intelligently selects the most appropriate pattern from the following templates:
+
+    - ``HH:mm:ss`` (e.g., 23:59:59)
+    - ``dd HH:mm:ss`` (e.g., 01d 00:00:00)
+    - ``mm dd HH:mm:ss`` (e.g., 01m 30d 00:00:00)
+    - ``yy mm dd HH:mm:ss`` (e.g., 99y 11m 30d 22:23:24)
+
+    Example:
+
+        .. code-block:: python
+
+            class MySerializer(serializers.ModelSerializer):
+                uptime = UptimeField()
+
+        This example assumes a serializer where the `uptime` field represents a time duration in seconds.
+        The `UptimeField` will then display the duration in a human-readable format on the frontend,
+        making it convenient for users to interpret and input values.
 
     .. note::
-        Effective only in GUI. Works similar to :class:`rest_framework.fields.IntegerField` in API.
-
+        Effective only in GUI. Works similarly to :class:`rest_framework.fields.IntegerField` in API.
     """
 
 
@@ -750,25 +978,63 @@ class RedirectCharField(RedirectFieldMixin, CharField):
 
 class NamedBinaryFileInJsonField(VSTCharField):
     """
-    Field that takes JSON with properties:
-    * name - string - name of file;
-    * mediaType - string - MIME type of file;
-    * content - base64 string - content of file.
+    Field that represents a binary file in JSON format.
 
-    This field is useful for saving binary files with their names in :class:`django.db.models.CharField`
-    or :class:`django.db.models.TextField` model fields. All manipulations with decoding and encoding
-    binary content data executes on client. This imposes reasonable limits on file size.
+    :param file: If True, accept only subclasses of File as input.
+                 If False, accept only string input. Default: False.
+    :type file: bool
+    :param post_handlers: Functions to process the file after validation.
+                          Each function takes two arguments: ``binary_data`` (file bytes)
+                          and ``original_data`` (reference to the original JSON object).
+                          The function should return the processed ``binary_data``.
+    :type post_handlers: tuple,list
+    :param pre_handlers: Functions to process the file before validation.
+                         Each function takes two arguments: ``binary_data`` (file bytes)
+                         and ``original_data`` (reference to the original JSON object).
+                         The function should return the processed ``binary_data``.
+    :type pre_handlers: tuple,list
+    :param int max_content_size: Maximum allowed size of the file content in bytes.
+    :param int min_content_size: Minimum allowed size of the file content in bytes.
+    :param int min_length: Minimum length of the file name. Only applicable when ``file=True``.
+    :param int max_length: Maximum length of the file name. Only applicable when ``file=True``.
 
-    Additionally, this field can construct :class:`django.core.files.uploadedfile.SimpleUploadedFile`
-    from incoming JSON and store it as file in :class:`django.db.models.FileField` if `file` argument is set to `True`
 
-    Attrs:
-    :attr:`NamedBinaryInJsonField.file`: if True, accept only subclasses of File as input. If False, accept only string
-    input. Default: False.
+    This field is designed for storing binary files alongside their names in
+    :class:`django.db.models.CharField` or :class:`django.db.models.TextField`
+    model fields. All manipulations involving decoding and encoding binary content data
+    occur on the client, imposing reasonable limits on file size.
 
-    .. note::
-        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
+    Additionally, this field can construct a
+    :class:`django.core.files.uploadedfile.SimpleUploadedFile` from incoming JSON
+    and store it as a file in :class:`django.db.models.FileField` if the
+    `file` attribute is set to `True`.
 
+    Example:
+
+        In a serializer, include this field to handle binary files:
+
+        .. code-block:: python
+
+            class MySerializer(serializers.ModelSerializer):
+                binary_data = NamedBinaryFileInJsonField(file=True)
+
+        This example assumes a serializer where the ``binary_data`` field represents
+        binary file information in JSON format. The ``NamedBinaryFileInJsonField``
+        will then handle the storage and retrieval of binary files in a
+        user-friendly manner.
+
+    The binary file is represented in JSON with the following properties:
+
+    - **name** (str): Name of the file.
+    - **mediaType** (str): MIME type of the file.
+    - **content** (str or File): Content of the file. If `file` is True, it will be a
+      reference to the file; otherwise, it will be base64-encoded content.
+
+    .. warning::
+        The client application will display the content as a download link.
+        Users will interact with the binary file through the application,
+        with the exchange between the Rest API and the client occurring through
+        the presented JSON object.
     """
 
     __valid_keys = ('name', 'content', 'mediaType')
@@ -880,14 +1146,37 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
 class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
     """
-    Extends :class:`.NamedBinaryFileInJsonField` to represent image on frontend
-    (if binary image is valid). Validate this field with
-    :class:`vstutils.api.validators.ImageValidator`.
+    Field that represents an image in JSON format, extending :class:`.NamedBinaryFileInJsonField`.
 
-    :param background_fill_color: Color to fill area that is not covered by image after cropping.
-        Transparent by default but will be black if image format is not supporting transparency.
+    :param background_fill_color: Color to fill the area not covered by the image after cropping.
+        Transparent by default but will be black if the image format does not support transparency.
         Can be any valid CSS color.
     :type background_fill_color: str
+
+    This field is designed for handling image files alongside their names in
+    :class:`django.db.models.CharField` or :class:`django.db.models.TextField` model fields.
+    It extends the capabilities of :class:`.NamedBinaryFileInJsonField` to specifically handle images.
+
+    Additionally, this field validates the image using the following validators:
+    - :class:`vstutils.api.validators.ImageValidator`
+    - :class:`vstutils.api.validators.ImageResolutionValidator`
+    - :class:`vstutils.api.validators.ImageHeightValidator`
+
+    When saving and with the added validators, the field will display a corresponding window for adjusting
+    the image to the specified parameters, providing a user-friendly interface for managing images.
+
+    The image file is represented in JSON with the following properties:
+
+    - **name** (str): Name of the image file.
+    - **mediaType** (str): MIME type of the image file.
+    - **content** (str or File): Content of the image file. If `file` is True, it will be a
+      reference to the image file; otherwise, it will be base64-encoded content.
+
+    .. warning::
+        The client application will display the content as an image.
+        Users will interact with the image through the application,
+        with the exchange between the Rest API and the client occurring through
+        the presented JSON object.
     """
 
     def __init__(self, *args, **kwargs):
@@ -993,27 +1282,28 @@ def _handle_related_value_decorator(func):
 
 class RelatedListField(VSTCharField):
     """
-    Extends class :class:`.VSTCharField`. With this field you can output reverse ForeignKey relation
-    as a list of related instances.
+    Extends :class:`.VSTCharField` to represent a reverse ForeignKey relation as a list of related instances.
 
-    To use it, you specify 'related_name' kwarg (related_manager for reverse ForeignKey)
-    and 'fields' kwarg (list or tuple of fields from related model, which needs to be included).
+    This field allows you to output the reverse ForeignKey relation as a list of related instances.
+    To use it, specify the ``related_name`` kwarg (related manager for reverse ForeignKey) and the ``fields``
+    kwarg (list or tuple of fields from the related model to be included).
 
-    By default :class:`.VSTCharField` used to serialize all field values and represent it on
-    frontend. You can specify `serializer_class` and override fields as you need. For example title, description
+    By default, :class:`.VSTCharField` is used to serialize all field values and represent them on the frontend.
+    You can specify the `serializer_class` and override fields as needed. For example, title, description,
     and other field properties can be set to customize frontend behavior.
 
-    :param related_name: name of a related manager for reverse foreign key
+    :param related_name: Name of a related manager for reverse ForeignKey.
     :type related_name: str
-    :param fields: list of related model fields.
+    :param fields: List of related model fields.
     :type fields: list[str], tuple[str]
-    :param view_type: determines how field are represented on frontend. Must be either 'list' or 'table'.
+    :param view_type: Determines how fields are represented on the frontend. Must be either ``list`` or ``table``.
     :type view_type: str
-    :param fields_custom_handlers_mapping: includes custom handlers, where key: field_name, value: callable_obj that
-                                           takes params: instance[dict], fields_mapping[dict], model, field_name[str]
+    :param fields_custom_handlers_mapping: Custom handlers mapping, where key: field_name, value: callable_obj
+                                           that takes params:
+                                           instance[dict], fields_mapping[dict], model, field_name[str].
     :type fields_custom_handlers_mapping: dict
-    :param serializer_class: Serializer to customize types of fields, if no serializer provided :class:`.VSTCharField`
-                             will be used for every field in `fields` list
+    :param serializer_class: Serializer to customize types of fields. If no serializer is provided,
+                             :class:`.VSTCharField` will be used for every field in the `fields` list.
     :type serializer_class: type
     """
 
@@ -1211,8 +1501,28 @@ def is_all_digits_validator(value):
 
 class PhoneField(CharField):
     """
-    Extends class 'rest_framework.serializers.CharField'.
-    Field for phone in international format
+    Extends the 'rest_framework.serializers.CharField' class.
+    Field for representing a phone number in international format.
+
+    This field is designed for capturing and validating phone numbers in international format.
+    It extends the 'rest_framework.serializers.CharField' and adds custom validation to ensure
+    that the phone number contains only digits.
+
+    Example:
+        In a serializer, include this field to handle phone numbers:
+
+        .. code-block:: python
+
+            class MySerializer(VSTSerializer):
+                phone_number = PhoneField()
+
+        This example assumes a serializer where the ``phone_number`` field represents
+        a phone number in international format. The ``PhoneField`` will then handle the
+        validation and representation of phone numbers, making it convenient for users to
+        input standardized phone numbers.
+
+    The field will be displayed in the client application as an input field for entering
+    a phone number, including the country code.
     """
 
     def __init__(self, **kwargs):
@@ -1225,15 +1535,33 @@ class PhoneField(CharField):
 
 class MaskedField(CharField):
     """
-    Extends class 'rest_framework.serializers.CharField'.
-    Field that applies mask to value.
+    Extends the 'rest_framework.serializers.CharField' class.
+    Field that applies a mask to the input value.
 
-    :param mask: `IMask <https://imask.js.org/guide.html>`_
+    This field is designed for applying a mask to the input value on the frontend.
+    It extends the 'rest_framework.serializers.CharField' and allows the use of the
+    `IMask <https://imask.js.org/guide.html>`_ library for defining masks.
+
+    :param mask: The mask to be applied to the value. It can be either a dictionary or a string
+                 following the `IMask` library format.
     :type mask: dict, str
 
+    Example:
+        In a serializer, include this field to apply a mask to a value:
+
+        .. code-block:: python
+
+            class MySerializer(serializers.Serializer):
+                masked_value = MaskedField(mask='000-000')
+
+        This example assumes a serializer where the ``masked_value`` field represents
+        a value with a predefined mask. The ``MaskedField`` will apply the specified mask
+        on the frontend, providing a masked input for users.
+
     .. note::
-        Effective only on frontend.
+        The effectiveness of this field is limited to the frontend, and the mask is applied during user input.
     """
+
     def __init__(self, mask, **kwargs):
         super().__init__(**kwargs)
         self.mask = mask
@@ -1241,11 +1569,31 @@ class MaskedField(CharField):
 
 class WYSIWYGField(TextareaField):
     """
-    On frontend renders https://ui.toast.com/tui-editor.
-    Saves data as markdown and escapes all html tags.
+    Extends the :class:`.TextareaField` class to render the https://ui.toast.com/tui-editor on the frontend.
 
-    :param escape: html-escape input. Enabled by default.
+    This field is specifically designed for rendering a WYSIWYG editor on the frontend,
+    using the https://ui.toast.com/tui-editor. It saves data as markdown and escapes all HTML tags.
+
+    :param escape: HTML-escape input. Enabled by default to prevent HTML injection vulnerabilities.
     :type escape: bool
+
+    Example:
+        In a serializer, include this field to render a WYSIWYG editor on the frontend:
+
+        .. code-block:: python
+
+            class MySerializer(serializers.Serializer):
+                wysiwyg_content = WYSIWYGField()
+
+        This example assumes a serializer where the ``wysiwyg_content`` field represents
+        data to be rendered in a WYSIWYG editor on the frontend. The ``WYSIWYGField`` ensures
+        that the content is saved as markdown and HTML tags are escaped to enhance security.
+
+    .. warning::
+        Enabling the ``escape`` option is recommended to prevent potential HTML injection vulnerabilities.
+
+    .. note::
+        The rendering on the frontend is achieved using the https://ui.toast.com/tui-editor.
     """
 
     def __init__(self, *args, **kwargs):

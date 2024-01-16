@@ -94,14 +94,27 @@ class SerializerMetaClass(serializers.SerializerMetaclass):
 class BaseSerializer(DependFromFkSerializerMixin, serializers.Serializer, metaclass=SerializerMetaClass):
     """
     Default serializer with logic to work with objects.
-    Read more in `DRF serializer's documentation
-    <https://www.django-rest-framework.org/api-guide/serializers/#serializers>`_
-    how to create Serializers and work with them.
+
+    This serializer serves as a base class for creating serializers to work with non-model objects.
+    It extends the 'rest_framework.serializers.Serializer' class and includes additional logic
+    for handling object creation and updating.
 
     .. note::
-        You can also setup ``generated_fields`` in class attribute ``Meta`` to get serializer
-        with default CharField fields. Setup attribute ``generated_field_factory`` to change default fabric method.
-    """
+        You can set the ``generated_fields`` attribute in the ``Meta`` class to automatically include
+        default CharField fields. You can also customize the field creation using the ``generated_field_factory``
+        attribute.
+
+    Example:
+
+        .. code-block:: python
+
+            class MySerializer(BaseSerializer):
+                class Meta:
+                    generated_fields = ['additional_field']
+                    generated_field_factory = lambda f: drf_fields.IntegerField()
+
+        In this example, the ``MySerializer`` class extends ``BaseSerializer`` and includes an additional generated field.
+    """  # noqa: E501
 
     def create(self, validated_data):  # nocv
         return validated_data
@@ -121,9 +134,24 @@ class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer, me
     Read more in `DRF documentation <https://www.django-rest-framework.org/api-guide/serializers/#modelserializer>`_
     how to create Model Serializers.
     This serializer matches model fields to extended set of serializer fields.
+
     List of available pairs specified in  `VSTSerializer.serializer_field_mapping`.
     For example, to set :class:`vstutils.api.fields.FkModelField` in serializer use
     :class:`vstutils.models.fields.FkModelField` in a model.
+
+    Example:
+
+        .. code-block:: python
+
+            class MyModel(models.Model):
+                name = models.CharField(max_length=255)
+
+            class MySerializer(VSTSerializer):
+                class Meta:
+                    model = MyModel
+
+        In this example, the ``MySerializer`` class extends ``VSTSerializer`` and
+        is associated with the ``MyModel`` model.
     """
     # pylint: disable=abstract-method
 
