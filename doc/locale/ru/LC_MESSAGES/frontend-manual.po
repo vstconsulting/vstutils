@@ -3,45 +3,46 @@
 # This file is distributed under the same license as the VST Utils package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 08:36+0000\n"
+"POT-Creation-Date: 2024-01-10 23:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.14.0\n"
 
 #: ../../frontend-manual.rst:2
 msgid "Frontend documentation"
-msgstr ""
+msgstr "Документация по фронтенду"
 
 #: ../../frontend-manual.rst:5
 msgid "API Flowchart"
-msgstr ""
+msgstr "Схема API"
 
 #: ../../frontend-manual.rst:7
 msgid "This flowchart shows how data goes though application from and to API."
-msgstr ""
+msgstr "Эта схема показывает, как данные проходят через приложение от и до API."
 
 #: ../../frontend-manual.rst:39
 msgid "Signals"
-msgstr ""
+msgstr "Сигналы"
 
 #: ../../frontend-manual.rst:40
 msgid ""
 "System of signals is a mechanism, that VST Utils uses for app "
 "customization."
 msgstr ""
+"Система сигналов - это механизм, который VST Utils использует для "
+"настройки приложения."
 
 #: ../../frontend-manual.rst:42
 msgid "Let's look how it works."
-msgstr ""
+msgstr "Давайте посмотрим, как это работает."
 
 #: ../../frontend-manual.rst:44
 msgid ""
@@ -49,10 +50,13 @@ msgid ""
 "But how can you know about this event? And what if you need to know about"
 " this event in several blocks of code?"
 msgstr ""
+"Очень часто вам нужно что-то изменить после того, как произошло какое-то "
+"событие. Но как вы можете узнать о этом событии? А что, если вам нужно "
+"знать об этом событии в нескольких блоках кода?"
 
 #: ../../frontend-manual.rst:47
 msgid "To solve this problem VST Utils uses system of signals, where:"
-msgstr ""
+msgstr "Чтобы решить эту проблему, VST Utils использует систему сигналов, где:"
 
 #: ../../frontend-manual.rst:49
 msgid ""
@@ -60,6 +64,9 @@ msgid ""
 "has occurred, and pass some data/variables from the context, where this "
 "event has occurred;"
 msgstr ""
+"вы можете отправить какой-то сигнал, который сообщит всем подписчикам, "
+"что произошло какое-то событие, и передать некоторые данные/переменные из"
+" контекста, где произошло это событие;"
 
 #: ../../frontend-manual.rst:51
 msgid ""
@@ -68,54 +75,65 @@ msgid ""
 "data/variables, that were passed from the context, where event had "
 "occurred."
 msgstr ""
+"вы можете подписаться на какой-то сигнал, который уведомит вас о каком-то"
+" событии, и вы также можете передать некоторый обратный вызов "
+"(обработчик), который может делать что-то с данными/переменными, которые "
+"были переданы из контекста, где произошло событие."
 
 #: ../../frontend-manual.rst:55
 msgid "Emit signal"
-msgstr ""
+msgstr "Генерация сигнала"
 
 #: ../../frontend-manual.rst:56
 msgid "To emit some signal you need to write following in you code:"
-msgstr ""
+msgstr "Чтобы сгенерировать сигнал, вам нужно написать следующее в своем коде:"
 
 #: ../../frontend-manual.rst:62 ../../frontend-manual.rst:86
 msgid "where:"
-msgstr ""
+msgstr "где:"
 
 #: ../../frontend-manual.rst:64 ../../frontend-manual.rst:88
 msgid "**name_of_signal** - string, which stores name of signal (event);"
-msgstr ""
+msgstr "**name_of_signal** - строка, которая хранит имя сигнала (события);"
 
 #: ../../frontend-manual.rst:65
 msgid ""
 "**context** - some variable of any type, that will be passed to the "
 "callback (handler) during connection to this signal."
 msgstr ""
+"**context** - некоторая переменная любого типа, которая будет передана в "
+"обратный вызов (обработчик) во время подключения к этому сигналу."
 
 #: ../../frontend-manual.rst:67
 msgid "Example of signal emitting:"
-msgstr ""
+msgstr "Пример генерации сигнала:"
 
 #: ../../frontend-manual.rst:79
 msgid "Connect to signal"
-msgstr ""
+msgstr "Подключение к сигналу"
 
 #: ../../frontend-manual.rst:80
 msgid "To connect to some signal you need to write following in you code:"
 msgstr ""
+"Чтобы подключиться к какому-то сигналу, вам нужно написать следующее в "
+"своем коде:"
 
 #: ../../frontend-manual.rst:89
 msgid ""
 "**callback** - function, that can do something with variables, which will"
 " be passed from event's context to this callback as arguments."
 msgstr ""
+"**callback** - функция, которая может выполнять действия с переменными, "
+"которые будут переданы из контекста события в этот обратный вызов в "
+"качестве аргументов."
 
 #: ../../frontend-manual.rst:91
 msgid "Example of connecting to signal:"
-msgstr ""
+msgstr "Пример подключения к сигналу:"
 
 #: ../../frontend-manual.rst:104
 msgid "List of signals in VST Utils"
-msgstr ""
+msgstr "Список сигналов в VST Utils"
 
 #: ../../frontend-manual.rst:105
 msgid ""
@@ -124,18 +142,24 @@ msgid ""
 "these signals and add callback function with desired behavior. Also you "
 "can emit you own signals in your project."
 msgstr ""
+"VST Utils имеет несколько сигналов, которые генерируются во время работы "
+"приложения. Если вам нужно настроить что-то в вашем проекте, вы можете "
+"подписаться на эти сигналы и добавить функцию обратного вызова с желаемым"
+" поведением. Также вы можете генерировать свои сигналы в своем проекте."
 
 #: ../../frontend-manual.rst:112
 msgid "openapi.loaded"
-msgstr ""
+msgstr "openapi.loaded"
 
 #: ../../frontend-manual.rst:113
 msgid "**Signal name:** \"openapi.loaded\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"openapi.loaded\"."
 
 #: ../../frontend-manual.rst:115
 msgid "**Context argument:** openapi - {object} - OpenAPI schema loaded from API."
 msgstr ""
+"**Аргумент контекста:** openapi - {object} - OpenAPI-схема, загруженная "
+"из API."
 
 #: ../../frontend-manual.rst:117
 msgid ""
@@ -143,46 +167,53 @@ msgid ""
 "You can use this signal if you need to change something in the OpenAPI "
 "schema, before it was parsed."
 msgstr ""
+"**Описание:** Этот сигнал генерируется после загрузки схемы OpenAPI. Вы "
+"можете использовать этот сигнал, если вам нужно что-то изменить в схеме "
+"OpenAPI, прежде чем она будет разобрана."
 
 #: ../../frontend-manual.rst:121
 msgid "resource.loaded"
-msgstr ""
+msgstr "resource.loaded"
 
 #: ../../frontend-manual.rst:122
 msgid "**Signal name:** \"resource.loaded\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"resource.loaded\"."
 
 #: ../../frontend-manual.rst:124 ../../frontend-manual.rst:132
 msgid "**Context argument:** None."
-msgstr ""
+msgstr "**Аргумент контекста:** Нет."
 
 #: ../../frontend-manual.rst:126
 msgid ""
 "**Description:** This signal is emitted after all static files were "
 "successfully loaded and added to the page."
 msgstr ""
+"**Описание:** Этот сигнал генерируется после успешной загрузки всех "
+"статических файлов и их добавления на страницу."
 
 #: ../../frontend-manual.rst:129
 msgid "app.version.updated"
-msgstr ""
+msgstr "app.version.updated"
 
 #: ../../frontend-manual.rst:130
 msgid "**Signal name:** \"app.version.updated\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"app.version.updated\"."
 
 #: ../../frontend-manual.rst:134
 msgid ""
 "**Description:** This signal is emitted during app loading if VST Utils "
 "detects, that version of your project was updated."
 msgstr ""
+"**Описание:** Этот сигнал генерируется во время загрузки приложения, если"
+" VST Utils обнаруживает, что версия вашего проекта была обновлена."
 
 #: ../../frontend-manual.rst:139
 msgid "app.beforeInitRouter"
-msgstr ""
+msgstr "app.beforeInitRouter"
 
 #: ../../frontend-manual.rst:140
 msgid "**Signal name:** \"app.beforeInitRouter\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"app.beforeInitRouter\"."
 
 #: ../../frontend-manual.rst:142
 msgid ""
@@ -190,26 +221,33 @@ msgid ""
 "{routerConstructor: RouterConstructor}, where routerConstructor is an "
 "instance of RouterConstructor."
 msgstr ""
+"**Аргумент контекста:** obj - {object} - Объект со следующей структурой: "
+"{routerConstructor: RouterConstructor}, где routerConstructor - это "
+"экземпляр RouterConstructor."
 
 #: ../../frontend-manual.rst:144
 msgid ""
 "**Description:** This signal is emitted after creation of "
 "RouterConstructor instance and before app creation"
 msgstr ""
+"**Описание:** Этот сигнал генерируется после создания экземпляра "
+"RouterConstructor и перед созданием приложения."
 
 #: ../../frontend-manual.rst:148
 msgid "app.beforeInit"
-msgstr ""
+msgstr "app.beforeInit"
 
 #: ../../frontend-manual.rst:149
 msgid "**Signal name:** \"app.beforeInit\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"app.beforeInit\"."
 
 #: ../../frontend-manual.rst:151 ../../frontend-manual.rst:160
 msgid ""
 "**Context argument:** obj - {object} - Object with following structure: "
 "{app: app}, where app is an instance of App class."
 msgstr ""
+"**Аргумент контекста:** obj - {object} - Объект со следующей структурой: "
+"{app: app}, где app - это экземпляр класса App."
 
 #: ../../frontend-manual.rst:153
 msgid ""
@@ -217,48 +255,59 @@ msgid ""
 " (OpenAPI schema was parsed, models and views were created), but before "
 "app was mounted to the page."
 msgstr ""
+"**Описание:** Этот сигнал генерируется после инициализации переменной "
+"приложения (разбор схемы OpenAPI, создание моделей и представлений), но "
+"перед тем, как приложение будет смонтировано на страницу."
 
 #: ../../frontend-manual.rst:157
 msgid "app.afterInit"
-msgstr ""
+msgstr "app.afterInit"
 
 #: ../../frontend-manual.rst:158
 msgid "**Signal name:** \"app.afterInit\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"app.afterInit\"."
 
 #: ../../frontend-manual.rst:162
 msgid "**Description:** This signal is emitted after app was mounted to the page."
 msgstr ""
+"**Описание:** Этот сигнал генерируется после того, как приложение было "
+"смонтировано на страницу."
 
 #: ../../frontend-manual.rst:165
 msgid "app.language.changed"
-msgstr ""
+msgstr "app.language.changed"
 
 #: ../../frontend-manual.rst:166
 msgid "**Signal name:** \"app.language.changed\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"app.language.changed\"."
 
 #: ../../frontend-manual.rst:168
 msgid ""
 "**Context argument:** obj - {object} - Object with following structure: "
 "{lang: lang}, where lang is an code of applied language."
 msgstr ""
+"**Аргумент контекста:** obj - {object} - Объект со следующей структурой: "
+"{lang: lang}, где lang - это код примененного языка."
 
 #: ../../frontend-manual.rst:170
 msgid ""
 "**Description:** This signal is emitted after app interface language was "
 "changed."
 msgstr ""
+"**Описание:** Этот сигнал генерируется после изменения языка интерфейса "
+"приложения."
 
 #: ../../frontend-manual.rst:173
 msgid "models[model_name].fields.beforeInit"
-msgstr ""
+msgstr "models[model_name].fields.beforeInit"
 
 #: ../../frontend-manual.rst:174
 msgid ""
 "**Signal name:** \"models[\" + model_name + \"].fields.beforeInit\". For "
 "example, for User model: \"models[User].fields.beforeInit\"."
 msgstr ""
+"**Имя сигнала:** \"models[\" + model_name + \"].fields.beforeInit\". "
+"Например, для модели пользователя: \"models[User].fields.beforeInit\"."
 
 #: ../../frontend-manual.rst:176
 msgid ""
@@ -267,12 +316,17 @@ msgid ""
 " moment, field - is just object with options, it is not guiFields "
 "instance."
 msgstr ""
+"**Контекстный аргумент:** fields - {object} - Объект с парами "
+"ключ-значение, где ключ - имя поля, значение - объект с его опциями. На "
+"данный момент поле - просто объект с опциями, это не экземпляр guiFields."
 
 #: ../../frontend-manual.rst:179
 msgid ""
 "**Description:** This signal is emitted before creation of guiFields "
 "instances for Model fields."
 msgstr ""
+"**Описание:** Этот сигнал генерируется перед созданием экземпляров "
+"guiFields для полей модели."
 
 #: ../../frontend-manual.rst:182
 msgid "models[model_name].fields.afterInit"
@@ -283,18 +337,24 @@ msgid ""
 "**Signal name:** \"models[\" + model_name + \"].fields.afterInit\". For "
 "example, for User model: \"models[User].fields.afterInit\"."
 msgstr ""
+"**Имя сигнала:** \"models[\" + model_name + \"].fields.afterInit\". "
+"Например, для модели пользователя: \"models[User].fields.afterInit\"."
 
 #: ../../frontend-manual.rst:185
 msgid ""
 "**Context argument:** fields - {object} - Object with pairs of key, "
 "value, where key - name of field, value - guiFields instance."
 msgstr ""
+"**Контекстный аргумент:** fields - {object} - Объект с парами "
+"ключ-значение, где ключ - имя поля, значение - экземпляр guiFields."
 
 #: ../../frontend-manual.rst:187
 msgid ""
 "**Description:** This signal is emitted after creation of guiFields "
 "instances for Model fields."
 msgstr ""
+"**Описание:** Этот сигнал генерируется после создания экземпляров "
+"guiFields для полей модели."
 
 #: ../../frontend-manual.rst:190
 msgid "models[model_name].created"
@@ -305,16 +365,20 @@ msgid ""
 "**Signal name:** \"models[\" + model_name + \"].created\". For example, "
 "for User model: \"models[User].created\"."
 msgstr ""
+"**Имя сигнала:** \"models[\" + model_name + \"].created\". Например, для "
+"модели пользователя: \"models[User].created\"."
 
 #: ../../frontend-manual.rst:193
 msgid ""
 "**Context argument:** obj - {object} - Object with following structure: "
 "{model: model}, where model is the created Model."
 msgstr ""
+"**Контекстный аргумент:** obj - {object} - Объект со следующей "
+"структурой: {model: model}, где model - созданная модель."
 
 #: ../../frontend-manual.rst:195
 msgid "**Description:** This signal is emitted after creation of Model object."
-msgstr ""
+msgstr "**Описание:** Этот сигнал генерируется после создания объекта модели."
 
 #: ../../frontend-manual.rst:198
 msgid "allModels.created"
@@ -322,17 +386,20 @@ msgstr ""
 
 #: ../../frontend-manual.rst:199
 msgid "**Signal name:** \"allModels.created\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"allModels.created\"."
 
 #: ../../frontend-manual.rst:201
 msgid ""
 "**Context argument:** obj - {object} - Object with following structure: "
 "{models: models}, where models is the object, storing Models objects."
 msgstr ""
+"**Контекстный аргумент:** obj - {object} - Объект со следующей "
+"структурой: {models: models}, где models - объект, хранящий объекты "
+"моделей."
 
 #: ../../frontend-manual.rst:203
 msgid "**Description:** This signal is emitted after all models were created."
-msgstr ""
+msgstr "**Описание:** Этот сигнал генерируется после создания всех моделей."
 
 #: ../../frontend-manual.rst:207
 msgid "allViews.created"
@@ -340,13 +407,16 @@ msgstr ""
 
 #: ../../frontend-manual.rst:208
 msgid "**Signal name:** \"allViews.created\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"allViews.created\"."
 
 #: ../../frontend-manual.rst:210
 msgid ""
 "**Context argument:** obj - {object} - Object with following structure: "
 "{views: views}, where views - object with all View Instances."
 msgstr ""
+"**Контекстный аргумент:** obj - {object} - Объект со следующей "
+"структурой: {views: views}, где views - объект со всеми экземплярами "
+"представлений."
 
 #: ../../frontend-manual.rst:213
 msgid ""
@@ -354,6 +424,9 @@ msgid ""
 "Instances, with set actions / child_links / multi_actions / operations / "
 "sublinks properties."
 msgstr ""
+"**Описание:** Этот сигнал генерируется после создания всех экземпляров "
+"представлений с установленными свойствами actions / child_links / "
+"multi_actions / operations / sublinks."
 
 #: ../../frontend-manual.rst:217
 msgid "routes[name].created"
@@ -364,6 +437,8 @@ msgid ""
 "**Signal name:** \"routes[\" + name + \"].created\". For example, for "
 "``/user/`` view: \"routes[/user/].created\"."
 msgstr ""
+"**Имя сигнала:** \"routes[\" + name + \"].created\". Например, для "
+"представления ``/user/``: \"routes[/user/].created\"."
 
 #: ../../frontend-manual.rst:220
 msgid ""
@@ -372,12 +447,18 @@ msgid ""
 "route, path - template of route's path, component - component, that will "
 "be rendered for current route."
 msgstr ""
+"**Контекстный аргумент:** route - {object} - Объект со следующей "
+"структурой: {name: name, path: path, component: component}, где name - "
+"имя маршрута, path - шаблон пути маршрута, component - компонент, который"
+" будет отображаться для текущего маршрута."
 
 #: ../../frontend-manual.rst:223
 msgid ""
 "**Description:** This signal will be emitted after route was formed and "
 "added to routes list."
 msgstr ""
+"**Описание:** Этот сигнал будет генерироваться после формирования "
+"маршрута и добавления его в список маршрутов."
 
 #: ../../frontend-manual.rst:226
 msgid "allRoutes.created"
@@ -385,7 +466,7 @@ msgstr ""
 
 #: ../../frontend-manual.rst:227
 msgid "**Signal name:** \"allRoutes.created\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"allRoutes.created\"."
 
 #: ../../frontend-manual.rst:229
 msgid ""
@@ -394,12 +475,18 @@ msgid ""
 "where name - name of route, path - template of route's path, component - "
 "component, that will be rendered for current route."
 msgstr ""
+"**Контекстный аргумент:** routes - {array} - Массив объектов маршрутов со"
+" следующей структурой: {name: name, path: path, component: component}, "
+"где name - имя маршрута, path - шаблон пути маршрута, component - "
+"компонент, который будет отображаться для текущего маршрута."
 
 #: ../../frontend-manual.rst:232
 msgid ""
 "**Description:** This signal is emitted after all routes was formed and "
 "added to routes list."
 msgstr ""
+"**Описание:** Этот сигнал генерируется после формирования всех маршрутов "
+"и добавления их в список маршрутов."
 
 #: ../../frontend-manual.rst:235
 msgid "<${PATH}>filterActions"
@@ -407,17 +494,19 @@ msgstr ""
 
 #: ../../frontend-manual.rst:236
 msgid "**Signal name:** \"<${PATH}>filterActions\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"<${PATH}>filterActions\"."
 
 #: ../../frontend-manual.rst:238
 msgid ""
 "**Context argument:** obj - {actions: Object[], data} - Actions is array "
 "of action objects. Data represents current instance's data."
 msgstr ""
+"**Контекстный аргумент:** obj - {actions: Object[], data} - Actions - "
+"массив объектов действий. Data представляет данные текущего экземпляра."
 
 #: ../../frontend-manual.rst:240
 msgid "**Description:** This signal will be executed to filter actions."
-msgstr ""
+msgstr "**Описание:** Этот сигнал будет выполнен для фильтрации действий."
 
 #: ../../frontend-manual.rst:243
 msgid "<${PATH}>filterSublinks"
@@ -425,17 +514,19 @@ msgstr ""
 
 #: ../../frontend-manual.rst:244
 msgid "**Signal name:** \"<${PATH}>filterSublinks\"."
-msgstr ""
+msgstr "**Имя сигнала:** \"<${PATH}>filterSublinks\"."
 
 #: ../../frontend-manual.rst:246
 msgid ""
 "**Context argument:** obj - {sublinks: Object[], data} - Actions is array"
 " of sublink objects. Data represents current instance's data."
 msgstr ""
+"**Контекстный аргумент:** obj - {sublinks: Object[], data} - Sublinks - "
+"массив объектов подссылок. Data представляет данные текущего экземпляра."
 
 #: ../../frontend-manual.rst:248
 msgid "**Description:** This signal will be executed to filter sublinks."
-msgstr ""
+msgstr "**Описание:** Этот сигнал будет выполнен для фильтрации подссылок."
 
 #: ../../frontend-manual.rst:253
 msgid "Field Format"
@@ -448,7 +539,7 @@ msgid ""
 "on). Create everytime similar functionality is rather boring and "
 "ineffective, so we tried ti solve this problem with the help of VST "
 "Utils."
-msgstr ""
+msgstr "Файловые форматы"
 
 #: ../../frontend-manual.rst:258
 msgid ""
@@ -458,82 +549,106 @@ msgid ""
 "value, just set appropriate field format to ``password`` instead of "
 "``string`` to show stars instead of actual characters."
 msgstr ""
+"Часто при создании нового приложения разработчикам нужно создавать общие "
+"поля некоторых базовых типов и форматов (строка, булево, число и так "
+"далее). Создание каждый раз подобной функциональности довольно скучно и "
+"неэффективно, поэтому мы попытались решить эту проблему с помощью VST "
+"Utils."
 
 #: ../../frontend-manual.rst:264
 msgid ""
 "Field classes are used in Model Instances as fields and also are used in "
 "Views Instances of ``list`` type as filters."
 msgstr ""
+"VST Utils содержит набор встроенных полей наиболее распространенных типов"
+" и форматов, которые могут использоваться в различных случаях. Например, "
+"когда вам нужно добавить какое-то поле в веб-форму, которое должно "
+"скрывать значение вставленного значения, просто установите "
+"соответствующий формат поля на ``password`` вместо ``string``, чтобы "
+"вместо фактических символов отображались звездочки."
 
 #: ../../frontend-manual.rst:266
 msgid ""
 "All available fields classes are stored in the ``guiFields`` variable. "
 "There are 44 fields formats in VST Utils:"
 msgstr ""
+"Все доступные классы полей хранятся в переменной ``guiFields``."
+"На данный момент в VST Utils 44 формата полей:"
 
 #: ../../frontend-manual.rst:268
 msgid "**base** - base field, from which the most other fields are inherited;"
 msgstr ""
-
+"**base** - базовое поле, все остальные поля наследуются от этого поля;"
 #: ../../frontend-manual.rst:269
 msgid ""
 "**string** - string field, for inserting and representation of some short"
 " 'string' values;"
 msgstr ""
+"**string** - строковое поле для вставки и представления коротких значений 'string';"
 
 #: ../../frontend-manual.rst:270
 msgid ""
 "**textarea** - string field, for inserting and representation of some "
 "long 'string' values;"
 msgstr ""
+"**textarea** - строковое поле для вставки и представления длинных значений 'string';"
 
 #: ../../frontend-manual.rst:271
 msgid ""
 "**number** - number field, for inserting and representation of 'number' "
 "values;"
 msgstr ""
+"**number** - числовое поле для вставки и представления значений 'number';"
 
 #: ../../frontend-manual.rst:272
 msgid ""
 "**integer** - number field, for inserting and representation of values of"
 " 'integer' format;"
 msgstr ""
+"**integer** - числовое поле для вставки и представления значений формата 'integer';"
 
 #: ../../frontend-manual.rst:273
 msgid ""
 "**int32** - number field, for inserting and representation of values of "
 "'int32' format;"
 msgstr ""
+"**int32** - числовое поле для вставки и представления значений формата 'int32';"
 
 #: ../../frontend-manual.rst:274
 msgid ""
 "**int64** - number field, for inserting and representation of values of "
 "'int64' format;"
 msgstr ""
+"**int64** - числовое поле для вставки и представления значений формата 'int64';"
 
 #: ../../frontend-manual.rst:275
 msgid ""
 "**double** - number field, for inserting and representation of values of "
 "'double' format;"
 msgstr ""
+"**double** - числовое поле для вставки и представления значений формата 'double';"
 
 #: ../../frontend-manual.rst:276
 msgid ""
 "**float** - number field, for inserting and representation of values of "
 "'float' format;;"
 msgstr ""
+"**float** - числовое поле для вставки и представления значений формата 'float';"
 
 #: ../../frontend-manual.rst:277
 msgid ""
 "**boolean** - boolean field, for inserting and representation of "
 "'boolean' values;"
 msgstr ""
+"**boolean** - логическое поле для вставки и представления значений 'boolean';"
 
 #: ../../frontend-manual.rst:278
 msgid ""
 "**choices** - string field, with strict set of preset values, user can "
 "only choose one of the available value variants;"
 msgstr ""
+"**choices** - строковое поле с жестким набором предопределенных значений,"
+" пользователь может выбрать только одно из доступных значений;"
 
 #: ../../frontend-manual.rst:279
 msgid ""
@@ -541,26 +656,33 @@ msgid ""
 "either choose one of the available value variants or insert his own "
 "value;"
 msgstr ""
+"**autocomplete** - строковое поле с набором предопределенных значений, "
+"пользователь может либо выбрать одно из доступных значений, либо ввести "
+"свое собственное значение;"
 
 #: ../../frontend-manual.rst:280
 msgid "**password** - string field, that hides inserted value by '*' symbols;"
-msgstr ""
+msgstr "**password** - строковое поле, скрывающее вставленное значение знаками '*'"
 
 #: ../../frontend-manual.rst:281
 msgid "**file** - string field, that can read content of the file;"
-msgstr ""
+msgstr "**file** - строковое поле, способное считывать содержимое файла;"
 
 #: ../../frontend-manual.rst:282
 msgid ""
 "**secretfile** - string field, that can read content of the file and then"
 " hide it from representation;"
 msgstr ""
+"**secretfile** - строковое поле, которое может считать содержимое файла, "
+"а затем скрыть его при отображении;"
 
 #: ../../frontend-manual.rst:283
 msgid ""
 "**binfile** - string field, that can read content of the file and convert"
 " it to the 'base64' format;"
 msgstr ""
+"**binfile** - строковое поле, которое может считать содержимое файла и "
+"преобразовывать его в формат 'base64';"
 
 #: ../../frontend-manual.rst:284
 msgid ""
@@ -568,6 +690,9 @@ msgid ""
 " 2 properties: name (string) - name of file and content(base64 string) - "
 "content of file;"
 msgstr ""
+"**namedbinfile** - поле в формате JSON, которое принимает и возвращает "
+"JSON с 2 свойствами: name (строка) - имя файла и content (строка base64) "
+"- содержание файла;"
 
 #: ../../frontend-manual.rst:285
 msgid ""
@@ -575,6 +700,9 @@ msgid ""
 "with 2 properties: name (string) - name of image and content(base64 "
 "string) - content of image;"
 msgstr ""
+"**namedbinimage** - поле в формате JSON, которое принимает и возвращает "
+"JSON с 2 свойствами: name (строка) - имя изображения и content (строка "
+"base64) - содержание изображения;"
 
 #: ../../frontend-manual.rst:286
 msgid ""
@@ -582,6 +710,9 @@ msgid ""
 "array with objects, consisting of 2 properties: name (string) - name of "
 "file and content(base64 string) - content of file;"
 msgstr ""
+"**multiplenamedbinimage** - поле в формате JSON, которое принимает и "
+"возвращает массив объектов, состоящих из 2 свойств: name (строка) - имя "
+"изображения и content (строка base64) - содержание изображения;"
 
 #: ../../frontend-manual.rst:287
 msgid ""
@@ -589,36 +720,49 @@ msgid ""
 "array with objects, consisting of 2 properties: name (string) - name of "
 "image and content(base64 string) - content of image;"
 msgstr ""
+"**multiplenamedbinimage** - поле в формате JSON, которое принимает и "
+"возвращает массив объектов, состоящих из 2 свойств: name (строка) - имя "
+"изображения и content (строка base64) - содержание изображения;"
 
 #: ../../frontend-manual.rst:288
 msgid ""
 "**text_paragraph** - string field, that is represented as text paragraph "
 "(without any inputs);"
 msgstr ""
+"**text_paragraph** - строковое поле, представленное в виде текстового "
+"абзаца (без каких-либо вводов);"
 
 #: ../../frontend-manual.rst:289
 msgid ""
 "**plain_text** - string field, that saves all non-printing characters "
 "during representation;"
 msgstr ""
+"**plain_text** - строковое поле, сохраняющее все непечатные символы во "
+"время представления;"
 
 #: ../../frontend-manual.rst:290
 msgid ""
 "**html** - string field, that contents different html tags and that "
 "renders them during representation;"
 msgstr ""
+"**html** - строковое поле, содержащее различные теги HTML и отображающее "
+"их во время представления;"
 
 #: ../../frontend-manual.rst:291
 msgid ""
 "**date** - date field, for inserting and representation of 'date' values "
 "in 'YYYY-MM-DD' format;"
 msgstr ""
+"**date** - поле даты для вставки и представления значений 'date' в "
+"формате 'YYYY-MM-DD';"
 
 #: ../../frontend-manual.rst:292
 msgid ""
 "**date_time** - date field, for inserting and representation of 'date' "
 "values in 'YYYY-MM-DD HH:mm' format;"
 msgstr ""
+"**date_time** - поле даты для вставки и представления значений 'date' в "
+"формате 'YYYY-MM-DD HH:mm';"
 
 #: ../../frontend-manual.rst:293
 msgid ""
@@ -627,24 +771,34 @@ msgid ""
 "00:00:00 / 01m 30d 00:00:00 / 99y 11m 30d 22:23:24) due to the it's value"
 " size;"
 msgstr ""
+"**uptime** - строковое поле, которое преобразует продолжительность "
+"времени (количество секунд) в один из наиболее подходящих вариантов "
+"(23:59:59 / 01d 00:00:00 / 01m 30d 00:00:00 / 99y 11m 30d 22:23:24) в "
+"зависимости от его размера;"
 
 #: ../../frontend-manual.rst:295
 msgid ""
 "**time_interval** - number field, that converts time from milliseconds "
 "into seconds;"
 msgstr ""
+"**time_interval** - числовое поле, которое преобразует время из "
+"миллисекунд в секунды;"
 
 #: ../../frontend-manual.rst:296
 msgid ""
 "**crontab** - string field, that has additional form for creation "
 "schedule in 'crontab' format;"
 msgstr ""
+"**crontab** - строковое поле, которое имеет дополнительную форму для "
+"создания расписания в формате 'crontab';"
 
 #: ../../frontend-manual.rst:297
 msgid ""
 "**json** - field of JSON format, during representation it uses another "
 "guiFields for representation of current field properties;"
 msgstr ""
+"**json** - поле в формате JSON, во время представления использует другие "
+"guiFields для представления текущих свойств поля;"
 
 #: ../../frontend-manual.rst:298
 msgid ""
@@ -652,6 +806,9 @@ msgid ""
 "Instance from API (value of this field is the whole Model Instance data)."
 " This is read only field;"
 msgstr ""
+"**api_object** - поле, используемое для представления некоторого "
+"экземпляра модели из API (значение этого поля - все данные экземпляра "
+"модели). Это только для чтения поле;"
 
 #: ../../frontend-manual.rst:300
 msgid ""
@@ -659,6 +816,10 @@ msgid ""
 "from API (value of this field is the Model Instance Primary Key). During "
 "edit mode this field has strict set of preset values to choose;"
 msgstr ""
+"**fk** - поле, используемое для представления некоторого экземпляра "
+"модели из API (значение этого поля - первичный ключ экземпляра модели). "
+"Во время режима редактирования у этого поля есть строгий набор "
+"предопределенных значений для выбора;"
 
 #: ../../frontend-manual.rst:302
 msgid ""
@@ -667,6 +828,11 @@ msgid ""
 "Primary Key or some string). During edit mode user can either choose of "
 "the preset values from autocomplete list or insert his own value;"
 msgstr ""
+"**fk_autocomplete** - поле, используемое для представления некоторого "
+"экземпляра модели из API (значение этого поля - первичный ключ экземпляра"
+" модели или некоторая строка). Во время режима редактирования "
+"пользователь может либо выбрать одно из предопределенных значений из "
+"списка автозаполнения, либо ввести свое собственное значение;"
 
 #: ../../frontend-manual.rst:304
 msgid ""
@@ -675,30 +841,39 @@ msgid ""
 "Primary Key or some string). During edit mode user can either choose of "
 "the preset values from modal window or insert his own value;"
 msgstr ""
+"**fk_multi_autocomplete** - поле, используемое для представления "
+"некоторого экземпляра модели из API (значение этого поля - первичный ключ"
+" экземпляра модели или некоторая строка). Во время режима редактирования "
+"пользователь может либо выбрать одно из предопределенных значений из "
+"модального окна, либо ввести свое собственное значение;"
 
 #: ../../frontend-manual.rst:306
 msgid "**color** - string field, that stores HEX code of selected color;"
 msgstr ""
+"**color** - строковое поле, которое сохраняет шестнадцатеричный код "
+"выбранного цвета;"
 
 #: ../../frontend-manual.rst:307
 msgid ""
 "**inner_api_object** - field, that is linked to the fields of another "
 "model;"
-msgstr ""
+msgstr "**inner_api_object** - поле, которое связано с полями другой модели;"
 
 #: ../../frontend-manual.rst:308
 msgid "**api_data** - field for representing some data from API;"
-msgstr ""
+msgstr "**api_data** - поле для представления некоторых данных из API;"
 
 #: ../../frontend-manual.rst:309
 msgid ""
 "**dynamic** - field, that can change its format depending on the values "
 "of surrounding fields;"
 msgstr ""
+"**dynamic** - поле, которое может изменять свой формат в зависимости от "
+"значений окружающих полей;"
 
 #: ../../frontend-manual.rst:310
 msgid "**hidden** - field, that is hidden from representation;"
-msgstr ""
+msgstr "**hidden** - поле, скрытое от представления;"
 
 #: ../../frontend-manual.rst:311
 msgid ""
@@ -706,16 +881,19 @@ msgid ""
 "values as one JSON, where key - name of form field, value - value of form"
 " field;"
 msgstr ""
+"**form** - поле, объединяющее несколько других полей и сохраняющее их "
+"значения как один JSON, где key - имя поля формы, value - значение поля "
+"формы;"
 
 #: ../../frontend-manual.rst:313
 msgid "**button** - special field for form field, imitates button in form;"
-msgstr ""
+msgstr "**button** - специальное поле для формы, имитирующее кнопку в форме;"
 
 #: ../../frontend-manual.rst:314
 msgid ""
 "**string_array** - field, that converts array with strings into one "
 "string;"
-msgstr ""
+msgstr "**string_array** - поле, преобразующее массив строк в одну строку;"
 
 #: ../../frontend-manual.rst:315
 msgid ""
@@ -723,10 +901,13 @@ msgid ""
 " key. It has additional validation, that checks, that field's value is "
 "not equal to some other URL keys (new/ edit/ remove)."
 msgstr ""
+"**string_id** - строковое поле, предназначенное для использования в URL "
+"как ключ 'id'. Он имеет дополнительную проверку, которая проверяет, что "
+"значение поля не равно некоторым другим ключам URL (new/ edit/ remove)."
 
 #: ../../frontend-manual.rst:319
 msgid "Layout customization with CSS"
-msgstr ""
+msgstr "Настройка макета с использованием CSS"
 
 #: ../../frontend-manual.rst:320
 msgid ""
@@ -737,37 +918,49 @@ msgid ""
 " for the fields with \"boolean\" and \"choices\" types. Also classes "
 "apply to operations buttons and links."
 msgstr ""
+"Если вам нужно настроить элементы с помощью CSS, у нас есть некоторая "
+"функциональность для этого. К корневым элементам ``EntityView`` (если он "
+"содержит `ModelField`), ``ModelField``, ``ListTableRow`` и "
+"``MultiActions`` применяются классы в зависимости от полей, которые они "
+"содержат. Классы формируются для полей типов \"boolean\" и \"choices\". "
+"Кроме того, классы применяются к кнопкам операций и ссылкам."
 
 #: ../../frontend-manual.rst
 msgid "Classes generation rules"
-msgstr ""
+msgstr "Правила генерации классов"
 
 #: ../../frontend-manual.rst:327
 msgid ""
 "``EntityView, ModelField and ListTableRow`` - *field-[field_name]-[field-"
 "value]*"
 msgstr ""
+"``EntityView, ModelField и ListTableRow`` - *field-[field_name]-[field-"
+"value]*"
 
 #: ../../frontend-manual.rst:332 ../../frontend-manual.rst:336
 #: ../../frontend-manual.rst:345
 msgid "**Example:**"
-msgstr ""
+msgstr "**Пример:**"
 
 #: ../../frontend-manual.rst:330
 msgid ""
 "*\"field-active-true\"* for model that contains \"boolean\" field with "
 "name \"active\" and value \"true\""
 msgstr ""
+"*\"field-active-true\"* для модели, содержащей поле \"boolean\" с именем "
+"\"active\" и значением \"true\""
 
 #: ../../frontend-manual.rst:331
 msgid ""
 "*\"field-tariff_type-WAREHOUSE\"* for model that contains \"choices\" "
 "field with name \"tariff_type\" and value \"WAREHOUSE\""
 msgstr ""
+"*\"field-tariff_type-WAREHOUSE\"* для модели, содержащей поле \"choices\""
+" с именем \"tariff_type\" и значением \"WAREHOUSE\""
 
 #: ../../frontend-manual.rst:336
 msgid "``MultiActions`` - *selected__field-[field_name]-[field-value]*"
-msgstr ""
+msgstr "``MultiActions`` - *selected__field-[field_name]-[field-value]*"
 
 #: ../../frontend-manual.rst:336
 msgid ""
@@ -776,40 +969,51 @@ msgid ""
 "\"choices\" field with name \"tariff_type\" and values \"WAREHOUSE\" and "
 "\"SLIDE\" respectively."
 msgstr ""
+"*\"selected__field-tariff_type-WAREHOUSE\"* и *\"selected__field-"
+"tariff_type-SLIDE\"*, если выбраны 2 строки ``ListTableRow``, содержащие "
+"поле \"choices\" с именем \"tariff_type\" и значениями \"WAREHOUSE\" и "
+"\"SLIDE\" соответственно."
 
 #: ../../frontend-manual.rst:345
 msgid "``Operation`` - *operation__[operation_name]*"
-msgstr ""
+msgstr "``Operation`` - *operation__[operation_name]*"
 
 #: ../../frontend-manual.rst:342
 msgid "**Warning**"
-msgstr ""
+msgstr "**Предупреждение**"
 
 #: ../../frontend-manual.rst:340
 msgid ""
 "If you hide operations using CSS classes and for example all actions were"
 " hidden then Actions dropdown button will still be visible."
 msgstr ""
+"Если вы скрываете операции с использованием классов CSS и, например, все "
+"действия были скрыты, то кнопка выпадающего списка действий все равно "
+"будет видна."
 
 #: ../../frontend-manual.rst:342
 msgid ""
 "For better control over actions and sublinks see :ref:`changing-actions-"
 "or-sublinks`"
 msgstr ""
+"Для более тщательного контроля над действиями и подссылками см. :ref"
+":`changing-actions-or-sublinks`"
 
 #: ../../frontend-manual.rst:345
 msgid ""
 "*operation__pickup_point* if operation button or link has name "
 "*pickup_point*"
 msgstr ""
+"*operation__pickup_point*, если кнопка операции или ссылка имеют имя "
+"*pickup_point*"
 
 #: ../../frontend-manual.rst:347
 msgid "Based on these classes, you can change the styles of various elements."
-msgstr ""
+msgstr "На основе этих классов вы можете изменять стили различных элементов."
 
 #: ../../frontend-manual.rst:373
 msgid "A few use cases:"
-msgstr ""
+msgstr "Несколько вариантов использования:"
 
 #: ../../frontend-manual.rst:350
 msgid ""
@@ -817,18 +1021,25 @@ msgid ""
 "product detail view when product is not \"active\", you can do so by "
 "adding a CSS selector:"
 msgstr ""
+"Если вам нужно скрыть кнопку для действия \"change_category\" на странице"
+" подробной информации о продукте, когда продукт неактивен, вы можете "
+"сделать это, добавив селектор CSS:"
 
 #: ../../frontend-manual.rst:358
 msgid ""
 "Hide the button for the \"remove\" action in ``MultiActions`` menu if "
 "selected at least one product with status \"active\":"
 msgstr ""
+"Скрыть кнопку для действия \"remove\" в меню ``MultiActions``, если "
+"выбран хотя бы один продукт со статусом \"active\":"
 
 #: ../../frontend-manual.rst:366
 msgid ""
 "If you need to change *background-color* to red for order with status "
 "\"CANCELLED\" on ``ListView`` component do this:"
 msgstr ""
+"Если вам нужно изменить *цвет фона* на красный для заказа со статусом "
+"\"CANCELLED\" на компоненте ``ListView``, сделайте следующее:"
 
 #: ../../frontend-manual.rst:374
 msgid ""
@@ -837,87 +1048,8 @@ msgid ""
 "selected in the selector, because the class \"field-status-CANCELLED\" is"
 " added in different places on the page."
 msgstr ""
-
-#~ msgid "app.beforeInitStore"
-#~ msgstr ""
-
-#~ msgid "**Signal name:** \"app.beforeInitStore\"."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "**Context argument:** obj - {object} -"
-#~ " Object with following structure: "
-#~ "{storeConstructor: StoreConstructor}, where "
-#~ "storeConstructor is an instance of "
-#~ "StoreConstructor."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "**Description:** This signal is emitted "
-#~ "after creation of StoreConstructor instance"
-#~ " and before app creation"
-#~ msgstr ""
-
-#~ msgid "GuiCustomizer.beforeInit"
-#~ msgstr ""
-
-#~ msgid "**Signal name:** \"GuiCustomizer.beforeInit\"."
-#~ msgstr ""
-
-#~ msgid "**Context argument:** obj - {object} - Instance of GuiCustomizer class."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "**Description:** This signal will be "
-#~ "executed before initialization of "
-#~ "GuiCustomizer Instance."
-#~ msgstr ""
-
-#~ msgid "GuiCustomizer.skins_custom_settings.reseted"
-#~ msgstr ""
-
-#~ msgid "**Signal name:** \"GuiCustomizer.skins_custom_settings.reseted\"."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "**Description:** This signal will be "
-#~ "executed after custom settings of "
-#~ "GuiCustomizer skin were reset."
-#~ msgstr ""
-
-#~ msgid "GuiCustomizer.skins_custom_settings.saved"
-#~ msgstr ""
-
-#~ msgid "**Signal name:** \"GuiCustomizer.skins_custom_settings.saved\"."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "**Description:** This signal will be "
-#~ "executed after custom settings of "
-#~ "GuiCustomizer skin were saved."
-#~ msgstr ""
-
-#~ msgid "GuiCustomizer.skin.name.changed"
-#~ msgstr ""
-
-#~ msgid "**Signal name:** \"GuiCustomizer.skin.name.changed\"."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "**Description:** This signal will be "
-#~ "executed after changing of current "
-#~ "GuiCustomizer skin."
-#~ msgstr ""
-
-#~ msgid "GuiCustomizer.skin.settings.changed"
-#~ msgstr ""
-
-#~ msgid "**Signal name:** \"GuiCustomizer.skin.settings.changed\"."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "**Description:** This signal will be "
-#~ "executed after changing of current "
-#~ "GuiCustomizer skin's settings."
-#~ msgstr ""
+"В этом случае вам нужно использовать дополнительный класс \"item-row\" "
+"(Используется для напримера, вы можете выбрать другой) для указания элемента,"
+" который будет выбран в селекторе, потому что класс \"field-status-"
+"CANCELLED\" добавляется в различные места на странице."
 
