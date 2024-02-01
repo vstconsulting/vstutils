@@ -1,5 +1,6 @@
 //{% load request_static %}
 //{% load cache %}
+//{% load sw %}
 //{% cache block_timeout service_worker_block gui_named_version %}
 //{% autoescape off %}
 
@@ -50,6 +51,8 @@ self.addEventListener('fetch', (event) => {
     }
 
 });
+
+{% service_worker_contributions %}
 
 //{% endautoescape %}
 //{% endcache %}

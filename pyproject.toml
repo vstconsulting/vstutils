@@ -157,5 +157,6 @@ module = [
     "configparserc.*",
     "kombu.*",
     "tarantool.*",
+    "pywebpush.*",
 ]
 ignore_missing_imports = true

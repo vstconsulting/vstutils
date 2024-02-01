@@ -406,3 +406,53 @@ Vstutils uses mosts of these functions under the hood.
 
 .. automodule:: vstutils.utils
     :members:
+
+
+.. _webpush-manual:
+
+Integrating Web Push Notifications
+----------------------------------
+
+Web push notifications are an effective way to engage users with real-time messaging.
+To integrate web push notifications in your VSTUtils project, follow these steps:
+
+1. **Configuration**: First, include the ``vstutils.webpush`` module in the ``INSTALLED_APPS`` section of your ``settings.py`` file.
+   This enables the web push functionality provided by VSTUtils. Additionally,
+   configure the necessary settings as described in the web push settings section (see :ref:`here<webpush-settings>` for details).
+2. **Creating Notifications**: To create a web push notification, you need to define a class that inherits from
+   either :class:`vstutils.webpush.BaseWebPush` or :class:`vstutils.webpush.BaseWebPushNotification`.
+   VSTUtils automatically detects and utilizes web push classes defined in the ``webpushes`` module of all ``INSTALLED_APPS``.
+   Below is an example that illustrates how to implement custom web push classes:
+
+
+   .. literalinclude:: ../test_src/test_proj/webpushes.py
+       :language: python
+       :linenos:
+
+   This example contains three classes:
+
+   - `TestWebPush`: Sends notifications to all subscribed users.
+   - `TestNotification`: Targets notifications to specific users.
+   - `StaffOnlyNotification`: Restricts notifications to staff users only. Sometimes you may want to allow only some users to subscribe on specific notifications.
+
+3. **Sending Notifications**: To dispatch a web push notification, invoke the ``send`` or ``send_in_task``
+   method on an instance of your web push class. For instance, to send a notification using `TestNotification`,
+   you can do the following:
+
+   .. code-block:: python
+
+       from test_proj.webpushes import TestNotification
+
+       # Sending a notification immediately (synchronously)
+       TestNotification(name='Some user', user_id=1).send()
+
+       # Sending a notification as a background task (asynchronously)
+       TestNotification.send_in_task(name='Some user', user_id=1)
+
+.. warning::
+   The asynchronous sending of web push notifications (using methods like ``send_in_task``) requires a configured Celery setup
+   in your project, as it relies on Celery tasks "under the hood".
+   Ensure that Celery is properly set up and running to utilize asynchronous notification dispatching.
+
+
+By following these steps, you can fast integrate and utilize web push notifications in projects with VSTUtils.

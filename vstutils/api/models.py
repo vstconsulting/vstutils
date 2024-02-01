@@ -1,6 +1,8 @@
 import hashlib
+from itertools import chain
 
 import pyotp
+from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.utils.module_loading import import_string
@@ -48,7 +50,12 @@ class Language(ListModel):
     def get_translations(self, for_server=False):
         code = self.code.replace('-', '_')
         translation_data = self._get_translation_data('vstutils', code, for_server)
-        for attr_name in lib_names:
+        apps_translations = (
+            a.name
+            for a in apps.get_app_configs()
+            if getattr(a, 'contribute_translations', False)
+        )
+        for attr_name in chain(apps_translations, lib_names):
             translation_data.update(
                 self._get_translation_data(attr_name, code, for_server)
             )
@@ -66,7 +73,7 @@ class Language(ListModel):
     def server_translations(self):
         return self.get_translations(for_server=True)
 
-    def translate(self, text):
+    def translate(self, text: str) -> str:
         translated = self.server_translations.get(text, None)
         if translated is None:
             # place for additional translation methods

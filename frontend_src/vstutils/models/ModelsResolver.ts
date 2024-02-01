@@ -128,6 +128,7 @@ export class ModelsResolver {
                 static translateModel = modelSchema['x-translate-model'] || null;
                 static hideNotRequired = modelSchema['x-hide-not-required'];
                 static displayMode = modeValue ?? 'DEFAULT';
+                static visibilityDataFieldName = modelSchema['x-visibility-data-field-name'];
             },
             modelName,
         );

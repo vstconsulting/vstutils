@@ -572,6 +572,26 @@ For example, if you want to apply throttle to ``api/v1/author``:
 More on throttling at `DRF Throttle docs <https://www.django-rest-framework.org/api-guide/throttling/>`_.
 
 
+.. _webpush-settings:
+
+Web Push settings
+-----------------
+
+Section ``[webpuwsh]``.
+
+* **enabled**: A boolean flag that enables or disables web push notifications. Set to `true` to activate web push notifications, and `false` to deactivate them. Default: `false`. If set to false then notifications settings on user page will be hidden and `send` method of notification class will do nothing.
+
+* **vapid_private_key**, **vapid_public_key**: These are the application server keys used for sending push notifications. The VAPID (Voluntary Application Server Identification) keys consist of a public and a private key. These keys are essential for secure communication between your server and the push service. For generating a VAPID key pair and understanding their usage, refer to the detailed guide available here: `Creating VAPID Keys <https://web.dev/articles/push-notifications-subscribing-a-user#how_to_create_application_server_keys>`_.
+
+* **vapid_admin_email**: This setting specifies the email address of the administrator or the person responsible for the server. It is a contact point for the push service to get in touch in case of any issues or policy violations.
+
+* **default_notification_icon**: URL of the default icon image to be used for web push notifications, to avoid confusion absolute URL is preferred. This icon will be displayed in the notifications if no other icon is specified at the notification level. More information about icon can be found `here <https://web.dev/articles/push-notifications-display-a-notification#icon>`_.
+
+For more detailed guidance on using and implementing web push notifications in VSTUtils, refer to the Web Push manual provided :ref:`here<webpush-manual>`.
+
+Remember, these settings are crucial for the proper functioning and reliability of web push notifications in your application. Ensure that they are configured accurately for optimal performance.
+
+
 Production web settings
 -----------------------
 

@@ -53,4 +53,14 @@ api_info_dict = OrderedDict(
     }
 )
 
+if settings.WEBPUSH_ENABLED:
+    api_info_dict['x-webpush'] = {
+        'public_key': settings.WEBPUSH_PUBLIC_KEY,
+        'user_settings_subpath': (
+            settings.WEBPUSH_USER_SETTINGS_VIEW_SUBPATH
+            if settings.WEBPUSH_CREATE_USER_SETTINGS_VIEW
+            else None
+        ),
+    }
+
 api_info = openapi.Info(**api_info_dict)

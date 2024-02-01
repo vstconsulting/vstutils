@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-11 03:28+0000\n"
+"POT-Creation-Date: 2024-02-01 04:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1598,15 +1598,105 @@ msgstr ""
 "Подробнее об ограничении количества запросов в `документации DRF Throttle"
 " <https://www.django-rest-framework.org/api-guide/throttling/>`_."
 
-#: ../../config.rst:576
+#: ../../config.rst:578
+msgid "Web Push settings"
+msgstr "Настройки веб-уведомлений"
+
+#: ../../config.rst:580
+msgid "Section ``[webpuwsh]``."
+msgstr "Раздел ``[webpuwsh]``."
+
+#: ../../config.rst:582
+msgid ""
+"**enabled**: A boolean flag that enables or disables web push "
+"notifications. Set to `true` to activate web push notifications, and "
+"`false` to deactivate them. Default: `false`. If set to false then "
+"notifications settings on user page will be hidden and `send` method of "
+"notification class will do nothing."
+msgstr ""
+"**enabled**: Булевый флаг, который включает или отключает веб-уведомления."
+" Установите `true`, чтобы активировать веб-уведомления, и `false`, чтобы "
+"деактивировать их. По умолчанию: `false`. Если установлено значение false, "
+"то настройки уведомлений на странице пользователя будут скрыты, и метод "
+"`send` класса уведомлений ничего не будет делать."
+
+#: ../../config.rst:584
+msgid ""
+"**vapid_private_key**, **vapid_public_key**: These are the application "
+"server keys used for sending push notifications. The VAPID (Voluntary "
+"Application Server Identification) keys consist of a public and a private"
+" key. These keys are essential for secure communication between your "
+"server and the push service. For generating a VAPID key pair and "
+"understanding their usage, refer to the detailed guide available here: "
+"`Creating VAPID Keys <https://web.dev/articles/push-notifications-"
+"subscribing-a-user#how_to_create_application_server_keys>`_."
+msgstr ""
+"**vapid_private_key**, **vapid_public_key**: Это ключи сервера приложений, "
+"используемые для отправки push-уведомлений. Ключи VAPID (Voluntary "
+"Application Server Identification) состоят из публичного и приватного "
+"ключей. Эти ключи являются необходимыми для безопасной связи между вашим "
+"сервером и службой push. Для генерации пары ключей VAPID и понимания их "
+"использования смотрите подробное руководство, доступное здесь: `Создание "
+"ключей VAPID <https://web.dev/articles/push-notifications-"
+"subscribing-a-user#how_to_create_application_server_keys>`_."
+
+#: ../../config.rst:586
+msgid ""
+"**vapid_admin_email**: This setting specifies the email address of the "
+"administrator or the person responsible for the server. It is a contact "
+"point for the push service to get in touch in case of any issues or "
+"policy violations."
+msgstr ""
+"**vapid_admin_email**: Эта настройка указывает адрес электронной почты "
+"администратора или ответственного за сервер. Это контактная точка для "
+"службы push, чтобы связаться в случае каких-либо проблем или нарушений "
+"политики."
+
+#: ../../config.rst:588
+msgid ""
+"**default_notification_icon**: URL of the default icon image to be used "
+"for web push notifications, to avoid confusion absolute URL is preferred."
+" This icon will be displayed in the notifications if no other icon is "
+"specified at the notification level. More information about icon can be "
+"found `here <https://web.dev/articles/push-notifications-"
+"display-a-notification#icon>`_."
+msgstr ""
+"**default_notification_icon**: URL изображения иконки по умолчанию, "
+"которая будет использоваться для веб-уведомлений. Для избежания "
+"путаницы предпочтительно использовать абсолютный URL. Эта иконка будет "
+"отображаться в уведомлениях, если на уровне уведомления не указана другая "
+"иконка. Более подробную информацию об иконке можно найти `здесь <https://"
+"web.dev/articles/push-notifications-display-a-notification#icon>`_."
+
+#: ../../config.rst:590
+msgid ""
+"For more detailed guidance on using and implementing web push "
+"notifications in VSTUtils, refer to the Web Push manual provided "
+":ref:`here<webpush-manual>`."
+msgstr ""
+"Для более подробного руководства по использованию и реализации веб-"
+"уведомлений в VSTUtils смотрите руководство по веб-уведомлениям, "
+":ref:`here<webpush-manual>`."
+
+#: ../../config.rst:592
+msgid ""
+"Remember, these settings are crucial for the proper functioning and "
+"reliability of web push notifications in your application. Ensure that "
+"they are configured accurately for optimal performance."
+msgstr ""
+"Помните, что эти настройки критически важны для правильной работы и "
+"надежности веб-уведомлений в вашем приложении. Убедитесь, что они "
+"настроены правильно для оптимальной производительности."
+
+#: ../../config.rst:596
 msgid "Production web settings"
 msgstr "Настройки для продакшн-сервера"
 
-#: ../../config.rst:578
+#: ../../config.rst:598
 msgid "Section ``[uwsgi]``."
 msgstr "Раздел ``[uwsgi]``."
 
-#: ../../config.rst:580
+#: ../../config.rst:600
 msgid ""
 "Settings related to web-server used by vstutils-based application in "
 "production (for deb and rpm packages by default). Most of them related to"
@@ -1619,7 +1709,7 @@ msgstr ""
 "т. д.). Дополнительные настройки смотрите в `документации uWSGI. <http"
 "://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_."
 
-#: ../../config.rst:586
+#: ../../config.rst:606
 msgid ""
 "But keep in mind that uWSGI is deprecated and may be removed in future "
 "releases. Use the uvicorn settings to manage your app server."
@@ -1627,60 +1717,63 @@ msgstr ""
 "Однако имейте в виду, что uWSGI устарел и может быть удален в будущих "
 "версиях. Используйте настройки uvicorn для управления сервером вашего "
 "приложения."
-#: ../../config.rst:591
+
+#: ../../config.rst:611
 msgid "Working behind the proxy server with TLS"
 msgstr "Работа за прокси-сервером с поддержкой TLS"
 
-#: ../../config.rst:594
+#: ../../config.rst:614
 msgid "Nginx"
 msgstr "Nginx"
 
-#: ../../config.rst:596
+#: ../../config.rst:616
 msgid ""
 "To configure vstutils for operation behind Nginx with TLS, follow these "
 "steps:"
 msgstr ""
-"Чтобы настроить vstutils для работы через Nginx с поддержкой TLS, выполните следующие шаги:"
+"Чтобы настроить vstutils для работы через Nginx с поддержкой TLS, "
+"выполните следующие шаги:"
 
-#: ../../config.rst:598
+#: ../../config.rst:618
 msgid "**Install Nginx:**"
 msgstr "**Установка Nginx:**"
 
-#: ../../config.rst:600
+#: ../../config.rst:620
 msgid ""
 "Ensure that Nginx is installed on your server. You can install it using "
 "the package manager specific to your operating system."
 msgstr ""
-"Убедитесь, что Nginx установлен на вашем сервере. Вы можете установить его с помощью "
-"менеджера пакетов, специфичного для вашей операционной системы."
+"Убедитесь, что Nginx установлен на вашем сервере. Вы можете установить "
+"его с помощью менеджера пакетов, специфичного для вашей операционной "
+"системы."
 
-#: ../../config.rst:602
+#: ../../config.rst:622
 msgid "**Configure Nginx:**"
 msgstr "**Настройка Nginx:**"
 
-#: ../../config.rst:604
+#: ../../config.rst:624
 msgid ""
 "Create an Nginx configuration file for your vstutils application. Below "
 "is a basic example of an Nginx configuration. Adjust the values based on "
 "your specific setup."
 msgstr ""
 "Создайте файл конфигурации Nginx для вашего приложения vstutils. Ниже "
-"приведен базовый пример конфигурации Nginx. Измените значения в соответствии с "
-"вашей конкретной настройкой."
+"приведен базовый пример конфигурации Nginx. Измените значения в "
+"соответствии с вашей конкретной настройкой."
 
-#: ../../config.rst:643
+#: ../../config.rst:663
 msgid ""
 "Replace ``your_domain.com`` with your actual domain, and update the paths"
 " for SSL certificates."
 msgstr ""
-"Замените ``your_domain.com`` на ваш реальный домен и обновите пути "
-"к SSL-сертификатам."
+"Замените ``your_domain.com`` на ваш реальный домен и обновите пути к "
+"SSL-сертификатам."
 
-#: ../../config.rst:645 ../../config.rst:728 ../../config.rst:779
+#: ../../config.rst:665 ../../config.rst:748 ../../config.rst:800
 msgid "**Update vstutils settings:**"
 msgstr "**Обновление настроек vstutils:**"
 
-#: ../../config.rst:647 ../../config.rst:730 ../../config.rst:781
+#: ../../config.rst:667 ../../config.rst:750 ../../config.rst:802
 msgid ""
 "Ensure that your vstutils settings have the correct configurations for "
 "HTTPS. In your ``/etc/vstutils/settings.ini`` (or project "
@@ -1690,162 +1783,166 @@ msgstr ""
 "HTTPS. В вашем ``/etc/vstutils/settings.ini`` (или в проекте "
 "``settings.ini``):"
 
-#: ../../config.rst:655
+#: ../../config.rst:675
 msgid "This ensures that vstutils recognizes the HTTPS connection."
 msgstr "Это гарантирует, что vstutils распознает соединение по протоколу HTTPS."
 
-#: ../../config.rst:657
+#: ../../config.rst:677
 msgid "**Restart Nginx:**"
 msgstr "**Перезапустите Nginx:**"
 
-#: ../../config.rst:659
+#: ../../config.rst:679
 msgid "After making these changes, restart Nginx to apply the new configurations:"
-msgstr "После внесения этих изменений перезапустите Nginx, чтобы применить новые конфигурации:"
+msgstr ""
+"После внесения этих изменений перезапустите Nginx, чтобы применить новые "
+"конфигурации:"
 
-#: ../../config.rst:665
+#: ../../config.rst:685
 msgid ""
 "Now, your vstutils application should be accessible via HTTPS through "
 "Nginx. Adjust these instructions based on your specific environment and "
 "security considerations."
 msgstr ""
 "Теперь ваше приложение vstutils должно быть доступно через HTTPS через "
-"Nginx. Измените эти инструкции в зависимости от вашего конкретного окружения и "
-"требований к безопасности."
+"Nginx. Измените эти инструкции в зависимости от вашего конкретного "
+"окружения и требований к безопасности."
 
-#: ../../config.rst:669
+#: ../../config.rst:689
 msgid "Traefik"
 msgstr "Traefik"
 
-#: ../../config.rst:671
+#: ../../config.rst:691
 msgid ""
 "To configure vstutils for operation behind Traefik with TLS, follow these"
 " steps:"
 msgstr ""
-"Чтобы настроить vstutils для работы через Traefik с поддержкой TLS, выполните следующие шаги:"
+"Чтобы настроить vstutils для работы через Traefik с поддержкой TLS, "
+"выполните следующие шаги:"
 
-#: ../../config.rst:673
+#: ../../config.rst:693
 msgid "**Install Traefik:**"
 msgstr "**Установка Traefik:**"
 
-#: ../../config.rst:675
+#: ../../config.rst:695
 msgid ""
 "Ensure that Traefik is installed on your server. You can download the "
 "binary from the official website or use a package manager specific to "
 "your operating system."
 msgstr ""
-"Убедитесь, что Traefik установлен на вашем сервере. Вы можете скачать двоичный файл с "
-"официального сайта или использовать менеджер пакетов, специфичный для вашей "
-"операционной системы."
+"Убедитесь, что Traefik установлен на вашем сервере. Вы можете скачать "
+"двоичный файл с официального сайта или использовать менеджер пакетов, "
+"специфичный для вашей операционной системы."
 
-#: ../../config.rst:677
+#: ../../config.rst:697
 msgid "**Configure Traefik:**"
 msgstr "**Настройка Traefik:**"
 
-#: ../../config.rst:679
+#: ../../config.rst:699
 msgid ""
 "Create a Traefik configuration file ``/path/to/traefik.toml``. Here's a "
 "basic example:"
 msgstr ""
-"Создайте файл конфигурации Traefik ``/path/to/traefik.toml``. Вот базовый пример:"
+"Создайте файл конфигурации Traefik ``/path/to/traefik.toml``. Вот базовый"
+" пример:"
 
-#: ../../config.rst:701
+#: ../../config.rst:721
 msgid "**Create Traefik Toml Configuration:**"
 msgstr "**Создайте конфигурацию Traefik Toml:**"
 
-#: ../../config.rst:703
+#: ../../config.rst:723
 msgid ""
 "Create the ``/path/to/traefik_config.toml`` file with the following "
 "content:"
-msgstr ""
-"Создайте файл ``/path/to/traefik_config.toml`` с следующим "
-"содержимым:"
+msgstr "Создайте файл ``/path/to/traefik_config.toml`` с следующим содержимым:"
 
-#: ../../config.rst:726
+#: ../../config.rst:746
 msgid "Make sure to replace ``your_domain.com`` with your actual domain."
 msgstr "Обязательно замените ``your_domain.com`` на ваш реальный домен."
 
-#: ../../config.rst:737
+#: ../../config.rst:757
 msgid "**Start Traefik:**"
 msgstr "**Запустите Traefik:**"
 
-#: ../../config.rst:739
+#: ../../config.rst:759
 msgid "Start Traefik with the following command:"
 msgstr "Запустите Traefik следующей командой:"
 
-#: ../../config.rst:745
+#: ../../config.rst:765
 msgid ""
 "Now, your vstutils application should be accessible via HTTPS through "
 "Traefik. Adjust these instructions based on your specific environment and"
 " requirements."
 msgstr ""
 "Теперь ваше приложение vstutils должно быть доступно через HTTPS через "
-"Traefik. Измените эти инструкции в зависимости от вашего конкретного окружения и "
-"требований."
+"Traefik. Измените эти инструкции в зависимости от вашего конкретного "
+"окружения и требований."
 
-#: ../../config.rst:749
+#: ../../config.rst:769
 msgid "HAProxy"
 msgstr "HAProxy"
 
-#: ../../config.rst:751
+#: ../../config.rst:771
 msgid "**Install HAProxy:**"
 msgstr "**Установка HAProxy:**"
 
-#: ../../config.rst:753
+#: ../../config.rst:773
 msgid ""
 "Ensure that HAProxy is installed on your server. You can install it using"
 " the package manager specific to your operating system."
 msgstr ""
-"Убедитесь, что HAProxy установлен на вашем сервере. Вы можете установить его с помощью"
-" менеджера пакетов, специфичного для вашей операционной системы."
+"Убедитесь, что HAProxy установлен на вашем сервере. Вы можете установить "
+"его с помощью менеджера пакетов, специфичного для вашей операционной "
+"системы."
 
-#: ../../config.rst:755
+#: ../../config.rst:775
 msgid "**Configure HAProxy:**"
 msgstr "**Настройка HAProxy:**"
 
-#: ../../config.rst:757
+#: ../../config.rst:777
 msgid ""
 "Create an HAProxy configuration file for your vstutils application. Below"
 " is a basic example of an HAProxy configuration. Adjust the values based "
 "on your specific setup."
 msgstr ""
-"Создайте файл конфигурации HAProxy для вашего приложения vstutils. Вот базовый пример конфигурации"
-" HAProxy. Измените значения в соответствии с вашей конкретной настройкой."
+"Создайте файл конфигурации HAProxy для вашего приложения vstutils. Вот "
+"базовый пример конфигурации HAProxy. Измените значения в соответствии с "
+"вашей конкретной настройкой."
 
-#: ../../config.rst:777
+#: ../../config.rst:798
 msgid ""
 "Replace ``your_domain.com`` with your actual domain and update the paths "
 "for SSL certificates."
 msgstr ""
-"Замените ``your_domain.com`` на ваш реальный домен и обновите пути "
-"к SSL-сертификатам."
+"Замените ``your_domain.com`` на ваш реальный домен и обновите пути к "
+"SSL-сертификатам."
 
-#: ../../config.rst:788
+#: ../../config.rst:809
 msgid "**Restart HAProxy:**"
 msgstr "**Перезапуск HAProxy:**"
 
-#: ../../config.rst:790
+#: ../../config.rst:811
 msgid ""
 "After making these changes, restart HAProxy to apply the new "
 "configurations:"
 msgstr ""
-"После внесения этих изменений перезапустите HAProxy, чтобы применить новые "
-"конфигурации."
+"После внесения этих изменений перезапустите HAProxy, чтобы применить "
+"новые конфигурации."
 
-#: ../../config.rst:796
+#: ../../config.rst:817
 msgid ""
 "Now, your vstutils application should be accessible via HTTPS through "
 "HAProxy. Adjust these instructions based on your specific environment and"
 " security considerations."
 msgstr ""
 "Теперь ваше приложение vstutils должно быть доступно через HTTPS через "
-"HAProxy. Измените эти инструкции в зависимости от вашего конкретного окружения и "
-"требований к безопасности."
+"HAProxy. Измените эти инструкции в зависимости от вашего конкретного "
+"окружения и требований к безопасности."
 
-#: ../../config.rst:800
+#: ../../config.rst:821
 msgid "Configuration options"
 msgstr "Параметры конфигурации"
 
-#: ../../config.rst:802
+#: ../../config.rst:823
 msgid ""
 "This section contains additional information for configure additional "
 "elements."
@@ -1853,7 +1950,7 @@ msgstr ""
 "В этом разделе содержится дополнительная информация для настройки "
 "дополнительных элементов."
 
-#: ../../config.rst:804
+#: ../../config.rst:825
 msgid ""
 "If you need set ``https`` for your web settings, you can do it using "
 "HAProxy, Nginx, Traefik or configure it in ``settings.ini``."
@@ -1862,7 +1959,7 @@ msgstr ""
 " сделать это с помощью HAProxy, Nginx, Traefik или настроить в файле "
 "``settings.ini``."
 
-#: ../../config.rst:816
+#: ../../config.rst:837
 msgid ""
 "We strictly do not recommend running the web server from root. Use HTTP "
 "proxy to run on privileged ports."
@@ -1870,7 +1967,7 @@ msgstr ""
 "Мы настоятельно не рекомендуем запускать веб-сервер от имени root. "
 "Используйте HTTP-прокси, чтобы работать на привилегированных портах."
 
-#: ../../config.rst:818
+#: ../../config.rst:839
 msgid ""
 "You can use `{ENV[HOME:-value]}` (where `HOME` is environment variable, "
 "`value` is default value) in configuration values."
@@ -1878,7 +1975,7 @@ msgstr ""
 "Вы можете использовать `{ENV[HOME:-value]}` (где `HOME` - переменная "
 "окружения, `value` - значение по умолчанию) в значениях конфигурации."
 
-#: ../../config.rst:821
+#: ../../config.rst:842
 msgid ""
 "You can use environment variables for setup important settings. But "
 "config variables has more priority then env. Available settings are: "
@@ -1891,7 +1988,7 @@ msgstr ""
 "``DJANGO_LOG_LEVEL``, ``TIMEZONE`` и некоторые настройки с префиксом "
 "``[ENV_NAME]``."
 
-#: ../../config.rst:824
+#: ../../config.rst:845
 msgid ""
 "For project without special settings and project levels named ``project``"
 " these variables will start with ``PROJECT_`` prefix. There is a list of "
@@ -1915,7 +2012,7 @@ msgstr ""
 "``{ENV_NAME}_GLOBAL_THROTTLE_RATE``, и "
 "``{ENV_NAME}_GLOBAL_THROTTLE_ACTIONS``."
 
-#: ../../config.rst:831
+#: ../../config.rst:852
 msgid ""
 "There are also URI-specific variables for connecting to various services "
 "such as databases and caches. There are ``DATABASE_URL``, ``CACHE_URL``, "
@@ -1929,7 +2026,7 @@ msgstr ""
 "``SESSIONS_CACHE_URL`` и ``ETAG_CACHE_URL``. Как видно из названий, они "
 "тесно связаны с ключами и именами соответствующих секций конфигурации."
 
-#: ../../config.rst:835
+#: ../../config.rst:856
 msgid ""
 "We recommend to install ``uvloop`` to your environment and setup ``loop ="
 " uvloop`` in ``[uvicorn]`` section for performance reasons."
@@ -1937,7 +2034,7 @@ msgstr ""
 "Мы рекомендуем установить ``uvloop`` в ваше окружение и настроить ``loop "
 "= uvloop`` в разделе ``[uvicorn]`` для повышения производительности."
 
-#: ../../config.rst:837
+#: ../../config.rst:858
 msgid ""
 "In the context of vstutils, the adoption of ``uvloop`` is paramount for "
 "optimizing the performance of the application, especially because "
@@ -1955,7 +2052,7 @@ msgstr ""
 "библиотеки высокопроизводительного цикла событий, и специально разработан"
 " для оптимизации скорости выполнения асинхронного кода."
 
-#: ../../config.rst:841
+#: ../../config.rst:862
 msgid ""
 "By leveraging ``uvloop``, developers can achieve substantial performance "
 "improvements in terms of reduced latency and increased throughput. This "

@@ -24,7 +24,9 @@ import ormsgpack
 import pytz
 from bs4 import BeautifulSoup
 from django import VERSION as django_version
+from django.apps import apps
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.contrib.auth.models import AnonymousUser
 from django.core import mail
 from django.db.models import F
@@ -43,6 +45,8 @@ from django.http import FileResponse, HttpResponseNotModified
 from django.test.client import RequestFactory
 from django.urls import reverse
 from fakeldap import MockLDAP
+import requests
+from pywebpush import WebPushException
 
 from vstutils import utils
 from vstutils.api.models import Language
@@ -70,6 +74,9 @@ from vstutils.api import serializers, fields
 from vstutils.api.filter_backends import VSTFilterBackend
 from vstutils.utils import SecurePickling, BaseEnum, get_render, create_view
 from vstutils.api.validators import resize_image
+from vstutils.webpush.models import WebPushDeviceSubscription, WebPushNotificationSubscription
+from vstutils.webpush.utils import subscribe_device, update_user_subscriptions
+from vstutils.webpush.test_utils import subscribe_user_device_to_pushes
 
 from .models import (
     File,
@@ -92,6 +99,7 @@ from .models import (
     Attribute,
     Product
 )
+from .webpushes import TestNotification, TestWebPush, StaffOnlyNotification
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
 from PIL import Image
@@ -6110,3 +6118,424 @@ class BarcodeFieldsTestCase(BaseTestCase):
         # try to set value with non-ASCII characters
         with self.assertRaises(ValidationError, msg='"невалидная строка" is not a valid ASCII string.'):
             f.run_validation(data='невалидная строка')
+
+
+class WebPushesTestCase(BaseTestCase):
+    def tearDown(self):
+        super().tearDown()
+        WebPushDeviceSubscription.objects.all().delete()
+
+    def test_webpush_sending(self):
+        user1 = self._create_user(is_super_user=False, is_staff=False)
+        client1 = self.client_class()
+        client1.force_login(user1)
+
+        user2 = self._create_user(is_super_user=False, is_staff=False)
+        client2 = self.client_class()
+        client2.force_login(user2)
+
+        # Subscribe users devices
+
+        subscribe_device(
+            session_key=client1.session.session_key,
+            user_id=user1.id,
+            data={
+                'endpoint': 'https://example.com/user1_device1',
+                'keys': {'p256dh': 'p256dh', 'auth': 'auth'},
+            },
+            language_code='ru',
+        )
+
+        subscribe_device(
+            session_key=client1.session.session_key,
+            user_id=user1.id,
+            data={
+                'endpoint': 'https://example.com/user1_device2',
+                'keys': {'p256dh': 'p256dh', 'auth': 'auth'},
+            },
+            language_code='ru',
+        )
+
+        subscribe_device(
+            session_key=client2.session.session_key,
+            user_id=user2.id,
+            data={
+                'endpoint': 'https://example.com/user2_device1',
+                'keys': {'p256dh': 'p256dh', 'auth': 'auth'},
+            },
+            language_code='ru',
+        )
+
+        # Update users subscriptions
+
+        update_user_subscriptions(
+            user_id=user1.id,
+            subscriptions={
+                'test_proj_webpushes_TestWebPush': True,
+                'test_proj_webpushes_TestNotification': True,
+            },
+        )
+
+        update_user_subscriptions(
+            user_id=user2.id,
+            subscriptions={
+                'test_proj_webpushes_TestWebPush': False,
+                'test_proj_webpushes_TestNotification': True,
+            },
+        )
+
+        # Send TestWebPush. Only user1 subscribed to it but they have 2 devices
+        with patch('vstutils.webpush.models.webpush') as webpush_mock:
+            TestWebPush().send()
+        self.assertEqual(webpush_mock.call_count, 2)
+        self.assertCountEqual(
+            [call.kwargs for call in webpush_mock.call_args_list],
+            [
+                {
+                    'subscription_info': {
+                        'endpoint': 'https://example.com/user1_device1',
+                        'keys': {'p256dh': 'p256dh', 'auth': 'auth'},
+                    },
+                    'data': '{"some":"data","lang":"ru"}',
+                    'vapid_private_key': 'kVUgUbSz5254_wYdevQwzoOykKyJXIybjVig4dNf2Pc',
+                    'vapid_claims': {'sub': 'mailto:webpush@test_proj'},
+                    'ttl': 900,
+                },
+                {
+                    'subscription_info': {
+                        'endpoint': 'https://example.com/user1_device2',
+                        'keys': {'p256dh': 'p256dh', 'auth': 'auth'},
+                    },
+                    'data': '{"some":"data","lang":"ru"}',
+                    'vapid_private_key': 'kVUgUbSz5254_wYdevQwzoOykKyJXIybjVig4dNf2Pc',
+                    'vapid_claims': {'sub': 'mailto:webpush@test_proj'},
+                    'ttl': 900,
+                },
+            ]
+        )
+
+        # Send TestNotification
+        # Both users subscribed to it but we want to send it only to user2
+        with patch('vstutils.webpush.models.webpush') as webpush_mock:
+            TestNotification(name='Msh', user_id=user2.id).send()
+        self.assertEqual(webpush_mock.call_count, 1)
+        self.assertDictEqual(
+            webpush_mock.call_args_list[0].kwargs,
+            {
+                'subscription_info': {
+                    'endpoint': 'https://example.com/user2_device1',
+                    'keys': {'p256dh': 'p256dh', 'auth': 'auth'},
+                },
+                'data': '{"type":"notification","data":{"title":"Hello Msh","options":{"body":"Test notification body","data":{"url":"/"}}}}',
+                'vapid_private_key': 'kVUgUbSz5254_wYdevQwzoOykKyJXIybjVig4dNf2Pc',
+                'vapid_claims': {'sub': 'mailto:webpush@test_proj'},
+                'ttl': 900,
+            },
+        )
+
+        # Check no notifications sent
+        with patch('vstutils.webpush.models.webpush') as webpush_mock:
+            TestNotification(name='Msh', user_id=1337).send()
+        self.assertEqual(webpush_mock.call_count, 0)
+
+
+    def test_webpush_settings_view(self):
+        user = self._create_user(is_super_user=False, is_staff=False)
+
+        user_device1 = self.client_class()
+        user_device1.force_login(user)
+
+        # Check initially no subscriptions
+        response = user_device1.get(f'/api/v1/user/{user.id}/custom_path/')
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(
+            response.json(),
+            {
+                **response.json(),
+                "test_proj_webpushes_TestNotification": False,
+                "test_proj_webpushes_TestWebPush": False,
+            },
+        )
+
+        self.assertEqual(len(WebPushDeviceSubscription.objects.filter(user_id=user.id)), 0)
+        self.assertEqual(len(WebPushNotificationSubscription.objects.filter(user_id=user.id)), 0)
+
+        # Subscribe device1
+        response = user_device1.patch(
+            f'/api/v1/user/{user.id}/custom_path/',
+            content_type='application/json',
+            data={
+                'test_proj_webpushes_TestNotification': True,
+                'subscription_data': {
+                    'endpoint': 'https://example.com/user1_device1',
+                    'keys': {'p256dh': 'p256dh', 'auth': 'auth'},
+                    'expirationTime': None,
+                },
+            },
+        )
+        self.assertListEqual(
+            list(
+                WebPushDeviceSubscription.objects \
+                .filter(user_id=user.id) \
+                .values('user_id', 'session', 'endpoint', 'language_code', '_data'),
+            ),
+            [
+                {
+                    'user_id': user.id,
+                    'session': user_device1.session.session_key,
+                    'endpoint': 'https://example.com/user1_device1',
+                    'language_code': 'en',
+                    '_data': b'{"expirationTime":null,"keys":{"auth":"auth","p256dh":"p256dh"}}'
+                }
+            ],
+        )
+        self.assertListEqual(
+            list(
+                WebPushNotificationSubscription.objects \
+                .filter(user_id=user.id) \
+                .values('user_id', 'type', 'enabled')
+            ),
+            [
+                {'user_id': user.id, 'type': 'test_proj_webpushes_TestNotification', 'enabled': True}
+            ],
+        )
+
+        # Unsubscribe device1
+
+        response = user_device1.patch(
+            f'/api/v1/user/{user.id}/custom_path/',
+            content_type='application/json',
+            data={
+                'subscription_data': None,
+            },
+        )
+        self.assertEqual(len(WebPushDeviceSubscription.objects.filter(user_id=user.id)), 0)
+
+    def test_settings_view_permissions(self):
+        other_user = self._create_user(is_super_user=False, is_staff=False, username='other_user')
+        user = self._create_user(is_super_user=False, is_staff=False, username='user')
+
+        path = f'/api/v1/user/{user.id}/custom_path/'
+
+        for request_user, allowed in ((user, True), (other_user, False)):
+            with self.subTest(user=user.username):
+                client = self.client_class()
+                client.force_login(request_user)
+
+                response = client.get(path)
+                if allowed:
+                    self.assertEqual(response.status_code, 200)
+                else:
+                    self.assertEqual(response.status_code, 404)
+
+                response = client.patch(
+                    path,
+                    content_type='application/json',
+                    data={
+                        'test_proj_webpushes_TestNotification': True,
+                        'subscription_data': {
+                            'endpoint': 'https://example.com/user1_device1',
+                            'keys': {'p256dh': 'p256dh', 'auth': 'auth'},
+                        },
+                    },
+                )
+                if allowed:
+                    self.assertEqual(response.status_code, 200)
+                else:
+                    self.assertEqual(response.status_code, 404)
+
+                response = client.delete(path)
+                if allowed:
+                    self.assertEqual(response.status_code, 204)
+                else:
+                    self.assertEqual(response.status_code, 404)
+
+    def test_subscription_expiration(self):
+        user = self._create_user(is_super_user=False, is_staff=False)
+
+        update_user_subscriptions(user_id=user.id, subscriptions={
+            'test_proj_webpushes_TestWebPush': True,
+        })
+
+        for code in (404, 410):
+            with self.subTest(f'Error response with status {code}'):
+                subscribe_device(
+                    session_key='abc',
+                    user_id=user.id,
+                    data={
+                        'endpoint': 'https://example.com/expired',
+                        'keys': {'p256dh': 'p256dh', 'auth': 'auth'},
+                    },
+                )
+                exc_resp = requests.Response()
+                exc_resp.status_code = code
+                exc = WebPushException('Error', response=exc_resp)
+                with patch('vstutils.webpush.models.webpush', side_effect=exc):
+                    TestWebPush().send()
+                self.assertEqual(WebPushDeviceSubscription.objects.count(), 0)
+
+    def test_in_task_execution(self):
+        user = self._create_user(is_super_user=False, is_staff=False)
+        client = self.client_class()
+        client.force_login(user)
+
+        user_device = subscribe_user_device_to_pushes(user)
+        user_device.subscribe(TestNotification)
+
+        with user_device.receive() as pushes:
+            TestNotification.send_in_task(name='Koshk', user_id=user.id)
+        pushes.assert_notification({
+            "title": "Hello Koshk",
+            "options":{
+                "body": "Test notification body",
+                "data":{"url": "/"},
+            },
+        })
+
+    def test_push_failure(self):
+        user = self._create_user(is_super_user=False, is_staff=False)
+
+        update_user_subscriptions(user_id=user.id, subscriptions={
+            'test_proj_webpushes_TestWebPush': True,
+        })
+        subscribe_device(
+            session_key='abc',
+            user_id=user.id,
+            data={
+                'endpoint': 'https://example.com/expired',
+                'keys': {'p256dh': 'p256dh', 'auth': 'auth'},
+            },
+        )
+
+        exc_resp = requests.Response()
+        exc_resp.status_code = 500
+        exc = WebPushException('Some error', response=exc_resp)
+        with self.assertLogs('vstutils.webpush', level='ERROR') as logs, \
+                patch('vstutils.webpush.models.webpush', side_effect=exc):
+            TestWebPush().send()
+        # Check subscription not removed
+        self.assertEqual(WebPushDeviceSubscription.objects.count(), 1)
+        # Check logs
+        output = str(logs.output)
+        self.assertIn('Web push failed for subscription', output)
+        self.assertIn('Some error', output)
+
+    @override_settings(
+        WEBPUSH_PRIVATE_KEY='',
+        WEBPUSH_PUBLIC_KEY='',
+        WEBPUSH_SUB_EMAIL='',
+    )
+    def test_settings_validation(self):
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            apps.get_app_config('vstutils_webpush')._validate_settings()
+        self.assertEqual(
+            str(ctx.exception),
+            'WEBPUSH_ENABLED is True but following settings are not set: WEBPUSH_PRIVATE_KEY, WEBPUSH_PUBLIC_KEY, WEBPUSH_SUB_EMAIL',
+        )
+
+    def test_availability(self):
+        staff = self._create_user(is_super_user=False, is_staff=True, username='staff')
+        not_staff = self._create_user(is_super_user=False, is_staff=False, username='not_staff')
+
+        path = '/api/v1/user/profile/custom_path/'
+
+        for user, available in ((staff, True), (not_staff, False)):
+            with self.subTest(user.username):
+                client = self.client_class()
+                client.force_login(user)
+
+                response = client.get(path)
+                self.assertEqual(response.status_code, 200, response.data)
+                self.assertEqual(response.json()['_availability'], {
+                    'notifications_enabled': True,
+                    'test_proj_webpushes_TestNotification': True,
+                    'test_proj_webpushes_TestWebPush': True,
+                    'test_proj_webpushes_StaffOnlyNotification': available,
+                })
+
+                response = client.patch(
+                    path,
+                    content_type='application/json',
+                    data={
+                        'test_proj_webpushes_StaffOnlyNotification': True,
+                    },
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    WebPushNotificationSubscription.objects
+                        .filter(
+                            user_id=user.id,
+                            type='test_proj_webpushes_StaffOnlyNotification',
+                            enabled=True
+                        )
+                        .exists(),
+                    available,
+                )
+
+    def test_public_key_is_sent_with_user_profile(self):
+        user = self._create_user(is_super_user=False, is_staff=False, username='user')
+        other_user = self._create_user(is_super_user=False, is_staff=False, username='other_user')
+
+        # Check that user see webpush public key when requests self
+        for request_user, has_access in ((user, True), (other_user, False)):
+            with self.subTest(user.username):
+                client = self.client_class()
+                client.force_login(request_user)
+                expected_value = settings.WEBPUSH_PUBLIC_KEY if has_access else None
+
+                response = client.get(f'/api/v1/user/{user.id}/')
+                self.assertEqual(response.headers.get('Webpush-Public-Key', None), expected_value)
+
+                with self.user_as(self, request_user):
+                    [response] = self.bulk({'method': 'get', 'path': ['user', user.id]})
+                    self.assertEqual(response['headers'].get('Webpush-Public-Key', None), expected_value)
+
+        # Check that user see webpush public key when requests profile
+        response = client.get('/api/v1/user/profile/')
+        self.assertEqual(response.headers['Webpush-Public-Key'], settings.WEBPUSH_PUBLIC_KEY)
+        [response] = self.bulk({'method': 'get', 'path': ['user', 'profile']})
+        self.assertEqual(response['headers']['Webpush-Public-Key'], settings.WEBPUSH_PUBLIC_KEY)
+
+    def test_test_utils(self):
+        user = self._create_user(is_super_user=False, is_staff=False, username='user')
+        device = subscribe_user_device_to_pushes(user)
+        device.subscribe(TestNotification)
+
+        # Check assert_notification
+        with device.receive() as pushes:
+            pass
+        with self.assertRaisesMessage(
+            AssertionError,
+            'No push with data {\'type\': \'notification\', \'data\': {\'title\': \'Test\'}} found',
+        ):
+            pushes.assert_notification({'title': 'Test'})
+
+        # Check assert_no_pushes
+        with device.receive() as pushes:
+            TestNotification(name='Test name', user_id=user.id).send()
+        with self.assertRaisesMessage(
+            AssertionError,
+            "Unexpected pushes: [{'type': 'notification', 'data': {'title': 'Hello Test name', 'options': {'body': 'Test notification body', 'data': {'url': '/'}}}}]",
+        ):
+            pushes.assert_no_pushes()
+
+        # Check unsubscribe
+        device.unsubscribe(TestNotification)
+        with device.receive() as pushes:
+            TestNotification(name='Test name 2', user_id=user.id).send()
+        pushes.assert_no_pushes()
+
+        # Check assert_count
+        with self.assertRaisesMessage(AssertionError, 'Expected 1 pushes, got 0'):
+            pushes.assert_count(1)
+
+        with self.assertRaisesMessage(
+            ValueError,
+            "Push <class 'test_proj.webpushes.StaffOnlyNotification'> is not available for user user",
+        ):
+            device.subscribe(StaffOnlyNotification)
+
+        # Check set_language
+        self.assertEqual(device._sub.language_code, 'en')
+        device.set_language('ru')
+        self.assertEqual(device._sub.language_code, 'ru')

@@ -1,3 +1,4 @@
+import { onScopeDispose } from 'vue';
 import TabSignal from '@vstconsulting/tabsignal';
 
 import { capitalize, getApp } from '@/vstutils/utils';
@@ -13,6 +14,18 @@ export const APP_CREATED = 'APP_CREATED';
 export const APP_AFTER_INIT = 'app.afterInit';
 export const APP_BEFORE_INIT = 'app.beforeInit';
 export const SCHEMA_MODELS_CREATED = 'allModels.created';
+export const SCHEMA_VIEWS_CREATED = 'allViews.created';
+
+export function useSignalSubscription(name: string, callback: (...args: any[]) => void) {
+    const signalSlot = signals.on({
+        signal: name,
+        callback,
+    });
+
+    onScopeDispose(() => {
+        signals.disconnect(signalSlot!, name);
+    });
+}
 
 const createHook = (() => {
     const emittedSignals = new Map<string, unknown[]>();
@@ -46,9 +59,14 @@ const createHook = (() => {
         }
     }
 
+    let isFirst = true;
+
     signals.connect(APP_CREATED, () => {
-        emittedSignals.clear();
-        signalsCallbacks.clear();
+        if (!isFirst) {
+            emittedSignals.clear();
+            signalsCallbacks.clear();
+        }
+        isFirst = false;
     });
 
     return function createHook<T extends unknown[]>(signal: string) {
@@ -64,6 +82,7 @@ const createHook = (() => {
 
 export const onAppAfterInit = createHook<[{ app: IAppInitialized }]>(APP_AFTER_INIT);
 export const onAppBeforeInit = createHook<[{ app: IAppInitialized }]>(APP_BEFORE_INIT);
+export const onSchemaViewsCreated = createHook<[{ views: IAppInitialized['views'] }]>(SCHEMA_VIEWS_CREATED);
 export const onSchemaModelsCreated =
     createHook<[{ app: IAppInitialized; models: Map<string, Model> }]>(SCHEMA_MODELS_CREATED);
 
@@ -81,4 +100,18 @@ export function filterOperations<T extends Action | Sublink>(
     };
     signals.emit(`<${getApp().store.page.view.path}>filter${capitalize(type)}`, obj);
     return obj[type] as T[];
+}
+
+type FilterOperationsCallbackArg<T extends 'actions' | 'sublinks'> = {
+    data?: RepresentData;
+    isListItem: boolean;
+} & (T extends 'actions' ? { actions: Action[] } : { sublinks: Sublink[] });
+
+export function onFilterOperations<T extends 'actions' | 'sublinks'>(
+    type: T,
+    path: string,
+    callback: (arg: FilterOperationsCallbackArg<T>) => void,
+) {
+    // @ts-expect-error Missing typing
+    signals.connect(`<${path}>filter${capitalize(type)}`, callback);
 }
