@@ -418,6 +418,16 @@ class Boto3Subsection(BackendSection):
         return key_uppercase
 
 
+class WebPushSection(BackendSection):
+    types_map = {
+        'enabled': ConfigBoolType,
+        'vapid_private_key': ConfigStringType,
+        'vapid_public_key': ConfigStringType,
+        'vapid_admin_email': ConfigStringType,
+        'default_notification_icon': ConfigStringType,
+    }
+
+
 class DjangoEnv(environ.Env):
     BOOLEAN_TRUE_STRINGS = environ.Env.BOOLEAN_TRUE_STRINGS + ('enable', 'ENABLE')
 
@@ -605,6 +615,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'throttle': ThrottleSection,
         'storages.boto3': Boto3Subsection,
         'uvicorn': UvicornSection,
+        'webpush': WebPushSection,
     },
     format_exclude_sections=('uwsgi',)
 )
@@ -1479,6 +1490,18 @@ STORAGES['default'] = {
 DOCKERRUN_MIGRATE_LOCK_ID = config['docker'].get('migrate_lock_id', VST_PROJECT_LIB_NAME)
 
 DOCKERRUN_MIGRATE_LOCK_TIMEOUT = config['docker'].getint('migrate_lock_timeout', 15)
+
+# WebPush settings
+##############################################################
+webpush_section = config['webpush']
+WEBPUSH_ENABLED: bool = webpush_section.get('enabled', False)
+WEBPUSH_PRIVATE_KEY: _t.Optional[str] = webpush_section.get('vapid_private_key', None)
+WEBPUSH_PUBLIC_KEY: _t.Optional[str] = webpush_section.get('vapid_public_key', None)
+WEBPUSH_SUB_EMAIL: _t.Optional[str] = webpush_section.get('vapid_admin_email', None)
+WEBPUSH_DEFAULT_NOTIFICATIONS_ICON: _t.Optional[str] = webpush_section.get('default_notification_icon', None)
+WEBPUSH_CREATE_USER_SETTINGS_VIEW = WEBPUSH_ENABLED
+WEBPUSH_USER_SETTINGS_VIEW_SUBPATH = 'push_notifications'
+
 
 # Test settings for speedup tests
 ##############################################################

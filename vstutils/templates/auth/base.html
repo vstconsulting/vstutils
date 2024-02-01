@@ -58,5 +58,11 @@
             document.getElementById('next').value = match.groups.next
         }
 
+        // Service worker may need to know that user is no longer signed in
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.getRegistration().then((registration) => {
+                registration.active.postMessage("authPageOpened");
+            });
+        }
     </script>
 {% endblock %}

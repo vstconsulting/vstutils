@@ -51,6 +51,7 @@ response_headers_to_pass = (
     "Location",
     "Pagination-Identifiers",
     "X-Query-Data",
+    "Webpush-Public-Key",
 )
 
 

@@ -1,6 +1,6 @@
-import type { Spec, Info, Schema } from 'swagger-schema-official';
+import type * as swagger from 'swagger-schema-official';
 import type { FieldDefinition } from './fields/FieldsResolver';
-import type { HttpMethod } from './utils';
+import { type HttpMethod } from './utils';
 
 declare global {
     interface Window {
@@ -26,7 +26,7 @@ export interface XMenuItem {
 
 export type XMenu = XMenuItem[];
 
-export interface AppInfo extends Info {
+export interface AppInfo extends swagger.Info {
     'x-settings': {
         static_path: string;
         login_url: string;
@@ -42,12 +42,16 @@ export interface AppInfo extends Info {
     'x-centrifugo-address'?: string;
     'x-centrifugo-token'?: string;
     'x-subscriptions-prefix': string;
+    'x-webpush'?: {
+        public_key: string;
+        user_settings_subpath: string | null;
+    };
     [key: string]: any;
 }
 
 export const MODEL_MODES = ['DEFAULT', 'STEP'] as const;
 
-export type ModelDefinition = Schema & {
+export type ModelDefinition = swagger.Schema & {
     properties?: Record<string, FieldDefinition>;
     'x-properties-groups'?: Record<string, string[]>;
     'x-view-field-name'?: string;
@@ -55,11 +59,21 @@ export type ModelDefinition = Schema & {
     'x-translate-model'?: string;
     'x-hide-not-required'?: boolean;
     'x-display-mode'?: typeof MODEL_MODES[number];
+    'x-visibility-data-field-name'?: string;
 };
 
-export interface AppSchema extends Spec {
+export interface Operation extends swagger.Operation {
+    'x-hidden'?: boolean;
+}
+
+export type Path = swagger.Path & {
+    [key in HttpMethod]?: Operation | undefined;
+};
+
+export interface AppSchema extends swagger.Spec {
     info: AppInfo;
     definitions: Record<string, ModelDefinition>;
+    paths: Record<string, Path>;
     [key: string]: any;
 }
 

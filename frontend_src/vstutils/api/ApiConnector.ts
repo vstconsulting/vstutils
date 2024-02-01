@@ -137,6 +137,7 @@ export class ApiConnector {
     headers: Record<string, string | null>;
     bulkCollector: BulkCollector = { bulkParts: [] };
     baseURL: string | null = null;
+    disableBulk = false;
     private _etagsCachePrefix: string | null = null;
     private _etagsCacheName: string | null = null;
 
@@ -187,7 +188,7 @@ export class ApiConnector {
     ): Promise<APIResponse<T>>;
     async makeRequest(req: MakeRequestParamsFetchRaw): Promise<Response>;
     async makeRequest<T = unknown>(req: MakeRequestParams): Promise<APIResponse<T> | Response> {
-        if (req.useBulk) {
+        if (req.useBulk && !this.disableBulk) {
             const realBulk: RealBulkRequest = {
                 method: req.method,
                 path: req.path,

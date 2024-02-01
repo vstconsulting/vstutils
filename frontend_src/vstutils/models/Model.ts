@@ -73,6 +73,7 @@ export class BaseModel implements Model {
     static additionalProperties?: Field | undefined;
     static additionalPropertiesGroup = '';
     static displayMode: typeof MODEL_MODES[number] = 'DEFAULT';
+    static visibilityDataFieldName?: string;
 
     _queryset?: QuerySet;
     _parentInstance?: Model;
@@ -391,5 +392,12 @@ export class BaseModel implements Model {
         }
         const instance = new this._c(data, this._queryset, this._parentInstance);
         return instance as this;
+    }
+
+    static getFieldsVisibilityData(data: RepresentData): Record<string, boolean | undefined> | undefined {
+        if (!this.visibilityDataFieldName) {
+            return undefined;
+        }
+        return data[this.visibilityDataFieldName] as Record<string, boolean | undefined> | undefined;
     }
 }

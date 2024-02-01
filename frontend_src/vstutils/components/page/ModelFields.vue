@@ -147,12 +147,14 @@
         return getModelFieldsInstancesGroups(model.value, data.value);
     });
 
+    const visibilityData = computed(() => props.model.getFieldsVisibilityData(props.data));
+
     const {
         hiddenFields,
         visibleFieldsGroups,
         hideField: _hideField,
         showField: _showField,
-    } = useHideableFieldsGroups(fieldsInstancesGroups, props);
+    } = useHideableFieldsGroups(fieldsInstancesGroups, { hideReadOnly: props.hideReadOnly, visibilityData });
 
     function showField(field: Field) {
         emit('set-value', { field: field.name, value: field.getInitialValue(), markChanged: true });

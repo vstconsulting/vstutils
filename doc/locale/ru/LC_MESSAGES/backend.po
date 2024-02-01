@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-12 06:04+0000\n"
+"POT-Creation-Date: 2024-02-01 05:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4078,6 +4078,7 @@ msgstr ""
 msgid "The body of the task executed by workers."
 msgstr "Тело задачи выполняется worker'ами."
 
+
 #: ../../backend.rst:162
 msgid "Endpoint"
 msgstr "Endpoint"
@@ -5503,6 +5504,109 @@ msgstr ""
 "Использует функцию :func:`django.utils.translation.get_language` для "
 "получения кода языка и пытается получить перевод из списка доступных."
 
+#: ../../backend.rst:414
+msgid "Integrating Web Push Notifications"
+msgstr "Интеграция Web Push-уведомлений"
+
+#: ../../backend.rst:416
+msgid ""
+"Web push notifications are an effective way to engage users with real-"
+"time messaging. To integrate web push notifications in your VSTUtils "
+"project, follow these steps:"
+msgstr ""
+"Web-уведомления - это эффективный способ взаимодействия с пользователями "
+"с помощью реального времени. Чтобы интегрировать web-уведомления в ваш "
+"проект VSTUtils, выполните следующие шаги:"
+
+#: ../../backend.rst:419
+msgid ""
+"**Configuration**: First, include the ``vstutils.webpush`` module in the "
+"``INSTALLED_APPS`` section of your ``settings.py`` file. This enables the"
+" web push functionality provided by VSTUtils. Additionally, configure the"
+" necessary settings as described in the web push settings section (see "
+":ref:`here<webpush-settings>` for details)."
+msgstr ""
+"**Конфигурация**: Во-первых, включите модуль ``vstutils.webpush`` в "
+"разделе ``INSTALLED_APPS`` вашего файла ``settings.py``. Это позволяет "
+"использовать функциональность web-уведомлений, предоставляемую VSTUtils. "
+"Кроме того, настройте необходимые параметры, как описано в разделе "
+"настроек web-уведомлений (см. :ref:`здесь<webpush-settings>` для "
+"подробностей)."
+
+#: ../../backend.rst:422
+msgid ""
+"**Creating Notifications**: To create a web push notification, you need "
+"to define a class that inherits from either "
+":class:`vstutils.webpush.BaseWebPush` or "
+":class:`vstutils.webpush.BaseWebPushNotification`. VSTUtils automatically"
+" detects and utilizes web push classes defined in the ``webpushes`` "
+"module of all ``INSTALLED_APPS``. Below is an example that illustrates "
+"how to implement custom web push classes:"
+msgstr ""
+"**Создание уведомлений**: Чтобы создать web-уведомление, вам нужно "
+"определить класс, который наследуется от "
+":class:`vstutils.webpush.BaseWebPush` или "
+":class:`vstutils.webpush.BaseWebPushNotification`. VSTUtils автоматически"
+" обнаруживает и использует классы web-уведомлений, определенные в модуле "
+"``webpushes`` всех ``INSTALLED_APPS``. Ниже приведен пример, "
+"иллюстрирующий, как реализовать пользовательские классы web-уведомлений:"
+
+#: ../../backend.rst:432
+msgid "This example contains three classes:"
+msgstr "Этот пример содержит три класса:"
+
+#: ../../backend.rst:434
+msgid "`TestWebPush`: Sends notifications to all subscribed users."
+msgstr "`TestWebPush`: Отправляет уведомления всем подписанным пользователям."
+
+#: ../../backend.rst:435
+msgid "`TestNotification`: Targets notifications to specific users."
+msgstr "`TestNotification`: Направляет уведомления конкретным пользователям."
+
+#: ../../backend.rst:436
+msgid ""
+"`StaffOnlyNotification`: Restricts notifications to staff users only. "
+"Sometimes you may want to allow only some users to subscribe on specific "
+"notifications."
+msgstr ""
+"`StaffOnlyNotification`: Ограничивает уведомления только для сотрудников."
+" Иногда вы можете хотеть разрешить подписку на конкретные уведомления "
+"только некоторым пользователям."
+
+#: ../../backend.rst:438
+msgid ""
+"**Sending Notifications**: To dispatch a web push notification, invoke "
+"the ``send`` or ``send_in_task`` method on an instance of your web push "
+"class. For instance, to send a notification using `TestNotification`, you"
+" can do the following:"
+msgstr ""
+"**Отправка уведомлений**: Чтобы отправить web-уведомление, вызовите метод"
+" ``send`` или ``send_in_task`` на экземпляре вашего класса "
+"web-уведомления. Например, чтобы отправить уведомление с использованием "
+"`TestNotification`, вы можете сделать следующее:"
+
+#: ../../backend.rst:453
+msgid ""
+"The asynchronous sending of web push notifications (using methods like "
+"``send_in_task``) requires a configured Celery setup in your project, as "
+"it relies on Celery tasks \"under the hood\". Ensure that Celery is "
+"properly set up and running to utilize asynchronous notification "
+"dispatching."
+msgstr ""
+"Асинхронная отправка web-уведомлений (с использованием методов, таких как"
+" ``send_in_task``) требует настроенной конфигурации Celery в вашем "
+"проекте, поскольку она полагается на задачи Celery \"под капотом\". "
+"Убедитесь, что Celery правильно настроен и работает, чтобы использовать "
+"асинхронную отправку уведомлений."
+
+#: ../../backend.rst:458
+msgid ""
+"By following these steps, you can fast integrate and utilize web push "
+"notifications in projects with VSTUtils."
+msgstr ""
+"Следуя этим шагам, вы быстро сможете интегрировать и использовать "
+"web-уведомления в проектах с VSTUtils."
+
 #~ msgid "prefetch values on frontend at list-view. Default is ``False``."
 #~ msgstr ""
 #~ "делает prefetch значений на фронтенде в"
@@ -5830,4 +5934,3 @@ msgstr ""
 #~ "rest-framework.org/api-guide/serializers/#serializers>`_ "
 #~ "как создавать сериализаторы и работать с"
 #~ " ними."
-

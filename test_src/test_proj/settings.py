@@ -4,6 +4,7 @@ from vstutils.settings import *
 INSTALLED_APPS += [
     'test_proj',
     'test_apps',
+    'vstutils.webpush',
 ]
 
 MIDDLEWARE.append('vstutils.middleware.TimezoneHeadersMiddleware')
@@ -168,3 +169,5 @@ DOCKER_DATABASES_TO_MIGRATE = ('primary1',)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.BasicAuthentication',)
+
+WEBPUSH_USER_SETTINGS_VIEW_SUBPATH = 'custom_path'

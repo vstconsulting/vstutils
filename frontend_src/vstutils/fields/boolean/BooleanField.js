@@ -54,7 +54,6 @@ class BooleanField extends BaseField {
 
     /**
      * Redefinition of base guiField static property 'mixins'.
-     * @private
      */
     static get mixins() {
         return [BooleanFieldMixin];

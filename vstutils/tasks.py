@@ -156,6 +156,9 @@ class SendEmailMessage(TaskClass):
     """
     ignore_result = True
 
+    # Message context usually contains language object witch is not serializable by msgpack.
+    serializer = 'pickle'
+
     def run(self, *args, **kwargs):
         try:
             send_template_email_handler(*args, **kwargs)
