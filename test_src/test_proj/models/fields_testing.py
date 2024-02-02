@@ -71,7 +71,7 @@ class PropertyAuthorSerializer(BaseSerializer):
     phone = PhoneField(allow_null=True, required=False)
 
 
-@actions.SimpleAction(serializer_class=PropertyAuthorSerializer, atomic=True)
+@actions.SimpleAction(serializer_class=PropertyAuthorSerializer, atomic=True, require_confirmation=True)
 def simple_property_action(self, request, *args, **kwargs):
     """
     Simple property description
@@ -95,6 +95,7 @@ def simple_property_action(self, instance, request, *args, **kwargs):
     query_serializer=PropertyAuthorSerializer,
     title='Get query',
     icons='fas fa-pen',
+    require_confirmation=True,
 )
 def simple_property_action_with_query(self, request, query_data, *args, **kwargs):
     instance = self.get_object()
@@ -160,7 +161,7 @@ class Author(BModel):
             "author_profile": actions.SimpleAction(
                 name='author_profile',
                 methods=["get", "put", "delete"],
-                serializer_class=AuthorProfileSerializer
+                serializer_class=AuthorProfileSerializer,
             )(),
             "check_named_response_as_result_serializer": actions.Action(
                 serializer_class=PhoneBookSerializer,

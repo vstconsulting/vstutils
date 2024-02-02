@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-    import type { Location } from 'vue-router';
+    import type { RawLocation } from 'vue-router';
     import { useRoute } from 'vue-router/composables';
     import type { PaginationItem } from '@/vstutils/store';
 
@@ -50,10 +50,9 @@
         }
     }
 
-    function location(page: number): Location {
+    function location(page: number): RawLocation {
         return {
-            ...route,
-            name: route.name || undefined,
+            path: route.path,
             query: { ...route.query, page: page.toString() },
         };
     }

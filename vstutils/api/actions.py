@@ -76,6 +76,7 @@ class Action:
     :param icons: List of icons for UI button.
     :param is_list: Flag indicating whether the action type is a list or a single entity.
                     Typically used with GET actions.
+    :param require_confirmation: If true user will be asked to confirm action execution on frontend.
     :param kwargs: Set of named arguments for :func:`rest_framework.decorators.action`.
 
     """
@@ -91,6 +92,7 @@ class Action:
         'icons',
         'is_list',
         'hidden',
+        'require_confirmation',
     )
     method_response_mapping = {
         "HEAD": HTTP_200_OK,
@@ -113,6 +115,7 @@ class Action:
         icons=None,
         is_list=False,
         hidden=False,
+        require_confirmation=False,
         **kwargs,
     ):
         # pylint: disable=too-many-arguments
@@ -126,6 +129,7 @@ class Action:
         self.icons = icons
         self.is_list = is_list
         self.hidden = hidden
+        self.require_confirmation = require_confirmation
         self.action_kwargs = kwargs
         self.action_kwargs.setdefault('pagination_class', SimpleCountedListPagination if is_list else None)
         if self.query_serializer:
@@ -157,6 +161,8 @@ class Action:
             swagger_kwargs['x-icons'] = self.icons.split(' ') if isinstance(self.icons, str) else list(self.icons)
         if self.is_page:
             swagger_kwargs['x-list'] = self.is_list
+        if self.require_confirmation:
+            swagger_kwargs['x-require-confirmation'] = True
 
         res = swagger_auto_schema(**swagger_kwargs)(res)
         res.action = self

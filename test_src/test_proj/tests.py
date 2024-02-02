@@ -2308,6 +2308,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(api['paths'][path]['get']['description'], 'Simple property description')
         self.assertNotIn('x-title', api['paths'][path]['get'])
         self.assertEqual(len(api['paths'][path]['get']['parameters']), 0)
+        self.assertEqual(api['paths'][path]['patch']['x-require-confirmation'], True)
 
         path = '/author/{id}/simple_property_action_with_query/'
         self.assertCount(api['paths'][path], 2)
