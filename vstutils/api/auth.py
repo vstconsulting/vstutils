@@ -17,6 +17,7 @@ from vstutils.api.serializers import VSTSerializer, BaseSerializer, update_decla
 from vstutils.api.models import TwoFactor, RecoveryCode, UserSettings
 from vstutils.utils import raise_context_decorator_with_default, translate, lazy_translate as __
 from vstutils.webpush.api import create_webpush_settings_action
+from vstutils.webpush.autodiscovery import get_web_pushes_classes
 
 User: _t.Type[AbstractUser] = get_user_model()
 
@@ -341,7 +342,7 @@ class UserViewSet(base.ModelViewSet):
         return responses.HTTP_200_OK(serializer.data)
 
 
-if settings.WEBPUSH_CREATE_USER_SETTINGS_VIEW:
+if settings.WEBPUSH_CREATE_USER_SETTINGS_VIEW and len(get_web_pushes_classes()) > 0:
     setattr(
         UserViewSet,
         settings.WEBPUSH_USER_SETTINGS_VIEW_SUBPATH,
