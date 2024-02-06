@@ -22,7 +22,7 @@ from .signals import before_mount_app
 if not apps.apps_ready:
     django.setup(set_prefix=False)  # nocv
 
-static_app = FastAPI(root_path=settings.STATIC_URL, openapi_url=None, docs_url=None, redoc_url=None)
+static_app = FastAPI(openapi_url=None, docs_url=None, redoc_url=None)
 static_app.add_middleware(GZipMiddleware)
 
 application = FastAPI(openapi_url=None, docs_url=None, redoc_url=None)

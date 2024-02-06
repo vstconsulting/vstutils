@@ -771,7 +771,7 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
         response = fclient.get('/static/bundle/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 404, response.content)
         response = fclient.get('/static/bundle/output.json')
         self.assertEqual(response.status_code, 200)
         response = fclient.get('/media/test.txt')

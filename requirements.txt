@@ -8,15 +8,15 @@ djangorestframework~=3.14.0
 drf-yasg==1.21.7
 django-filter==23.5
 drf_orjson_renderer==1.7.1
-ormsgpack~=1.4.1
+ormsgpack~=1.4.2
 pyyaml~=6.0.1
 
 # web server
-uvicorn~=0.25.0
+uvicorn~=0.27.0post1
 pyuwsgi==2.0.23.post0
 # Restore it if some problems with pyuwsgi
 # uwsgi==2.0.23
-fastapi~=0.108.0
+fastapi~=0.109.2
 aiofiles==23.2.1
 
 # Notifications
