@@ -95,6 +95,7 @@ async function setupAppNotifications(app: IApp, view: PageEditView) {
     if (!notificationSettingsViewPath) {
         return;
     }
+    view.parent!.useViewFieldAsTitle = false;
     const qs = view.objects.clone({ url: formatPath(notificationSettingsViewPath, { id: 'profile' }) });
     const notificationsSettings = await qs.get(undefined);
 
