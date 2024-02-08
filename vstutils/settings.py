@@ -172,7 +172,7 @@ class WebSection(BaseAppendSection):
         'cors_allow_all_origins': ConfigBoolType,
         'cors_allowed_credentials': ConfigBoolType,
         'cors_allowed_origins': ConfigListType,
-        'cors_allowed_origins_regexes': ConfigListType,
+        'cors_allowed_origins_regex': ConfigStringType,
         'cors_expose_headers': ConfigListType,
         'cors_allow_methods': ConfigListType,
         'cors_allow_headers': ConfigListType,
@@ -272,6 +272,7 @@ class CacheSection(BackendSection):
 class CacheOptionsSection(BackendSection):
     parent: BaseAppendSection
     types_map = {
+        'connect_on_start': ConfigBoolType,
         'binary': ConfigBoolType,
         'no_delay': ConfigBoolType,
         'ignore_exc': ConfigBoolType,
@@ -350,7 +351,7 @@ class RPCSection(BaseAppendSection):
         'prefetch_multiplier': ConfigIntType,
         'max_tasks_per_child': ConfigIntType,
         'heartbeat': ConfigIntType,
-        'results_expiry_days': ConfigIntType,
+        'results_expiry': ConfigIntSecondsType,
         'create_instance_attempts': ConfigIntType,
         'enable_worker': ConfigBoolType,
         'task_send_sent_event': ConfigBoolType,
@@ -417,6 +418,16 @@ class Boto3Subsection(BackendSection):
         return key_uppercase
 
 
+class WebPushSection(BackendSection):
+    types_map = {
+        'enabled': ConfigBoolType,
+        'vapid_private_key': ConfigStringType,
+        'vapid_public_key': ConfigStringType,
+        'vapid_admin_email': ConfigStringType,
+        'default_notification_icon': ConfigStringType,
+    }
+
+
 class DjangoEnv(environ.Env):
     BOOLEAN_TRUE_STRINGS = environ.Env.BOOLEAN_TRUE_STRINGS + ('enable', 'ENABLE')
 
@@ -443,6 +454,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'ldap-server': env.str(f'{ENV_NAME}_LDAP_CONNECTION', default=None),
             'ldap-default-domain': env.str(f'{ENV_NAME}_LDAP_DOMAIN', default=''),
             'ldap-auth_format': env.str(f'{ENV_NAME}_LDAP_AUTH_FORMAT', default='cn=<username>,<domain>'),
+            'ldap-search-scope': env.str(f'{ENV_NAME}_LDAP_SEARCH_SCOPE', default='ONELEVEL'),
             'language_cookie_name': env.str(f'{ENV_NAME}_LANGUAGE_COOKIE_NAME', default='lang'),
             'agreement_terms_path': env.str(f'{ENV_NAME}_TERMS_PATH', default=f'/etc/{VST_PROJECT_LIB}/terms.md'),
             'consent_to_processing_path': env.str(
@@ -453,7 +465,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'allow_cors': env.bool(f'{ENV_NAME}_WEB_ALLOW_CORS', default=False),
             'cors_allowed_credentials': env.bool(f'{ENV_NAME}_WEB_CORS_ALLOWED_CREDENTIALS', default=False),
             'cors_allowed_origins': env.list(f'{ENV_NAME}_WEB_CORS_ALLOWED_ORIGINS', default=[]),
-            'cors_allowed_origins_regexes': env.list(f'{ENV_NAME}_WEB_CORS_ALLOWED_ORIGINS_REGEXES', default=[]),
+            'cors_allowed_origins_regex': env.str(f'{ENV_NAME}_WEB_CORS_ALLOWED_ORIGINS_REGEX', default=''),
             'cors_expose_headers': env.list(f'{ENV_NAME}_WEB_CORS_EXPOSE_HEADERS', default=[]),
             'cors_preflight_max_age': env.str(f'{ENV_NAME}_WEB_CORS_PREFLIGHT_MAX_AGE', default='1d'),
             'session_timeout': env.str(f"{ENV_NAME}_SESSION_TIMEOUT", default='2w'),
@@ -536,7 +548,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'prefetch_multiplier': env.int(f'{ENV_NAME}_RPC_PREFETCH_MULTIPLIER', default=1),
             'max_tasks_per_child': env.int(f'{ENV_NAME}_RPC_MAX_TASKS_PER_CHILD', default=1),
             'heartbeat': env.int(f'{ENV_NAME}_RPC_HEARTBEAT', default=10),
-            'results_expiry_days': env.int(f'{ENV_NAME}_RPC_RESULTS_EXPIRY_DAYS', default=1),
+            'results_expiry': env.int(f'{ENV_NAME}_RPC_RESULTS_EXPIRY', default=24 * 60 * 60),
             'create_instance_attempts': env.int(f'{ENV_NAME}_RPC_CREATE_INSTANCE_ATTEMPTS', default=10),
             'default_delivery_mode': "persistent",
             'broker_transport_options': {},
@@ -603,6 +615,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'throttle': ThrottleSection,
         'storages.boto3': Boto3Subsection,
         'uvicorn': UvicornSection,
+        'webpush': WebPushSection,
     },
     format_exclude_sections=('uwsgi',)
 )
@@ -732,7 +745,7 @@ MAX_TFA_ATTEMPTS: int = web['max_tfa_attempts']
 CORS_ORIGIN_ALLOW_ALL: bool = web['allow_cors']
 CORS_ALLOWED_ORIGINS: _t.Sequence[str] = web['cors_allowed_origins']
 CORS_ALLOWED_CREDENTIALS: bool = web['cors_allowed_credentials']
-CORS_ALLOWED_ORIGIN_REGEXES: _t.Sequence[_t.Union[str, _t.Pattern[str]]] = web['cors_allowed_origins_regexes'] or None
+CORS_ALLOWED_ORIGIN_REGEX: _t.Union[str, _t.Pattern[str]] = web['cors_allowed_origins_regex'] or None
 CORS_EXPOSE_HEADERS: _t.Sequence = web['cors_expose_headers']
 CORS_PREFLIGHT_MAX_AGE: int = web['cors_preflight_max_age']
 if 'cors_allow_methods' in web:
@@ -743,6 +756,7 @@ if 'cors_allow_headers' in web:
 LDAP_SERVER: _t.Optional[_t.Text] = main["ldap-server"]
 LDAP_DOMAIN: _t.Optional[_t.Text] = main["ldap-default-domain"]
 LDAP_FORMAT: _t.Text = main["ldap-auth_format"]
+LDAP_SEARCH_SCOPE: _t.Text = main["ldap-search-scope"]
 
 DEFAULT_AUTH_PLUGINS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     'LDAP': {
@@ -1048,11 +1062,7 @@ SWAGGER_SETTINGS: _t.Dict = {
         'vstutils.api.schema.renderers.OpenAPIRenderer',
     ],
     'DEEP_LINKING': True,
-    'SECURITY_DEFINITIONS': {
-        'basic': {
-            'type': 'basic'
-        }
-    },
+    'SECURITY_DEFINITIONS': {},
     'LOGIN_URL': 'login',
     'LOGOUT_URL': 'logout',
 }
@@ -1234,9 +1244,9 @@ if RPC_ENABLED:
     CELERYD_PREFETCH_MULTIPLIER = rpc["prefetch_multiplier"]
     CELERYD_MAX_TASKS_PER_CHILD = rpc["max_tasks_per_child"]
     CELERY_BROKER_HEARTBEAT = rpc["heartbeat"]
-    CELERY_ACCEPT_CONTENT = ['pickle', 'json']
-    CELERY_TASK_SERIALIZER = 'pickle'
-    CELERY_RESULT_EXPIRES = rpc["results_expiry_days"]
+    CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack']
+    CELERY_TASK_SERIALIZER = 'msgpack'
+    CELERY_RESULT_EXPIRES = rpc["results_expiry"]
     CELERY_SEND_SENT_EVENT = rpc["task_send_sent_event"]
     CELERY_SEND_EVENTS = rpc["worker_send_task_events"]
     CELERY_DEFAULT_DELIVERY_MODE = rpc["default_delivery_mode"]
@@ -1480,6 +1490,18 @@ STORAGES['default'] = {
 DOCKERRUN_MIGRATE_LOCK_ID = config['docker'].get('migrate_lock_id', VST_PROJECT_LIB_NAME)
 
 DOCKERRUN_MIGRATE_LOCK_TIMEOUT = config['docker'].getint('migrate_lock_timeout', 15)
+
+# WebPush settings
+##############################################################
+webpush_section = config['webpush']
+WEBPUSH_ENABLED: bool = webpush_section.get('enabled', False)
+WEBPUSH_PRIVATE_KEY: _t.Optional[str] = webpush_section.get('vapid_private_key', None)
+WEBPUSH_PUBLIC_KEY: _t.Optional[str] = webpush_section.get('vapid_public_key', None)
+WEBPUSH_SUB_EMAIL: _t.Optional[str] = webpush_section.get('vapid_admin_email', None)
+WEBPUSH_DEFAULT_NOTIFICATIONS_ICON: _t.Optional[str] = webpush_section.get('default_notification_icon', None)
+WEBPUSH_CREATE_USER_SETTINGS_VIEW = WEBPUSH_ENABLED
+WEBPUSH_USER_SETTINGS_VIEW_SUBPATH = 'push_notifications'
+
 
 # Test settings for speedup tests
 ##############################################################

@@ -46,5 +46,5 @@ class MsgpackRenderer(BaseRenderer):
         Renders *obj* into serialized MessagePack.
         """
         if data is None:
-            return ''  # nocv
+            return b''  # nocv
         return ormsgpack.packb(data, default=ORJSONRenderer.default, option=self.options)

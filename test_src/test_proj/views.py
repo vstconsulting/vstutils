@@ -70,7 +70,11 @@ HiddenOnFrontendHostsViewSet = create_view(
     Host,
     hidden=True,
     extra_view_attributes={
-        'empty_action': Action(name='hidden_action', hidden=True)(lambda *a, **k: None),
+        'empty_action': Action(
+            name='hidden_action',
+            hidden=True,
+            require_confirmation=True,
+        )(lambda *a, **k: None),
     }
 )
 

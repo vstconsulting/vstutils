@@ -20,7 +20,14 @@ as BModel provides plenty of Meta attributes to autogenerate serializers and vie
     :members: register_view_action
 
 
-You can also use custom models without using database:
+Vstutils supports models that don't necessitate direct database interaction or aren't inherently tied to database tables.
+These models exhibit diverse behaviors, such as fetching data directly from class attributes, loading data from files,
+or implementing custom data retrieval mechanisms.
+Remarkably, there are models that, in a sense, implement the mechanism of SQL views with pre-defined queries.
+This flexibility allows developers to define a wide range of models that cater to specific data needs,
+from in-memory models to those seamlessly integrating external data sources.
+Vstutils' model system is not confined to traditional database-backed structures,
+providing a versatile foundation for crafting various data representations.
 
 .. automodule:: vstutils.models.custom_model
     :members: ListModel,FileModel,ExternalCustomModel,ViewCustomModel
@@ -57,10 +64,17 @@ Serializers
 ~~~~~~~~~~~
 
 .. automodule:: vstutils.api.serializers
-    :members: BaseSerializer,VSTSerializer,EmptySerializer,JsonObjectSerializer
+    :members: DisplayMode,BaseSerializer,VSTSerializer,EmptySerializer,JsonObjectSerializer
 
 Views
 ~~~~~
+VSTUtils extends the standard behavior of ViewSets from Django REST Framework (DRF) by providing
+built-in mechanisms for managing model views that cater to the most commonly encountered development patterns.
+This framework enhancement simplifies the process of creating robust and scalable web applications by offering
+a rich set of tools and utilities that automate much of the boilerplate code required in API development.
+Through these extensions, developers can easily implement custom business logic, data validation,
+and access control with minimal effort, thus significantly reducing development time and improving code maintainability.
+
 
 .. automodule:: vstutils.api.base
     :members: GenericViewSet,ModelViewSet,ReadOnlyModelViewSet,HistoryModelViewSet,CopyMixin,FileResponseRetrieveMixin
@@ -68,6 +82,27 @@ Views
 .. automodule:: vstutils.api.decorators
     :members: nested_view,subaction
 
+-------------
+
+**An ETag** (Entity Tag) is a mechanism defined by the HTTP protocol for web cache validation and to manage resource versions efficiently.
+It represents a unique identifier for the content of a resource at a given time, allowing client and server to determine
+if the resource has changed without downloading the entire content.
+This mechanism significantly reduces bandwidth and improves web performance by enabling conditional requests.
+Servers send ETags in responses to clients, which can cache these tags along with the resources.
+On subsequent requests, clients send the cached ETag back to the server in an If-None-Match header.
+If the resource has not changed (the ETag matches), the server responds with a 304 Not Modified status, indicating that the client's cached version is up-to-date.
+
+Beyond GET requests, ETags can also be instrumental in other HTTP methods like PUT or DELETE to ensure consistency
+and prevent unintended overwrites or deletions, known as "mid-air collision avoidance."
+By including an ETag in the If-Match header of non-GET requests, clients signal that the operation should proceed only
+if the resource's current state matches the specified ETag, thus safeguarding against concurrent modifications by different clients.
+This application of ETags enhances the reliability and integrity of web applications by ensuring that operations are performed on the correct version of a resource.
+
+Here is main functionality provided for working with ETag's mechanism:
+
+
+.. automodule:: vstutils.api.base
+    :members: CachableHeadMixin,check_request_etag,get_etag_value,EtagDependency
 
 Actions
 ~~~~~~~
@@ -399,3 +434,53 @@ Vstutils uses mosts of these functions under the hood.
 
 .. automodule:: vstutils.utils
     :members:
+
+
+.. _webpush-manual:
+
+Integrating Web Push Notifications
+----------------------------------
+
+Web push notifications are an effective way to engage users with real-time messaging.
+To integrate web push notifications in your VSTUtils project, follow these steps:
+
+1. **Configuration**: First, include the ``vstutils.webpush`` module in the ``INSTALLED_APPS`` section of your ``settings.py`` file.
+   This enables the web push functionality provided by VSTUtils. Additionally,
+   configure the necessary settings as described in the web push settings section (see :ref:`here<webpush-settings>` for details).
+2. **Creating Notifications**: To create a web push notification, you need to define a class that inherits from
+   either :class:`vstutils.webpush.BaseWebPush` or :class:`vstutils.webpush.BaseWebPushNotification`.
+   VSTUtils automatically detects and utilizes web push classes defined in the ``webpushes`` module of all ``INSTALLED_APPS``.
+   Below is an example that illustrates how to implement custom web push classes:
+
+
+   .. literalinclude:: ../test_src/test_proj/webpushes.py
+       :language: python
+       :linenos:
+
+   This example contains three classes:
+
+   - `TestWebPush`: Sends notifications to all subscribed users.
+   - `TestNotification`: Targets notifications to specific users.
+   - `StaffOnlyNotification`: Restricts notifications to staff users only. Sometimes you may want to allow only some users to subscribe on specific notifications.
+
+3. **Sending Notifications**: To dispatch a web push notification, invoke the ``send`` or ``send_in_task``
+   method on an instance of your web push class. For instance, to send a notification using `TestNotification`,
+   you can do the following:
+
+   .. code-block:: python
+
+       from test_proj.webpushes import TestNotification
+
+       # Sending a notification immediately (synchronously)
+       TestNotification(name='Some user', user_id=1).send()
+
+       # Sending a notification as a background task (asynchronously)
+       TestNotification.send_in_task(name='Some user', user_id=1)
+
+.. warning::
+   The asynchronous sending of web push notifications (using methods like ``send_in_task``) requires a configured Celery setup
+   in your project, as it relies on Celery tasks "under the hood".
+   Ensure that Celery is properly set up and running to utilize asynchronous notification dispatching.
+
+
+By following these steps, you can fast integrate and utilize web push notifications in projects with VSTUtils.

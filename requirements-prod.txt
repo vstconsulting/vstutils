@@ -3,3 +3,5 @@
 # mysql-connector-python==8.0.15; python_version>'3.4'
 # Advanced cache support
 redis[hiredis]~=5.0.1
+tarantool~=1.1.2
+pywebpush~=1.14.1

@@ -83,7 +83,6 @@ Throughout this tutorial, we’ll go through a creation of a basic poll applicat
     .. sourcecode::
 
        /{{app_dir}}/{{app_name}}
-        ├── .coveragerc
         ├── frontend_src
         │   ├── app
         │   │   └── index
@@ -92,11 +91,10 @@ Throughout this tutorial, we’ll go through a creation of a basic poll applicat
         │   └── .prettierrc
         ├── MANIFEST.in
         ├── package.json
-        ├── .pep8
         ├── README.rst
         ├── requirements-test.txt
         ├── requirements.txt
-        ├── setup.cfg
+        ├── pyproject.toml
         ├── setup.py
         ├── {{app_name}}
         │   ├── __init__.py
@@ -120,7 +118,7 @@ Throughout this tutorial, we’ll go through a creation of a basic poll applicat
     * **README.rst** - default README file for your application (this file includes base commands for starting/stopping your application);
     * **requirements-test.txt** - file with list of requirements for test environment;
     * **requirements.txt** - file with list of requirements for your application;
-    * **setup.cfg** - this file is used for building installation package;
+    * **pyproject.toml** - this file is used for building installation package;
     * **setup.py** - this file is used for building installation package;
     * **test.py** - this file is used for tests creation;
     * **tox.ini** - this file is used for tests execution;

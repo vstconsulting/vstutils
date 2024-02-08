@@ -1,5 +1,5 @@
 include README.rst LICENSE
-include setup.cfg
+include pyproject.toml
 include requirements.txt
 recursive-include {{project_name}}/*/templates *
 recursive-include {{project_name}}/templates *

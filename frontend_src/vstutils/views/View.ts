@@ -297,7 +297,7 @@ export abstract class BaseView<
      * Method that returns Vue component for view
      * @return {Object}
      */
-    getComponent(): ComponentOptions<Vue> | typeof Vue {
+    getComponent(): ComponentOptions<Vue> | typeof Vue | Component {
         // If we provide `this` in `data` directly then `view` will become Vue component
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const thisView = this;

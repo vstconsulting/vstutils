@@ -36,6 +36,7 @@ import * as utils from '@/vstutils/utils';
 import type { IView, BaseView } from '@/vstutils/views';
 import { ListView, PageNewView, PageView, ViewsTree } from '@/vstutils/views';
 import ViewConstructor from '@/vstutils/views/ViewConstructor.js';
+import { setupPushNotifications } from '@/vstutils/webpush';
 
 import type { Cache } from '@/cache';
 import type { InnerData } from '@/vstutils/utils';
@@ -222,6 +223,8 @@ export class App implements IApp {
         this.localSettingsModel = null;
 
         this.actions = new ActionsManager(this);
+
+        setupPushNotifications(this);
 
         signals.emit(APP_CREATED, this);
     }

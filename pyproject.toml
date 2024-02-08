@@ -98,6 +98,7 @@ omit = [
     '*/vstutils/compile.py',
     '*/vstutils/api/admin.py',
     '*/vstutils/api/doc_generator.py',
+    '*/vstutils/drivers/*',
 ]
 
 [tool.coverage.report]
@@ -154,5 +155,8 @@ module = [
     "ruamel.*",
     "mysql.*",
     "configparserc.*",
+    "kombu.*",
+    "tarantool.*",
+    "pywebpush.*",
 ]
 ignore_missing_imports = true

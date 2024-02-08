@@ -1,38 +1,47 @@
 [tox]
-envlist = py36-build,py{38}-wheel
+envlist = py38-build,py31{1,2}-wheel
 skipsdist = True
 
 [testenv]
 passenv = *
 setenv =
-  CCACHE_DIR = {envdir}/.ccache
-  DONT_YARN = false
-  BUILD_COMPILE = true
-changedir = .
-whitelist_externals =
+    CCACHE_DIR = {envdir}/.ccache
+    DONT_YARN = false
+    build: BUILD_OPTIMIZATION=false
+    build: DONT_YARN=true
+    NOT_COMPRESS = 1
+    wheel: BUILD_OPTIMIZATION=true
+changedir = {envdir}
+allowlist_externals =
     rm
     ls
     grep
     bash
+    yarn
 commands =
-  rm -rf build
-  build: python setup.py compile -v
-  wheel: python setup.py bdist_wheel -v
+    rm -rf {toxinidir}/build
+    # Uncomment this strings if you're using custom frontend
+    # build: bash -ec 'cd {toxinidir} && yarn install --pure-lockfile && yarn build'
+    build: python -m build --sdist --wheel --no-isolation --skip-dependency-check --outdir {toxinidir}/dist {toxinidir}
+    wheel: python -m build --wheel --no-isolation --skip-dependency-check --outdir {toxinidir}/dist {toxinidir}
 deps =
-  cython>=0.29.2
-  wheel==0.31.1
-  setuptools>=40.6.3
-  jsmin~=3.0.0
-  csscompressor==0.9.5
+    cython>=3.0.5
+    build~=1.0.3
+    wheel==0.41.3
+    setuptools>=61.2.0
+    -rrequirements-doc.txt
+    jsmin~=3.0.0
+    csscompressor==0.9.5
+    vstcompile~=2.0
 
 [testenv:auditwheel]
-basepython = python3.6
-whitelist_externals =
+basepython = python3.11
+allowlist_externals =
     bash
     grep
     rm
     ls
 commands =
-    bash -c "for whl in `ls dist/*.whl | grep -v manylinux`; do auditwheel repair --plat manylinux2014_x86_64 $whl -w dist/; rm $whl; done"
+    bash -c "for whl in `ls {toxinidir}/dist/*.whl | grep -v manylinux | grep linux`; do auditwheel repair --plat manylinux2014_x86_64 $whl -w {toxinidir}/dist/; rm $whl; done"
 deps =
-    auditwheel
+    auditwheel~=5.4.0

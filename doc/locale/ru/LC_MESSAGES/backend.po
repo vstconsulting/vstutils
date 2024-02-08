@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-25 04:56+0000\n"
+"POT-Creation-Date: 2024-02-08 03:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.13.1\n"
+"Generated-By: Babel 2.14.0\n"
 
 #: ../../backend.rst:2
 msgid "Backend API manual"
@@ -62,8 +62,9 @@ msgstr ""
 
 #: of vstutils.api.actions.Action:5 vstutils.api.actions.EmptyAction:9
 #: vstutils.api.actions.SimpleAction:20 vstutils.api.base.ModelViewSet:31
-#: vstutils.api.fields.FkField:44 vstutils.models.BModel:162
-#: vstutils.models.BModel:187 vstutils.models.custom_model.FileModel:22
+#: vstutils.api.fields.DeepFkField:37 vstutils.api.fields.FkField:37
+#: vstutils.models.BModel:162 vstutils.models.BModel:187
+#: vstutils.models.custom_model.FileModel:20
 #: vstutils.models.custom_model.ListModel:16
 #: vstutils.models.custom_model.ListModel:35
 msgid "Examples:"
@@ -315,9 +316,10 @@ msgstr ""
 "вложенного view, kwargs для декоратора "
 ":class:`vstutils.api.decorators.nested_view`, но поддерживает атрибут "
 "``model`` в качестве вложенного). ``model`` может быть строкой для "
-"импорта. Используйте параметр ``override_params`` в тех случаях, когда необходимо перегрузить"
-"параметры генерируемого представления в качестве вложенного (работает только когда задан ``model`` "
-"как вложенное представление)."
+"импорта. Используйте параметр ``override_params`` в тех случаях, когда "
+"необходимо перегрузить параметры генерируемого представления в качестве "
+"вложенного (работает только когда задан ``model`` как вложенное "
+"представление)."
 
 #: of vstutils.models.BModel:123
 msgid ""
@@ -404,8 +406,8 @@ msgid ""
 "Django Rest Framework (DRF) Generic ViewSets. It allows developers to "
 "define and customize various aspects of the associated DRF view class."
 msgstr ""
-"Метод ``get_view_class()`` — это служебный метод в ORM Django "
-"моделях, предназначенный для облегчения настройки и создания экземпляров"
+"Метод ``get_view_class()`` — это служебный метод в ORM Django моделях, "
+"предназначенный для облегчения настройки и создания экземпляров "
 "представлений Django Rest Framework (DRF). Это позволяет разработчикам "
 "определить и настроить различные аспекты класса представления DRF."
 
@@ -416,10 +418,11 @@ msgid ""
 " backends, permission classes, etc. It uses attributes declared in meta "
 "attributes, but allows individual parts to be overriden."
 msgstr ""
-"Разработчики могут использовать этот метод для изменения различных аспектов "
-"получаемого представления, таких как классы сериализаторов, конфигурацию полей, фильтры,"
-"классы разрешений и т.п. Этот метод использует такие же атрибуты, которые были объявлены"
-"в мета-атрибутах, но позволяет перегружать отдельные части."
+"Разработчики могут использовать этот метод для изменения различных "
+"аспектов получаемого представления, таких как классы сериализаторов, "
+"конфигурацию полей, фильтры,классы разрешений и т.п. Этот метод "
+"использует такие же атрибуты, которые были объявлены в мета-атрибутах, но"
+" позволяет перегружать отдельные части."
 
 #: ../../docstring of vstutils.models.BModel.hidden:1
 msgid "If hidden is set to True, entry will be excluded from query in BQuerySet."
@@ -485,91 +488,365 @@ msgstr ""
 msgid ""
 "Decorator for turning model methods to generated view `actions "
 "<https://www.django-rest-framework.org/api-guide/viewsets/#marking-extra-"
-"actions-for-routing>`_. The decorated method becomes a method of "
-"generated view and `self` is an view object. See supported args in "
-":func:`vstutils.api.decorators.subaction`."
+"actions-for-routing>`_. When a method is decorated, it becomes a part of "
+"the generated view and the `self` reference within the method points to "
+"the view object. This allows you to extend the functionality of generated"
+" views with custom actions."
 msgstr ""
-"Декоратор, позволяющий обратить методы модели в сгенерированные `экшены "
+"Декоратор для превращения методов модели в сгенерированные view `экшены "
 "<https://www.django-rest-framework.org/api-guide/viewsets/#marking-extra-"
-"actions-for-routing>`_ view. Декорированный метод становится методом "
-"сгенерированного view, где `self` - объект view. Смотрите поддерживаемые "
-"аргументы в :func:`vstutils.api.decorators.subaction`."
+"actions-for-routing>`_. Когда метод декорируется, он становится частью "
+"сгенерированного view, и ссылка `self` внутри метода указывает на объект "
+"view. Это позволяет расширять функциональность сгенерированных view с "
+"помощью пользовательских экшенов."
 
 #: of vstutils.models.decorators.register_view_action:7
 msgid ""
-"Sometimes you may need to use proxy models with a common set of actions. "
-"To receive the action by the proxy model, pass the named argument "
-"``inherit`` with ``True`` value."
+"The `register_view_action` decorator supports various arguments, and you "
+"can refer to the documentation for "
+":func:`vstutils.api.decorators.subaction` to explore the complete list of"
+" supported arguments. These arguments provide flexibility in defining the"
+" behavior and characteristics of the generated view actions."
 msgstr ""
-"Возможно вам потребуется использовать прокси-модели со стандартным "
-"набором экшенов. Чтобы получить экшен прокси-модели, передайте "
-"именованный аргумент ``inherit`` со значением ``True``."
+"Декоратор `register_view_action` поддерживает различные аргументы, и вы "
+"можете обратиться к документации для "
+":func:`vstutils.api.decorators.subaction`, чтобы изучить полный список "
+"поддерживаемых аргументов. Эти аргументы предоставляют гибкость в "
+"определении поведения и характеристик сгенерированных экшенов view."
 
-#: of vstutils.models.decorators.register_view_action:11
+#: of vstutils.models.decorators.register_view_action:12
 msgid ""
-"Often, an action does not transfer any parameters and requires only "
-"sending an empty query. To speed up development, we set the default "
-"serializer to :class:`vstutils.api.serializers.EmptySerializer`."
+"In scenarios where you're working with proxy models that share a common "
+"set of actions, you can use the `inherit` named argument with a value of "
+"`True`. This allows the proxy model to inherit actions defined in the "
+"base model, reducing redundancy and promoting code reuse."
 msgstr ""
-"Часто экшен не должен передавать никаких параметров, отправляя вместо "
-"этого пустой запрос. Чтобы ускорить разработку, мы установили "
-"сериализатор :class:`vstutils.api.serializers.EmptySerializer`. по "
-"умолчанию."
+"В сценариях, где вы работаете с прокси-моделями, использующими общий "
+"набор действий, вы можете использовать именованный аргумент `inherit` со "
+"значением `True`. Это позволяет прокси-модели наследовать действия, "
+"определенные в базовой модели, сокращая избыточность и способствуя "
+"повторному использованию кода."
 
-#: ../../backend.rst:23
-msgid "You can also use custom models without using database:"
-msgstr "Вы также можете использовать модели, не нуждающиеся в базе данных:"
-
-#: of vstutils.models.custom_model.ExternalCustomModel:1
+#: of vstutils.models.decorators.register_view_action:18
 msgid ""
-"This custom model is intended for self-implementation of requests to "
-"external services. The model allows you to pass filtering, limiting and "
-"sorting parameters to an external request, receiving already limited "
-"data."
+"In many cases, an action may not require any parameters and can be "
+"executed by sending an empty query. To streamline development and enhance"
+" efficiency, the `register_view_action` decorator sets the default "
+"serializer to :class:`vstutils.api.serializers.EmptySerializer`. This "
+"means that the action expects no input data, making it convenient for "
+"actions that operate without additional parameters."
 msgstr ""
-"Данная кастомная модель предназначена для самостоятельной реализации "
-"запросов к внешним сервисам. Модель позволяет вам передавать параметры "
-"фильтрации, лимитирования и сортировки к внешним запросам, получая уже "
-"ограниченные данные."
-
-#: of vstutils.models.custom_model.ExternalCustomModel:5
-msgid ""
-"To start using this model, it is enough to implement the "
-"``get_data_generator()`` class method, which receives the query object "
-"with the necessary parameters as an argument."
-msgstr ""
-"Чтобы начать использовать эту модель, достаточно реализовать метод класса"
-" ``get_data_generator()``, который получает объект запроса с необходимыми"
-" параметрами, как аргумент."
-
-#: of vstutils.models.custom_model.FileModel:1
-msgid ""
-"Custom model which loads data from YAML-file instead of database. Path to"
-" the file stored in `FileModel.file_path` attribute."
-msgstr ""
-"Модель, загружающая данные из YAML-файла вместо базы данных. Путь до "
-"файла хранится в атрибуте `FileModel.file_path`."
-
-#: of vstutils.models.custom_model.FileModel:6
-msgid "Source file stored in `/etc/authors.yaml` with content:"
-msgstr ""
-"Исходный файл хранится в `/etc/authors.yaml` вместе со следующим "
-"содержимым:"
+"Во многих случаях действие может не требовать параметров и может быть "
+"выполнено, отправив пустой запрос. Для упрощения разработки и повышения "
+"эффективности декоратор `register_view_action` устанавливает сериализатор"
+" по умолчанию на :class:`vstutils.api.serializers.EmptySerializer`. Это "
+"означает, что действие не ожидает входных данных, что удобно для "
+"действий, которые работают без дополнительных параметров."
 
 #: of vstutils.api.base.FileResponseRetrieveMixin:3
 #: vstutils.api.decorators.nested_view:37
+#: vstutils.api.fields.AutoCompletionField:28
+#: vstutils.api.fields.Barcode128Field:24
+#: vstutils.api.fields.CommaMultiSelect:20
+#: vstutils.api.fields.DependFromFkField:54
+#: vstutils.api.fields.DynamicJsonTypeField:40 vstutils.api.fields.HtmlField:25
+#: vstutils.api.fields.MaskedField:23
+#: vstutils.api.fields.NamedBinaryFileInJsonField:32
+#: vstutils.api.fields.PhoneField:19 vstutils.api.fields.QrCodeField:27
+#: vstutils.api.fields.TextareaField:20 vstutils.api.fields.UptimeField:14
+#: vstutils.api.fields.WYSIWYGField:19
 #: vstutils.api.filter_backends.DeepViewFilterBackend:25
 #: vstutils.api.filter_backends.VSTFilterBackend:22
 #: vstutils.api.filters.FkFilterHandler:15
+#: vstutils.api.serializers.BaseSerializer:12
+#: vstutils.api.serializers.VSTSerializer:10
 #: vstutils.middleware.BaseMiddleware:38
-#: vstutils.models.custom_model.FileModel:13 vstutils.tasks.TaskClass:4
-#: vstutils.utils.BaseEnum:4 vstutils.utils.Lock:35
+#: vstutils.models.decorators.register_view_action:24
+#: vstutils.tasks.TaskClass:4 vstutils.utils.BaseEnum:4 vstutils.utils.Lock:35
 #: vstutils.utils.ObjectHandlers:31 vstutils.utils.SecurePickling:22
 #: vstutils.utils.URLHandlers:10 vstutils.utils.apply_decorators:18
 #: vstutils.utils.classproperty:20 vstutils.utils.create_view:17
 #: vstutils.utils.raise_context_decorator_with_default:19
 msgid "Example:"
 msgstr "Пример:"
+
+#: of vstutils.models.decorators.register_view_action:26
+msgid ""
+"This example demonstrates how to use the decorator to create a custom "
+"action within a model view. The ``empty_action`` method becomes part of "
+"the generated view and expects no input parameters."
+msgstr ""
+"В этом примере показано, как использовать декоратор для создания "
+"пользовательского действия в представлении модели. Метод ``empty_action``"
+" становится частью сгенерированного view и не ожидает входных параметров."
+
+#: ../../backend.rst:23
+msgid ""
+"Vstutils supports models that don't necessitate direct database "
+"interaction or aren't inherently tied to database tables. These models "
+"exhibit diverse behaviors, such as fetching data directly from class "
+"attributes, loading data from files, or implementing custom data "
+"retrieval mechanisms. Remarkably, there are models that, in a sense, "
+"implement the mechanism of SQL views with pre-defined queries. This "
+"flexibility allows developers to define a wide range of models that cater"
+" to specific data needs, from in-memory models to those seamlessly "
+"integrating external data sources. Vstutils' model system is not confined"
+" to traditional database-backed structures, providing a versatile "
+"foundation for crafting various data representations."
+msgstr ""
+"Vstutils поддерживает модели, которые не требуют прямого взаимодействия с"
+" базой данных или не являются непосредственно таблицами в базе. Эти "
+"модели проявляют разнообразные поведения, такие как извлечение данных "
+"непосредственно из атрибутов класса, загрузка данных из файлов или "
+"реализация собственных механизмов получения данных. Замечательно, что "
+"существуют модели, которые, в каком-то смысле, реализуют механизм SQL "
+"представлений с предопределенными запросами. Эта гибкость позволяет "
+"разработчикам определять широкий спектр моделей, от моделей, существующих"
+" только в памяти, до тех, которые без проблем интегрируют внешние "
+"источники данных. Система моделей Vstutils не ограничивается "
+"традиционными структурами, поддерживаемыми базой данных, предоставляя "
+"гибкое основание для создания различных представлений данных."
+
+#: of vstutils.models.custom_model.ExternalCustomModel:1
+msgid ""
+"Represents a custom model designed for the self-implementation of "
+"requests to external services."
+msgstr ""
+"Представляет собой кастомную модель, предназначенную для самостоятельной "
+"реализации запросов ко внешним сервисам."
+
+#: of vstutils.models.custom_model.ExternalCustomModel:3
+msgid ""
+"This model facilitates the seamless interaction with external services by"
+" allowing the passing of filtering, limiting, and sorting parameters to "
+"an external request. It is designed to receive data that is already "
+"filtered and limited."
+msgstr ""
+"Данная кастомная модель облегчает взаимодействие с внешними сервисами, "
+"позволяя передавать параметры фильтрации, лимитирования и сортировки во "
+"внешний запрос. Она предназначена для получения данных, которые уже "
+"отфильтрованы и ограничены."
+
+#: of vstutils.models.custom_model.ExternalCustomModel:7
+msgid ""
+"To utilize this model effectively, developers need to implement the "
+"``get_data_generator()`` class method. This method receives a query "
+"object containing the necessary parameters, enabling developers to "
+"customize interactions with external services."
+msgstr ""
+"Для эффективного использования этой модели разработчики должны "
+"реализовать метод класса ``get_data_generator()``. Этот метод получает "
+"объект запроса с необходимыми параметрами, позволяя разработчикам "
+"настраивать взаимодействие с внешними сервисами."
+
+#: of vstutils.models.custom_model.ExternalCustomModel:11
+msgid "**Example:**"
+msgstr "**Пример:**"
+
+#: of vstutils.models.custom_model.ExternalCustomModel.get_data_generator:1
+msgid ""
+"This class method must be implemented by derived classes to define custom"
+" logic for fetching data from an external service based on the provided "
+"query parameters."
+msgstr ""
+"Этот метод класса должен быть реализован в производных классах для "
+"определения пользовательской логики извлечения данных из внешнего сервиса"
+" на основе предоставленных параметров запроса."
+
+#: of vstutils.models.custom_model.ExternalCustomModel.get_data_generator:4
+msgid "Query object might contain the following parameters:"
+msgstr "Объект запроса может содержать следующие параметры:"
+
+#: of vstutils.models.custom_model.ExternalCustomModel.get_data_generator:6
+msgid "filter (dict): A dictionary specifying the filtering criteria."
+msgstr "filter (dict): Словарь, задающий критерии фильтрации."
+
+#: of vstutils.models.custom_model.ExternalCustomModel.get_data_generator:7
+msgid "exclude (dict): A dictionary specifying the exclusion criteria."
+msgstr "exclude (dict): Словарь, задающий критерии исключения."
+
+#: of vstutils.models.custom_model.ExternalCustomModel.get_data_generator:8
+msgid "order_by (list): A list specifying the sorting order."
+msgstr "order_by (list): Список, задающий порядок сортировки."
+
+#: of vstutils.models.custom_model.ExternalCustomModel.get_data_generator:9
+msgid "low_mark (int): The low index for slicing (if sliced)."
+msgstr "low_mark (int): Нижний индекс для среза (если задан срез)."
+
+#: of vstutils.models.custom_model.ExternalCustomModel.get_data_generator:10
+msgid "high_mark (int): The high index for slicing (if sliced)."
+msgstr "high_mark (int): Верхний индекс для среза (если задан срез)."
+
+#: of vstutils.models.custom_model.ExternalCustomModel.get_data_generator:11
+msgid "is_sliced (bool): A boolean indicating whether the query is sliced."
+msgstr "is_sliced (bool): Булево значение, указывающее, является ли запрос срезом."
+
+#: of vstutils.api.actions.Action
+#: vstutils.api.base.GenericViewSet.create_action_serializer
+#: vstutils.api.base.GenericViewSet.get_query_serialized_data
+#: vstutils.api.base.check_request_etag vstutils.api.base.get_etag_value
+#: vstutils.api.decorators.nested_view vstutils.api.decorators.subaction
+#: vstutils.api.endpoint.EndpointViewSet.get
+#: vstutils.api.endpoint.EndpointViewSet.get_client
+#: vstutils.api.endpoint.EndpointViewSet.operate
+#: vstutils.api.endpoint.EndpointViewSet.post
+#: vstutils.api.endpoint.EndpointViewSet.put
+#: vstutils.api.fields.AutoCompletionField vstutils.api.fields.Barcode128Field
+#: vstutils.api.fields.BinFileInStringField vstutils.api.fields.CSVFileField
+#: vstutils.api.fields.CommaMultiSelect vstutils.api.fields.DeepFkField
+#: vstutils.api.fields.DependEnumField vstutils.api.fields.DependFromFkField
+#: vstutils.api.fields.DynamicJsonTypeField
+#: vstutils.api.fields.FileInStringField vstutils.api.fields.FkField
+#: vstutils.api.fields.FkModelField vstutils.api.fields.MaskedField
+#: vstutils.api.fields.MultipleNamedBinaryImageInJsonField
+#: vstutils.api.fields.NamedBinaryFileInJsonField
+#: vstutils.api.fields.NamedBinaryImageInJsonField
+#: vstutils.api.fields.QrCodeField vstutils.api.fields.RatingField
+#: vstutils.api.fields.RedirectFieldMixin vstutils.api.fields.RelatedListField
+#: vstutils.api.fields.SecretFileInString vstutils.api.fields.WYSIWYGField
+#: vstutils.api.filters.FkFilterHandler vstutils.api.filters.extra_filter
+#: vstutils.api.filters.name_filter vstutils.api.responses.BaseResponseClass
+#: vstutils.api.validators.FileMediaTypeValidator
+#: vstutils.api.validators.ImageBaseSizeValidator
+#: vstutils.api.validators.ImageHeightValidator
+#: vstutils.api.validators.ImageOpenValidator
+#: vstutils.api.validators.ImageResolutionValidator
+#: vstutils.api.validators.ImageValidator
+#: vstutils.api.validators.ImageWidthValidator
+#: vstutils.api.validators.RegularExpressionValidator
+#: vstutils.api.validators.UrlQueryStringValidator
+#: vstutils.api.validators.resize_image
+#: vstutils.api.validators.resize_image_from_to
+#: vstutils.middleware.BaseMiddleware.get_response_handler
+#: vstutils.middleware.BaseMiddleware.handler
+#: vstutils.middleware.BaseMiddleware.request_handler
+#: vstutils.models.custom_model.ExternalCustomModel.get_data_generator
+#: vstutils.tests.BaseTestCase.assertCheckDict
+#: vstutils.tests.BaseTestCase.assertCount
+#: vstutils.tests.BaseTestCase.assertRCode vstutils.tests.BaseTestCase.bulk
+#: vstutils.tests.BaseTestCase.bulk_transactional
+#: vstutils.tests.BaseTestCase.call_registration
+#: vstutils.tests.BaseTestCase.details_test
+#: vstutils.tests.BaseTestCase.endpoint_call
+#: vstutils.tests.BaseTestCase.endpoint_schema
+#: vstutils.tests.BaseTestCase.get_count
+#: vstutils.tests.BaseTestCase.get_model_class
+#: vstutils.tests.BaseTestCase.get_model_filter
+#: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.list_test
+#: vstutils.tests.BaseTestCase.patch_field_default
+#: vstutils.tests.BaseTestCase.user_as
+#: vstutils.utils.BaseVstObject.get_django_settings vstutils.utils.Executor
+#: vstutils.utils.Executor.aexecute vstutils.utils.Executor.execute
+#: vstutils.utils.Executor.post_execute vstutils.utils.Executor.pre_execute
+#: vstutils.utils.Executor.working_handler vstutils.utils.Executor.write_output
+#: vstutils.utils.Lock vstutils.utils.ModelHandlers
+#: vstutils.utils.ModelHandlers.get_object vstutils.utils.ObjectHandlers
+#: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers
+#: vstutils.utils.URLHandlers.get_object vstutils.utils.UnhandledExecutor
+#: vstutils.utils.classproperty vstutils.utils.create_view
+#: vstutils.utils.decode vstutils.utils.deprecated vstutils.utils.encode
+#: vstutils.utils.get_render vstutils.utils.lazy_translate
+#: vstutils.utils.list_to_choices vstutils.utils.send_template_email
+#: vstutils.utils.send_template_email_handler vstutils.utils.tmp_file
+#: vstutils.utils.tmp_file.write vstutils.utils.translate
+msgid "Parameters"
+msgstr "Параметры"
+
+#: of vstutils.models.custom_model.ExternalCustomModel.get_data_generator:14
+msgid "An object containing filtering, limiting, and sorting parameters."
+msgstr "Объект, содержащий параметры фильтрации, лимитирования и сортировки."
+
+#: of vstutils.api.base.GenericViewSet.create_action_serializer
+#: vstutils.api.base.check_request_etag vstutils.api.base.get_etag_value
+#: vstutils.api.filters.extra_filter vstutils.api.filters.name_filter
+#: vstutils.api.validators.resize_image
+#: vstutils.api.validators.resize_image_from_to
+#: vstutils.middleware.BaseMiddleware.handler
+#: vstutils.middleware.BaseMiddleware.request_handler
+#: vstutils.models.custom_model.ExternalCustomModel.get_data_generator
+#: vstutils.models.custom_model.ViewCustomModel.get_view_queryset
+#: vstutils.tests.BaseTestCase.bulk
+#: vstutils.tests.BaseTestCase.bulk_transactional
+#: vstutils.tests.BaseTestCase.endpoint_call
+#: vstutils.tests.BaseTestCase.get_count
+#: vstutils.tests.BaseTestCase.get_model_class
+#: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.get_url
+#: vstutils.utils.BaseVstObject.get_django_settings
+#: vstutils.utils.Executor.aexecute vstutils.utils.Executor.execute
+#: vstutils.utils.Executor.write_output vstutils.utils.ModelHandlers.get_object
+#: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
+#: vstutils.utils.decode vstutils.utils.encode vstutils.utils.get_render
+#: vstutils.utils.list_to_choices vstutils.utils.send_template_email_handler
+#: vstutils.utils.tmp_file.write
+msgid "Returns"
+msgstr "Возвращает"
+
+#: of vstutils.models.custom_model.ExternalCustomModel.get_data_generator:17
+msgid "A generator that yields the requested data."
+msgstr "Генератор, возвращающий запрошенные данные."
+
+#: of vstutils.api.base.GenericViewSet.create_action_serializer
+#: vstutils.api.base.get_etag_value vstutils.api.endpoint.EndpointViewSet.get
+#: vstutils.api.endpoint.EndpointViewSet.get_client
+#: vstutils.api.endpoint.EndpointViewSet.get_serializer
+#: vstutils.api.endpoint.EndpointViewSet.get_serializer_context
+#: vstutils.api.endpoint.EndpointViewSet.operate
+#: vstutils.api.endpoint.EndpointViewSet.post
+#: vstutils.api.endpoint.EndpointViewSet.put vstutils.api.filters.extra_filter
+#: vstutils.api.filters.name_filter vstutils.api.validators.resize_image
+#: vstutils.api.validators.resize_image_from_to
+#: vstutils.middleware.BaseMiddleware.get_response_handler
+#: vstutils.middleware.BaseMiddleware.handler
+#: vstutils.middleware.BaseMiddleware.request_handler
+#: vstutils.models.custom_model.ExternalCustomModel.get_data_generator
+#: vstutils.models.custom_model.ViewCustomModel.get_view_queryset
+#: vstutils.tasks.TaskClass.do vstutils.tests.BaseTestCase.bulk
+#: vstutils.tests.BaseTestCase.bulk_transactional
+#: vstutils.tests.BaseTestCase.endpoint_call
+#: vstutils.tests.BaseTestCase.get_count
+#: vstutils.tests.BaseTestCase.get_model_class
+#: vstutils.tests.BaseTestCase.get_model_filter
+#: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.get_url
+#: vstutils.tests.BaseTestCase.patch
+#: vstutils.tests.BaseTestCase.patch_field_default
+#: vstutils.tests.BaseTestCase.random_name vstutils.utils.Executor.write_output
+#: vstutils.utils.ModelHandlers.get_object
+#: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
+#: vstutils.utils.create_view vstutils.utils.decode vstutils.utils.encode
+#: vstutils.utils.get_render vstutils.utils.tmp_file.write
+msgid "Return type"
+msgstr "Тип возвращаемого значения"
+
+#: of vstutils.api.validators.RegularExpressionValidator
+#: vstutils.models.custom_model.ExternalCustomModel.get_data_generator
+#: vstutils.models.custom_model.ViewCustomModel.get_view_queryset
+msgid "Raises"
+msgstr "Выбрасывает"
+
+#: of vstutils.models.custom_model.ExternalCustomModel.get_data_generator:20
+#: vstutils.models.custom_model.ViewCustomModel.get_view_queryset:7
+msgid "If the method is not implemented by the derived class."
+msgstr "Если метод не реализован в производном классе."
+
+#: of vstutils.models.custom_model.FileModel:1
+msgid ""
+"Custom model that loads data from a YAML file instead of a database. The "
+"path to the file is specified in the `FileModel.file_path` attribute."
+msgstr ""
+"Кастомная модель, загружающая данные из YAML-файла вместо базы данных. "
+"Путь к файлу указывается в атрибуте `FileModel.file_path`."
+
+#: of vstutils.models.custom_model.FileModel:5
+msgid ""
+"Suppose the source file is stored at `/etc/authors.yaml` with the "
+"following content:"
+msgstr ""
+"Предположим, что исходный файл хранится в `/etc/authors.yaml` со "
+"следующим содержимым:"
+
+#: of vstutils.models.custom_model.FileModel:12
+msgid "You can create a custom model using this file:"
+msgstr "Вы можете создать кастомную модель, используя этот файл:"
 
 #: of vstutils.models.custom_model.ListModel:1
 msgid ""
@@ -604,21 +881,48 @@ msgstr ""
 "`setup_custom_queryset_kwargs`, и каждый последующий вызов в цепочке "
 "методов будет работать с этими данными."
 
-#: ../../docstring of vstutils.models.custom_model.ListModel.data:1
+#: of vstutils.api.base.ModelViewSet vstutils.api.responses.BaseResponseClass
+#: vstutils.models.custom_model.ListModel
+msgid "Variables"
+msgstr "Переменные"
+
+#: of vstutils.models.custom_model.ListModel:40
 msgid "List with data dicts. Empty by default."
 msgstr "Список кортежей данных. Пустой по умолчанию."
 
 #: of vstutils.models.custom_model.ViewCustomModel:1
-msgid ""
-"This model implements the SQL View programming mechanism over other "
-"models. In the ``get_view_queryset()`` method, a query is prepared, and "
-"all further actions are implemented on top of it."
-msgstr ""
-"Эта модель реализует механизм программирования SQL View над другими "
-"моделями. В методе ``get_view_queryset()`` подготавливается запрос, и все"
-" остальные действия осуществляются поверх него."
+msgid "Implements the SQL View programming mechanism over other models."
+msgstr "Реализует механизм программирования SQL View над другими моделями."
 
-#: ../../backend.rst:29
+#: of vstutils.models.custom_model.ViewCustomModel:3
+msgid ""
+"This model provides a mechanism for implementing SQL View-like behavior "
+"over other models. In the ``get_view_queryset()`` method, a base query is"
+" prepared, and all further actions are implemented on top of it."
+msgstr ""
+"Эта модель предоставляет механизм для реализации поведения, аналогичного "
+"SQL View, над другими моделями. В методе ``get_view_queryset()`` "
+"подготавливается базовый запрос, и все последующие действия реализуются "
+"поверх него."
+
+#: of vstutils.models.custom_model.ViewCustomModel:7
+msgid "**Example Usage:**"
+msgstr "**Примеры:**"
+
+#: of vstutils.models.custom_model.ViewCustomModel.get_view_queryset:1
+msgid ""
+"This class method must be implemented by derived classes to define custom"
+" logic for generating the base queryset for the SQL View."
+msgstr ""
+"Этот метод класса должен быть реализован в производных классах для "
+"определения пользовательской логики создания базового queryset для SQL "
+"View."
+
+#: of vstutils.models.custom_model.ViewCustomModel.get_view_queryset:4
+msgid "The base queryset for the SQL View."
+msgstr "Базовый queryset для SQL View."
+
+#: ../../backend.rst:36
 msgid "Model Fields"
 msgstr "Поля Модели"
 
@@ -782,11 +1086,11 @@ msgstr ""
 ":class:`django.db.models.TextField`, поэтому не поддерживает индексацию и"
 " не рекомендовано для использования в фильтрах."
 
-#: ../../backend.rst:36
+#: ../../backend.rst:43
 msgid "Web API"
 msgstr "Веб-API"
 
-#: ../../backend.rst:38
+#: ../../backend.rst:45
 msgid ""
 "Web API is based on Django Rest Framework with additional nested "
 "functions."
@@ -794,11 +1098,11 @@ msgstr ""
 "Веб-API основано на Django Rest Framework. Предоставляет дополнительные "
 "вложенные функции."
 
-#: ../../backend.rst:41
+#: ../../backend.rst:48
 msgid "Fields"
 msgstr "Поля"
 
-#: ../../backend.rst:43
+#: ../../backend.rst:50
 msgid ""
 "The Framework includes a list of convenient serializer fields. Some of "
 "them take effect only in generated admin interface."
@@ -815,157 +1119,134 @@ msgstr ""
 
 #: of vstutils.api.fields.AutoCompletionField:1
 msgid ""
-"Field that provides autocompletion on frontend, using specified list of "
-"objects."
+"Serializer field that provides autocompletion on the frontend, using a "
+"specified list of objects."
 msgstr ""
-"Поле, предоставляющее автодополнение на фронтенде. Использует указанный "
-"список объектов."
-
-#: of vstutils.api.actions.Action
-#: vstutils.api.base.GenericViewSet.create_action_serializer
-#: vstutils.api.base.GenericViewSet.get_query_serialized_data
-#: vstutils.api.decorators.nested_view vstutils.api.decorators.subaction
-#: vstutils.api.endpoint.EndpointViewSet.get
-#: vstutils.api.endpoint.EndpointViewSet.get_client
-#: vstutils.api.endpoint.EndpointViewSet.operate
-#: vstutils.api.endpoint.EndpointViewSet.post
-#: vstutils.api.endpoint.EndpointViewSet.put
-#: vstutils.api.fields.AutoCompletionField vstutils.api.fields.Barcode128Field
-#: vstutils.api.fields.BinFileInStringField vstutils.api.fields.CSVFileField
-#: vstutils.api.fields.CommaMultiSelect vstutils.api.fields.DeepFkField
-#: vstutils.api.fields.DependEnumField vstutils.api.fields.DependFromFkField
-#: vstutils.api.fields.DynamicJsonTypeField
-#: vstutils.api.fields.FileInStringField vstutils.api.fields.FkField
-#: vstutils.api.fields.FkModelField vstutils.api.fields.MaskedField
-#: vstutils.api.fields.MultipleNamedBinaryImageInJsonField
-#: vstutils.api.fields.NamedBinaryImageInJsonField
-#: vstutils.api.fields.QrCodeField vstutils.api.fields.RatingField
-#: vstutils.api.fields.RedirectFieldMixin vstutils.api.fields.RelatedListField
-#: vstutils.api.fields.SecretFileInString vstutils.api.fields.WYSIWYGField
-#: vstutils.api.filters.FkFilterHandler vstutils.api.filters.extra_filter
-#: vstutils.api.filters.name_filter vstutils.api.responses.BaseResponseClass
-#: vstutils.api.validators.FileMediaTypeValidator
-#: vstutils.api.validators.ImageBaseSizeValidator
-#: vstutils.api.validators.ImageHeightValidator
-#: vstutils.api.validators.ImageOpenValidator
-#: vstutils.api.validators.ImageResolutionValidator
-#: vstutils.api.validators.ImageValidator
-#: vstutils.api.validators.ImageWidthValidator
-#: vstutils.api.validators.RegularExpressionValidator
-#: vstutils.api.validators.UrlQueryStringValidator
-#: vstutils.api.validators.resize_image
-#: vstutils.api.validators.resize_image_from_to
-#: vstutils.middleware.BaseMiddleware.get_response_handler
-#: vstutils.middleware.BaseMiddleware.handler
-#: vstutils.middleware.BaseMiddleware.request_handler
-#: vstutils.tests.BaseTestCase.assertCheckDict
-#: vstutils.tests.BaseTestCase.assertCount
-#: vstutils.tests.BaseTestCase.assertRCode vstutils.tests.BaseTestCase.bulk
-#: vstutils.tests.BaseTestCase.bulk_transactional
-#: vstutils.tests.BaseTestCase.call_registration
-#: vstutils.tests.BaseTestCase.details_test
-#: vstutils.tests.BaseTestCase.endpoint_call
-#: vstutils.tests.BaseTestCase.endpoint_schema
-#: vstutils.tests.BaseTestCase.get_count
-#: vstutils.tests.BaseTestCase.get_model_class
-#: vstutils.tests.BaseTestCase.get_model_filter
-#: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.list_test
-#: vstutils.tests.BaseTestCase.patch_field_default
-#: vstutils.tests.BaseTestCase.user_as
-#: vstutils.utils.BaseVstObject.get_django_settings vstutils.utils.Executor
-#: vstutils.utils.Executor.aexecute vstutils.utils.Executor.execute
-#: vstutils.utils.Executor.post_execute vstutils.utils.Executor.pre_execute
-#: vstutils.utils.Executor.working_handler vstutils.utils.Executor.write_output
-#: vstutils.utils.Lock vstutils.utils.ModelHandlers
-#: vstutils.utils.ModelHandlers.get_object vstutils.utils.ObjectHandlers
-#: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers
-#: vstutils.utils.URLHandlers.get_object vstutils.utils.UnhandledExecutor
-#: vstutils.utils.classproperty vstutils.utils.create_view
-#: vstutils.utils.decode vstutils.utils.deprecated vstutils.utils.encode
-#: vstutils.utils.get_render vstutils.utils.lazy_translate
-#: vstutils.utils.list_to_choices vstutils.utils.send_template_email
-#: vstutils.utils.send_template_email_handler vstutils.utils.tmp_file
-#: vstutils.utils.tmp_file.write vstutils.utils.translate
-msgid "Parameters"
-msgstr "Параметры"
+"Поле сериализатора, обеспечивающее автодополнение на фронтенде с "
+"использованием указанного списка объектов."
 
 #: of vstutils.api.fields.AutoCompletionField:3
 msgid ""
-"Autocompletion reference. You can set list/tuple with values or set "
-"OpenAPI schema definition name. For definition name GUI will find optimal"
-" link and will show values based on ``autocomplete_property`` and "
-"``autocomplete_represent`` arguments."
+"Autocompletion reference. You can set a list or tuple with values or "
+"specify the name of an OpenAPI schema definition. For a definition name, "
+"the GUI will find the optimal link and display values based on the "
+"``autocomplete_property`` and ``autocomplete_represent`` arguments."
 msgstr ""
-"Источник для автодополнения. Можно задать список/кортеж со значениями или"
-" definition name в схеме OpenAPI. Для definition пользовательский "
-"интерфейс найдет оптимальную ссылку и отобразит значения, основанные на "
-"аргументах ``autocomplete_property`` и ``autocomplete_represent``."
+"Ссылка для автодополнения. Можно установить список или кортеж с "
+"значениями или указать имя определения схемы OpenAPI. Для имени "
+"определения, GUI найдет оптимальную ссылку и отобразит значения на основе"
+" аргументов ``autocomplete_property`` и ``autocomplete_represent``."
 
 #: of vstutils.api.fields.AutoCompletionField:9
 msgid ""
-"this argument indicates which attribute will be get from OpenAPI schema "
-"definition model as value."
+"Specifies which attribute to retrieve from the OpenAPI schema definition "
+"model as the value. Default is 'id'."
 msgstr ""
-"этот аргумент указывает, какие атрибуты будут взяты из model definition "
-"схемы OpenAPI в качестве используемого значения."
+"Указывает, какой атрибут из модели определения схемы OpenAPI использовать"
+" в качестве значения. По умолчанию 'id'."
 
-#: of vstutils.api.fields.AutoCompletionField:12
+#: of vstutils.api.fields.AutoCompletionField:13
 msgid ""
-"this argument indicates which attribute will be get from OpenAPI schema "
-"definition model as represent value."
+"Specifies which attribute to retrieve from the OpenAPI schema definition "
+"model as the representational value. Default is 'name'."
 msgstr ""
-"этот аргумент указывает, какие атрибуты будут взяты из model definition "
-"схемы OpenAPI в качестве отображаемого значения."
+"Указывает, какой атрибут из модели определения схемы OpenAPI использовать"
+" в качестве представленного значения. По умолчанию 'name'."
 
-#: of vstutils.api.fields.AutoCompletionField:14 vstutils.api.fields.FkField:16
-#: vstutils.api.fields.FkModelField:14
-msgid "prefetch values on frontend at list-view. Default is ``True``."
+#: of vstutils.api.fields.AutoCompletionField:16
+msgid "Prefetch values on the frontend in list view. Default is ``True``."
 msgstr ""
-"делает prefetch для значений на фронтенде в list-view. ``True`` по "
-"умолчанию."
+"Загружать значения на фронтенде в режиме просмотра списка. Значение по "
+"умолчанию — ``True``."
 
-#: of vstutils.api.fields.AutoCompletionField:18
-#: vstutils.api.fields.BinFileInStringField:8
-#: vstutils.api.fields.CommaMultiSelect:22 vstutils.api.fields.HtmlField:7
-#: vstutils.api.fields.NamedBinaryFileInJsonField:18
-#: vstutils.api.fields.TextareaField:4
-msgid "Effective only in GUI. Works similar to :class:`.VSTCharField` in API."
+#: of vstutils.api.fields.AutoCompletionField:20
+#: vstutils.api.fields.BinFileInStringField:10
+msgid ""
+"This functionality is effective only in the GUI. In the API, it behaves "
+"similarly to :class:`.VSTCharField`."
 msgstr ""
-"Действует только в графическом интерфейсе. Работает аналогично "
-":class:`.VSTCharField` в API."
+"Эта функциональность работает только в графическом интерфейсе. В API она "
+"ведет себя так же, как и :class:`.VSTCharField`."
+
+#: of vstutils.api.fields.AutoCompletionField:45
+msgid "Usage:"
+msgstr "Использование:"
+
+#: of vstutils.api.fields.AutoCompletionField:23
+msgid ""
+"This field is designed to be used in serializers where a user needs to "
+"input a value, and autocompletion based on a predefined list or an "
+"OpenAPI schema definition is desired. If an OpenAPI schema is specified, "
+"two additional parameters, ``autocomplete_property`` and "
+"``autocomplete_represent``, can be configured to customize the appearance"
+" of the dropdown list."
+msgstr ""
+"Это поле предназначено для использования в сериализаторах, где "
+"пользователь должен ввести значение, и требуется автодополнение на основе"
+" предопределенного списка или определения схемы OpenAPI. Если указана "
+"схема OpenAPI, два дополнительных параметра, ``autocomplete_property`` и "
+"``autocomplete_represent``, могут быть настроены для настройки внешнего "
+"вида выпадающего списка."
 
 #: of vstutils.api.fields.Barcode128Field:1
 msgid ""
-"Simple string field. Value must always be a valid ASCII-string. The field"
-" is going to represent as Barcode (Code 128) in user interface."
+"A field for representing data as a Barcode (Code 128) in the user "
+"interface."
 msgstr ""
-"Простое строковое поле. Значение всегда должно быть допустимой строкой "
-"ASCII. В пользовательском интерфейсе оно будет отображено как штрихкод "
-"(код 128)."
+"Поле для представления данных в виде штрихкода (Code 128) в "
+"пользовательском интерфейсе."
 
-#: of vstutils.api.fields.Barcode128Field:4 vstutils.api.fields.QrCodeField:4
+#: of vstutils.api.fields.Barcode128Field:3
 msgid ""
-"original data field for serialization or deserialization. Default: "
+"This field accepts and validates data in the form of a valid ASCII "
+"string. It is designed to display the data as a Code 128 barcode in the "
+"graphical user interface. The underlying data is serialized or "
+"deserialized using the specified child field."
+msgstr ""
+"Это поле принимает и проверяет данные в виде допустимой ASCII-строки. Оно"
+" предназначено для отображения данных в виде штрихкода Code 128 в "
+"графическом пользовательском интерфейсе. Основные данные сериализуются "
+"или десериализуются с использованием указанного дочернего поля."
+
+#: of vstutils.api.fields.Barcode128Field:7 vstutils.api.fields.QrCodeField:6
+msgid ""
+"The original data field for serialization or deserialization. Default: "
 ":class:`rest_framework.fields.CharField`"
 msgstr ""
-"поле для сериализации или десериализации оригинальных данных.По "
-"умолчанию: :class:`rest_framework.fields.CharField`"
+"Исходное поле данных для сериализации или десериализации. По умолчанию: "
+":class:`rest_framework.fields.CharField`"
+
+#: of vstutils.api.fields.Barcode128Field:12
+msgid ""
+"Suppose you have a model with a `product_code` field, and you want to "
+"display its Code 128 barcode representation in the GUI. You can use "
+"`Barcode128Field` in your serializer:"
+msgstr ""
+"Предположим, у вас есть модель с полем `product_code`, и вы хотите "
+"отображать его представление в виде штрихкода Code 128 в графическом "
+"интерфейсе пользователя. Вы можете использовать `Barcode128Field` в своем"
+" сериализаторе:"
 
 #: of vstutils.api.fields.BinFileInStringField:1
 msgid ""
-"Field extends :class:`.FileInStringField`, but works with binary (base64)"
-" files."
+"This field extends :class:`.FileInStringField` and is specifically "
+"designed to handle binary files. In the GUI, it functions as a file input"
+" field, accepting binary files from the user, which are then converted to"
+" base64-encoded strings and stored in this field."
 msgstr ""
-"Поле, расширяющее :class:`.FileInStringField`, но работающее также с "
-"бинарными (base64) файлами."
+"Это поле расширяет функциональность :class:`.FileInStringField` и "
+"специально предназначено для обработки бинарных файлов. В интерфейсе "
+"пользователя оно выступает в качестве поля для загрузки файлов, принимая "
+"бинарные файлы от пользователя, которые затем конвертируются в строку в "
+"формате base64 и сохраняются в данном поле."
 
-#: of vstutils.api.fields.BinFileInStringField:3
+#: of vstutils.api.fields.BinFileInStringField:5
 msgid ""
-"List of MIME types to select on the user's side. Supported syntax using "
-"``*``. Default: `['*/*']`"
+"A list of MIME types to filter on the user's side. Supports the use of "
+"``*`` as a wildcard. Default: `['*/*']`"
 msgstr ""
 "Список MIME-типов, доступных для выбора пользователем. Поддерживается "
-"синтаксис с использованием ``*``. По умолчанию `['*/*']`"
+"синтаксис с использованием ``*``. По умолчанию ``['*/*']``"
 
 #: of vstutils.api.fields.CSVFileField:1
 msgid ""
@@ -1051,55 +1332,65 @@ msgstr ""
 
 #: of vstutils.api.fields.CommaMultiSelect:1
 msgid ""
-"Field containing a list of values with specified separator (default: "
-"\",\"). Gets list of values from another model or custom list. Provides "
-"autocompletion as :class:`.AutoCompletionField`, but with comma-lists. "
-"Suited for property-fields in model where main logic is already "
-"implemented or with :class:`model.CharField`."
-msgstr ""
-"Поле, содержащее список значений с указанным разделителем (по умолчанию "
-"\",\"). Получает список значений из другой модели или списка. "
-"Предоставляет автодополнение, как и :class:`.AutoCompletionField`, но со "
-"списками в виде строки, где слова разделяются запятыми. Подходит для "
-"полей-свойств модели, где уже реализована основная логика, или для поля "
+"Field that allows users to input multiple values, separated by a "
+"specified delimiter (default: \",\"). It retrieves a list of values from "
+"another model or a custom list and provides autocompletion similar to "
+":class:`.AutoCompletionField`. This field is suitable for property fields"
+" in a model where the main logic is already implemented or for use with "
 ":class:`model.CharField`."
+msgstr ""
+"Поле, позволяющее пользователям вводить несколько значений, разделенных "
+"указанным разделителем (по умолчанию \",\"). Извлекает список значений из"
+" другой модели или пользовательского списка и предоставляет "
+"автодополнение аналогично :class:`.AutoCompletionField`. Это поле "
+"подходит для полей-свойств модели, где основная логика уже реализована, "
+"или для использования с :class:`model.CharField`."
+
+#: of vstutils.api.fields.CommaMultiSelect:5
+msgid "OpenAPI schema definition name or a list with values."
+msgstr "Имя определения схемы OpenAPI или список со значениями."
 
 #: of vstutils.api.fields.CommaMultiSelect:7
-msgid "OpenAPI schema definition name or list with values."
-msgstr "Определение имени схемы OpenAPI или списка со значениями."
+msgid "The separator for values. The default is a comma."
+msgstr "Разделитель значений. По умолчанию - запятая."
 
 #: of vstutils.api.fields.CommaMultiSelect:9
-msgid "separator of values. Default is comma."
-msgstr "разделитель значений. По умолчанию запятая."
+msgid ""
+"These parameters function similarly to ``autocomplete_property`` and "
+"``autocomplete_represent``. The default is ``name``."
+msgstr ""
+"Эти параметры работают аналогично ``autocomplete_property`` и "
+"``autocomplete_represent``. По умолчанию - ``name``."
 
 #: of vstutils.api.fields.CommaMultiSelect:11
-msgid ""
-"work as ``autocomplete_property`` and ``autocomplete_represent``. Default"
-" is ``name``."
+msgid "Prefetch values on the frontend in list view. The default is ``False``."
 msgstr ""
-"работает так же, как ``autocomplete_property`` и "
-"``autocomplete_represent`` По умолчанию ``name``."
+"Загружать значения на фронтенде в режиме просмотра списка. Значение по "
+"умолчанию - ``False``."
 
 #: of vstutils.api.fields.CommaMultiSelect:13
-msgid "prefetch values on frontend at list-view. Default is ``False``."
-msgstr "делает prefetch значений на фронтенде в list-view. По умолчанию ``False``."
-
-#: of vstutils.api.fields.CommaMultiSelect:14
-#: vstutils.api.fields.FkModelField:15
-msgid "Show value as link to model. Default is ``True``."
-msgstr "Отображает значение как ссылку на модель. По умолчанию ``True``."
+msgid "Show values as links to the model. The default is ``True``."
+msgstr "Отображать значения как ссылки на модель. По умолчанию - ``True``."
 
 #: of vstutils.api.fields.CommaMultiSelect:15
 msgid ""
-"Dictionary, where keys are name of field from the same model, and values "
-"are name of query filter. If at least one of the fields that we depend on"
-" is non nullable, required and set to null, autocompletion list will be "
-"empty and field will be disabled."
+"A dictionary where keys are the names of fields from the same model, and "
+"values are the names of query filters. If at least one of the fields we "
+"depend on is non-nullable, required, and set to null, the autocompletion "
+"list will be empty, and the field will be disabled."
 msgstr ""
 "Словарь, где ключи - это имена полей из той же модели, а значения - "
 "названия query-фильтров. Если хотя бы одно из полей, от которых "
-"существует зависимость не допускает null, обязательно или установлено в "
-"null, список автодополнения будет пустым, а поле окажется выключенным."
+"существует зависимость, не допускает null, обязательно или установлено в "
+"null, список автодополнения будет пустым, и поле будет отключено."
+
+#: of vstutils.api.fields.CommaMultiSelect:43
+msgid ""
+"This functionality is effective only in the GUI and works similarly to "
+":class:`.VSTCharField` in the API."
+msgstr ""
+"Эта функциональность работает только в графическом интерфейсе. В API она "
+"ведет себя так же, как и :class:`.VSTCharField`."
 
 #: of vstutils.api.fields.CrontabField:1
 msgid ""
@@ -1180,30 +1471,96 @@ msgid "Default value of each field if not specified is ``*``."
 msgstr "Значение по умолчанию для каждого поля, если не указано, составляет"
 
 #: of vstutils.api.fields.DeepFkField:1
-msgid "Extends :class:`.FkModelField`, but displays as tree on frontend."
-msgstr ""
-"Расширяет :class:`.FkModelField`, но отображается в виде дерева на "
-"фронтенде."
-
-#: of vstutils.api.fields.DeepFkField:4
 msgid ""
-"This field does not support ``dependence``. Use ``filters`` at your own "
-"risk, as it would rather break the tree structure."
+"Extends :class:`.FkModelField`, specifically designed for hierarchical "
+"relationships in the frontend."
 msgstr ""
-"Это поле не поддерживает ``dependence``. Используйте ``filters`` на свой "
-"страх и риск, так как они могут сломать структуру дерева."
+"Расширяет :class:`.FkModelField`, специально разработанный для "
+"иерархических отношений на фронтенде."
 
-#: of vstutils.api.fields.DeepFkField:8
+#: of vstutils.api.fields.DeepFkField:3
 msgid ""
-"if True then only allows a value to be selected if it has no children. "
-"Default is `False`"
+"This field is intended for handling ForeignKey relationships within a "
+"hierarchical or tree-like structure. It displays as a tree in the "
+"frontend, offering a clear visual representation of parent-child "
+"relationships."
 msgstr ""
-"если True, то допускает к выбору только то значение, которое не имеет "
-"дочерних элементов. По умолчанию `False`"
+"Это поле предназначено для работы с отношениями ForeignKey в "
+"иерархической или древовидной структуре. Оно отображается в виде дерева "
+"на фронтенде, предоставляя четкое визуальное представление отношений "
+"родитель-ребенок."
+
+#: of vstutils.api.fields.DeepFkField:7
+msgid ""
+"This field intentionally does not support the ``dependence`` parameter, "
+"as it operates in a tree structure. Usage of ``filters`` should be "
+"approached with caution, as inappropriate filters may disrupt the tree "
+"hierarchy."
+msgstr ""
+"Это поле специально не поддерживает параметр ``dependence``, так как "
+"работает в структуре дерева. Использование параметра ``filters`` следует "
+"приглядеться с осторожностью, поскольку неправильные фильтры могут "
+"нарушить иерархию дерева."
 
 #: of vstutils.api.fields.DeepFkField:11
-msgid "name of parent field in model. Default is `parent`"
-msgstr "название родительского поля в модели. По умолчанию `parent`"
+msgid ""
+"If True, the field restricts the selection to nodes without children. "
+"Default is `False`. Useful when you want to enforce selection of leaf "
+"nodes."
+msgstr ""
+"Если True, поле ограничит выбор узлов без детей. Значение по умолчанию - "
+"`False`. Полезно, когда вы хотите обеспечить выбор листовых узлов."
+
+#: of vstutils.api.fields.DeepFkField:15
+msgid ""
+"The name of the parent field in the related model. Default is `parent`. "
+"Should be set to the ForeignKey field in the related model, representing "
+"the parent-child relationship. For example, if your related model has a "
+"ForeignKey like `parent = models.ForeignKey('self', ...)`, then "
+"`parent_field_name` should be set to `'parent'`."
+msgstr ""
+"Имя поля родителя в связанной модели. Значение по умолчанию - `parent`. "
+"Должно быть установлено в поле ForeignKey в связанной модели, "
+"представляющее отношения родитель-ребенок. Например, если у вашей "
+"связанной модели есть ForeignKey, например, `parent = "
+"models.ForeignKey('self', ...)`, то `parent_field_name` должно быть "
+"установлено в `'parent'`."
+
+#: of vstutils.api.fields.DeepFkField:24
+msgid ""
+"Consider a related model with a ForeignKey field representing parent-"
+"child relationships:"
+msgstr ""
+"Предположим, у вас есть связанная модель с полем ForeignKey, "
+"представляющим отношения родитель-ребенок:"
+
+#: of vstutils.api.fields.DeepFkField:32
+msgid ""
+"To use the DeepFkField with this related model in a serializer, you would"
+" set the parent_field_name to 'parent':"
+msgstr ""
+"Чтобы использовать DeepFkField с этой связанной моделью в сериализаторе, "
+"вы установили бы `parent_field_name` в 'parent':"
+
+#: of vstutils.api.fields.DeepFkField:39
+msgid ""
+"This example assumes a Category related model with a ForeignKey 'parent' "
+"field. The DeepFkField will then display the categories as a tree "
+"structure in the frontend, providing an intuitive selection mechanism for"
+" hierarchical relationships."
+msgstr ""
+"В этом примере предполагается, что у вас есть связанная модель Category с"
+" полем ForeignKey 'parent'. Затем DeepFkField отобразит категории в виде "
+"дерева на фронтенде, предоставляя интуитивно понятный механизм выбора для"
+" иерархических отношений."
+
+#: of vstutils.api.fields.DeepFkField:44 vstutils.api.fields.UptimeField:26
+msgid ""
+"Effective only in GUI. Works similarly to "
+":class:`rest_framework.fields.IntegerField` in API."
+msgstr ""
+"Действует только в графическом интерфейсе. Работает аналогично "
+":class:`rest_framework.fields.IntegerField` в API."
 
 #: of vstutils.api.fields.DependEnumField:1
 msgid ""
@@ -1216,14 +1573,12 @@ msgstr ""
 ":class:`property` в модели или для экшенов."
 
 #: of vstutils.api.fields.DependEnumField:4
-#: vstutils.api.fields.DynamicJsonTypeField:4
 msgid "field in model which value change will change type of current value."
 msgstr ""
 "поле в модели, изменение значения которого будет менять тип текущего "
 "значения."
 
 #: of vstutils.api.fields.DependEnumField:6
-#: vstutils.api.fields.DynamicJsonTypeField:6
 msgid ""
 "key-value mapping where key is value of subscribed field and value is "
 "type (in OpenAPI format) of current field."
@@ -1232,7 +1587,6 @@ msgstr ""
 "поля-подписчика, а значением - тип (формата OpenAPI) текущего поля."
 
 #: of vstutils.api.fields.DependEnumField:9
-#: vstutils.api.fields.DynamicJsonTypeField:9
 msgid ""
 "variants of choices for different subscribed field values. Uses mapping "
 "where key is value of subscribed field and value is list with values to "
@@ -1252,260 +1606,341 @@ msgstr ""
 
 #: of vstutils.api.fields.DependFromFkField:1
 msgid ""
-"Field extends :class:`DynamicJsonTypeField`. Validates field data by "
-":attr:`.field_attribute` chosen in related model. By default, any value "
-"of :attr:`.field_attribute` validates as :class:`.VSTCharField`. To "
-"override this behavior set dict attribute ``{field_attribute "
-"value}_fields_mapping`` in related model where:"
+"A specialized field that extends :class:`DynamicJsonTypeField` and "
+"validates field data based on a :attr:`.field_attribute` chosen in a "
+"related model. The field data is validated against the type defined by "
+"the chosen value of :attr:`.field_attribute`."
 msgstr ""
-"Поле, расширяющее :class:`DynamicJsonTypeField`. Валидирует данные поля с"
-" помощью :attr:`.field_attribute`, выбранного в связанной модели. По "
-"умолчанию любое значение :attr:`.field_attribute` валидируется классом "
-":class:`.VSTCharField`. Чтобы переопределить это поведение, установите "
-"словарный атрибут ``{field_attribute value}_fields_mapping`` в связанной "
-"модели, где:"
+"Специализированное поле, расширяющее :class:`DynamicJsonTypeField` и "
+"проверяющее данные поля на основе :attr:`.field_attribute`, выбранного в "
+"связанной модели. Данные поля проверяются на соответствие типу, "
+"определенному выбранным значением :attr:`.field_attribute`."
 
-#: of vstutils.api.fields.DependFromFkField:5
+#: of vstutils.api.fields.DependFromFkField:7
 msgid ""
-"**key** - string representation of value type which is received from "
-"related instance :attr:`.field_attribute`."
+"By default, any value of :attr:`.field_attribute` validates as "
+":class:`.VSTCharField`. To override this behavior, set the class "
+"attribute ``{field_attribute}_fields_mapping`` in the related model. The "
+"attribute should be a dictionary where keys are string representations of"
+" the values of :attr:`.field_attribute`, and values are instances of "
+":class:`rest_framework.Field` for validation. If a value is not found in "
+"the dictionary, the default type will be :class:`.VSTCharField`."
 msgstr ""
-"**key** - строковое представление типа значения, получаемое от связанной "
-"модели :attr:`.field_attribute`."
+"По умолчанию любое значение :attr:`.field_attribute` проверяется как "
+":class:`.VSTCharField`. Чтобы изменить это поведение, установите атрибут "
+"класса ``{field_attribute}_fields_mapping`` в связанной модели. Атрибут "
+"должен быть словарем, где ключи - это строковые представления значений "
+":attr:`.field_attribute`, а значения - экземпляры "
+":class:`rest_framework.Field` для проверки. Если значение не найдено в "
+"словаре, то тип по умолчанию будет :class:`.VSTCharField`."
 
-#: of vstutils.api.fields.DependFromFkField:6
-msgid "**value** - :class:`rest_framework.Field` instance for validation."
-msgstr "**value** - экземпляр :class:`rest_framework.Field` для валидации."
-
-#: of vstutils.api.fields.DependFromFkField:8
+#: of vstutils.api.fields.DependFromFkField:14
 msgid ""
-"field in model which value change changes type of current value. Field "
-"must be :class:`.FkModelField`."
+"The field in the model whose value change determines the type of the "
+"current value. The field must be of type :class:`.FkModelField`."
 msgstr ""
-"поле в модели, чье изменение значения меняет тип текущего значения. Поле "
-"должно быть классом :class:`.FkModelField`."
+"Поле в модели, значение которого определяет тип текущего значения. Поле "
+"должно быть типа :class:`.FkModelField`."
 
-#: of vstutils.api.fields.DependFromFkField:11
-msgid "attribute of related model instance with name of type."
-msgstr "атрибут связанного экземпляра модели с именем типа."
-
-#: of vstutils.api.fields.DependFromFkField:15
+#: of vstutils.api.fields.DependFromFkField:17
 msgid ""
-"``field_attribute`` in related model must be "
-":class:`rest_framework.fields.ChoicesField` or GUI will show field as "
-"simple text."
+"The attribute of the related model instance containing the name of the "
+"type."
+msgstr "Атрибут экземпляра связанной модели, содержащий имя типа."
+
+#: of vstutils.api.fields.DependFromFkField:19
+#: vstutils.api.fields.DynamicJsonTypeField:6
+msgid ""
+"A key-value mapping where the key is the value of the subscribed field, "
+"and the value is the type (in OpenAPI format) of the current field."
+msgstr ""
+"Отображение ключ-значение, где ключ - это значение подписанного поля, а "
+"значение - тип (в формате OpenAPI) текущего поля."
+
+#: of vstutils.api.fields.DependFromFkField:24
+msgid ""
+"The ``field_attribute`` in the related model must be of type "
+":class:`rest_framework.fields.ChoicesField` to ensure proper functioning "
+"in the GUI; otherwise, the field will be displayed as simple text."
 msgstr ""
 "``field_attribute`` в связанной модели должно быть типа "
 ":class:`rest_framework.fields.ChoicesField`, иначе в графическом "
 "интерфейсе поле будет отображаться как обычное текстовое."
 
+#: of vstutils.api.fields.DependFromFkField:29
+msgid ""
+"Suppose you have a model with a ForeignKey field `related_model` and a "
+"field `type_attribute` in `RelatedModel` that determines the type of "
+"data. You can use `DependFromFkField` to dynamically adapt the "
+"serialization based on the value of `type_attribute`:"
+msgstr ""
+"Предположим, у вас есть модель с полем ForeignKey `related_model` и полем"
+" `type_attribute` в `RelatedModel`, которое определяет тип данных. Вы "
+"можете использовать `DependFromFkField` для динамической адаптации "
+"сериализации на основе значения `type_attribute`:"
+
 #: of vstutils.api.fields.DynamicJsonTypeField:1
 msgid ""
-"Field which type is based on another field. It converts value to internal"
-" string and represent field as json object."
+"A versatile serializer field that dynamically adapts its type based on "
+"the value of another field in the model. It facilitates complex scenarios"
+" where the type of data to be serialized depends on the value of a "
+"related field."
 msgstr ""
-"Поле, тип которого зависит от другого поля. Хранит значение в виде "
-"строки, а отображает поле в виде объекта json."
+"Универсальное поле сериализатора, которое динамически адаптирует свой тип"
+" в зависимости от значения другого поля в модели. Оно облегчает сложные "
+"сценарии, где тип данных для сериализации зависит от значения связанного "
+"поля."
+
+#: of vstutils.api.fields.DynamicJsonTypeField:4
+msgid ""
+"The field in the model whose value change will dynamically determine the "
+"type of the current field."
+msgstr ""
+"Поле в модели, изменение значения которого будет динамически определять "
+"тип текущего поля."
+
+#: of vstutils.api.fields.DynamicJsonTypeField:9
+msgid ""
+"Variants of choices for different subscribed field values. Uses a mapping"
+" where the key is the value of the subscribed field, and the value is a "
+"list with values to choose from."
+msgstr ""
+"Варианты выбора для разных значений подписанных полей. Использует "
+"отображение, где ключ - это значение подписанного поля, а значение - "
+"список значений для выбора."
 
 #: of vstutils.api.fields.DynamicJsonTypeField:13
 msgid ""
-"Allows to use parent views data as source for field creation. Exact view "
-"path (`/user/{id}/`) or relative parent specifier "
-"(`<<parent>>.<<parent>>.<<parent>>`) can be provided. For example if "
-"current page is `/user/1/role/2/` and `source_view` is "
-"`<<parent>>.<<parent>>` then data from `/user/1/` will be used. Only "
-"detail views if supported."
+"Allows using parent views data as a source for field creation. The exact "
+"view path (`/user/{id}/`) or relative parent specifier "
+"(`<<parent>>.<<parent>>.<<parent>>`) can be provided. For example, if the"
+" current page is `/user/1/role/2/` and `source_view` is "
+"`<<parent>>.<<parent>>`, then data from `/user/1/` will be used. Only "
+"detail views are supported."
 msgstr ""
-"Позволяет использовать данные родительских view в качестве источника для "
-"создания полей. Можно указать точный путь представления (`/user/{id}/`) "
-"или относительный спецификатор родительского представления "
+"Позволяет использовать данные родительских представлений в качестве "
+"источника для создания поля. Можно указать точный путь представления "
+"(`/user/{id}/`) или относительный указатель родителя "
 "(`<<parent>>.<<parent>>.<<parent>>`). Например, если текущая страница - "
 "`/user/1/role/2/`, а `source_view` - `<<parent>>.<<parent>>`, то будут "
-"использованы данные из `/user/1/`. Поддерживаются только представления "
-"деталей."
+"использованы данные из `/user/1/`. Поддерживаются только детальные "
+"представления."
 
 #: of vstutils.api.fields.DynamicJsonTypeField:22
 msgid ""
-"Effective only in GUI. In API works similar to :class:`.VSTCharField` "
-"without value modifications."
+"Suppose you have a serializer `MySerializer` with a `field_type` (e.g., a"
+" `ChoiceField`) and a corresponding `object_data`. The `object_data` "
+"field can have different types based on the value of `field_type`. Here's"
+" an example configuration:"
 msgstr ""
-"Действует только в графическом интерфейсе. В API работает аналогично "
-":class:`.VSTCharField` без изменения значения."
+"Предположим, у вас есть сериализатор `MySerializer` с полем `field_type` "
+"(например, `ChoiceField`) и соответствующим полем `object_data`. Поле "
+"`object_data` может иметь разные типы в зависимости от значения "
+"`field_type`. Вот пример конфигурации:"
+
+#: of vstutils.api.fields.DynamicJsonTypeField:40
+msgid ""
+"In this example, the `object_data` field dynamically adapts its type "
+"based on the selected value of `field_type`. The `types` argument defines"
+" different types for each possible value of `field_type`, allowing for "
+"flexible and dynamic serialization."
+msgstr ""
+"В этом примере поле `object_data` динамически адаптирует свой тип в "
+"зависимости от выбранного значения `field_type`. Аргумент `types` "
+"определяет разные типы для каждого возможного значения `field_type`, "
+"позволяя гибкую и динамичную сериализацию."
 
 #: of vstutils.api.fields.FileInStringField:1
-msgid "Field extends :class:`.VSTCharField` and saves file's content as string."
+msgid ""
+"This field extends :class:`.VSTCharField` and stores the content of a "
+"file as a string."
 msgstr ""
 "Поле, расширяющее :class:`.VSTCharField`. Сохраняет содержимое файла в "
 "виде строки."
 
 #: of vstutils.api.fields.FileInStringField:3
 #: vstutils.api.fields.SecretFileInString:3
-msgid "Value must be text (not binary) and saves in model as is."
+msgid "The value must be text (not binary) and is saved in the model as is."
 msgstr "Поле должно быть текстовым (не бинарным). Сохраняется в модель как есть."
 
 #: of vstutils.api.fields.FileInStringField:5
 #: vstutils.api.fields.SecretFileInString:5
 msgid ""
-"List of MIME types to select on the user's side. Supported syntax using "
-"``*``. Default: ``['*/*']``"
+"A list of MIME types to filter on the user's side. Supports the use of "
+"``*`` as a wildcard. Default: ``['*/*']``"
 msgstr ""
 "Список MIME-типов, доступных для выбора пользователем. Поддерживается "
 "синтаксис с использованием ``*``. По умолчанию ``['*/*']``"
 
 #: of vstutils.api.fields.FileInStringField:10
 #: vstutils.api.fields.SecretFileInString:10
-msgid "Take effect only in GUI. In API it would behave as :class:`.VSTCharField`."
+msgid ""
+"This setting only takes effect in the GUI. In the API, it behaves like "
+":class:`.VSTCharField`."
 msgstr ""
 "Действует только в графическом интерфейсе. В API ведет себя так же, как и"
 " :class:`.VSTCharField`."
 
 #: of vstutils.api.fields.FkField:1
 msgid ""
-"Implementation of ForeignKeyField. You can specify which field of a "
-"related model will be stored in field (default: \"id\"), and which will "
-"represent field on frontend."
+"An implementation of ForeignKeyField, designed for use in serializers. "
+"This field allows you to specify which field of a related model will be "
+"stored in the field (default: \"id\"), and which field will represent the"
+" value on the frontend."
 msgstr ""
-"Реализация ForeignKeyField. Вы можете указать, какое поле связанной "
-"модели будет храниться в этом поле (по умолчанию: \"id\") и какое будет "
-"отображаться на фронтенде."
+"Реализация ForeignKeyField, предназначенная для использования в "
+"сериализаторах. Это поле позволяет указать, какое поле связанной модели "
+"будет храниться в этом поле (по умолчанию: \"id\"), а какое поле будет "
+"представлять значение на фронтенде."
 
-#: of vstutils.api.fields.FkField:4
+#: of vstutils.api.fields.FkField:5
 msgid "OpenAPI schema definition name."
 msgstr "Имя определения схемы OpenAPI."
 
-#: of vstutils.api.fields.FkField:6 vstutils.api.fields.FkModelField:7
+#: of vstutils.api.fields.FkField:7
 msgid ""
-"this argument indicates which attribute will be get from OpenAPI schema "
-"definition model as value. Default is ``id``."
+"Specifies which attribute will be retrieved from the OpenAPI schema "
+"definition model as the value. Default is ``id``."
 msgstr ""
-"этот аргумент указывает, какие атрибуты будут взяты из model definition "
-"схемы OpenAPI в качестве используемого значения. По умолчанию ``id``."
+"Указывает, какой атрибут из модели определения схемы OpenAPI использовать"
+" в качестве значения. По умолчанию 'id'."
 
-#: of vstutils.api.fields.FkField:10 vstutils.api.fields.FkModelField:11
+#: of vstutils.api.fields.FkField:10
 msgid ""
-"this argument indicates which attribute will be get from OpenAPI schema "
-"definition model as represent value. Default is ``name``."
+"Specifies which attribute will be retrieved from the OpenAPI schema "
+"definition model as the representational value. Default is ``name``."
 msgstr ""
-"этот аргумент указывает, какие атрибуты будут взяты из model definition "
-"схемы OpenAPI в качестве отображаемого значения. По умолчанию ``name``."
+"Указывает, какой атрибут из модели определения схемы OpenAPI использовать"
+" в качестве представленного значения. По умолчанию 'name'."
 
-#: of vstutils.api.fields.FkField:13
+#: of vstutils.api.fields.FkField:12
 msgid ""
-"defines the autocomplete_property type for further definition in the "
-"schema and casting to the type from the api. Default is passthroughs but "
-"require `int` or `str` objects."
+"Defines the type of the autocomplete_property for further definition in "
+"the schema and casting to the type from the API. Default is passthrough "
+"but requires `int` or `str` objects."
 msgstr ""
 "Определяет тип поля autocomplete_property для дальнейшего описания в "
 "схеме и преобразования этого типа из API. По умолчанию пропускается, но "
-"требуект объекты `int`или `str`."
+"требует объекты `int` или `str`."
 
-#: of vstutils.api.fields.FkField:18
-msgid "show value as link to model. Default is ``True``."
-msgstr "Отображает значение как ссылку на модель. По умолчанию ``True``."
-
-#: of vstutils.api.fields.FkField:20
-msgid ""
-"dictionary, where keys are names of a field from the same model, and "
-"values are names of query filter. If at least one of the fields that we "
-"depend on is non nullable, required and set to null, autocompletion list "
-"will be empty and field will be disabled.  There are some special keys "
-"for dependence dictionary to get data that is stored on frontend without "
-"additional database query:  ``'<<pk>>'`` gets primary key of current "
-"instance,  ``'<<view_name>>'`` gets view name from Vue component,  "
-"``'<<parent_view_name>>'`` gets parent view name from Vue component,  "
-"``'<<view_level>>'`` gets view level,  ``'<<operation_id>>'`` gets "
-"operation_id,  ``'<<parent_operation_id'>>`` gets parent_operation_id."
+#: of vstutils.api.fields.FkField:15
+msgid "Prefetch values on the frontend at list-view. Default is ``True``."
 msgstr ""
-"словарь, где ключи - это имена полей из той же модели, а значения - "
+"Загружать значения на фронтенде в режиме просмотра списка. Значение по "
+"умолчанию — ``True``."
+
+#: of vstutils.api.fields.FkField:17
+msgid "Show the value as a link to the related model. Default is ``True``."
+msgstr ""
+"Отображать значение как ссылку на модель. Значение по умолчанию — "
+"``True``."
+
+#: of vstutils.api.fields.FkField:19
+msgid ""
+"A dictionary where keys are names of fields from the same model, and "
+"values are names of query filters. If at least one of the fields that we "
+"depend on is non-nullable, required, and set to null, the autocompletion "
+"list will be empty, and the field will be disabled.  There are some "
+"special keys for the dependence dictionary to get data that is stored on "
+"the frontend without additional database query:  - ``'<<pk>>'`` gets the "
+"primary key of the current instance, - ``'<<view_name>>'`` gets the view "
+"name from the Vue component, - ``'<<parent_view_name>>'`` gets the parent"
+" view name from the Vue component, - ``'<<view_level>>'`` gets the view "
+"level, - ``'<<operation_id>>'`` gets the operation_id, - "
+"``'<<parent_operation_id'>>`` gets the parent_operation_id."
+msgstr ""
+"Словарь, где ключи - это имена полей из той же модели, а значения - "
 "названия query-фильтров. Если хотя бы одно из полей, от которых "
 "существует зависимость, не допускает null, обязательно или установлено в "
-"null, список автодополнения будет пустым, а поле окажется выключенным.  "
-"Есть несколько специальных ключей dependence-словаря, с помощью которых "
-"можно получить данные, хранящиеся на фронтенде, не делая лишних запросов "
-"в базу данных: ``'<<pk>>'`` получает первичный ключ текущего экземпляра,"
-"  ``'<<view_name>>'`` получает имя view из компонента Vue,  "
+"null, список автодополнения будет пустым, а поле будет отключено. Есть "
+"несколько специальных ключей dependence-словаря, с помощью которых можно "
+"получить данные, хранящиеся на фронтенде, не делая лишних запросов в базу"
+" данных: ``'<<pk>>'`` получает первичный ключ текущего экземпляра, "
+"``'<<view_name>>'`` получает имя view из компонента Vue,  "
 "``'<<parent_view_name>>'`` получает имя родительского view из компонента "
 "Vue,  ``'<<view_level>>'`` получает уровень view,  ``'<<operation_id>>'``"
-"  получает operation_id,  ``'<<parent_operation_id'>>`` получает "
+" получает operation_id,  ``'<<parent_operation_id'>>`` получает "
 "родительский operation_id."
 
-#: of vstutils.api.fields.FkField:20
+#: of vstutils.api.fields.FkField:19
 msgid ""
-"dictionary, where keys are names of a field from the same model, and "
-"values are names of query filter. If at least one of the fields that we "
-"depend on is non nullable, required and set to null, autocompletion list "
-"will be empty and field will be disabled."
+"A dictionary where keys are names of fields from the same model, and "
+"values are names of query filters. If at least one of the fields that we "
+"depend on is non-nullable, required, and set to null, the autocompletion "
+"list will be empty, and the field will be disabled."
 msgstr ""
-"словарь, где ключи - это имена полей из той же модели, а значения - "
+"Словарь, где ключи - это имена полей из той же модели, а значения - "
 "названия query-фильтров. Если хотя бы одно из полей, от которых "
-"существует зависимость не допускает null, обязательно или установлено в "
-"null, список автодополнения будет пустым, а поле окажется выключенным."
+"существует зависимость, не допускает null, обязательно или установлено в "
+"null, список автодополнения будет пустым, и поле будет отключено."
 
-#: of vstutils.api.fields.FkField:25
+#: of vstutils.api.fields.FkField:23
 msgid ""
-"There are some special keys for dependence dictionary to get data that is"
-" stored on frontend without additional database query:"
+"There are some special keys for the dependence dictionary to get data "
+"that is stored on the frontend without additional database query:"
 msgstr ""
 "Есть несколько специальных ключей dependence-словаря, с помощью которых "
 "можно получить данные, хранящиеся на фронтенде, не делая лишних запросов "
 "в базу данных:"
 
-#: of vstutils.api.fields.FkField:28
-msgid "``'<<pk>>'`` gets primary key of current instance,"
+#: of vstutils.api.fields.FkField:26
+msgid "``'<<pk>>'`` gets the primary key of the current instance,"
 msgstr "``'<<pk>>'`` получает первичный ключ текущего экземпляра,"
 
-#: of vstutils.api.fields.FkField:30
-msgid "``'<<view_name>>'`` gets view name from Vue component,"
+#: of vstutils.api.fields.FkField:27
+msgid "``'<<view_name>>'`` gets the view name from the Vue component,"
 msgstr "``'<<view_name>>'`` получает имя view из компонента Vue,"
 
-#: of vstutils.api.fields.FkField:32
-msgid "``'<<parent_view_name>>'`` gets parent view name from Vue component,"
+#: of vstutils.api.fields.FkField:28
+msgid ""
+"``'<<parent_view_name>>'`` gets the parent view name from the Vue "
+"component,"
 msgstr ""
 "``'<<parent_view_name>>'`` получает имя родительского view из компонента "
 "Vue,"
 
-#: of vstutils.api.fields.FkField:34
-msgid "``'<<view_level>>'`` gets view level,"
+#: of vstutils.api.fields.FkField:29
+msgid "``'<<view_level>>'`` gets the view level,"
 msgstr "``'<<view_level>>'`` получает уровень view,"
 
-#: of vstutils.api.fields.FkField:36
-msgid "``'<<operation_id>>'`` gets operation_id,"
+#: of vstutils.api.fields.FkField:30
+msgid "``'<<operation_id>>'`` gets the operation_id,"
 msgstr "``'<<operation_id>>'``  получает operation_id,"
 
-#: of vstutils.api.fields.FkField:38
-msgid "``'<<parent_operation_id'>>`` gets parent_operation_id."
+#: of vstutils.api.fields.FkField:31
+msgid "``'<<parent_operation_id'>>`` gets the parent_operation_id."
 msgstr "``'<<parent_operation_id'>>`` получает родительский operation_id."
 
-#: of vstutils.api.fields.FkField:46
+#: of vstutils.api.fields.FkField:39
 msgid ""
-"This filter will get pk of current object and make query on frontend "
-"'/category?my_filter=3' where '3' is primary key of current instance."
+"This filter will get the primary key of the current object and make a "
+"query on the frontend ``/category?my_filter=3`` where ``3`` is the "
+"primary key of the current instance."
 msgstr ""
-"Этот фильтр получит первичный ключ текущего объекта и сделает запрос на "
-"фронтенде '/category?my_filter=3', где '3' - первичный ключ текущего "
+"Этот фильтр получит первичный ключ текущего объекта и выполнит запрос на "
+"фронтенде ``/category?my_filter=3``, где ``3`` - первичный ключ текущего "
 "экземпляра."
+
+#: of vstutils.api.fields.FkField:43
+msgid ""
+"A dictionary where keys are names of fields from a related model "
+"(specified by this FkField), and values are values of that field."
+msgstr ""
+"Словарь, где ключи - это имена полей из связанной модели (указанной в "
+"этом FkField), а значения - значения этого поля."
+
+#: of vstutils.api.fields.FkField:48
+msgid ""
+"The intersection of `dependence.values()` and `filters.keys()` will throw"
+" an error to prevent ambiguous filtering."
+msgstr ""
+"Пересечение `dependence.values()` и `filters.keys()` вызовет ошибку для "
+"предотвращения неоднозначной фильтрации."
 
 #: of vstutils.api.fields.FkField:50
 msgid ""
-"dictionary, where keys are names of a field from a related (by this "
-"FkField) model, and values are values of that field."
-msgstr ""
-"словарь, где ключи - это имена поля связанной модели, а значения - "
-"значения этого поля."
-
-#: of vstutils.api.fields.FkField:55
-msgid ""
-"Intersection of `dependence.values()` and `filters.keys()` will throw "
-"error to prevent ambiguous filtering."
-msgstr ""
-"Пересечение `dependence.values()` и `filters.keys()` выкинет ошибку для "
-"предотвращения неоднозначности при фильтрации."
-
-#: of vstutils.api.fields.FkField:57 vstutils.api.fields.RedirectCharField:4
-#: vstutils.api.fields.RedirectIntegerField:4 vstutils.api.fields.UptimeField:4
-msgid ""
-"Effective only in GUI. Works similar to "
-":class:`rest_framework.fields.IntegerField` in API."
+"Effective only in the GUI. Works similarly to "
+":class:`rest_framework.fields.IntegerField` in the API."
 msgstr ""
 "Действует только в графическом интерфейсе. Работает аналогично "
 ":class:`rest_framework.fields.IntegerField` в API."
@@ -1527,6 +1962,32 @@ msgstr ""
 "класс модели (основанный на :class:`vstutils.models.BModel`) или "
 "сериализатор, используемый в API и имеющий свой путь в схеме OpenAPI."
 
+#: of vstutils.api.fields.FkModelField:7
+msgid ""
+"this argument indicates which attribute will be get from OpenAPI schema "
+"definition model as value. Default is ``id``."
+msgstr ""
+"этот аргумент указывает, какие атрибуты будут взяты из model definition "
+"схемы OpenAPI в качестве используемого значения. По умолчанию ``id``."
+
+#: of vstutils.api.fields.FkModelField:11
+msgid ""
+"this argument indicates which attribute will be get from OpenAPI schema "
+"definition model as represent value. Default is ``name``."
+msgstr ""
+"этот аргумент указывает, какие атрибуты будут взяты из model definition "
+"схемы OpenAPI в качестве отображаемого значения. По умолчанию ``name``."
+
+#: of vstutils.api.fields.FkModelField:14
+msgid "prefetch values on frontend at list-view. Default is ``True``."
+msgstr ""
+"делает prefetch для значений на фронтенде в list-view. ``True`` по "
+"умолчанию."
+
+#: of vstutils.api.fields.FkModelField:15
+msgid "Show value as link to model. Default is ``True``."
+msgstr "Отображает значение как ссылку на модель. По умолчанию ``True``."
+
 #: of vstutils.api.fields.FkModelField:19
 msgid ""
 "Model class get object from database during `.to_internal_value` "
@@ -1546,35 +2007,81 @@ msgstr ""
 
 #: of vstutils.api.fields.HtmlField:1
 msgid ""
-"Field contains html text and marked as format:html. The field does not "
-"validate whether its content is HTML."
+"A specialized field for handling HTML text content, marked with the "
+"format:html."
 msgstr ""
-"Поле, содержащее текст html и помеченное как format:html. Это поле не "
-"проверяет, является ли его содержимое валидным HTML."
+"Специализированное поле для обработки HTML-текстового контента, "
+"отмеченного форматом: html."
 
-#: of vstutils.api.fields.HtmlField:4
+#: of vstutils.api.fields.HtmlField:9 vstutils.api.fields.TextareaField:4
 msgid ""
-"To avoid vulnerability, do not allow users to modify this data because "
-"users ate able to execute their scripts."
+"This field is designed for use in the graphical user interface (GUI) and "
+"functions similarly to :class:`.VSTCharField` in the API."
 msgstr ""
-"Чтобы избежать уязвимости, не позволяйте пользователям изменять эти "
-"данные, так как они могут выполнить нежелательный скрипт."
+"Это поле предназначено для использования в графическом интерфейсе "
+"пользователя (GUI) и работает аналогично :class:`.VSTCharField` в API."
+
+#: of vstutils.api.fields.HtmlField:13
+msgid ""
+"If you have a model with an `html_content` field that stores HTML-"
+"formatted text, you can use `HtmlField` in your serializer to handle this"
+" content in the GUI:"
+msgstr ""
+"Если у вас есть модель с полем `html_content`, в котором хранится "
+"HTML-форматированный текст, вы можете использовать `HtmlField` в своем "
+"сериализаторе для обработки этого контента в графическом интерфейсе "
+"пользователя:"
 
 #: of vstutils.api.fields.MaskedField:1
 msgid ""
-"Extends class 'rest_framework.serializers.CharField'. Field that applies "
-"mask to value."
+"Extends the 'rest_framework.serializers.CharField' class. Field that "
+"applies a mask to the input value."
 msgstr ""
 "Расширяет класс 'rest_framework.serializers.CharField'. Поле, применяющее"
 " маску к значению."
 
-#: of vstutils.api.fields.MaskedField:5
-msgid "`IMask <https://imask.js.org/guide.html>`_"
-msgstr "`IMask <https://imask.js.org/guide.html>`_"
+#: of vstutils.api.fields.MaskedField:4
+msgid ""
+"This field is designed for applying a mask to the input value on the "
+"frontend. It extends the 'rest_framework.serializers.CharField' and "
+"allows the use of the `IMask <https://imask.js.org/guide.html>`_ library "
+"for defining masks."
+msgstr ""
+"Это поле предназначено для применения маски к значению на фронтенде. Оно "
+"расширяет класс 'rest_framework.serializers.CharField' и позволяет "
+"использовать библиотеку `IMask <https://imask.js.org/guide.html>`_ для "
+"определения масок."
 
 #: of vstutils.api.fields.MaskedField:9
-msgid "Effective only on frontend."
-msgstr "Действует только на фронтенде."
+msgid ""
+"The mask to be applied to the value. It can be either a dictionary or a "
+"string following the `IMask` library format."
+msgstr ""
+"Маска, которая будет применена к значению. Это может быть как словарь, "
+"так и строка в формате библиотеки `IMask`."
+
+#: of vstutils.api.fields.MaskedField:14
+msgid "In a serializer, include this field to apply a mask to a value:"
+msgstr "В сериализаторе включите это поле для применения маски к значению:"
+
+#: of vstutils.api.fields.MaskedField:21
+msgid ""
+"This example assumes a serializer where the ``masked_value`` field "
+"represents a value with a predefined mask. The ``MaskedField`` will apply"
+" the specified mask on the frontend, providing a masked input for users."
+msgstr ""
+"В этом примере предполагается, что сериализатор имеет поле "
+"`masked_value`, представляющее значение с предопределенной маской. "
+"`MaskedField` применит указанную маску на фронтенде, предоставляя "
+"маскированный ввод для пользователей."
+
+#: of vstutils.api.fields.MaskedField:26
+msgid ""
+"The effectiveness of this field is limited to the frontend, and the mask "
+"is applied during user input."
+msgstr ""
+"Эффективность этого поля ограничивается фронтендом, и маска применяется "
+"при вводе пользователя."
 
 #: of vstutils.api.fields.MultipleNamedBinaryFileInJsonField:1
 msgid ""
@@ -1587,7 +2094,6 @@ msgstr ""
 ":class:`NamedBinaryFileInJsonField`."
 
 #: of vstutils.api.fields.MultipleNamedBinaryFileInJsonField:4
-#: vstutils.api.fields.NamedBinaryFileInJsonField:13
 msgid ""
 "Attrs: :attr:`NamedBinaryInJsonField.file`: if True, accept only "
 "subclasses of File as input. If False, accept only string input. Default:"
@@ -1608,7 +2114,6 @@ msgstr ""
 " работает как список объектов :class:`NamedBinaryImageInJsonField`."
 
 #: of vstutils.api.fields.MultipleNamedBinaryImageInJsonField:4
-#: vstutils.api.fields.NamedBinaryImageInJsonField:5
 msgid ""
 "Color to fill area that is not covered by image after cropping. "
 "Transparent by default but will be black if image format is not "
@@ -1619,50 +2124,220 @@ msgstr ""
 "поддерживает прозрачность. Может быть любым допустимым цветом CSS."
 
 #: of vstutils.api.fields.NamedBinaryFileInJsonField:1
+msgid "Field that represents a binary file in JSON format."
+msgstr "Поле, представляющее бинарный файл в формате JSON."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:3
 msgid ""
-"Field that takes JSON with properties: * name - string - name of file; * "
-"mediaType - string - MIME type of file; * content - base64 string - "
-"content of file."
+"If True, accept only subclasses of File as input. If False, accept only "
+"string input. Default: False."
 msgstr ""
-"Поле, принимающее на вход JSON со следующими свойствами: * name - string "
-"- имя файла; * mediaType - string - MIME-тип файла; * content - base64 "
-"string - содержимое файла."
+"Если True, принимает только подклассы File в качестве входных данных. "
+"Если False, принимает только строковые входные данные. По умолчанию: "
+"False."
 
 #: of vstutils.api.fields.NamedBinaryFileInJsonField:6
 msgid ""
-"This field is useful for saving binary files with their names in "
-":class:`django.db.models.CharField` or "
-":class:`django.db.models.TextField` model fields. All manipulations with "
-"decoding and encoding binary content data executes on client. This "
-"imposes reasonable limits on file size."
+"Functions to process the file after validation. Each function takes two "
+"arguments: ``binary_data`` (file bytes) and ``original_data`` (reference "
+"to the original JSON object). The function should return the processed "
+"``binary_data``."
 msgstr ""
-"Это поле полезно для сохранения бинарных файлов с их именами в полях "
-"модели :class:`django.db.models.CharField` или "
-":class:`django.db.models.TextField`. Все операции по кодированию или "
-"декодированию бинарного содержимого осуществляется на клиенте. Это "
-"накладывает разумные ограничения на размер файла."
+"Функции для обработки файла после валидации. Каждая функция принимает два"
+" аргумента: ``binary_data`` (байты файла) и ``original_data`` (ссылка на "
+"исходный JSON-объект). Функция должна возвращать обработанный "
+"``binary_data``."
 
-#: of vstutils.api.fields.NamedBinaryFileInJsonField:10
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:11
 msgid ""
-"Additionally, this field can construct "
+"Functions to process the file before validation. Each function takes two "
+"arguments: ``binary_data`` (file bytes) and ``original_data`` (reference "
+"to the original JSON object). The function should return the processed "
+"``binary_data``."
+msgstr ""
+"Функции для обработки файла перед валидацией. Каждая функция принимает "
+"два аргумента: ``binary_data`` (байты файла) и ``original_data`` (ссылка "
+"на исходный JSON-объект). Функция должна возвращать обработанный "
+"``binary_data``."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:16
+msgid "Maximum allowed size of the file content in bytes."
+msgstr "Максимально допустимый размер содержимого файла в байтах."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:17
+msgid "Minimum allowed size of the file content in bytes."
+msgstr "Минимально допустимый размер содержимого файла в байтах."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:18
+msgid "Minimum length of the file name. Only applicable when ``file=True``."
+msgstr "Минимальная длина имени файла. Применяется только при ``file=True``."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:19
+msgid "Maximum length of the file name. Only applicable when ``file=True``."
+msgstr "Максимальная длина имени файла. Применяется только при ``file=True``."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:22
+msgid ""
+"This field is designed for storing binary files alongside their names in "
+":class:`django.db.models.CharField` or "
+":class:`django.db.models.TextField` model fields. All manipulations "
+"involving decoding and encoding binary content data occur on the client, "
+"imposing reasonable limits on file size."
+msgstr ""
+"Это поле предназначено для хранения бинарных файлов вместе с их именами в"
+" полях модели :class:`django.db.models.CharField` или "
+":class:`django.db.models.TextField`. Все манипуляции, связанные с "
+"декодированием и кодированием данных бинарного содержимого, выполняются "
+"на клиенте, что накладывает разумные ограничения на размер файла."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:27
+msgid ""
+"Additionally, this field can construct a "
 ":class:`django.core.files.uploadedfile.SimpleUploadedFile` from incoming "
-"JSON and store it as file in :class:`django.db.models.FileField` if "
-"`file` argument is set to `True`"
+"JSON and store it as a file in :class:`django.db.models.FileField` if the"
+" `file` attribute is set to `True`."
 msgstr ""
 "Кроме того, это поле может создать "
 ":class:`django.core.files.uploadedfile.SimpleUploadedFile` из входящего "
 "JSON и сохранить его как файл в :class:`django.db.models.FileField`, если"
-" для аргумента `file` установлено значение `True`"
+" атрибут `file` установлен в значение `True`."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:34
+msgid "In a serializer, include this field to handle binary files:"
+msgstr "В сериализаторе включите это поле для обработки бинарных файлов:"
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:41
+msgid ""
+"This example assumes a serializer where the ``binary_data`` field "
+"represents binary file information in JSON format. The "
+"``NamedBinaryFileInJsonField`` will then handle the storage and retrieval"
+" of binary files in a user-friendly manner."
+msgstr ""
+"В этом примере предполагается, что в сериализаторе поле ``binary_data`` "
+"представляет информацию о бинарном файле в формате JSON. Поле "
+"``NamedBinaryFileInJsonField`` обеспечит обработку хранения и извлечения "
+"бинарных файлов удобным для пользователя образом."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:46
+msgid "The binary file is represented in JSON with the following properties:"
+msgstr "Бинарный файл представлен в формате JSON со следующими свойствами:"
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:48
+msgid "**name** (str): Name of the file."
+msgstr "**name** (str): Имя файла."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:49
+msgid "**mediaType** (str): MIME type of the file."
+msgstr "**mediaType** (str): MIME-тип файла."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:50
+msgid ""
+"**content** (str or File): Content of the file. If `file` is True, it "
+"will be a reference to the file; otherwise, it will be base64-encoded "
+"content."
+msgstr ""
+"**content** (str или File): Содержимое файла. Если `file` установлен в "
+"True, это будет ссылка на файл; в противном случае содержимое будет "
+"закодировано base64."
+
+#: of vstutils.api.fields.NamedBinaryFileInJsonField:54
+msgid ""
+"The client application will display the content as a download link. Users"
+" will interact with the binary file through the application, with the "
+"exchange between the Rest API and the client occurring through the "
+"presented JSON object."
+msgstr ""
+"Приложение клиента отобразит содержимое в виде ссылки для скачивания. "
+"Пользователи будут взаимодействовать с бинарным файлом через приложение, "
+"а обмен между Rest API и клиентом будет происходить через представленный "
+"объект JSON."
 
 #: of vstutils.api.fields.NamedBinaryImageInJsonField:1
 msgid ""
-"Extends :class:`.NamedBinaryFileInJsonField` to represent image on "
-"frontend (if binary image is valid). Validate this field with "
-":class:`vstutils.api.validators.ImageValidator`."
+"Field that represents an image in JSON format, extending "
+":class:`.NamedBinaryFileInJsonField`."
 msgstr ""
-"Расширяет :class:`.NamedBinaryFileInJsonField` для view изображения на "
-"фронтенде (если бинарное изображение валидно). Валидируйте это поле с "
-"помощью :class:`vstutils.api.validators.ImageValidator`."
+"Поле, представляющее изображение в формате JSON, расширяющее "
+":class:`.NamedBinaryFileInJsonField`."
+
+#: of vstutils.api.fields.NamedBinaryImageInJsonField:3
+msgid ""
+"Color to fill the area not covered by the image after cropping. "
+"Transparent by default but will be black if the image format does not "
+"support transparency. Can be any valid CSS color."
+msgstr ""
+"Цвет для заполнения области, не покрытой изображением после обрезки. По "
+"умолчанию прозрачный, но будет черным, если формат изображения не "
+"поддерживает прозрачность. Может быть любым допустимым цветом CSS."
+
+#: of vstutils.api.fields.NamedBinaryImageInJsonField:8
+msgid ""
+"This field is designed for handling image files alongside their names in "
+":class:`django.db.models.CharField` or "
+":class:`django.db.models.TextField` model fields. It extends the "
+"capabilities of :class:`.NamedBinaryFileInJsonField` to specifically "
+"handle images."
+msgstr ""
+"Это поле предназначено для хранения бинарных файлов вместе с их именами в"
+" полях модели :class:`django.db.models.CharField` или "
+":class:`django.db.models.TextField`. Оно расширяет возможности "
+":class:`.NamedBinaryFileInJsonField` для специальной обработки "
+"изображений."
+
+#: of vstutils.api.fields.NamedBinaryImageInJsonField:12
+msgid ""
+"Additionally, this field validates the image using the following "
+"validators: - :class:`vstutils.api.validators.ImageValidator` - "
+":class:`vstutils.api.validators.ImageResolutionValidator` - "
+":class:`vstutils.api.validators.ImageHeightValidator`"
+msgstr ""
+"Кроме того, это поле проверяет изображение с использованием следующих "
+"валидаторов: - :class:`vstutils.api.validators.ImageValidator` - "
+":class:`vstutils.api.validators.ImageResolutionValidator` - "
+":class:`vstutils.api.validators.ImageHeightValidator`"
+
+#: of vstutils.api.fields.NamedBinaryImageInJsonField:17
+msgid ""
+"When saving and with the added validators, the field will display a "
+"corresponding window for adjusting the image to the specified parameters,"
+" providing a user-friendly interface for managing images."
+msgstr ""
+"При сохранении и с добавленными валидаторами поле будет отображать "
+"соответствующее окно для настройки изображения по указанным параметрам, "
+"предоставляя удобный интерфейс для управления изображениями."
+
+#: of vstutils.api.fields.NamedBinaryImageInJsonField:20
+msgid "The image file is represented in JSON with the following properties:"
+msgstr "Бинарный файл представлен в формате JSON со следующими свойствами:"
+
+#: of vstutils.api.fields.NamedBinaryImageInJsonField:22
+msgid "**name** (str): Name of the image file."
+msgstr "**name** (str): Имя файла изображения."
+
+#: of vstutils.api.fields.NamedBinaryImageInJsonField:23
+msgid "**mediaType** (str): MIME type of the image file."
+msgstr "**mediaType** (str): MIME-тип файла изображения."
+
+#: of vstutils.api.fields.NamedBinaryImageInJsonField:24
+msgid ""
+"**content** (str or File): Content of the image file. If `file` is True, "
+"it will be a reference to the image file; otherwise, it will be "
+"base64-encoded content."
+msgstr ""
+"**content** (str или File): Содержимое файла изображения. Если `file` "
+"установлен в True, это будет ссылка на файл; в противном случае "
+"содержимое будет закодировано base64."
+
+#: of vstutils.api.fields.NamedBinaryImageInJsonField:28
+msgid ""
+"The client application will display the content as an image. Users will "
+"interact with the image through the application, with the exchange "
+"between the Rest API and the client occurring through the presented JSON "
+"object."
+msgstr ""
+"Приложение клиента отобразит содержимое как изображение. Пользователи "
+"будут взаимодействовать с изображением через приложение, и обмен между "
+"Rest API и клиентом будет происходить через представленный объект JSON."
 
 #: of vstutils.api.fields.PasswordField:1
 msgid ""
@@ -1677,19 +2352,86 @@ msgstr ""
 
 #: of vstutils.api.fields.PhoneField:1
 msgid ""
-"Extends class 'rest_framework.serializers.CharField'. Field for phone in "
-"international format"
+"Extends the 'rest_framework.serializers.CharField' class. Field for "
+"representing a phone number in international format."
 msgstr ""
-"Расширяет класс 'rest_framework.serializers.CharField'. Поле для ввода "
-"номера телефона в международном формате"
+"Расширяет класс 'rest_framework.serializers.CharField'. Поле для "
+"представления номера телефона в международном формате."
+
+#: of vstutils.api.fields.PhoneField:4
+msgid ""
+"This field is designed for capturing and validating phone numbers in "
+"international format. It extends the "
+"'rest_framework.serializers.CharField' and adds custom validation to "
+"ensure that the phone number contains only digits."
+msgstr ""
+"Это поле предназначено для захвата и валидации номеров телефонов в "
+"международном формате. Оно расширяет класс "
+"'rest_framework.serializers.CharField' и добавляет пользовательскую "
+"валидацию для обеспечения того, что номер телефона содержит только цифры."
+
+#: of vstutils.api.fields.PhoneField:9
+msgid "In a serializer, include this field to handle phone numbers:"
+msgstr "В сериализаторе включите это поле для обработки номеров телефонов:"
+
+#: of vstutils.api.fields.PhoneField:16
+msgid ""
+"This example assumes a serializer where the ``phone_number`` field "
+"represents a phone number in international format. The ``PhoneField`` "
+"will then handle the validation and representation of phone numbers, "
+"making it convenient for users to input standardized phone numbers."
+msgstr ""
+"В этом примере предполагается, что сериализатор имеет поле "
+"`phone_number`, представляющее номер телефона в международном формате. "
+"`PhoneField` затем обработает валидацию и представление номеров "
+"телефонов, облегчая пользователям ввод стандартизированных номеров "
+"телефонов."
+
+#: of vstutils.api.fields.PhoneField:21
+msgid ""
+"The field will be displayed in the client application as an input field "
+"for entering a phone number, including the country code."
+msgstr ""
+"Поле будет отображаться в клиентском приложении в виде поля ввода для "
+"ввода номера телефона, включая код страны."
 
 #: of vstutils.api.fields.QrCodeField:1
+msgid "A versatile field for encoding various types of data into QR codes."
+msgstr "Универсальное поле для кодирования различных типов данных в QR-коды."
+
+#: of vstutils.api.fields.QrCodeField:3
 msgid ""
-"Simple string field. The field is going to represent as QrCode in user "
-"interface."
+"This field can encode a wide range of data into a QR code representation,"
+" making it useful for displaying QR codes in the user interface. It works"
+" by serializing or deserializing data using the specified child field."
 msgstr ""
-"Простое строковое поле. В пользовательском интерфейсе оно будет "
-"отображено как QR-код."
+"Это поле может закодировать различные типы данных в представление "
+"QR-кода, что делает его полезным для отображения QR-кодов в "
+"пользовательском интерфейсе. Оно работает путем сериализации или "
+"десериализации данных с использованием указанного дочернего поля."
+
+#: of vstutils.api.fields.QrCodeField:11
+msgid ""
+"Suppose you have a model with a `data` field, and you want to display its"
+" QR code representation in the GUI. You can use `QrCodeField` in your "
+"serializer:"
+msgstr ""
+"Предположим, у вас есть модель с полем `data`, и вы хотите отображать его"
+" представление в виде QR-кода в графическом интерфейсе пользователя. Вы "
+"можете использовать `QrCodeField` в своем сериализаторе:"
+
+#: of vstutils.api.fields.QrCodeField:26
+msgid ""
+"In this example, the qr_code_data field will represent the QR code "
+"generated from the data field in the GUI. Users can interact with this QR"
+" code, and if their device supports it, they can scan the code for "
+"further actions."
+msgstr ""
+"В этом примере поле qr_code_data будет представлять QR-код, "
+"сгенерированный из поля данных в графическом интерфейсе пользователя. "
+"Пользователи могут взаимодействовать с этим QR-кодом, и, если их "
+"устройство поддерживает, они могут сканировать код для дополнительных "
+"действий."
 
 #: of vstutils.api.fields.RatingField:1
 msgid ""
@@ -1752,6 +2494,15 @@ msgstr ""
 "Поле для редиректа по строке. Часто используется в экшенах для редиректа "
 "после выполнения."
 
+#: of vstutils.api.fields.RedirectCharField:4
+#: vstutils.api.fields.RedirectIntegerField:4
+msgid ""
+"Effective only in GUI. Works similar to "
+":class:`rest_framework.fields.IntegerField` in API."
+msgstr ""
+"Действует только в графическом интерфейсе. Работает аналогично "
+":class:`rest_framework.fields.IntegerField` в API."
+
 #: of vstutils.api.fields.RedirectFieldMixin:1
 msgid ""
 "Field mixin indicates that this field is used to send redirect address to"
@@ -1790,86 +2541,145 @@ msgstr ""
 
 #: of vstutils.api.fields.RelatedListField:1
 msgid ""
-"Extends class :class:`.VSTCharField`. With this field you can output "
-"reverse ForeignKey relation as a list of related instances."
+"Extends :class:`.VSTCharField` to represent a reverse ForeignKey relation"
+" as a list of related instances."
 msgstr ""
-"Расширяет класс :class:`.VSTCharField`. С этим полем вы можете получить "
-"обратное ForeignKey отношение как список связанных экземпляров."
+"Расширяет класс :class:`.VSTCharField`. Представляет обратное ForeignKey "
+"отношение в виде списка связанных экземпляров."
 
-#: of vstutils.api.fields.RelatedListField:4
+#: of vstutils.api.fields.RelatedListField:3
 msgid ""
-"To use it, you specify 'related_name' kwarg (related_manager for reverse "
-"ForeignKey) and 'fields' kwarg (list or tuple of fields from related "
-"model, which needs to be included)."
+"This field allows you to output the reverse ForeignKey relation as a list"
+" of related instances. To use it, specify the ``related_name`` kwarg "
+"(related manager for reverse ForeignKey) and the ``fields`` kwarg (list "
+"or tuple of fields from the related model to be included)."
 msgstr ""
-"Для использования следует указать kwarg 'related_name' (related_manager "
-"для обратного ForeignKey) и kwarg 'fields' (список или кортеж полей из "
-"связанной модели, которая должна быть включена)."
+"Это поле позволяет представить обратное ForeignKey отношение в виде "
+"списка связанных экземпляров. Для использования укажите ``related_name`` "
+"(related manager для обратного ForeignKey) и ``fields`` (список или "
+"кортеж полей из связанной модели, которые должны быть включены)."
 
 #: of vstutils.api.fields.RelatedListField:7
 msgid ""
-"By default :class:`.VSTCharField` used to serialize all field values and "
-"represent it on frontend. You can specify `serializer_class` and override"
-" fields as you need. For example title, description and other field "
-"properties can be set to customize frontend behavior."
+"By default, :class:`.VSTCharField` is used to serialize all field values "
+"and represent them on the frontend. You can specify the "
+"`serializer_class` and override fields as needed. For example, title, "
+"description, and other field properties can be set to customize frontend "
+"behavior."
 msgstr ""
-"По умолчанию :class:`.VSTCharField` используется для сериализации всех "
-"значений поля и отображения их на фронтенде. Вы можете указать "
-"`serializer_class` и переопределить поля, которые вам нужны. Например, "
-"title, description или другие поля, свойства которых можно задать так, "
-"чтобы определить новое поведение на фронтенде."
+"По умолчанию используется :class:`.VSTCharField` для сериализации всех "
+"значений поля и их представления на фронтенде. Вы можете указать "
+"`serializer_class` и переопределить поля по мере необходимости. Например,"
+" заголовок, описание и другие свойства полей можно установить для "
+"настройки поведения на фронтенде."
 
 #: of vstutils.api.fields.RelatedListField:12
-msgid "name of a related manager for reverse foreign key"
-msgstr "имя related manager'a для обратного foreign key отношения"
+msgid "Name of a related manager for reverse ForeignKey."
+msgstr "Имя related manager для обратного ForeignKey."
 
 #: of vstutils.api.fields.RelatedListField:15
-msgid "list of related model fields."
-msgstr "список связанных полей модели."
+msgid "List of related model fields."
+msgstr "Список связанных полей модели."
 
 #: of vstutils.api.fields.RelatedListField:18
 msgid ""
-"determines how field are represented on frontend. Must be either 'list' "
-"or 'table'."
+"Determines how fields are represented on the frontend. Must be either "
+"``list`` or ``table``."
 msgstr ""
-"определяет, как поля будут отображены на фронтенде. Должен быть либо "
-"'list', либо 'table'."
+"Определяет, как поля будут представлены на фронтенде. Должен быть либо "
+"``list``, либо ``table``."
 
 #: of vstutils.api.fields.RelatedListField:20
 msgid ""
-"includes custom handlers, where key: field_name, value: callable_obj that"
-" takes params: instance[dict], fields_mapping[dict], model, "
-"field_name[str]"
+"Custom handlers mapping, where key: field_name, value: callable_obj that "
+"takes params: instance[dict], fields_mapping[dict], model, "
+"field_name[str]."
 msgstr ""
-"включает пользовательские handler'ы, где ключ: field_name, значение: "
-"callable_obj, который принимает параметры: instance[dict], "
-"fields_mapping[dict], model, field_name[str]"
+"Отображение пользовательских обработчиков, где ключ: field_name, "
+"значение: callable_obj, принимающий параметры: instance[dict], "
+"fields_mapping[dict], model, field_name[str]."
 
-#: of vstutils.api.fields.RelatedListField:24
+#: of vstutils.api.fields.RelatedListField:25
 msgid ""
-"Serializer to customize types of fields, if no serializer provided "
-":class:`.VSTCharField` will be used for every field in `fields` list"
+"Serializer to customize types of fields. If no serializer is provided, "
+":class:`.VSTCharField` will be used for every field in the `fields` list."
 msgstr ""
-"Сериализатор для определения типов полей, если не задано, будет "
-"использован :class:`.VSTCharField` для каждого поля из списка `fields`"
+"Сериализатор для настройки типов полей. Если сериализатор не "
+"предоставлен, будет использован :class:`.VSTCharField` для каждого поля "
+"из списка `fields`."
 
 #: of vstutils.api.fields.SecretFileInString:1
 msgid ""
-"Field extends :class:`.FileInStringField`, but hides it's value in admin "
-"interface."
+"This field extends :class:`.FileInStringField` but hides its value in the"
+" admin interface."
 msgstr ""
 "Поле, расширяющее :class:`.FileInStringField`, но скрывающее свое "
 "значение в интерфейсе администратора."
 
 #: of vstutils.api.fields.TextareaField:1
-msgid "Field containing multiline string."
-msgstr "Поле, содержащее многострочный текст."
+msgid "A specialized field that allows the input and display of multiline text."
+msgstr ""
+
+#: of vstutils.api.fields.TextareaField:8
+msgid ""
+"Suppose you have a model with a `description` field that can contain "
+"multiline text. You can use `TextareaField` in your serializer to enable "
+"users to input and view multiline text in the GUI:"
+msgstr ""
 
 #: of vstutils.api.fields.UptimeField:1
-msgid "Time duration field, in seconds. May be used to compute some uptime."
+msgid ""
+"Time duration field, in seconds, specifically designed for computing and "
+"displaying system uptime."
 msgstr ""
-"Поле продолжительности времени, в секундах. Может быть использовано для "
-"подсчета времени работы чего-либо."
+"Поле продолжительности времени, в секундах, специально разработанное для "
+"вычисления и отображения времени работы системы."
+
+#: of vstutils.api.fields.UptimeField:3
+msgid ""
+"This field is effective only in the GUI and behaves similarly to "
+":class:`rest_framework.fields.IntegerField` in the API."
+msgstr ""
+"Это поле действует только в графическом интерфейсе и ведет себя "
+"аналогично :class:`rest_framework.fields.IntegerField` в API."
+
+#: of vstutils.api.fields.UptimeField:6
+msgid ""
+"The `UptimeField` class transforms time in seconds into a user-friendly "
+"representation on the frontend. It intelligently selects the most "
+"appropriate pattern from the following templates:"
+msgstr ""
+"Класс `UptimeField` преобразует время в секундах в удобочитаемое "
+"представление на фронтенде. Он интеллектуально выбирает наиболее "
+"подходящий шаблон из следующих:"
+
+#: of vstutils.api.fields.UptimeField:9
+msgid "``HH:mm:ss`` (e.g., 23:59:59)"
+msgstr ""
+
+#: of vstutils.api.fields.UptimeField:10
+msgid "``dd HH:mm:ss`` (e.g., 01d 00:00:00)"
+msgstr ""
+
+#: of vstutils.api.fields.UptimeField:11
+msgid "``mm dd HH:mm:ss`` (e.g., 01m 30d 00:00:00)"
+msgstr ""
+
+#: of vstutils.api.fields.UptimeField:12
+msgid "``yy mm dd HH:mm:ss`` (e.g., 99y 11m 30d 22:23:24)"
+msgstr ""
+
+#: of vstutils.api.fields.UptimeField:21
+msgid ""
+"This example assumes a serializer where the `uptime` field represents a "
+"time duration in seconds. The `UptimeField` will then display the "
+"duration in a human-readable format on the frontend, making it convenient"
+" for users to interpret and input values."
+msgstr ""
+"В этом примере предполагается, что сериализатор имеет поле `uptime`, "
+"представляющее продолжительность времени в секундах. `UptimeField` затем "
+"отобразит продолжительность в удобочитаемом формате на фронтенде, "
+"облегчая пользователям интерпретацию и ввод значений."
 
 #: of vstutils.api.fields.VSTCharField:1
 msgid ""
@@ -1881,21 +2691,72 @@ msgstr ""
 
 #: of vstutils.api.fields.WYSIWYGField:1
 msgid ""
-"On frontend renders https://ui.toast.com/tui-editor. Saves data as "
-"markdown and escapes all html tags."
+"Extends the :class:`.TextareaField` class to render the "
+"https://ui.toast.com/tui-editor on the frontend."
 msgstr ""
-"На фронтенде отображается https://ui.toast.com/tui-editor. Сохраняет "
-"данные в формате markdown, экранируя все html-теги."
+"Расширяет класс :class:`.TextareaField` для отображения редактора "
+"https://ui.toast.com/tui-на фронтенде."
 
-#: of vstutils.api.fields.WYSIWYGField:4
-msgid "html-escape input. Enabled by default."
-msgstr "экранирование входящих html-символов. Включено по умолчанию."
+#: of vstutils.api.fields.WYSIWYGField:3
+msgid ""
+"This field is specifically designed for rendering a WYSIWYG editor on the"
+" frontend, using the https://ui.toast.com/tui-editor. It saves data as "
+"markdown and escapes all HTML tags."
+msgstr ""
+"Это поле специально разработано для отображения WYSIWYG-редактора на "
+"фронтенде с использованием https://ui.toast.com/tui-editor. Сохраняет "
+"данные в формате markdown и экранирует все HTML-теги."
 
-#: ../../backend.rst:49
+#: of vstutils.api.fields.WYSIWYGField:6
+msgid ""
+"HTML-escape input. Enabled by default to prevent HTML injection "
+"vulnerabilities."
+msgstr ""
+"Экранирование HTML-тегов для входных данных. Включено по умолчанию для "
+"предотвращения уязвимостей HTML-инъекций."
+
+#: of vstutils.api.fields.WYSIWYGField:10
+msgid ""
+"In a serializer, include this field to render a WYSIWYG editor on the "
+"frontend:"
+msgstr ""
+"Включите это поле в сериализаторе, чтобы отобразить WYSIWYG-редактор на "
+"фронтенде:"
+
+#: of vstutils.api.fields.WYSIWYGField:17
+msgid ""
+"This example assumes a serializer where the ``wysiwyg_content`` field "
+"represents data to be rendered in a WYSIWYG editor on the frontend. The "
+"``WYSIWYGField`` ensures that the content is saved as markdown and HTML "
+"tags are escaped to enhance security."
+msgstr ""
+"В этом примере предполагается, что сериализатор имеет поле "
+"`wysiwyg_content`, представляющее данные, которые должны быть отображены "
+"в WYSIWYG-редакторе на фронтенде. `WYSIWYGField` гарантирует, что "
+"содержимое сохраняется в формате markdown, и HTML-теги экранируются для "
+"повышения безопасности."
+
+#: of vstutils.api.fields.WYSIWYGField:22
+msgid ""
+"Enabling the ``escape`` option is recommended to prevent potential HTML "
+"injection vulnerabilities."
+msgstr ""
+"Рекомендуется включить опцию ``escape`` для предотвращения потенциальных "
+"уязвимостей HTML-инъекций."
+
+#: of vstutils.api.fields.WYSIWYGField:25
+msgid ""
+"The rendering on the frontend is achieved using the https://ui.toast.com"
+"/tui-editor."
+msgstr ""
+"Отображение на фронтенде достигается с использованием "
+"https://ui.toast.com/tui-editor."
+
+#: ../../backend.rst:56
 msgid "Validators"
 msgstr "Валидаторы"
 
-#: ../../backend.rst:51
+#: ../../backend.rst:58
 msgid "There are validation classes for fields."
 msgstr "Классы для валидации полей."
 
@@ -2001,10 +2862,6 @@ msgstr "Обертка для ImageBaseSizeValidator, проверяющая т�
 msgid "Class for regular expression based validation"
 msgstr "Класс для валидации на основе регулярного выражения"
 
-#: of vstutils.api.validators.RegularExpressionValidator
-msgid "Raises"
-msgstr "Выбрасывает"
-
 #: of vstutils.api.validators.RegularExpressionValidator:3
 msgid "in case value does not match regular expression"
 msgstr "в случае, если значение не соответствует регулярному выражению"
@@ -2037,58 +2894,6 @@ msgstr "Необходимая ширина"
 msgid "Required height"
 msgstr "Необходимая высота"
 
-#: of vstutils.api.base.GenericViewSet.create_action_serializer
-#: vstutils.api.filters.extra_filter vstutils.api.filters.name_filter
-#: vstutils.api.validators.resize_image
-#: vstutils.api.validators.resize_image_from_to
-#: vstutils.middleware.BaseMiddleware.handler
-#: vstutils.middleware.BaseMiddleware.request_handler
-#: vstutils.tests.BaseTestCase.bulk
-#: vstutils.tests.BaseTestCase.bulk_transactional
-#: vstutils.tests.BaseTestCase.endpoint_call
-#: vstutils.tests.BaseTestCase.get_count
-#: vstutils.tests.BaseTestCase.get_model_class
-#: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.get_url
-#: vstutils.utils.BaseVstObject.get_django_settings
-#: vstutils.utils.Executor.aexecute vstutils.utils.Executor.execute
-#: vstutils.utils.Executor.write_output vstutils.utils.ModelHandlers.get_object
-#: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
-#: vstutils.utils.decode vstutils.utils.encode vstutils.utils.get_render
-#: vstutils.utils.list_to_choices vstutils.utils.send_template_email_handler
-#: vstutils.utils.tmp_file.write
-msgid "Returns"
-msgstr "Возвращает"
-
-#: of vstutils.api.base.GenericViewSet.create_action_serializer
-#: vstutils.api.endpoint.EndpointViewSet.get
-#: vstutils.api.endpoint.EndpointViewSet.get_client
-#: vstutils.api.endpoint.EndpointViewSet.get_serializer
-#: vstutils.api.endpoint.EndpointViewSet.get_serializer_context
-#: vstutils.api.endpoint.EndpointViewSet.operate
-#: vstutils.api.endpoint.EndpointViewSet.post
-#: vstutils.api.endpoint.EndpointViewSet.put vstutils.api.filters.extra_filter
-#: vstutils.api.filters.name_filter vstutils.api.validators.resize_image
-#: vstutils.api.validators.resize_image_from_to
-#: vstutils.middleware.BaseMiddleware.get_response_handler
-#: vstutils.middleware.BaseMiddleware.handler
-#: vstutils.middleware.BaseMiddleware.request_handler
-#: vstutils.tasks.TaskClass.do vstutils.tests.BaseTestCase.bulk
-#: vstutils.tests.BaseTestCase.bulk_transactional
-#: vstutils.tests.BaseTestCase.endpoint_call
-#: vstutils.tests.BaseTestCase.get_count
-#: vstutils.tests.BaseTestCase.get_model_class
-#: vstutils.tests.BaseTestCase.get_model_filter
-#: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.get_url
-#: vstutils.tests.BaseTestCase.patch
-#: vstutils.tests.BaseTestCase.patch_field_default
-#: vstutils.tests.BaseTestCase.random_name vstutils.utils.Executor.write_output
-#: vstutils.utils.ModelHandlers.get_object
-#: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
-#: vstutils.utils.create_view vstutils.utils.decode vstutils.utils.encode
-#: vstutils.utils.get_render vstutils.utils.tmp_file.write
-msgid "Return type"
-msgstr "Тип возвращаемого значения"
-
 #: of vstutils.api.validators.resize_image_from_to:1
 msgid ""
 "Utility function to resize image proportional to values between min and "
@@ -2108,7 +2913,7 @@ msgstr ""
 "Словарь с максимальным/минимальным ограничениями, например ``{'width': "
 "{'min': 300, 'max: 600'}, 'height':  {'min': 400, 'max: 800'}}``"
 
-#: ../../backend.rst:57
+#: ../../backend.rst:64
 msgid "Serializers"
 msgstr "Сериализаторы"
 
@@ -2123,27 +2928,59 @@ msgstr ""
 "<https://www.django-rest-framework.org/api-guide/serializers/>`_."
 
 #: of vstutils.api.serializers.BaseSerializer:1
-msgid ""
-"Default serializer with logic to work with objects. Read more in `DRF "
-"serializer's documentation <https://www.django-rest-framework.org/api-"
-"guide/serializers/#serializers>`_ how to create Serializers and work with"
-" them."
-msgstr ""
-"Стандартный сериализатор с логикой работы с объектами. Читайте подробнее "
-"в `документации сериализатора <https://www.django-rest-framework.org/api-"
-"guide/serializers/#serializers>`_ как создавать сериализаторы и работать "
-"с ними."
+msgid "Default serializer with logic to work with objects."
+msgstr "Сериализатор по умолчанию с логикой для работы с объектами."
 
-#: of vstutils.api.serializers.BaseSerializer:7
+#: of vstutils.api.serializers.BaseSerializer:3
 msgid ""
-"You can also setup ``generated_fields`` in class attribute ``Meta`` to "
-"get serializer with default CharField fields. Setup attribute "
-"``generated_field_factory`` to change default fabric method."
+"This serializer serves as a base class for creating serializers to work "
+"with non-model objects. It extends the "
+"'rest_framework.serializers.Serializer' class and includes additional "
+"logic for handling object creation and updating."
+msgstr ""
+"Этот сериализатор служит базовым классом для создания сериализаторов для "
+"работы с объектами, не являющимися моделями. Он расширяет класс "
+"'rest_framework.serializers.Serializer' и включает дополнительную логику "
+"для обработки создания и обновления объектов."
+
+#: of vstutils.api.serializers.BaseSerializer:8
+msgid ""
+"You can set the ``generated_fields`` attribute in the ``Meta`` class to "
+"automatically include default CharField fields. You can also customize "
+"the field creation using the ``generated_field_factory`` attribute."
 msgstr ""
 "Вы также можете настроить ``generated_fields`` в атрибуте класса "
 "``Meta``, чтобы получить сериализатор с полями CharField по умолчанию. "
 "Настройте атрибут ``generated_field_factory`` чтобы изменить фабричный "
 "метод по умолчанию."
+
+#: of vstutils.api.serializers.BaseSerializer:21
+msgid ""
+"In this example, the ``MySerializer`` class extends ``BaseSerializer`` "
+"and includes an additional generated field."
+msgstr ""
+"В этом примере класс ``MySerializer`` расширяет ``BaseSerializer`` и "
+"включает дополнительное созданное поле."
+
+#: of vstutils.api.serializers.DisplayMode:1
+msgid ""
+"For any serializer displayed on frontend property `_display_mode` can be "
+"set to one of this values."
+msgstr ""
+"Для любого сериализатора, показанного на фронтенде, аттрибут "
+"`_display_mode` может принимать одно из следующих значений."
+
+#: ../../docstring of vstutils.api.serializers.DisplayMode.DEFAULT:1
+msgid "Will be used if no mode provided."
+msgstr "Используется, когда не задано никакого режима."
+
+#: ../../docstring of vstutils.api.serializers.DisplayMode.STEP:1
+msgid ""
+"Each properties group displayed as separate tab. On creation displayed as"
+" multiple steps."
+msgstr ""
+"Каждая группа параметров отображается на раздельных вкладках. При "
+"создании выглядит как пошаговый мастер."
 
 #: of vstutils.api.serializers.EmptySerializer:1
 msgid ""
@@ -2161,28 +2998,52 @@ msgid ""
 "documentation <https://www.django-rest-framework.org/api-"
 "guide/serializers/#modelserializer>`_ how to create Model Serializers. "
 "This serializer matches model fields to extended set of serializer "
-"fields. List of available pairs specified in  "
+"fields."
+msgstr ""
+"Сериализатор модели по умолчанию, основанный на "
+":class:`rest_framework.serializers.ModelSerializer`. Узнайте больше в "
+"`документации DRF <https://www.django-rest-framework.org/api-"
+"guide/serializers/#modelserializer>`_ о том, как создавать сериализаторы "
+"модели. Этот сериализатор сопоставляет поля модели с расширенным набором "
+"полей сериализатора."
+
+#: of vstutils.api.serializers.VSTSerializer:6
+msgid ""
+"List of available pairs specified in  "
 "`VSTSerializer.serializer_field_mapping`. For example, to set "
 ":class:`vstutils.api.fields.FkModelField` in serializer use "
 ":class:`vstutils.models.fields.FkModelField` in a model."
 msgstr ""
-"Стандартный сериализатор модели, основанный на "
-":class:`rest_framework.serializers.ModelSerializer`. Читайте подробнее в "
-"`документации DRF <https://www.django-rest-framework.org/api-"
-"guide/serializers/#modelserializer>`_, как создавать сериализаторы "
-"модели. Этот сериализатор сопоставляет полям модели расширенный набор "
-"полей сериализатора. Список доступных пар описан в "
-"`VSTSerializer.serializer_field_mapping`. Например, чтобы использовать "
-":class:`vstutils.api.fields.FkModelField` в сериализаторе, задайте "
+"Список доступных пар, указанных в "
+"`VSTSerializer.serializer_field_mapping`. Например, чтобы установить "
+":class:`vstutils.api.fields.FkModelField` в сериализаторе, используйте "
 ":class:`vstutils.models.fields.FkModelField` в модели."
 
-#: ../../backend.rst:63
+#: of vstutils.api.serializers.VSTSerializer:21
+msgid ""
+"In this example, the ``MySerializer`` class extends ``VSTSerializer`` and"
+" is associated with the ``MyModel`` model."
+msgstr ""
+"В этом примере класс ``MySerializer`` расширяет ``VSTSerializer`` и "
+"ассоциируется с моделью ``MyModel``."
+
+#: ../../backend.rst:70
 msgid "Views"
 msgstr "Представления"
 
-#: of vstutils.api.base:1
-msgid "Default ViewSets for web-api."
-msgstr "Стандартные ViewSet'ы для web-api."
+#: ../../backend.rst:71
+msgid ""
+"VSTUtils extends the standard behavior of ViewSets from Django REST "
+"Framework (DRF) by providing built-in mechanisms for managing model views"
+" that cater to the most commonly encountered development patterns. This "
+"framework enhancement simplifies the process of creating robust and "
+"scalable web applications by offering a rich set of tools and utilities "
+"that automate much of the boilerplate code required in API development. "
+"Through these extensions, developers can easily implement custom business"
+" logic, data validation, and access control with minimal effort, thus "
+"significantly reducing development time and improving code "
+"maintainability."
+msgstr "VSTUtils расширяет стандартное поведение ViewSets из Django REST Framework (DRF), предоставляя встроенные механизмы для управления представлениями моделей, которые удовлетворяют наиболее часто встречающимся паттернам разработки. Это улучшение фреймворка упрощает процесс создания надежных и масштабируемых веб-приложений, предлагая богатый набор инструментов и утилит, которые автоматизируют большую часть шаблонного кода, необходимого при разработке API. Благодаря этим расширениям, разработчики могут легко реализовать пользовательскую бизнес-логику, валидацию данных и контроль доступа с минимальными усилиями, тем самым значительно сокращая время разработки и улучшая поддерживаемость кода."
 
 #: of vstutils.api.base.CopyMixin:1
 msgid "Mixin for viewsets which adds `copy` endpoint to view."
@@ -2370,10 +3231,6 @@ msgstr ""
 "Viewset, предоставляющий CRUD-экшены над моделью. Наследуется от "
 ":class:`.GenericViewSet`."
 
-#: of vstutils.api.base.ModelViewSet vstutils.api.responses.BaseResponseClass
-msgid "Variables"
-msgstr "Переменные"
-
 #: of vstutils.api.base.ModelViewSet:3
 msgid "DB model with data."
 msgstr "Модель БД с данными."
@@ -2539,11 +3396,360 @@ msgstr "Заменить заголовок действия."
 msgid "Setup action icon classes."
 msgstr "Настроить классы иконок действия."
 
-#: ../../backend.rst:73
+#: ../../backend.rst:85
+msgid ""
+"**An ETag** (Entity Tag) is a mechanism defined by the HTTP protocol for "
+"web cache validation and to manage resource versions efficiently. It "
+"represents a unique identifier for the content of a resource at a given "
+"time, allowing client and server to determine if the resource has changed"
+" without downloading the entire content. This mechanism significantly "
+"reduces bandwidth and improves web performance by enabling conditional "
+"requests. Servers send ETags in responses to clients, which can cache "
+"these tags along with the resources. On subsequent requests, clients send"
+" the cached ETag back to the server in an If-None-Match header. If the "
+"resource has not changed (the ETag matches), the server responds with a "
+"304 Not Modified status, indicating that the client's cached version is "
+"up-to-date."
+msgstr ""
+"**ETag** (Entity Tag) — это механизм, определенный протоколом HTTP для "
+"проверки кэша веба и эффективного управления версиями ресурсов. Он "
+"представляет собой уникальный идентификатор содержимого ресурса на "
+"определенный момент времени, позволяя клиенту и серверу определить, "
+"изменился ли ресурс без необходимости загружать весь контент. Этот "
+"механизм значительно сокращает использование полосы пропускания и "
+"улучшает производительность веба за счет использования условных запросов."
+" Серверы отправляют ETags в ответах клиентам, которые могут кэшировать "
+"эти теги вместе с ресурсами. При последующих запросах клиенты отправляют "
+"кэшированный ETag обратно на сервер в заголовке If-None-Match. Если "
+"ресурс не изменился (ETag совпадает), сервер отвечает статусом 304 Not "
+"Modified, указывая, что кэшированная версия клиента актуальна."
+
+#: ../../backend.rst:93
+msgid ""
+"Beyond GET requests, ETags can also be instrumental in other HTTP methods"
+" like PUT or DELETE to ensure consistency and prevent unintended "
+"overwrites or deletions, known as \"mid-air collision avoidance.\" By "
+"including an ETag in the If-Match header of non-GET requests, clients "
+"signal that the operation should proceed only if the resource's current "
+"state matches the specified ETag, thus safeguarding against concurrent "
+"modifications by different clients. This application of ETags enhances "
+"the reliability and integrity of web applications by ensuring that "
+"operations are performed on the correct version of a resource."
+msgstr ""
+"Помимо GET-запросов, ETags также могут быть полезны в других методах "
+"HTTP, таких как PUT или DELETE, для обеспечения согласованности и "
+"предотвращения непреднамеренных перезаписей или удалений, известных как "
+"«избежание столкновений в воздухе». Включая ETag в заголовок If-Match "
+"не-GET запросов, клиенты сигнализируют, что операция должна продолжаться "
+"только в том случае, если текущее состояние ресурса соответствует "
+"указанному ETag, тем самым защищая от одновременных изменений разными "
+"клиентами. Это применение ETags повышает надежность и целостность "
+"веб-приложений, гарантируя выполнение операций с корректной версией "
+"ресурса."
+
+#: ../../backend.rst:99
+msgid "Here is main functionality provided for working with ETag's mechanism:"
+msgstr "Вот основные функции, предоставляемые для работы с механизмом ETag:"
+
+#: of vstutils.api.base.CachableHeadMixin:1
+msgid ""
+"A mixin designed to enhance caching for GET responses in Django REST "
+"framework views, leveraging the standard HTTP caching mechanism. It "
+"returns a 304 Not Modified status for reading requests like GET or HEAD "
+"when the ETag (Entity Tag) in the client's request matches the current "
+"resource state, and a 412 Precondition Failed status for writing requests"
+" when the condition fails. This approach reduces unnecessary network "
+"traffic and load times for unchanged resources, and ensures data "
+"consistency for write operations."
+msgstr ""
+"Миксин, предназначенный для улучшения кэширования ответов на GET-запросы "
+"в представлениях Django REST framework, используя стандартный механизм "
+"кэширования HTTP. Он возвращает статус 304 Not Modified для чтения "
+"запросов, таких как GET или HEAD, когда ETag (Entity Tag) в запросе "
+"клиента совпадает с текущим состоянием ресурса, и статус 412 Precondition"
+" Failed для записывающих запросов, когда условие не выполняется. Этот "
+"подход снижает ненужный сетевой трафик и время загрузки для неизменных "
+"ресурсов, а также обеспечивает согласованность данных для операций "
+"записи."
+
+#: of vstutils.api.base.CachableHeadMixin:8
+msgid ""
+"The mixin relies on :func:`.get_etag_value` and "
+":func:`.check_request_etag` functions within the `GenericViewSet` context"
+" to dynamically generate and validate ETags for resource states. By "
+"comparing ETags, it determines whether content has changed since the last"
+" request, allowing clients to reuse cached responses when applicable and "
+"preventing concurrent write operations from overwriting each other "
+"without acknowledgment of updated state."
+msgstr ""
+"Миксин использует функции :func:`.get_etag_value` и "
+":func:`.check_request_etag` в контексте `GenericViewSet` для "
+"динамического создания и проверки ETag для состояний ресурсов. Сравнивая "
+"ETag, он определяет, изменилось ли содержимое с момента последнего "
+"запроса, позволяя клиентам повторно использовать кэшированные ответы, "
+"когда это применимо, и предотвращая одновременные операции записи от "
+"перезаписи друг друга без подтверждения обновленного состояния."
+
+#: of vstutils.api.base.CachableHeadMixin:15
+msgid ""
+"This mixin is designed to work with models that inherit from "
+":class:`vstutils.models.BModel`. Usage with other models may not provide "
+"the intended caching behavior and could lead to incorrect application "
+"behavior."
+msgstr ""
+"Этот миксин разработан для работы с моделями, наследующими от "
+":class:`vstutils.models.BModel`. Использование с другими моделями может "
+"не обеспечить предполагаемое поведение кэширования и может привести к "
+"некорректному поведению приложения."
+
+#: of vstutils.api.base.CachableHeadMixin:20
+msgid ""
+"For effective use, ensure model classes are compatible with ETag "
+"generation and validation by implementing the :func:`.get_etag_value` "
+"method for custom ETag computation. Additionally, the "
+":class:`.GenericViewSet` using this mixin should properly handle ETag "
+"headers in client requests to leverage HTTP caching."
+msgstr ""
+"Для эффективного использования убедитесь, что классы моделей совместимы с"
+" генерацией и проверкой ETag, реализовав метод :func:`.get_etag_value` "
+"для пользовательского вычисления ETag. Кроме того, "
+":class:`.GenericViewSet`, использующий этот миксин, должен правильно "
+"обрабатывать заголовки ETag в запросах клиентов для использования "
+"кэширования HTTP."
+
+#: of vstutils.api.base.CachableHeadMixin:25
+msgid ""
+"An additional feature of the ``CachableHeadMixin`` is its automatic "
+"inclusion in the generated view from a :class:`vstutils.models.BModel` if"
+" the model class has the ``_cache_responses`` class attribute set to "
+"``True``. This enables automatic caching capabilities for models "
+"indicating readiness for HTTP-based caching, streamlining the process of "
+"optimizing response times and reducing server load for frequently "
+"accessed resources."
+msgstr ""
+"Дополнительной особенностью ``CachableHeadMixin`` является его "
+"автоматическое включение в сгенерированное представление из "
+":class:`vstutils.models.BModel`, если класс модели имеет атрибут класса "
+"`_cache_responses`, установленный в ``True``. Это позволяет "
+"автоматизировать возможности кэширования для моделей, указывающих на "
+"готовность к кэшированию на основе HTTP, оптимизируя процесс сокращения "
+"времени ответа и снижения нагрузки на сервер для часто доступных "
+"ресурсов."
+
+#: of vstutils.api.base.EtagDependency:1
+msgid ""
+"A custom enumeration that defines potential dependencies for ETag "
+"generation. It includes:"
+msgstr ""
+"Пользовательское перечисление, определяющее потенциальные зависимости для"
+" генерации ETag. Оно включает:"
+
+#: ../../docstring of vstutils.api.base.EtagDependency.LANG:1
+msgid "Indicates dependency on the user's language preference."
+msgstr "Указывает на зависимость от языковых предпочтений пользователя."
+
+#: ../../docstring of vstutils.api.base.EtagDependency.SESSION:1
+msgid "Indicates dependency on the user's session."
+msgstr "Указывает на зависимость от сессии пользователя."
+
+#: ../../docstring of vstutils.api.base.EtagDependency.USER:1
+msgid "Indicates dependency on the user's identity."
+msgstr "Указывает на зависимость от идентичности пользователя."
+
+#: of vstutils.api.base.check_request_etag:1
+msgid ""
+"The function plays a crucial role within the context of the ETag "
+"mechanism, providing a flexible way to validate client-side ETags against"
+" the server-side version for both cache validation and ensuring data "
+"consistency in web applications. It supports conditional handling of HTTP"
+" requests based on the match or mismatch of ETag values, accommodating "
+"various scenarios such as cache freshness checks and prevention of "
+"concurrent modifications."
+msgstr ""
+"Функция играет ключевую роль в контексте механизма ETag, предоставляя "
+"гибкий способ проверки ETags на стороне клиента по сравнению с версией на"
+" стороне сервера как для проверки кэша, так и для обеспечения "
+"согласованности данных в веб-приложениях. Она поддерживает условную "
+"обработку HTTP-запросов на основе совпадения или несовпадения значений "
+"ETag, адаптируясь к различным сценариям, таким как проверки свежести кэша"
+" и предотвращение одновременных изменений."
+
+#: of vstutils.api.base.check_request_etag:8
+msgid ""
+"The HTTP request object containing the client's headers, from which the "
+"ETag for comparison is retrieved."
+msgstr ""
+"Объект HTTP-запроса, содержащий заголовки клиента, из которых извлекается"
+" ETag для сравнения."
+
+#: of vstutils.api.base.check_request_etag:12
+msgid ""
+"The server-generated ETag value that represents the current state of the "
+"resource. This unique identifier is recalculated whenever the resource's "
+"content changes."
+msgstr ""
+"ETag, сгенерированный сервером, представляет текущее состояние ресурса. "
+"Этот уникальный идентификатор пересчитывается при каждом изменении "
+"содержимого ресурса."
+
+#: of vstutils.api.base.check_request_etag:16
+msgid ""
+"Specifies the HTTP header to look for the client's ETag. Defaults to "
+"\"If-None-Match\", commonly used in GET requests for cache validation. "
+"For operations requiring confirmation that the client is acting on the "
+"latest version of a resource (e.g., PUT or DELETE), \"If-Match\" should "
+"be used instead."
+msgstr ""
+"Указывает HTTP-заголовок для поиска ETag клиента. По умолчанию "
+"используется \"If-None-Match\", обычно используемый в GET-запросах для "
+"проверки кэша. Для операций, требующих подтверждения того, что клиент "
+"действует с последней версией ресурса (например, PUT или DELETE), вместо "
+"этого следует использовать \"If-Match\"."
+
+#: of vstutils.api.base.check_request_etag:22
+msgid ""
+"A function to compare the ETags. By default, this is set to "
+"``str.__eq__``, which checks for an exact match between the client's and "
+"server's ETags, suitable for validating caches with ``If-None-Match``. To"
+" handle ``If-Match`` scenarios, where the operation should proceed only "
+"if the ETags do not match, indicating the resource has been modified, "
+"``str.__ne__`` (not equal) can be used as the operation handler. This "
+"flexibility allows for precise control over how and when clients are "
+"allowed to read from or write to resources based on their version."
+msgstr ""
+"Функция для сравнения ETags. По умолчанию установлено ``str.__eq__``, "
+"которое проверяет точное совпадение ETags клиента и сервера, подходящее "
+"для проверки кэшей с ``If-None-Match``. Для обработки сценариев ``If-"
+"Match``, когда операция должна продолжаться только в случае, если ETags "
+"не совпадают, указывая на то, что ресурс был изменен, можно использовать "
+"``str.__ne__`` (не равно) в качестве обработчика операции. Эта гибкость "
+"позволяет точно контролировать, как и когда клиентам разрешено читать или"
+" записывать ресурсы на основе их версии."
+
+#: of vstutils.api.base.check_request_etag:30
+msgid ""
+"Returns a tuple containing the server's ETag and a boolean flag. The flag"
+" is ``True`` if the operation handler condition between the server's and "
+"client's ETag is met, indicating the request should proceed based on the "
+"matching logic defined by the operation handler; otherwise, it returns "
+"``False``."
+msgstr ""
+"Возвращает кортеж, содержащий ETag сервера и булев флаг. Флаг равен "
+"``True``, если условие обработчика операции между ETag сервера и клиента "
+"выполнено, указывая на то, что запрос должен продолжаться на основе "
+"логики сопоставления, определенной обработчиком операции; в противном "
+"случае возвращает ``False``."
+
+#: of vstutils.api.base.get_etag_value:1
+msgid ""
+"The get_etag_value function is designed to compute a unique ETag value "
+"based on the model's state, request parameters, and additional "
+"dependencies such as user language, session, and user identity. This "
+"function supports both single models and collections of models."
+msgstr ""
+"Функция get_etag_value предназначена для вычисления уникального значения "
+"ETag на основе состояния модели, параметров запроса и дополнительных "
+"зависимостей, таких как язык пользователя, сессия и идентичность "
+"пользователя. Эта функция поддерживает как отдельные модели, так и "
+"коллекции моделей."
+
+#: of vstutils.api.base.get_etag_value:6
+msgid "An instance of :class:`.GenericViewSet`, responsible for view operations."
+msgstr "Экземпляр :class:`.GenericViewSet`, отвечающий за операции просмотра."
+
+#: of vstutils.api.base.get_etag_value:9
+msgid ""
+"The model class for which the ETag value is being generated. This "
+"parameter can be a single model class or a collection of model classes "
+"(:class:`list`, :class:`tuple`, or :class:`set`). Each model class may "
+"optionally implement a class method named ``get_etag_value``."
+msgstr ""
+"Класс модели, для которой генерируется значение ETag. Этот параметр может"
+" быть одним классом модели или коллекцией классов моделей (:class:`list`,"
+" :class:`tuple` или :class:`set`). Каждый класс модели может "
+"необязательно реализовать метод класса с именем ``get_etag_value``."
+
+#: of vstutils.api.base.get_etag_value:15
+msgid ""
+"The request object from the Django REST framework, containing all the "
+"HTTP request information."
+msgstr ""
+"Объект запроса из Django REST framework, содержащий всю информацию "
+"HTTP-запроса."
+
+#: of vstutils.api.base.get_etag_value:18
+msgid ""
+"he primary key of the model instance for which the ETag is being "
+"calculated. This can be a specific value (int or str) for single model "
+"usage, or a dictionary mapping model classes to their respective primary "
+"key values for collections of models."
+msgstr ""
+"Первичный ключ экземпляра модели, для которого рассчитывается ETag. Это "
+"может быть конкретное значение (int или str) для использования в одной "
+"модели или словарь, сопоставляющий классы моделей с их соответствующими "
+"значениями первичных ключей для коллекций моделей."
+
+#: of vstutils.api.base.get_etag_value:22
+msgid "The computed ETag value as a hexadecimal string."
+msgstr "Вычисленное значение ETag в виде шестнадцатеричной строки."
+
+#: of vstutils.api.base.get_etag_value:23
+msgid ":class:`str`"
+msgstr ":py:class:`str`"
+
+#: of vstutils.api.base.get_etag_value:25
+msgid ""
+"The function operates differently based on the type of model_class "
+"provided:"
+msgstr ""
+"Функция работает по-разному в зависимости от предоставленного типа "
+"model_class:"
+
+#: of vstutils.api.base.get_etag_value:27
+msgid ""
+"**Collection of Models**: When model_class is a collection, the function "
+"computes an ETag by concatenating ETag values of individual models in the"
+" collection, using a recursive call for each model. The ETag value for "
+"each model is encoded and hashed using Blake2s algorithm."
+msgstr ""
+"**Коллекция моделей**: Когда model_class является коллекцией, функция "
+"вычисляет ETag, объединяя значения ETag отдельных моделей в коллекции, "
+"используя рекурсивный вызов для каждой модели. Значение ETag для каждой "
+"модели кодируется и хешируется с использованием алгоритма Blake2s."
+
+#: of vstutils.api.base.get_etag_value:31
+msgid ""
+"**Model with ``get_etag_value`` method**: If the model class has a "
+"get_etag_value method, the function calls this method to obtain a base "
+"ETag value. It then appends language, user ID, and session key "
+"information if they are marked as dependencies in the model's "
+"``_cache_response_dependencies`` attribute. This base ETag may be further"
+" processed to include the application's full version string and hashed if"
+" user or session information is included."
+msgstr ""
+"**Модель с методом ``get_etag_value``**: Если класс модели имеет метод "
+"get_etag_value, функция вызывает этот метод, чтобы получить базовое "
+"значение ETag. Затем она добавляет информацию о языке, идентификаторе "
+"пользователя и ключе сессии, если они помечены как зависимости в атрибуте"
+" ``_cache_response_dependencies`` модели. Это базовое значение ETag может"
+" быть дополнительно обработано, включая полную строку версии приложения и"
+" хешировано, если включена информация о пользователе или сессии."
+
+#: of vstutils.api.base.get_etag_value:37
+msgid ""
+"**Model without ``get_etag_value`` method**: For models lacking a custom "
+"get_etag_value method, the function generates an ETag based on the "
+"model's class name and a hash of the application's full version string."
+msgstr ""
+"**Модель без метода ``get_etag_value``**: Для моделей без "
+"пользовательского метода get_etag_value функция генерирует ETag на основе"
+" имени класса модели и хеша полной строки версии приложения."
+
+#: ../../backend.rst:106
 msgid "Actions"
 msgstr "Actions (Действия)"
 
-#: ../../backend.rst:75
+#: ../../backend.rst:108
 msgid ""
 "Vstutils has the advanced system of working with actions. REST API works "
 "with data through verbs, which are called methods. However, to work with "
@@ -2553,7 +3759,7 @@ msgstr ""
 "данными через глаголы, которые называются методами. Однако для работы с "
 "одной или списком сущностей этих действий может быть недостаточно."
 
-#: ../../backend.rst:79
+#: ../../backend.rst:112
 msgid ""
 "To expand the set of actions, you need to create an action that will work"
 " with some aspect of the described model. For these purposes, there is a "
@@ -2568,7 +3774,7 @@ msgstr ""
 "также можно расширить с помощью схемы. Но для большего удобства в "
 "vstutils есть набор декораторов, которые позволяют избежать написания "
 
-#: ../../backend.rst:83
+#: ../../backend.rst:116
 msgid ""
 "The main philosophy for these wrappers is that the developer writes "
 "business logic without being distracted by the boilerplate code. Often, "
@@ -2663,6 +3869,12 @@ msgstr ""
 "сущностью. Обычно используется с действиями GET."
 
 #: of vstutils.api.actions.Action:62
+msgid "If true user will be asked to confirm action execution on frontend."
+msgstr ""
+"Если истина, то в интерфейсе пользователь должен будет подтвердить "
+"действие перед выполнением."
+
+#: of vstutils.api.actions.Action:64
 msgid "Set of named arguments for :func:`rest_framework.decorators.action`."
 msgstr "Набор именованных аргументов для :func:`rest_framework.decorators.action`."
 
@@ -2740,11 +3952,11 @@ msgstr ""
 "При назначении действия на объект список методов также заполняется "
 "необходимыми методами."
 
-#: ../../backend.rst:92
+#: ../../backend.rst:125
 msgid "Filtersets"
 msgstr "Filterset'ы"
 
-#: ../../backend.rst:94
+#: ../../backend.rst:127
 msgid ""
 "For greater development convenience, the framework provides additional "
 "classes and functions for filtering elements by fields."
@@ -2830,11 +4042,11 @@ msgstr ""
 msgid "searching part of name."
 msgstr "часть названия для поиска."
 
-#: ../../backend.rst:102
+#: ../../backend.rst:135
 msgid "Responses"
 msgstr "Ответы (responses)"
 
-#: ../../backend.rst:104
+#: ../../backend.rst:137
 msgid ""
 "DRF provides a standard set of variables whose names correspond to the "
 "human-readable name of the HTTP code. For convenience, we have "
@@ -2846,7 +4058,7 @@ msgstr ""
 "оборачиваем их в набор классов с соответствующими именами и дополнительно"
 " обеспечиваем следующие возможности:"
 
-#: ../../backend.rst:109
+#: ../../backend.rst:142
 msgid ""
 "String responses are wrapped in json like ``{ \"detail\": \"string "
 "response\" }``."
@@ -2854,11 +4066,11 @@ msgstr ""
 "Строковые ответы оборачиваются в json, например ``{ \"detail\": \"string "
 "response\" }``."
 
-#: ../../backend.rst:110
+#: ../../backend.rst:143
 msgid "Attribute timings are kept for further processing in middleware."
 msgstr "Тайминги атрибутов сохраняются для дальнейшей обработки в middleware."
 
-#: ../../backend.rst:111
+#: ../../backend.rst:144
 msgid ""
 "Status code is set by class name (e.g. ``HTTP_200_OK`` or ``Response200``"
 " has code 200)."
@@ -2866,7 +4078,7 @@ msgstr ""
 "Код состояния задается именем класса (например ``HTTP_200_OK`` или "
 "``Response200`` имеют код 200)."
 
-#: ../../backend.rst:113
+#: ../../backend.rst:146
 msgid "All classes inherit from:"
 msgstr "Все классы наследуются от:"
 
@@ -2883,11 +4095,11 @@ msgstr "Код состояния HTTP."
 msgid "Response timings."
 msgstr "Тайминги ответов."
 
-#: ../../backend.rst:120
+#: ../../backend.rst:153
 msgid "Middleware"
 msgstr "Middleware"
 
-#: ../../backend.rst:122
+#: ../../backend.rst:155
 msgid ""
 "By default, Django `supposes "
 "<https://docs.djangoproject.com/en/4.1/topics/http/middleware/#writing-"
@@ -2998,11 +4210,11 @@ msgstr "Handler запроса. Вызывается перед обработк
 msgid "Handled request object."
 msgstr "Обработанный объект запроса."
 
-#: ../../backend.rst:131
+#: ../../backend.rst:164
 msgid "Filter Backends"
 msgstr "Filter Backend'ы"
 
-#: ../../backend.rst:132
+#: ../../backend.rst:165
 msgid ""
 "`Filter Backends <https://www.django-rest-framework.org/api-"
 "guide/filtering/#djangofilterbackend>`_ are used to modify model "
@@ -3148,11 +4360,11 @@ msgstr ""
 "автогенерации схемы, предоставляемой REST-фреймворком, реализуя этот "
 "метод. Метод должен возвращать список OpenAPI сопоставлений схемы."
 
-#: ../../backend.rst:141
+#: ../../backend.rst:174
 msgid "Celery"
 msgstr "Celery"
 
-#: ../../backend.rst:143
+#: ../../backend.rst:176
 msgid ""
 "Celery is a distributed task queue. It's used to execute some actions "
 "asynchronously in a separate worker. For more details on Celery, check "
@@ -3171,7 +4383,7 @@ msgstr ""
 "settings>`_ в settings.ini. Также вам понадобится установить "
 "дополнительные [rpc] зависимости."
 
-#: ../../backend.rst:149
+#: ../../backend.rst:182
 msgid "Tasks"
 msgstr "Tasks"
 
@@ -3233,11 +4445,11 @@ msgstr ""
 msgid "The body of the task executed by workers."
 msgstr "Тело задачи выполняется worker'ами."
 
-#: ../../backend.rst:155
+#: ../../backend.rst:188
 msgid "Endpoint"
 msgstr "Endpoint"
 
-#: ../../backend.rst:157
+#: ../../backend.rst:190
 msgid ""
 "Endpoint view has two purposes: bulk requests execution and providing "
 "OpenAPI schema."
@@ -3245,7 +4457,7 @@ msgstr ""
 "Endpoint-view имеет две цели: выполнение bulk-запросов и предоставление "
 "схемы OpenAPI."
 
-#: ../../backend.rst:159
+#: ../../backend.rst:192
 msgid ""
 "Endpoint url is ``/{API_URL}/endpoint/``, for example value with default "
 "settings is ``/api/endpoint/``."
@@ -3253,7 +4465,7 @@ msgstr ""
 "URL endpoint'а - ``/{API_URL}/endpoint/``, например значение с "
 "настройками по умолчанию - ``/api/endpoint/``."
 
-#: ../../backend.rst:161
+#: ../../backend.rst:194
 msgid "``API_URL`` can be changed in ``settings.py``."
 msgstr "``API_URL`` может быть изменен в ``settings.py``."
 
@@ -3327,11 +4539,11 @@ msgstr "Выполнить нетранзакционный bulk-запрос"
 msgid "One operation serializer class."
 msgstr "Класс сериализатора одной операции."
 
-#: ../../backend.rst:168
+#: ../../backend.rst:201
 msgid "Bulk requests"
 msgstr "Bulk-запросы"
 
-#: ../../backend.rst:170
+#: ../../backend.rst:203
 msgid ""
 "Bulk request allows you send multiple requests to api at once, it accepts"
 " json list of operations."
@@ -3339,39 +4551,39 @@ msgstr ""
 "Bulk-запрос позволяет вам отсылать несколько запросов к api в одном. Он "
 "принимает json-список операций."
 
-#: ../../backend.rst:173
+#: ../../backend.rst:206
 msgid "Method"
 msgstr "Метод"
 
-#: ../../backend.rst:173
+#: ../../backend.rst:206
 msgid "Transactional (all operations in one transaction)"
 msgstr "Транзакционный (все операции в одной транзакции)"
 
-#: ../../backend.rst:173
+#: ../../backend.rst:206
 msgid "Synchronous (operations executed one by one in given order)"
 msgstr "Синхронный (операции выполняются одна за другой в указанном порядке)"
 
-#: ../../backend.rst:177
+#: ../../backend.rst:210
 msgid "``PUT /{API_URL}/endpoint/``"
 msgstr "``PUT /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:177 ../../backend.rst:181
+#: ../../backend.rst:210 ../../backend.rst:214
 msgid "NO"
 msgstr "НЕТ"
 
-#: ../../backend.rst:177 ../../backend.rst:179
+#: ../../backend.rst:210 ../../backend.rst:212
 msgid "YES"
 msgstr "ДА"
 
-#: ../../backend.rst:179
+#: ../../backend.rst:212
 msgid "``POST /{API_URL}/endpoint/``"
 msgstr "``POST /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:181
+#: ../../backend.rst:214
 msgid "``PATCH /{API_URL}/endpoint/``"
 msgstr "``PATCH /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:184
+#: ../../backend.rst:217
 msgid ""
 "Parameters of one operation (required parameter marked by "
 ":superscript:`*`):"
@@ -3379,25 +4591,25 @@ msgstr ""
 "Параметры одной операции (обязательный параметр помечается "
 ":superscript:`*`):"
 
-#: ../../backend.rst:186
+#: ../../backend.rst:219
 msgid "``method``:superscript:`*` - http method of request"
 msgstr "``method``:superscript:`*` - http-метод запроса"
 
-#: ../../backend.rst:187
+#: ../../backend.rst:220
 msgid "``path``:superscript:`*` - path of request, can be ``str`` or ``list``"
 msgstr ""
 "``path``:superscript:`*` - путь запроса, может быть типа ``str`` или  "
 "``list``"
 
-#: ../../backend.rst:188
+#: ../../backend.rst:221
 msgid "``data`` - data to send"
 msgstr "``data`` - данные для отправки"
 
-#: ../../backend.rst:189
+#: ../../backend.rst:222
 msgid "``query`` - query parameters as ``str``"
 msgstr "``query`` - query-параметры типа ``str``"
 
-#: ../../backend.rst:190
+#: ../../backend.rst:223
 msgid ""
 "``let`` - string with name of variable (used for access to response "
 "result in templates)"
@@ -3405,7 +4617,7 @@ msgstr ""
 "``let`` - строка с именем переменной (используется для доступа к "
 "результату ответа в шаблонах)"
 
-#: ../../backend.rst:191
+#: ../../backend.rst:224
 msgid ""
 "``headers`` - ``dict`` with headers which will be sent (key - header's "
 "name, value - header's value string)."
@@ -3413,7 +4625,7 @@ msgstr ""
 "``headers`` - словарь с заголовками, которые будут переданы в запрос "
 "(ключ - имя заголовка, значение - строка со значением заголовка."
 
-#: ../../backend.rst:192
+#: ../../backend.rst:225
 msgid ""
 "``version`` - ``str`` with specified version of api, if not provided then"
 " ``VST_API_VERSION`` will be used"
@@ -3421,7 +4633,7 @@ msgstr ""
 "``version`` - ``str`` с указанной версией api, если не задано, то "
 "используется ``VST_API_VERSION``"
 
-#: ../../backend.rst:196
+#: ../../backend.rst:229
 msgid ""
 "In previous versions header's names must follow `CGI specification "
 "<https://www.w3.org/CGI/>`_ (e.g., ``CONTENT_TYPE``, "
@@ -3431,7 +4643,7 @@ msgstr ""
 "`спецификации CGI <https://www.w3.org/CGI/>`_ (например, "
 "``CONTENT_TYPE``, ``GATEWAY_INTERFACE``, ``HTTP_*``)."
 
-#: ../../backend.rst:200
+#: ../../backend.rst:233
 msgid ""
 "Since version 5.3 and after migrate to Django 4 names must follow HTTP "
 "specification instead of CGI."
@@ -3439,7 +4651,7 @@ msgstr ""
 "Начиная с версии 5.3 и после миграции на Django 4 имена должны "
 "соответствовать HTTP спецификации вместо CGI."
 
-#: ../../backend.rst:202
+#: ../../backend.rst:235
 msgid ""
 "In any request parameter you can insert result value of previous "
 "operations (``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), "
@@ -3449,27 +4661,27 @@ msgstr ""
 " операции (``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), "
 "например:"
 
-#: ../../backend.rst:212
+#: ../../backend.rst:245
 msgid "Result of bulk request is json list of objects for operation:"
 msgstr "Результат bulk-запроса - это список json-объектов, описывающих операцию:"
 
-#: ../../backend.rst:214
+#: ../../backend.rst:247
 msgid "``method`` - http method"
 msgstr "``method`` - http-метод"
 
-#: ../../backend.rst:215
+#: ../../backend.rst:248
 msgid "``path`` - path of request, always str"
 msgstr "``path`` - путь запроса, всегда строка"
 
-#: ../../backend.rst:216
+#: ../../backend.rst:249
 msgid "``data`` - data that needs to be sent"
 msgstr "``data`` - данные, которые нужно отправить"
 
-#: ../../backend.rst:217
+#: ../../backend.rst:250
 msgid "``status`` - response status code"
 msgstr "``status`` - код состояния ответа"
 
-#: ../../backend.rst:219
+#: ../../backend.rst:252
 msgid ""
 "Transactional bulk request returns ``502 BAG GATEWAY`` and does rollback "
 "after first failed request."
@@ -3477,7 +4689,7 @@ msgstr ""
 "Транзакционный bulk-запрос возвращает ``502 BAG GATEWAY`` и делает откат "
 "к состоянию до запроса после первого неудачного запроса."
 
-#: ../../backend.rst:222
+#: ../../backend.rst:255
 msgid ""
 "If you send non-transactional bulk request, you will get ``200`` status "
 "and must validate statuses on each operation responses."
@@ -3485,15 +4697,15 @@ msgstr ""
 "Если вы отправили нетранзакционный bulk-запрос, вы получите код 200 и "
 "должны будете проверить статус каждого ответа операции отдельно."
 
-#: ../../backend.rst:226
+#: ../../backend.rst:259
 msgid "OpenAPI schema"
 msgstr "Схема OpenAPI"
 
-#: ../../backend.rst:228
+#: ../../backend.rst:261
 msgid "Request on ``GET /{API_URL}/endpoint/`` returns Swagger UI."
 msgstr "Запрос на ``GET /{API_URL}/endpoint/`` возвращает Swagger UI."
 
-#: ../../backend.rst:230
+#: ../../backend.rst:263
 msgid ""
 "Request on ``GET /{API_URL}/endpoint/?format=openapi`` returns OpenAPI "
 "schema in json format. Also you can specify required version of schema "
@@ -3504,7 +4716,7 @@ msgstr ""
 "OpenAPI в формате json. Также вы можете указать нужную версию схемы, "
 "используя query-параметр ``version`` "
 
-#: ../../backend.rst:233
+#: ../../backend.rst:266
 msgid ""
 "To change the schema after generating and before sending to user use "
 "hooks. Define one or more function, each taking 2 named arguments:"
@@ -3513,15 +4725,15 @@ msgstr ""
 "используйте хуки. Напишите одну или несколько функций, каждая из которых "
 "принимает 2 именованных аргумента:"
 
-#: ../../backend.rst:236
+#: ../../backend.rst:269
 msgid "``request`` - user request object."
 msgstr "``request`` - объект запроса пользователя."
 
-#: ../../backend.rst:237
+#: ../../backend.rst:270
 msgid "``schema`` - ordered dict with OpenAPI schema."
 msgstr "``schema`` - ordered dict, содержащий схему OpenAPI."
 
-#: ../../backend.rst:240
+#: ../../backend.rst:273
 msgid ""
 "Sometimes hooks may raise an exception; in order to keep a chain of data "
 "modification, such exceptions are handled. The changes made to the schema"
@@ -3531,11 +4743,11 @@ msgstr ""
 "модификации данных, такие исключения обрабатываются. Изменения, сделанные"
 " в схеме перед выбросом исключения, в любом случае сохраняются."
 
-#: ../../backend.rst:249
+#: ../../backend.rst:282
 msgid "Example hook:"
 msgstr "Пример хука:"
 
-#: ../../backend.rst:251
+#: ../../backend.rst:284
 msgid ""
 "To connect hook(s) to your app add function import name to the "
 "``OPENAPI_HOOKS`` list in ``settings.py``"
@@ -3543,11 +4755,11 @@ msgstr ""
 "Чтобы присоединить хук(-и) к вашему приложению, добавьте строку импорта "
 "вашей функции в список ``OPENAPI_HOOKS`` в ``settings.py``"
 
-#: ../../backend.rst:261
+#: ../../backend.rst:294
 msgid "Testing Framework"
 msgstr "Фреймворк для тестирования"
 
-#: ../../backend.rst:263
+#: ../../backend.rst:296
 msgid ""
 "VST Utils Framework includes a helper in base test case class and "
 "improves support for making API requests. That means if you want make "
@@ -3559,11 +4771,11 @@ msgstr ""
 " что для отправления bulk-запроса на endpoint нет необходимости создавать"
 " и инициализировать test client, а можно сразу делать запрос."
 
-#: ../../backend.rst:274
+#: ../../backend.rst:307
 msgid "Creating test case"
 msgstr "Создание тест-кейса"
 
-#: ../../backend.rst:275
+#: ../../backend.rst:308
 msgid ""
 "``test.py`` module contains test case classes based on "
 ":class:`vstutils.tests.BaseTestCase`. At the moment, we officially "
@@ -3577,11 +4789,11 @@ msgstr ""
 "оберток запросов с проверкой выполнения и runtime-оптимизацией "
 "bulk-запросов с ручной проверкой значений."
 
-#: ../../backend.rst:282
+#: ../../backend.rst:315
 msgid "Simple example with classic tests"
 msgstr "Простой пример с классическими тестами"
 
-#: ../../backend.rst:284
+#: ../../backend.rst:317
 msgid ""
 "For example, if you have api endpoint like ``/api/v1/project/`` and model"
 " Project you can write test case like this:"
@@ -3589,7 +4801,7 @@ msgstr ""
 "Например, если у вас endpoint вида ``/api/v1/project/`` и модель Project,"
 " вы можете написать такой тест:"
 
-#: ../../backend.rst:319
+#: ../../backend.rst:352
 msgid ""
 "This example demonstrates functionality of default test case class. "
 "Default projects are initialized for the fastest and most efficient "
@@ -3603,11 +4815,11 @@ msgstr ""
 " в разные классы. В данном примере показан классический подход к "
 "тестированию, однако вы можете использовать bulk-запросы в ваших тестах."
 
-#: ../../backend.rst:327
+#: ../../backend.rst:360
 msgid "Bulk requests in tests"
 msgstr "Bulk-запросы в тестах"
 
-#: ../../backend.rst:329
+#: ../../backend.rst:362
 msgid ""
 "Bulk query system is well suited for testing and executing valid queries."
 " Previous example could be rewritten as follows:"
@@ -3615,7 +4827,7 @@ msgstr ""
 "Система bulk-запросов хорошо подходит для тестирования и запуска валидных"
 " запросов. Предыдущий пример может быть переписан так:"
 
-#: ../../backend.rst:379
+#: ../../backend.rst:412
 msgid ""
 "In this case, you have more code, but your tests are closer to GUI "
 "workflow, because vstutils-projects uses ``/api/endpoint/`` for requests."
@@ -3630,7 +4842,7 @@ msgstr ""
 " котором используется bulk меньше по сравнению с тестом, использующим "
 "стандартный механизм."
 
-#: ../../backend.rst:386
+#: ../../backend.rst:419
 msgid "Test case API"
 msgstr "API тест-кейса"
 
@@ -4002,11 +5214,11 @@ msgstr ""
 msgid "new user object for execution."
 msgstr "новый объект пользователя, от которого будет выполнение."
 
-#: ../../backend.rst:393
+#: ../../backend.rst:426
 msgid "Utils"
 msgstr "Утилиты"
 
-#: ../../backend.rst:395
+#: ../../backend.rst:428
 msgid ""
 "This is tested set of development utilities. Utilities include a "
 "collection of code that will be useful in one way or another for "
@@ -4376,8 +5588,9 @@ msgid ""
 "This function is oldstyle and will be deprecated in future versions. Use "
 "native call of method :method:`vstutils.models.BModel.get_view_class`."
 msgstr ""
-"Эта функция олдскульная и будет объявлена устаревшей в будущих версиях. Используйте "
-"встроенный вызов метода :method:`vstutils.models.BModel.get_view_class`."
+"Эта функция олдскульная и будет объявлена устаревшей в будущих версиях. "
+"Используйте встроенный вызов метода "
+":method:`vstutils.models.BModel.get_view_class`."
 
 #: of vstutils.utils.create_view:28
 msgid ""
@@ -4657,13 +5870,587 @@ msgstr ""
 "Использует функцию :func:`django.utils.translation.get_language` для "
 "получения кода языка и пытается получить перевод из списка доступных."
 
-#~ msgid ""
-#~ ":py:data:`typing.Union`\\[:py:class:`dict`, "
-#~ ":py:class:`collections.OrderedDict`]"
-#~ msgstr ""
-#~ ":py:data:`typing.Union`\\[:py:class:`dict`, "
-#~ ":py:class:`collections.OrderedDict`]"
+#: ../../backend.rst:440
+msgid "Integrating Web Push Notifications"
+msgstr "Интеграция Web Push-уведомлений"
 
-#~ msgid ":py:class:`rest_framework.serializers.BaseSerializer`"
-#~ msgstr ":py:class:`rest_framework.serializers.BaseSerializer`"
+#: ../../backend.rst:442
+msgid ""
+"Web push notifications are an effective way to engage users with real-"
+"time messaging. To integrate web push notifications in your VSTUtils "
+"project, follow these steps:"
+msgstr ""
+"Web-уведомления - это эффективный способ взаимодействия с пользователями "
+"с помощью реального времени. Чтобы интегрировать web-уведомления в ваш "
+"проект VSTUtils, выполните следующие шаги:"
+
+#: ../../backend.rst:445
+msgid ""
+"**Configuration**: First, include the ``vstutils.webpush`` module in the "
+"``INSTALLED_APPS`` section of your ``settings.py`` file. This enables the"
+" web push functionality provided by VSTUtils. Additionally, configure the"
+" necessary settings as described in the web push settings section (see "
+":ref:`here<webpush-settings>` for details)."
+msgstr ""
+"**Конфигурация**: Во-первых, включите модуль ``vstutils.webpush`` в "
+"разделе ``INSTALLED_APPS`` вашего файла ``settings.py``. Это позволяет "
+"использовать функциональность web-уведомлений, предоставляемую VSTUtils. "
+"Кроме того, настройте необходимые параметры, как описано в разделе "
+"настроек web-уведомлений (см. :ref:`здесь<webpush-settings>` для "
+"подробностей)."
+
+#: ../../backend.rst:448
+msgid ""
+"**Creating Notifications**: To create a web push notification, you need "
+"to define a class that inherits from either "
+":class:`vstutils.webpush.BaseWebPush` or "
+":class:`vstutils.webpush.BaseWebPushNotification`. VSTUtils automatically"
+" detects and utilizes web push classes defined in the ``webpushes`` "
+"module of all ``INSTALLED_APPS``. Below is an example that illustrates "
+"how to implement custom web push classes:"
+msgstr ""
+"**Создание уведомлений**: Чтобы создать web-уведомление, вам нужно "
+"определить класс, который наследуется от "
+":class:`vstutils.webpush.BaseWebPush` или "
+":class:`vstutils.webpush.BaseWebPushNotification`. VSTUtils автоматически"
+" обнаруживает и использует классы web-уведомлений, определенные в модуле "
+"``webpushes`` всех ``INSTALLED_APPS``. Ниже приведен пример, "
+"иллюстрирующий, как реализовать пользовательские классы web-уведомлений:"
+
+#: ../../backend.rst:458
+msgid "This example contains three classes:"
+msgstr "Этот пример содержит три класса:"
+
+#: ../../backend.rst:460
+msgid "`TestWebPush`: Sends notifications to all subscribed users."
+msgstr "`TestWebPush`: Отправляет уведомления всем подписанным пользователям."
+
+#: ../../backend.rst:461
+msgid "`TestNotification`: Targets notifications to specific users."
+msgstr "`TestNotification`: Направляет уведомления конкретным пользователям."
+
+#: ../../backend.rst:462
+msgid ""
+"`StaffOnlyNotification`: Restricts notifications to staff users only. "
+"Sometimes you may want to allow only some users to subscribe on specific "
+"notifications."
+msgstr ""
+"`StaffOnlyNotification`: Ограничивает уведомления только для сотрудников."
+" Иногда вы можете хотеть разрешить подписку на конкретные уведомления "
+"только некоторым пользователям."
+
+#: ../../backend.rst:464
+msgid ""
+"**Sending Notifications**: To dispatch a web push notification, invoke "
+"the ``send`` or ``send_in_task`` method on an instance of your web push "
+"class. For instance, to send a notification using `TestNotification`, you"
+" can do the following:"
+msgstr ""
+"**Отправка уведомлений**: Чтобы отправить web-уведомление, вызовите метод"
+" ``send`` или ``send_in_task`` на экземпляре вашего класса "
+"web-уведомления. Например, чтобы отправить уведомление с использованием "
+"`TestNotification`, вы можете сделать следующее:"
+
+#: ../../backend.rst:479
+msgid ""
+"The asynchronous sending of web push notifications (using methods like "
+"``send_in_task``) requires a configured Celery setup in your project, as "
+"it relies on Celery tasks \"under the hood\". Ensure that Celery is "
+"properly set up and running to utilize asynchronous notification "
+"dispatching."
+msgstr ""
+"Асинхронная отправка web-уведомлений (с использованием методов, таких как"
+" ``send_in_task``) требует настроенной конфигурации Celery в вашем "
+"проекте, поскольку она полагается на задачи Celery \"под капотом\". "
+"Убедитесь, что Celery правильно настроен и работает, чтобы использовать "
+"асинхронную отправку уведомлений."
+
+#: ../../backend.rst:484
+msgid ""
+"By following these steps, you can fast integrate and utilize web push "
+"notifications in projects with VSTUtils."
+msgstr ""
+"Следуя этим шагам, вы быстро сможете интегрировать и использовать "
+"web-уведомления в проектах с VSTUtils."
+
+#~ msgid "prefetch values on frontend at list-view. Default is ``False``."
+#~ msgstr ""
+#~ "делает prefetch значений на фронтенде в"
+#~ " list-view. По умолчанию ``False``."
+
+#~ msgid ""
+#~ "Dictionary, where keys are name of "
+#~ "field from the same model, and "
+#~ "values are name of query filter. "
+#~ "If at least one of the fields "
+#~ "that we depend on is non nullable,"
+#~ " required and set to null, "
+#~ "autocompletion list will be empty and"
+#~ " field will be disabled."
+#~ msgstr ""
+#~ "Словарь, где ключи - это имена "
+#~ "полей из той же модели, а значения"
+#~ " - названия query-фильтров. Если хотя "
+#~ "бы одно из полей, от которых "
+#~ "существует зависимость не допускает null, "
+#~ "обязательно или установлено в null, "
+#~ "список автодополнения будет пустым, а "
+#~ "поле окажется выключенным."
+
+#~ msgid ""
+#~ "Field which type is based on "
+#~ "another field. It converts value to "
+#~ "internal string and represent field as"
+#~ " json object."
+#~ msgstr ""
+#~ "Поле, тип которого зависит от другого"
+#~ " поля. Хранит значение в виде строки,"
+#~ " а отображает поле в виде объекта "
+#~ "json."
+
+#~ msgid ""
+#~ "Allows to use parent views data as"
+#~ " source for field creation. Exact "
+#~ "view path (`/user/{id}/`) or relative "
+#~ "parent specifier (`<<parent>>.<<parent>>.<<parent>>`) "
+#~ "can be provided. For example if "
+#~ "current page is `/user/1/role/2/` and "
+#~ "`source_view` is `<<parent>>.<<parent>>` then "
+#~ "data from `/user/1/` will be used. "
+#~ "Only detail views if supported."
+#~ msgstr ""
+#~ "Позволяет использовать данные родительских "
+#~ "view в качестве источника для создания"
+#~ " полей. Можно указать точный путь "
+#~ "представления (`/user/{id}/`) или относительный "
+#~ "спецификатор родительского представления "
+#~ "(`<<parent>>.<<parent>>.<<parent>>`). Например, если "
+#~ "текущая страница - `/user/1/role/2/`, а "
+#~ "`source_view` - `<<parent>>.<<parent>>`, то "
+#~ "будут использованы данные из `/user/1/`. "
+#~ "Поддерживаются только представления деталей."
+
+#~ msgid ""
+#~ "Effective only in GUI. In API "
+#~ "works similar to :class:`.VSTCharField` "
+#~ "without value modifications."
+#~ msgstr ""
+#~ "Действует только в графическом интерфейсе. "
+#~ "В API работает аналогично "
+#~ ":class:`.VSTCharField` без изменения значения."
+
+#~ msgid ""
+#~ "A versatile field in Django Rest "
+#~ "Framework that dynamically adapts its "
+#~ "type based on the value of another"
+#~ " field in the model. It facilitates"
+#~ " complex scenarios where the type of"
+#~ " data to be serialized depends on "
+#~ "the value of a related field."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Example: Suppose you have a serializer"
+#~ " `MySerializer` with a `field_type` (e.g.,"
+#~ " a `ChoiceField`) and a corresponding "
+#~ "`object_data`. The `object_data` field can "
+#~ "have different types based on the "
+#~ "value of `field_type`. Here's an example"
+#~ " configuration:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Field extends :class:`DynamicJsonTypeField`. "
+#~ "Validates field data by "
+#~ ":attr:`.field_attribute` chosen in related "
+#~ "model. By default, any value of "
+#~ ":attr:`.field_attribute` validates as "
+#~ ":class:`.VSTCharField`. To override this "
+#~ "behavior set dict attribute ``{field_attribute"
+#~ " value}_fields_mapping`` in related model "
+#~ "where:"
+#~ msgstr ""
+#~ "Поле, расширяющее :class:`DynamicJsonTypeField`. "
+#~ "Валидирует данные поля с помощью "
+#~ ":attr:`.field_attribute`, выбранного в связанной "
+#~ "модели. По умолчанию любое значение "
+#~ ":attr:`.field_attribute` валидируется классом "
+#~ ":class:`.VSTCharField`. Чтобы переопределить это "
+#~ "поведение, установите словарный атрибут "
+#~ "``{field_attribute value}_fields_mapping`` в "
+#~ "связанной модели, где:"
+
+#~ msgid ""
+#~ "**key** - string representation of value"
+#~ " type which is received from related"
+#~ " instance :attr:`.field_attribute`."
+#~ msgstr ""
+#~ "**key** - строковое представление типа "
+#~ "значения, получаемое от связанной модели "
+#~ ":attr:`.field_attribute`."
+
+#~ msgid "**value** - :class:`rest_framework.Field` instance for validation."
+#~ msgstr "**value** - экземпляр :class:`rest_framework.Field` для валидации."
+
+#~ msgid "Field containing multiline string."
+#~ msgstr "Поле, содержащее многострочный текст."
+
+#~ msgid ""
+#~ "Field contains html text and marked "
+#~ "as format:html. The field does not "
+#~ "validate whether its content is HTML."
+#~ msgstr ""
+#~ "Поле, содержащее текст html и помеченное"
+#~ " как format:html. Это поле не "
+#~ "проверяет, является ли его содержимое "
+#~ "валидным HTML."
+
+#~ msgid ""
+#~ "To avoid vulnerability, do not allow "
+#~ "users to modify this data because "
+#~ "users ate able to execute their "
+#~ "scripts."
+#~ msgstr ""
+#~ "Чтобы избежать уязвимости, не позволяйте "
+#~ "пользователям изменять эти данные, так "
+#~ "как они могут выполнить нежелательный "
+#~ "скрипт."
+
+#~ msgid ""
+#~ "Simple string field. Value must always"
+#~ " be a valid ASCII-string. The "
+#~ "field is going to represent as "
+#~ "Barcode (Code 128) in user interface."
+#~ msgstr ""
+#~ "Простое строковое поле. Значение всегда "
+#~ "должно быть допустимой строкой ASCII. В"
+#~ " пользовательском интерфейсе оно будет "
+#~ "отображено как штрихкод (код 128)."
+
+#~ msgid ""
+#~ "Simple string field. The field is "
+#~ "going to represent as QrCode in "
+#~ "user interface."
+#~ msgstr ""
+#~ "Простое строковое поле. В пользовательском "
+#~ "интерфейсе оно будет отображено как "
+#~ "QR-код."
+
+#~ msgid "warning"
+#~ msgstr "предупреждение"
+
+#~ msgid ""
+#~ "Exercise caution when using this field,"
+#~ " as it does not validate whether "
+#~ "the content is valid HTML. Be "
+#~ "aware of the potential security risks"
+#~ " associated with allowing users to "
+#~ "modify HTML content, as they may "
+#~ "execute scripts."
+#~ msgstr ""
+#~ "Будьте осторожны при использовании этого "
+#~ "поля, так как оно не проверяет, "
+#~ "является ли контент допустимым HTML. "
+#~ "Будьте в курсе потенциальных рисков "
+#~ "безопасности, связанных с разрешением "
+#~ "пользователям изменять HTML-контент, так как"
+#~ " они могут выполнять сценарии."
+
+#~ msgid "note"
+#~ msgstr "None"
+
+#~ msgid "show value as link to model. Default is ``True``."
+#~ msgstr "Отображает значение как ссылку на модель. По умолчанию ``True``."
+
+#~ msgid ""
+#~ "dictionary, where keys are names of "
+#~ "a field from the same model, and"
+#~ " values are names of query filter."
+#~ " If at least one of the fields"
+#~ " that we depend on is non "
+#~ "nullable, required and set to null, "
+#~ "autocompletion list will be empty and"
+#~ " field will be disabled."
+#~ msgstr ""
+#~ "словарь, где ключи - это имена "
+#~ "полей из той же модели, а значения"
+#~ " - названия query-фильтров. Если хотя "
+#~ "бы одно из полей, от которых "
+#~ "существует зависимость не допускает null, "
+#~ "обязательно или установлено в null, "
+#~ "список автодополнения будет пустым, а "
+#~ "поле окажется выключенным."
+
+#~ msgid ""
+#~ "This field does not support "
+#~ "``dependence``. Use ``filters`` at your "
+#~ "own risk, as it would rather break"
+#~ " the tree structure."
+#~ msgstr ""
+#~ "Это поле не поддерживает ``dependence``. "
+#~ "Используйте ``filters`` на свой страх и"
+#~ " риск, так как они могут сломать "
+#~ "структуру дерева."
+
+#~ msgid ""
+#~ "if True then only allows a value"
+#~ " to be selected if it has no"
+#~ " children. Default is `False`"
+#~ msgstr ""
+#~ "если True, то допускает к выбору "
+#~ "только то значение, которое не имеет "
+#~ "дочерних элементов. По умолчанию `False`"
+
+#~ msgid "name of parent field in model. Default is `parent`"
+#~ msgstr "название родительского поля в модели. По умолчанию `parent`"
+
+#~ msgid ""
+#~ "Field that takes JSON with properties:"
+#~ " * name - string - name of "
+#~ "file; * mediaType - string - MIME"
+#~ " type of file; * content - "
+#~ "base64 string - content of file."
+#~ msgstr ""
+#~ "Поле, принимающее на вход JSON со "
+#~ "следующими свойствами: * name - string"
+#~ " - имя файла; * mediaType - "
+#~ "string - MIME-тип файла; * content "
+#~ "- base64 string - содержимое файла."
+
+#~ msgid "Effective only in GUI. Works similar to :class:`.VSTCharField` in API."
+#~ msgstr ""
+#~ "Действует только в графическом интерфейсе. "
+#~ "Работает аналогично :class:`.VSTCharField` в "
+#~ "API."
+
+#~ msgid "**Attributes:**"
+#~ msgstr "**Атрибуты**:"
+
+#~ msgid ":attr:`bool file`: If True, accept only subclasses of File as input."
+#~ msgstr ""
+#~ ":attr:`bool file`: Если True, принимает "
+#~ "только подклассы File в качестве входных"
+#~ " данных."
+
+#~ msgid "If False, accept only string input. Default: False."
+#~ msgstr ""
+#~ "Если False, принимает только строковые "
+#~ "входные данные. По умолчанию: False."
+
+#~ msgid "Максимально допустимый размер содержимого файла в байтах."
+#~ msgstr "Максимально допустимый размер содержимого файла в байтах."
+
+#~ msgid "Минимально допустимый размер содержимого файла в байтах."
+#~ msgstr "Минимально допустимый размер содержимого файла в байтах."
+
+#~ msgid "Минимальная длина имени файла. Применяется только при ``file=True``."
+#~ msgstr "Минимальная длина имени файла. Применяется только при ``file=True``."
+
+#~ msgid "Максимальная длина имени файла. Применяется только при ``file=True``."
+#~ msgstr "Максимальная длина имени файла. Применяется только при ``file=True``."
+
+#~ msgid ""
+#~ "Extends :class:`.NamedBinaryFileInJsonField` to "
+#~ "represent image on frontend (if binary"
+#~ " image is valid). Validate this field"
+#~ " with :class:`vstutils.api.validators.ImageValidator`."
+#~ msgstr ""
+#~ "Расширяет :class:`.NamedBinaryFileInJsonField` для "
+#~ "view изображения на фронтенде (если "
+#~ "бинарное изображение валидно). Валидируйте это"
+#~ " поле с помощью "
+#~ ":class:`vstutils.api.validators.ImageValidator`."
+
+#~ msgid "**name** (str): Имя файла изображения."
+#~ msgstr "**name** (str): Имя файла."
+
+#~ msgid "**mediaType** (str): MIME-тип файла изображения."
+#~ msgstr "**mediaType** (str): MIME-тип файла."
+
+#~ msgid ""
+#~ "**content** (str or File): Содержимое "
+#~ "файла изображения. Если `file` установлен "
+#~ "в True, это будет ссылка на файл"
+#~ " изображения; в противном случае содержимое"
+#~ " будет закодировано в формате base64."
+#~ msgstr ""
+#~ "**content** (str или File): Содержимое "
+#~ "файла. Если `file` установлен в True,"
+#~ " это будет ссылка на файл "
+#~ "изображения; в противном случае содержимое "
+#~ "будет закодировано в формате base64."
+
+#~ msgid "`IMask <https://imask.js.org/guide.html>`_"
+#~ msgstr "`IMask <https://imask.js.org/guide.html>`_"
+
+#~ msgid "Effective only on frontend."
+#~ msgstr "Действует только на фронтенде."
+
+#~ msgid ""
+#~ "Default serializer with logic to work"
+#~ " with objects. Read more in `DRF "
+#~ "serializer's documentation <https://www.django-"
+#~ "rest-framework.org/api-guide/serializers/#serializers>`_ "
+#~ "how to create Serializers and work "
+#~ "with them."
+#~ msgstr ""
+#~ "Стандартный сериализатор с логикой работы "
+#~ "с объектами. Читайте подробнее в "
+#~ "`документации сериализатора <https://www.django-"
+#~ "rest-framework.org/api-guide/serializers/#serializers>`_ "
+#~ "как создавать сериализаторы и работать с"
+#~ " ними."
+
+#~ msgid ""
+#~ "Collection of Models: When model_class "
+#~ "is a collection, the function computes"
+#~ " an ETag by concatenating ETag values"
+#~ " of individual models in the "
+#~ "collection, using a recursive call for"
+#~ " each model. The ETag value for "
+#~ "each model is encoded and hashed "
+#~ "using Blake2s algorithm."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Model with get_etag_value Method: If the"
+#~ " model class has a get_etag_value "
+#~ "method, the function calls this method"
+#~ " to obtain a base ETag value. "
+#~ "It then appends language, user ID, "
+#~ "and session key information if they "
+#~ "are marked as dependencies in the "
+#~ "model's ``_cache_response_dependencies`` attribute. "
+#~ "This base ETag may be further "
+#~ "processed to include the application's "
+#~ "full version string and hashed if "
+#~ "user or session information is included."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Model without get_etag_value Method: For "
+#~ "models lacking a custom get_etag_value "
+#~ "method, the function generates an ETag"
+#~ " based on the model's class name "
+#~ "and a hash of the application's "
+#~ "full version string."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A function to compare the ETags. "
+#~ "By default, this is set to "
+#~ "str.__eq__, which checks for an exact"
+#~ " match between the client's and "
+#~ "server's ETags, suitable for validating "
+#~ "caches with If-None-Match. To "
+#~ "handle If-Match scenarios, where the "
+#~ "operation should proceed only if the "
+#~ "ETags do not match, indicating the "
+#~ "resource has been modified, str.__ne__ "
+#~ "(not equal) can be used as the "
+#~ "operation handler. This flexibility allows "
+#~ "for precise control over how and "
+#~ "when clients are allowed to read "
+#~ "from or write to resources based "
+#~ "on their version."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A function to compare the ETags. "
+#~ "By default, this is set to "
+#~ ":method:`str.__eq__`, which checks for an "
+#~ "exact match between the client's and "
+#~ "server's ETags, suitable for validating "
+#~ "caches with If-None-Match. To "
+#~ "handle If-Match scenarios, where the "
+#~ "operation should proceed only if the "
+#~ "ETags do not match, indicating the "
+#~ "resource has been modified, "
+#~ ":method:`str.__ne__` (not equal) can be "
+#~ "used as the operation handler. This "
+#~ "flexibility allows for precise control "
+#~ "over how and when clients are "
+#~ "allowed to read from or write to"
+#~ " resources based on their version."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A function to compare the ETags. "
+#~ "By default, this is set to "
+#~ ":method:`str.__eq__`, which checks for an "
+#~ "exact match between the client's and "
+#~ "server's ETags, suitable for validating "
+#~ "caches with ``If-None-Match``. To "
+#~ "handle ``If-Match`` scenarios, where the"
+#~ " operation should proceed only if the"
+#~ " ETags do not match, indicating the"
+#~ " resource has been modified, "
+#~ ":method:`str.__ne__` (not equal) can be "
+#~ "used as the operation handler. This "
+#~ "flexibility allows for precise control "
+#~ "over how and when clients are "
+#~ "allowed to read from or write to"
+#~ " resources based on their version."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A function to compare the ETags. "
+#~ "By default, this is set to "
+#~ "`str.__eq__`, which checks for an exact"
+#~ " match between the client's and "
+#~ "server's ETags, suitable for validating "
+#~ "caches with ``If-None-Match``. To "
+#~ "handle ``If-Match`` scenarios, where the"
+#~ " operation should proceed only if the"
+#~ " ETags do not match, indicating the"
+#~ " resource has been modified, `str.__ne__`"
+#~ " (not equal) can be used as the"
+#~ " operation handler. This flexibility allows"
+#~ " for precise control over how and "
+#~ "when clients are allowed to read "
+#~ "from or write to resources based "
+#~ "on their version."
+#~ msgstr ""
+
+#~ msgid "Default ViewSets for web-api."
+#~ msgstr "Стандартные ViewSet'ы для web-api."
+
+#~ msgid ""
+#~ "Mixin which cache GET responses. Uses"
+#~ " standard HTTP-caching mechanism which "
+#~ "response 304 when Etag match."
+#~ msgstr ""
+#~ "Миксина, кэширующяя ответы GET. Использует "
+#~ "стандартный механизм кэширования HTTP, который"
+#~ " отвечает 304, когда Etag совпадает."
+
+#~ msgid "This works only with models based on :class:`vstutils.models.BModel`."
+#~ msgstr ""
+#~ "Это работает только с моделями на "
+#~ "основе :class:`vstutils.models.BModel`."
+
+#~ msgid ""
+#~ "The mixin relies on `.get_etag_value` "
+#~ "and `.check_request_etag` functions within the"
+#~ " `GenericViewSet` context to dynamically "
+#~ "generate and validate ETags for resource"
+#~ " states. By comparing ETags, it "
+#~ "determines whether content has changed "
+#~ "since the last request, allowing clients"
+#~ " to reuse cached responses when "
+#~ "applicable and preventing concurrent write "
+#~ "operations from overwriting each other "
+#~ "without acknowledgment of updated state."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For effective use, ensure model classes"
+#~ " are compatible with ETag generation "
+#~ "and validation by implementing the "
+#~ "`.get_etag_value` method for custom ETag "
+#~ "computation. Additionally, the `.GenericViewSet` "
+#~ "using this mixin should properly handle"
+#~ " ETag headers in client requests to"
+#~ " leverage HTTP caching."
+#~ msgstr ""
 

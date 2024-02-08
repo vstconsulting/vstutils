@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 from django.http import FileResponse
 from drf_yasg.inspectors.base import FieldInspector, FilterInspector, NotHandled
-from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_field_type
+from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_field_type, find_limits
 from drf_yasg.inspectors.query import DrfAPICompatInspector, force_real_str  # type: ignore
 from drf_yasg import openapi
 from rest_framework.fields import Field, JSONField, DecimalField, ListField, empty
@@ -130,10 +130,26 @@ def field_have_redirect(field, **kwargs):
     return kwargs
 
 
+# Some fields must be ignored from limits because actual data they represent doesn't
+# match field type they extend. For example when field extends CharField but actually
+# represent object or array.
+IGNORED_LIMITS = (
+    # Actually object or array
+    fields.NamedBinaryFileInJsonField,
+    # Can be any type
+    fields.DynamicJsonTypeField,
+)
+
+
 def field_extra_handler(field, **kwargs):
     kwargs = field_have_redirect(field, **kwargs)
     if kwargs['type'] in (openapi.TYPE_ARRAY, openapi.TYPE_OBJECT):
         kwargs['title'] = force_real_str(field.label) if field.label else None
+
+    if not isinstance(field, IGNORED_LIMITS):
+        # Get limits from field e.g min_length, minimum
+        kwargs.update(find_limits(field))
+
     return kwargs
 
 
@@ -352,8 +368,6 @@ class RatingFieldInspector(FieldInspector):
             'type': openapi.TYPE_NUMBER,
             'format': FORMAT_RATING,
             X_OPTIONS: {
-                'min_value': field.min_value,
-                'max_value': field.max_value,
                 'step': field.step,
                 'style': field.front_style,
                 'color': field.color,
@@ -550,6 +564,9 @@ class DecimalFieldInspector(FieldInspector):
         if field.default != empty:
             kwargs['default'] = str(field.default)
 
+        if not field.allow_null and kwargs['type'] == 'string':
+            kwargs['minLength'] = 1
+
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
@@ -620,6 +637,7 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
 
         view_field_name = getattr(serializer_class, '_view_field_name', None)
         hide_not_required = getattr(serializer_class, '_hide_not_required', None)
+        display_mode = getattr(serializer_class, '_display_mode', None)
 
         if view_field_name is None and schema_properties:
             view_field_name = get_first_match_name(schema_properties, schema_properties[0])
@@ -644,6 +662,9 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
 
         if hide_not_required:
             schema['x-hide-not-required'] = bool(hide_not_required)
+
+        if display_mode:
+            schema['x-display-mode'] = display_mode
 
         schema._handled = True  # pylint: disable=protected-access
 

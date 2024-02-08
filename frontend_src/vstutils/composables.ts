@@ -1,7 +1,7 @@
-import { computed, ref } from 'vue';
+import { computed, ref, unref } from 'vue';
 import { useResizeObserver } from '@vueuse/core';
 
-import type { Ref } from 'vue';
+import type { ComputedRef, Ref } from 'vue';
 import type { FieldsGroup, FieldsInstancesGroup, ModelConstructor } from '@/vstutils/models';
 import type { RepresentData } from '@/vstutils/utils';
 import type { Field } from '@/vstutils/fields/base';
@@ -39,7 +39,12 @@ export function getModelFieldsInstancesGroups(model: ModelConstructor, data: Rep
 
 export function useHideableFieldsGroups(
     fieldsGroups: Ref<FieldsInstancesGroup[]>,
-    options: { hideReadOnly?: boolean } = {},
+    options: {
+        hideReadOnly?: boolean;
+        visibilityData?:
+            | Record<string, boolean | undefined>
+            | ComputedRef<Record<string, boolean | undefined> | undefined>;
+    } = {},
 ) {
     const hiddenFields = ref<Field[]>([]);
 
@@ -55,8 +60,12 @@ export function useHideableFieldsGroups(
     }
 
     function shouldShowField(field: Field) {
+        const visibilityData = unref(options.visibilityData);
         return (
-            !field.hidden && !(options.hideReadOnly && field.readOnly) && !hiddenFields.value.includes(field)
+            !field.hidden &&
+            !(options.hideReadOnly && field.readOnly) &&
+            !hiddenFields.value.includes(field) &&
+            (!visibilityData || visibilityData[field.name])
         );
     }
 

@@ -1,6 +1,6 @@
 # Packages needed for test
-coverage~=7.3.2
-fakeldap==0.6.1
-tblib~=1.7.0
-beautifulsoup4~=4.12.2
-httpx~=0.25.1
+coverage~=7.4.1
+fakeldap~=0.6.6
+tblib==3.0.0
+beautifulsoup4~=4.12.3
+httpx~=0.26.0

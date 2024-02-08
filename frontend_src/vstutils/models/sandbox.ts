@@ -137,13 +137,20 @@ export function createModelSandbox(instance: Model) {
         _changedFields.value.clear();
     }
 
-    function validate() {
+    function partialValidate(fieldsNames: string[]) {
+        const fields = fieldsNames.map((name) => {
+            const field = instance._fields.get(name);
+            if (!field) {
+                throw new Error(`Field "${name}" not found`);
+            }
+            return field;
+        });
         const data = getData();
         // Validate represent data
         const errors: FieldValidationErrorInfo[] = [];
 
         const validatedData = emptyRepresentData();
-        for (const field of instance._fields.values()) {
+        for (const field of fields) {
             try {
                 validatedData[field.name] = field.validateValue(data);
             } catch (e) {
@@ -170,12 +177,12 @@ export function createModelSandbox(instance: Model) {
 
         // Create inner data
         const newData = emptyInnerData();
-        for (const field of instance._fields.values()) {
+        for (const field of fields) {
             newData[field.name] = field.toInner(validatedData);
         }
 
         // Validate inner data
-        for (const field of instance._fields.values()) {
+        for (const field of fields) {
             try {
                 field.validateInner(newData);
             } catch (e) {
@@ -204,6 +211,10 @@ export function createModelSandbox(instance: Model) {
         return newData;
     }
 
+    function validate() {
+        return partialValidate([...instance._fields.keys()]);
+    }
+
     function markUnchanged() {
         _changedFields.value.clear();
     }
@@ -212,6 +223,7 @@ export function createModelSandbox(instance: Model) {
         set,
         setPrefetchedValue,
         reset,
+        partialValidate,
         validate,
         markUnchanged,
         get changed() {

@@ -51,6 +51,7 @@ response_headers_to_pass = (
     "Location",
     "Pagination-Identifiers",
     "X-Query-Data",
+    "Webpush-Public-Key",
 )
 
 
@@ -451,7 +452,11 @@ class EndpointViewSet(views.APIView):
         else:
             should_gzip = False
 
-        response = self.get_client(request).get(url, secure=request.is_secure())
+        headers = {}
+        if 'if-none-match' in request.headers:
+            headers['if-none-match'] = request.headers['if-none-match']
+
+        response = self.get_client(request).get(url, secure=request.is_secure(), headers=headers)
 
         if should_gzip:
             patch_gzip_response(response, request)

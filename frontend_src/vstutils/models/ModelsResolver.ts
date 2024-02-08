@@ -6,6 +6,7 @@ import type { ModelConstructor } from './Model';
 import { BaseModel } from './Model';
 import { makeModel } from './utils';
 
+import { MODEL_MODES } from '@/vstutils/AppConfiguration';
 import type { AppSchema, ModelDefinition } from '@/vstutils/AppConfiguration';
 import type { FieldsResolver } from '@/vstutils/fields';
 import AddKeyField from '../additionalProperties/AddKeyField.vue';
@@ -108,6 +109,15 @@ export class ModelsResolver {
             additionalProperties.getLabelComponent = () => AddKeyField;
         }
 
+        let modeValue = modelSchema['x-display-mode'];
+        if (modeValue && !MODEL_MODES.includes(modeValue)) {
+            console.warn(
+                `Model "${modelName}" has unsupported mode "${modeValue}". ` +
+                    `Supported modes: ${MODEL_MODES.join(', ')}.`,
+            );
+            modeValue = undefined;
+        }
+
         const model = makeModel(
             class extends BaseModel {
                 static declaredFields = fields;
@@ -117,6 +127,8 @@ export class ModelsResolver {
                 static nonBulkMethods = modelSchema['x-non-bulk-methods'] || null;
                 static translateModel = modelSchema['x-translate-model'] || null;
                 static hideNotRequired = modelSchema['x-hide-not-required'];
+                static displayMode = modeValue ?? 'DEFAULT';
+                static visibilityDataFieldName = modelSchema['x-visibility-data-field-name'];
             },
             modelName,
         );

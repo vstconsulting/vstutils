@@ -288,9 +288,10 @@ class ListModel(BaseModel, metaclass=CustomModelBase):
 
     In this case, we setup source list via `setup_custom_queryset_kwargs` function, and any other chained call
     is going to work with this data.
+
+    :ivar list data: List with data dicts. Empty by default.
     """
 
-    #: List with data dicts. Empty by default.
     data = []
     objects = CustomQuerySet.as_manager()
 
@@ -319,24 +320,22 @@ class ListModel(BaseModel, metaclass=CustomModelBase):
 
 class FileModel(ListModel):
     """
-    Custom model which loads data from YAML-file instead of database.
-    Path to the file stored in `FileModel.file_path` attribute.
-
+    Custom model that loads data from a YAML file instead of a database.
+    The path to the file is specified in the `FileModel.file_path` attribute.
 
     Examples:
-        Source file stored in `/etc/authors.yaml` with content:
+        Suppose the source file is stored at `/etc/authors.yaml` with the following content:
 
         .. sourcecode:: YAML
 
             - name: "Sergey Klyuykov"
             - name: "Michael Taran"
 
-        Example:
+        You can create a custom model using this file:
 
         .. sourcecode:: python
 
             from vstutils.custom_model import FileModel, CharField
-
 
             class Authors(FileModel):
                 name = CharField(max_length=512)
@@ -360,25 +359,83 @@ class FileModel(ListModel):
 
 class ExternalCustomModel(ListModel):
     """
-    This custom model is intended for self-implementation of requests to external services.
-    The model allows you to pass filtering, limiting and sorting parameters to an external request,
-    receiving already limited data.
+    Represents a custom model designed for the self-implementation of requests to external services.
 
-    To start using this model, it is enough to implement the ``get_data_generator()`` class method,
-    which receives the query object with the necessary parameters as an argument.
+    This model facilitates the seamless interaction with external services by allowing the
+    passing of filtering, limiting, and sorting parameters to an external request. It is designed
+    to receive data that is already filtered and limited.
+
+    To utilize this model effectively, developers need to implement the ``get_data_generator()``
+    class method. This method receives a query object containing the necessary parameters,
+    enabling developers to customize interactions with external services.
+
+    **Example:**
+
+    .. code-block:: python
+
+        class MyExternalModel(ExternalCustomModel):
+            # ... model fields ...
+
+            class Meta:
+                managed = False
+
+            @classmethod
+            def get_data_generator(cls, query):
+                data = ... # some fetched data from the external resource or generated from memory calculations.
+                for row in data:
+                    yield row
+
     """
     class Meta:
         abstract = True
 
     @classmethod
     def get_data_generator(cls, query):
+        """
+        This class method must be implemented by derived classes to define custom logic
+        for fetching data from an external service based on the provided query parameters.
+
+        Query object might contain the following parameters:
+
+        * filter (dict): A dictionary specifying the filtering criteria.
+        * exclude (dict): A dictionary specifying the exclusion criteria.
+        * order_by (list): A list specifying the sorting order.
+        * low_mark (int): The low index for slicing (if sliced).
+        * high_mark (int): The high index for slicing (if sliced).
+        * is_sliced (bool): A boolean indicating whether the query is sliced.
+
+        :param query: An object containing filtering, limiting, and sorting parameters.
+        :type query: dict
+
+        :return: A generator that yields the requested data.
+        :rtype: Generator
+
+        :raises NotImplementedError: If the method is not implemented by the derived class.
+        """
         raise NotImplementedError
 
 
 class ViewCustomModel(ExternalCustomModel):
     """
-    This model implements the SQL View programming mechanism over other models.
-    In the ``get_view_queryset()`` method, a query is prepared, and all further actions are implemented on top of it.
+    Implements the SQL View programming mechanism over other models.
+
+    This model provides a mechanism for implementing SQL View-like behavior over other models.
+    In the ``get_view_queryset()`` method, a base query is prepared, and all further actions
+    are implemented on top of it.
+
+    **Example Usage:**
+
+    .. code-block:: python
+
+        class MyViewModel(ViewCustomModel):
+            # ... model fields ...
+
+            class Meta:
+                managed = False
+
+            @classmethod
+            def get_view_queryset(cls):
+                return SomeModel.objects.annotate(...)  # add some additional annotations to query
     """
 
     class Meta:
@@ -386,6 +443,15 @@ class ViewCustomModel(ExternalCustomModel):
 
     @classmethod
     def get_view_queryset(cls):
+        """
+        This class method must be implemented by derived classes to define custom logic
+        for generating the base queryset for the SQL View.
+
+        :return: The base queryset for the SQL View.
+        :rtype: django.db.models.query.QuerySet
+
+        :raises NotImplementedError: If the method is not implemented by the derived class.
+        """
         raise NotImplementedError
 
     @classmethod

@@ -22,7 +22,7 @@ from .signals import before_mount_app
 if not apps.apps_ready:
     django.setup(set_prefix=False)  # nocv
 
-static_app = FastAPI(root_path=settings.STATIC_URL, openapi_url=None, docs_url=None, redoc_url=None)
+static_app = FastAPI(openapi_url=None, docs_url=None, redoc_url=None)
 static_app.add_middleware(GZipMiddleware)
 
 application = FastAPI(openapi_url=None, docs_url=None, redoc_url=None)
@@ -31,7 +31,7 @@ application.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ALLOWED_ORIGINS if not settings.CORS_ORIGIN_ALLOW_ALL else ['*'],
     expose_headers=settings.CORS_EXPOSE_HEADERS,
-    allow_origin_regex=settings.CORS_ALLOWED_ORIGIN_REGEXES if not settings.CORS_ORIGIN_ALLOW_ALL else None,
+    allow_origin_regex=settings.CORS_ALLOWED_ORIGIN_REGEX if not settings.CORS_ORIGIN_ALLOW_ALL else None,
     allow_methods=getattr(settings, 'CORS_ALLOW_METHODS', ("GET",)) if not settings.CORS_ORIGIN_ALLOW_ALL else ['*'],
     allow_headers=getattr(settings, 'CORS_ALLOW_HEADERS', ()) if not settings.CORS_ORIGIN_ALLOW_ALL else ['*'],
     allow_credentials=getattr(settings, 'CORS_ALLOWED_CREDENTIALS', settings.CORS_ORIGIN_ALLOW_ALL),

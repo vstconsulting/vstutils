@@ -1,5 +1,5 @@
 <template>
-    <button type="button" :title="title" :class="buttonClasses">
+    <button type="button" :title="$t(title)" :class="buttonClasses">
         <i v-if="iconClasses" class="icon-for-btn" :class="iconClasses" />
         <span v-if="title" class="title-for-btn" :class="{ 'd-none d-lg-inline-block': iconClasses }">
             {{ $t(title) }}
