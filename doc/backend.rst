@@ -68,6 +68,13 @@ Serializers
 
 Views
 ~~~~~
+VSTUtils extends the standard behavior of ViewSets from Django REST Framework (DRF) by providing
+built-in mechanisms for managing model views that cater to the most commonly encountered development patterns.
+This framework enhancement simplifies the process of creating robust and scalable web applications by offering
+a rich set of tools and utilities that automate much of the boilerplate code required in API development.
+Through these extensions, developers can easily implement custom business logic, data validation,
+and access control with minimal effort, thus significantly reducing development time and improving code maintainability.
+
 
 .. automodule:: vstutils.api.base
     :members: GenericViewSet,ModelViewSet,ReadOnlyModelViewSet,HistoryModelViewSet,CopyMixin,FileResponseRetrieveMixin
@@ -75,6 +82,27 @@ Views
 .. automodule:: vstutils.api.decorators
     :members: nested_view,subaction
 
+-------------
+
+**An ETag** (Entity Tag) is a mechanism defined by the HTTP protocol for web cache validation and to manage resource versions efficiently.
+It represents a unique identifier for the content of a resource at a given time, allowing client and server to determine
+if the resource has changed without downloading the entire content.
+This mechanism significantly reduces bandwidth and improves web performance by enabling conditional requests.
+Servers send ETags in responses to clients, which can cache these tags along with the resources.
+On subsequent requests, clients send the cached ETag back to the server in an If-None-Match header.
+If the resource has not changed (the ETag matches), the server responds with a 304 Not Modified status, indicating that the client's cached version is up-to-date.
+
+Beyond GET requests, ETags can also be instrumental in other HTTP methods like PUT or DELETE to ensure consistency
+and prevent unintended overwrites or deletions, known as "mid-air collision avoidance."
+By including an ETag in the If-Match header of non-GET requests, clients signal that the operation should proceed only
+if the resource's current state matches the specified ETag, thus safeguarding against concurrent modifications by different clients.
+This application of ETags enhances the reliability and integrity of web applications by ensuring that operations are performed on the correct version of a resource.
+
+Here is main functionality provided for working with ETag's mechanism:
+
+
+.. automodule:: vstutils.api.base
+    :members: CachableHeadMixin,check_request_etag,get_etag_value,EtagDependency
 
 Actions
 ~~~~~~~

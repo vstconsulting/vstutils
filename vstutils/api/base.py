@@ -1,6 +1,3 @@
-"""
-Default ViewSets for web-api.
-"""
 import enum
 import hashlib
 import re
@@ -458,20 +455,57 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         return super().as_view(actions, **initkwargs)
 
 
-def _get_etag_value(view, model_class, request, pk=None):
+def get_etag_value(view, model_class, request, pk=None):
+    """
+    The get_etag_value function is designed to compute a unique ETag value based on the model's state,
+    request parameters, and additional dependencies such as user language, session,
+    and user identity. This function supports both single models and collections of models.
+
+    :param view: An instance of :class:`.GenericViewSet`, responsible for view operations.
+    :type view: :class:`.GenericViewSet`
+    :param model_class: The model class for which the ETag value is being generated.
+                        This parameter can be a single model class or a collection of model classes
+                        (:class:`list`, :class:`tuple`, or :class:`set`).
+                        Each model class may optionally implement a class method named ``get_etag_value``.
+    :type model_class: :class:`django.db.models.Model`, :class:`list`, :class:`tuple`, or :class:`set`
+    :param request: The request object from the Django REST framework, containing all the HTTP request information.
+    :type request: :class:`rest_framework.request.Request`
+    :param pk: he primary key of the model instance for which the ETag is being calculated.
+               This can be a specific value (int or str) for single model usage,
+               or a dictionary mapping model classes to their respective primary key values for collections of models.
+
+    :return: The computed ETag value as a hexadecimal string.
+    :rtype: :class:`str`
+
+    The function operates differently based on the type of model_class provided:
+
+    - **Collection of Models**: When model_class is a collection, the function computes an ETag by concatenating
+      ETag values of individual models in the collection, using a recursive call for each model.
+      The ETag value for each model is encoded and hashed using Blake2s algorithm.
+
+    - **Model with ``get_etag_value`` method**: If the model class has a get_etag_value method,
+      the function calls this method to obtain a base ETag value.
+      It then appends language, user ID, and session key information if they are marked as dependencies in the model's
+      ``_cache_response_dependencies`` attribute. This base ETag may be further processed to include the application's
+      full version string and hashed if user or session information is included.
+
+    - **Model without ``get_etag_value`` method**: For models lacking a custom get_etag_value method,
+      the function generates an ETag based on the model's class name and
+      a hash of the application's full version string.
+    """
     should_hash = False
     ver = settings.FULL_VERSION
 
     if isinstance(model_class, (list, tuple, set)):
         pk = pk or {view.model_class: view.kwargs.get(view.lookup_url_kwarg or view.lookup_field)}
         return hashlib.blake2s(
-            "_".join(_get_etag_value(view, mc, request, pk.get(mc, 0)) for mc in model_class)
+            "_".join(get_etag_value(view, mc, request, pk.get(mc, 0)) for mc in model_class)
             .encode(settings.DEFAULT_CHARSET),
             digest_size=8,
         ).hexdigest()
-    elif (get_etag_value := getattr(model_class, 'get_etag_value', None)) is not None:
+    elif (get_etag_value_callback := getattr(model_class, 'get_etag_value', None)) is not None:
         pk = pk or view.kwargs.get(view.lookup_url_kwarg or view.lookup_field)
-        etag_value = get_etag_value(pk)
+        etag_value = get_etag_value_callback(pk)
         dependencies = getattr(model_class, '_cache_response_dependencies', (EtagDependency.LANG,))
 
         if EtagDependency.LANG in dependencies:
@@ -491,12 +525,52 @@ def _get_etag_value(view, model_class, request, pk=None):
 
 
 class EtagDependency(enum.Flag):
+    """
+    A custom enumeration that defines potential dependencies for ETag generation. It includes:
+    """
+
     USER = enum.auto()
+    """ Indicates dependency on the user's identity. """
+
     SESSION = enum.auto()
+    """ Indicates dependency on the user's session. """
+
     LANG = enum.auto()
+    """ Indicates dependency on the user's language preference. """
 
 
 def check_request_etag(request, etag_value, header_name="If-None-Match", operation_handler=str.__eq__):
+    """
+    The function plays a crucial role within the context of the ETag mechanism,
+    providing a flexible way to validate client-side ETags against the server-side version for both cache validation
+    and ensuring data consistency in web applications.
+    It supports conditional handling of HTTP requests based on the match or mismatch of ETag values,
+    accommodating various scenarios such as cache freshness checks and prevention of concurrent modifications.
+
+    :param request: The HTTP request object containing the client's headers,
+                    from which the ETag for comparison is retrieved.
+    :type request: :class:`rest_framework.request.Request`
+    :param etag_value: The server-generated ETag value that represents the current state of the resource.
+                       This unique identifier is recalculated whenever the resource's content changes.
+    :type etag_value: :class:`str`
+    :param header_name: Specifies the HTTP header to look for the client's ETag.
+                        Defaults to "If-None-Match", commonly used in GET requests for cache validation.
+                        For operations requiring confirmation that the client is acting on the latest version
+                        of a resource (e.g., PUT or DELETE), "If-Match" should be used instead.
+    :type header_name: :class:`str`
+    :param operation_handler: A function to compare the ETags. By default, this is set to ``str.__eq__``,
+                              which checks for an exact match between the client's and server's ETags,
+                              suitable for validating caches with ``If-None-Match``.
+                              To handle ``If-Match`` scenarios, where the operation should proceed only if the ETags
+                              do not match, indicating the resource has been modified, ``str.__ne__`` (not equal)
+                              can be used as the operation handler. This flexibility allows for precise control over how
+                              and when clients are allowed to read from or write to resources based on their version.
+
+    :return: Returns a tuple containing the server's ETag and a boolean flag.
+             The flag is ``True`` if the operation handler condition between the server's and client's ETag is met,
+             indicating the request should proceed based on the matching logic defined by the operation handler;
+             otherwise, it returns ``False``.
+    """
     header = request.headers.get(header_name)
 
     if not header:
@@ -520,11 +594,35 @@ def check_request_etag(request, etag_value, header_name="If-None-Match", operati
 
 class CachableHeadMixin(GenericViewSet):
     """
-    Mixin which cache GET responses.
-    Uses standard HTTP-caching mechanism which response 304 when Etag match.
+    A mixin designed to enhance caching for GET responses in Django REST framework views,
+    leveraging the standard HTTP caching mechanism. It returns a 304 Not Modified status for
+    reading requests like GET or HEAD when the ETag (Entity Tag) in the client's request matches
+    the current resource state, and a 412 Precondition Failed status for writing requests when
+    the condition fails. This approach reduces unnecessary network traffic and load times for
+    unchanged resources, and ensures data consistency for write operations.
+
+    The mixin relies on :func:`.get_etag_value` and :func:`.check_request_etag` functions within the
+    `GenericViewSet` context to dynamically generate and validate ETags for resource states.
+    By comparing ETags, it determines whether content has changed since the last request,
+    allowing clients to reuse cached responses when applicable and preventing concurrent write
+    operations from overwriting each other without acknowledgment of updated state.
 
     .. warning::
-        This works only with models based on :class:`vstutils.models.BModel`.
+        This mixin is designed to work with models that inherit from :class:`vstutils.models.BModel`.
+        Usage with other models may not provide the intended caching behavior and could lead
+        to incorrect application behavior.
+
+    .. note::
+        For effective use, ensure model classes are compatible with ETag generation and validation
+        by implementing the :func:`.get_etag_value` method for custom ETag computation. Additionally,
+        the :class:`.GenericViewSet` using this mixin should properly handle ETag headers in client
+        requests to leverage HTTP caching.
+
+    An additional feature of the ``CachableHeadMixin`` is its automatic inclusion in the generated
+    view from a :class:`vstutils.models.BModel` if the model class has the ``_cache_responses``
+    class attribute set to ``True``. This enables automatic caching capabilities for models
+    indicating readiness for HTTP-based caching, streamlining the process of optimizing
+    response times and reducing server load for frequently accessed resources.
     """
 
     class NotModifiedException(exceptions.APIException):
@@ -548,7 +646,7 @@ class CachableHeadMixin(GenericViewSet):
         return self.action in main_actions or getattr(getattr(self, self.action, None), '_nested_view', None) is None
 
     def get_etag_value(self, model_class, request, pk=None):
-        return _get_etag_value(view=self, model_class=model_class, request=request, pk=pk)
+        return get_etag_value(view=self, model_class=model_class, request=request, pk=pk)
 
     def _get_etag(self, model_class, request):
         return f'"{self.get_etag_value(model_class, request)}"'
