@@ -7,9 +7,7 @@ import type { Model, ModelConstructor } from '../../models';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 import { i18n } from '../../translation';
 import type { IApp } from '@/vstutils/app';
-import type { Component, ComponentOptions } from 'vue';
-import type Vue from 'vue';
-import type { ComponentOptionsMixin } from 'vue/types/v3-component-options';
+import type { Component } from 'vue';
 import { BaseFieldLabel } from '@/vstutils/fields/base';
 
 const componentsCache = new WeakMap<FieldConstructor, Component>();
@@ -93,6 +91,7 @@ export interface Field<
 
     getComponent(): Component;
     getLabelComponent(): Component;
+    getArrayComponent(): Component | undefined;
 
     toInner(data: RepresentData): Inner | null | undefined;
     toRepresent(data: InnerData): Represent | null | undefined;
@@ -120,7 +119,7 @@ export interface Field<
     getContainerCssClasses(data: RepresentData): string[] | undefined;
 }
 
-export type FieldMixin = ComponentOptionsMixin | ComponentOptions<Vue> | typeof Vue;
+export type FieldMixin = Component;
 
 export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = DefaultXOptions>
     implements Field<Inner, Represent, XOptions>
@@ -129,7 +128,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
 
     options: FieldOptions<XOptions, Inner>;
     props: XOptions;
-    component?: ComponentOptions<Vue>;
+    component?: Component;
 
     type: ParameterType;
     format?: string;
@@ -199,6 +198,10 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
 
     getComponent(): Component {
         return this.component ?? (this.constructor as FieldConstructor)._component;
+    }
+
+    getArrayComponent(): Component | undefined {
+        return undefined;
     }
 
     getLabelComponent(): Component {

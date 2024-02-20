@@ -1,6 +1,6 @@
 import { test, describe, expect } from '@jest/globals';
 import StringField from '../text/StringField';
-import { FKField } from '../fk/fk';
+import { FKField } from '../fk/fk/FKField';
 
 describe('fields types', () => {
     test('simple string field', () => {

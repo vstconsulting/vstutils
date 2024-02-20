@@ -5,8 +5,9 @@ import type { RepresentData } from '@/vstutils/utils';
 import { formatPath, getApp, getDependenceValueAsString, RequestTypes } from '@/vstutils/utils';
 
 import FKFieldMixin from './FKFieldMixin';
+import { FKArrayFieldMixin } from './array';
 
-import type { ComponentOptions } from 'vue';
+import type { Component, ComponentOptions } from 'vue';
 import type { ModelDefinition } from '@/vstutils/AppConfiguration';
 import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
 import type { PageView, ViewStore } from '@/vstutils/views';
@@ -149,6 +150,10 @@ export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> impl
 
     static get mixins() {
         return [FKFieldMixin as ComponentOptions<Vue>];
+    }
+
+    override getArrayComponent(): Component {
+        return FKArrayFieldMixin;
     }
 
     getEmptyValue() {

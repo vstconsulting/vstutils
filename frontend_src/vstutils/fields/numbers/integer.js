@@ -1,5 +1,6 @@
 import { BaseFieldContentEdit } from '../base';
 import { NumberField, NumberFieldContentMixin, NumberFieldMixin } from './number';
+import { IntegerArrayFieldMixin } from './array';
 
 export const IntegerFieldContentMixin = {
     mixins: [NumberFieldContentMixin],
@@ -26,5 +27,9 @@ export class IntegerField extends NumberField {
      */
     static get mixins() {
         return [IntegerFieldMixin];
+    }
+
+    getArrayComponent() {
+        return IntegerArrayFieldMixin;
     }
 }

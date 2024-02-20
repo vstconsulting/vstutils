@@ -1,10 +1,8 @@
-import FKField from './FKField';
-import FKFieldContent from './FKFieldContent.js';
-import FKFieldContentEditable from './FKFieldContentEditable.vue';
-import FKFieldContentReadonly from './FKFieldContentReadonly.vue';
-import FKFieldMixin from './FKFieldMixin';
+export { FKField } from './FKField';
+export { default as FKFieldContent } from './FKFieldContent.js';
+export { default as FKFieldContentEditable } from './FKFieldContentEditable.vue';
+export { default as FKFieldContentReadonly } from './FKFieldContentReadonly.vue';
+export { default as FKFieldMixin } from './FKFieldMixin';
 
 export * from './transport';
 export * from './composables';
-
-export { FKField, FKFieldContent, FKFieldContentEditable, FKFieldContentReadonly, FKFieldMixin };

@@ -1,5 +1,6 @@
-import { FKField } from '../fk';
-import { DeepFKFieldMixin } from './index';
+import { FKField } from '../fk/FKField';
+import DeepFKFieldMixin from './DeepFKFieldMixin';
+import { DeepFkArrayFieldMixin } from './array';
 
 /**
  * DeepFKField extends `FkField`, but displays as tree
@@ -72,6 +73,10 @@ class DeepFKField extends FKField {
 
     static get mixins() {
         return [DeepFKFieldMixin];
+    }
+
+    getArrayComponent() {
+        return DeepFkArrayFieldMixin;
     }
 }
 export default DeepFKField;

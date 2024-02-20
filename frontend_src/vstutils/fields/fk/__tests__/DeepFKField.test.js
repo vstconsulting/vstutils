@@ -1,12 +1,16 @@
 import { expect, test, describe, beforeAll, beforeEach } from '@jest/globals';
+import { reactive } from 'vue';
+import { within } from '@testing-library/dom';
+import { userEvent } from '@testing-library/user-event';
 import fetchMock from 'jest-fetch-mock';
-import { createApp, createSchema, mount, waitFor } from '@/unittests';
+import { createApp, createSchema, waitFor, mount } from '@/unittests';
 import schema from './DeepFKField-schema.json';
 
 describe('DeepFKfield', () => {
     let app;
     let Category;
     let deepFk;
+    let deepFkArray;
 
     beforeAll(async () => {
         fetchMock.enableMocks();
@@ -24,6 +28,23 @@ describe('DeepFKfield', () => {
                 view_field: 'name',
                 parent_field_name: 'parent',
                 only_last_child: true,
+            },
+        });
+        deepFkArray = app.fieldsResolver.resolveField({
+            name: 'testField',
+            type: 'array',
+            items: {
+                type: 'integer',
+                format: 'deep_fk',
+                'x-options': {
+                    makeLink: true,
+                    model: { $ref: '#/definitions/Category' },
+                    usePrefetch: true,
+                    value_field: 'id',
+                    view_field: 'name',
+                    parent_field_name: 'parent',
+                    only_last_child: true,
+                },
             },
         });
     });
@@ -75,12 +96,15 @@ describe('DeepFKfield', () => {
         const emitted = wrapper.emitted();
 
         // Wait for categories to load and display
-        await waitFor(() => expect(wrapper.find('li[data-id="1"]').exists()).toBeTruthy(), {
-            container: wrapper.element,
-        });
+        await waitFor(() => expect(wrapper.find('li[data-id="1"]').exists()).toBeTruthy());
 
         // Select category with subcategory
-        wrapper.find('li[data-id="1"]').find('.tree-content').trigger('click');
+        wrapper.find('li[data-id="1"]').trigger('click');
+        await wrapper.vm.$nextTick();
+        expect(emitted['set-value']).toBeFalsy();
+
+        // Open subcategory
+        wrapper.find('li[data-id="1"]').find('.tree-arrow').trigger('click');
         await wrapper.vm.$nextTick();
         expect(emitted['set-value']).toBeFalsy();
 
@@ -88,5 +112,51 @@ describe('DeepFKfield', () => {
         wrapper.find('li[data-id="2"]').find('.tree-content').trigger('click');
         expect(emitted['set-value'].length).toBe(1);
         expect(emitted['set-value'][0][0].value.getPkValue()).toBe(2);
+    });
+
+    test('deep fk field array', async () => {
+        fetchMock.mockResponseOnce(
+            JSON.stringify([
+                {
+                    status: 200,
+                    data: {
+                        count: 2,
+                        results: [
+                            { id: 1, parent: null, name: 'Cat 1' },
+                            { id: 2, parent: 1, name: 'Cat 1.1' },
+                            { id: 4, parent: null, name: 'Cat 3' },
+                            { id: 3, parent: null, name: 'Cat 2' },
+                        ],
+                    },
+                },
+            ]),
+        );
+        const data = reactive({ testField: [2, 3] });
+        const wrapper = mount({
+            template: `<transition><field type="edit" :field="field" :data="data" @set-value="setValue" /></transition>`,
+            components: {
+                field: deepFkArray.getComponent(),
+            },
+            setup() {
+                const field = deepFkArray;
+                function setValue(e) {
+                    data.testField = e.value;
+                }
+                return { data, field, setValue };
+            },
+        });
+
+        const user = userEvent.setup({ document: wrapper.vm.$el.ownerDocument });
+        const screen = within(wrapper.element);
+
+        // Cat 1.1 is selected so must be visible when opened
+        const cat1_1 = await screen.findByText(
+            (content, el) => content === 'Cat 1.1' && el.parentElement.classList.contains('tree-anchor'),
+        );
+
+        // Unselect Cat 1.1
+        user.click(cat1_1);
+        await waitFor(() => expect(data.testField.length).toBe(1));
+        expect(data.testField[0].id).toBe(3);
     });
 });
