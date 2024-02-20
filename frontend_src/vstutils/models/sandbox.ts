@@ -152,7 +152,7 @@ export function createModelSandbox(instance: Model) {
         const validatedData = emptyRepresentData();
         for (const field of fields) {
             try {
-                validatedData[field.name] = field.validateValue(data);
+                validatedData[field.name] = field.readOnly ? field.getValue(data) : field.validateValue(data);
             } catch (e) {
                 errors.push({ field, message: (e as Error).message });
             }

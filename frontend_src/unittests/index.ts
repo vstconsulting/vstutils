@@ -63,14 +63,11 @@ export function useTestCtx() {
     const user = userEvent.setup({ document: doc });
     const screen = within(doc.body);
 
-    return { app: getApp(), screen, user, wrapper: currentWrapper };
+    return { app: getApp(), screen, user, wrapper: currentWrapper, waitFor };
 }
 
 export function waitFor<T>(callback: () => T, options?: Parameters<typeof _waitFor>[1]) {
     const container = options?.container || __currentApp?.rootVm?.$el;
-    if (!container) {
-        throw new Error('App must be mounted first or custom must be provided');
-    }
     return _waitFor(callback, {
         ...options,
         // @ts-expect-error $el is ok here

@@ -1,5 +1,6 @@
 import { BaseField, BaseFieldContentEdit, BaseFieldMixin } from '../base';
 import { hasOwnProp } from '../../utils';
+import { NumberArrayFieldMixin } from './array';
 
 export const NumberFieldContentMixin = {
     methods: {
@@ -67,5 +68,9 @@ export class NumberField extends BaseField {
      */
     static get mixins() {
         return [NumberFieldMixin];
+    }
+
+    getArrayComponent() {
+        return NumberArrayFieldMixin;
     }
 }

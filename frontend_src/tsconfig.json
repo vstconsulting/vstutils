@@ -1,4 +1,7 @@
 {
+    "include": [
+        "./**/*"
+    ],
     "compilerOptions": {
         "outDir": "./dist",
         "baseUrl": "./",

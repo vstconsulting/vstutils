@@ -42,8 +42,8 @@
     import Card from '@/vstutils/components/Card.vue';
     import ModelFields from '@/vstutils/components/page/ModelFields.vue';
     import { emptyRepresentData } from '@/vstutils/utils';
-    import type { NestedObjectField } from '@/vstutils/fields/nested-object';
-    import type ArrayField from '../../ArrayField';
+    import type { NestedObjectField } from '@/vstutils/fields/nested-object/index';
+    import type ArrayField from '@/vstutils/fields/array/ArrayField';
     import type { FieldEditPropsDefType } from '@/vstutils/fields/base';
     import {
         FieldEditPropsDef,

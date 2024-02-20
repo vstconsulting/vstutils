@@ -1,5 +1,6 @@
 import { i18n } from '@/vstutils/translation';
 import { type RawEnumItem, ChoicesField } from './ChoicesField';
+import { ChoicesArrayFieldMixin } from './array';
 
 class OrderingChoicesField extends ChoicesField {
     translateValue(value: string): string {
@@ -19,6 +20,10 @@ class OrderingChoicesField extends ChoicesField {
             preparedItem.text = hasMinus ? `⬇ ${translatedText}` : `⬆ ${translatedText}`;
         }
         return preparedItem;
+    }
+
+    override getArrayComponent() {
+        return ChoicesArrayFieldMixin;
     }
 }
 

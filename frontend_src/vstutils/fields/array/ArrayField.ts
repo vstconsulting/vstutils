@@ -8,20 +8,10 @@ import type {
     FieldXOptions,
 } from '@/vstutils/fields/base';
 import { BaseField } from '@/vstutils/fields/base';
-import { ChoicesField, OrderingChoicesField } from '@/vstutils/fields/choices';
-import { FKField } from '@/vstutils/fields/fk/fk';
-import { NestedObjectField } from '@/vstutils/fields/nested-object';
-import { integer, NumberField } from '@/vstutils/fields/numbers';
-import { StringField } from '@/vstutils/fields/text';
 import { onAppBeforeInit } from '@/vstutils/signals';
-
-import { ChoicesArrayFieldMixin } from './custom/choices';
-import { FKArrayFieldMixin } from './custom/fk';
-import { NestedObjectArrayFieldMixin } from './custom/nested-object';
-import { IntegerArrayFieldMixin, NumberArrayFieldMixin } from './custom/number';
-import { StringArrayFieldMixin } from './custom/string';
-import { ArrayFieldMixin } from './mixins';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
+
+import { ArrayFieldMixin } from './mixins';
 
 export interface ArrayFieldXOptions extends FieldXOptions {
     'x-collectionFormat'?: ParameterCollectionFormat;
@@ -37,16 +27,6 @@ export class ArrayField<TRealField extends Field = Field> extends BaseField<
         ['ssv', ' '],
         ['tsv', '\t'],
         ['pipes', '|'],
-    ]);
-
-    static CUSTOM_COMPONENTS = new Map<new (options: any) => Field, unknown>([
-        [ChoicesField as unknown as new (options: any) => Field, ChoicesArrayFieldMixin],
-        [OrderingChoicesField as unknown as new (options: any) => Field, ChoicesArrayFieldMixin],
-        [FKField, FKArrayFieldMixin],
-        [StringField, StringArrayFieldMixin],
-        [NumberField, NumberArrayFieldMixin],
-        [integer.IntegerField, IntegerArrayFieldMixin],
-        [NestedObjectField, NestedObjectArrayFieldMixin],
     ]);
 
     collectionFormat?: ParameterCollectionFormat;
@@ -88,9 +68,7 @@ export class ArrayField<TRealField extends Field = Field> extends BaseField<
         this.itemField = this.app.fieldsResolver.resolveField(this.options.items!, this.name) as TRealField;
         this.itemField.model = this.model;
 
-        const customComponent = ArrayField.CUSTOM_COMPONENTS.get(
-            this.itemField.constructor as new (options: any) => Field,
-        );
+        const customComponent = this.itemField.getArrayComponent();
         if (customComponent) {
             this.component = customComponent;
         }

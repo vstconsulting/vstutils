@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeAll, beforeEach } from '@jest/globals';
 import fetchMock from 'jest-fetch-mock';
-import { FKField } from '../fk';
 import { createApp } from '../../../../unittests/create-app.js';
+import { FKField } from '../fk/FKField';
 
 describe('FKfield', () => {
     /** @type {App} */

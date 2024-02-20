@@ -3,12 +3,12 @@ import { toRef, defineComponent, h } from 'vue';
 import { fetchPKs } from '@/vstutils/fetch-values';
 import { FieldEditPropsDef } from '@/vstutils/fields/base';
 import { createTransport, useQuerySets } from '@/vstutils/fields/fk/fk';
-import { ArrayFieldMixin } from '../mixins';
+import { ArrayFieldMixin } from '@/vstutils/fields/array/mixins';
 
 import type { PropType } from 'vue';
 import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
-import type { FKField } from '@/vstutils/fields/fk/fk';
-import type { ArrayField } from '../ArrayField';
+import type { FKField } from '@/vstutils/fields/fk/fk/FKField';
+import type { ArrayField } from '@/vstutils/fields/array/ArrayField';
 import type { Model } from '@/vstutils/models';
 
 type TRepresent = ExtractRepresent<FKField>;

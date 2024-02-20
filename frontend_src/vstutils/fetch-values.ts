@@ -1,9 +1,9 @@
 import { i18n } from '@/vstutils/translation';
 import { AggregatedQueriesExecutor } from '@/vstutils/AggregatedQueriesExecutor';
 import { RequestTypes, createPropertyProxy, getApp } from '@/vstutils/utils';
-import { ArrayField } from '@/vstutils/fields/array';
+import { FKField } from '@/vstutils/fields/fk/fk/FKField';
+import { ArrayField } from '@/vstutils/fields/array/ArrayField';
 import { DynamicField } from '@/vstutils/fields/dynamic';
-import { FKField } from '@/vstutils/fields/fk/fk';
 
 import type { BaseView } from '@/vstutils/views';
 import type { Model, ModelConstructor } from '@/vstutils/models';

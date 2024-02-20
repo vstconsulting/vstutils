@@ -5,6 +5,7 @@ import type { FieldOptions, FieldXOptions } from '../base';
 import { StringField } from '../text';
 import ChoicesFieldMixin from './ChoicesFieldMixin.js';
 import type { RepresentData } from '@/vstutils/utils';
+import { ChoicesArrayFieldMixin } from './array';
 
 export type RawEnumItem = string | [string, string] | { value: string; prefetch_value: string } | Model;
 
@@ -96,6 +97,10 @@ export class ChoicesField extends StringField<ChoicesFieldXOptions> {
      */
     static get mixins() {
         return [ChoicesFieldMixin];
+    }
+
+    override getArrayComponent() {
+        return ChoicesArrayFieldMixin;
     }
 
     getContainerCssClasses(data: RepresentData) {

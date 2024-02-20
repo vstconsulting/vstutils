@@ -5,11 +5,11 @@ import TagsSelector from '@/vstutils/components/TagsSelector.vue';
 import { HideButton } from '@/vstutils/fields/buttons';
 import { resumeEnterPropagation, stopEnterPropagation } from '@/vstutils/utils';
 
-import { ArrayFieldMixin } from '../mixins';
+import { ArrayFieldMixin } from '@/vstutils/fields/array/mixins';
 
-import type ArrayField from '../ArrayField';
+import { type ArrayField } from '@/vstutils/fields/array/ArrayField';
 
-import './style.scss';
+import './string-array.scss';
 
 export const StringArrayFieldEdit = defineComponent({
     name: 'StringArrayFieldEdit',

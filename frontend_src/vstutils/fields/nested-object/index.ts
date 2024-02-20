@@ -1,4 +1,4 @@
-import { computed, defineComponent, h } from 'vue';
+import { type Component, computed, defineComponent, h } from 'vue';
 
 import { ModelFields } from '@/vstutils/components/page';
 import type {
@@ -12,10 +12,11 @@ import type {
 import { BaseField, FieldPropsDef, useFieldWrapperClasses } from '@/vstutils/fields/base';
 import { onAppBeforeInit } from '@/vstutils/signals';
 import { emptyInnerData, emptyRepresentData, mapObjectValues } from '@/vstutils/utils';
+import { NestedObjectArrayFieldMixin } from './array';
 
 import type { ModelConstructor } from '@/vstutils/models';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
-import type { ModelDefinition } from '../AppConfiguration';
+import type { ModelDefinition } from '@/vstutils/AppConfiguration';
 
 type TInner = InnerData;
 type TRepresent = RepresentData;
@@ -200,5 +201,9 @@ export class NestedObjectField
             }
         }
         return classes;
+    }
+
+    override getArrayComponent(): Component {
+        return NestedObjectArrayFieldMixin;
     }
 }

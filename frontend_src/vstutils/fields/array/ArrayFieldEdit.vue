@@ -3,7 +3,7 @@
         <select ref="select" class="form-control" multiple style="width: 100%" />
 
         <div v-if="showItemField" class="item-field-wrapper" style="padding: 0.5rem">
-            <button class="btn btn-danger" @click="closeItemField">
+            <button type="button" class="btn btn-danger" @click="closeItemField">
                 <i class="fas fa-ban" />
             </button>
             <component
@@ -15,7 +15,7 @@
                 hide-title
                 @set-value="setNewValue"
             />
-            <button class="btn btn-primary" @click="addValue">
+            <button type="button" class="btn btn-primary" @click="addValue">
                 <i class="fas fa-plus" />
             </button>
         </div>
@@ -66,7 +66,7 @@
                     if (!item.vm) {
                         item.vm = new Vue({
                             parent: this,
-                            mixins: [this.field.itemField.component],
+                            mixins: [this.field.itemField.getComponent()],
                             propsData: {
                                 field: this.field.itemField,
                                 data: { [this.field.itemField.name]: item.value },
