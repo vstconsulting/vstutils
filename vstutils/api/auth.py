@@ -16,8 +16,10 @@ from vstutils.api.filters import DefaultIDFilter, name_filter, name_help
 from vstutils.api.serializers import VSTSerializer, BaseSerializer, update_declared_fields
 from vstutils.api.models import TwoFactor, RecoveryCode, UserSettings
 from vstutils.utils import raise_context_decorator_with_default, translate, lazy_translate as __
-from vstutils.webpush.api import create_webpush_settings_action
-from vstutils.webpush.autodiscovery import get_web_pushes_classes
+
+if settings.WEBPUSH_ENABLED:
+    from vstutils.webpush.api import create_webpush_settings_action
+    from vstutils.webpush.autodiscovery import get_web_pushes_classes
 
 User: _t.Type[AbstractUser] = get_user_model()
 
