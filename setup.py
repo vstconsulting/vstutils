@@ -42,7 +42,7 @@ kwargs = dict(
         'vstutils/static/bundle/.*\.js$'
     ],
     install_requires=[
-        "django~=" + (os.environ.get('DJANGO_DEP', "") or "4.2.9"),
+        "django~=" + (os.environ.get('DJANGO_DEP', "") or "4.2.10"),
     ]
     + requirements
     + load_requirements('requirements-doc.txt'),
@@ -59,7 +59,7 @@ kwargs = dict(
             for i in requirements
             if isinstance(i, str) and 'django-storages' in i
         ],
-        'sqs': requirements_rpc + ['pycurl~=7.45.2'],
+        'sqs': requirements_rpc + ['pycurl~=7.45.3'],
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),
