@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-08 03:53+0000\n"
+"POT-Creation-Date: 2024-03-13 07:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.14.0\n"
+"Generated-By: Babel 2.12.1\n"
 
 #: ../../backend.rst:2
 msgid "Backend API manual"
@@ -3043,7 +3043,18 @@ msgid ""
 " logic, data validation, and access control with minimal effort, thus "
 "significantly reducing development time and improving code "
 "maintainability."
-msgstr "VSTUtils расширяет стандартное поведение ViewSets из Django REST Framework (DRF), предоставляя встроенные механизмы для управления представлениями моделей, которые удовлетворяют наиболее часто встречающимся паттернам разработки. Это улучшение фреймворка упрощает процесс создания надежных и масштабируемых веб-приложений, предлагая богатый набор инструментов и утилит, которые автоматизируют большую часть шаблонного кода, необходимого при разработке API. Благодаря этим расширениям, разработчики могут легко реализовать пользовательскую бизнес-логику, валидацию данных и контроль доступа с минимальными усилиями, тем самым значительно сокращая время разработки и улучшая поддерживаемость кода."
+msgstr ""
+"VSTUtils расширяет стандартное поведение ViewSets из Django REST "
+"Framework (DRF), предоставляя встроенные механизмы для управления "
+"представлениями моделей, которые удовлетворяют наиболее часто "
+"встречающимся паттернам разработки. Это улучшение фреймворка упрощает "
+"процесс создания надежных и масштабируемых веб-приложений, предлагая "
+"богатый набор инструментов и утилит, которые автоматизируют большую часть"
+" шаблонного кода, необходимого при разработке API. Благодаря этим "
+"расширениям, разработчики могут легко реализовать пользовательскую "
+"бизнес-логику, валидацию данных и контроль доступа с минимальными "
+"усилиями, тем самым значительно сокращая время разработки и улучшая "
+"поддерживаемость кода."
 
 #: of vstutils.api.base.CopyMixin:1
 msgid "Mixin for viewsets which adds `copy` endpoint to view."
@@ -3396,7 +3407,7 @@ msgstr "Заменить заголовок действия."
 msgid "Setup action icon classes."
 msgstr "Настроить классы иконок действия."
 
-#: ../../backend.rst:85
+#: ../../backend.rst:87
 msgid ""
 "**An ETag** (Entity Tag) is a mechanism defined by the HTTP protocol for "
 "web cache validation and to manage resource versions efficiently. It "
@@ -3424,7 +3435,7 @@ msgstr ""
 "ресурс не изменился (ETag совпадает), сервер отвечает статусом 304 Not "
 "Modified, указывая, что кэшированная версия клиента актуальна."
 
-#: ../../backend.rst:93
+#: ../../backend.rst:95
 msgid ""
 "Beyond GET requests, ETags can also be instrumental in other HTTP methods"
 " like PUT or DELETE to ensure consistency and prevent unintended "
@@ -3447,7 +3458,7 @@ msgstr ""
 "веб-приложений, гарантируя выполнение операций с корректной версией "
 "ресурса."
 
-#: ../../backend.rst:99
+#: ../../backend.rst:101
 msgid "Here is main functionality provided for working with ETag's mechanism:"
 msgstr "Вот основные функции, предоставляемые для работы с механизмом ETag:"
 
@@ -3745,11 +3756,11 @@ msgstr ""
 "пользовательского метода get_etag_value функция генерирует ETag на основе"
 " имени класса модели и хеша полной строки версии приложения."
 
-#: ../../backend.rst:106
+#: ../../backend.rst:108
 msgid "Actions"
 msgstr "Actions (Действия)"
 
-#: ../../backend.rst:108
+#: ../../backend.rst:110
 msgid ""
 "Vstutils has the advanced system of working with actions. REST API works "
 "with data through verbs, which are called methods. However, to work with "
@@ -3759,7 +3770,7 @@ msgstr ""
 "данными через глаголы, которые называются методами. Однако для работы с "
 "одной или списком сущностей этих действий может быть недостаточно."
 
-#: ../../backend.rst:112
+#: ../../backend.rst:114
 msgid ""
 "To expand the set of actions, you need to create an action that will work"
 " with some aspect of the described model. For these purposes, there is a "
@@ -3774,7 +3785,7 @@ msgstr ""
 "также можно расширить с помощью схемы. Но для большего удобства в "
 "vstutils есть набор декораторов, которые позволяют избежать написания "
 
-#: ../../backend.rst:116
+#: ../../backend.rst:118
 msgid ""
 "The main philosophy for these wrappers is that the developer writes "
 "business logic without being distracted by the boilerplate code. Often, "
@@ -3952,11 +3963,11 @@ msgstr ""
 "При назначении действия на объект список методов также заполняется "
 "необходимыми методами."
 
-#: ../../backend.rst:125
+#: ../../backend.rst:127
 msgid "Filtersets"
 msgstr "Filterset'ы"
 
-#: ../../backend.rst:127
+#: ../../backend.rst:129
 msgid ""
 "For greater development convenience, the framework provides additional "
 "classes and functions for filtering elements by fields."
@@ -4042,11 +4053,11 @@ msgstr ""
 msgid "searching part of name."
 msgstr "часть названия для поиска."
 
-#: ../../backend.rst:135
+#: ../../backend.rst:137
 msgid "Responses"
 msgstr "Ответы (responses)"
 
-#: ../../backend.rst:137
+#: ../../backend.rst:139
 msgid ""
 "DRF provides a standard set of variables whose names correspond to the "
 "human-readable name of the HTTP code. For convenience, we have "
@@ -4058,7 +4069,7 @@ msgstr ""
 "оборачиваем их в набор классов с соответствующими именами и дополнительно"
 " обеспечиваем следующие возможности:"
 
-#: ../../backend.rst:142
+#: ../../backend.rst:144
 msgid ""
 "String responses are wrapped in json like ``{ \"detail\": \"string "
 "response\" }``."
@@ -4066,11 +4077,11 @@ msgstr ""
 "Строковые ответы оборачиваются в json, например ``{ \"detail\": \"string "
 "response\" }``."
 
-#: ../../backend.rst:143
+#: ../../backend.rst:145
 msgid "Attribute timings are kept for further processing in middleware."
 msgstr "Тайминги атрибутов сохраняются для дальнейшей обработки в middleware."
 
-#: ../../backend.rst:144
+#: ../../backend.rst:146
 msgid ""
 "Status code is set by class name (e.g. ``HTTP_200_OK`` or ``Response200``"
 " has code 200)."
@@ -4078,7 +4089,7 @@ msgstr ""
 "Код состояния задается именем класса (например ``HTTP_200_OK`` или "
 "``Response200`` имеют код 200)."
 
-#: ../../backend.rst:146
+#: ../../backend.rst:148
 msgid "All classes inherit from:"
 msgstr "Все классы наследуются от:"
 
@@ -4095,11 +4106,11 @@ msgstr "Код состояния HTTP."
 msgid "Response timings."
 msgstr "Тайминги ответов."
 
-#: ../../backend.rst:153
+#: ../../backend.rst:155
 msgid "Middleware"
 msgstr "Middleware"
 
-#: ../../backend.rst:155
+#: ../../backend.rst:157
 msgid ""
 "By default, Django `supposes "
 "<https://docs.djangoproject.com/en/4.1/topics/http/middleware/#writing-"
@@ -4210,11 +4221,11 @@ msgstr "Handler запроса. Вызывается перед обработк
 msgid "Handled request object."
 msgstr "Обработанный объект запроса."
 
-#: ../../backend.rst:164
+#: ../../backend.rst:166
 msgid "Filter Backends"
 msgstr "Filter Backend'ы"
 
-#: ../../backend.rst:165
+#: ../../backend.rst:167
 msgid ""
 "`Filter Backends <https://www.django-rest-framework.org/api-"
 "guide/filtering/#djangofilterbackend>`_ are used to modify model "
@@ -4360,11 +4371,11 @@ msgstr ""
 "автогенерации схемы, предоставляемой REST-фреймворком, реализуя этот "
 "метод. Метод должен возвращать список OpenAPI сопоставлений схемы."
 
-#: ../../backend.rst:174
+#: ../../backend.rst:176
 msgid "Celery"
 msgstr "Celery"
 
-#: ../../backend.rst:176
+#: ../../backend.rst:178
 msgid ""
 "Celery is a distributed task queue. It's used to execute some actions "
 "asynchronously in a separate worker. For more details on Celery, check "
@@ -4383,7 +4394,7 @@ msgstr ""
 "settings>`_ в settings.ini. Также вам понадобится установить "
 "дополнительные [rpc] зависимости."
 
-#: ../../backend.rst:182
+#: ../../backend.rst:184
 msgid "Tasks"
 msgstr "Tasks"
 
@@ -4445,11 +4456,11 @@ msgstr ""
 msgid "The body of the task executed by workers."
 msgstr "Тело задачи выполняется worker'ами."
 
-#: ../../backend.rst:188
+#: ../../backend.rst:190
 msgid "Endpoint"
 msgstr "Endpoint"
 
-#: ../../backend.rst:190
+#: ../../backend.rst:192
 msgid ""
 "Endpoint view has two purposes: bulk requests execution and providing "
 "OpenAPI schema."
@@ -4457,7 +4468,7 @@ msgstr ""
 "Endpoint-view имеет две цели: выполнение bulk-запросов и предоставление "
 "схемы OpenAPI."
 
-#: ../../backend.rst:192
+#: ../../backend.rst:194
 msgid ""
 "Endpoint url is ``/{API_URL}/endpoint/``, for example value with default "
 "settings is ``/api/endpoint/``."
@@ -4465,7 +4476,7 @@ msgstr ""
 "URL endpoint'а - ``/{API_URL}/endpoint/``, например значение с "
 "настройками по умолчанию - ``/api/endpoint/``."
 
-#: ../../backend.rst:194
+#: ../../backend.rst:196
 msgid "``API_URL`` can be changed in ``settings.py``."
 msgstr "``API_URL`` может быть изменен в ``settings.py``."
 
@@ -4539,11 +4550,11 @@ msgstr "Выполнить нетранзакционный bulk-запрос"
 msgid "One operation serializer class."
 msgstr "Класс сериализатора одной операции."
 
-#: ../../backend.rst:201
+#: ../../backend.rst:203
 msgid "Bulk requests"
 msgstr "Bulk-запросы"
 
-#: ../../backend.rst:203
+#: ../../backend.rst:205
 msgid ""
 "Bulk request allows you send multiple requests to api at once, it accepts"
 " json list of operations."
@@ -4551,39 +4562,39 @@ msgstr ""
 "Bulk-запрос позволяет вам отсылать несколько запросов к api в одном. Он "
 "принимает json-список операций."
 
-#: ../../backend.rst:206
+#: ../../backend.rst:208
 msgid "Method"
 msgstr "Метод"
 
-#: ../../backend.rst:206
+#: ../../backend.rst:208
 msgid "Transactional (all operations in one transaction)"
 msgstr "Транзакционный (все операции в одной транзакции)"
 
-#: ../../backend.rst:206
+#: ../../backend.rst:208
 msgid "Synchronous (operations executed one by one in given order)"
 msgstr "Синхронный (операции выполняются одна за другой в указанном порядке)"
 
-#: ../../backend.rst:210
+#: ../../backend.rst:212
 msgid "``PUT /{API_URL}/endpoint/``"
 msgstr "``PUT /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:210 ../../backend.rst:214
+#: ../../backend.rst:212 ../../backend.rst:216
 msgid "NO"
 msgstr "НЕТ"
 
-#: ../../backend.rst:210 ../../backend.rst:212
+#: ../../backend.rst:212 ../../backend.rst:214
 msgid "YES"
 msgstr "ДА"
 
-#: ../../backend.rst:212
+#: ../../backend.rst:214
 msgid "``POST /{API_URL}/endpoint/``"
 msgstr "``POST /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:214
+#: ../../backend.rst:216
 msgid "``PATCH /{API_URL}/endpoint/``"
 msgstr "``PATCH /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:217
+#: ../../backend.rst:219
 msgid ""
 "Parameters of one operation (required parameter marked by "
 ":superscript:`*`):"
@@ -4591,25 +4602,25 @@ msgstr ""
 "Параметры одной операции (обязательный параметр помечается "
 ":superscript:`*`):"
 
-#: ../../backend.rst:219
+#: ../../backend.rst:221
 msgid "``method``:superscript:`*` - http method of request"
 msgstr "``method``:superscript:`*` - http-метод запроса"
 
-#: ../../backend.rst:220
+#: ../../backend.rst:222
 msgid "``path``:superscript:`*` - path of request, can be ``str`` or ``list``"
 msgstr ""
 "``path``:superscript:`*` - путь запроса, может быть типа ``str`` или  "
 "``list``"
 
-#: ../../backend.rst:221
+#: ../../backend.rst:223
 msgid "``data`` - data to send"
 msgstr "``data`` - данные для отправки"
 
-#: ../../backend.rst:222
+#: ../../backend.rst:224
 msgid "``query`` - query parameters as ``str``"
 msgstr "``query`` - query-параметры типа ``str``"
 
-#: ../../backend.rst:223
+#: ../../backend.rst:225
 msgid ""
 "``let`` - string with name of variable (used for access to response "
 "result in templates)"
@@ -4617,7 +4628,7 @@ msgstr ""
 "``let`` - строка с именем переменной (используется для доступа к "
 "результату ответа в шаблонах)"
 
-#: ../../backend.rst:224
+#: ../../backend.rst:226
 msgid ""
 "``headers`` - ``dict`` with headers which will be sent (key - header's "
 "name, value - header's value string)."
@@ -4625,7 +4636,7 @@ msgstr ""
 "``headers`` - словарь с заголовками, которые будут переданы в запрос "
 "(ключ - имя заголовка, значение - строка со значением заголовка."
 
-#: ../../backend.rst:225
+#: ../../backend.rst:227
 msgid ""
 "``version`` - ``str`` with specified version of api, if not provided then"
 " ``VST_API_VERSION`` will be used"
@@ -4633,7 +4644,7 @@ msgstr ""
 "``version`` - ``str`` с указанной версией api, если не задано, то "
 "используется ``VST_API_VERSION``"
 
-#: ../../backend.rst:229
+#: ../../backend.rst:231
 msgid ""
 "In previous versions header's names must follow `CGI specification "
 "<https://www.w3.org/CGI/>`_ (e.g., ``CONTENT_TYPE``, "
@@ -4643,7 +4654,7 @@ msgstr ""
 "`спецификации CGI <https://www.w3.org/CGI/>`_ (например, "
 "``CONTENT_TYPE``, ``GATEWAY_INTERFACE``, ``HTTP_*``)."
 
-#: ../../backend.rst:233
+#: ../../backend.rst:235
 msgid ""
 "Since version 5.3 and after migrate to Django 4 names must follow HTTP "
 "specification instead of CGI."
@@ -4651,7 +4662,7 @@ msgstr ""
 "Начиная с версии 5.3 и после миграции на Django 4 имена должны "
 "соответствовать HTTP спецификации вместо CGI."
 
-#: ../../backend.rst:235
+#: ../../backend.rst:237
 msgid ""
 "In any request parameter you can insert result value of previous "
 "operations (``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), "
@@ -4661,27 +4672,27 @@ msgstr ""
 " операции (``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), "
 "например:"
 
-#: ../../backend.rst:245
+#: ../../backend.rst:247
 msgid "Result of bulk request is json list of objects for operation:"
 msgstr "Результат bulk-запроса - это список json-объектов, описывающих операцию:"
 
-#: ../../backend.rst:247
+#: ../../backend.rst:249
 msgid "``method`` - http method"
 msgstr "``method`` - http-метод"
 
-#: ../../backend.rst:248
+#: ../../backend.rst:250
 msgid "``path`` - path of request, always str"
 msgstr "``path`` - путь запроса, всегда строка"
 
-#: ../../backend.rst:249
+#: ../../backend.rst:251
 msgid "``data`` - data that needs to be sent"
 msgstr "``data`` - данные, которые нужно отправить"
 
-#: ../../backend.rst:250
+#: ../../backend.rst:252
 msgid "``status`` - response status code"
 msgstr "``status`` - код состояния ответа"
 
-#: ../../backend.rst:252
+#: ../../backend.rst:254
 msgid ""
 "Transactional bulk request returns ``502 BAG GATEWAY`` and does rollback "
 "after first failed request."
@@ -4689,7 +4700,7 @@ msgstr ""
 "Транзакционный bulk-запрос возвращает ``502 BAG GATEWAY`` и делает откат "
 "к состоянию до запроса после первого неудачного запроса."
 
-#: ../../backend.rst:255
+#: ../../backend.rst:257
 msgid ""
 "If you send non-transactional bulk request, you will get ``200`` status "
 "and must validate statuses on each operation responses."
@@ -4697,15 +4708,15 @@ msgstr ""
 "Если вы отправили нетранзакционный bulk-запрос, вы получите код 200 и "
 "должны будете проверить статус каждого ответа операции отдельно."
 
-#: ../../backend.rst:259
+#: ../../backend.rst:261
 msgid "OpenAPI schema"
 msgstr "Схема OpenAPI"
 
-#: ../../backend.rst:261
+#: ../../backend.rst:263
 msgid "Request on ``GET /{API_URL}/endpoint/`` returns Swagger UI."
 msgstr "Запрос на ``GET /{API_URL}/endpoint/`` возвращает Swagger UI."
 
-#: ../../backend.rst:263
+#: ../../backend.rst:265
 msgid ""
 "Request on ``GET /{API_URL}/endpoint/?format=openapi`` returns OpenAPI "
 "schema in json format. Also you can specify required version of schema "
@@ -4716,7 +4727,7 @@ msgstr ""
 "OpenAPI в формате json. Также вы можете указать нужную версию схемы, "
 "используя query-параметр ``version`` "
 
-#: ../../backend.rst:266
+#: ../../backend.rst:268
 msgid ""
 "To change the schema after generating and before sending to user use "
 "hooks. Define one or more function, each taking 2 named arguments:"
@@ -4725,15 +4736,15 @@ msgstr ""
 "используйте хуки. Напишите одну или несколько функций, каждая из которых "
 "принимает 2 именованных аргумента:"
 
-#: ../../backend.rst:269
+#: ../../backend.rst:271
 msgid "``request`` - user request object."
 msgstr "``request`` - объект запроса пользователя."
 
-#: ../../backend.rst:270
+#: ../../backend.rst:272
 msgid "``schema`` - ordered dict with OpenAPI schema."
 msgstr "``schema`` - ordered dict, содержащий схему OpenAPI."
 
-#: ../../backend.rst:273
+#: ../../backend.rst:275
 msgid ""
 "Sometimes hooks may raise an exception; in order to keep a chain of data "
 "modification, such exceptions are handled. The changes made to the schema"
@@ -4743,11 +4754,11 @@ msgstr ""
 "модификации данных, такие исключения обрабатываются. Изменения, сделанные"
 " в схеме перед выбросом исключения, в любом случае сохраняются."
 
-#: ../../backend.rst:282
+#: ../../backend.rst:284
 msgid "Example hook:"
 msgstr "Пример хука:"
 
-#: ../../backend.rst:284
+#: ../../backend.rst:286
 msgid ""
 "To connect hook(s) to your app add function import name to the "
 "``OPENAPI_HOOKS`` list in ``settings.py``"
@@ -4755,11 +4766,11 @@ msgstr ""
 "Чтобы присоединить хук(-и) к вашему приложению, добавьте строку импорта "
 "вашей функции в список ``OPENAPI_HOOKS`` в ``settings.py``"
 
-#: ../../backend.rst:294
+#: ../../backend.rst:296
 msgid "Testing Framework"
 msgstr "Фреймворк для тестирования"
 
-#: ../../backend.rst:296
+#: ../../backend.rst:298
 msgid ""
 "VST Utils Framework includes a helper in base test case class and "
 "improves support for making API requests. That means if you want make "
@@ -4771,11 +4782,11 @@ msgstr ""
 " что для отправления bulk-запроса на endpoint нет необходимости создавать"
 " и инициализировать test client, а можно сразу делать запрос."
 
-#: ../../backend.rst:307
+#: ../../backend.rst:309
 msgid "Creating test case"
 msgstr "Создание тест-кейса"
 
-#: ../../backend.rst:308
+#: ../../backend.rst:310
 msgid ""
 "``test.py`` module contains test case classes based on "
 ":class:`vstutils.tests.BaseTestCase`. At the moment, we officially "
@@ -4789,11 +4800,11 @@ msgstr ""
 "оберток запросов с проверкой выполнения и runtime-оптимизацией "
 "bulk-запросов с ручной проверкой значений."
 
-#: ../../backend.rst:315
+#: ../../backend.rst:317
 msgid "Simple example with classic tests"
 msgstr "Простой пример с классическими тестами"
 
-#: ../../backend.rst:317
+#: ../../backend.rst:319
 msgid ""
 "For example, if you have api endpoint like ``/api/v1/project/`` and model"
 " Project you can write test case like this:"
@@ -4801,7 +4812,7 @@ msgstr ""
 "Например, если у вас endpoint вида ``/api/v1/project/`` и модель Project,"
 " вы можете написать такой тест:"
 
-#: ../../backend.rst:352
+#: ../../backend.rst:354
 msgid ""
 "This example demonstrates functionality of default test case class. "
 "Default projects are initialized for the fastest and most efficient "
@@ -4815,11 +4826,11 @@ msgstr ""
 " в разные классы. В данном примере показан классический подход к "
 "тестированию, однако вы можете использовать bulk-запросы в ваших тестах."
 
-#: ../../backend.rst:360
+#: ../../backend.rst:362
 msgid "Bulk requests in tests"
 msgstr "Bulk-запросы в тестах"
 
-#: ../../backend.rst:362
+#: ../../backend.rst:364
 msgid ""
 "Bulk query system is well suited for testing and executing valid queries."
 " Previous example could be rewritten as follows:"
@@ -4827,7 +4838,7 @@ msgstr ""
 "Система bulk-запросов хорошо подходит для тестирования и запуска валидных"
 " запросов. Предыдущий пример может быть переписан так:"
 
-#: ../../backend.rst:412
+#: ../../backend.rst:414
 msgid ""
 "In this case, you have more code, but your tests are closer to GUI "
 "workflow, because vstutils-projects uses ``/api/endpoint/`` for requests."
@@ -4842,7 +4853,7 @@ msgstr ""
 " котором используется bulk меньше по сравнению с тестом, использующим "
 "стандартный механизм."
 
-#: ../../backend.rst:419
+#: ../../backend.rst:421
 msgid "Test case API"
 msgstr "API тест-кейса"
 
@@ -5214,11 +5225,11 @@ msgstr ""
 msgid "new user object for execution."
 msgstr "новый объект пользователя, от которого будет выполнение."
 
-#: ../../backend.rst:426
+#: ../../backend.rst:428
 msgid "Utils"
 msgstr "Утилиты"
 
-#: ../../backend.rst:428
+#: ../../backend.rst:430
 msgid ""
 "This is tested set of development utilities. Utilities include a "
 "collection of code that will be useful in one way or another for "
@@ -5870,11 +5881,11 @@ msgstr ""
 "Использует функцию :func:`django.utils.translation.get_language` для "
 "получения кода языка и пытается получить перевод из списка доступных."
 
-#: ../../backend.rst:440
+#: ../../backend.rst:442
 msgid "Integrating Web Push Notifications"
 msgstr "Интеграция Web Push-уведомлений"
 
-#: ../../backend.rst:442
+#: ../../backend.rst:444
 msgid ""
 "Web push notifications are an effective way to engage users with real-"
 "time messaging. To integrate web push notifications in your VSTUtils "
@@ -5884,7 +5895,7 @@ msgstr ""
 "с помощью реального времени. Чтобы интегрировать web-уведомления в ваш "
 "проект VSTUtils, выполните следующие шаги:"
 
-#: ../../backend.rst:445
+#: ../../backend.rst:447
 msgid ""
 "**Configuration**: First, include the ``vstutils.webpush`` module in the "
 "``INSTALLED_APPS`` section of your ``settings.py`` file. This enables the"
@@ -5899,7 +5910,7 @@ msgstr ""
 "настроек web-уведомлений (см. :ref:`здесь<webpush-settings>` для "
 "подробностей)."
 
-#: ../../backend.rst:448
+#: ../../backend.rst:450
 msgid ""
 "**Creating Notifications**: To create a web push notification, you need "
 "to define a class that inherits from either "
@@ -5917,19 +5928,19 @@ msgstr ""
 "``webpushes`` всех ``INSTALLED_APPS``. Ниже приведен пример, "
 "иллюстрирующий, как реализовать пользовательские классы web-уведомлений:"
 
-#: ../../backend.rst:458
+#: ../../backend.rst:460
 msgid "This example contains three classes:"
 msgstr "Этот пример содержит три класса:"
 
-#: ../../backend.rst:460
+#: ../../backend.rst:462
 msgid "`TestWebPush`: Sends notifications to all subscribed users."
 msgstr "`TestWebPush`: Отправляет уведомления всем подписанным пользователям."
 
-#: ../../backend.rst:461
+#: ../../backend.rst:463
 msgid "`TestNotification`: Targets notifications to specific users."
 msgstr "`TestNotification`: Направляет уведомления конкретным пользователям."
 
-#: ../../backend.rst:462
+#: ../../backend.rst:464
 msgid ""
 "`StaffOnlyNotification`: Restricts notifications to staff users only. "
 "Sometimes you may want to allow only some users to subscribe on specific "
@@ -5939,7 +5950,7 @@ msgstr ""
 " Иногда вы можете хотеть разрешить подписку на конкретные уведомления "
 "только некоторым пользователям."
 
-#: ../../backend.rst:464
+#: ../../backend.rst:466
 msgid ""
 "**Sending Notifications**: To dispatch a web push notification, invoke "
 "the ``send`` or ``send_in_task`` method on an instance of your web push "
@@ -5951,7 +5962,7 @@ msgstr ""
 "web-уведомления. Например, чтобы отправить уведомление с использованием "
 "`TestNotification`, вы можете сделать следующее:"
 
-#: ../../backend.rst:479
+#: ../../backend.rst:481
 msgid ""
 "The asynchronous sending of web push notifications (using methods like "
 "``send_in_task``) requires a configured Celery setup in your project, as "
@@ -5965,13 +5976,38 @@ msgstr ""
 "Убедитесь, что Celery правильно настроен и работает, чтобы использовать "
 "асинхронную отправку уведомлений."
 
-#: ../../backend.rst:484
+#: ../../backend.rst:486
 msgid ""
 "By following these steps, you can fast integrate and utilize web push "
 "notifications in projects with VSTUtils."
 msgstr ""
 "Следуя этим шагам, вы быстро сможете интегрировать и использовать "
 "web-уведомления в проектах с VSTUtils."
+
+#: ../../backend.rst:490
+msgid "Troubleshooting"
+msgstr "Устранение и поиск неисправностей"
+
+#: ../../backend.rst:492
+msgid ""
+"Vstutils makes some errors more readable for common users and provides "
+"special error codes for administration to simplify troubleshooting."
+msgstr ""
+"Vstutils делает некоторые ошибки более читаемыми для обычных "
+"пользователей и предоставляет специальные коды ошибок для администрации, "
+"чтобы упростить поиск и устранение проблем."
+
+#: ../../backend.rst:494
+msgid "``VE100-VE199`` - Database related errors."
+msgstr "``VE100-VE199`` - Ошибки, связанные с базой данных."
+
+#: ../../backend.rst:495
+msgid ""
+"``VE100`` - Integrity error code. Used when "
+"``django.db.utils.IntegrityError`` appears."
+msgstr ""
+"``VE100`` - Код ошибки целостности. Используется при появляении "
+"``django.db.utils.IntegrityError``."
 
 #~ msgid "prefetch values on frontend at list-view. Default is ``False``."
 #~ msgstr ""

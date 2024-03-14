@@ -261,6 +261,16 @@ TRANSLATION = {
     'Scanner camera': '扫描相机',
     'Not supported by this device': '该设备不支持',
     'Allow using camera in browser': '允许在浏览器中使用相机',
+
+    # errors
+    (
+        'We encountered an issue with your submission due to duplicate '
+        'or invalid data. Please check your entries for any mistakes or '
+        'duplicate information and try again. If the issue continues, '
+        'please contact support with the error code: {}.'
+    ): (
+        '由於資料重複或無效，我們在提交時遇到了問題。請檢查您的輸入是否有任何錯誤或重複訊息，然後重試。如果問題仍然存在，請聯絡支援人員並提供錯誤代碼：{}'
+    )
 }
 
 SERVER_TRANSLATION = {

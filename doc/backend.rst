@@ -484,3 +484,12 @@ To integrate web push notifications in your VSTUtils project, follow these steps
 
 
 By following these steps, you can fast integrate and utilize web push notifications in projects with VSTUtils.
+
+
+Troubleshooting
+----------------------------------
+
+Vstutils makes some errors more readable for common users and provides special error codes for administration to simplify troubleshooting.
+
+* ``VE100-VE199`` - Database related errors.
+    * ``VE100`` - Integrity error code. Used when ``django.db.utils.IntegrityError`` appears.

@@ -41,6 +41,9 @@ class Product(BaseModel):
 
     class Meta:
         default_related_name = 'products'
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'store'], name='uniq_name_store')
+        ]
         _nested = {
             'options': {
                 'allow_append': True,
