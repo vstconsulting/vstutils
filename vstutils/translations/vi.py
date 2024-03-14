@@ -261,6 +261,18 @@ TRANSLATION = {
     'Scanner camera': 'Máy quét',
     'Not supported by this device': 'Không được thiết bị này hỗ trợ',
     'Allow using camera in browser': 'Cho phép sử dụng máy ảnh trong trình duyệt',
+
+    # errors
+    (
+        'We encountered an issue with your submission due to duplicate '
+        'or invalid data. Please check your entries for any mistakes or '
+        'duplicate information and try again. If the issue continues, '
+        'please contact support with the error code: {}.'
+    ): (
+        'Chúng tôi đã gặp sự cố khi gửi dữ liệu của bạn do dữ liệu trùng lặp hoặc không hợp lệ. Vui lòng kiểm tra '
+        'các mục nhập của bạn xem có lỗi hoặc thông tin trùng lặp nào không và thử lại. Nếu sự cố vẫn tiếp diễn, '
+        'vui lòng liên hệ với bộ phận hỗ trợ kèm theo mã lỗi: {}.'
+    )
 }
 
 SERVER_TRANSLATION = {

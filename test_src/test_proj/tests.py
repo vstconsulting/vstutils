@@ -5104,6 +5104,47 @@ class ProjectTestCase(BaseTestCase):
         generated_serializer = ModelWithBinaryFiles.generated_view.serializer_class()
         serializer_test(generated_serializer)
 
+    def test_custom_exception_messages(self):
+                # Test nested model viewsets permissions.
+        store = Store.objects.create(
+            name='test'
+        )
+        manufacturer = Manufacturer.objects.create(
+            name='test man',
+            store=store
+        )
+
+        results = self.bulk([
+            {
+                'method': 'post',
+                'path': f'/stores/{store.id}/products/',
+                'data': dict(
+                    name='test prod',
+                    store=store.id,
+                    price = 100,
+                    manufacturer=manufacturer.id
+                )
+            },
+            {
+                'method': 'post',
+                'path': f'/stores/{store.id}/products/',
+                'data': dict(
+                    name='test prod',
+                    store=store.id,
+                    price = 100,
+                    manufacturer=manufacturer.id
+                )
+            },
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 400)
+        self.assertEqual(
+            results[1]['data']['detail'],
+            'We encountered an issue with your submission due to duplicate or invalid data. Please check your entries '
+            'for any mistakes or duplicate information and try again. If the issue continues, please contact support '
+            'with the error code: VE100.'
+        )
+
     def test_nested_views_permissions(self):
         # Test nested model viewsets permissions.
         store = Store.objects.create(

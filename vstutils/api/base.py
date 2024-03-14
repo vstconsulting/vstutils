@@ -17,6 +17,7 @@ from django.core import exceptions as djexcs
 from django.http.response import Http404, FileResponse, HttpResponseNotModified
 from django.db.models.query import QuerySet
 from django.db import transaction, models
+from django.db.utils import IntegrityError
 from django.utils.functional import cached_property, lazy
 from django.utils.http import urlencode
 from rest_framework.reverse import reverse
@@ -66,6 +67,8 @@ non_optimizeable_fields = (
 logger = logging.getLogger(settings.VST_PROJECT)
 http404_re_translate = re.compile(r"^No\s(.+)\smatches the given query.$", re.MULTILINE)
 
+INTEGRITY_ERROR_CODE = 'VE100'
+
 
 def _get_cleared(qs):
     return getattr(qs, 'cleared', lambda: qs)()
@@ -89,6 +92,7 @@ def apply_translation(obj, trans_function):
 
 def exception_handler(exc, context):
     # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
     traceback_str: _t.Text = traceback.format_exc()
     default_exc = (exceptions.APIException, djexcs.PermissionDenied)
     serializer_class = ErrorSerializer
@@ -128,13 +132,30 @@ def exception_handler(exc, context):
     elif isinstance(exc, djexcs.ValidationError):
         if hasattr(exc, 'error_dict'):  # nocv
             errors = apply_translation(dict(exc), translate)  # type: ignore
+            if all := errors.pop('__all__', None):
+                errors['other_errors'] = all
         elif hasattr(exc, 'error_list'):
             errors = {'other_errors': apply_translation(list(exc), translate)}
         else:  # nocv
             errors = {'other_errors': apply_translation(str(exc), translate)}
+
         data = {"detail": errors}
         serializer_class = ValidationErrorSerializer
         logger.debug(traceback_str)
+
+    elif isinstance(exc, IntegrityError):
+        data = {
+            "detail": apply_translation(
+                'We encountered an issue with your submission due to duplicate '
+                'or invalid data. Please check your entries for any mistakes or '
+                'duplicate information and try again. If the issue continues, '
+                'please contact support with the error code: {}.',
+                translate
+                ).format(
+                    INTEGRITY_ERROR_CODE
+                )
+            }
+        logger.error(f'{traceback_str} \n ERROR CODE: {INTEGRITY_ERROR_CODE} \n')
 
     elif not isinstance(exc, default_exc) and isinstance(exc, Exception):
         data = {

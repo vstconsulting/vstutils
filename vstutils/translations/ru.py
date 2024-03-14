@@ -259,6 +259,18 @@ TRANSLATION = {
     'Scanner camera': 'Сканирующая камера',
     'Not supported by this device': 'Не поддерживается текущим устройством',
     'Allow using camera in browser': 'Разрешите использование камеры в браузере',
+
+    # errors
+    (
+        'We encountered an issue with your submission due to duplicate '
+        'or invalid data. Please check your entries for any mistakes or '
+        'duplicate information and try again. If the issue continues, '
+        'please contact support with the error code: {}.'
+    ): (
+        'Мы столкнулись с проблемой из-за повторяющихся или неверных данных. Пожалуйста, проверьте свои '
+        'записи на наличие ошибок или дублирующейся информации и повторите попытку. Если проблема '
+        'не исчезнет, обратитесь в службу поддержки, указав код ошибки: {}.'
+    )
 }
 
 SERVER_TRANSLATION = {
