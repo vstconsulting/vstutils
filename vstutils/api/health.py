@@ -13,7 +13,7 @@ def health_wrapper(method):
     def wrapper(self):
         try:
             return method(self) or 'ok', st.HTTP_200_OK
-        except BaseException as exception:
+        except Exception as exception:
             code = getattr(exception, 'status', st.HTTP_500_INTERNAL_SERVER_ERROR)
             return str(exception), code
 
@@ -44,8 +44,7 @@ class BaseBackend(BaseVstObject, metaclass=HealthBackendMeta):
         result, status = {}, st.HTTP_200_OK
         for key, method in self.health_checks.items():
             result[key], method_status = method(self)
-            if method_status > status:
-                status = method_status
+            status = max(status, method_status)
         return result, status
 
 

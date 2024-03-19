@@ -208,7 +208,7 @@ class MultipleImageField(MultipleFileMixin, ImageField):
     description = "List of Images"
 
     def update_dimension_fields(self, instance, force=False, *args, **kwargs):
-        pass
+        pass  # nocv
 
 
 class NamedBinaryFileInJSONField(TextField):

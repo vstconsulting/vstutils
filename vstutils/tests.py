@@ -100,7 +100,7 @@ class BaseTestCase(TestCase):
         return client
 
     def _logout(self, client):
-        self.assertEqual(client.get(self.logout_url).status_code, 302)
+        self.assertEqual(client.post(self.logout_url).status_code, 302)
 
     def _check_update(self, url, data, **fields):
         """

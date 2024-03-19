@@ -1260,8 +1260,7 @@ class StaticFilesHandlers(ObjectHandlers):
 
     def get_static_objects(self):
         for name in self.keys():
-            for result in self.get_object(name).spa_static_list:
-                yield result
+            yield from self.get_object(name).spa_static_list
 
     def get_sorted_list(self):
         return tuple(multikeysort(self.get_static_objects(), ['priority']))

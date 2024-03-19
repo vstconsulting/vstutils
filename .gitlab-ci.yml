@@ -81,9 +81,9 @@ functional_test:
   parallel:
     matrix:
       - TOX_ENVS:
-          - py38-django42-install
+          - py310-django50-install
       - TOX_ENVS:
-          - py312-django42-coverage
+          - py312-django50-coverage
 
 js_tests:
   <<: *branch_js_tests

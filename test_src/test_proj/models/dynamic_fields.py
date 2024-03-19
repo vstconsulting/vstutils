@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.functions import Upper
 from rest_framework.fields import CharField, IntegerField, ListField
 from rest_framework.serializers import Serializer
 from vstutils.api import fields
@@ -27,9 +28,14 @@ class AnotherSerializer(BaseSerializer):
 class DynamicFields(BModel):
     field_type = models.CharField(max_length=100)
     dynamic_with_types = models.CharField(max_length=500)
+    generated_field = models.GeneratedField(
+        expression=Upper('field_type'),
+        output_field=models.CharField(max_length=100),
+        db_persist=True,
+    )
 
     class Meta:
-        _list_fields = _detail_fields = ['id', 'field_type', 'dynamic_with_types']
+        _list_fields = _detail_fields = ['id', 'field_type', 'dynamic_with_types', 'generated_field']
         _override_list_fields = {
             'dynamic_with_types': fields.DynamicJsonTypeField(field='field_type', types={
                 'serializer': SomeSerializer(),

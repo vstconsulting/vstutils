@@ -23,7 +23,6 @@ from collections import OrderedDict
 import ormsgpack
 import pytz
 from bs4 import BeautifulSoup
-from django import VERSION as django_version
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -2080,6 +2079,22 @@ class OpenapiEndpointTestCase(BaseTestCase):
 
         # Check field without allow_blank will have minLength
         self.assertEqual(api['definitions']['OnePost']['properties']['text']['minLength'], 1)
+
+        # Check generated field type
+        self.assertDictEqual(api['definitions']['DynamicFields']['properties']['generated_field'], {
+            'type': 'string',
+            'title': 'Generated field',
+            'minLength': 1,
+            'maxLength': 100,
+            'readOnly': True,
+        })
+        self.assertDictEqual(api['definitions']['OneDynamicFields']['properties']['generated_field'], {
+            'type': 'string',
+            'title': 'Generated field',
+            'minLength': 1,
+            'maxLength': 100,
+            'readOnly': True,
+        })
 
         # Check dynamic field with complex types
         nested_model = {
@@ -4479,6 +4494,7 @@ class ProjectTestCase(BaseTestCase):
 
         self.assertEqual(results[3]['status'], 201)
         self.assertEqual(results[3]['data']['dynamic_with_types'], 5)
+        self.assertEqual(results[3]['data']['generated_field'], results[3]['data']['field_type'].upper())
         self.assertEqual(results[4]['status'], 200)
         self.assertEqual(results[4]['data']['dynamic_with_types'], 5)
 
@@ -5131,7 +5147,7 @@ class ProjectTestCase(BaseTestCase):
                 'data': dict(
                     name='test prod',
                     store=store.id,
-                    price = 100,
+                    price=100,
                     manufacturer=manufacturer.id
                 )
             },
@@ -5716,6 +5732,7 @@ class ConfigParserCTestCase(BaseTestCase):
             'NAME': 'file:memorydb_default?mode=memory&cache=shared',
             'TEST': {
                 'SERIALIZE': False,
+                'MIGRATE': True,
                 'CHARSET': None,
                 'COLLATION': None,
                 'NAME': None,
@@ -5730,8 +5747,6 @@ class ConfigParserCTestCase(BaseTestCase):
             'HOST': '',
             'PORT': ''
         }
-        if django_version[0] >= 3 and django_version[1] in (1, 2):  # nocv
-            db_default_val['TEST']['MIGRATE'] = True
 
         self.assertEqual(settings.ALLOWED_HOSTS, ['*', 'testserver'])
 

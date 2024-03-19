@@ -18,14 +18,12 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
     "Framework :: Django",
-    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
     "Operating System :: POSIX",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -67,7 +65,7 @@ include = ['vstutils', 'vstutils.*']
 namespaces = false
 
 [tool.flake8]
-ignore = "E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741,W504,B001,B008,B023,C812,C815,CFQ004,B019,I100"
+ignore = "E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741,W504,B001,B008,B023,C812,C815,CFQ004,B019,B026,I100"
 exclude = "./vstutils/*/migrations/*,./vstutils/settings*.py,.tox/*,./etc/*,./*/__init__.py,./t_openstack.py,./vstutils/projects/*,vstutils/__main__.py,vstutils/compile.py"
 max-line-length = 120
 import-order-style = 'pep8'

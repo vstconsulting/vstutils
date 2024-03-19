@@ -80,8 +80,7 @@ def _iter_request(request, operation_handler, context):
         return operation_handler(operation, context)
 
     with executor_class(max_workers=THREADS_COUNT) as executor:
-        for operation_result in executor.map(handler, _get_request_data(request.data)):
-            yield operation_result
+        yield from executor.map(handler, _get_request_data(request.data))
 
 
 def _join_paths(*args) -> _t.Text:

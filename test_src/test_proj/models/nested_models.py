@@ -42,7 +42,7 @@ class Product(BaseModel):
     class Meta:
         default_related_name = 'products'
         constraints = [
-            models.UniqueConstraint(fields=['name', 'store'], name='uniq_name_store')
+            models.UniqueConstraint(models.F('name'), models.F('store'), name='uniq_name_store')
         ]
         _nested = {
             'options': {

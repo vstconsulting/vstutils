@@ -388,12 +388,12 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
                 x_nullable=v is None,
             )
             for k, v in fields.DEFAULT_NAMED_FILE_DATA.items()
-        }
+        },
     }
 
     default_multiple_schema_data = {
         'type': openapi.TYPE_ARRAY,
-        'items': openapi.Items(**default_schema_data)  # type: ignore
+        'items': openapi.Items(**default_schema_data),  # type: ignore
     }
 
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
