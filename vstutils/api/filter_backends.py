@@ -42,14 +42,14 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
             field_type = openapi.TYPE_NUMBER
         elif isinstance(field, filters.BooleanFilter):
             field_type = openapi.TYPE_BOOLEAN
-        elif isinstance(field, filters.ChoiceFilter):
+        elif isinstance(field, (filters.ChoiceFilter, filters.MultipleChoiceFilter)):
             kwargs['enum'] = tuple(dict(field.field.choices).keys())
         elif field_name in {'id', 'id__not'}:
             search_field = field_name.split('__')[0]
             m_field = next((f for f in queryset.model._meta.fields if f.name == search_field), None)
             field_type, kwargs_update = get_field_type_from_queryset(m_field)
 
-        if field.method == extra_filter:
+        if field.method == extra_filter or isinstance(field, (filters.MultipleChoiceFilter, filters.BaseCSVFilter)):
             kwargs = {
                 'items': {
                     'type': field_type,
