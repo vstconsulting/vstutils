@@ -5245,6 +5245,11 @@ class ProjectTestCase(BaseTestCase):
 
     def test_m2m_fk_deep_nested(self):
         Group = self.get_model_class('test_proj.Group')
+
+        # check empty result set
+        qs = Group.objects.filter(id__in=()).get_children(True)
+        self.assertTrue(qs.query.is_empty())
+
         results = self.bulk([
             {'method': 'post', 'path': 'group', 'data': {'name': '1'}},
             {'method': 'post', 'path': ['group', '<<0[data][id]>>', 'childrens'], 'data': {'name': '1.1'}},
