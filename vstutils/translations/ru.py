@@ -228,22 +228,26 @@ TRANSLATION = {
     # create
     'New "<b>{0}</b>" instance was successfully created.': 'Новый объект "<b>{0}</b>" был успешно создан.',
     # remove
-    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} был(а) успешно удален.',
+    '<b>{1}</b> "<b>{0}</b>" was successfully removed.': '<b>{1}</b> "<b>{0}</b>" был(а) успешно удален.',
     # save
-    'Changes in "<b>{0}</b>" {1} were successfully saved.': 'Изменения в объекте {1} "<b>{0}</b>" были успешно сохранены.',
+    'Changes in <b>{1}</b> <b>{0}</b> were successfully saved.': 'Изменения в объекте <b>{1}</b> <b>{0}</b> были успешно сохранены.',
     # execute
-    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': 'Действие "<b>{0}</b>" было успешно запущено на объекте "<b>{1}</b>".',
+    'Action <b>{0}</b> was successfully executed on <b>{1}</b>.<br>{2}': 'Действие <b>{0}</b> было успешно запущено на объекте <b>{1}</b>.<br>{2}',
     # instance operation error
     # add:
     'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': 'Во время добавления дочернего объекта "<b>{0}</b>" к родительскому списку произошла ошибка.<br> Подробнее: {1}',
     # create:
     'An error occurred during creation.<br>Error details:<br>{0}': 'Во время создания нового объекта произошла ошибка.<br>Подробнее:<br>{0}',
     # remove:
-    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': 'Во время удаления {1} "<b>{0}</b>" произошла ошибка.<br> Подробнее: {2}',
+    'An error occurred during removal process of <b>{1}</b>  "<b>{0}</b>". <br> Error details: {2}': 'Во время удаления {1} "<b>{0}</b>" произошла ошибка. <br> Подробнее: {2}',
+    # removeMany:
+    'An error occurred during removal process. Error details: {0}': 'Во время удаления произошла ошибка. Подробнее: {0}',
     # save:
     'An error occurred during process.<br>Error details:<br>{0}': 'Во время сохранения произошла ошибка.<br>Подробнее:<br>{0}',
     # execute:
     'An error occurred during <b>{0}</b>. Error details:<br>{1}': 'Во время запуска действия <b>{0}</b> произошла ошибка. Подробнее:<br>{1}',
+    # Execute Empty:
+    'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>. <br> Error details: {2} <br>{3}': 'Произошла ошибка во время выполнения действия <b>{0}</b> на <b>{1}</b>. <br> Подробнее: {2} <br>{3}',
     'Link': 'Ссылка',
     # csv
     'Actions': 'Действия',

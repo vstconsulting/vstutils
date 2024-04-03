@@ -1,4 +1,5 @@
 import iziToast from 'izitoast';
+import { i18n } from '@/vstutils/translation';
 
 /**
  * Class, that is responsible for showing of pop up notification.
@@ -62,7 +63,11 @@ export class PopUp {
      */
     _generatePopUp(type = 'show', message = '', opt = {}) {
         opt.message = message;
-        return this._showPopUp(type, this._getPopUpSettings(type, opt));
+        const settings = this._getPopUpSettings(type, opt);
+        if (settings.title) {
+            settings.title = i18n.t(settings.title);
+        }
+        return this._showPopUp(type, settings);
     }
     /**
      * Method, that generates default pop up notification.
@@ -164,8 +169,8 @@ export let pop_up_msg = {
             remove: '<b>{1}</b> "<b>{0}</b>" was successfully removed.',
             removeMany: 'Selected instances were successfully removed',
             save: 'Changes in <b>{1}</b> <b>{0}</b> were successfully saved.',
-            executeEmpty: 'Action <b>{0}</b> was successfully executed' + ' on <b>{1}</b>.<br>{2}',
-            execute: 'Action <b>{0}</b> was successfully executed.<br>{1}',
+            executeEmpty: 'Action <b>{0}</b> was successfully executed on <b>{1}</b>.<br>{2}',
+            execute: 'Action <b>{0}</b> was successfully executed on <b>{1}</b>.<br>{2}',
         },
         error: {
             add:
@@ -173,15 +178,11 @@ export let pop_up_msg = {
                 ' to parent list.' +
                 '<br> Error details: {1}',
             create: 'An error occurred during creation.<br>Error details:<br>{0}',
-            remove:
-                'An error occurred during removal process of <b>{1}</b>  "<b>{0}</b>".' +
-                '<br> Error details: {2}',
+            remove: 'An error occurred during removal process of <b>{1}</b>  "<b>{0}</b>". <br> Error details: {2}',
             removeMany: 'An error occurred during removal process. Error details: {0}',
             save: 'An error occurred during process.<br>Error details:<br>{0}',
             executeEmpty:
-                'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>.' +
-                '<br> Error details: {2}' +
-                '<br>{3}',
+                'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>. <br> Error details: {2} <br>{3}',
             execute: 'An error occurred during <b>{0}</b>. Error details:<br>{1}',
         },
     },

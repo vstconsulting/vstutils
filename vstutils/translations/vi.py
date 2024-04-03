@@ -229,22 +229,26 @@ TRANSLATION = {
     # create
     'New "<b>{0}</b>" instance was successfully created.': 'Đối tượng mới "<b> {0} </b>" đã được tạo thành công.',
     # remove
-    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} đã được xóa thành công."',
+    '<b>{1}</b> "<b>{0}</b>" was successfully removed.': '<b>{1}</b> "<b>{0}</b>" đã được xóa thành công."',
     # save
-    'Changes in "<b>{0}</b>" {1} were successfully saved.': 'Thay đổi đối tượng {1} "<b> {0} </ b>" đã được lưu thành công.',
+    'Changes in <b>{1}</b> <b>{0}</b> were successfully saved.': 'Thay đổi đối tượng <b>{1}</b> <b>{0}</b> đã được lưu thành công.',
     # execute
-    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': 'Thao tác "<b> {0} </b>" đã được thực hiện thành công trên đối tượng "<b> {1} </b>".',
+    'Action <b>{0}</b> was successfully executed on <b>{1}</b>.<br>{2}': 'Thao tác "<b> {0} </b>" đã được thực hiện thành công trên đối tượng <b>{1}</b>.<br>{2}',
     # instance operation error
     # add:
     'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': 'Khi thêm đối tượng con "<b> {0} </b>" vào danh sách mẹ đã xảy ra lỗi <br> thêm chi tiết: {1}',
     # create:
     'An error occurred during creation.<br>Error details:<br>{0}': 'Đã xảy ra một số lỗi khi tạo phiên bản mới. <br> Chi tiết lỗi: <br> {0}',
     # remove:
-    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': 'Khi xóa {1} "<b> {0} </b>". đã xảy ra lỗi <br> thêm chi tiết: {2}',
+    'An error occurred during removal process of <b>{1}</b>  "<b>{0}</b>". <br> Error details: {2}': 'Khi xóa {1} "<b> {0} </b>". đã xảy ra lỗi <br> thêm chi tiết: {2}',
+    # removeMany:
+    'An error occurred during removal process. Error details: {0}': 'Đã xảy ra lỗi trong quá trình xóa. Chi tiết lỗi: {0}',
     # save:
     'An error occurred during process.<br>Error details:<br>{0}': 'Đã xảy ra một số lỗi trong quá trình lưu. <br> Chi tiết lỗi: <br> {0}',
     # execute:
     'An error occurred during <b>{0}</b>. Error details:<br>{1}': 'Đã xảy ra một số lỗi trong <b> {0} </b>. Chi tiết lỗi: <br> {1}',
+    # Execute Empty:
+    'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>. <br> Error details: {2} <br>{3}': 'Đã xảy ra một số lỗi trong quá trình thực thi hành động <b>{0</b> trên <b>{1</b>. <br> Chi tiết lỗi: {2} <br>{3}',
     'Link': 'Liên kết',
 
     # csv

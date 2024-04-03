@@ -229,22 +229,26 @@ TRANSLATION = {
     # create
     'New "<b>{0}</b>" instance was successfully created.': '新对象“ <b> {0} </ b>”已成功创建.',
     # remove
-    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} 已成功删除."',
+    '<b>{1}</b> "<b>{0}</b>" was successfully removed.': '<b>{1}</b> "<b>{0}</b>" 已成功删除."',
     # save
-    'Changes in "<b>{0}</b>" {1} were successfully saved.': '对象变化{1}“ <b> {0} </ b>”的更改已成功保存.',
+    'Changes in <b>{1}</b> <b>{0}</b> were successfully saved.': '对象变化 <b>{1}</b> <b>{0}</b>”的更改已成功保存.',
     # execute
-    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': '在对象“ <b> {1} </ b>”上成功启动了操作“ <b> {0} </ b>”。',
+    'Action <b>{0}</b> was successfully executed on <b>{1}</b>.<br>{2}': '在对象 <b>{0}</b> 上成功启动了操作 <b>{1}</b>.<br>{2}',
     # instance operation error
     # add:
     'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': '将对象“ <b> {0} </ b>”添加到目级列表时发生错误。<br>更多详细信息：{1}',
     # create:
     'An error occurred during creation.<br>Error details:<br>{0}': '创建新对象时发生错误<br>更多详细信息：{0}',
     # remove:
-    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': '删除{1}“ <b> {0} </ b>”时发生错误<br>更多详细信息：{2}',
+    'An error occurred during removal process of <b>{1}</b>  "<b>{0}</b>". <br> Error details: {2}': '删除{1}“ <b> {0} </ b>”时发生错误<br>更多详细信息：{2}',
+    # removeMany:
+    'An error occurred during removal process. Error details: {0}': '刪除過程中發生錯誤。錯誤詳細資訊：{0}',
     # save:
     'An error occurred during process.<br>Error details:<br>{0}': '保存时发生错误。<br>更多详细信息：{0}',
     # execute:
     'An error occurred during <b>{0}</b>. Error details:<br>{1}': '<b>{0}</b> 期间发生了一些错误。 错误详情：<br>{1}',
+    # Execute Empty:
+    'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>. <br> Error details: {2} <br>{3}': '<b>{1}</b> 上的 <b>{0}</b> 操作執行期間發生了一些錯誤。 <br>錯誤詳細資料：{2} <br>{3}',
     'Link': '链接',
 
     # csv
