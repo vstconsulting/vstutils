@@ -211,6 +211,9 @@
 </script>
 
 <style>
+    .content-wrapper {
+        overflow: hidden;
+    }
     .control-sidebar-enter,
     .control-sidebar-leave-to {
         right: -300px !important;

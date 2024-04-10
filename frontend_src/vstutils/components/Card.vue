@@ -47,6 +47,9 @@
 </script>
 
 <style scoped>
+    .card {
+        word-break: break-all;
+    }
     .card-header {
         display: flex;
         align-items: center;
