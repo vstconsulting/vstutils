@@ -6046,7 +6046,7 @@ class TasksTestCase(BaseTestCase):
             'run_task',
             '--sync',
             interactive=0,
-            kwargs=json.dumps({'name': "test host obj"}),
+            kwargs=os.path.join(os.path.dirname(__file__), 'run_task_file_example.json'),
             task='test_proj.tasks.CreateHostTask'
         )
         self.assertEqual(Host.objects.order_by('-id').first().name, 'test host obj')
