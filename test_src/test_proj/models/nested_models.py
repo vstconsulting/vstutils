@@ -1,10 +1,5 @@
 from django.db import models
-from django.dispatch import receiver
-from django.db.models.signals import pre_delete
-from django.core.validators import ValidationError
 from rest_framework.permissions import BasePermission
-from rest_framework.request import Request
-from rest_framework.views import APIView
 
 from vstutils.models import BaseModel
 

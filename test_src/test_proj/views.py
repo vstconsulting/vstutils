@@ -1,3 +1,4 @@
+import mimetypes
 import time
 import json
 
@@ -9,7 +10,7 @@ from vstutils.api.base import NonModelsViewSet
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
 from vstutils.api.serializers import DataSerializer, JsonObjectSerializer
 from vstutils.api.auth import UserViewSet
-from vstutils.api.actions import Action
+from vstutils.api.actions import Action, SimpleFileAction
 from vstutils.utils import create_view
 from vstutils.gui.context import gui_version
 
@@ -131,6 +132,27 @@ except AssertionError:
 
 
 class TestBinaryFilesViewSet(ModelWithBinaryFiles.generated_view):
+
+    @SimpleFileAction(as_attachment=True)
+    def test_some_filefield_default(self, request, *args, **kwargs):
+        return self.get_object().some_filefield
+
+    @SimpleFileAction(as_attachment=True)
+    def test_some_filefield(self, request, *args, **kwargs):
+        return self.get_object()
+
+    @test_some_filefield.modified_since
+    def test_some_filefield(self, obj):
+        return obj.some_filefield.storage.get_modified_time(obj.some_filefield.name)
+
+    @test_some_filefield.pre_data
+    def test_some_filefield(self, obj):
+        file = obj.some_filefield
+        filename = file.name
+        content_type, _ = mimetypes.guess_type(filename)
+        content_type = content_type or 'application/octet-stream'
+        return file, filename, content_type
+
     @action(methods=['get'], detail=True)
     def test_nested_view_inspection(self, *args, **kwargs):
         raise Exception  # nocv

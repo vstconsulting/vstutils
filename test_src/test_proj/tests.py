@@ -37,6 +37,7 @@ try:
 except ImportError:  # nocv
     from django.middleware.csrf import _get_new_csrf_string as _get_new_csrf_token
 from django.core.cache import cache
+from django.utils.http import http_date
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.test import Client
@@ -4143,6 +4144,15 @@ class ProjectTestCase(BaseTestCase):
         self.assertIn('Etag', data['paths']['/cacheable/{id}/']['put']['responses']['200']['headers'])
         self.assertIn('412', data['paths']['/cacheable/{id}/']['put']['responses'])
 
+        self.assertEqual(
+            data['paths']['/testbinaryfiles/{id}/test_some_filefield_default/']['get']['responses']['200']['schema']['type'],
+            'file'
+        )
+        self.assertEqual(
+            data['paths']['/testbinaryfiles/{id}/test_some_filefield/']['get']['responses']['200']['schema']['type'],
+            'file'
+        )
+
     def test_manifest_json(self):
         result = self.get_result('get', '/manifest.json')
         self.assertEqual(result['name'], 'Example project')
@@ -4821,6 +4831,32 @@ class ProjectTestCase(BaseTestCase):
         )
         with open(os.path.join(DIR_PATH, 'cat.jpeg'), 'rb') as cat1:
             self.assertEqual(instance.some_filefield.file.read(), cat1.read())
+
+        self.get_result('get', ['testbinaryfiles', instance.id, 'test_some_filefield_default'])
+        self.get_result(
+            'get',
+            ['testbinaryfiles', instance.id, 'test_some_filefield_default'],
+            code=304,
+            headers={'If-Modified-Since': http_date((datetime.datetime.now() + datetime.timedelta(days=1)).timestamp())}
+        )
+        self.get_result(
+            'get',
+            ['testbinaryfiles', instance.id, 'test_some_filefield_default'],
+            headers={'If-Modified-Since': http_date((datetime.datetime.now() - datetime.timedelta(days=1)).timestamp())}
+        )
+
+        self.get_result('get', ['testbinaryfiles', instance.id, 'test_some_filefield'])
+        self.get_result(
+            'get',
+            ['testbinaryfiles', instance.id, 'test_some_filefield'],
+            code=304,
+            headers={'If-Modified-Since': http_date((datetime.datetime.now() + datetime.timedelta(days=1)).timestamp())}
+        )
+        self.get_result(
+            'get',
+            ['testbinaryfiles', instance.id, 'test_some_filefield'],
+            headers={'If-Modified-Since': http_date((datetime.datetime.now() - datetime.timedelta(days=1)).timestamp())}
+        )
 
     def test_related_list_field(self):
         with open(os.path.join(DIR_PATH, 'cat.jpeg'), 'rb') as fd:

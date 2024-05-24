@@ -140,9 +140,11 @@ class ExtendedSwaggerAutoSchema(SwaggerAutoSchema):
         if self.view.action not in main_actions:
             with contextlib.suppress(AttributeError):
                 action = getattr(self.view, self.view.action).action
-                if action.result_serializer_class and \
-                        issubclass(action.result_serializer_class, serializers.BaseSerializer):
-                    result = action.result_serializer_class(many=action.is_list)
+                if action.result_serializer_class:
+                    if issubclass(action.result_serializer_class, serializers.BaseSerializer):
+                        result = action.result_serializer_class(many=action.is_list)
+                    elif issubclass(action.result_serializer_class, FileResponse):
+                        result = Schema(type='file')
         return result or super().get_default_response_serializer()
 
 

@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-13 07:08+0000\n"
+"POT-Creation-Date: 2024-05-23 06:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.15.0\n"
 
 #: ../../backend.rst:2
 msgid "Backend API manual"
@@ -61,10 +61,10 @@ msgstr ""
 "для list() и retrieve(), фильтры, api endpoint-ы и вложенные view."
 
 #: of vstutils.api.actions.Action:5 vstutils.api.actions.EmptyAction:9
-#: vstutils.api.actions.SimpleAction:20 vstutils.api.base.ModelViewSet:31
-#: vstutils.api.fields.DeepFkField:37 vstutils.api.fields.FkField:37
-#: vstutils.models.BModel:162 vstutils.models.BModel:187
-#: vstutils.models.custom_model.FileModel:20
+#: vstutils.api.actions.SimpleAction:20 vstutils.api.actions.SimpleFileAction:7
+#: vstutils.api.base.ModelViewSet:31 vstutils.api.fields.DeepFkField:37
+#: vstutils.api.fields.FkField:37 vstutils.models.BModel:162
+#: vstutils.models.BModel:187 vstutils.models.custom_model.FileModel:20
 #: vstutils.models.custom_model.ListModel:16
 #: vstutils.models.custom_model.ListModel:35
 msgid "Examples:"
@@ -681,7 +681,9 @@ msgstr "high_mark (int): Верхний индекс для среза (если
 msgid "is_sliced (bool): A boolean indicating whether the query is sliced."
 msgstr "is_sliced (bool): Булево значение, указывающее, является ли запрос срезом."
 
-#: of vstutils.api.actions.Action
+#: of vstutils.api.actions.Action vstutils.api.actions.SimpleFileAction
+#: vstutils.api.actions.SimpleFileAction.modified_since
+#: vstutils.api.actions.SimpleFileAction.pre_data
 #: vstutils.api.base.GenericViewSet.create_action_serializer
 #: vstutils.api.base.GenericViewSet.get_query_serialized_data
 #: vstutils.api.base.check_request_etag vstutils.api.base.get_etag_value
@@ -756,7 +758,9 @@ msgstr "Параметры"
 msgid "An object containing filtering, limiting, and sorting parameters."
 msgstr "Объект, содержащий параметры фильтрации, лимитирования и сортировки."
 
-#: of vstutils.api.base.GenericViewSet.create_action_serializer
+#: of vstutils.api.actions.SimpleFileAction.modified_since
+#: vstutils.api.actions.SimpleFileAction.pre_data
+#: vstutils.api.base.GenericViewSet.create_action_serializer
 #: vstutils.api.base.check_request_etag vstutils.api.base.get_etag_value
 #: vstutils.api.filters.extra_filter vstutils.api.filters.name_filter
 #: vstutils.api.validators.resize_image
@@ -3962,6 +3966,58 @@ msgid ""
 msgstr ""
 "При назначении действия на объект список методов также заполняется "
 "необходимыми методами."
+#: of vstutils.api.actions.SimpleFileAction:1
+msgid ""
+"Action for handling file responses. This action always returns a "
+"FileResponse."
+msgstr "Экшен для обработки ответов с файлами. Это действие всегда возвращает FileResponse."
+
+#: of vstutils.api.actions.SimpleFileAction:3
+msgid ""
+"This class is designed to simplify the process of creating actions that "
+"return file responses. It ensures that the file is only sent if it has "
+"been modified since the client's last request, and it sets appropriate "
+"headers to facilitate caching and attachment handling."
+msgstr "Этот класс предназначен для упрощения процесса создания действий, возвращающих ответы с файлами. Он гарантирует, что файл отправляется только в случае его изменения с момента последнего запроса клиента, и устанавливает соответствующие заголовки для облегчения кэширования и обработки вложений."
+
+#: of vstutils.api.actions.SimpleFileAction:62
+msgid "Cache-Control header value. Defaults to 'max-age=3600'."
+msgstr "Значение заголовка Cache-Control. По умолчанию 'max-age=3600'."
+
+#: of vstutils.api.actions.SimpleFileAction:64
+msgid ""
+"Boolean indicating if the file should be sent as an attachment. Defaults "
+"to False."
+msgstr "Булево значение, указывающее, следует ли отправлять файл в виде вложения. По умолчанию False."
+
+#: of vstutils.api.actions.SimpleFileAction:66
+msgid "Additional named arguments for :func:`rest_framework.decorators.action`."
+msgstr "Набор именованных аргументов для :func:`rest_framework.decorators.action`."
+#: of vstutils.api.actions.SimpleFileAction.modified_since:1
+msgid "Default modified_since method that checks the modification time of a file."
+msgstr "Метод modified_since по умолчанию, который проверяет время изменения файла."
+
+#: of vstutils.api.actions.SimpleFileAction.modified_since:4
+#: vstutils.api.actions.SimpleFileAction.pre_data:4
+msgid "The view instance."
+msgstr "Экземпляр представления."
+
+#: of vstutils.api.actions.SimpleFileAction.modified_since:6
+#: vstutils.api.actions.SimpleFileAction.pre_data:6
+msgid "The file object, typically a FileField or ImageField."
+msgstr "Объект файла, обычно FileField или ImageField."
+
+#: of vstutils.api.actions.SimpleFileAction.modified_since:8
+msgid "The modification time of the file, or None if it cannot be determined."
+msgstr "Время изменения файла или None, если оно не может быть определено."
+
+#: of vstutils.api.actions.SimpleFileAction.pre_data:1
+msgid "Default pre_data method that returns the file, its name, and content type."
+msgstr "Метод pre_data по умолчанию, который возвращает файл, его имя и тип содержимого."
+
+#: of vstutils.api.actions.SimpleFileAction.pre_data:8
+msgid "A tuple containing the file, its name, and its content type."
+msgstr "Кортеж, содержащий файл, его имя и тип содержимого."
 
 #: ../../backend.rst:127
 msgid "Filtersets"

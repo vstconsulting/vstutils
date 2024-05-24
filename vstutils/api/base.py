@@ -28,6 +28,7 @@ from rest_framework.schemas import AutoSchema as DRFAutoSchema
 from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 
 from ..utils import classproperty, get_if_lazy, raise_context_decorator_with_default, patch_gzip_response_decorator
+from .. import exceptions as vstexceptions
 from . import responses, fields
 from .filter_backends import get_serializer_readable_fields
 from .serializers import (
@@ -646,10 +647,8 @@ class CachableHeadMixin(GenericViewSet):
     response times and reducing server load for frequently accessed resources.
     """
 
-    class NotModifiedException(exceptions.APIException):
-        status_code = 304
-        default_detail = ''
-        default_code = 'cached'
+    class NotModifiedException(vstexceptions.NotModifiedException):
+        pass
 
     class PreconditionFailedException(exceptions.APIException):
         status_code = 412

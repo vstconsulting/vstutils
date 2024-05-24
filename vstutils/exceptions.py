@@ -1,5 +1,11 @@
 # pylint: disable=unused-import
-from rest_framework import status
+from rest_framework import status, exceptions
+
+
+class NotModifiedException(exceptions.APIException):
+    status_code = 304
+    default_detail = ''
+    default_code = 'cached'
 
 
 class VSTUtilsException(Exception):
