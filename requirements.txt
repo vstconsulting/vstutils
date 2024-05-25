@@ -16,7 +16,7 @@ uvicorn~=0.28.0
 pyuwsgi==2.0.23.post0
 # Restore it if some problems with pyuwsgi
 # uwsgi==2.0.23
-fastapi~=0.110.0
+fastapi-slim~=0.111.0
 aiofiles==23.2.1
 
 # Notifications
