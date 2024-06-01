@@ -213,6 +213,7 @@ class LangMiddleware(BaseMiddleware):
         set_cookie = True
         if 'lang' in request.GET:
             code = request.GET['lang']
+            set_cookie = request.COOKIES.get('settings.LANGUAGE_COOKIE_NAME') != code
         elif settings.LANGUAGE_COOKIE_NAME in request.COOKIES:
             code = request.COOKIES[settings.LANGUAGE_COOKIE_NAME]
             set_cookie = False
