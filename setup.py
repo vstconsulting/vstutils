@@ -44,8 +44,7 @@ kwargs = dict(
     install_requires=[
         "django~=" + (os.environ.get('DJANGO_DEP', "") or "5.0.3"),
     ]
-    + requirements
-    + load_requirements('requirements-doc.txt'),
+    + requirements,
     extras_require={
         'test': load_requirements('requirements-test.txt'),
         'rpc': requirements_rpc,
