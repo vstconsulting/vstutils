@@ -6,8 +6,8 @@ import type { ModelConstructor } from './Model';
 import { BaseModel } from './Model';
 import { makeModel } from './utils';
 
-import { MODEL_MODES } from '@/vstutils/AppConfiguration';
-import type { AppSchema, ModelDefinition } from '@/vstutils/AppConfiguration';
+import { MODEL_MODES } from '@/vstutils/schema';
+import type { AppSchema, ModelDefinition } from '@/vstutils/schema';
 import type { FieldsResolver } from '@/vstutils/fields';
 import AddKeyField from '../additionalProperties/AddKeyField.vue';
 import type { FieldDefinition } from '../fields/FieldsResolver';

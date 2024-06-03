@@ -1,7 +1,12 @@
-import { describe, expect, test, beforeAll, beforeEach } from '@jest/globals';
 import { waitFor } from '@testing-library/dom';
-import fetchMock from 'jest-fetch-mock';
-import { createApp, createSchema, mountApp, schemaListOf, waitForPageLoading, useTestCtx } from '@/unittests';
+import {
+    createApp,
+    createSchema,
+    schemaListOf,
+    waitForPageLoading,
+    useTestCtx,
+    expectNthRequest,
+} from '@/unittests';
 
 describe('main action execution', () => {
     beforeAll(async () => {
@@ -88,8 +93,6 @@ describe('main action execution', () => {
             },
         });
         await createApp({ schema });
-        await mountApp();
-        fetchMock.enableMocks();
     });
 
     beforeEach(() => {
@@ -111,14 +114,16 @@ describe('main action execution', () => {
 
         await waitFor(() => expect(fetchMock).toBeCalledTimes(2));
         // Create new
-        expect(fetchMock).nthCalledWith(1, 'http://localhost/api/endpoint/', {
-            body: JSON.stringify([{ method: 'post', path: ['some'], data: { name: 'some name' } }]),
+        expectNthRequest(0, {
+            url: 'http://localhost/api/endpoint/',
+            body: [{ method: 'post', path: ['some'], data: { name: 'some name' } }],
             headers: { 'Content-Type': 'application/json' },
             method: 'put',
         });
         // Redirect to list
-        expect(fetchMock).nthCalledWith(2, 'http://localhost/api/endpoint/', {
-            body: JSON.stringify([{ method: 'get', path: ['some'], query: 'limit=20&offset=0' }]),
+        expectNthRequest(1, {
+            url: 'http://localhost/api/endpoint/',
+            body: [{ method: 'get', path: ['some'], query: 'limit=20&offset=0' }],
             headers: { 'Content-Type': 'application/json' },
             method: 'put',
         });
@@ -139,14 +144,16 @@ describe('main action execution', () => {
 
         await waitFor(() => expect(fetchMock).toBeCalledTimes(2));
         // Execute action
-        expect(fetchMock).nthCalledWith(1, 'http://localhost/api/endpoint/', {
-            body: JSON.stringify([{ method: 'post', path: '/some/action/', data: { name: 'some value' } }]),
+        expectNthRequest(0, {
+            url: 'http://localhost/api/endpoint/',
+            body: [{ method: 'post', path: '/some/action/', data: { name: 'some value' } }],
             headers: { 'Content-Type': 'application/json' },
             method: 'put',
         });
         // Redirect to list
-        expect(fetchMock).nthCalledWith(2, 'http://localhost/api/endpoint/', {
-            body: JSON.stringify([{ method: 'get', path: ['some'], query: 'limit=20&offset=0' }]),
+        expectNthRequest(1, {
+            url: 'http://localhost/api/endpoint/',
+            body: [{ method: 'get', path: ['some'], query: 'limit=20&offset=0' }],
             headers: { 'Content-Type': 'application/json' },
             method: 'put',
         });
@@ -166,10 +173,9 @@ describe('main action execution', () => {
 
         await waitFor(() => expect(fetchMock).toBeCalledTimes(2));
         // Update
-        expect(fetchMock).toHaveBeenCalledWith('http://localhost/api/endpoint/', {
-            body: JSON.stringify([
-                { method: 'patch', path: ['some', 5], data: { name: 'test namenew value' } },
-            ]),
+        expectNthRequest(1, {
+            url: 'http://localhost/api/endpoint/',
+            body: [{ method: 'patch', path: ['some', 5], data: { name: 'test namenew value' } }],
             headers: { 'Content-Type': 'application/json' },
             method: 'put',
         });

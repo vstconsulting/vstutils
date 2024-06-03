@@ -3,7 +3,7 @@
         <div class="p-3 control-sidebar-content">
             <div>
                 <b>{{ $u.capitalize($tc('version', 1)) }}:</b>
-                <code>{{ $app.config.projectVersion }}</code>
+                <code>{{ $app.version }}</code>
             </div>
 
             <component :is="btn.component" v-for="(btn, idx) in buttons" v-bind="btn.props" :key="idx" />
@@ -44,6 +44,7 @@
 </template>
 
 <script lang="ts">
+    import { cleanAllCacheAndReloadPage } from '@/vstutils/cleanCacheHelpers.js';
     import { HelpModal } from './modal';
     import ControlSidebarButton from './ControlSidebarButton.vue';
     import ConfirmModal from '../common/ConfirmModal.vue';
@@ -95,7 +96,9 @@
                     {
                         component: ControlSidebarButton,
                         props: {
-                            href: this.$app.config.endpointUrl.href,
+                            href: String(
+                                new URL(this.$app.config.api.endpointPath, this.$app.config.api.url),
+                            ),
                             iconClass: 'fa fa-toolbox',
                             text: 'API',
                         },
@@ -130,7 +133,7 @@
                 this.localSettings.setValue(options);
             },
             cleanAllCache() {
-                window.cleanAllCacheAndReloadPage();
+                cleanAllCacheAndReloadPage();
             },
             closeControlSidebar(ev: Event) {
                 if ((ev as KeyboardEvent).key === 'Escape') {

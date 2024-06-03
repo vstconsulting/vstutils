@@ -1,5 +1,4 @@
-import { expect, beforeEach, test, describe, beforeAll } from '@jest/globals';
-import fetchMock from 'jest-fetch-mock';
+import { createSchema, createApp } from '@/unittests';
 import { makeModel, BaseModel } from '../models';
 import { QuerySet } from '../querySet/QuerySet.ts';
 import { StringField } from '../fields/text/';
@@ -7,13 +6,10 @@ import { IntegerField } from '../fields/numbers/integer.js';
 import { RequestTypes } from '../utils';
 import { AggregatedQueriesExecutor } from '../AggregatedQueriesExecutor.js';
 import { NotFoundError } from '../querySet/errors.js';
-import { apiConnector } from '../api/ApiConnector';
-import { createAppConfig } from '../../unittests/create-app';
 
 describe('AggregatedQueriesExecutor', () => {
-    beforeAll(() => {
-        apiConnector.initConfiguration(createAppConfig());
-        fetchMock.enableMocks();
+    beforeAll(async () => {
+        await createApp({ schema: createSchema() });
     });
 
     beforeEach(() => {

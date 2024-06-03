@@ -1,5 +1,5 @@
 # pylint: disable=unused-import
-from rest_framework import status, exceptions
+from rest_framework import status, response, exceptions
 
 
 class NotModifiedException(exceptions.APIException):
@@ -32,3 +32,8 @@ class UnknownTypeException(VSTUtilsException):
 
 class NotApplicable(VSTUtilsException):
     status = status.HTTP_404_NOT_FOUND
+
+
+class HttpResponseException(Exception):
+    def get_response(self) -> response.Response:
+        raise NotImplementedError()

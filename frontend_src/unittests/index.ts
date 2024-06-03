@@ -1,5 +1,4 @@
-import { expect } from '@jest/globals';
-import { mount as vueMount } from '@vue/test-utils';
+import { mount as vueMount, createWrapper, type Wrapper } from '@vue/test-utils';
 import { waitFor as _waitFor, within } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import { getApp } from '@/vstutils/utils';
@@ -21,49 +20,17 @@ export function mount(component: ComponentOptions<Vue>, options?: Parameters<typ
     });
 }
 
-let currentWrapper: ReturnType<typeof mount> | undefined;
-
-export async function mountApp() {
-    const app = globalThis.__currentApp;
-
-    if (!app) {
-        throw new Error('App is not initialized, use createApp() first');
-    }
-
-    if (currentWrapper) {
-        throw new Error('Mounting of multiple apps is not supported');
-    }
-
-    const wrapper = mount(
-        { mixins: [app.appRootComponent, ...app.additionalRootMixins] },
-        {
-            propsData: {
-                info: app.config.schema.info,
-                x_menu: app.config.schema.info['x-menu'],
-                x_docs: app.config.schema.info['x-docs'],
-            },
-        },
-    );
-
-    // @ts-expect-error Override rootVm
-    app.rootVm = wrapper.vm;
-
-    await waitForPageLoading();
-
-    currentWrapper = wrapper;
-
-    return wrapper;
-}
-
 export function useTestCtx() {
-    if (!currentWrapper) {
-        throw new Error('App must be mounted first');
+    if (!__currentApp) {
+        throw new Error('App is not created');
     }
-    const doc = currentWrapper.vm.$el.ownerDocument;
+    // @ts-expect-error __currentApp is set
+    const wrapper: Wrapper<Vue> = createWrapper(__currentApp._mounted);
+    const doc = wrapper.vm.$el.ownerDocument;
     const user = userEvent.setup({ document: doc });
     const screen = within(doc.body);
 
-    return { app: getApp(), screen, user, wrapper: currentWrapper, waitFor };
+    return { app: getApp(), screen, user, wrapper, waitFor };
 }
 
 export function waitFor<T>(callback: () => T, options?: Parameters<typeof _waitFor>[1]) {
@@ -80,4 +47,54 @@ const isLoading = () => __currentApp!.rootVm!.$el.querySelector('.in-loading');
 export async function waitForPageLoading() {
     await waitFor(() => expect(isLoading()).toBeTruthy());
     await waitFor(() => expect(isLoading()).toBeFalsy());
+}
+
+export function expectRequest(
+    request: undefined | Request | [string | Request | undefined, RequestInit | undefined],
+    expected: { url?: string; method?: string; body: string | object; headers?: Record<string, string> },
+) {
+    if (!request) {
+        throw new Error('Request expected');
+    }
+    if (Array.isArray(request)) {
+        if (request[0] instanceof Request) {
+            request = request[0];
+        } else {
+            // @ts-expect-error It's actually a Request
+            request = new Request(request);
+        }
+    }
+    if (expected.url) {
+        expect(request.url).toBe(expected.url);
+    }
+    if (expected.method) {
+        expect(request.method).toBe(expected.method.toUpperCase());
+    }
+    if (expected.body) {
+        expect(request.body).toBeTruthy();
+        // @ts-expect-error It's actually a Buffer
+        const body = (request.body as Buffer).toString();
+        if (typeof expected.body === 'object') {
+            expect(JSON.parse(body)).toEqual(expected.body);
+        } else {
+            expect(body).toBe(expected.body);
+        }
+    }
+    if (expected.headers) {
+        const headers = request.headers;
+        for (const [key, value] of Object.entries(expected.headers)) {
+            expect(headers.get(key)).toBe(value);
+        }
+    }
+}
+
+export function expectNthRequest(
+    idx: number,
+    expected: { url?: string; method?: string; body: string | object; headers?: Record<string, string> },
+) {
+    expectRequest(fetchMockCallAt(idx), expected);
+}
+
+export function fetchMockCallAt(idx: number) {
+    return fetchMock.mock.calls.at(idx);
 }

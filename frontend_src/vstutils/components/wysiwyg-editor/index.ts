@@ -29,11 +29,9 @@ const realComponent = (readOnly: boolean, lang?: LangInfo) =>
         const [ToastUIEditor, ToastUIEditorVue] = await Promise.all([
             import('@toast-ui/editor'),
             import('@toast-ui/vue-editor'),
-            // @ts-expect-error Styles are not typed
             import('@toast-ui/editor/dist/toastui-editor.css'),
             getApp().darkModeEnabled
-                ? // @ts-expect-error Styles are not typed
-                  import('@toast-ui/editor/dist/theme/toastui-editor-dark.css')
+                ? import('@toast-ui/editor/dist/theme/toastui-editor-dark.css')
                 : Promise.resolve(),
         ]);
         if (lang) {

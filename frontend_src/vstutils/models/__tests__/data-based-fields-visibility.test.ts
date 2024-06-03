@@ -1,6 +1,4 @@
-import { expect, test, beforeAll, describe } from '@jest/globals';
-import { createApp, createSchema, schemaListOf, mountApp, useTestCtx } from '@/unittests';
-import fetchMock from 'jest-fetch-mock';
+import { createApp, createSchema, schemaListOf, useTestCtx } from '@/unittests';
 
 const schema = createSchema({
     paths: {
@@ -69,18 +67,16 @@ const schema = createSchema({
 
 beforeAll(async () => {
     const app = await createApp({ schema });
-    await mountApp();
     app.api.disableBulk = true;
 });
 
 describe('data based fields visibility', () => {
     test('detail readonly', async () => {
         const { app, screen } = useTestCtx();
-        fetchMock.enableMocks();
 
         // All fields visible
         fetchMock.mockOnceIf(
-            'http://test.vst/api/v1/test/1/',
+            'http://localhost/api/v1/test/1/',
             JSON.stringify({
                 id: 1,
                 field1: 'field1 value',
@@ -94,7 +90,7 @@ describe('data based fields visibility', () => {
 
         // One field hidden
         fetchMock.mockOnceIf(
-            'http://test.vst/api/v1/test/2/',
+            'http://localhost/api/v1/test/2/',
             JSON.stringify({
                 id: 2,
                 field1: 'field1 value',
@@ -112,11 +108,10 @@ describe('data based fields visibility', () => {
 
     test('detail edit', async () => {
         const { app, screen } = useTestCtx();
-        fetchMock.enableMocks();
 
         // All fields visible
         fetchMock.mockOnceIf(
-            'http://test.vst/api/v1/test/1/',
+            'http://localhost/api/v1/test/1/',
             JSON.stringify({
                 id: 1,
                 field1: 'field1 value',
@@ -131,7 +126,7 @@ describe('data based fields visibility', () => {
 
         // One field hidden
         fetchMock.mockOnceIf(
-            'http://test.vst/api/v1/test/2/',
+            'http://localhost/api/v1/test/2/',
             JSON.stringify({
                 id: 2,
                 field1: 'field1 value',

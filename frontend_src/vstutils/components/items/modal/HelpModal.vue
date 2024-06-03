@@ -46,9 +46,10 @@
 </template>
 
 <script>
+    import { cleanAllCacheAndReloadPage } from '@/vstutils/cleanCacheHelpers.js';
     import ModalWindowAndButtonMixin from '../../../fields/ModalWindowAndButtonMixin.js';
     import BootstrapModal from './../../BootstrapModal.vue';
-    import ControlSidebarButton from '../ControlSidebarButton';
+    import ControlSidebarButton from '../ControlSidebarButton.vue';
 
     export default {
         name: 'HelpModal',
@@ -64,7 +65,7 @@
                 return Array.isArray(item);
             },
             resetAll() {
-                window.cleanAllCacheAndReloadPage({ resetAll: true });
+                cleanAllCacheAndReloadPage({ resetAll: true });
             },
         },
     };

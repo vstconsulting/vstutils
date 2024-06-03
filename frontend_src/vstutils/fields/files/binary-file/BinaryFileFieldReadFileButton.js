@@ -1,4 +1,4 @@
-import FileFieldReadFileButton from '../file/FileFieldReadFileButton';
+import FileFieldReadFileButton from '../file/FileFieldReadFileButton.vue';
 
 export default {
     mixins: [FileFieldReadFileButton],

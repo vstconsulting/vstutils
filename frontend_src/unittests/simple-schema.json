@@ -17,7 +17,7 @@
             "basic": []
         }
     ],
-    "host": "test.vst",
+    "host": "localhost",
     "info": {
         "title": "Test Project",
         "version": "v1",

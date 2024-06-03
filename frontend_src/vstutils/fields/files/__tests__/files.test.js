@@ -1,4 +1,3 @@
-import { jest, test, beforeAll, expect } from '@jest/globals';
 import { createApp, mount } from '@/unittests';
 import { h } from 'vue';
 import { deferredPromise } from '@/vstutils/utils';
@@ -30,7 +29,7 @@ test('files renaming', async () => {
     });
 
     const { promise: setValuePromise, resolve } = deferredPromise();
-    const listener = jest.fn(() => resolve());
+    const listener = vitest.fn(() => resolve());
 
     const wrapper = mount({
         setup() {

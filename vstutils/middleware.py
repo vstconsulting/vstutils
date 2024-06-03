@@ -7,8 +7,6 @@ from django.db import connections
 from django.apps import apps
 from django.conf import settings
 from django.utils import translation
-from django.urls import resolve
-from django.shortcuts import redirect
 
 from .api.models import Language
 from .utils import BaseVstObject
@@ -234,39 +232,6 @@ class LangMiddleware(BaseMiddleware):
         if 'Content-Language' not in response:
             response['Content-Language'] = request.language.code  # type: ignore
         return response
-
-
-class TwoFaMiddleware(BaseMiddleware):
-    redirect_name = 'login'
-    pass_names = (
-        'login',
-        'logout',
-        'pwa_manifest',
-        'service_worker',
-        'offline_gui',
-        'user_registration',
-        'terms',
-    )
-
-    def request_handler(self, request):
-        request.user.need_twofa = False  # type: ignore
-        if request.user.is_authenticated:
-            twofa = getattr(request.user, 'twofa', None)
-            if twofa and not request.session.get('2fa', False):
-                request.user.need_twofa = True  # type: ignore
-        return request
-
-    def check_url_name(self, request):
-        url_name = resolve(request.path).url_name
-        return any([
-            url_name not in self.pass_names,
-            url_name is not None and url_name.startswith('password_reset')
-        ])
-
-    def get_response_handler(self, request):
-        if request.user.need_twofa and self.check_url_name(request):  # type: ignore
-            return redirect(self.redirect_name)
-        return super().get_response_handler(request)
 
 
 class FrontendChangesNotifications(BaseMiddleware):

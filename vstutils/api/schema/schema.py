@@ -20,7 +20,10 @@ if _t.TYPE_CHECKING:
 
 
 def _get_nested_view_and_subaction(view, default=None):
-    sub_action = getattr(view, view.action, None)
+    action = getattr(view, 'action', None)
+    if not action:
+        return None, None
+    sub_action = getattr(view, action, None)
     return getattr(sub_action, '_nested_view', default), sub_action
 
 

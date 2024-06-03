@@ -1,6 +1,7 @@
 import type { IApp } from './vstutils/app';
-import type SchemaLoader from './app_loader/OpenAPILoader.js';
+import type SchemaLoader from './vstutils/OpenAPILoader';
 import type * as SPA from './app.common.js';
+import 'vitest-fetch-mock';
 
 declare global {
     interface String {
@@ -18,7 +19,6 @@ declare global {
     var __currentApp: IApp | undefined;
     var SELECT2_THEME: string;
     var schemaLoader: SchemaLoader;
-    var cleanAllCacheAndReloadPage: () => void;
     var IS_TESTS: boolean | undefined;
     var DISABLE_AUTO_UPDATE: boolean | undefined;
     /* eslint-enable no-var */

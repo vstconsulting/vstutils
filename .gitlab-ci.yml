@@ -126,28 +126,32 @@ release:
   script:
     - bash autorelease.sh
 
-release_pypi:
+release_packages:
   stage: release
   image: registry.gitlab.com/vstconsulting/images:ubuntu-v3
   artifacts:
     reports:
       dotenv: variables.env
   rules:
-    - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
+    - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME && $NPM_TOKEN'
       when: on_success
     - when: never
   script:
+    - echo MILESTONE=${CI_COMMIT_TAG%.*} > variables.env
+    # pypi
     - tox -e build
     - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/* -type f -name '*.tar.gz') $(find dist/* -type f -name '*.whl')
-    - echo MILESTONE=${CI_COMMIT_TAG%.*} > variables.env
+    # npm
+    - yarn build-lib
+    - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'>.npmrc
+    - npm publish --access public
   allow_failure: true
-
 
 release_job:
   stage: post_release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
-    - job: release_pypi
+    - job: release_packages
       artifacts: true
   rules:
     - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
@@ -166,4 +170,7 @@ release_job:
       links:
         - name: 'PyPI'
           url: "https://pypi.org/project/vstutils/${CI_COMMIT_TAG}/"
+          link_type: 'other'
+        - name: 'npm'
+          url: "https://www.npmjs.com/package/@vstconsulting/vstutils/v/${CI_COMMIT_TAG}"
           link_type: 'other'

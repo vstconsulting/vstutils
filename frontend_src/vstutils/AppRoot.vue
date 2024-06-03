@@ -47,7 +47,7 @@
     import AppModals from './components/common/AppModals.vue';
 
     import type { Component, PropType } from 'vue';
-    import type { XMenu } from './AppConfiguration';
+    import type { XMenu } from './schema';
 
     const DARK_MODE_CLASS = 'dark-mode';
 
@@ -110,7 +110,7 @@
                 return menu;
             },
             showBackButton() {
-                return this.$route.name !== 'home' && this.$route.meta?.view.showBackButton;
+                return this.$route.name !== 'home' && this.$route.meta?.view?.showBackButton;
             },
             showTitle() {
                 return true;
@@ -223,3 +223,4 @@
         right: 0 !important;
     }
 </style>
+./schema

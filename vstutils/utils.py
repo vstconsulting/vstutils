@@ -20,6 +20,7 @@ import warnings
 from functools import lru_cache, wraps
 from pathlib import Path
 from enum import Enum, EnumMeta
+from importlib import import_module
 
 from asgiref.sync import sync_to_async, async_to_sync
 from django.conf import settings
@@ -30,13 +31,16 @@ from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation, functional
+from django.utils.cache import cc_delim_re
 from django.utils.translation import get_language
 from django.utils.module_loading import import_string
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 
 from . import exceptions as ex
-from .tools import multikeysort
+
+if tp.TYPE_CHECKING:  # nocv
+    from django.contrib.sessions.backends.base import SessionBase
 
 
 logger: logging.Logger = logging.getLogger('vstutils')
@@ -1252,20 +1256,6 @@ class ObjectHandlers(BaseVstObject):
         return self[name](*args, **opts)
 
 
-class StaticFilesHandlers(ObjectHandlers):
-    def opts(self, name):
-        opts = super().opts(name)
-        opts['name'] = name
-        return opts
-
-    def get_static_objects(self):
-        for name in self.keys():
-            yield from self.get_object(name).spa_static_list
-
-    def get_sorted_list(self):
-        return tuple(multikeysort(self.get_static_objects(), ['priority']))
-
-
 class ModelHandlers(ObjectHandlers):
     """
     Handlers for some models like 'INTEGRATIONS' or 'REPO_BACKENDS'.
@@ -1314,10 +1304,6 @@ class URLHandlers(ObjectHandlers):
     """
     __slots__ = ('additional_handlers', '__handlers__', 'default_namespace')
 
-    settings_urls = [
-        'LOGIN_URL',
-        'LOGOUT_URL'
-    ]
     additional_handlers: tp.List[tp.Text]
 
     def __init__(self, type_name='URLS', *args, **kwargs):
@@ -1360,8 +1346,6 @@ class URLHandlers(ObjectHandlers):
         args = options.pop('view_args', argv)
         view_kwargs = options.pop('view_kwargs', {})
         csrf_enable = self.get_backend_data(regexp).get('CSRF_ENABLE', True)
-        if regexp in self.settings_urls:
-            regexp = f'{self.get_django_settings(regexp)[1:]}'
         view_class = self[name]
         namespace = view_kwargs.pop('namespace', self.default_namespace)
         result: tp.Union[tuple, types.ModuleType]
@@ -1477,3 +1461,21 @@ class BaseEnum(str, VstEnum):
 
     def not_equal(self, cmp_str):
         return not self.is_equal(cmp_str)
+
+
+@lru_cache(maxsize=1)
+def get_session_store() -> 'SessionBase':
+    engine = import_module(settings.SESSION_ENGINE)
+    return engine.SessionStore
+
+
+def add_in_vary(headers: dict, value: str):
+    """
+    Adds provided value to Vary header if not added already
+    """
+    vary = cc_delim_re.split(
+        headers.get('Vary', '').lower()
+    )
+    if value not in vary:
+        vary.append(value)
+        headers['Vary'] = ', '.join(vary)

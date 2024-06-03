@@ -55,7 +55,7 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: ModelCons
             return save();
         }
         async function init() {
-            const { data } = await api.bulkQuery<InnerData<Settings>>({
+            const { data } = await api.makeRequest<InnerData<Settings>>({
                 method: HttpMethods.GET,
                 path: USER_SETTINGS_PATH,
             });

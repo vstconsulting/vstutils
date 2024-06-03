@@ -45,7 +45,7 @@ import type { RepresentData, InnerData } from '@/vstutils/utils';
 import type { BaseViewStore } from './page-types';
 import type { SetFieldValueOptions } from '../fields/base';
 
-export function useParentViews() {
+export function useParentViews(params?: { getPath?: () => string }) {
     interface Item {
         view: IView;
         state: unknown;
@@ -55,10 +55,12 @@ export function useParentViews() {
     const items = ref<Item[]>([]);
     const itemsMap = computed(() => new Map(items.value.map((item) => [item.view.path, item])));
 
+    const getPath = params?.getPath ?? (() => getApp().router.currentRoute.path);
+
     async function push(store: BaseViewStore): Promise<void> {
         const view = store.view;
         const router = getApp().router;
-        const path = router.currentRoute.path;
+        const path = getPath();
 
         const promises: Promise<Item>[] = [];
 
@@ -269,7 +271,7 @@ export function filterNonEmpty(obj: Record<string, any>) {
 export function useListFilters(qs: Ref<QuerySet>) {
     const app = getApp();
     const count = ref(0);
-    const pageSize = ref(app.config.defaultPageLimit);
+    const pageSize = ref(app.defaultPageLimit);
     const pageNumber = ref(1);
     const filters = ref<InnerData>(emptyInnerData());
 

@@ -13,7 +13,7 @@ from django_filters import BooleanFilter, CharFilter
 from rest_framework import serializers, exceptions, request as drf_request
 from vstutils.api import fields, base, permissions, responses, decorators as deco
 from vstutils.api.filters import DefaultIDFilter, name_filter, name_help
-from vstutils.api.serializers import VSTSerializer, BaseSerializer, update_declared_fields
+from vstutils.api.serializers import VSTSerializer, BaseSerializer, update_declared_fields, JsonObjectSerializer
 from vstutils.api.models import TwoFactor, RecoveryCode, UserSettings
 from vstutils.utils import raise_context_decorator_with_default, translate, lazy_translate as __
 
@@ -211,7 +211,7 @@ class MainSettingsSerializer(BaseSerializer):
 
 class UserSettingsSerializer(BaseSerializer):
     main = MainSettingsSerializer(default={})
-    custom = serializers.JSONField(default={})
+    custom = JsonObjectSerializer(default={})
 
     class Meta:
         ref_name = '_UserSettings'

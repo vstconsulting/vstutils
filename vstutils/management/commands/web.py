@@ -73,6 +73,7 @@ class Command(BaseCommand):
     uwsgi_default_config = Path(os.path.dirname(__file__)).parent.parent / 'web.ini'
     default_addrport = settings.WEB_ADDRPORT
     prefix = getattr(settings, 'VST_PROJECT_LIB', 'vstutils').upper()
+    requires_system_checks = "__all__"
 
     def add_arguments(self, parser):
         super().add_arguments(parser)

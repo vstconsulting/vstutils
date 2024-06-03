@@ -1,8 +1,9 @@
 import os
 import time
 import copy
+from urllib.parse import urljoin
 
-import jwt
+from authlib.jose import jwt, OctKey
 from rest_framework import request as drf_request
 from django.conf import settings
 from django.utils.module_loading import import_string
@@ -20,6 +21,28 @@ def get_centrifugo_public_address(request: drf_request.Request):
     elif 'api' in address.rsplit('/', 2):
         address = address[:address.rfind('api')]
     return os.path.join(address.replace('http', 'ws', 1), 'connection/websocket')
+
+
+def get_oauth2_security_definition(request: drf_request.Request):
+    if settings.OAUTH_SERVER_URL:
+        token_url = urljoin(
+            settings.OAUTH_SERVER_URL,
+            settings.OAUTH_SERVER_TOKEN_ENDPOINT_PATH or f'/{settings.API_URL}/oauth2/token/',
+        )
+    elif settings.OAUTH_SERVER_ENABLE:
+        token_url = request.build_absolute_uri(f'/{settings.API_URL}/oauth2/token/')
+
+    definition = {
+        'type': 'oauth2',
+        'flow': 'password',
+        'tokenUrl': token_url,
+        'scopes': {},
+    }
+
+    if settings.OAUTH_SERVER_SCHEMA_CLIENT_ID:
+        definition['x-clientId'] = settings.OAUTH_SERVER_SCHEMA_CLIENT_ID
+
+    return definition
 
 
 class EndpointEnumerator(generators.EndpointEnumerator):
@@ -127,22 +150,23 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         if not getattr(request, 'version', ''):
             request.version = self.version
         result = super().get_schema(request, *args, **kwargs)
+        result['securityDefinitions']['oauth2'] = get_oauth2_security_definition(request)
         if request and getattr(request, 'accepted_media_type', None) == 'application/openapi+json':
             result['info']['x-user-id'] = request.user.pk
             if (notificator := getattr(request, 'notificator', None)) and request.user.is_authenticated:
                 secret = notificator.get_openapi_secret()
                 if secret and request.user.pk:
                     result['info']['x-centrifugo-token'] = jwt.encode(
-                        {
+                        header={'alg': 'HS256', 'typ': 'JWT'},
+                        payload={
                             "sub": request.session.session_key,
                             "exp": int(time.time() + request.session.get_expiry_age()),
                             "info": {
                                 'user_id': request.user.pk
                             }
                         },
-                        secret,
-                        algorithm="HS256"
-                    )
+                        key=OctKey.import_key(secret),
+                    ).decode()
                     result['info']['x-centrifugo-address'] = get_centrifugo_public_address(request)
 
         for hook in self._get_hooks():

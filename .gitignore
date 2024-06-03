@@ -1,5 +1,5 @@
 node_modules
-vstutils/static/bundle
+vstutils/static/spa
 *.pyc
 *.c
 *.so

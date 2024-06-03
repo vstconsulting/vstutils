@@ -1,7 +1,4 @@
 import Vue from 'vue';
-import * as Vue27 from 'vue';
-window.Vue = Vue;
-window.Vue27 = Vue27;
 
 import VueI18n from 'vue-i18n';
 window.VueI18n = VueI18n;
@@ -19,5 +16,7 @@ Vue.directive('element-bound', {
         callback(el);
     },
 });
+
+Vue.config.productionTip = false;
 
 export { Vue, VueI18n, PortalVue };

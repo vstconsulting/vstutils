@@ -1,4 +1,3 @@
-import { expect, test, describe, it } from '@jest/globals';
 import { BaseModel, makeModel } from '../index.ts';
 import { StringField } from '../../fields/text';
 import { IntegerField } from '../../fields/numbers/integer.js';
@@ -74,7 +73,7 @@ describe('Model', () => {
         expect(user['email']).toBe('name@domain.com');
 
         // Set value and check that 'toInner' is invoked
-        const settingsSpy = jest.spyOn(user._fields.get('settings'), 'toInner');
+        const settingsSpy = vitest.spyOn(user._fields.get('settings'), 'toInner');
         user.settings = { param1: 'value2', param2: 2, param3: false };
         user._validateAndSetData();
         expect(settingsSpy).toBeCalledTimes(1);

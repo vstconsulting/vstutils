@@ -7,11 +7,11 @@
         @shown="shown = true"
     >
         <template #body>
-            <Splide v-if="shown" :options="options">
-                <SplideSlide v-for="(item, idx) in preparedItems" :key="idx">
+            <swiper-container v-if="shown">
+                <swiper-slide v-for="(item, idx) in preparedItems" :key="idx">
                     <img :src="item.imgSrc" :alt="item.name ?? ''" class="slide-image" />
-                </SplideSlide>
-            </Splide>
+                </swiper-slide>
+            </swiper-container>
         </template>
 
         <template #activator="{ openModal }">
@@ -24,8 +24,6 @@
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import { Splide, SplideSlide } from '@splidejs/vue-splide';
-
     import { makeDataImageUrl } from '@/vstutils/utils';
     import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
 
@@ -36,14 +34,6 @@
         field: MultipleNamedBinaryImageField;
         value: ExtractRepresent<MultipleNamedBinaryImageField> | null | undefined;
     }>();
-
-    const options = {
-        heightRatio: 1,
-        perPage: 1,
-        perMove: 1,
-        rewind: true,
-        rewindByDrag: true,
-    };
 
     const shown = ref(false);
 

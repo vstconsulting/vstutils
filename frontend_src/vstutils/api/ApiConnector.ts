@@ -1,8 +1,11 @@
-import { BulkType, getCookie, guiLocalSettings, makeQueryString } from '@/vstutils/utils';
+import { BulkType, guiLocalSettings, makeQueryString } from '@/vstutils/utils';
 import { StatusError } from './StatusError';
 
-import type { AppConfiguration, AppSchema } from '@/vstutils/AppConfiguration';
+import type { AppSchema } from '@/vstutils/schema';
 import type { HttpMethod, InnerData } from '@/vstutils/utils';
+import { createApiFetch } from '../api-fetch';
+import { type InitAppConfig } from '../init-app';
+import { type IApp } from '../app';
 
 const isNativeCacheAvailable = 'caches' in window;
 
@@ -130,47 +133,51 @@ export type MakeRequestParams = MakeRequestParamsBulk | MakeRequestParamsFetch |
  * Class, that sends API requests.
  */
 export class ApiConnector {
-    appConfig: AppConfiguration | null = null;
+    appConfig: InitAppConfig | null = null;
     openapi: AppSchema | null = null;
     defaultVersion: string | null = null;
     endpointURL: string | null = null;
-    headers: Record<string, string | null>;
+    headers: Record<string, string | null | undefined>;
     bulkCollector: BulkCollector = { bulkParts: [] };
     baseURL: string | null = null;
     disableBulk = false;
     private _etagsCachePrefix: string | null = null;
     private _etagsCacheName: string | null = null;
+    fetch: typeof fetch = window.fetch;
 
     /**
      * Constructor of ApiConnector class.
      */
     constructor() {
         this.headers = {};
+    }
 
-        const csrftoken = getCookie('csrftoken');
-        if (csrftoken) {
-            this.headers['X-CSRFToken'] = csrftoken;
-        }
+    private initPromises: Promise<void>[] = [];
+
+    initialized() {
+        return Promise.all(this.initPromises);
     }
 
     /**
      * Method that sets application configuration. Must be called before making any requests.
      */
-    initConfiguration(appConfig: AppConfiguration): this {
-        this.appConfig = appConfig;
-        this.openapi = appConfig.schema;
+    initConfiguration(app: IApp): this {
+        this.appConfig = app.config;
+        this.openapi = app.schema;
         this.defaultVersion = this.openapi.info.version;
-        this.endpointURL = String(appConfig.endpointUrl); // TODO fetchMock does not support URL
+        this.endpointURL = String(new URL(app.config.api.endpointPath, app.config.api.url)); // TODO fetchMock does not support URL
 
-        // remove version and ending slash from path (/api/v1/)
-        const path = this.openapi.basePath?.replace(this.defaultVersion, '').replace(/\/$/, '');
-        this.baseURL = `${this.openapi.schemes![0]}://${this.openapi.host!}${path!}`;
+        this.baseURL = new URL(app.config.api.url).toString().replace(/\/$/, '');
 
         if (isNativeCacheAvailable) {
             this._etagsCachePrefix = 'etags-cache';
-            this._etagsCacheName = `${this._etagsCachePrefix}-${this.appConfig.fullUserVersion}`;
+            // TODO full version required for cache invalidation
+            this._etagsCacheName = `${this._etagsCachePrefix}-${app.version}`;
             void this._removeOldEtagsCaches();
         }
+
+        this.fetch = createApiFetch({ config: app.config });
+        this.disableBulk = app.config.api.disableBulk;
 
         return this;
     }
@@ -200,7 +207,7 @@ export class ApiConnector {
             if (query) {
                 realBulk.query = query;
             }
-            if (req.headers) {
+            if (req.headers && Object.keys(req.headers).length > 0) {
                 realBulk.headers = req.headers;
             }
             if (req.data) {
@@ -224,7 +231,7 @@ export class ApiConnector {
             const pathStr = Array.isArray(req.path) ? req.path.join('/') : req.path.replace(/^\//, '');
             const pathToSend = `${this.getFullUrl(pathStr)}${makeQueryString(req.query)}`;
 
-            const response = await fetch(pathToSend, {
+            const response = await this.fetch(pathToSend, {
                 method: req.method,
                 headers,
                 body: preparedData,
@@ -314,7 +321,7 @@ export class ApiConnector {
     }
 
     async sendBulk<Responses = undefined>(requests: RealBulkRequest[], type = BulkType.SIMPLE) {
-        const response = await fetch(this.endpointURL!, {
+        const response = await this.fetch(this.endpointURL!, {
             method: type,
             headers: { ...this.headers, 'Content-Type': 'application/json' },
             body: JSON.stringify(requests),
@@ -371,6 +378,9 @@ export class ApiConnector {
             } else {
                 results = await this.sendBulk(bulkData);
             }
+            if (results.length < bulkParts.length) {
+                throw new Error('Responses count does not match requests count');
+            }
             for (const [idx, item] of results.entries()) {
                 try {
                     APIResponse.checkStatus(item.status, item.data);
@@ -412,8 +422,8 @@ export class ApiConnector {
      * Method, that loads data of authorized user.
      */
     loadUser() {
-        return this.bulkQuery<InnerData>({
-            path: ['user', this.getUserId()],
+        return this.makeRequest<InnerData>({
+            path: ['user', 'profile'],
             method: 'get',
         }).then((response) => {
             return response.data;

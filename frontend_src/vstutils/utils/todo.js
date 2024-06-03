@@ -55,41 +55,6 @@ String.prototype.format_keys = function () {
 };
 
 /**
- * Function returns capitalized string - first char is in UpperCase, others - in LowerCase.
- * @param {string} string String, that should be capitalized.
- * @return {string}
- */
-export function capitalize(string) {
-    if (!string) return '';
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-}
-
-/**
- * Converts name to title
- * @param {string} name
- * @returns {string}
- */
-export function nameToTitle(name) {
-    return String(name)
-        .replace(/_/g, ' ')
-        .replace(/\s{2,}/g, ' ')
-        .trim();
-}
-
-/**
- * Lowercase value
- * @param {string} value
- * @returns {string|*}
- */
-export function lower(value) {
-    if (!value) {
-        return '';
-    }
-    value = value.toString();
-    return value.toLowerCase();
-}
-
-/**
  * Uppercase value
  * @param {string} value
  * @returns {string|*}
@@ -841,20 +806,6 @@ export function getRandomInt(min, max) {
  */
 export function randomSleep(min, max) {
     return sleep(getRandomInt(min, max));
-}
-
-/**
- * Escape string so it can be safe used in html
- * @param {string} unsafe
- * @return {string}
- */
-export function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
 }
 
 /**

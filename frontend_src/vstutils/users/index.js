@@ -87,7 +87,7 @@ signals.once('allViews.created', ({ views }) => {
             const secret = store.sandbox.value.secret;
             if (secret) {
                 const username = app.user.getViewFieldValue();
-                return `otpauth://totp/${app.config.projectName}:${username}?secret=${secret}`;
+                return `otpauth://totp/${app.projectName}:${username}?secret=${secret}`;
             }
             return null;
         });

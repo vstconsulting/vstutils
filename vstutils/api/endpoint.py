@@ -28,6 +28,7 @@ from .validators import UrlQueryStringValidator
 from .renderers import ORJSONRenderer
 from ..utils import Dict, raise_context, patch_gzip_response
 from ..middleware import BaseMiddleware
+from ..oauth2.authentication import JWTBearerTokenAuthentication
 
 RequestType = _t.Union[drf_request.Request, HttpRequest]
 logger: logging.Logger = logging.getLogger('vstutils')
@@ -42,7 +43,8 @@ REST_METHODS: _t.List[_t.Text] = [
 default_authentication_classes = (
     SessionAuthentication,
     BasicAuthentication,
-    TokenAuthentication
+    TokenAuthentication,
+    JWTBearerTokenAuthentication,
 )
 
 append_to_list = list.append
@@ -375,7 +377,11 @@ class EndpointViewSet(views.APIView):
         if request.user.is_authenticated:
             if isinstance(request.successful_authenticator, SessionAuthentication):
                 kwargs['HTTP_COOKIE'] = str(request.META.get('HTTP_COOKIE'))
-            elif isinstance(request.successful_authenticator, (BasicAuthentication, TokenAuthentication)):
+            elif isinstance(request.successful_authenticator, (
+                BasicAuthentication,
+                TokenAuthentication,
+                JWTBearerTokenAuthentication,
+            )):
                 kwargs['HTTP_AUTHORIZATION'] = str(request.META.get('HTTP_AUTHORIZATION'))
             kwargs['user'] = request.user
         kwargs['language'] = getattr(request, 'language', None)

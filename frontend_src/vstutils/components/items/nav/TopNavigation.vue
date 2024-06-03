@@ -50,10 +50,10 @@
                         <div class="dropdown-divider" />
                     </template>
 
-                    <a :href="logout_url" class="dropdown-item">
+                    <button type="button" class="dropdown-item" @click="logout">
                         <i class="fas fa-sign-out-alt mr-2 ico-data-default" />
                         {{ $u.capitalize($t('logout')) }}
-                    </a>
+                    </button>
                 </div>
             </li>
             <li v-else class="nav-item">
@@ -129,24 +129,6 @@
 
                 return url;
             },
-            /**
-             * Property, that returns URL to openapi.
-             */
-            openapi_url() {
-                return window.openapi_path;
-            },
-            /**
-             * Property, that returns logout URL.
-             */
-            logout_url() {
-                return this.$app.config.urls.logout;
-            },
-            /**
-             * Property, that returns login URL.
-             */
-            login_url() {
-                return this.$app.config.urls.login;
-            },
         },
         mounted() {
             $(this.$refs.sidebarControl).PushMenu();
@@ -168,6 +150,9 @@
             setDefaultGravatar(el) {
                 el.src = this.getDefaultGravatarImg();
                 return false;
+            },
+            async logout() {
+                await this.$app.config.logoutHandler({ config: this.$app.config });
             },
         },
     };

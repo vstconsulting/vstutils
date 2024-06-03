@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, onMounted, nextTick } from 'vue';
+    import { ref, computed, onMounted, nextTick, shallowRef } from 'vue';
     // @ts-expect-error liquor-tree has no types
     import * as LiquorTree from 'liquor-tree';
     import { i18n } from '@/vstutils/translation';
@@ -72,7 +72,7 @@
     const onlyLastChild = computed(() => props.field.onlyLastChild);
     const initialized = ref(false);
     const tree = ref();
-    const treeData = ref<any[]>([]);
+    const treeData = shallowRef<any[]>([]);
     const treeFilter = ref('');
     const treeOptions = {
         multiple: props.multiple,

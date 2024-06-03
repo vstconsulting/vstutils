@@ -1,5 +1,5 @@
 import { BaseField, BaseFieldContentEdit, BaseFieldMixin } from '../base';
-import { hasOwnProp } from '../../utils';
+import { hasOwnProp } from '../../utils/todo';
 import { NumberArrayFieldMixin } from './array';
 
 export const NumberFieldContentMixin = {

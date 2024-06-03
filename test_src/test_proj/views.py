@@ -3,12 +3,13 @@ import time
 import json
 
 from django.utils.functional import SimpleLazyObject
+from rest_framework.permissions import AllowAny
 
 from vstutils.api import responses, filter_backends, fields
 from vstutils.api.views import SettingsViewSet
-from vstutils.api.base import NonModelsViewSet
+from vstutils.api.base import GenericViewSet, NonModelsViewSet
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
-from vstutils.api.serializers import DataSerializer, JsonObjectSerializer
+from vstutils.api.serializers import DataSerializer, JsonObjectSerializer, EmptySerializer
 from vstutils.api.auth import UserViewSet
 from vstutils.api.actions import Action, SimpleFileAction
 from vstutils.utils import create_view
@@ -250,3 +251,19 @@ CacheableView = create_view(CachableProxyModel)
 class CacheableViewSet(CacheableView):
     def get_etag_value(self, model_class, request):
         return super().get_etag_value((model_class, gui_version), request)
+
+
+
+class TestOauth2ViewSet(GenericViewSet):
+    serializer_class = EmptySerializer
+    permission_classes = [AllowAny]
+
+    @subaction(methods=['POST', 'GET'], detail=False)
+    def counter(self, request):
+        value = request.session.get('test_counter', 0)
+        if request.method == 'POST':
+            value += 1
+            request.session['test_counter'] = value
+        # Some tests run with session middleware disabled so it needs to be saved manually
+        request.session.save()
+        return responses.Response200({'value': value})

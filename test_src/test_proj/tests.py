@@ -15,8 +15,9 @@ import datetime
 from copy import deepcopy
 from pathlib import Path
 from smtplib import SMTPException
+from urllib.parse import urlencode, parse_qs, urlparse
 
-from unittest.mock import patch, PropertyMock
+from unittest.mock import patch, PropertyMock, Mock
 
 from collections import OrderedDict
 
@@ -31,7 +32,10 @@ from django.core import mail
 from django.db.models import F
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
+from django.core.management.base import SystemCheckError
 from django.template.exceptions import TemplateDoesNotExist
+
+from vstutils.api.schema.generators import get_oauth2_security_definition
 try:
     from django.middleware.csrf import _get_new_csrf_token
 except ImportError:  # nocv
@@ -40,16 +44,17 @@ from django.core.cache import cache
 from django.utils.http import http_date
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
-from django.test import Client
 from django.http import FileResponse, HttpResponseNotModified
 from django.test.client import RequestFactory
 from django.urls import reverse
 from fakeldap import MockLDAP
 import requests
 from pywebpush import WebPushException
+from authlib.jose import jwt
+from authlib.oauth2.rfc6749 import OAuth2Request
 
 from vstutils import utils
-from vstutils.api.models import Language
+from vstutils.api.models import Language, TwoFactor
 from vstutils.api.schema.inspectors import X_OPTIONS
 from vstutils.api.serializers import BaseSerializer
 from vstutils.api.validators import (
@@ -77,6 +82,9 @@ from vstutils.api.validators import resize_image
 from vstutils.webpush.models import WebPushDeviceSubscription, WebPushNotificationSubscription
 from vstutils.webpush.utils import subscribe_device, update_user_subscriptions
 from vstutils.webpush.test_utils import subscribe_user_device_to_pushes
+from vstutils.oauth2.jwk import jwk_set as oauth2_server_jwk_set
+from vstutils.oauth2.endpoints import server as authorization_server
+from vstutils.oauth2.user import UserWrapper
 
 from .models import (
     File,
@@ -159,6 +167,8 @@ packaje_json_data = {
 validator_dict = {
     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
 }
+
+User = get_user_model()
 
 
 def to_soup(content):
@@ -314,15 +324,8 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
 class VSTUtilsTestCase(BaseTestCase):
     use_msgpack = True
 
-    def _get_test_ldap(self, client, data):
-        self.client.post(self.login_url, data=data, HTTP_X_AUTH_PLUGIN='DJANGO')
-        response = client.get('/api/v1/user/')
-        self.assertNotEqual(response.status_code, 200)
-        response = self.client.post(self.logout_url)
-        self.assertEqual(response.status_code, 302)
-
     @patch('ldap.initialize')
-    def test_ldap_auth(self, ldap_obj):
+    def test_ldap(self, ldap_obj):
         User = self.get_model_class('django.contrib.auth.models.User')
         User.objects.create(username='admin', password='some_strong_password')
         # Test on fakeldap
@@ -334,15 +337,6 @@ class VSTUtilsTestCase(BaseTestCase):
             "cn=admin,dc=test,dc=lan": admin_dict,
             'test': {"userPassword": admin_password}
         })
-        data = dict(username=admin, password=admin_password)
-        client = Client()
-        ldap_obj.return_value = LDAP_obj
-        self._get_test_ldap(client, data)
-        data['username'] = 'test'
-        with override_settings(LDAP_DOMAIN='test.lan'):
-            self._get_test_ldap(client, data)
-        with override_settings(LDAP_DOMAIN='TEST'):
-            self._get_test_ldap(client, data)
 
         # Unittest
         ldap_backend = LDAP(
@@ -741,9 +735,6 @@ class ViewsTestCase(BaseTestCase):
     def test_main_views(self):
         # Main
         self.get_result('get', '/')
-        self.get_result('post', self.logout_url, 302)
-        self.get_result('post', self.login_url, 302)
-        self.get_result('get', self.login_url, 302)
         # API
         api = self.get_result('get', '/api/')
         print(api)
@@ -761,7 +752,6 @@ class ViewsTestCase(BaseTestCase):
         )
 
         # Check static views
-        self.get_result('get', '/static/bundle/output.json', code=200)
         self.get_result('get', '/docs/', code=200)
         self.get_result('get', '/docs/index.html', code=200)
 
@@ -770,10 +760,8 @@ class ViewsTestCase(BaseTestCase):
         response = fclient.get('/docs/')
         self.assertEqual(response.status_code, 200)
 
-        response = fclient.get('/static/bundle/')
+        response = fclient.get('/static/404/')
         self.assertEqual(response.status_code, 404, response.content)
-        response = fclient.get('/static/bundle/output.json')
-        self.assertEqual(response.status_code, 200)
         response = fclient.get('/media/test.txt')
         self.assertEqual(response.status_code, 200)
 
@@ -801,6 +789,20 @@ class ViewsTestCase(BaseTestCase):
         for js_url in ['service-worker.js']:
             response = self.get_result('get', f'/{js_url}')
             self.assertCount(str(response).split('\n'), 1, f'{js_url} is longer than 1 string.')
+
+    def test_spa_routes(self):
+        client = self.api_test_client
+
+        response = client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['content-type'], 'text/html; charset=utf-8')
+        self.assertIn('<div id="app"></div>', response.text)
+        script = re.compile(r'src="(/spa/.+\.js)"></script>').search(response.text).group(1)
+
+        response = client.get(script)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['content-type'], 'text/javascript; charset=utf-8')
+        self.assertEqual(response.headers['cache-control'], 'public, max-age 2592000')
 
     def test_uregister(self):
         router_v1 = router.routers[0][1]
@@ -913,10 +915,7 @@ class ViewsTestCase(BaseTestCase):
             password2='12345'
         )
         user_get_request = {"method": "get", "path": ['user', 'profile']}
-        self.client.post(
-            f'{self.login_url}?lang=ru',
-            data=self.user.data
-        )
+        self.client.force_login(self.user)
         results = self.bulk([
             {"method": "post", "path": ['user', 'profile', 'change_password'], "data": i}
             for i in (invalid_old_password, not_identical_passwords, update_password)
@@ -1008,197 +1007,13 @@ class ViewsTestCase(BaseTestCase):
         gravatar_of_nonexistent_user = get_user_gravatar(123321)
         self.assertEqual(default_gravatar, gravatar_of_nonexistent_user)
 
-    def test_reset_password(self):
-        test_user = self._create_user(is_super_user=False)
-        client = self.client_class()
-        response = client.post(self.login_url, {'username': test_user.username, 'password': test_user.password})
-        self.assertEqual(response.status_code, 200)
-        response = client.post(self.logout_url)
-        self.assertEqual(response.status_code, 302)
-        response = client.post(reverse('password_reset'), {'email': 'error@error.error'})
-        self.assertEqual(response.status_code, 302)
-        self.assertCount(mail.outbox, 0)
-        response = client.post(reverse('password_reset'), {'email': test_user.email})
-        self.assertEqual(response.status_code, 302)
-        regex = r"^http(s)?:\/\/.*$"
-        match = re.search(regex, mail.outbox[-1].body, re.MULTILINE)
-        href = match.group(0)
-        response = client.post(href, {'new_password1': 'newpass', 'new_password2': 'newpass'})
-        self.assertEqual(response.status_code, 302)
-        response = client.post(self.login_url, {'username': test_user.username, 'password': 'newpass'})
-        self.assertEqual(response.status_code, 200)
-
-    def test_register_new_user(self):
-        # create user data and init client class
-        user = dict(
-            username='newuser',
-            password1='pass',
-            password2='pass',
-            email='new@user.com',
-            agreement=True,
-            consent_to_processing=True,
-        )
-        user_fail = dict(
-            username='newuser',
-            password1='pass',
-            password2='pss',
-            email='new@user.com',
-            agreement=True,
-            consent_to_processing=True,
-        )
-        client = self.client_class()
-
-        self.assertIsNone(get_user_model().objects.filter(email=user['email']).last())
-
-        # Try register failed user data
-        response = self.call_registration(user_fail)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            ''.join(response.context_data['form'].errors.get('password2', [])),
-            'The two password fields didn\'t match.'
-        )
-
-        # Try register user without data
-        response = self.call_registration(None)
-        self.assertEqual(response.status_code, 200)
-        self.assertListEqual(
-            list(response.context_data['form'].errors.keys()),
-            ['username', 'email', 'password1', 'password2', 'agreement', 'consent_to_processing']
-        )
-
-        # Correct registration request
-        response = self.call_registration(user)
-        self.assertRedirects(response, self.confirmation_redirect_url)
-
-        self.assertCount(mail.outbox, 1)
-        regex = r"http(s)?:\/\/.*\/registration\/(\?.*?(?=\")){0,1}"
-        match = re.search(regex, mail.outbox[-1].alternatives[-1][0], re.MULTILINE)
-        href = match.group(0)
-
-        href_base, correct_uid = href.split('uid=')
-
-        response = client.post(href_base, {'uid': 'wrong'})
-        self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(response.context_data['form'].errors.get_json_data(), {
-            'uid': [{'message': 'Confirmation link is invalid or expired', 'code': ''}],
-        })
-
-        # Check email and uid in create method
-        secure_pickle = SecurePickling(settings.SECRET_KEY)
-        fail_check_email_user = user.copy()
-        fail_check_email_user['email'] = 'new_random_changed@email.com'
-        cache_key_unhashed = 'not_correct@email.com'
-        cache_key_hashed = make_password(cache_key_unhashed)
-
-        cache.set(cache_key_hashed, secure_pickle.dumps(fail_check_email_user))
-        fail_check_email_user['uid'] = cache_key_hashed
-        response = client.post(href_base, fail_check_email_user)
-        self.assertEqual(response.status_code, 400)
-
-        # Success registration
-        user['uid'] = correct_uid
-        response = client.post(href, user)
-        self.assertRedirects(response, self.login_url, target_status_code=302)
-
-        client.post(href_base, {'uid': correct_uid})
-        response = client.post(href_base, {'uid': correct_uid})
-        self.assertEqual(len(response.context['form'].errors), 1)
-        self.assertEqual(response.context['form'].errors['uid'][0], 'Confirmation link is invalid or expired')
-
-        get_user_model().objects.filter(email=user['email']).delete()
-        response = client.post(href, {'uid': user['uid']})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['form'].errors), 1)
-        self.assertEqual(response.context['form'].errors['uid'][0], 'Confirmation link is invalid or expired')
-
-        client.post(self.logout_url)
-        client.get(href)
-        response = client.post(href, user)
-        self.assertEqual(response.status_code, 302)
-
-    def test_registration_with_confirmation(self):
-        user = dict(
-            first_name='alex',
-            last_name='mercer',
-            password1='New@password22',
-            password2='New@password22',
-            email='new@user.com',
-            username='trop',
-            agreement=True,
-            consent_to_processing=True
-        )
-
-        client = self.client_class()
-        response = self.call_registration(data=user, HTTP_ACCEPT_LANGUAGE='ru-RU')
-        self.assertRedirects(response, self.confirmation_redirect_url)
-        response = client.get(self.confirmation_redirect_url)
-        self.assertIn('Confirm your email before logging in', str(response.content))
-
-        self.assertCount(mail.outbox, 1)
-        confirmation_message = str(mail.outbox[-1].message())
-
-        self.assertIn('Подтвердите свой аккаунт', confirmation_message)
-        self.assertIn('Пожалуйста, подтвердите свой Example Project аккаунт', confirmation_message)
-
-        regex = r"http(s)?:\/\/.*\/registration\/(\?.*?(?=\")){0,1}"
-        match = re.search(regex, confirmation_message, re.MULTILINE)
-        href = match.group(0)
-        correct_uid = href.split('uid=')[-1]
-        response = client.post(self.login_url, data={'username': user['username'], 'password': user['password1']})
-        # login failed
-        self.assertIn('Please enter a correct username and password', str(response.context_data['form'].errors))
-        response = client.get('/')
-        self.assertFalse(response.wsgi_request.user.is_authenticated)
-        # confirm email (different client)
-        client2 = self.client_class()
-        response = client2.post(href, {'uid': correct_uid})
-        self.assertRedirects(response, self.login_url, target_status_code=302)
-        response = client2.post(self.login_url, data={'username': user['username'], 'password': user['password1']})
-        # successful login
-        response = client2.get('/')
-        self.assertTrue(response.wsgi_request.user.is_authenticated)
-
     def test_terms_agreement(self):
-        user = dict(
-            username='newuser',
-            password1='pass',
-            password2='pass',
-            email='new@user.com',
-            agreement=True,
-            consent_to_processing=True,
-        )
-        user_fail = dict(
-            username='newuser',
-            password1='pass',
-            password2='pass',
-            email='new@user.com',
-            consent_to_processing=True,
-        )
-        client = self.client_class()
-
         lang_text_data = {
             'ru': 'лицензионное соглашение',
             'en': 'terms of agreement',
             'cn': '协议条款',
             'vi': 'các điều khoản của thỏa thuận'
         }
-        # Correct registration request returns redirect
-        response = self.call_registration(user)
-        self.assertRedirects(response, self.confirmation_redirect_url)
-
-        # Try registration without agreement returns error
-        response = self.call_registration(user_fail)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.context_data['form'].errors['agreement'][0],
-            'To continue, need to accept the terms agreement.'
-        )
-
-        # If ENABLE_AGREEMENT_TERMS=False, registration without agreement returns redirect
-        with override_settings(ENABLE_AGREEMENT_TERMS=False):
-            response = self.call_registration(user_fail)
-            self.assertRedirects(response, self.confirmation_redirect_url)
-
         # Response with 'lang=en' returns default 'terms.md' with correct html
         with utils.tmp_file(data='## test_header', encoding='utf8') as md_file:
             with override_settings(AGREEMENT_TERMS_PATH=md_file.path):
@@ -1218,46 +1033,12 @@ class ViewsTestCase(BaseTestCase):
                     self.assertContains(response_with_en_lang, f'<h2>{item[1]}</h2>')
 
     def test_personal_data_processing(self):
-        user = dict(
-            username='newuser',
-            password1='pass',
-            password2='pass',
-            email='new@user.com',
-            agreement=True,
-            consent_to_processing=True,
-        )
-        user_fail = dict(
-            username='newuser',
-            password1='pass',
-            password2='pass',
-            email='new@user.com',
-            agreement=True,
-        )
-        client = self.client_class()
-
         lang_text_data = {
             'ru': 'политика обработки персональных данных',
             'en': 'personal data processing policy',
             'cn': '个人资料处理政策',
             'vi': 'chính sách xử lý dữ liệu cá nhân'
         }
-        # Correct registration request returns redirect
-        response = self.call_registration(user)
-        self.assertRedirects(response, self.confirmation_redirect_url)
-
-        # Try registration without consent_to_processing returns error
-        response = self.call_registration(user_fail)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.context_data['form'].errors['consent_to_processing'][0],
-            'To continue, need to agree to the personal data processing policy.'
-        )
-
-        # If ENABLE_CONSENT_TO_PROCESSING=False, registration without `consent_to_processing` returns redirect
-        with override_settings(ENABLE_CONSENT_TO_PROCESSING=False):
-            response = self.call_registration(user_fail)
-            self.assertRedirects(response, self.confirmation_redirect_url)
-
         # Response with 'lang=en' returns default 'consent_to_processing.md' with correct html
         with utils.tmp_file(data='## test_header', encoding='utf8') as md_file:
             with override_settings(CONSENT_TO_PROCESSING_PATH=md_file.path):
@@ -1279,47 +1060,6 @@ class ViewsTestCase(BaseTestCase):
         # If file not found - returns 404 status
         response_without_file = self.client.get(reverse('consent_to_processing'))
         self.assertEqual(response_without_file.status_code, 404)
-
-    @override_settings(SEND_CONFIRMATION_EMAIL=False, AUTHENTICATE_AFTER_REGISTRATION=False)
-    def test_register_new_user_without_confirmation(self):
-        user = dict(
-            username='newuser',
-            password1='pass',
-            password2='pass',
-            email='new@user.com',
-            agreement=True,
-            consent_to_processing = True,
-        )
-        user_fail = dict(
-            username='newuser',
-            password1='pass',
-            password2='pss',
-            email='new@user.com',
-            agreement=True,
-            consent_to_processing=True,
-        )
-        client = self.client_class()
-        response = client.post(self.login_url, {'username': user['username'], 'password': user['password1']})
-        self.assertEqual(response.status_code, 200)
-        response = self.call_registration(user_fail)
-        self.assertEqual(response.status_code, 200)
-        response = self.call_registration(user)
-        self.assertRedirects(response, self.login_url)
-        response = client.post(self.login_url, {'username': user['username'], 'password': user['password2']})
-        self.assertRedirects(response, '/')
-
-    def test_login_redirects(self):
-        user = self._create_user(is_super_user=False)
-        client = self.client_class()
-        redirect_page = '/#/user/1/notification_settings'
-
-        # Test that login POST handler redirects after successful login
-        response = client.post(self.login_url, {
-            'username': user.data['username'],
-            'password': user.data['password'],
-            'next': redirect_page
-        })
-        self.assertRedirects(response, redirect_page)
 
     @override_settings(MAX_TFA_ATTEMPTS=4)
     def test_2fa(self):
@@ -1388,48 +1128,6 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(results[9]['status'], 200)
         self.assertEqual(results[9]['data'], {'enabled': True})
         self.assertEqual(self.user.twofa.recoverycode.all().count(), 2)
-
-        # Check logout after invalid attempts
-        client = self.client_class()
-        client.post(self.login_url, data=self.user.data)
-        with self.patch('pyotp.TOTP.verify') as mock_obj:
-            mock_obj.side_effect = lambda x: x == pin
-            # Make 3 attempts with invalid pin
-            client.post(self.login_url, data={'pin': '111'})
-            client.post(self.login_url, data={'pin': '111'})
-            response = client.post(self.login_url, data={'pin': '111'})
-            # Check that response contains error message
-            self.assertContains(response, 'Invalid authentication code')
-            # Make 4th attempt
-            response = client.post(self.login_url, data={'pin': '111'})
-            # Check that login page returned
-            self.assertContains(response, 'Sign in to start your session')
-
-        # Check recovery codes
-        client = self.client_class()
-        client.post(self.login_url, data=self.user.data)
-        response = client.post(self.login_url, data={'pin': 'cod-e2'})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(self.user.twofa.recoverycode.all().count(), 1)
-        response = client.get('/')
-        self.assertEqual(response.status_code, 200)
-
-        # Check login and redirects
-        client = self.client_class()
-        client.post(self.login_url, data=self.user.data)
-        self.assertTrue(settings.SESSION_COOKIE_NAME in client.cookies)
-
-        response = client.get('/')
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, self.login_url)
-
-        with self.patch('pyotp.TOTP.verify') as mock_obj:
-            mock_obj.side_effect = lambda x: x == pin
-            response = client.post(self.login_url, data={'pin': pin})
-            self.assertEqual(response.status_code, 302)
-
-        response = client.get('/')
-        self.assertEqual(response.status_code, 200)
 
     def test_user_settings(self):
         initial_settings = {'custom': {}, 'main': {'dark_mode': False, 'language': 'en'}}
@@ -1510,6 +1208,204 @@ class ViewsTestCase(BaseTestCase):
             self.assertFalse(nonstaff_user.is_staff)
 
 
+class APIAuthViewsTestCase(BaseTestCase):
+    @override_settings(SEND_CONFIRMATION_EMAIL=False)
+    def test_registration(self):
+        # Test successful registration
+        response = self.client_class().post(
+            '/api/oauth2/registration/',
+            {
+                'username': 'test_user',
+                'password': 'test_password',
+                'email': 'test@user.test',
+            },
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json(), {
+            'email_confirmation_required': False,
+            'email': 'test@user.test',
+            'username': 'test_user',
+            'first_name': '',
+            'last_name': '',
+        })
+        self.assertDictEqual(
+            User.objects.filter(username='test_user').values('email', 'first_name', 'last_name', 'username').first(),
+            {
+                'email': 'test@user.test',
+                'first_name': '',
+                'last_name': '',
+                'username': 'test_user',
+            },
+        )
+        self.assertTrue(User.objects.get(username='test_user').check_password('test_password'))
+
+        # Test registration with existing username
+        response = self.client_class().post(
+            '/api/oauth2/registration/',
+            {
+                'username': 'test_user',
+                'password': 'test_password',
+                'email': 'test@user.test',
+            },
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'username': ['User with this username already exists.']})
+
+        # Test registration with missing data
+        response = self.client_class().post(
+            '/api/oauth2/registration/',
+            {},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {
+            'password': ['This field is required.'],
+            'username': ['This field is required.'],
+        })
+
+    @override_settings(SEND_CONFIRMATION_EMAIL=True)
+    def test_registration_with_email_confirmaion(self):
+        # Test successful registration
+        response = self.client_class().post(
+            '/api/oauth2/registration/',
+            {
+                'username': 'test_user',
+                'password': 'test_password',
+                'email': 'test@user.test',
+            },
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json(), {
+            'email_confirmation_required': True,
+            'email': 'test@user.test',
+            'username': 'test_user',
+        })
+        self.assertFalse(User.objects.filter(username='test_user').exists())
+
+        # Check confirmation message
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0]
+        self.assertEqual(msg.to, ['test@user.test'])
+        content = str(msg.message())
+        match = re.search(r'href="http://testserver/#/auth/registration/confirm-email/([\w\$]+)"', content)
+        self.assertIsNotNone(match)
+
+        # Verify email
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client_class().post(
+                '/api/oauth2/confirm_email/',
+                {'code': match.group(1)},
+                content_type='application/json',
+            )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json(), {})
+        user = User.objects.filter(username='test_user').first()
+        self.assertIsNotNone(user)
+        self.assertTrue(user.check_password('test_password'))
+
+        # Test same code second time
+        response = self.client_class().post(
+            '/api/oauth2/confirm_email/',
+            {'code': match.group(1)},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'code': ['Confirmation code is invalid or expired.']})
+
+    def test_registration_email_check(self):
+        user = {
+            'username': 'newuser',
+            'password': 'pass',
+            'email': 'new@user.com',
+        }
+        response = self.client_class().post(
+            '/api/oauth2/registration/',
+            user,
+            content_type='application/json',
+        )
+        secure_pickle = SecurePickling(settings.SECRET_KEY)
+        fail_check_email_user = user.copy()
+        fail_check_email_user['email'] = 'new_random_changed@email.com'
+        new_code = make_password('not_correct@email.com')
+        cache.set(new_code, secure_pickle.dumps(fail_check_email_user))
+        response = self.client_class().post(
+            '/api/oauth2/confirm_email/',
+            {'code': new_code},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'code': ['Invalid registration email send.']})
+
+    def test_password_reset(self):
+        # Unknown email
+        response = self.client_class().post(
+            '/api/oauth2/password_reset/',
+            {'email': 'unknown@user.com'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json(), {})
+        self.assertEqual(len(mail.outbox), 0)
+
+        # Real user
+        user = self._create_user(is_super_user=False, email='test_user@email.com')
+        response = self.client_class().post(
+            '/api/oauth2/password_reset/',
+            {'email': 'test_user@email.com'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json(), {})
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0]
+        content = str(msg.message())
+        match = re.search(r'http://testserver/#/auth/password-reset/([\w=]+)/([\w=-]+)', content)
+        self.assertIsNotNone(match)
+        uid = match.group(1)
+        token = match.group(2)
+
+        # Check invalid uid
+        response = self.client_class().post(
+            '/api/oauth2/password_reset_confirm/',
+            {'uid': 'invalid', 'token': token, 'password': 'new_password'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'uid': ['Invalid value']})
+
+        # Check invalid token
+        response = self.client_class().post(
+            '/api/oauth2/password_reset_confirm/',
+            {'uid': uid, 'token': 'invalid', 'password': 'new_password'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'token': ['Invalid value']})
+
+        # Try set invalid password
+        response = self.client_class().post(
+            '/api/oauth2/password_reset_confirm/',
+            {'uid': uid, 'token': token, 'password': 'test_user@email.com'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'password': ['The password is too similar to the email address.']})
+
+        # Try set valid password
+        response = self.client_class().post(
+            '/api/oauth2/password_reset_confirm/',
+            {'uid': uid, 'token': token, 'password': 'new_password'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json(), {})
+        user.refresh_from_db()
+        self.assertTrue(user.check_password('new_password'))
+
+
 class DefaultBulkTestCase(BaseTestCase):
     use_msgpack = True
 
@@ -1558,7 +1454,8 @@ class DefaultBulkTestCase(BaseTestCase):
             dict(method='get', path=['usr', self.user.id])
         ]
         self.bulk_transactional(bulk_request_data, 502)
-        self.client.post(f'{self.login_url}?lang=ru', self.user.data)
+        self.client.force_login(self.user)
+        self.client.get('/?lang=ru')
         result = self.bulk(
             bulk_request_data,
             headers={'accept-language': 'ru,en-US;q=0.9,en;q=0.8,ru-RU;q=0.7,es;q=0.6'},
@@ -1686,7 +1583,6 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertIn('ETag', results[0]['headers'])
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[1]['data']['swagger'], '2.0')
-        self.assertEqual(results[1]['data']['info']['x-settings']['logout_url'], self.logout_url)
         self.client.logout()
 
     @override_settings(
@@ -2410,7 +2306,10 @@ class OpenapiEndpointTestCase(BaseTestCase):
 
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
-        paths_which_is_tech = (r'settings', r'_lang')
+        paths_which_is_tech = (
+            r'settings',
+            r'_lang',
+        )
 
         valid_paths = [
             f'/{y}/'
@@ -3379,23 +3278,23 @@ class LangTestCase(BaseTestCase):
         )
 
         for expected_code, header in languages:
-            response = self.client_class().get(self.login_url, HTTP_ACCEPT_LANGUAGE=header)
+            response = self.client_class().get('/', HTTP_ACCEPT_LANGUAGE=header)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.cookies['lang'].value, expected_code)
             self.assertEqual(to_soup(response.content).html['lang'], expected_code, f'Header: {header}')
 
-        response = client.get(f'{self.login_url}?lang=ru', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        response = client.get('/?lang=ru', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.cookies.get('lang').value, 'ru')
         self.assertEqual(to_soup(response.content).html['lang'], 'ru')
 
-        response = client.get(self.login_url, HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        response = client.get('/', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
         self.assertEqual(to_soup(response.content).html['lang'], 'ru')
 
-        response = self.client_class().get(self.login_url)
+        response = self.client_class().get('/')
         self.assertEqual(to_soup(response.content).html['lang'], 'en')
 
-        response = self.client_class().get(self.login_url, HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        response = self.client_class().get('/', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
         self.assertEqual(to_soup(response.content).html['lang'], 'en')
 
     def test_server_translation(self):
@@ -3413,6 +3312,16 @@ class LangTestCase(BaseTestCase):
                          'Перевод, который может быть перезаписан серверным переводом')
         self.assertEqual(ru_lang_obj.translate('Some shared translation'), 'Серверный перевод имеет более высокий приоритет')
 
+    def test_error_keys_are_not_translated(self):
+        response = self.client_class().post(
+            '/api/oauth2/confirm_email/?lang=ru',
+            data={'code': 'invalid'},
+            content_type='application/json',
+        )
+        self.assertDictEqual(
+            response.json(),
+            {'code': ['Код подтверждения недействителен или устарел.']},
+        )
 
 class ProjectTestCase(BaseTestCase):
     use_msgpack = True
@@ -5697,13 +5606,11 @@ class CustomModelTestCase(BaseTestCase):
 
     def test_additional_urls(self):
         response = self.client.get('/suburls/admin/login/')
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, self.login_url)
+        self.assertEqual(response.status_code, 200)
         response = self.client.get('/suburls_module/admin/login/')
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, self.login_url)
+        self.assertEqual(response.status_code, 200)
         response = self.client.get(f'/suburls/login/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
 
 class ToolsTestCase(BaseTestCase):
@@ -5795,7 +5702,7 @@ class ConfigParserCTestCase(BaseTestCase):
         self.assertEqual(settings.LDAP_DOMAIN, '')
         self.assertEqual(settings.LDAP_FORMAT, 'cn=<username>,<domain>')
         self.assertEqual(settings.TIME_ZONE, "UTC")
-        self.assertEqual(settings.ENABLE_ADMIN_PANEL, False)
+        self.assertEqual(settings.ENABLE_ADMIN_PANEL, True)
 
         self.assertEqual(settings.SESSION_COOKIE_AGE, 1209600)
         self.assertEqual(settings.STATIC_URL, '/static/')
@@ -6637,3 +6544,1001 @@ class WebPushesTestCase(BaseTestCase):
         self.assertEqual(device._sub.language_code, 'en')
         device.set_language('ru')
         self.assertEqual(device._sub.language_code, 'ru')
+
+
+class Oauth2TestCase(BaseTestCase):
+    maxDiff = None
+
+    def test_configuration(self):
+        # Check that OAUTH_SERVER_URL or OAUTH_SERVER_ENABLE must be set
+        with (
+            override_settings(
+                OAUTH_SERVER_URL=None,
+                OAUTH_SERVER_ENABLE=False,
+            ),
+            self.assertRaisesRegex(
+                SystemCheckError,
+                'OAUTH_SERVER_URL or OAUTH_SERVER_ENABLE must be set',
+            ),
+        ):
+            call_command('check')
+
+    def access_token_tester(self, prepare_data):
+        user = self._create_user(is_super_user=False, is_staff=False)
+        client = self.client_class()
+
+        # Missing grant_type
+        response = client.post(
+            '/api/oauth2/token/',
+            **prepare_data({}),
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(response.json(), {'error': 'unsupported_grant_type'})
+
+        # Invalid password
+        response = client.post(
+            '/api/oauth2/token/',
+            **prepare_data({
+                'client_id': 'simple-client-id',
+                'client_secret': 'simple-client-secret',
+                'grant_type': 'password',
+                'username': user.username,
+                'password': 'invalid',
+            }),
+        )
+        self.assertEqual(response.status_code, 400, response.json())
+        self.assertDictEqual(response.json(), {
+            'error': 'invalid_request',
+            'error_description': 'Invalid "username" or "password" in request.'},
+        )
+
+        # Valid data
+        with (
+            self.patch('time.time', return_value=1000),
+            self.patch('vstutils.oauth2.authorization_server.JWTBearerTokenGenerator._get_expires_in', return_value=60),
+        ):
+            response = client.post(
+                '/api/oauth2/token/',
+                **prepare_data({
+                    'client_id': 'simple-client-id',
+                    'client_secret': 'simple-client-secret',
+                    'grant_type': 'password',
+                    'username': user.username,
+                    'password': user.data['password'],
+                }),
+            )
+        data = response.json()
+        self.assertEqual(response.status_code, 200, data)
+        self.assertDictEqual(data, {
+            'access_token': data['access_token'],
+            'expires_in': 60,
+            'refresh_token': data['refresh_token'],
+            'token_type': 'Bearer',
+        })
+
+        # Check token
+        token = response.json()['access_token']
+        with self.patch('time.time', return_value=1000):
+            response = client.get(
+                '/api/v1/user/profile/',
+                HTTP_AUTHORIZATION=f'Bearer {token}',
+            )
+        self.assertEqual(response.status_code, 200, response.json())
+        self.assertEqual(response.json()['id'], user.id)
+
+        # Check claims
+        claims = jwt.decode(
+            token,
+            key=oauth2_server_jwk_set,
+        )
+        self.assertDictEqual(claims, {
+            'jti': claims['jti'],
+            'session_key': claims['session_key'],
+            'iss': 'https://test_proj.vst',
+            'exp': 1060,
+            'client_id': 'simple-client-id',
+            'iat': 1000,
+            'scope': None,
+            'sub': f'{user.id}',
+            'aud':'simple-client-id',
+            'sup': False,
+        })
+
+        # Check token after expiration
+        with self.patch('time.time', return_value=1061):
+            response = client.get(
+                '/api/v1/user/profile/',
+                HTTP_AUTHORIZATION=f'Bearer {token}',
+            )
+        self.assertEqual(response.status_code, 401, response.json())
+        self.assertDictEqual(response.json(), {
+            'error': 'invalid_token',
+            'error_description': 'The access token provided is expired, revoked, malformed, or invalid for other reasons.',
+        })
+        self.assertDictEqual(dict(response.headers), {
+            **response.headers,
+            'Content-Type': 'application/json; charset=utf-8',
+            'WWW-Authenticate': 'Bearer extra_attributes="{}", error="invalid_token", error_description="The access token provided is expired, revoked, malformed, or invalid for other reasons."',
+        })
+
+    def test_access_token_json(self):
+        def prepare_data(data: dict):
+            return {
+                'content_type': 'application/json',
+                'data': data,
+            }
+
+        self.access_token_tester(prepare_data)
+
+    def test_access_token_urlencoded(self):
+        def prepare_data(data: dict):
+            return {
+                'content_type': 'application/x-www-form-urlencoded',
+                'data': urlencode(data),
+            }
+        self.access_token_tester(prepare_data)
+
+
+    def test_login_with_second_factor(self):
+        user = self._create_user(is_super_user=False, is_staff=False)
+        TwoFactor.objects.create(user=user, secret='ABCDE')
+        auth_data = {
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'grant_type': 'password',
+            'username': user.username,
+            'password': user.data['password'],
+        }
+
+        # Missing second factor
+        response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data=auth_data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {
+            'error': 'invalid_request',
+            'error_description': 'Missing or invalid "second_factor" in request.',
+            'second_factor_missing_or_invalid': True,
+        })
+
+        # Invalid second factor
+        with self.patch('pyotp.TOTP.verify', return_value=False):
+            response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+                **auth_data,
+                'second_factor': 123456,
+            })
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {
+            'error': 'invalid_request',
+            'error_description': 'Missing or invalid "second_factor" in request.',
+            'second_factor_missing_or_invalid': True,
+        })
+
+        # Valid second factor
+        with self.patch('pyotp.TOTP.verify', return_value=True):
+            response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+                **auth_data,
+                'second_factor': 123456,
+            })
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_refresh_token_revocation(self):
+        user = self._create_user(is_super_user=False, is_staff=False)
+
+        # Create refresh_token
+        response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'grant_type': 'password',
+            'username': user.username,
+            'password': user.data['password'],
+        })
+        refresh_token = response.json()['refresh_token']
+        self.assertTrue(refresh_token)
+
+        # Revoke refresh_token
+        response = self.client_class().post('/api/oauth2/revoke/', content_type='application/json', data={
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'token': refresh_token,
+        })
+        self.assertEqual(response.status_code, 200)
+
+        # Check refresh token
+        response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+            'grant_type': 'refresh_token',
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'refresh_token': refresh_token,
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 400, data)
+        self.assertDictEqual(data, {
+            'error': 'invalid_request',
+            'error_description': 'There is no "user" for this token.'},
+        )
+
+        # Invocation endpoint must return 200 for unknown token
+        response = self.client_class().post('/api/oauth2/revoke/', content_type='application/json', data={
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'token': 'unknown',
+        })
+        self.assertEqual(response.status_code, 200)
+
+    def test_refresh_token(self):
+        def refresh_token_tester(username: str, password: str, anon = False):
+            # Create refresh_token
+            response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+                'client_id': 'simple-client-id',
+                'client_secret': 'simple-client-secret',
+                'grant_type': 'password',
+                'username': username,
+                'password': password,
+            })
+            refresh_token = response.json()['refresh_token']
+            self.assertTrue(refresh_token)
+
+            # Refresh token
+            response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+                'grant_type': 'refresh_token',
+                'client_id': 'simple-client-id',
+                'client_secret': 'simple-client-secret',
+                'refresh_token': refresh_token,
+            })
+            data = response.json()
+            self.assertEqual(response.status_code, 200, data)
+
+            # Check new token
+            response = self.client_class().get(
+                '/api/oauth2/userinfo/',
+                HTTP_AUTHORIZATION=f'Bearer {data["access_token"]}',
+            )
+            self.assertEqual(response.status_code, 200)
+            if anon:
+                self.assertEqual(response.json()['anon'], True)
+            else:
+                self.assertEqual(response.json()['preferred_username'], username)
+
+            # Check invalid refresh token
+            response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+                'grant_type': 'refresh_token',
+                'client_id': 'simple-client-id',
+                'client_secret': 'simple-client-secret',
+                'refresh_token': 'invalid',
+            })
+            data = response.json()
+            self.assertEqual(response.status_code, 400, data)
+            self.assertDictEqual(data, {
+                'error': 'invalid_grant',
+            })
+
+        user = self._create_user(is_super_user=False, is_staff=False)
+        with self.subTest('Not anonyuous user'):
+            refresh_token_tester(
+                username=user.username,
+                password=user.data['password'],
+            )
+
+        with self.subTest('Anonyuous user'):
+            refresh_token_tester(
+                username='',
+                password='',
+                anon=True,
+            )
+
+    def test_session(self):
+        def session_tester(username: str, password: str):
+            user = self._create_user(is_super_user=False, is_staff=False)
+            auth_data = {
+                'client_id': 'simple-client-id',
+                'client_secret': 'simple-client-secret',
+                'grant_type': 'password',
+                'username': user.username,
+                'password': user.data['password'],
+            }
+
+            # Login
+            token1 = self.client_class() \
+                .post('/api/oauth2/token/', content_type='application/json', data=auth_data).json()['access_token']
+            token2 = self.client_class() \
+                .post('/api/oauth2/token/', content_type='application/json', data=auth_data).json()['access_token']
+
+            # Check value on token1
+            response = self.client_class().get('/api/v1/oauth2_tests/counter/', HTTP_AUTHORIZATION=f'Bearer {token1}')
+            self.assertEqual(response.json(), {'value': 0})
+
+            # Increment value in token1
+            response = self.client_class().post('/api/v1/oauth2_tests/counter/', HTTP_AUTHORIZATION=f'Bearer {token1}')
+
+            # Check incremented value in token1
+            response = self.client_class().get('/api/v1/oauth2_tests/counter/', HTTP_AUTHORIZATION=f'Bearer {token1}')
+            self.assertEqual(response.json(), {'value': 1})
+
+            # Check value in token2
+            response = self.client_class().get('/api/v1/oauth2_tests/counter/', HTTP_AUTHORIZATION=f'Bearer {token2}')
+            self.assertEqual(response.json(), {'value': 0})
+
+        # User
+        user = self._create_user(is_super_user=False, is_staff=False)
+        with self.subTest('Logged in user'):
+            session_tester(user.username, user.data['password'])
+
+        # Anonymous user
+        with self.subTest('Anonymous user'):
+            session_tester('', '')
+
+        # Disabled session middleware
+        user = self._create_user(is_super_user=False, is_staff=False)
+        with self.subTest('Logged in user without session miffleware'):
+            with override_settings(
+                MIDDLEWARE=[
+                    middleware
+                    for middleware in settings.MIDDLEWARE
+                    if middleware not in {
+                        'django.contrib.sessions.middleware.SessionMiddleware',
+                        'django.contrib.auth.middleware.AuthenticationMiddleware',
+                        'django.contrib.messages.middleware.MessageMiddleware',
+                    }
+                ]
+            ):
+                session_tester(user.username, user.data['password'])
+
+    def test_anon_user_login(self):
+        # Obtain token
+        response = self.client_class().post(
+            '/api/oauth2/token/',
+            content_type='application/json',
+            data={
+                'client_id': 'simple-client-id',
+                'client_secret': 'simple-client-secret',
+                'grant_type': 'password',
+                'username': '',
+                'password': '',
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        access_token = response.json()['access_token']
+
+        # Assert claims
+        access_token_jwt = jwt.decode(
+            access_token,
+            oauth2_server_jwk_set,
+        )
+        self.maxDiff = None
+        self.assertDictEqual(access_token_jwt, {
+            'exp': access_token_jwt['exp'],
+            'iat': access_token_jwt['iat'],
+            'session_key': access_token_jwt['session_key'],
+            'sub': access_token_jwt['sub'],
+            'jti': access_token_jwt['jti'],
+            'anon': True,
+            'aud': 'simple-client-id',
+            'client_id': 'simple-client-id',
+            'iss': 'https://test_proj.vst',
+            'scope': None,
+            'sup': False
+        })
+
+        # Test token introspection endpoint
+        response = self.client_class().post(
+            '/api/oauth2/introspect/',
+            content_type='application/json',
+            data={
+                'client_id': 'simple-client-id',
+                'client_secret': 'simple-client-secret',
+                'token': access_token,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
+            'active': True,
+            'sub': access_token_jwt['sub'],
+        })
+
+        # Test user info endpoint
+        response = self.client_class().get(
+            '/api/oauth2/userinfo/',
+            headers={'Authorization': f'Bearer {access_token}'},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), {
+            "sub": access_token_jwt['sub'],
+            "anon": True,
+        })
+
+    def test_schema(self):
+        response = self.client_class().get(
+            '/api/oauth2/_openapi/',
+            headers={'Accept': 'application/json'},
+        )
+        self.assertEqual(response.status_code, 200)
+        schema = response.json()
+
+        self.assertDictEqual(schema['securityDefinitions']['oauth2'], {
+            'type': 'oauth2',
+            'flow': 'password',
+            'tokenUrl': 'http://testserver/api/oauth2/token/',
+            'scopes': {},
+        })
+
+        self.assertDictEqual(schema['paths']['/userinfo/'], {
+            "get": {
+                "consumes": ["application/json"],
+                "description": "",
+                "operationId": "userinfo",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "User info",
+                        "schema": {
+                            "properties": {
+                                "email": {"type": "string"},
+                                "family_name": {"type": "string"},
+                                "given_name": {"type": "string"},
+                                "name": {"type": "string"},
+                                "preferred_username": {"type": "string"},
+                                "sub": {"type": "string"},
+                                "anon": {"type": "boolean"},
+                            },
+                            "required": ["sub"],
+                            "type": "object",
+                        },
+                    }
+                },
+                "tags": ["userinfo"],
+                "x-list": True,
+            },
+            "parameters": [],
+        })
+
+        self.assertDictEqual(schema['paths']['/token/'], {
+            "parameters": [],
+            "post": {
+                "consumes": ["application/json"],
+                "description": "",
+                "operationId": "get_token",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "data",
+                        "required": True,
+                        "schema": {
+                            "properties": {
+                                "client_id": {"type": "string"},
+                                "client_secret": {"type": "string"},
+                                "grant_type": {"enum": ["password"], "type": "string"},
+                                "password": {"type": "string"},
+                                "second_factor": {"type": "string"},
+                                "username": {"type": "string"},
+                            },
+                            "required": [
+                                "grant_type",
+                                "username",
+                                "password",
+                            ],
+                            "type": "object",
+                        },
+                    }
+                ],
+                "responses": {
+                    "200": {"description": "Token response"},
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "additionalProperties": True,
+                            "properties": {
+                                "error": {"type": "string"},
+                                "error_description": {"type": "string"},
+                                "second_factor_missing_or_invalid": {"type": "boolean"},
+                            },
+                            "required": ["error"],
+                            "type": "object",
+                        },
+                    },
+                },
+                "tags": ["token"],
+            },
+        })
+
+        self.assertDictEqual(schema['paths']['/introspect/'], {
+            "parameters": [],
+            "post": {
+                "consumes": ["application/json"],
+                "description": "",
+                "operationId": "token_introspection",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "data",
+                        "required": True,
+                        "schema": {
+                            "properties": {
+                                "token": {"type": "string"},
+                                "token_type_hint": {"type": "string"},
+                            },
+                            "required": ["token"],
+                            "type": "object",
+                        },
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token introspection",
+                        "schema": {
+                            "properties": {
+                                "active": {"type": "boolean"},
+                                "aud": {"type": "string"},
+                                "client_id": {"type": "string"},
+                                "exp": {"type": "integer"},
+                                "iat": {"type": "integer"},
+                                "iss": {"type": "string"},
+                                "jti": {"type": "string"},
+                                "nbf": {"type": "integer"},
+                                "scope": {"type": "string"},
+                                "sub": {"type": "string"},
+                                "token_type": {"type": "string"},
+                                "username": {"type": "string"},
+                            },
+                            "required": ["active"],
+                            "type": "object",
+                        },
+                    }
+                },
+                "tags": ["introspect"],
+            },
+        })
+
+        self.assertDictEqual(schema['paths']['/revoke/'], {
+            "parameters": [],
+            "post": {
+                "consumes": ["application/json"],
+                "description": "",
+                "operationId": "revoke_token",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "data",
+                        "required": True,
+                        "schema": {
+                            "properties": {
+                                "token": {"type": "string"},
+                                "token_type_hint": {"type": "string"},
+                            },
+                            "required": ["token"],
+                            "type": "object",
+                        },
+                    }
+                ],
+                "responses": {"200": {"description": "Token revoked"}},
+                "tags": ["revoke"],
+            },
+        })
+
+    def test_metadata_endpoints(self):
+        client = self.api_test_client
+
+        response = client.get('/.well-known/oauth-authorization-server')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertDictEqual(response.json(), {
+            'issuer': 'https://vstutilstestserver',
+            'response_types_supported': ['token', 'code'],
+            'grant_types_supported': ['password', 'authorization_code'],
+            'authorization_endpoint': 'https://some-server/auth',
+            'token_endpoint': 'https://vstutilstestserver/api/oauth2/token/',
+            'revocation_endpoint': 'https://vstutilstestserver/api/oauth2/revoke/',
+            'introspection_endpoint': 'https://vstutilstestserver/api/oauth2/introspect/',
+        })
+
+        response = client.get('/.well-known/openid-configuration')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertDictEqual(response.json(), {
+            'issuer': 'https://vstutilstestserver',
+            'response_types_supported': ['token', 'code'],
+            'grant_types_supported': ['password', 'authorization_code'],
+            'authorization_endpoint': 'https://some-server/auth',
+            'token_endpoint': 'https://vstutilstestserver/api/oauth2/token/',
+            'revocation_endpoint': 'https://vstutilstestserver/api/oauth2/revoke/',
+            'introspection_endpoint': 'https://vstutilstestserver/api/oauth2/introspect/',
+            'userinfo_endpoint': 'https://vstutilstestserver/api/oauth2/userinfo/',
+        })
+
+    def test_userinfo(self):
+        user = self._create_user(
+            is_super_user=False,
+            is_staff=False,
+            first_name='Jane',
+            last_name='Doe',
+            email='janedoe@example.com',
+            username='j.doe'
+        )
+        token = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'grant_type': 'password',
+            'username': user.username,
+            'password': user.data['password'],
+        }).json()['access_token']
+
+        response = self.client_class().get('/api/oauth2/userinfo/', HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/json; charset=utf-8')
+        self.assertDictEqual(response.json(), {
+            "sub": f"{user.id}",
+            "name": "Jane Doe",
+            "given_name": "Jane",
+            "family_name": "Doe",
+            "preferred_username": "j.doe",
+            "email": "janedoe@example.com",
+        })
+
+    def test_auth_with_scope(self):
+        user = self._create_user(is_super_user=False, is_staff=False,)
+        response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'grant_type': 'password',
+            'username': user.username,
+            'password': user.data['password'],
+            'scope': 'openid'
+        })
+        self.assertEqual(response.status_code, 200)
+        access_token_jwt = jwt.decode(
+            response.json()['access_token'],
+            oauth2_server_jwk_set,
+        )
+        self.assertEqual(access_token_jwt['scope'], 'openid')
+
+    def test_token_introspection_endpoint(self):
+        # Check invalid token
+        response = self.client_class().post('/api/oauth2/introspect/', content_type='application/json', data={
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'token': 'abc',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
+            'active': False,
+        })
+
+        # Check valid token
+        user = self._create_user(is_super_user=False, is_staff=False,)
+        response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'grant_type': 'password',
+            'username': user.username,
+            'password': user.data['password'],
+        })
+        self.assertEqual(response.status_code, 200)
+        access_token = response.json()['access_token']
+
+        response = self.client_class().post('/api/oauth2/introspect/', content_type='application/json', data={
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'token': access_token,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
+            'active': True,
+            'sub': str(user.id),
+        })
+
+    def test_schema_security_definition(self):
+        request = Mock()
+        request.build_absolute_uri = lambda path: f'https://test_proj.vst{path}'
+
+        with override_settings(OAUTH_SERVER_URL='https://some.auth', OAUTH_SERVER_TOKEN_ENDPOINT_PATH='/token'):
+            self.assertDictEqual(
+                get_oauth2_security_definition(request),
+                {
+                    'flow': 'password',
+                    'scopes': {},
+                    'tokenUrl': 'https://some.auth/token',
+                    'type': 'oauth2',
+                },
+            )
+
+        with override_settings(OAUTH_SERVER_URL='https://some-vstutils.auth'):
+            self.assertDictEqual(
+                get_oauth2_security_definition(request),
+                {
+                    'flow': 'password',
+                    'scopes': {},
+                    'tokenUrl': 'https://some-vstutils.auth/api/oauth2/token/',
+                    'type': 'oauth2',
+                },
+            )
+
+        self.assertDictEqual(
+            get_oauth2_security_definition(request),
+            {
+                'flow': 'password',
+                'scopes': {},
+                'tokenUrl': 'https://test_proj.vst/api/oauth2/token/',
+                'type': 'oauth2',
+            },
+        )
+
+        with override_settings(OAUTH_SERVER_SCHEMA_CLIENT_ID='some-client'):
+            self.assertEqual(
+                get_oauth2_security_definition(request)['x-clientId'],
+                'some-client',
+            )
+
+    def test_bulk_request_with_invalid_token(self):
+        response = self.client_class().put(
+            '/api/endpoint/',
+            HTTP_AUTHORIZATION='Bearer invalid_token',
+            content_type='application/json',
+            data=[{'method': 'get', 'path': ['user', 'profile']}],
+        )
+        self.assertEqual(response.status_code, 401)
+        self.assertDictEqual(response.json(), {
+            'error': 'invalid_token',
+            'error_description': 'The access token provided is expired, revoked, malformed, or invalid for other reasons.',
+        })
+
+    @patch('ldap.initialize')
+    @override_settings(LDAP_SERVER='https://ldap.server', LDAP_DOMAIN='ldap.domain')
+    def test_ldap_auth(self, ldap_obj):
+        user = self._create_user(is_super_user=False, is_staff=False, username='ldap_user')
+        user.set_unusable_password()
+        user.save()
+
+        response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'grant_type': 'password',
+            'username': 'ldap_user',
+            'password': 'some_password',
+        }, HTTP_X_AUTH_PLUGIN='LDAP')
+        self.assertEqual(response.status_code, 200)
+        token = response.json()['access_token']
+
+        response = self.client_class().get('/api/v1/user/profile/', HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['id'], user.id)
+
+    def test_same_origin_client_auth(self):
+        user = self._create_user(is_super_user=False, is_staff=False)
+        response = self.client_class().post(
+            '/api/oauth2/token/',
+            content_type='application/json',
+            data={
+                'client_id': 'spa',
+                'client_secret': 'spa',
+                'grant_type': 'password',
+                'username': user.username,
+                'password': user.data['password'],
+            },
+            headers={'Sec-Fetch-Site': 'same-origin'},
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_authorization_in_vary(self):
+        user = self._create_user(is_super_user=False, is_staff=False)
+        token = self.client_class().post(
+            '/api/oauth2/token/',
+            content_type='application/json',
+            data={
+                'client_id': 'simple-client-id',
+                'client_secret': 'simple-client-secret',
+                'grant_type': 'password',
+                'username': user.username,
+                'password': user.data['password'],
+            },
+        ).json()['access_token']
+
+        response = self.client_class().get(
+            '/api/v1/user/profile/',
+            headers={'authorization': f'Bearer {token}'},
+        )
+        self.assertIn('authorization', response.headers.get('Vary').lower())
+
+    def test_authorization_code_grant_with_pkce(self):
+        user = self._create_user(is_super_user=False, is_staff=False)
+
+        # Invalid client
+        response = authorization_server.create_authorization_response(
+            OAuth2Request(
+                method='GET',
+                uri='https://some-server/auth?' + urlencode({
+                    'client_id': 'other-app',
+                    'redirect_uri': 'https://some-app.com/auth-callback',
+                    'response_type': 'code',
+                    'scope': 'openid',
+                    'state': 'some_state',
+                    'code_challenge': '0f21GTan3vsWzslXdPT7-0lyu_bx3MW-19TvjASR2AA',
+                    'code_challenge_method': 'S256',
+                }),
+            ),
+            grant_user=UserWrapper(user),
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(
+            json.loads(response.content),
+            {
+                "error": "invalid_client",
+                "state": "some_state",
+            }
+        )
+
+        # Invalid redirect uri
+        response = authorization_server.create_authorization_response(
+            OAuth2Request(
+                method='GET',
+                uri='https://some-server/auth?' + urlencode({
+                    'client_id': 'some-app',
+                    'redirect_uri': 'https://other-app.com/auth-callback',
+                    'response_type': 'code',
+                    'scope': 'openid',
+                    'state': 'some_state',
+                    'code_challenge': '0f21GTan3vsWzslXdPT7-0lyu_bx3MW-19TvjASR2AA',
+                    'code_challenge_method': 'S256',
+                }),
+            ),
+            grant_user=UserWrapper(user),
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(
+            json.loads(response.content),
+            {
+                "error": "invalid_request",
+                "error_description": "Redirect URI https://other-app.com/auth-callback is not supported by client.",
+                "state": "some_state",
+            }
+        )
+
+        # Missing redirect uri
+        response = authorization_server.create_authorization_response(
+            OAuth2Request(
+                method='GET',
+                uri='https://some-server/auth?' + urlencode({
+                    'client_id': 'some-app',
+                    'response_type': 'code',
+                    'scope': 'openid',
+                    'state': 'some_state',
+                    'code_challenge': '0f21GTan3vsWzslXdPT7-0lyu_bx3MW-19TvjASR2AA',
+                    'code_challenge_method': 'S256',
+                }),
+            ),
+            grant_user=UserWrapper(user),
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(
+            json.loads(response.content),
+            {
+                "error": "invalid_request",
+                "error_description": 'Missing "redirect_uri" in request.',
+                "state": "some_state",
+            }
+        )
+
+        # Missing auth backend path
+        with self.assertRaisesMessage(ValueError, 'Property "backend" is missing on user instance'):
+            response = authorization_server.create_authorization_response(
+                OAuth2Request(
+                    method='GET',
+                    uri='https://some-server/auth?' + urlencode({
+                        'client_id': 'some-app',
+                        'redirect_uri': 'https://some-app.com/auth-callback',
+                        'response_type': 'code',
+                        'scope': 'openid',
+                        'state': 'some_state',
+                        'code_challenge': '0f21GTan3vsWzslXdPT7-0lyu_bx3MW-19TvjASR2AA',
+                        'code_challenge_method': 'S256',
+                    }),
+                ),
+                grant_user=UserWrapper(user),
+            )
+
+        # Valid request
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        response = authorization_server.create_authorization_response(
+            OAuth2Request(
+                method='GET',
+                uri='https://some-server/auth?' + urlencode({
+                    'client_id': 'some-app',
+                    'redirect_uri': 'https://some-app.com/auth-callback',
+                    'response_type': 'code',
+                    'scope': 'openid',
+                    'state': 'some_state',
+                    'code_challenge': '0f21GTan3vsWzslXdPT7-0lyu_bx3MW-19TvjASR2AA',
+                    'code_challenge_method': 'S256',
+                }),
+            ),
+            grant_user=UserWrapper(user),
+        )
+        self.assertEqual(response.status_code, 302)
+        redirect = urlparse(response.headers['Location'])
+        self.assertEqual(redirect.scheme, 'https')
+        self.assertEqual(redirect.netloc, 'some-app.com')
+        self.assertEqual(redirect.path, '/auth-callback')
+        query = parse_qs(redirect.query)
+        self.assertEqual(query['state'], ['some_state'])
+        self.assertIn('code', query)
+
+        # Try exchange code for token with missing code_verifier
+        response = self.client_class().post(
+            '/api/oauth2/token/',
+            content_type='application/json',
+            data={
+                'client_id': 'some-app',
+                'grant_type': 'authorization_code',
+                'code': query['code'][0],
+                'redirect_uri': 'https://some-app.com/auth-callback',
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(
+            response.json(),
+            {'error': 'invalid_request', 'error_description': 'Missing "code_verifier"'},
+        )
+
+        # Exchange code for token
+        response = self.client_class().post(
+            '/api/oauth2/token/',
+            content_type='application/json',
+            data={
+                'client_id': 'some-app',
+                'grant_type': 'authorization_code',
+                'code': query['code'][0],
+                'redirect_uri': 'https://some-app.com/auth-callback',
+                'code_verifier': '0efce59c515c441290b0a36881664a8fc2e22a2923c04c54a4bc2b1e7794dbba7a25d0c8e0d24d30bdf7179af0d8213c',
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertSetEqual(
+            set(response.json().keys()),
+            {'access_token', 'expires_in', 'scope', 'id_token', 'token_type'},
+        )
+
+        # Try use same code second time
+        response = self.client_class().post(
+            '/api/oauth2/token/',
+            content_type='application/json',
+            data={
+                'client_id': 'some-app',
+                'grant_type': 'authorization_code',
+                'code': query['code'][0],
+                'redirect_uri': 'https://some-app.com/auth-callback',
+                'code_verifier': '0efce59c515c441290b0a36881664a8fc2e22a2923c04c54a4bc2b1e7794dbba7a25d0c8e0d24d30bdf7179af0d8213c',
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(
+            response.json(),
+            {'error': 'invalid_grant', 'error_description': 'Invalid "code" in request.'},
+        )
+
+    def test_bulk_request_will_not_revoke_token(self):
+        user = self._create_user(is_super_user=False, is_staff=False,)
+        response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
+            'client_id': 'simple-client-id',
+            'client_secret': 'simple-client-secret',
+            'grant_type': 'password',
+            'username': user.username,
+            'password': user.data['password'],
+        })
+        self.assertEqual(response.status_code, 200)
+        access_token = response.json()['access_token']
+
+        # Make bulk request
+        response = self.client_class().put(
+            '/api/endpoint/',
+            content_type='application/json',
+            headers={'authorization': f'Bearer {access_token}'},
+            data=[
+                {'method': 'get', 'path': ['user', 'profile']},
+            ],
+        )
+        self.assertEqual(response.json()[0]['status'], 200)
+
+        # Check token is still valid
+        response = self.client_class().get(
+            '/api/v1/user/profile/',
+            headers={'authorization': f'Bearer {access_token}'},
+        )
+        self.assertEqual(response.status_code, 200)

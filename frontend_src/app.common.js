@@ -11,11 +11,14 @@ window.SELECT2_THEME = 'bootstrap-5';
 
 import 'jquery.scrollto';
 
-require('jquery-slimscroll');
+import 'jquery-slimscroll';
 
-require('jquery-touchswipe/jquery.touchSwipe.js');
+import 'jquery-touchswipe/jquery.touchSwipe.js';
 
 import './libs/vue.js';
+
+import { register } from 'swiper/element/bundle';
+register();
 
 import moment from 'moment-timezone';
 window.moment = moment;
@@ -35,7 +38,7 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.css';
 window.iziToast = iziToast;
 
-import autoComplete from 'JavaScript-autoComplete/auto-complete';
+import autoComplete from '@/libs/auto-complete.js';
 window.autoComplete = autoComplete;
 
 import './libs/bootstrap-adminlte.js';
@@ -64,7 +67,7 @@ import * as users from './vstutils/users';
 import './vstutils/local-settings';
 
 export * from './vstutils/ComponentsRegistrator.js';
-export * from './vstutils/AppConfiguration.ts';
+export * from './vstutils/schema';
 export * from '@/cache';
 export { i18n } from './vstutils/translation';
 
@@ -84,6 +87,8 @@ export {
     api,
     users,
 };
+
+export const getApp = utils.getApp;
 
 // vstutils styles
 import './gui.css';

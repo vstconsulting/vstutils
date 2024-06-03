@@ -1,4 +1,3 @@
-import { expect, test } from '@jest/globals';
 import { makeModel, BaseModel } from '@/vstutils/models';
 import { StringField } from '@/vstutils/fields/text';
 import { IntegerField } from '@/vstutils/fields/numbers/integer';

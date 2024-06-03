@@ -2,7 +2,7 @@ import type { APIResponse } from '../api';
 import type { Field } from '../fields/base';
 import type { QuerySet } from '../querySet';
 import type { HttpMethod, InnerData, RepresentData } from '@/vstutils/utils';
-import type { MODEL_MODES } from '@/vstutils/AppConfiguration';
+import type { MODEL_MODES } from '@/vstutils/schema';
 import {
     deepEqual,
     escapeHtml,

@@ -4,7 +4,7 @@ import RelatedListFieldListView from './RelatedListFieldListView.vue';
 import RelatedListFieldReadonlyView from './RelatedListFieldReadonlyView.vue';
 
 import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
-import type { ModelDefinition } from '@/vstutils/AppConfiguration';
+import type { ModelDefinition } from '@/vstutils/schema';
 import type { ModelConstructor } from '@/vstutils/models';
 import type { InnerData } from '@/vstutils/utils';
 

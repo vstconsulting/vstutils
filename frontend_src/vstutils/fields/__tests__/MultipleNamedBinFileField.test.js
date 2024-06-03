@@ -1,4 +1,3 @@
-import { expect, test, describe } from '@jest/globals';
 import MultipleNamedBinFileField from '../files/multiple-named-binary-file/MultipleNamedBinaryFileField';
 
 describe('MultipleNamedBinFileField', () => {

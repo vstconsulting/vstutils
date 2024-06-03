@@ -110,6 +110,9 @@ API[VST_API_VERSION][r'cacheable'] = dict(
 API[VST_API_VERSION][r'dynamic_fields'] = dict(
     model='test_proj.models.dynamic_fields.DynamicFields'
 )
+API[VST_API_VERSION][r'oauth2_tests'] = dict(
+    view='test_proj.views.TestOauth2ViewSet',
+)
 API['v2']['testbinaryfiles2'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )
@@ -168,6 +171,15 @@ DATABASE_ROUTERS = ['test_proj.db_router.TestDbRouter']
 DOCKER_DATABASES_TO_MIGRATE = ('primary1',)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.BasicAuthentication',)
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += (
+    'rest_framework.authentication.BasicAuthentication',
+)
 
 WEBPUSH_USER_SETTINGS_VIEW_SUBPATH = 'custom_path'
+
+OAUTH_SERVER_CLIENTS['some-app'] = {
+    'allowed_grant_types': ['authorization_code'],
+    'token_endpoint_auth_methods': ['none'],
+    'allowed_redirect_uris': 'https://some-app.com/auth-callback',
+    'allowed_response_types': ['code'],
+}

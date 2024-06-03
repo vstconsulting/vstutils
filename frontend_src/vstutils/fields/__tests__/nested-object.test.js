@@ -1,5 +1,4 @@
-import { expect, test, describe, beforeAll } from '@jest/globals';
-import { createApp } from '../../../unittests/create-app.js';
+import { createApp } from '../../../unittests/create-app.ts';
 
 describe('NestedObject field', () => {
     let app;

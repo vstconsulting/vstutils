@@ -13,6 +13,11 @@ def is_openapi_request(request):
     )
 
 
+class IsOpenApiRequest(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return is_openapi_request(request)
+
+
 class IsAuthenticatedOpenApiRequest(permissions.IsAuthenticated):
     def has_permission(self, request, view):
         return is_openapi_request(request) or super().has_permission(request, view)

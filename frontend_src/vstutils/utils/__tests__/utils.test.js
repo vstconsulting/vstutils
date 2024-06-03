@@ -1,4 +1,3 @@
-import { jest, expect, test, describe, beforeAll } from '@jest/globals';
 import {
     capitalize,
     chunkArray,
@@ -167,12 +166,12 @@ describe('utils', () => {
     });
 
     test('randomSleep', async () => {
-        jest.useFakeTimers();
-        const callback = jest.fn();
+        vitest.useFakeTimers();
+        const callback = vitest.fn();
         const promise = randomSleep(500, 600).then(callback);
-        jest.advanceTimersByTime(499);
+        vitest.advanceTimersByTime(499);
         expect(callback).not.toBeCalled();
-        jest.advanceTimersByTime(600);
+        vitest.advanceTimersByTime(600);
         await promise;
         expect(callback).toBeCalledTimes(1);
     });

@@ -1,6 +1,6 @@
-import type { Vue } from 'vue/types/vue';
 import type { ComponentOptions } from 'vue';
 import type VueRouter from 'vue-router';
+import Vue from 'vue';
 
 import Centrifuge from 'centrifuge';
 import { defineStore } from 'pinia';
@@ -11,7 +11,7 @@ import type { ApiConnector } from '@/vstutils/api';
 import { apiConnector } from '@/vstutils/api';
 import type { Language } from '@/vstutils/api/TranslationsManager';
 import { TranslationsManager } from '@/vstutils/api/TranslationsManager';
-import type { AppConfiguration } from '@/vstutils/AppConfiguration';
+import type { AppSchema } from '@/vstutils/schema';
 import AppRoot from '@/vstutils/AppRoot.vue';
 import { AutoUpdateController } from '@/vstutils/autoupdate';
 import type { ComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
@@ -37,6 +37,7 @@ import type { IView, BaseView } from '@/vstutils/views';
 import { ListView, PageNewView, PageView, ViewsTree } from '@/vstutils/views';
 import ViewConstructor from '@/vstutils/views/ViewConstructor.js';
 import { setupPushNotifications } from '@/vstutils/webpush';
+import { type InitAppConfig } from '@/vstutils/init-app';
 
 import type { Cache } from '@/cache';
 import type { InnerData } from '@/vstutils/utils';
@@ -56,11 +57,13 @@ export function getCentrifugoClient(address?: string, token?: string) {
 type TAppRoot = InstanceType<typeof AppRoot>;
 
 export interface IApp {
-    config: AppConfiguration;
+    config: InitAppConfig;
     vue: typeof Vue;
     cache: Cache;
-
-    schema: AppConfiguration['schema'];
+    version: string;
+    defaultPageLimit: number;
+    schema: AppSchema;
+    projectName: string;
 
     fieldsResolver: FieldsResolver;
     modelsResolver: ModelsResolver;
@@ -98,12 +101,14 @@ export interface IApp {
 
     darkModeEnabled: boolean;
 
-    start(): void;
+    start(): Promise<void>;
     mount(target: HTMLElement | string): void;
 
     initActionConfirmationModal(options: { title: string }): Promise<void>;
     openReloadPageModal(): void;
     setLanguage(lang: string): void;
+
+    _mounted?: InstanceType<typeof Vue>;
 }
 
 export interface IAppInitialized extends IApp {
@@ -117,12 +122,20 @@ export interface IAppInitialized extends IApp {
     store: GlobalStoreInitialized;
 }
 
+interface AppParams {
+    config: InitAppConfig;
+    schema: AppSchema;
+    vue?: typeof Vue;
+}
+
 export class App implements IApp {
-    config: AppConfiguration;
+    config: InitAppConfig;
     vue: typeof Vue;
     cache: Cache;
-
-    schema: AppConfiguration['schema'];
+    version: string;
+    defaultPageLimit: number;
+    schema: AppSchema;
+    projectName: string;
 
     fieldsResolver: FieldsResolver;
     modelsResolver: ModelsResolver;
@@ -159,23 +172,27 @@ export class App implements IApp {
 
     rootVm: TAppRoot | null = null;
     application: unknown | null = null;
+    _mounted?: InstanceType<typeof Vue>;
 
-    constructor(config: AppConfiguration, cache: Cache, vue?: typeof Vue) {
+    constructor({ config, schema, vue }: AppParams) {
         globalThis.__currentApp = this;
         this.config = config;
 
-        this.vue = vue ?? globalThis.Vue;
-        this.schema = config.schema;
+        this.vue = vue ?? Vue;
+        this.schema = schema;
         this.router = null;
-        this.cache = cache;
+        this.cache = config.cache;
         this.i18n = i18n;
+        this.version = this.schema.info['x-versions'].application;
+        this.defaultPageLimit = this.schema.info['x-page-limit'] ?? 20;
+        this.projectName = this.schema.info.title;
 
         /**
          * Object, that manages connection with API (sends API requests).
          */
-        this.api = apiConnector.initConfiguration(config);
+        this.api = apiConnector.initConfiguration(this);
 
-        this.translationsManager = new TranslationsManager(apiConnector, cache);
+        this.translationsManager = new TranslationsManager(config);
 
         this.centrifugoClient = getCentrifugoClient(
             this.schema.info['x-centrifugo-address'],
@@ -206,9 +223,9 @@ export class App implements IApp {
         this.appRootComponent = AppRoot as unknown as ComponentOptions<Vue>;
         this.additionalRootMixins = [];
 
-        this.fieldsResolver = new FieldsResolver(this.config.schema);
+        this.fieldsResolver = new FieldsResolver(this.schema);
         addDefaultFields(this.fieldsResolver);
-        this.modelsResolver = new ModelsResolver(this.fieldsResolver, this.config.schema);
+        this.modelsResolver = new ModelsResolver(this.fieldsResolver, this.schema);
 
         /** @type {QuerySetsResolver} */
         this.qsResolver = null;
@@ -226,10 +243,20 @@ export class App implements IApp {
 
         setupPushNotifications(this);
 
+        config.auth.userManager.startSilentRenew();
+        config.auth.userManager.events.addSilentRenewError((e) => {
+            if ('error' in e && e.error === 'invalid_request') {
+                window.location.reload();
+                return;
+            }
+            console.log('Silent renew error', e);
+        });
+
         signals.emit(APP_CREATED, this);
     }
 
     async start() {
+        await this.api.initialized();
         if (this.centrifugoClient) {
             this.centrifugoClient.connect();
         }
@@ -277,7 +304,7 @@ export class App implements IApp {
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         this.views = new ViewConstructor(undefined, this.modelsResolver, this.fieldsResolver).generateViews(
-            this.config.schema,
+            this.schema,
         );
 
         this.viewsTree = new ViewsTree(this.views);
@@ -287,7 +314,7 @@ export class App implements IApp {
     }
 
     generateDefinitionsModels() {
-        for (const name of Object.keys(this.config.schema.definitions)) {
+        for (const name of Object.keys(this.schema.definitions)) {
             this.modelsResolver.byReferencePath(`#/definitions/${name}`);
         }
         signals.emit(SCHEMA_MODELS_CREATED, { app: this, models: this.modelsResolver._definitionsModels });
@@ -434,9 +461,9 @@ export class App implements IApp {
         this.rootVm = new Vue({
             mixins: [this.appRootComponent, ...this.additionalRootMixins],
             propsData: {
-                info: this.config.schema.info,
-                x_menu: this.config.schema.info['x-menu'],
-                x_docs: this.config.schema.info['x-docs'],
+                info: this.schema.info,
+                x_menu: this.schema.info['x-menu'],
+                x_docs: this.schema.info['x-docs'],
             },
             pinia,
             router: this.router,
@@ -451,11 +478,12 @@ export class App implements IApp {
         return (this.userSettingsStore?.settings.main?.dark_mode as boolean | undefined) ?? false;
     }
 
-    mount(target: HTMLElement | string = '#RealBody') {
+    mount(target: HTMLElement | string) {
         if (!this.rootVm) {
             throw new Error('Please initialize app first');
         }
-        this.rootVm.$mount(target);
+        // @ts-expect-error Vue 2 types is a mess
+        this._mounted = this.rootVm.$mount(target);
     }
 
     initActionConfirmationModal({ title }: { title: string }): Promise<void> {

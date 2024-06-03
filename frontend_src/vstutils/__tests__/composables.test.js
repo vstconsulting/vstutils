@@ -1,4 +1,3 @@
-import { test, beforeAll, expect, jest } from '@jest/globals';
 import { reactive, computed } from 'vue';
 import { createApp } from '@/unittests';
 import { StringField } from '@/vstutils/fields/text';
@@ -22,7 +21,7 @@ test('useModelFieldsGroups', () => {
 
     const data = { field3: 'some value' };
 
-    Model.fieldsGroups = jest.fn(() => [{ title: 'Some group', fields: ['field2'] }]);
+    Model.fieldsGroups = vitest.fn(() => [{ title: 'Some group', fields: ['field2'] }]);
 
     const filteredGroups = computed(() => getModelFieldsInstancesGroups(Model, data));
 

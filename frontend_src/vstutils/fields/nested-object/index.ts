@@ -16,7 +16,7 @@ import { NestedObjectArrayFieldMixin } from './array';
 
 import type { ModelConstructor } from '@/vstutils/models';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
-import type { ModelDefinition } from '@/vstutils/AppConfiguration';
+import type { ModelDefinition } from '@/vstutils/schema';
 
 type TInner = InnerData;
 type TRepresent = RepresentData;

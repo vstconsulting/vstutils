@@ -1,30 +1,35 @@
 import type { Cache } from '@/cache';
 import type { LocaleMessageObject } from 'vue-i18n';
-import { HttpMethods } from '../utils';
+import { type InitAppConfig } from '@/vstutils/init-app';
 
 export interface Language {
     code: string;
     name: string;
 }
 
-import type { ApiConnector } from './ApiConnector';
-
 /**
  * Class for requesting translations related data
  */
 export class TranslationsManager {
-    api: ApiConnector;
     cache: Cache;
+    config: InitAppConfig;
 
-    constructor(api: ApiConnector, cache: Cache) {
-        this.api = api;
-        this.cache = cache;
+    constructor(config: InitAppConfig) {
+        this.cache = config.cache;
+        this.config = config;
     }
 
-    loadLanguages(): Promise<Language[]> {
-        return this.api
-            .bulkQuery<{ results: Language[] }>({ path: '/_lang/', method: HttpMethods.GET })
-            .then((response) => response.data.results);
+    async loadLanguages(): Promise<Language[]> {
+        const response = await fetch(
+            new Request(new URL(this.config.api.endpointPath, this.config.api.url), {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify([{ method: 'GET', path: ['_lang'] }]),
+            }),
+        );
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const data = (await response.json())[0].data as { results: Language[] };
+        return data.results;
     }
 
     /**
@@ -44,13 +49,17 @@ export class TranslationsManager {
     /**
      * Method, that loads translations for some language from API.
      */
-    loadTranslations(lang: string): Promise<LocaleMessageObject> {
-        return this.api
-            .bulkQuery<{ translations: LocaleMessageObject }>({
-                path: ['_lang', lang],
-                method: HttpMethods.GET,
-            })
-            .then((response) => response.data.translations);
+    async loadTranslations(lang: string): Promise<LocaleMessageObject> {
+        const response = await fetch(
+            new Request(new URL(this.config.api.endpointPath, this.config.api.url), {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify([{ method: 'GET', path: ['_lang', lang] }]),
+            }),
+        );
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const data = (await response.json())[0].data as { translations: LocaleMessageObject };
+        return data.translations;
     }
 
     /**

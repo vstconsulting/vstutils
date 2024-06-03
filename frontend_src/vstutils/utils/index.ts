@@ -3,7 +3,7 @@ import { getApp } from './app-helpers';
 
 import type { ParameterType } from 'swagger-schema-official';
 import type { defineStore } from 'pinia';
-import type { Field } from '../fields/base/';
+import type { Field } from '../fields/base/Field';
 import type { Route, Location } from 'vue-router';
 import type { Model, ModelConstructor } from '@/vstutils/models';
 import type { IView, PageView, Sublink } from '@/vstutils/views';
@@ -486,3 +486,34 @@ export function fitToWrapper({
 
     return { width, height };
 }
+
+export function capitalize(string: string) {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}
+
+export function nameToTitle(name: string) {
+    return String(name)
+        .replace(/_/g, ' ')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+}
+
+export function lower(value: string) {
+    if (!value) {
+        return '';
+    }
+    value = value.toString();
+    return value.toLowerCase();
+}
+
+export function escapeHtml(unsafe: string) {
+    return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+export const OBJECT_NOT_FOUND_TEXT = '[Object not found]';

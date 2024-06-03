@@ -3,6 +3,7 @@ import os
 import posixpath
 import functools
 import time
+from datetime import timedelta
 
 import django
 import aiofiles.os
@@ -19,6 +20,11 @@ from starlette.staticfiles import NotModifiedResponse
 
 from .signals import before_mount_app
 
+
+SPA_STATIC_MAX_AGE = round(
+    timedelta(days=30).total_seconds()
+)
+
 if not apps.apps_ready:
     django.setup(set_prefix=False)  # nocv
 
@@ -26,6 +32,7 @@ static_app = FastAPI(openapi_url=None, docs_url=None, redoc_url=None)
 static_app.add_middleware(GZipMiddleware)
 
 application = FastAPI(openapi_url=None, docs_url=None, redoc_url=None)
+
 application.mount(settings.STATIC_URL, static_app)
 application.add_middleware(
     CORSMiddleware,
@@ -69,6 +76,12 @@ async def static(file_path: str, request: Request = None):
     return response
 
 
+if settings.OAUTH_SERVER_ENABLE:
+    from vstutils.oauth2.endpoints import oauth_authorization_server, openid_configuration
+    application.get('/.well-known/oauth-authorization-server')(oauth_authorization_server)
+    application.get('/.well-known/openid-configuration')(openid_configuration)
+
+
 @application.get('/.well-known/{file_path:path}')
 async def well_known(file_path: str, request: Request):
     return await static(f'.well-known/{file_path}', request)
@@ -89,6 +102,17 @@ async def add_server_timing_header(request: Request, call_next):
     response.headers['Server-Timing'] = f'total;dur={round((time.monotonic()-start_time)*1000, 2)}'
     return response
 
+if not settings.API_ONLY:
+    @application.route("/")
+    async def root(request: Request):
+        return await static('spa/index.html', request)
 
-if not any(m.path == '/' for m in application.routes):
-    application.mount("/", ASGIHandler())
+    @application.get('/spa/{file_path:path}')
+    async def serve_spa(file_path: str, request: Request):
+        response = await static(f'spa/{file_path}', request)
+        if response.status_code == 200:
+            response.headers['Cache-Control'] = f'public, max-age {SPA_STATIC_MAX_AGE}'
+        return response
+
+
+application.mount("/", ASGIHandler())

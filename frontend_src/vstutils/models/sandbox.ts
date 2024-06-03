@@ -219,7 +219,7 @@ export function createModelSandbox(instance: Model) {
         _changedFields.value.clear();
     }
 
-    return markRaw({
+    const sandbox = {
         set,
         setPrefetchedValue,
         reset,
@@ -240,5 +240,7 @@ export function createModelSandbox(instance: Model) {
             // (https://blog.vuejs.org/posts/vue-2-7-naruto)
             return getData();
         },
-    });
+    };
+
+    return markRaw(sandbox) as typeof sandbox;
 }

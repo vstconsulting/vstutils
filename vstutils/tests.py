@@ -13,7 +13,6 @@ from django.apps import apps
 from django.http import StreamingHttpResponse
 from django.db import transaction, models as django_models
 from django.core.exceptions import BadRequest
-from django.urls import reverse
 from django.conf import settings
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
@@ -100,7 +99,9 @@ class BaseTestCase(TestCase):
         return client
 
     def _logout(self, client):
-        self.assertEqual(client.post(self.logout_url).status_code, 302)
+        saved_cookies = client.cookies
+        client.logout()
+        client.cookies = saved_cookies
 
     def _check_update(self, url, data, **fields):
         """
@@ -149,9 +150,6 @@ class BaseTestCase(TestCase):
         }
         self.client = self.client_class(**self.client_kwargs)
         self.user = self._create_user()
-        self.login_url = reverse('login')
-        self.confirmation_redirect_url = self.login_url + '?confirmation=true'
-        self.logout_url = reverse('logout')
         self.last_response = None
 
     def _settings(self, item, default=None):
@@ -162,18 +160,6 @@ class BaseTestCase(TestCase):
         Simple function which returns uuid1 string.
         """
         return str(uuid.uuid1())
-
-    def call_registration(self, data, **kwargs):
-        """
-        Function for calling registration. Just got form data and headers.
-
-        :param data: Registration form data.
-        :type data: dict
-        :param kwargs: named arguments with request headers.
-        """
-
-        client = self.client_class(**self.client_kwargs)
-        return client.post(reverse('user_registration'), data=data, **kwargs)
 
     def get_url(self, *items) -> _t.Text:
         """
@@ -451,6 +437,7 @@ class BaseTestCase(TestCase):
             f'/{self._settings("VST_API_URL")}/endpoint/{query}',
             data=data,
             code=code,
+            headers=headers,
             **kwargs
         )
 

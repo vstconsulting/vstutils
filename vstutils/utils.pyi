@@ -465,14 +465,6 @@ class ObjectHandlers(BaseVstObject):
         ...
 
 
-class StaticFilesHandlers(ObjectHandlers):
-    def get_static_objects(self) -> Generator[tp.Any, None, None]:
-        ...
-
-    def get_sorted_list(self) -> tp.Tuple:
-        ...
-
-
 class ModelHandlers(ObjectHandlers):
     def get_object(self, name: tp.Text, obj) -> tp.Any:
         ...
@@ -531,3 +523,9 @@ class BaseEnum(str, VstEnum):
 
     def not_equal(self, cmp_str) -> bool:
         ...
+
+def get_session_store():
+    ...
+
+def add_in_vary(headers: dict, value: str):
+    ...

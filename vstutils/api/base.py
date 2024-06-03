@@ -79,7 +79,8 @@ def apply_translation(obj, trans_function):
     recursive_call = partial(apply_translation, trans_function=trans_function)
     if isinstance(obj, dict):
         return {
-            trans_function(k): recursive_call(v)
+            # Key must not be translated in order to properly handle errors on frontend.
+            k: recursive_call(v)
             for k, v in obj.items()
         }
     elif isinstance(obj, (tuple, list)):
@@ -166,6 +167,9 @@ def exception_handler(exc, context):
         code = getattr(exc, 'status', code)
         serializer_class = OtherErrorsSerializer
         logger.debug(traceback_str)
+
+    if isinstance(exc, vstexceptions.HttpResponseException):
+        return exc.get_response()
 
     if data is not None:
         serializer = serializer_class(data=data)
@@ -535,8 +539,8 @@ def get_etag_value(view, model_class, request, pk=None):
         if EtagDependency.USER in dependencies:
             etag_value += f'_{request.user.id or 0}'
             should_hash = True
-        if EtagDependency.SESSION in dependencies:
-            etag_value += f'_{request.session.session_key}'
+        if EtagDependency.SESSION in dependencies and (session := getattr(request, 'session', None)):
+            etag_value += f'_{session.session_key}'
             should_hash = True
     else:
         etag_value = f'{model_class}_{hashlib.blake2s(ver.encode(settings.DEFAULT_CHARSET), digest_size=4).hexdigest()}'

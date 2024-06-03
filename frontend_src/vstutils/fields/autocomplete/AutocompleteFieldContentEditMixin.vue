@@ -20,7 +20,7 @@
 
 <script>
     import $ from 'jquery';
-    import autoComplete from 'JavaScript-autoComplete/auto-complete';
+    import autoComplete from '@/libs/auto-complete.js';
     import { escapeHtml } from '../../utils';
     import { BaseFieldContentEdit } from '../base';
 

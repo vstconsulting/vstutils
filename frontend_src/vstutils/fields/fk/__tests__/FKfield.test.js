@@ -1,6 +1,4 @@
-import { expect, test, describe, beforeAll, beforeEach } from '@jest/globals';
-import fetchMock from 'jest-fetch-mock';
-import { createApp } from '../../../../unittests/create-app.js';
+import { createApp } from '../../../../unittests/create-app.ts';
 import { FKField } from '../fk/FKField';
 
 describe('FKfield', () => {
@@ -14,7 +12,6 @@ describe('FKfield', () => {
     beforeAll(async () => {
         app = await createApp();
         modelsClasses = app.modelsResolver._definitionsModels;
-        fetchMock.enableMocks();
     });
 
     test('Test Fk model', async () => {

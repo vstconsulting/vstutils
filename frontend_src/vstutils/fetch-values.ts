@@ -1,7 +1,6 @@
 import { i18n } from '@/vstutils/translation';
 import { AggregatedQueriesExecutor } from '@/vstutils/AggregatedQueriesExecutor';
-import { RequestTypes, createPropertyProxy, getApp } from '@/vstutils/utils';
-import { FKField } from '@/vstutils/fields/fk/fk/FKField';
+import { OBJECT_NOT_FOUND_TEXT, RequestTypes, createPropertyProxy, getApp } from '@/vstutils/utils';
 import { ArrayField } from '@/vstutils/fields/array/ArrayField';
 import { DynamicField } from '@/vstutils/fields/dynamic';
 
@@ -67,7 +66,7 @@ export function fetchPKs(
                 const model = qs!.getResponseModelClass(RequestTypes.LIST);
                 const notFound = new model({
                     [field.valueField]: pk,
-                    [field.viewField]: i18n.t(FKField.NOT_FOUND_TEXT),
+                    [field.viewField]: i18n.t(OBJECT_NOT_FOUND_TEXT),
                 } as InnerData);
                 notFound.__notFound = true;
                 return notFound;

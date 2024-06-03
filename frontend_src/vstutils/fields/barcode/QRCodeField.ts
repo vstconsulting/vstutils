@@ -3,9 +3,9 @@ import { defineComponent, h, ref } from 'vue';
 import type { FieldReadonlyPropsDefType } from '@/vstutils/fields/base';
 import { BaseField, BaseFieldMixin, FieldReadonlyPropsDef } from '@/vstutils/fields/base';
 import { Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import { getApp } from '@/vstutils/utils';
 import type { BarcodeFieldXOptions, BarcodeField } from './base';
 import BarcodeFieldContentEdit from './BarcodeFieldContentEdit.vue';
-import { getApp } from '@/spa';
 import CanvasRenderer from './CanvasRenderer.vue';
 import FullScreenView from '@/vstutils/components/FullScreenView.vue';
 

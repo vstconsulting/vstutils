@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.2", "vstcompile~=2.0"]
+requires = ["setuptools>=61.2", "vstcompile~=3.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -156,5 +156,6 @@ module = [
     "kombu.*",
     "tarantool.*",
     "pywebpush.*",
+    "authlib.*",
 ]
 ignore_missing_imports = true

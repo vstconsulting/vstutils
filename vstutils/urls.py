@@ -1,5 +1,4 @@
 # pylint: disable=invalid-name,consider-using-f-string
-import os
 import re
 import functools
 
@@ -16,11 +15,24 @@ from .utils import URLHandlers
 from .api.views import HealthView, MetricsView
 
 static_serve = functools.partial(serve_static, insecure=True)
-gui_enabled = not getattr(settings, 'API_ONLY', False)
+gui_enabled = not settings.API_ONLY
 
+if settings.OAUTH_SERVER_ENABLE:
+    if settings.DEFAULT_REGISTRATION_VIEW_ENABLE:
+        settings.API['oauth2'].setdefault('registration', {
+            'view': 'vstutils.api.registration.views.UserRegistrationViewSet',
+        })
+        settings.API['oauth2'].setdefault('confirm_email', {
+            'view': 'vstutils.api.registration.views.ConfirmEmailViewSet',
+        })
 
-def get_valid_url(*args):
-    return os.path.join('/', *(x.lstrip('^/') for x in filter(bool, args + ('/',))))
+    if settings.DEFAULT_PASSWORD_RESET_VIEW_ENABLE:
+        settings.API['oauth2'].setdefault('password_reset', {
+            'view': 'vstutils.api.password_reset.PasswordResetViewSet',
+        })
+        settings.API['oauth2'].setdefault('password_reset_confirm', {
+            'view': 'vstutils.api.password_reset.PasswordResetConfirmViewSet',
+        })
 
 
 class AdminLoginLogoutRedirectView(RedirectView):
@@ -34,25 +46,19 @@ router.register_view('health', HealthView.as_view({'get': 'list'}), 'health')
 if settings.ENABLE_METRICS_VIEW:
     router.register_view('metrics', MetricsView.as_view({'get': 'list'}), 'metrics')
 
-
-admin.site.site_header = 'Admin panel'
-admin.site.site_title = settings.VST_PROJECT
-admin.site.index_title = f"{settings.VST_PROJECT.upper()} Settings Panel"
-admin.site.site_url = "/"
-# TODO: make it depends on 'gui_enabled' when auth migrate to API
-admin.site.login = AdminLoginLogoutRedirectView.as_view(  # type: ignore
-    url=get_valid_url(settings.ACCOUNT_URL, settings.LOGIN_URL)
-)
-admin.site.logout = AdminLoginLogoutRedirectView.as_view(  # type: ignore
-    url=get_valid_url(settings.ACCOUNT_URL, settings.LOGOUT_URL)
-)
+if settings.ENABLE_ADMIN_PANEL:
+    admin.site.site_header = 'Admin panel'
+    admin.site.site_title = settings.VST_PROJECT
+    admin.site.index_title = f"{settings.VST_PROJECT.upper()} Settings Panel"
+    admin.site.site_url = "/"
 doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 
 urlpatterns = list(URLHandlers()) if gui_enabled else []
 
-urlpatterns += [
-    path(settings.ACCOUNT_URL, include(list(URLHandlers('ACCOUNT_URLS'))))
-]
+if gui_enabled and settings.OAUTH_SERVER_ENABLE:
+    urlpatterns += [
+        path(settings.ACCOUNT_URL, include(list(URLHandlers('ACCOUNT_URLS'))))
+    ]
 
 urlpatterns += [
     path('admin/', admin.site.urls),

@@ -44,7 +44,9 @@ export const MaskedFieldEdit = {
     },
     methods: {
         setValue(value) {
-            this.$emit('set-value', value);
+            if (value !== this.value) {
+                this.$emit('set-value', value);
+            }
         },
         beforeSet(value) {
             if (!value) return '';

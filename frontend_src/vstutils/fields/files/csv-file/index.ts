@@ -13,10 +13,10 @@ import type { ParseConfig } from 'papaparse';
 import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
 import type { InnerData, RepresentData } from '@/vstutils/utils';
 import type { ModelConstructor } from '@/vstutils/models';
-import type { ModelDefinition } from '@/vstutils/AppConfiguration';
+import type { ModelDefinition } from '@/vstutils/schema';
 import type { IFileField } from '../file';
 import { guiPopUp } from '@/vstutils/popUp';
-import { i18n } from '@/app.common';
+import { i18n } from '@/vstutils/translation';
 
 export { CsvFileFieldEdit, CsvFileFieldReadonly };
 

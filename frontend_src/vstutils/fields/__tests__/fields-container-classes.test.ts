@@ -1,4 +1,3 @@
-import { expect, test } from '@jest/globals';
 import { createApp, createSchema } from '@/unittests';
 import { useEntityViewClasses } from '@/vstutils/store';
 import { ref } from 'vue';

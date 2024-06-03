@@ -1,14 +1,8 @@
-import { test, expect, beforeAll } from '@jest/globals';
 import { ref } from 'vue';
-import { createApp } from '../../../unittests/create-app';
-import { createSchema } from '../../../unittests/schema';
-import fetchMock from 'jest-fetch-mock';
+import { waitFor } from '@testing-library/dom';
+import { expectNthRequest, createApp, createSchema } from '@/unittests';
 import { useSelection } from '../helpers';
 import pageSchema from './page-schema.json';
-
-beforeAll(() => {
-    fetchMock.enableMocks();
-});
 
 test('createListViewStore', async () => {
     // Created schema and Model
@@ -16,27 +10,18 @@ test('createListViewStore', async () => {
         schema: createSchema(pageSchema),
     });
 
-    const listView = app.views.get('/some_list/');
-
-    // Get store for view and make sure that store is created, and it isn't null
-    const store = listView._createStore();
-    expect(store).not.toBeNull();
-
-    // Push our path to router
-    await app.router.push('/some_list/');
-    await app.store.setPage(store);
-
-    expect(store.response).toBeFalsy();
-
-    // Mock response with empty results and make sure that response is received
     fetchMock.mockResponseOnce(
         JSON.stringify([{ status: 200, data: { count: 0, next: null, previous: null, results: [] } }]),
     );
-    await store.fetchData();
+    app.router.push('/some_list/');
 
-    expect(store.response).toBeTruthy();
-    expect(store.loading).toBeFalsy();
-    expect(store.instances.length).toBe(0);
+    expect(app.store.page.response).toBeFalsy();
+
+    await waitFor(() => expect(fetchMock).toBeCalledTimes(1));
+
+    expect(app.store.page.response).toBeTruthy();
+    expect(app.store.page.loading).toBeFalsy();
+    expect(app.store.page.instances.length).toBe(0);
 
     const data = JSON.stringify([
         {
@@ -71,10 +56,10 @@ test('createListViewStore', async () => {
 
     // Mock response with results
     fetchMock.mockResponseOnce(data);
-    await store.fetchData();
+    await app.store.page.fetchData();
 
-    expect(store.instances.length).toBe(3);
-    expect(store.instances[0]._data).toStrictEqual({
+    expect(app.store.page.instances.length).toBe(3);
+    expect(app.store.page.instances[0]._data).toStrictEqual({
         id: 5,
         store: 'LolShop',
         status: 'PAID',
@@ -82,31 +67,30 @@ test('createListViewStore', async () => {
     });
 
     // Check that instance on listView is selected
-    const selection = useSelection(ref(store.instances));
+    const selection = useSelection(ref(app.store.page.instances));
     selection.toggleSelection(5);
     expect(selection.selection.value).toStrictEqual([5]);
     selection.toggleSelection(5);
 
     // Check sublinks, actions and multiActions.
-    expect(store.sublinks).toStrictEqual([]);
+    expect(app.store.page.sublinks).toStrictEqual([]);
     // Actions must have filters action.
-    expect(store.actions.length).toBe(1);
-    expect(store.actions[0].name).toStrictEqual('filters');
+    expect(app.store.page.actions.length).toBe(1);
+    expect(app.store.page.actions[0].name).toStrictEqual('filters');
     // MultiActions must have remove action.
-    expect(store.multiActions.length).toBe(1);
-    expect(store.multiActions[0].name).toStrictEqual('remove');
+    expect(app.store.page.multiActions.length).toBe(1);
+    expect(app.store.page.multiActions[0].name).toStrictEqual('remove');
 
     // Check pagination
-    expect(store.count).toBe(3);
-    expect(store.pageNumber).toBe(1);
+    expect(app.store.page.count).toBe(3);
+    expect(app.store.page.pageNumber).toBe(1);
 
     // Check query params
     app.router.push('/some_list/?page=2');
-    await store.fetchData();
-    expect(store.filters).toStrictEqual({ page: '2' });
+    await app.store.page.fetchData();
+    expect(app.store.page.filters).toStrictEqual({ page: '2' });
 
     fetchMock.resetMocks();
-    app.router.push('/some_list/?id=3&name=MshShop');
     fetchMock.mockResponseOnce(
         JSON.stringify([
             {
@@ -127,29 +111,49 @@ test('createListViewStore', async () => {
             },
         ]),
     );
-    await store.fetchData();
-    expect(store.error).toBeFalsy();
-    expect(store.instances.length).toBe(1);
+    app.router.push('/some_list/?id=3&name=MshShop');
+    await waitFor(() => expect(fetchMock).toBeCalledTimes(1));
+    expect(app.store.page.error).toBeFalsy();
+    expect(app.store.page.instances.length).toBe(1);
 
-    let [, request] = fetchMock.mock.calls[0];
-    let bulk = JSON.parse(request.body);
-    expect(bulk[0].method).toBe('get');
-    expect(bulk[0].path).toStrictEqual(['some_list']);
-    expect(bulk[0].query).toBe('limit=20&offset=0&id=3&name=MshShop');
+    expectNthRequest(0, {
+        method: 'PUT',
+        url: 'http://localhost/api/endpoint/',
+        body: [
+            {
+                method: 'get',
+                path: ['some_list'],
+                query: 'limit=20&offset=0&id=3&name=MshShop',
+            },
+        ],
+    });
 
     // Check delete instance
     fetchMock.resetMocks();
     fetchMock.mockResponseOnce('{}', { status: 204 });
-    await store.removeInstance({ instance: store.instances[0], fromList: true, purge: true });
-    [, request] = fetchMock.mock.calls[0];
-    bulk = JSON.parse(request.body);
-    expect(bulk[0].method).toBe('delete');
-    expect(bulk[0].path).toStrictEqual(['some_list', 3]);
+    await app.store.page.removeInstance({
+        instance: app.store.page.instances[0],
+        fromList: true,
+        purge: true,
+    });
+    expectNthRequest(0, {
+        method: 'PUT',
+        url: 'http://localhost/api/endpoint/',
+        body: [
+            {
+                method: 'delete',
+                path: ['some_list', 3],
+                headers: {
+                    'X-Purge-Nested': 'true',
+                },
+            },
+        ],
+    });
 
     // Check delete instances
     fetchMock.resetMocks();
     fetchMock.mockResponseOnce(data);
-    await store.fetchData();
+    await app.store.page.fetchData();
 
     fetchMock.resetMocks();
     fetchMock.mockResponseOnce(
@@ -158,10 +162,28 @@ test('createListViewStore', async () => {
             { headers: '{}', status: 204 },
         ]),
     );
-    await store.removeInstances({ instances: [store.instances[0], store.instances[1]], purge: true });
-    [, request] = fetchMock.mock.calls[0];
-    bulk = JSON.parse(request.body);
-    expect(bulk[0].method).toBe('delete');
-    expect(bulk[0].path).toStrictEqual(['some_list', 5]);
-    expect(bulk[1].path).toStrictEqual(['some_list', 2]);
+    await app.store.page.removeInstances({
+        instances: [app.store.page.instances[0], app.store.page.instances[1]],
+        purge: true,
+    });
+    expectNthRequest(0, {
+        method: 'PUT',
+        url: 'http://localhost/api/endpoint/',
+        body: [
+            {
+                method: 'delete',
+                path: ['some_list', 5],
+                headers: {
+                    'X-Purge-Nested': 'true',
+                },
+            },
+            {
+                method: 'delete',
+                path: ['some_list', 2],
+                headers: {
+                    'X-Purge-Nested': 'true',
+                },
+            },
+        ],
+    });
 });

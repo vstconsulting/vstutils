@@ -1,7 +1,12 @@
-import { jest, describe, expect, test, beforeAll, beforeEach } from '@jest/globals';
 import { fireEvent, screen, waitFor } from '@testing-library/dom';
-import fetchMock from 'jest-fetch-mock';
-import { createApp, createSchema, schemaListOf, mountApp, waitForPageLoading } from '@/unittests';
+import {
+    createApp,
+    createSchema,
+    expectRequest,
+    fetchMockCallAt,
+    schemaListOf,
+    waitForPageLoading,
+} from '@/unittests';
 import { openPage } from '@/vstutils/utils';
 
 async function assertFileDownloaded(filename, url, f) {
@@ -9,7 +14,7 @@ async function assertFileDownloaded(filename, url, f) {
 
     const called = [];
 
-    jest.spyOn(HTMLAnchorElement, 'click').mockImplementation(function () {
+    vitest.spyOn(HTMLAnchorElement, 'click').mockImplementation(function () {
         called.push({ url: this.href, filename: this.download });
     });
 
@@ -91,9 +96,7 @@ describe('file response', () => {
 
     beforeAll(async () => {
         app = await createApp({ schema });
-        await mountApp();
-        fetchMock.enableMocks();
-        jest.spyOn(window, 'open').mockImplementation(() => {});
+        vitest.spyOn(window, 'open').mockImplementation(() => {});
     });
 
     beforeEach(async () => {
@@ -168,10 +171,11 @@ describe('file response', () => {
 
         // Check request data
         expect(fetchMock).toBeCalledTimes(1);
-        expect(fetchMock).toBeCalledWith('http://test.vst/api/v1/some/make_file_with_input/', {
+        expectRequest(fetchMockCallAt(0), {
+            url: 'http://localhost/api/v1/some/make_file_with_input/',
             method: 'post',
+            body: { name: 'some-file-name' },
             headers: { 'Content-Type': 'application/json' },
-            body: '{"name":"some-file-name"}',
         });
     });
 });

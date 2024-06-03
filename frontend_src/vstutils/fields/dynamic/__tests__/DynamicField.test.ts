@@ -1,4 +1,3 @@
-import { beforeAll, describe, expect, test, jest } from '@jest/globals';
 import { StringField } from '@/vstutils/fields/text';
 import { DynamicField } from '../DynamicField';
 import { createApp } from '@/unittests';
@@ -32,7 +31,7 @@ describe('DynamicField', () => {
         };
 
         const data = reactive({ someField: 'val 1', field: 'initial value' });
-        const setValue = jest.fn();
+        const setValue = vitest.fn();
         const wrapper = mount(
             {
                 template: `<Field :field="field" :data="data" type="readonly" @set-value="setValue" />`,

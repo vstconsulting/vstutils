@@ -1,10 +1,9 @@
-import { expect, jest, test, describe } from '@jest/globals';
 import ErrorHandler from '../ErrorHandler.js';
 import { StringField } from '../../fields/text';
 import { guiPopUp } from '../PopUp';
 import { ModelValidationError } from '@/vstutils/models';
 
-jest.mock('../PopUp');
+vitest.mock('../PopUp');
 
 describe('Error Handler', () => {
     test('error to string', () => {
@@ -48,7 +47,7 @@ describe('Error Handler', () => {
         const objDataError = { data: { random: 'random' } };
         expect(handler.errorToString(objDataError)).toBe('<br><b>random</b>: random');
 
-        global.console = { error: jest.fn() };
+        global.console = { error: vitest.fn() };
 
         handler.defineErrorAndShow('Err 1');
         handler.showError('Err 1', 'console');

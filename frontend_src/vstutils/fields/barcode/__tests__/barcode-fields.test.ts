@@ -1,7 +1,4 @@
-import { expect, test, describe, beforeAll, beforeEach } from '@jest/globals';
-import fetchMock from 'jest-fetch-mock';
-import { setupJestCanvasMock } from 'jest-canvas-mock';
-import { createApp, createSchema, mountApp, openPage, useTestCtx, waitForPageLoading } from '@/unittests';
+import { createApp, createSchema, useTestCtx, waitForPageLoading } from '@/unittests';
 import schema from './fields-schema.json';
 import type { BaseModel } from '@/vstutils/models';
 import { QRCodeField } from '../QRCodeField';
@@ -147,19 +144,15 @@ describe('Barcode fields', () => {
     let instance: BaseModel;
 
     beforeAll(async () => {
-        fetchMock.enableMocks();
-        setupJestCanvasMock();
         // @ts-expect-error it works on my pc really
         await createApp({ schema: createSchema(schema) });
-        await mountApp();
         const { app } = useTestCtx();
         SomeModel = app.modelsResolver.byReferencePath('#/definitions/SomeModel');
         instance = new SomeModel();
     });
 
-    beforeEach(async () => {
+    beforeEach(() => {
         fetchMock.resetMocks();
-        await openPage('/');
     });
 
     test('resolving', () => {

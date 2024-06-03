@@ -1,6 +1,5 @@
-import { test, beforeAll, expect, beforeEach } from '@jest/globals';
-import fetchMock from 'jest-fetch-mock';
-import { createApp, openPage } from '@/unittests';
+import { waitFor } from '@testing-library/dom';
+import { createApp, expectNthRequest } from '@/unittests';
 import { fetchInstances } from '@/vstutils/fetch-values';
 import { ArrayField } from '@/vstutils/fields/array';
 
@@ -10,8 +9,9 @@ let User;
 beforeAll(async () => {
     app = await createApp();
     User = app.modelsResolver.byReferencePath('#/definitions/User');
-    await openPage('/user/');
-    fetchMock.enableMocks();
+    fetchMock.mockResponse(JSON.stringify([{ count: 0, results: [] }]));
+    app.router.push('/user');
+    await waitFor(() => expect(fetchMock).toBeCalledTimes(1));
 });
 
 beforeEach(() => {
@@ -99,16 +99,15 @@ test('fk fetching', async () => {
     expect(instances[5].some_fk).toBeUndefined();
 
     expect(fetchMock).toBeCalledTimes(1);
-    const [, request] = fetchMock.mock.calls[0];
-    const body = JSON.parse(request.body);
-
-    expect(body).toStrictEqual([
-        {
-            method: 'get',
-            path: ['user'],
-            query: new URLSearchParams({ id: '5,3,1', limit: '3' }).toString(),
-        },
-    ]);
+    expectNthRequest(0, {
+        body: [
+            {
+                method: 'get',
+                path: ['user'],
+                query: new URLSearchParams({ id: '5,3,1', limit: '3' }).toString(),
+            },
+        ],
+    });
 });
 
 test('dynamic with fk fetching', async () => {
@@ -153,16 +152,15 @@ test('dynamic with fk fetching', async () => {
     await fetchInstances(instances);
 
     expect(fetchMock).toBeCalledTimes(1);
-    const [, request] = fetchMock.mock.calls[0];
-    const body = JSON.parse(request.body);
-
-    expect(body).toStrictEqual([
-        {
-            method: 'get',
-            path: ['user'],
-            query: new URLSearchParams({ id: '1337', limit: '1' }).toString(),
-        },
-    ]);
+    expectNthRequest(0, {
+        body: [
+            {
+                method: 'get',
+                path: ['user'],
+                query: new URLSearchParams({ id: '1337', limit: '1' }).toString(),
+            },
+        ],
+    });
 
     // Fk should become instances
     expect(instances[0].dynamic).toBeInstanceOf(User);
@@ -233,16 +231,15 @@ test('related list with array with dynamic with fk fetching', async () => {
     await fetchInstances(instances);
 
     expect(fetchMock).toBeCalledTimes(1);
-    const [, request] = fetchMock.mock.calls[0];
-    const body = JSON.parse(request.body);
-
-    expect(body).toStrictEqual([
-        {
-            method: 'get',
-            path: ['user'],
-            query: new URLSearchParams({ id: '1001,1000', limit: '2' }).toString(),
-        },
-    ]);
+    expectNthRequest(0, {
+        body: [
+            {
+                method: 'get',
+                path: ['user'],
+                query: new URLSearchParams({ id: '1001,1000', limit: '2' }).toString(),
+            },
+        ],
+    });
 
     // Integers should not be changed
     expect(instances[0].related_list[0].list).toStrictEqual([1, 2, 3]);

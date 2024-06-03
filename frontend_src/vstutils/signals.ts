@@ -7,14 +7,18 @@ import type { Model } from '@/vstutils/models';
 import type { IAppInitialized } from '@/vstutils/app';
 import type { RepresentData } from '@/vstutils/utils';
 import type { Action, Sublink } from '@/vstutils/views';
+import type { RouteConfig } from 'vue-router';
+import type { AppSchema } from './schema';
 
 export const signals = new TabSignal('application');
 
+export const SCHEMA_LOADED = 'openapi.loaded';
 export const APP_CREATED = 'APP_CREATED';
 export const APP_AFTER_INIT = 'app.afterInit';
 export const APP_BEFORE_INIT = 'app.beforeInit';
 export const SCHEMA_MODELS_CREATED = 'allModels.created';
 export const SCHEMA_VIEWS_CREATED = 'allViews.created';
+export const ROUTES_CREATED = 'allRoutes.created';
 
 export function useSignalSubscription(name: string, callback: (...args: any[]) => void) {
     const signalSlot = signals.on({
@@ -80,9 +84,13 @@ const createHook = (() => {
     };
 })();
 
+export const onAppCreated = createHook<[{ app: IAppInitialized }]>(APP_CREATED);
 export const onAppAfterInit = createHook<[{ app: IAppInitialized }]>(APP_AFTER_INIT);
 export const onAppBeforeInit = createHook<[{ app: IAppInitialized }]>(APP_BEFORE_INIT);
 export const onSchemaViewsCreated = createHook<[{ views: IAppInitialized['views'] }]>(SCHEMA_VIEWS_CREATED);
+export const onRoutesCreated = createHook<[RouteConfig[]]>(ROUTES_CREATED);
+export const onSchemaLoaded = createHook<[AppSchema]>(SCHEMA_LOADED);
+
 export const onSchemaModelsCreated =
     createHook<[{ app: IAppInitialized; models: Map<string, Model> }]>(SCHEMA_MODELS_CREATED);
 

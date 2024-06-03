@@ -1,6 +1,7 @@
+import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import '../libs/vue.js';
-import { getCookie, capitalize } from './utils/todo';
+import { getCookie, capitalize } from './utils';
 
 export const RUPluralizationRule = (choice: number, choicesLength: number) => {
     if (choice === 0) {
@@ -60,12 +61,18 @@ VueI18n.prototype.ts = function ts(key: VueI18n.Path, values?: VueI18n.Values): 
     return String(this.t(key, values));
 };
 
-export const i18n = new VueI18n({
-    locale: document.documentElement.lang || getCookie('lang') || 'en',
-    messages: {},
-    silentTranslationWarn: true,
-    formatFallbackMessages: true,
-    pluralizationRules: {
-        ru: RUPluralizationRule,
-    },
-});
+export function createVueI18n() {
+    return new VueI18n({
+        locale: document.documentElement.lang || getCookie('lang') || 'en',
+        messages: {},
+        silentTranslationWarn: true,
+        formatFallbackMessages: true,
+        pluralizationRules: {
+            ru: RUPluralizationRule,
+        },
+    });
+}
+
+Vue.use(VueI18n);
+
+export const i18n = createVueI18n();
