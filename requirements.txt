@@ -6,13 +6,13 @@ django-environ~=0.11.2
 # REST API packages
 djangorestframework~=3.15.1
 drf-yasg==1.21.7
-django-filter==23.5
+django-filter==24.2
 drf_orjson_renderer==1.7.1
-ormsgpack~=1.4.2
+ormsgpack~=1.5.0
 pyyaml~=6.0.1
 
 # web server
-uvicorn~=0.28.0
+uvicorn~=0.30.1
 pyuwsgi==2.0.23.post0
 # Restore it if some problems with pyuwsgi
 # uwsgi==2.0.23
@@ -23,7 +23,7 @@ aiofiles==23.2.1
 cent~=4.1.0
 
 # Auth
-Authlib==1.3.0
+Authlib~=1.3.1
 
 # Minificators
 jsmin~=3.0.1
@@ -33,4 +33,4 @@ django-htmlmin~=0.11.0
 pyotp~=2.9.0
 
 # Storage
-django-storages[libcloud]==1.14.2
+django-storages[libcloud]==1.14.3

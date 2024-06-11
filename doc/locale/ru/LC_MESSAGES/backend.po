@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-23 06:14+0000\n"
+"POT-Creation-Date: 2024-06-11 22:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -727,7 +727,6 @@ msgstr "is_sliced (bool): Булево значение, указывающее,
 #: vstutils.tests.BaseTestCase.assertCount
 #: vstutils.tests.BaseTestCase.assertRCode vstutils.tests.BaseTestCase.bulk
 #: vstutils.tests.BaseTestCase.bulk_transactional
-#: vstutils.tests.BaseTestCase.call_registration
 #: vstutils.tests.BaseTestCase.details_test
 #: vstutils.tests.BaseTestCase.endpoint_call
 #: vstutils.tests.BaseTestCase.endpoint_schema
@@ -745,10 +744,11 @@ msgstr "is_sliced (bool): Булево значение, указывающее,
 #: vstutils.utils.ModelHandlers.get_object vstutils.utils.ObjectHandlers
 #: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers
 #: vstutils.utils.URLHandlers.get_object vstutils.utils.UnhandledExecutor
-#: vstutils.utils.classproperty vstutils.utils.create_view
-#: vstutils.utils.decode vstutils.utils.deprecated vstutils.utils.encode
-#: vstutils.utils.get_render vstutils.utils.lazy_translate
-#: vstutils.utils.list_to_choices vstutils.utils.send_template_email
+#: vstutils.utils.add_in_vary vstutils.utils.classproperty
+#: vstutils.utils.create_view vstutils.utils.decode vstutils.utils.deprecated
+#: vstutils.utils.encode vstutils.utils.get_render
+#: vstutils.utils.lazy_translate vstutils.utils.list_to_choices
+#: vstutils.utils.send_template_email
 #: vstutils.utils.send_template_email_handler vstutils.utils.tmp_file
 #: vstutils.utils.tmp_file.write vstutils.utils.translate
 msgid "Parameters"
@@ -1432,7 +1432,7 @@ msgstr "допустимое значение"
 
 #: of vstutils.api.fields.CrontabField:14
 msgid "minute"
-msgstr ""
+msgstr "минута"
 
 #: of vstutils.api.fields.CrontabField:14
 msgid "0-59"
@@ -1440,7 +1440,7 @@ msgstr "0-59"
 
 #: of vstutils.api.fields.CrontabField:15
 msgid "hour"
-msgstr ""
+msgstr "час"
 
 #: of vstutils.api.fields.CrontabField:15
 msgid "0-23"
@@ -1448,7 +1448,7 @@ msgstr "0-23"
 
 #: of vstutils.api.fields.CrontabField:16
 msgid "day of month"
-msgstr ""
+msgstr "день месяца"
 
 #: of vstutils.api.fields.CrontabField:16
 msgid "1-31"
@@ -1456,7 +1456,7 @@ msgstr "1-31"
 
 #: of vstutils.api.fields.CrontabField:17
 msgid "month"
-msgstr ""
+msgstr "месяц"
 
 #: of vstutils.api.fields.CrontabField:17
 msgid "1-12"
@@ -1464,7 +1464,7 @@ msgstr "1-12"
 
 #: of vstutils.api.fields.CrontabField:18
 msgid "day of week"
-msgstr ""
+msgstr "день недели"
 
 #: of vstutils.api.fields.CrontabField:18
 msgid "0-7 (0 or 7 is Sunday)"
@@ -2619,17 +2619,16 @@ msgid ""
 msgstr ""
 "Поле, расширяющее :class:`.FileInStringField`, но скрывающее свое "
 "значение в интерфейсе администратора."
-
 #: of vstutils.api.fields.TextareaField:1
 msgid "A specialized field that allows the input and display of multiline text."
-msgstr ""
+msgstr "Специализированное поле, которое позволяет вводить и отображать многострочный текст."
 
 #: of vstutils.api.fields.TextareaField:8
 msgid ""
 "Suppose you have a model with a `description` field that can contain "
 "multiline text. You can use `TextareaField` in your serializer to enable "
 "users to input and view multiline text in the GUI:"
-msgstr ""
+msgstr "Предположим, у вас есть модель с полем `description`, которое может содержать многострочный текст. Вы можете использовать `TextareaField` в вашем сериализаторе, чтобы пользователи могли вводить и просматривать многострочный текст в графическом интерфейсе:"
 
 #: of vstutils.api.fields.UptimeField:1
 msgid ""
@@ -2659,19 +2658,19 @@ msgstr ""
 
 #: of vstutils.api.fields.UptimeField:9
 msgid "``HH:mm:ss`` (e.g., 23:59:59)"
-msgstr ""
+msgstr "``HH:mm:ss`` (например, 23:59:59)"
 
 #: of vstutils.api.fields.UptimeField:10
 msgid "``dd HH:mm:ss`` (e.g., 01d 00:00:00)"
-msgstr ""
+msgstr "``dd HH:mm:ss`` (например, 01d 00:00:00)"
 
 #: of vstutils.api.fields.UptimeField:11
 msgid "``mm dd HH:mm:ss`` (e.g., 01m 30d 00:00:00)"
-msgstr ""
+msgstr "``mm dd HH:mm:ss`` (например, 01m 30d 00:00:00)"
 
 #: of vstutils.api.fields.UptimeField:12
 msgid "``yy mm dd HH:mm:ss`` (e.g., 99y 11m 30d 22:23:24)"
-msgstr ""
+msgstr "``yy mm dd HH:mm:ss`` (например, 99y 11m 30d 22:23:24)"
 
 #: of vstutils.api.fields.UptimeField:21
 msgid ""
@@ -3966,11 +3965,14 @@ msgid ""
 msgstr ""
 "При назначении действия на объект список методов также заполняется "
 "необходимыми методами."
+
 #: of vstutils.api.actions.SimpleFileAction:1
 msgid ""
 "Action for handling file responses. This action always returns a "
 "FileResponse."
-msgstr "Экшен для обработки ответов с файлами. Это действие всегда возвращает FileResponse."
+msgstr ""
+"Экшен для обработки ответов с файлами. Это действие всегда возвращает "
+"FileResponse."
 
 #: of vstutils.api.actions.SimpleFileAction:3
 msgid ""
@@ -3978,7 +3980,12 @@ msgid ""
 "return file responses. It ensures that the file is only sent if it has "
 "been modified since the client's last request, and it sets appropriate "
 "headers to facilitate caching and attachment handling."
-msgstr "Этот класс предназначен для упрощения процесса создания действий, возвращающих ответы с файлами. Он гарантирует, что файл отправляется только в случае его изменения с момента последнего запроса клиента, и устанавливает соответствующие заголовки для облегчения кэширования и обработки вложений."
+msgstr ""
+"Этот класс предназначен для упрощения процесса создания действий, "
+"возвращающих ответы с файлами. Он гарантирует, что файл отправляется "
+"только в случае его изменения с момента последнего запроса клиента, и "
+"устанавливает соответствующие заголовки для облегчения кэширования и "
+"обработки вложений."
 
 #: of vstutils.api.actions.SimpleFileAction:62
 msgid "Cache-Control header value. Defaults to 'max-age=3600'."
@@ -3988,14 +3995,19 @@ msgstr "Значение заголовка Cache-Control. По умолчани
 msgid ""
 "Boolean indicating if the file should be sent as an attachment. Defaults "
 "to False."
-msgstr "Булево значение, указывающее, следует ли отправлять файл в виде вложения. По умолчанию False."
+msgstr ""
+"Булево значение, указывающее, следует ли отправлять файл в виде вложения."
+" По умолчанию False."
 
 #: of vstutils.api.actions.SimpleFileAction:66
 msgid "Additional named arguments for :func:`rest_framework.decorators.action`."
 msgstr "Набор именованных аргументов для :func:`rest_framework.decorators.action`."
+
 #: of vstutils.api.actions.SimpleFileAction.modified_since:1
 msgid "Default modified_since method that checks the modification time of a file."
-msgstr "Метод modified_since по умолчанию, который проверяет время изменения файла."
+msgstr ""
+"Метод modified_since по умолчанию, который проверяет время изменения "
+"файла."
 
 #: of vstutils.api.actions.SimpleFileAction.modified_since:4
 #: vstutils.api.actions.SimpleFileAction.pre_data:4
@@ -4013,7 +4025,9 @@ msgstr "Время изменения файла или None, если оно н
 
 #: of vstutils.api.actions.SimpleFileAction.pre_data:1
 msgid "Default pre_data method that returns the file, its name, and content type."
-msgstr "Метод pre_data по умолчанию, который возвращает файл, его имя и тип содержимого."
+msgstr ""
+"Метод pre_data по умолчанию, который возвращает файл, его имя и тип "
+"содержимого."
 
 #: of vstutils.api.actions.SimpleFileAction.pre_data:8
 msgid "A tuple containing the file, its name, and its content type."
@@ -5009,20 +5023,6 @@ msgstr ""
 "Делает транзакционный bulk-запрос и проверяет код состояния (200 по "
 "умолчанию)"
 
-#: of vstutils.tests.BaseTestCase.call_registration:1
-msgid "Function for calling registration. Just got form data and headers."
-msgstr ""
-"Функция для вызова регистрации. Просто передайте данные формы вместе с "
-"заголовками."
-
-#: of vstutils.tests.BaseTestCase.call_registration:4
-msgid "Registration form data."
-msgstr "Данные регистрации с формы."
-
-#: of vstutils.tests.BaseTestCase.call_registration:7
-msgid "named arguments with request headers."
-msgstr "именованные аргументы вместе с заголовками запроса."
-
 #: of vstutils.tests.BaseTestCase.details_test:1
 msgid ""
 "Test for get details of model. If you setup additional named arguments, "
@@ -5616,6 +5616,10 @@ msgstr ""
 "Класс, основанный на :class:`.Executor`, но с выключенным "
 "`working_handler`."
 
+#: of vstutils.utils.add_in_vary:1
+msgid "Adds provided value to Vary header if not added already"
+msgstr "Добавляет указанное значение в заголовок Vary, если оно еще не добавлено"
+
 #: of vstutils.utils.apply_decorators:1
 msgid "Decorator which apply list of decorators on method or class."
 msgstr "Декоратор, оборачивающий метод или класс в список декораторов."
@@ -6064,485 +6068,3 @@ msgid ""
 msgstr ""
 "``VE100`` - Код ошибки целостности. Используется при появляении "
 "``django.db.utils.IntegrityError``."
-
-#~ msgid "prefetch values on frontend at list-view. Default is ``False``."
-#~ msgstr ""
-#~ "делает prefetch значений на фронтенде в"
-#~ " list-view. По умолчанию ``False``."
-
-#~ msgid ""
-#~ "Dictionary, where keys are name of "
-#~ "field from the same model, and "
-#~ "values are name of query filter. "
-#~ "If at least one of the fields "
-#~ "that we depend on is non nullable,"
-#~ " required and set to null, "
-#~ "autocompletion list will be empty and"
-#~ " field will be disabled."
-#~ msgstr ""
-#~ "Словарь, где ключи - это имена "
-#~ "полей из той же модели, а значения"
-#~ " - названия query-фильтров. Если хотя "
-#~ "бы одно из полей, от которых "
-#~ "существует зависимость не допускает null, "
-#~ "обязательно или установлено в null, "
-#~ "список автодополнения будет пустым, а "
-#~ "поле окажется выключенным."
-
-#~ msgid ""
-#~ "Field which type is based on "
-#~ "another field. It converts value to "
-#~ "internal string and represent field as"
-#~ " json object."
-#~ msgstr ""
-#~ "Поле, тип которого зависит от другого"
-#~ " поля. Хранит значение в виде строки,"
-#~ " а отображает поле в виде объекта "
-#~ "json."
-
-#~ msgid ""
-#~ "Allows to use parent views data as"
-#~ " source for field creation. Exact "
-#~ "view path (`/user/{id}/`) or relative "
-#~ "parent specifier (`<<parent>>.<<parent>>.<<parent>>`) "
-#~ "can be provided. For example if "
-#~ "current page is `/user/1/role/2/` and "
-#~ "`source_view` is `<<parent>>.<<parent>>` then "
-#~ "data from `/user/1/` will be used. "
-#~ "Only detail views if supported."
-#~ msgstr ""
-#~ "Позволяет использовать данные родительских "
-#~ "view в качестве источника для создания"
-#~ " полей. Можно указать точный путь "
-#~ "представления (`/user/{id}/`) или относительный "
-#~ "спецификатор родительского представления "
-#~ "(`<<parent>>.<<parent>>.<<parent>>`). Например, если "
-#~ "текущая страница - `/user/1/role/2/`, а "
-#~ "`source_view` - `<<parent>>.<<parent>>`, то "
-#~ "будут использованы данные из `/user/1/`. "
-#~ "Поддерживаются только представления деталей."
-
-#~ msgid ""
-#~ "Effective only in GUI. In API "
-#~ "works similar to :class:`.VSTCharField` "
-#~ "without value modifications."
-#~ msgstr ""
-#~ "Действует только в графическом интерфейсе. "
-#~ "В API работает аналогично "
-#~ ":class:`.VSTCharField` без изменения значения."
-
-#~ msgid ""
-#~ "A versatile field in Django Rest "
-#~ "Framework that dynamically adapts its "
-#~ "type based on the value of another"
-#~ " field in the model. It facilitates"
-#~ " complex scenarios where the type of"
-#~ " data to be serialized depends on "
-#~ "the value of a related field."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Example: Suppose you have a serializer"
-#~ " `MySerializer` with a `field_type` (e.g.,"
-#~ " a `ChoiceField`) and a corresponding "
-#~ "`object_data`. The `object_data` field can "
-#~ "have different types based on the "
-#~ "value of `field_type`. Here's an example"
-#~ " configuration:"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Field extends :class:`DynamicJsonTypeField`. "
-#~ "Validates field data by "
-#~ ":attr:`.field_attribute` chosen in related "
-#~ "model. By default, any value of "
-#~ ":attr:`.field_attribute` validates as "
-#~ ":class:`.VSTCharField`. To override this "
-#~ "behavior set dict attribute ``{field_attribute"
-#~ " value}_fields_mapping`` in related model "
-#~ "where:"
-#~ msgstr ""
-#~ "Поле, расширяющее :class:`DynamicJsonTypeField`. "
-#~ "Валидирует данные поля с помощью "
-#~ ":attr:`.field_attribute`, выбранного в связанной "
-#~ "модели. По умолчанию любое значение "
-#~ ":attr:`.field_attribute` валидируется классом "
-#~ ":class:`.VSTCharField`. Чтобы переопределить это "
-#~ "поведение, установите словарный атрибут "
-#~ "``{field_attribute value}_fields_mapping`` в "
-#~ "связанной модели, где:"
-
-#~ msgid ""
-#~ "**key** - string representation of value"
-#~ " type which is received from related"
-#~ " instance :attr:`.field_attribute`."
-#~ msgstr ""
-#~ "**key** - строковое представление типа "
-#~ "значения, получаемое от связанной модели "
-#~ ":attr:`.field_attribute`."
-
-#~ msgid "**value** - :class:`rest_framework.Field` instance for validation."
-#~ msgstr "**value** - экземпляр :class:`rest_framework.Field` для валидации."
-
-#~ msgid "Field containing multiline string."
-#~ msgstr "Поле, содержащее многострочный текст."
-
-#~ msgid ""
-#~ "Field contains html text and marked "
-#~ "as format:html. The field does not "
-#~ "validate whether its content is HTML."
-#~ msgstr ""
-#~ "Поле, содержащее текст html и помеченное"
-#~ " как format:html. Это поле не "
-#~ "проверяет, является ли его содержимое "
-#~ "валидным HTML."
-
-#~ msgid ""
-#~ "To avoid vulnerability, do not allow "
-#~ "users to modify this data because "
-#~ "users ate able to execute their "
-#~ "scripts."
-#~ msgstr ""
-#~ "Чтобы избежать уязвимости, не позволяйте "
-#~ "пользователям изменять эти данные, так "
-#~ "как они могут выполнить нежелательный "
-#~ "скрипт."
-
-#~ msgid ""
-#~ "Simple string field. Value must always"
-#~ " be a valid ASCII-string. The "
-#~ "field is going to represent as "
-#~ "Barcode (Code 128) in user interface."
-#~ msgstr ""
-#~ "Простое строковое поле. Значение всегда "
-#~ "должно быть допустимой строкой ASCII. В"
-#~ " пользовательском интерфейсе оно будет "
-#~ "отображено как штрихкод (код 128)."
-
-#~ msgid ""
-#~ "Simple string field. The field is "
-#~ "going to represent as QrCode in "
-#~ "user interface."
-#~ msgstr ""
-#~ "Простое строковое поле. В пользовательском "
-#~ "интерфейсе оно будет отображено как "
-#~ "QR-код."
-
-#~ msgid "warning"
-#~ msgstr "предупреждение"
-
-#~ msgid ""
-#~ "Exercise caution when using this field,"
-#~ " as it does not validate whether "
-#~ "the content is valid HTML. Be "
-#~ "aware of the potential security risks"
-#~ " associated with allowing users to "
-#~ "modify HTML content, as they may "
-#~ "execute scripts."
-#~ msgstr ""
-#~ "Будьте осторожны при использовании этого "
-#~ "поля, так как оно не проверяет, "
-#~ "является ли контент допустимым HTML. "
-#~ "Будьте в курсе потенциальных рисков "
-#~ "безопасности, связанных с разрешением "
-#~ "пользователям изменять HTML-контент, так как"
-#~ " они могут выполнять сценарии."
-
-#~ msgid "note"
-#~ msgstr "None"
-
-#~ msgid "show value as link to model. Default is ``True``."
-#~ msgstr "Отображает значение как ссылку на модель. По умолчанию ``True``."
-
-#~ msgid ""
-#~ "dictionary, where keys are names of "
-#~ "a field from the same model, and"
-#~ " values are names of query filter."
-#~ " If at least one of the fields"
-#~ " that we depend on is non "
-#~ "nullable, required and set to null, "
-#~ "autocompletion list will be empty and"
-#~ " field will be disabled."
-#~ msgstr ""
-#~ "словарь, где ключи - это имена "
-#~ "полей из той же модели, а значения"
-#~ " - названия query-фильтров. Если хотя "
-#~ "бы одно из полей, от которых "
-#~ "существует зависимость не допускает null, "
-#~ "обязательно или установлено в null, "
-#~ "список автодополнения будет пустым, а "
-#~ "поле окажется выключенным."
-
-#~ msgid ""
-#~ "This field does not support "
-#~ "``dependence``. Use ``filters`` at your "
-#~ "own risk, as it would rather break"
-#~ " the tree structure."
-#~ msgstr ""
-#~ "Это поле не поддерживает ``dependence``. "
-#~ "Используйте ``filters`` на свой страх и"
-#~ " риск, так как они могут сломать "
-#~ "структуру дерева."
-
-#~ msgid ""
-#~ "if True then only allows a value"
-#~ " to be selected if it has no"
-#~ " children. Default is `False`"
-#~ msgstr ""
-#~ "если True, то допускает к выбору "
-#~ "только то значение, которое не имеет "
-#~ "дочерних элементов. По умолчанию `False`"
-
-#~ msgid "name of parent field in model. Default is `parent`"
-#~ msgstr "название родительского поля в модели. По умолчанию `parent`"
-
-#~ msgid ""
-#~ "Field that takes JSON with properties:"
-#~ " * name - string - name of "
-#~ "file; * mediaType - string - MIME"
-#~ " type of file; * content - "
-#~ "base64 string - content of file."
-#~ msgstr ""
-#~ "Поле, принимающее на вход JSON со "
-#~ "следующими свойствами: * name - string"
-#~ " - имя файла; * mediaType - "
-#~ "string - MIME-тип файла; * content "
-#~ "- base64 string - содержимое файла."
-
-#~ msgid "Effective only in GUI. Works similar to :class:`.VSTCharField` in API."
-#~ msgstr ""
-#~ "Действует только в графическом интерфейсе. "
-#~ "Работает аналогично :class:`.VSTCharField` в "
-#~ "API."
-
-#~ msgid "**Attributes:**"
-#~ msgstr "**Атрибуты**:"
-
-#~ msgid ":attr:`bool file`: If True, accept only subclasses of File as input."
-#~ msgstr ""
-#~ ":attr:`bool file`: Если True, принимает "
-#~ "только подклассы File в качестве входных"
-#~ " данных."
-
-#~ msgid "If False, accept only string input. Default: False."
-#~ msgstr ""
-#~ "Если False, принимает только строковые "
-#~ "входные данные. По умолчанию: False."
-
-#~ msgid "Максимально допустимый размер содержимого файла в байтах."
-#~ msgstr "Максимально допустимый размер содержимого файла в байтах."
-
-#~ msgid "Минимально допустимый размер содержимого файла в байтах."
-#~ msgstr "Минимально допустимый размер содержимого файла в байтах."
-
-#~ msgid "Минимальная длина имени файла. Применяется только при ``file=True``."
-#~ msgstr "Минимальная длина имени файла. Применяется только при ``file=True``."
-
-#~ msgid "Максимальная длина имени файла. Применяется только при ``file=True``."
-#~ msgstr "Максимальная длина имени файла. Применяется только при ``file=True``."
-
-#~ msgid ""
-#~ "Extends :class:`.NamedBinaryFileInJsonField` to "
-#~ "represent image on frontend (if binary"
-#~ " image is valid). Validate this field"
-#~ " with :class:`vstutils.api.validators.ImageValidator`."
-#~ msgstr ""
-#~ "Расширяет :class:`.NamedBinaryFileInJsonField` для "
-#~ "view изображения на фронтенде (если "
-#~ "бинарное изображение валидно). Валидируйте это"
-#~ " поле с помощью "
-#~ ":class:`vstutils.api.validators.ImageValidator`."
-
-#~ msgid "**name** (str): Имя файла изображения."
-#~ msgstr "**name** (str): Имя файла."
-
-#~ msgid "**mediaType** (str): MIME-тип файла изображения."
-#~ msgstr "**mediaType** (str): MIME-тип файла."
-
-#~ msgid ""
-#~ "**content** (str or File): Содержимое "
-#~ "файла изображения. Если `file` установлен "
-#~ "в True, это будет ссылка на файл"
-#~ " изображения; в противном случае содержимое"
-#~ " будет закодировано в формате base64."
-#~ msgstr ""
-#~ "**content** (str или File): Содержимое "
-#~ "файла. Если `file` установлен в True,"
-#~ " это будет ссылка на файл "
-#~ "изображения; в противном случае содержимое "
-#~ "будет закодировано в формате base64."
-
-#~ msgid "`IMask <https://imask.js.org/guide.html>`_"
-#~ msgstr "`IMask <https://imask.js.org/guide.html>`_"
-
-#~ msgid "Effective only on frontend."
-#~ msgstr "Действует только на фронтенде."
-
-#~ msgid ""
-#~ "Default serializer with logic to work"
-#~ " with objects. Read more in `DRF "
-#~ "serializer's documentation <https://www.django-"
-#~ "rest-framework.org/api-guide/serializers/#serializers>`_ "
-#~ "how to create Serializers and work "
-#~ "with them."
-#~ msgstr ""
-#~ "Стандартный сериализатор с логикой работы "
-#~ "с объектами. Читайте подробнее в "
-#~ "`документации сериализатора <https://www.django-"
-#~ "rest-framework.org/api-guide/serializers/#serializers>`_ "
-#~ "как создавать сериализаторы и работать с"
-#~ " ними."
-
-#~ msgid ""
-#~ "Collection of Models: When model_class "
-#~ "is a collection, the function computes"
-#~ " an ETag by concatenating ETag values"
-#~ " of individual models in the "
-#~ "collection, using a recursive call for"
-#~ " each model. The ETag value for "
-#~ "each model is encoded and hashed "
-#~ "using Blake2s algorithm."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Model with get_etag_value Method: If the"
-#~ " model class has a get_etag_value "
-#~ "method, the function calls this method"
-#~ " to obtain a base ETag value. "
-#~ "It then appends language, user ID, "
-#~ "and session key information if they "
-#~ "are marked as dependencies in the "
-#~ "model's ``_cache_response_dependencies`` attribute. "
-#~ "This base ETag may be further "
-#~ "processed to include the application's "
-#~ "full version string and hashed if "
-#~ "user or session information is included."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Model without get_etag_value Method: For "
-#~ "models lacking a custom get_etag_value "
-#~ "method, the function generates an ETag"
-#~ " based on the model's class name "
-#~ "and a hash of the application's "
-#~ "full version string."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "A function to compare the ETags. "
-#~ "By default, this is set to "
-#~ "str.__eq__, which checks for an exact"
-#~ " match between the client's and "
-#~ "server's ETags, suitable for validating "
-#~ "caches with If-None-Match. To "
-#~ "handle If-Match scenarios, where the "
-#~ "operation should proceed only if the "
-#~ "ETags do not match, indicating the "
-#~ "resource has been modified, str.__ne__ "
-#~ "(not equal) can be used as the "
-#~ "operation handler. This flexibility allows "
-#~ "for precise control over how and "
-#~ "when clients are allowed to read "
-#~ "from or write to resources based "
-#~ "on their version."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "A function to compare the ETags. "
-#~ "By default, this is set to "
-#~ ":method:`str.__eq__`, which checks for an "
-#~ "exact match between the client's and "
-#~ "server's ETags, suitable for validating "
-#~ "caches with If-None-Match. To "
-#~ "handle If-Match scenarios, where the "
-#~ "operation should proceed only if the "
-#~ "ETags do not match, indicating the "
-#~ "resource has been modified, "
-#~ ":method:`str.__ne__` (not equal) can be "
-#~ "used as the operation handler. This "
-#~ "flexibility allows for precise control "
-#~ "over how and when clients are "
-#~ "allowed to read from or write to"
-#~ " resources based on their version."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "A function to compare the ETags. "
-#~ "By default, this is set to "
-#~ ":method:`str.__eq__`, which checks for an "
-#~ "exact match between the client's and "
-#~ "server's ETags, suitable for validating "
-#~ "caches with ``If-None-Match``. To "
-#~ "handle ``If-Match`` scenarios, where the"
-#~ " operation should proceed only if the"
-#~ " ETags do not match, indicating the"
-#~ " resource has been modified, "
-#~ ":method:`str.__ne__` (not equal) can be "
-#~ "used as the operation handler. This "
-#~ "flexibility allows for precise control "
-#~ "over how and when clients are "
-#~ "allowed to read from or write to"
-#~ " resources based on their version."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "A function to compare the ETags. "
-#~ "By default, this is set to "
-#~ "`str.__eq__`, which checks for an exact"
-#~ " match between the client's and "
-#~ "server's ETags, suitable for validating "
-#~ "caches with ``If-None-Match``. To "
-#~ "handle ``If-Match`` scenarios, where the"
-#~ " operation should proceed only if the"
-#~ " ETags do not match, indicating the"
-#~ " resource has been modified, `str.__ne__`"
-#~ " (not equal) can be used as the"
-#~ " operation handler. This flexibility allows"
-#~ " for precise control over how and "
-#~ "when clients are allowed to read "
-#~ "from or write to resources based "
-#~ "on their version."
-#~ msgstr ""
-
-#~ msgid "Default ViewSets for web-api."
-#~ msgstr "Стандартные ViewSet'ы для web-api."
-
-#~ msgid ""
-#~ "Mixin which cache GET responses. Uses"
-#~ " standard HTTP-caching mechanism which "
-#~ "response 304 when Etag match."
-#~ msgstr ""
-#~ "Миксина, кэширующяя ответы GET. Использует "
-#~ "стандартный механизм кэширования HTTP, который"
-#~ " отвечает 304, когда Etag совпадает."
-
-#~ msgid "This works only with models based on :class:`vstutils.models.BModel`."
-#~ msgstr ""
-#~ "Это работает только с моделями на "
-#~ "основе :class:`vstutils.models.BModel`."
-
-#~ msgid ""
-#~ "The mixin relies on `.get_etag_value` "
-#~ "and `.check_request_etag` functions within the"
-#~ " `GenericViewSet` context to dynamically "
-#~ "generate and validate ETags for resource"
-#~ " states. By comparing ETags, it "
-#~ "determines whether content has changed "
-#~ "since the last request, allowing clients"
-#~ " to reuse cached responses when "
-#~ "applicable and preventing concurrent write "
-#~ "operations from overwriting each other "
-#~ "without acknowledgment of updated state."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "For effective use, ensure model classes"
-#~ " are compatible with ETag generation "
-#~ "and validation by implementing the "
-#~ "`.get_etag_value` method for custom ETag "
-#~ "computation. Additionally, the `.GenericViewSet` "
-#~ "using this mixin should properly handle"
-#~ " ETag headers in client requests to"
-#~ " leverage HTTP caching."
-#~ msgstr ""
-
