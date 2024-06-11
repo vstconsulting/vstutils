@@ -88,8 +88,3 @@ class DefaultBackend(BaseBackend):
             return "disabled"
         else:
             return self.celery_check(celery_app)
-
-    def check_health_session_engine(self):
-        # pylint: disable=pointless-statement
-        tuple(self.request.session.values())
-        self.request.user.is_active

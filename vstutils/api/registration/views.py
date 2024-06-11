@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import AnonRateThrottle
 from vstutils.api.base import GenericViewSet
 
-from .serializers import ConfirmEmailSerializer
+from .email_confirmation import ConfirmEmailSerializer
 
 
 class RegistrationThrottle(AnonRateThrottle):
