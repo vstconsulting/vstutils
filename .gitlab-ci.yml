@@ -136,11 +136,11 @@ release_packages:
     - when: never
   script:
     - echo MILESTONE=${CI_COMMIT_TAG%.*} > variables.env
-    - tox -e build
-    - yarn build-lib
     # pypi
+    - tox -e build
     - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/* -type f -name '*.tar.gz') $(find dist/* -type f -name '*.whl')
     # npm
+    - yarn build-lib
     - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'>.npmrc
     - npm publish --access public
   allow_failure: true
