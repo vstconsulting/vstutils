@@ -11,6 +11,13 @@ import django
 from django.conf import settings
 from django.utils.module_loading import import_string
 
+try:
+    import uvloop
+    uwsgi.log('uvloop installed.')
+except ImportError:
+    uwsgi.log('No uvloop installed. Run with native asyncio.')
+    uvloop = None
+
 django.setup(set_prefix=False)
 
 # Import application
@@ -47,6 +54,7 @@ async def init(servers_list, fds, app):
 def destroy():
     uwsgi.log(f"destroy worker {uwsgi.worker_id()}")
     for server in servers:
+        server.should_exit = True
         server.handle_exit(sig=signal.SIGINT, frame=None)
     time.sleep(1)
     uwsgi.log(f"exit worker {uwsgi.worker_id()}")
@@ -65,7 +73,7 @@ def graceful_reload():
 
 if __name__ == '__main__':
     # Init event loop and destroy handlers
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop() if uvloop is None else uvloop.new_event_loop()
     loop.add_signal_handler(signal.SIGINT, destroy)
     loop.add_signal_handler(signal.SIGTERM, destroy)
     loop.add_signal_handler(signal.SIGHUP, graceful_reload)

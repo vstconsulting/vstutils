@@ -587,7 +587,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'pidfile': env.str(f'{ENV_NAME}_WORKER_PID', default='/run/{PROG_NAME}_worker.pid'),
             'autoscale': '{this[rpc][concurrency]},1',
             'hostname': f'{pwd.getpwuid(os.getuid()).pw_name}@%h',
-            'beat': env.bool(f'{ENV_NAME}_SCHEDULER_ENABLE', default=True)
+            'beat': env.bool(f'{ENV_NAME}_SCHEDULER_ENABLE', default=True),
+            'pool': 'prefork'
         },
         'storages': {
             'filesystem': {
@@ -1114,6 +1115,7 @@ SWAGGER_SETTINGS: _t.Dict = {
         'vstutils.api.schema.renderers.OpenAPIRenderer',
     ],
     'DEEP_LINKING': True,
+    'USE_SESSION_AUTH': False,
     'SECURITY_DEFINITIONS': {},
 }
 

@@ -70,7 +70,11 @@ async def static(file_path: str, request: Request = None):
     absolute_path = find_absolute_path(file_path)
     if not absolute_path or await aiofiles.os.path.isdir(absolute_path):
         return PlainTextResponse('Not found', status_code=404)
-    response = FileResponse(absolute_path, stat_result=await aiofiles.os.stat(absolute_path))
+    response = FileResponse(
+        absolute_path,
+        stat_result=await aiofiles.os.stat(absolute_path),
+        content_disposition_type='inline'
+    )
     if request is not None and StaticFiles.is_not_modified(None, response.headers, request.headers):  # type: ignore
         return NotModifiedResponse(response.headers)
     return response
