@@ -52,7 +52,7 @@ kwargs = dict(
         'doc': load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
         'stubs': load_requirements('requirements-stubs.txt'),
-        'pil': ['Pillow~=10.2.0'],
+        'pil': ['Pillow~=10.3.0'],
         'boto3': [
             i.replace('libcloud', 'libcloud,s3')
             for i in requirements

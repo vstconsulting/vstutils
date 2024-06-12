@@ -50,6 +50,7 @@ PROJECT_LIB_VERSION: _t.Text = getattr(vst_lib_module, '__version__', VSTUTILS_V
 PROJECT_VERSION: _t.Text = getattr(vst_project_module, '__version__', PROJECT_LIB_VERSION)
 FULL_VERSION: _t.Text = f'{PROJECT_VERSION}_{PROJECT_LIB_VERSION}_{VSTUTILS_VERSION}'
 PROJECT_GUI_NAME: _t.Text = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME[0].upper()+ENV_NAME[1:].lower())
+DJANGO_SETTINGS_MODULE: _t.Text = os.getenv("DJANGO_SETTINGS_MODULE")
 
 PY_VER: _t.SupportsInt = sys.version_info.major
 TMP_DIR: _t.Text = gettempdir() or '/tmp'  # nosec

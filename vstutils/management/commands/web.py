@@ -140,7 +140,7 @@ class Command(BaseCommand):
             f'--set-ph=lib_name={settings.VST_PROJECT_LIB}',
             f'--set-ph=api_path={settings.API_URL}',
             f'--set-ph=vstutils_version={settings.VSTUTILS_VERSION}',
-            f'--env=DJANGO_SETTINGS_MODULE={os.getenv("DJANGO_SETTINGS_MODULE")}',
+            f'--env=DJANGO_SETTINGS_MODULE={settings.DJANGO_SETTINGS_MODULE}',
             f'--python-worker-override={settings.UWSGI_WORKER_PATH}',
             f'--socket={opts["addrport"]}'
         ]

@@ -62,10 +62,8 @@ code_style:
   parallel:
     matrix:
       - TOX_ENVS:
-          - flake
-          - mypy
-          - pylint
-          - bandit
+          - flake,bandit
+          - mypy,pylint
 
 js_style:
   <<: *branch_js_tests
@@ -138,11 +136,11 @@ release_packages:
     - when: never
   script:
     - echo MILESTONE=${CI_COMMIT_TAG%.*} > variables.env
-    # pypi
     - tox -e build
+    - yarn build-lib
+    # pypi
     - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/* -type f -name '*.tar.gz') $(find dist/* -type f -name '*.whl')
     # npm
-    - yarn build-lib
     - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'>.npmrc
     - npm publish --access public
   allow_failure: true
