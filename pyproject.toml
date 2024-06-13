@@ -11,7 +11,7 @@ authors = [
 maintainers = [
     { name = "VST Consulting", email = "sergey.k@vstconsulting.net" }
 ]
-keywords = ["spa", "vue", "pwa", "framework", "openapi"]
+keywords = ["spa", "vue", "pwa", "framework", "openapi", "oauth2"]
 license = {text = "Apache License 2.0" }
 description = "VST Utils Framework for fast create web-application"
 classifiers = [
@@ -36,7 +36,7 @@ classifiers = [
     "Topic :: Software Development :: User Interfaces",
     "Topic :: Utilities",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dynamic = ["version", "dependencies", "optional-dependencies"]
 
 [project.urls]

@@ -5745,7 +5745,8 @@ class ConfigParserCTestCase(BaseTestCase):
             'pidfile': '/run/test_proj_worker.pid',
             'autoscale': '4,1',
             'hostname': f'{pwd.getpwuid(os.getuid()).pw_name}@%h',
-            'beat': True
+            'beat': True,
+            'pool': 'prefork',
         }
         self.assertDictEqual(worker_options, settings.WORKER_OPTIONS)
 
