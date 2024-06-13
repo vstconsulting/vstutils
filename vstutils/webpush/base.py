@@ -49,12 +49,13 @@ class BaseWebPush:
     frontend, but you can add custom service worker code to handle it.
     """
     json_renderer = ORJSONRenderer()
-
+    project: Optional[str] = None
     title: Optional[str] = None
+    key: Optional[str] = None
 
     @classmethod
     def get_key(cls) -> str:
-        return (cls.__module__ + '_' + cls.__name__).replace('.', '_')
+        return cls.key or (cls.__module__ + '_' + cls.__name__).replace('.', '_')
 
     def send(self):
         subscriptions = tuple(self.get_subscriptions())

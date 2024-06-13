@@ -57,15 +57,6 @@ class SimpleClient(ClientMixin):
         return self.default_redirect_uri
 
 
-class SameOriginSpaClient(SimpleClient):
-    def __init__(self):
-        super().__init__(
-            id='spa',
-            allowed_grant_types=['password', 'refresh_token'],
-            token_endpoint_auth_methods=['same_origin'],
-        )
-
-
 def query_simple_client(client_id: str):
     if client_id in settings.OAUTH_SERVER_CLIENTS:
         return SimpleClient(

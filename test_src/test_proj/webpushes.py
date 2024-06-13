@@ -51,3 +51,10 @@ class StaffOnlyNotification(BaseWebPushNotification):
     @staticmethod
     def is_available(user):
         return user.is_staff
+
+
+class NotificationFromOtherApp(BaseWebPushNotification):
+    """
+    Webpush notification from other project that should not be available in ui
+    """
+    project = 'other_project'

@@ -6580,8 +6580,8 @@ class Oauth2TestCase(BaseTestCase):
         response = client.post(
             '/api/oauth2/token/',
             **prepare_data({
-                'client_id': 'simple-client-id',
-                'client_secret': 'simple-client-secret',
+                'client_id': 'test-client',
+                'client_secret': 'test-client-secret',
                 'grant_type': 'password',
                 'username': user.username,
                 'password': 'invalid',
@@ -6601,8 +6601,8 @@ class Oauth2TestCase(BaseTestCase):
             response = client.post(
                 '/api/oauth2/token/',
                 **prepare_data({
-                    'client_id': 'simple-client-id',
-                    'client_secret': 'simple-client-secret',
+                    'client_id': 'test-client',
+                    'client_secret': 'test-client-secret',
                     'grant_type': 'password',
                     'username': user.username,
                     'password': user.data['password'],
@@ -6637,11 +6637,11 @@ class Oauth2TestCase(BaseTestCase):
             'session_key': claims['session_key'],
             'iss': 'https://test_proj.vst',
             'exp': 1060,
-            'client_id': 'simple-client-id',
+            'client_id': 'test-client',
             'iat': 1000,
             'scope': None,
             'sub': f'{user.id}',
-            'aud':'simple-client-id',
+            'aud':'test-client',
             'sup': False,
         })
 
@@ -6684,8 +6684,8 @@ class Oauth2TestCase(BaseTestCase):
         user = self._create_user(is_super_user=False, is_staff=False)
         TwoFactor.objects.create(user=user, secret='ABCDE')
         auth_data = {
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'grant_type': 'password',
             'username': user.username,
             'password': user.data['password'],
@@ -6727,8 +6727,8 @@ class Oauth2TestCase(BaseTestCase):
 
         # Create refresh_token
         response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'grant_type': 'password',
             'username': user.username,
             'password': user.data['password'],
@@ -6738,8 +6738,8 @@ class Oauth2TestCase(BaseTestCase):
 
         # Revoke refresh_token
         response = self.client_class().post('/api/oauth2/revoke/', content_type='application/json', data={
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'token': refresh_token,
         })
         self.assertEqual(response.status_code, 200)
@@ -6747,8 +6747,8 @@ class Oauth2TestCase(BaseTestCase):
         # Check refresh token
         response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
             'grant_type': 'refresh_token',
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'refresh_token': refresh_token,
         })
         data = response.json()
@@ -6760,8 +6760,8 @@ class Oauth2TestCase(BaseTestCase):
 
         # Invocation endpoint must return 200 for unknown token
         response = self.client_class().post('/api/oauth2/revoke/', content_type='application/json', data={
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'token': 'unknown',
         })
         self.assertEqual(response.status_code, 200)
@@ -6770,8 +6770,8 @@ class Oauth2TestCase(BaseTestCase):
         def refresh_token_tester(username: str, password: str, anon = False):
             # Create refresh_token
             response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
-                'client_id': 'simple-client-id',
-                'client_secret': 'simple-client-secret',
+                'client_id': 'test-client',
+                'client_secret': 'test-client-secret',
                 'grant_type': 'password',
                 'username': username,
                 'password': password,
@@ -6782,8 +6782,8 @@ class Oauth2TestCase(BaseTestCase):
             # Refresh token
             response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
                 'grant_type': 'refresh_token',
-                'client_id': 'simple-client-id',
-                'client_secret': 'simple-client-secret',
+                'client_id': 'test-client',
+                'client_secret': 'test-client-secret',
                 'refresh_token': refresh_token,
             })
             data = response.json()
@@ -6803,8 +6803,8 @@ class Oauth2TestCase(BaseTestCase):
             # Check invalid refresh token
             response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
                 'grant_type': 'refresh_token',
-                'client_id': 'simple-client-id',
-                'client_secret': 'simple-client-secret',
+                'client_id': 'test-client',
+                'client_secret': 'test-client-secret',
                 'refresh_token': 'invalid',
             })
             data = response.json()
@@ -6831,8 +6831,8 @@ class Oauth2TestCase(BaseTestCase):
         def session_tester(username: str, password: str):
             user = self._create_user(is_super_user=False, is_staff=False)
             auth_data = {
-                'client_id': 'simple-client-id',
-                'client_secret': 'simple-client-secret',
+                'client_id': 'test-client',
+                'client_secret': 'test-client-secret',
                 'grant_type': 'password',
                 'username': user.username,
                 'password': user.data['password'],
@@ -6890,8 +6890,8 @@ class Oauth2TestCase(BaseTestCase):
             '/api/oauth2/token/',
             content_type='application/json',
             data={
-                'client_id': 'simple-client-id',
-                'client_secret': 'simple-client-secret',
+                'client_id': 'test-client',
+                'client_secret': 'test-client-secret',
                 'grant_type': 'password',
                 'username': '',
                 'password': '',
@@ -6913,8 +6913,8 @@ class Oauth2TestCase(BaseTestCase):
             'sub': access_token_jwt['sub'],
             'jti': access_token_jwt['jti'],
             'anon': True,
-            'aud': 'simple-client-id',
-            'client_id': 'simple-client-id',
+            'aud': 'test-client',
+            'client_id': 'test-client',
             'iss': 'https://test_proj.vst',
             'scope': None,
             'sup': False
@@ -6925,8 +6925,8 @@ class Oauth2TestCase(BaseTestCase):
             '/api/oauth2/introspect/',
             content_type='application/json',
             data={
-                'client_id': 'simple-client-id',
-                'client_secret': 'simple-client-secret',
+                'client_id': 'test-client',
+                'client_secret': 'test-client-secret',
                 'token': access_token,
             },
         )
@@ -6960,6 +6960,7 @@ class Oauth2TestCase(BaseTestCase):
             'flow': 'password',
             'tokenUrl': 'http://testserver/api/oauth2/token/',
             'scopes': {},
+            'x-clientId': 'simple-client-id',
         })
 
         self.assertDictEqual(schema['paths']['/userinfo/'], {
@@ -7155,8 +7156,8 @@ class Oauth2TestCase(BaseTestCase):
             username='j.doe'
         )
         token = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'grant_type': 'password',
             'username': user.username,
             'password': user.data['password'],
@@ -7177,8 +7178,8 @@ class Oauth2TestCase(BaseTestCase):
     def test_auth_with_scope(self):
         user = self._create_user(is_super_user=False, is_staff=False,)
         response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'grant_type': 'password',
             'username': user.username,
             'password': user.data['password'],
@@ -7194,8 +7195,8 @@ class Oauth2TestCase(BaseTestCase):
     def test_token_introspection_endpoint(self):
         # Check invalid token
         response = self.client_class().post('/api/oauth2/introspect/', content_type='application/json', data={
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'token': 'abc',
         })
         self.assertEqual(response.status_code, 200)
@@ -7206,8 +7207,8 @@ class Oauth2TestCase(BaseTestCase):
         # Check valid token
         user = self._create_user(is_super_user=False, is_staff=False,)
         response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'grant_type': 'password',
             'username': user.username,
             'password': user.data['password'],
@@ -7216,8 +7217,8 @@ class Oauth2TestCase(BaseTestCase):
         access_token = response.json()['access_token']
 
         response = self.client_class().post('/api/oauth2/introspect/', content_type='application/json', data={
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'token': access_token,
         })
         self.assertEqual(response.status_code, 200)
@@ -7238,6 +7239,7 @@ class Oauth2TestCase(BaseTestCase):
                     'scopes': {},
                     'tokenUrl': 'https://some.auth/token',
                     'type': 'oauth2',
+                    'x-clientId': 'simple-client-id',
                 },
             )
 
@@ -7249,6 +7251,7 @@ class Oauth2TestCase(BaseTestCase):
                     'scopes': {},
                     'tokenUrl': 'https://some-vstutils.auth/api/oauth2/token/',
                     'type': 'oauth2',
+                    'x-clientId': 'simple-client-id',
                 },
             )
 
@@ -7259,6 +7262,7 @@ class Oauth2TestCase(BaseTestCase):
                 'scopes': {},
                 'tokenUrl': 'https://test_proj.vst/api/oauth2/token/',
                 'type': 'oauth2',
+                'x-clientId': 'simple-client-id',
             },
         )
 
@@ -7289,8 +7293,8 @@ class Oauth2TestCase(BaseTestCase):
         user.save()
 
         response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'grant_type': 'password',
             'username': 'ldap_user',
             'password': 'some_password',
@@ -7308,15 +7312,14 @@ class Oauth2TestCase(BaseTestCase):
             '/api/oauth2/token/',
             content_type='application/json',
             data={
-                'client_id': 'spa',
-                'client_secret': 'spa',
+                'client_id': 'simple-client-id',
                 'grant_type': 'password',
                 'username': user.username,
                 'password': user.data['password'],
             },
             headers={'Sec-Fetch-Site': 'same-origin'},
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, response.json())
 
     def test_authorization_in_vary(self):
         user = self._create_user(is_super_user=False, is_staff=False)
@@ -7324,8 +7327,8 @@ class Oauth2TestCase(BaseTestCase):
             '/api/oauth2/token/',
             content_type='application/json',
             data={
-                'client_id': 'simple-client-id',
-                'client_secret': 'simple-client-secret',
+                'client_id': 'test-client',
+                'client_secret': 'test-client-secret',
                 'grant_type': 'password',
                 'username': user.username,
                 'password': user.data['password'],
@@ -7517,8 +7520,8 @@ class Oauth2TestCase(BaseTestCase):
     def test_bulk_request_will_not_revoke_token(self):
         user = self._create_user(is_super_user=False, is_staff=False,)
         response = self.client_class().post('/api/oauth2/token/', content_type='application/json', data={
-            'client_id': 'simple-client-id',
-            'client_secret': 'simple-client-secret',
+            'client_id': 'test-client',
+            'client_secret': 'test-client-secret',
             'grant_type': 'password',
             'username': user.username,
             'password': user.data['password'],

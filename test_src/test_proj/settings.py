@@ -177,6 +177,12 @@ REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += (
 
 WEBPUSH_USER_SETTINGS_VIEW_SUBPATH = 'custom_path'
 
+OAUTH_SERVER_CLIENTS['test-client'] = {
+    'allowed_grant_types': ['password', 'refresh_token'],
+    'token_endpoint_auth_methods': ['client_secret_post', 'client_secret_basic'],
+    'secret': 'test-client-secret',
+}
+
 OAUTH_SERVER_CLIENTS['some-app'] = {
     'allowed_grant_types': ['authorization_code'],
     'token_endpoint_auth_methods': ['none'],
