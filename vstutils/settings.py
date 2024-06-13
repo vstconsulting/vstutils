@@ -447,7 +447,6 @@ class OAuthServerSection(cconfig.Section):
         'server_id_token_expires_in': ConfigIntSecondsType,
         'server_client_authentication_methods': ConfigListType,
         'server_authorization_endpoint': ConfigStringType,
-        'server_enable_same_origin_client_auth': ConfigBoolType,
         'server_simple_client_id': ConfigStringType,
         'server_simple_client_secret': ConfigStringType,
     }
@@ -620,13 +619,12 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'server_token_expires_in': 864000,
             'server_id_token_expires_in': 3600,
             'server_client_authentication_methods': [
-                'same_origin',
+                'same_origin_client_secret_post',
                 'client_secret_post',
                 'client_secret_basic',
                 'none',
             ],
             'server_authorization_endpoint': '',
-            'server_enable_same_origin_client_auth': True,
             'server_simple_client_id': 'simple-client-id',
             'server_simple_client_secret': 'simple-client-secret',
         },
@@ -1527,7 +1525,7 @@ class OauthServerClientConfig(_t.TypedDict):
     token_endpoint_auth_methods: _t.Optional[
         list[
             _t.Literal[
-                'same_origin',
+                'same_origin_client_secret_post',
                 'client_secret_post',
                 'client_secret_basic',
                 'none',
@@ -1540,10 +1538,17 @@ OauthServerClientsConfig = dict[str, OauthServerClientConfig]
 
 OAUTH_SERVER_URL: str = config['oauth']['server_url']
 OAUTH_SERVER_TOKEN_ENDPOINT_PATH: str = config['oauth']['server_token_endpoint_path']
-OAUTH_SERVER_SCHEMA_CLIENT_ID: str = config['oauth']['server_schema_client_id']
+OAUTH_SERVER_SCHEMA_CLIENT_ID: str = (
+    config['oauth']['server_schema_client_id'] or
+    config['oauth']['server_simple_client_id']
+)
 
 OAUTH_SERVER_ENABLE: bool = config['oauth']['server_enable']
-OAUTH_SERVER_ISSUER: str = env.str(f'{ENV_NAME}_OAUTH_SERVER_ISSUER', None) or config['oauth']['server_issuer']
+OAUTH_SERVER_ISSUER: str = (
+    env.str(f'{ENV_NAME}_OAUTH_SERVER_ISSUER', None) or
+    config['oauth']['server_issuer'] or
+    VST_PROJECT
+)
 OAUTH_SERVER_CLASS: str = config['oauth']['server_class']
 OAUTH_SERVER_ENABLE_ANON_LOGIN: bool = config['oauth']['server_enable_anon_login']
 OAUTH_SERVER_PASSWORD_GRANT_ADDITIONAL_EXTENSIONS: list[str] = []
@@ -1558,9 +1563,11 @@ OAUTH_SERVER_AUTHORIZATION_ENDPOINT: _t.Optional[str] = config['oauth']['server_
 OAUTH_SERVER_AUTHORIZATION_CODE_CACHE_NAME: str = 'session'
 OAUTH_SERVER_CLIENTS: OauthServerClientsConfig = {
     config['oauth']['server_simple_client_id']: {
-        'secret': config['oauth']['server_simple_client_secret'],
-        'token_endpoint_auth_methods': ['same_origin', 'client_secret_post', 'client_secret_basic'],
+        'token_endpoint_auth_methods': [
+            'same_origin_client_secret_post',
+        ],
         'allowed_grant_types': ['password', 'refresh_token'],
+        'secret': None,
         'allowed_redirect_uris': None,
         'allowed_response_types': None,
         'default_redirect_uri': None,

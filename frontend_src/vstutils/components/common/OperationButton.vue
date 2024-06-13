@@ -1,5 +1,5 @@
 <template>
-    <button type="button" :title="$t(title)" :class="buttonClasses">
+    <button type="button" :title="$t(title)" :class="buttonClasses" class="operation">
         <i v-if="iconClasses" class="icon-for-btn" :class="iconClasses" />
         <span v-if="title" class="title-for-btn" :class="{ 'd-none d-lg-inline-block': iconClasses }">
             {{ $t(title) }}
@@ -25,3 +25,11 @@
         },
     };
 </script>
+
+<style scoped>
+    .operation {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+</style>

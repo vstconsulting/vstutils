@@ -13,6 +13,9 @@ from authlib.oauth2.rfc6749 import (
     ResourceOwnerPasswordCredentialsGrant as BaseResourceOwnerPasswordCredentialsGrant,
     TokenMixin,
 )
+from authlib.oauth2.rfc6749.authenticate_client import (
+    _validate_client,
+)
 from authlib.oauth2.rfc7009 import (
     RevocationEndpoint as BaseRevocationEndpoint,
 )
@@ -32,7 +35,7 @@ from django.utils.module_loading import import_string
 from vstutils.utils import get_session_store
 
 from .authorization_code import AuthorizationCodeGrant, OpenIDCode
-from .client import query_simple_client, SameOriginSpaClient, SimpleClient
+from .client import query_simple_client, SimpleClient
 from .jwk import jwk_set
 from .requests import DjangoOAuth2Request, DjangoOAuthJsonRequest
 from .user import UserWrapper
@@ -275,9 +278,15 @@ class IntrospectionEndpoint(BaseIntrospectionEndpoint):
         }
 
 
-def same_origin_auth_method(query_client, request):
+def same_origin_client_secret_post(query_client, request):
     if request.headers.get('Sec-Fetch-Site') == 'same-origin':
-        return SameOriginSpaClient()
+        data = request.form
+        client_id = data.get('client_id')
+        if client_id:
+            client_secret = data.get('client_secret')
+            client = _validate_client(query_client, client_id, request.state)
+            if client.check_client_secret(client_secret):
+                return client
 
 
 class AuthorizationServer(BaseAuthorizationServer):
@@ -320,7 +329,10 @@ class AuthorizationServer(BaseAuthorizationServer):
         )
         self.register_endpoint(SessionRefreshTokenRevocationEndpoint)
         self.register_endpoint(IntrospectionEndpoint)
-        self.register_client_auth_method('same_origin', same_origin_auth_method)
+        self.register_client_auth_method(
+            'same_origin_client_secret_post',
+            same_origin_client_secret_post,
+        )
 
     def create_oauth2_request(self, request):
         if request.content_type == 'application/json':
