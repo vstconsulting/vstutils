@@ -140,8 +140,9 @@ release_packages:
     - tox -e build
     - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/* -type f -name '*.tar.gz') $(find dist/* -type f -name '*.whl')
     # npm
-    - VERSION=$(grep "__version__" vstutils/__init__.py | sed -E "s/__version__: str = '(.+)'/\1/")
-    - sed -i -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" package.json
+    - |
+      VERSION=$(grep "__version__" vstutils/__init__.py | sed -E "s/__version__: str = '(.+)'/\1/")
+      sed -i -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" package.json
     - yarn build-lib
     - cp -v README.rst dist/README.rst
     - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'>.npmrc
