@@ -34,7 +34,7 @@ class SimpleClient(ClientMixin):
         return self.id
 
     def check_client_secret(self, client_secret):
-        return self.secret == client_secret
+        return self.secret == client_secret or (self.secret is None and not client_secret)
 
     def check_endpoint_auth_method(self, method, endpoint):
         if endpoint == 'token':

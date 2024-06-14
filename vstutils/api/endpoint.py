@@ -9,11 +9,11 @@ import orjson
 from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, HttpRequest
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.test.client import Client, ClientHandler
 from django.test.utils import modify_settings
 from drf_yasg.views import SPEC_RENDERERS
-from rest_framework import serializers, views, versioning, request as drf_request
+from rest_framework import serializers, views, versioning, request as drf_request, exceptions
 from rest_framework.authentication import (
     SessionAuthentication,
     BasicAuthentication,
@@ -500,6 +500,16 @@ class EndpointViewSet(views.APIView):
 
     def patch(self, request: BulkRequestType) -> responses.BaseResponseClass:
         return self.put(request)
+
+    def perform_authentication(self, request):
+        try:
+            super().perform_authentication(request)
+        except exceptions.PermissionDenied as perm_err:  # nocv
+            # Required for some reasons when bulk request has both session and token
+            if perm_err.detail.startswith('CSRF Failed: '):
+                request.user = AnonymousUser()
+            else:
+                raise
 
     def initial(self, request: drf_request.Request, *args, **kwargs):
         super().initial(request, *args, **kwargs)

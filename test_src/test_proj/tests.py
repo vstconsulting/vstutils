@@ -3298,10 +3298,11 @@ class LangTestCase(BaseTestCase):
         self.assertEqual(to_soup(response.content).html['lang'], 'en')
 
     def test_server_translation(self):
+        self._logout(self.client)
         bulk_data = [
             dict(path=['_lang', 'ru'], method='get'),
         ]
-        results = self.bulk(bulk_data)
+        results = self.bulk(bulk_data, relogin=False)
         ru_lang_obj = Language.objects.get(code='ru')
 
         self.assertEqual(results[0]['status'], 200)
@@ -6987,6 +6988,7 @@ class Oauth2TestCase(BaseTestCase):
                         },
                     }
                 },
+                'security': [{'oauth2': []}],
                 "tags": ["userinfo"],
                 "x-list": True,
             },
@@ -7038,6 +7040,7 @@ class Oauth2TestCase(BaseTestCase):
                         },
                     },
                 },
+                'security': [],
                 "tags": ["token"],
             },
         })
@@ -7086,6 +7089,7 @@ class Oauth2TestCase(BaseTestCase):
                         },
                     }
                 },
+                'security': [],
                 "tags": ["introspect"],
             },
         })
@@ -7112,6 +7116,7 @@ class Oauth2TestCase(BaseTestCase):
                     }
                 ],
                 "responses": {"200": {"description": "Token revoked"}},
+                'security': [],
                 "tags": ["revoke"],
             },
         })
@@ -7320,6 +7325,38 @@ class Oauth2TestCase(BaseTestCase):
             headers={'Sec-Fetch-Site': 'same-origin'},
         )
         self.assertEqual(response.status_code, 200, response.json())
+
+        # with auth header
+        response = self.client_class().post(
+            '/api/oauth2/token/',
+            content_type='application/json',
+            data={
+                'grant_type': 'password',
+                'username': user.username,
+                'password': user.data['password'],
+            },
+            headers={
+                'Sec-Fetch-Site': 'same-origin',
+                'Authorization': f'Basic {base64.b64encode("simple-client-id:".encode("utf-8")).decode("utf-8")}'
+            },
+        )
+        self.assertEqual(response.status_code, 200, response.json())
+
+        # with not-basic auth header
+        response = self.client_class().post(
+            '/api/oauth2/token/',
+            content_type='application/json',
+            data={
+                'grant_type': 'password',
+                'username': user.username,
+                'password': user.data['password'],
+            },
+            headers={
+                'Sec-Fetch-Site': 'same-origin',
+                'Authorization': f'Bearer {base64.b64encode("simple-client-id:".encode("utf-8")).decode("utf-8")}'
+            },
+        )
+        self.assertEqual(response.status_code, 401, response.json())
 
     def test_authorization_in_vary(self):
         user = self._create_user(is_super_user=False, is_staff=False)
