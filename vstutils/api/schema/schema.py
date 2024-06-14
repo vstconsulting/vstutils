@@ -4,7 +4,7 @@ from copy import copy
 from warnings import warn
 
 from django.http import FileResponse
-from rest_framework import status, serializers, views
+from rest_framework import status, serializers, views, authentication, permissions
 from drf_yasg.inspectors.view import SwaggerAutoSchema
 from drf_yasg.app_settings import swagger_settings
 from drf_yasg.openapi import Schema, Response, Operation, Parameter, IN_HEADER, TYPE_STRING
@@ -13,6 +13,7 @@ from ... import utils
 from ...models.base import get_proxy_labels
 from ..decorators import NestedWithAppendMixin
 from ..base import detail_actions, main_actions, CachableHeadMixin
+from ...oauth2.authentication import JWTBearerTokenAuthentication
 from . import inspectors as vst_inspectors
 
 if _t.TYPE_CHECKING:
@@ -149,6 +150,22 @@ class ExtendedSwaggerAutoSchema(SwaggerAutoSchema):
                     elif issubclass(action.result_serializer_class, FileResponse):
                         result = Schema(type='file')
         return result or super().get_default_response_serializer()
+
+    def get_security(self):
+        result = super().get_security()
+
+        result = result or []
+        if (pm := self._sch.view.get_permissions()) and any(not isinstance(p, permissions.AllowAny) for p in pm):
+            for auth_class in self._sch.view.get_authenticators():
+                if isinstance(auth_class, JWTBearerTokenAuthentication):
+                    # TODO: provide scopes usage
+                    result.append({"oauth2": []})
+                elif isinstance(auth_class, authentication.SessionAuthentication):
+                    result.append({"session": []})
+                elif isinstance(auth_class, authentication.BasicAuthentication):
+                    result.append({"basic": []})
+
+        return result
 
 
 class VSTAutoSchema(ExtendedSwaggerAutoSchema):

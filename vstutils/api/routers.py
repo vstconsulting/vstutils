@@ -167,12 +167,6 @@ class APIRouter(_AbstractRouter):
                 'view': 'vstutils.api.auth.UserViewSet'
             }
 
-        if settings.OAUTH_SERVER_ENABLE and r'revoke' not in views_list:
-            views_list[r'_revoke'] = {
-                'view': 'vstutils.oauth2.endpoints.RevokeTokenViewSet',
-                'type': 'view',
-            }
-
         super().generate(views_list)
 
 

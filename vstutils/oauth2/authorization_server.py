@@ -13,9 +13,7 @@ from authlib.oauth2.rfc6749 import (
     ResourceOwnerPasswordCredentialsGrant as BaseResourceOwnerPasswordCredentialsGrant,
     TokenMixin,
 )
-from authlib.oauth2.rfc6749.authenticate_client import (
-    _validate_client,
-)
+from authlib.oauth2.rfc6749.authenticate_client import _validate_client, extract_basic_authorization
 from authlib.oauth2.rfc7009 import (
     RevocationEndpoint as BaseRevocationEndpoint,
 )
@@ -244,7 +242,8 @@ class JWTSessionRefreshToken(TokenMixin):  # pylint: disable=abstract-method
             return UserWrapper(user)
 
     def revoke(self):
-        self._session.delete()
+        if self._session:
+            self._session.delete()
 
     def check_client(self, client: 'SimpleClient'):
         return client.get_client_id() == self.claims['client_id']
@@ -280,7 +279,11 @@ class IntrospectionEndpoint(BaseIntrospectionEndpoint):
 
 def same_origin_client_secret_post(query_client, request):
     if request.headers.get('Sec-Fetch-Site') == 'same-origin':
-        data = request.form
+        if 'client_id' in request.form:
+            data = request.form
+        else:
+            data = dict(zip(('client_id', 'client_secret'), extract_basic_authorization(request.headers)))
+
         client_id = data.get('client_id')
         if client_id:
             client_secret = data.get('client_secret')

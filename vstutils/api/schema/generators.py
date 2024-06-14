@@ -61,6 +61,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         super().__init__(*args, **kwargs)
         if not self.version:
             self.version = settings.VST_API_VERSION
+        self.required_security_definitions = set()
 
     def _get_hooks(self):
         return map(
@@ -134,6 +135,12 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
             view = get_nested_view_obj(view, nested_view, sub_action, method)
         return super().should_include_endpoint(path, method, view, public)
 
+    def get_operation(self, *args, **kwargs):
+        operation = super().get_operation(*args, **kwargs)
+        for secDef in operation.get('security') or []:
+            self.required_security_definitions.add(tuple(secDef.keys())[0])
+        return operation
+
     def get_operation_keys(self, subpath, method, view):
         keys = super().get_operation_keys(subpath, method, view)
         subpath_keys = list(filter(bool, subpath.split('/')))
@@ -150,7 +157,22 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         if not getattr(request, 'version', ''):
             request.version = self.version
         result = super().get_schema(request, *args, **kwargs)
-        result['securityDefinitions']['oauth2'] = get_oauth2_security_definition(request)
+
+        # Security definitions
+        if 'oauth2' in self.required_security_definitions:
+            result['securityDefinitions']['oauth2'] = get_oauth2_security_definition(request)
+        if 'session' in self.required_security_definitions:
+            result['securityDefinitions']['session'] = {
+                'type': 'apiKey',
+                'name': settings.SESSION_COOKIE_NAME,
+                'in': 'cookie',
+            }
+        if 'basic' in self.required_security_definitions:
+            result['securityDefinitions']['basic'] = {
+                'type': 'basic',
+            }
+
+        # Add to schema centrifugo params
         if request and getattr(request, 'accepted_media_type', None) == 'application/openapi+json':
             result['info']['x-user-id'] = request.user.pk
             if (notificator := getattr(request, 'notificator', None)) and request.user.is_authenticated:
@@ -169,6 +191,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
                     ).decode()
                     result['info']['x-centrifugo-address'] = get_centrifugo_public_address(request)
 
+        # Run hooks for schema customisation
         for hook in self._get_hooks():
             result = copy.deepcopy(result)
             hook(request=request, schema=result)

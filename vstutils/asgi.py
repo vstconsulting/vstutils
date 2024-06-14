@@ -103,7 +103,7 @@ if not any(m.path == f'/{settings.API_URL}/live/' for m in application.routes):
 async def add_server_timing_header(request: Request, call_next):
     start_time = time.monotonic()
     response = await call_next(request)
-    response.headers['Server-Timing'] = f'full;dur={round((time.monotonic()-start_time)*1000, 2)}'
+    response.headers['Server-Timing'] = f'total_full;dur={round((time.monotonic()-start_time)*1000, 2)}'
     return response
 
 if not settings.API_ONLY:

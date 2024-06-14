@@ -3,6 +3,7 @@ import os
 import gc
 import pwd
 import sys
+from hashlib import blake2s
 from tempfile import gettempdir
 
 import environ
@@ -1554,7 +1555,11 @@ OAUTH_SERVER_ENABLE_ANON_LOGIN: bool = config['oauth']['server_enable_anon_login
 OAUTH_SERVER_PASSWORD_GRANT_ADDITIONAL_EXTENSIONS: list[str] = []
 OAUTH_SERVER_AUTHORIZATION_CODE_GRANT_ADDITIONAL_EXTENSIONS: list[str] = []
 OAUTH_SERVER_JWT_ALG: str = config['oauth']['server_jwt_alg']
-OAUTH_SERVER_JWT_KEY: str = env.str(f'{ENV_NAME}_OAUTH_SERVER_JWT_KEY', None) or config['oauth']['server_jwt_key']
+OAUTH_SERVER_JWT_KEY: str = (
+    env.str(f'{ENV_NAME}_OAUTH_SERVER_JWT_KEY', None)
+    or config['oauth'].get('server_jwt_key', fallback=None)
+)
+OAUTH_SERVER_JWT_KEY = OAUTH_SERVER_JWT_KEY or blake2s(SECRET_KEY.encode()).hexdigest()
 OAUTH_SERVER_JWT_EXTRA_CLAIMS_PROVIDER: _t.Optional[str] = config['oauth']['server_jwt_extra_claims_provider']
 OAUTH_SERVER_TOKEN_EXPIRES_IN: int = config['oauth']['server_token_expires_in']
 OAUTH_SERVER_ID_TOKEN_EXPIRES_IN: int = config['oauth']['server_id_token_expires_in']
