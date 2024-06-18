@@ -12,7 +12,7 @@ ormsgpack~=1.5.0
 pyyaml~=6.0.1
 
 # web server
-uvicorn~=0.30.1
+uvicorn~=0.27.1
 pyuwsgi==2.0.23.post0
 # Restore it if some problems with pyuwsgi
 # uwsgi==2.0.23

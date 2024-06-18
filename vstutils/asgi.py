@@ -14,7 +14,7 @@ from django.contrib.staticfiles import finders
 from django.test import override_settings
 from django.utils.module_loading import import_string
 from fastapi import FastAPI, Request
-from fastapi.responses import PlainTextResponse, FileResponse, ORJSONResponse
+from fastapi.responses import PlainTextResponse, FileResponse, ORJSONResponse, Response
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -115,7 +115,13 @@ if settings.ENABLE_BACKEND_MANIFEST and not any(m.path == '/manifest.json' for m
 @application.middleware('http')
 async def add_server_timing_header(request: Request, call_next):
     start_time = time.monotonic()
-    response = await call_next(request)
+    try:
+        response = await call_next(request)
+    except RuntimeError as err:  # nocv
+        if str(err) == 'No response returned.' and await request.is_disconnected():
+            response = Response(status_code=204)
+        else:
+            raise
     response.headers['Server-Timing'] = f'total_full;dur={round((time.monotonic()-start_time)*1000, 2)}'
     return response
 
