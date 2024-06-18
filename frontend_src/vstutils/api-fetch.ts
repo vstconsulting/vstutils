@@ -20,9 +20,12 @@ function addHeadersToRequest(request: Request, headers: Record<string, string>):
 }
 
 function createOauth2Fetch(config: InitAppConfig, _fetch: InternalFetch): InternalFetch {
-    const userManger = config.auth.userManager;
+    const userManager = config.auth.userManager;
     return async (request: Request) => {
-        const user = await userManger.getUser();
+        let user = await userManager.getUser();
+        if (!user || user.expired) {
+            user = await userManager.signinSilent();
+        }
         if (!user) {
             throw new Error('User is not logged in');
         }

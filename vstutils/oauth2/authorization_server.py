@@ -77,19 +77,30 @@ class JWTBearerTokenGenerator(BaseJWTBearerTokenGenerator):
 
     def get_extra_claims(self, client: SimpleClient, grant_type, user: 'UserWrapper', scope):
         claims = {}
+        session_key: Optional[str] = None
 
-        client.request.ensure_session()
-        django_request = client.request._request  # pylint: disable=protected-access
-        if not user.is_anon():
-            login(django_request, user.django_user)
-            django_request.session.save()
-        claims['session_key'] = django_request.session.session_key
+        if grant_type != 'refresh_token':
+            django_request = client.request._request  # pylint: disable=protected-access
+
+            if user.is_anon():
+                client.request.ensure_session()
+                session_key = django_request.session.session_key
+            else:
+                client.request.ensure_session()
+                login(django_request, user.django_user)
+                django_request.session.save()
+                session_key = django_request.session.session_key
+
+        elif grant_type == 'refresh_token':
+            session_key = client.request.refresh_token.claims['jti']
+
+        claims['jti'] = session_key
 
         if user.is_anon():
             claims['anon'] = True
 
         if extra_claims_provider:
-            if (extra_claims := extra_claims_provider(user.django_user)):
+            if extra_claims := extra_claims_provider(user.django_user):
                 claims.update(extra_claims)
 
         return claims

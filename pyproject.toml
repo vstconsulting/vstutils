@@ -91,6 +91,7 @@ omit = [
     'upload_big.py',
     '*/vstutils/__main__.py',
     '*/vstutils/asgi_worker.py',
+    '*/vstutils/admin_urls.py',
     '*/vstutils/celery_beat_scheduler.py',
     '*/vstutils/wsgi.py',
     '*/vstutils/compile.py',
@@ -109,6 +110,7 @@ exclude_lines = [
     'noce',
     'raise NotImplementedError',
     'if _t.TYPE_CHECKING:',
+    'if typing.TYPE_CHECKING:',
 ]
 
 [tool.bandit]
@@ -145,6 +147,7 @@ django_settings_module = "vstutils.settings"
 [[tool.mypy.overrides]]
 module = [
     "django_celery_beat.*",
+    "drf_orjson_renderer.*",
     "ldap.*",
     "uwsgi.*",
     "jsmin.*",

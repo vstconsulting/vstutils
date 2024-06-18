@@ -734,7 +734,7 @@ class ViewsTestCase(BaseTestCase):
 
     def test_main_views(self):
         # Main
-        self.get_result('get', '/')
+        self.get_result('get', '/suburls/test/')
         # API
         api = self.get_result('get', '/api/')
         print(api)
@@ -777,6 +777,22 @@ class ViewsTestCase(BaseTestCase):
         response = fclient.get('/api/live/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content), {'status': "ok"})
+
+        response = fclient.get('/manifest.json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                'background_color': 'rgb(236,240,245)',
+                'display': 'fullscreen',
+                'icons': [],
+                'name': 'Example project',
+                'scope': '.',
+                'short_name': 'Test_proj',
+                'start_url': './',
+                'theme_color': 'rgb(236,240,245)',
+            }
+        )
 
         # 404
         self.get_result('get', '/api/v1/some/', code=404)
@@ -2529,7 +2545,10 @@ class EndpointTestCase(BaseTestCase):
         response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
 
         self.assertEqual(response[0]['status'], 404, response[0])
-        self.assertTrue('Page not found' in response[0]['data']['detail'])
+        self.assertTrue(
+            'The requested resource was not found on this server.' in response[0]['data']['detail'],
+            response[0]['data']
+        )
 
     def test_testing_tool(self):
         with self.assertRaises(AssertionError):
@@ -3278,23 +3297,23 @@ class LangTestCase(BaseTestCase):
         )
 
         for expected_code, header in languages:
-            response = self.client_class().get('/', HTTP_ACCEPT_LANGUAGE=header)
+            response = self.client_class().get('/suburls/test/', HTTP_ACCEPT_LANGUAGE=header)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.cookies['lang'].value, expected_code)
             self.assertEqual(to_soup(response.content).html['lang'], expected_code, f'Header: {header}')
 
-        response = client.get('/?lang=ru', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        response = client.get('/suburls/test/?lang=ru', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.cookies.get('lang').value, 'ru')
         self.assertEqual(to_soup(response.content).html['lang'], 'ru')
 
-        response = client.get('/', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        response = client.get('/suburls/test/', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
         self.assertEqual(to_soup(response.content).html['lang'], 'ru')
 
-        response = self.client_class().get('/')
+        response = self.client_class().get('/suburls/test/')
         self.assertEqual(to_soup(response.content).html['lang'], 'en')
 
-        response = self.client_class().get('/', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        response = self.client_class().get('/suburls/test/', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
         self.assertEqual(to_soup(response.content).html['lang'], 'en')
 
     def test_server_translation(self):
@@ -4062,12 +4081,6 @@ class ProjectTestCase(BaseTestCase):
             data['paths']['/testbinaryfiles/{id}/test_some_filefield/']['get']['responses']['200']['schema']['type'],
             'file'
         )
-
-    def test_manifest_json(self):
-        result = self.get_result('get', '/manifest.json')
-        self.assertEqual(result['name'], 'Example project')
-        self.assertEqual(result['short_name'], 'Test_proj')
-        self.assertEqual(result['display'], 'fullscreen')
 
     def test_model_fk_field(self):
         bulk_data = [
@@ -5606,12 +5619,9 @@ class CustomModelTestCase(BaseTestCase):
         CachableModel.objects.all().delete()
 
     def test_additional_urls(self):
-        response = self.client.get('/suburls/admin/login/')
-        self.assertEqual(response.status_code, 200)
-        response = self.client.get('/suburls_module/admin/login/')
-        self.assertEqual(response.status_code, 200)
-        response = self.client.get(f'/suburls/login/')
-        self.assertEqual(response.status_code, 200)
+        response = self.client.get('/suburls/')
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/login?next=/suburls/')
 
 
 class ToolsTestCase(BaseTestCase):
@@ -6635,7 +6645,6 @@ class Oauth2TestCase(BaseTestCase):
         )
         self.assertDictEqual(claims, {
             'jti': claims['jti'],
-            'session_key': claims['session_key'],
             'iss': 'https://test_proj.vst',
             'exp': 1060,
             'client_id': 'test-client',
@@ -6910,7 +6919,6 @@ class Oauth2TestCase(BaseTestCase):
         self.assertDictEqual(access_token_jwt, {
             'exp': access_token_jwt['exp'],
             'iat': access_token_jwt['iat'],
-            'session_key': access_token_jwt['session_key'],
             'sub': access_token_jwt['sub'],
             'jti': access_token_jwt['jti'],
             'anon': True,

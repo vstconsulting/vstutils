@@ -751,13 +751,22 @@ ADDONS: _t.List[_t.Text] = [
 INSTALLED_APPS += ADDONS
 
 if ENABLE_ADMIN_PANEL:
-    INSTALLED_APPS.append('django.contrib.admin')
+    INSTALLED_APPS.insert(0, 'django.contrib.admin')
 
 
 # Additional middleware and auth
 ##############################################################
 MIDDLEWARE: _t.List[_t.Text] = [
     'vstutils.middleware.ExecuteTimeHeadersMiddleware',
+    'vstutils.middleware.FrontendChangesNotifications',
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'vstutils.middleware.LangMiddleware',
+]
+
+ADMIN_MIDDLEWARE = [
     'vstutils.middleware.FrontendChangesNotifications',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
@@ -1115,6 +1124,8 @@ SWAGGER_SETTINGS: _t.Dict = {
     ],
     'DEEP_LINKING': True,
     'USE_SESSION_AUTH': False,
+    'REFETCH_SCHEMA_WITH_AUTH': True,
+    'REFETCH_SCHEMA_ON_LOGOUT': True,
     'SECURITY_DEFINITIONS': {},
 }
 
@@ -1257,6 +1268,7 @@ LOGGING: _t.Dict = {
         VST_PROJECT: default_logger_data,
         'vstutils': default_logger_data,
         'drf_yasg.generators': default_logger_data,
+        'authlib': default_logger_data,
     }
 }
 
@@ -1269,6 +1281,9 @@ SILENCED_SYSTEM_CHECKS: _t.List = [
     "urls.W005",
     "fields.W122",
     "staticfiles.W004",
+    "admin.E408",
+    "admin.E409",
+    "admin.E410",
 ]
 
 
@@ -1322,20 +1337,9 @@ if RPC_ENABLED:
 # View settings
 ##############################################################
 MANIFEST_CLASS = 'vstutils.gui.pwa_manifest.PWAManifest'
+ENABLE_BACKEND_MANIFEST = True
 
 VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
-    "GUI": {
-        "BACKEND": 'vstutils.gui.views.GUIView',
-        "OPTIONS": {
-            'name': 'gui'
-        }
-    },
-    "MANIFEST": {
-        "BACKEND": 'vstutils.gui.views.ManifestView',
-        "OPTIONS": {
-            'name': 'pwa_manifest'
-        }
-    },
     "SERVICE_WORKER": {
         "BACKEND": 'vstutils.gui.views.SWView',
         "OPTIONS": {
@@ -1363,8 +1367,6 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
 }
 
 GUI_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
-    r'': 'GUI',
-    'manifest.json': 'MANIFEST',
     'service-worker.js': 'SERVICE_WORKER',
     'offline.html': 'OFFLINE',
 }

@@ -9,6 +9,10 @@ INSTALLED_APPS += [
 
 MIDDLEWARE.append('vstutils.middleware.TimezoneHeadersMiddleware')
 MIDDLEWARE.insert(0, 'django.middleware.gzip.GZipMiddleware')
+MIDDLEWARE.insert(5, 'django.middleware.security.SecurityMiddleware')
+MIDDLEWARE.insert(6, 'django.contrib.sessions.middleware.SessionMiddleware')
+MIDDLEWARE.insert(8, 'django.contrib.auth.middleware.AuthenticationMiddleware')
+MIDDLEWARE.insert(9, 'django.contrib.messages.middleware.MessageMiddleware')
 
 HEALTH_BACKEND_CLASS = 'test_proj.health.TestDefaultBackend'
 
@@ -135,13 +139,19 @@ API[VST_API_VERSION][r'test_changed_fk'] = dict(
     model='test_proj.models.ModelWithChangedFk'
 )
 
-GUI_VIEWS[r'^gui/$'] = ''
+GUI_VIEWS[r'^gui/$'] = r'^csrf_disable_gui/$'
 GUI_VIEWS[r'^csrf_disable_gui/$'] = {
-    'BACKEND': 'vstutils.gui.views.GUIView',
+    'BACKEND': 'vstutils.gui.views.SWView',
     'CSRF_ENABLE': False
 }
+GUI_VIEWS['login'] = {
+    'BACKEND': 'django.contrib.auth.views.LoginView',
+    'OPTIONS': {
+        'name': 'login'
+    }
+}
 GUI_VIEWS[r'^suburls/'] = {
-    'BACKEND': 'test_proj.suburls.urlpatterns'
+    'BACKEND': 'test_proj.suburls.urlpatterns',
 }
 GUI_VIEWS[r'^suburls_namespaced/'] = {
     'BACKEND': 'test_proj.suburls.urlpatterns',

@@ -6,10 +6,11 @@ from django.utils.module_loading import import_string
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from fastapi import Request
-from rest_framework.parsers import FormParser, JSONParser
+from rest_framework.parsers import FormParser
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
+from drf_orjson_renderer.parsers import ORJSONParser as JSONParser
 from vstutils.api.permissions import IsOpenApiRequest
 from vstutils.api.responses import HTTP_200_OK
 
@@ -29,8 +30,8 @@ class Oauth2Throttle(AnonRateThrottle):
 class TokenViewSet(APIView):
     parser_classes = [JSONParser, FormParser]
     throttle_classes = [Oauth2Throttle]
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = set()
+    permission_classes = set()
 
     @swagger_auto_schema(
         operation_id="get_token",

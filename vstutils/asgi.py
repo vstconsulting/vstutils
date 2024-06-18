@@ -11,6 +11,8 @@ from django.conf import settings
 from django.apps import apps
 from django.core.handlers.asgi import ASGIHandler
 from django.contrib.staticfiles import finders
+from django.test import override_settings
+from django.utils.module_loading import import_string
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse, FileResponse, ORJSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
@@ -19,6 +21,10 @@ from fastapi.staticfiles import StaticFiles
 from starlette.staticfiles import NotModifiedResponse
 
 from .signals import before_mount_app
+
+if typing.TYPE_CHECKING:
+    class ManifestProtocol(typing.Protocol):
+        data: dict[str, typing.Any]
 
 
 SPA_STATIC_MAX_AGE = round(
@@ -98,6 +104,13 @@ if not any(m.path == f'/{settings.API_URL}/live/' for m in application.routes):
     async def api_live_check():
         return ORJSONResponse({"status": "ok"})
 
+if settings.ENABLE_BACKEND_MANIFEST and not any(m.path == '/manifest.json' for m in application.routes):
+    manifest: 'ManifestProtocol' = import_string(settings.MANIFEST_CLASS)()
+
+    @application.get('/manifest.json')
+    async def gui_manifest():
+        return ORJSONResponse(manifest.data)
+
 
 @application.middleware('http')
 async def add_server_timing_header(request: Request, call_next):
@@ -118,5 +131,26 @@ if not settings.API_ONLY:
             response.headers['Cache-Control'] = f'public, max-age {SPA_STATIC_MAX_AGE}'
         return response
 
+if settings.ENABLE_ADMIN_PANEL:
+    class ASGIRequest(ASGIHandler.request_class):
+        def __init__(self, scope, body_file):  # nocv
+            scope['root_path'] = ""
+            super().__init__(scope, body_file)
+
+        @functools.cached_property
+        def urlconf(self):  # nocv
+            # pylint: disable=import-outside-toplevel
+            from . import admin_urls
+            return admin_urls
+
+    class AdminASGIHandler(ASGIHandler):
+        request_class = ASGIRequest
+
+    with override_settings(MIDDLEWARE=settings.ADMIN_MIDDLEWARE):
+        django_admin_app = AdminASGIHandler()
+
+    admin_application = FastAPI(openapi_url=None, docs_url=None, redoc_url=None, root_path='/admin')
+    admin_application.mount("/", django_admin_app)
+    application.mount("/admin/", admin_application)
 
 application.mount("/", ASGIHandler())
