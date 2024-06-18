@@ -72,7 +72,7 @@ export class BaseModel implements Model {
     static hideNotRequired?: boolean;
     static additionalProperties?: Field | undefined;
     static additionalPropertiesGroup = '';
-    static displayMode: typeof MODEL_MODES[number] = 'DEFAULT';
+    static displayMode: (typeof MODEL_MODES)[number] = 'DEFAULT';
     static visibilityDataFieldName?: string;
 
     _queryset?: QuerySet;

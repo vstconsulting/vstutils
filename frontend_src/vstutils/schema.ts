@@ -59,7 +59,7 @@ export type ModelDefinition = swagger.Schema & {
     'x-non-bulk-methods'?: HttpMethod[];
     'x-translate-model'?: string;
     'x-hide-not-required'?: boolean;
-    'x-display-mode'?: typeof MODEL_MODES[number];
+    'x-display-mode'?: (typeof MODEL_MODES)[number];
     'x-visibility-data-field-name'?: string;
 };
 
