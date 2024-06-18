@@ -21,7 +21,7 @@ export const HttpMethods = {
     DELETE: 'delete',
 } as const;
 
-export type HttpMethod = typeof HttpMethods[keyof typeof HttpMethods];
+export type HttpMethod = (typeof HttpMethods)[keyof typeof HttpMethods];
 
 export enum BulkType {
     SIMPLE = 'put',
@@ -142,7 +142,7 @@ export const RequestTypes = {
     REMOVE: 'remove',
 } as const;
 
-export type RequestType = typeof RequestTypes[keyof typeof RequestTypes];
+export type RequestType = (typeof RequestTypes)[keyof typeof RequestTypes];
 
 /**
  * Method, that converts query object into string

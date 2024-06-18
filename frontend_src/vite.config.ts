@@ -1,6 +1,6 @@
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { type PluginOption, defineConfig } from 'vite';
+import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue2';
 import dts from 'vite-plugin-dts';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -9,9 +9,9 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
 
 const frontendSrc = currentDir;
 
-export default defineConfig({
+export default defineConfig(() => ({
     plugins: [
-        tsconfigPaths({ root: frontendSrc }) as PluginOption,
+        tsconfigPaths({ root: frontendSrc }),
         vue(),
         dts({
             insertTypesEntry: true,
@@ -25,10 +25,10 @@ export default defineConfig({
                 index: join(frontendSrc, 'index.ts'),
                 'auth-app': join(frontendSrc, 'auth-app.ts'),
             },
-            formats: ['es'],
+            formats: ['es' as const],
         },
         rollupOptions: {
-            external: ['vue'],
+            external: ['vue', /@toast-ui\/vue-editor/, /@toast-ui\/editor/],
         },
     },
     resolve: {
@@ -48,4 +48,4 @@ export default defineConfig({
             reportsDirectory: join(frontendSrc, '..', 'node_modules', '.coverage'),
         },
     },
-});
+}));

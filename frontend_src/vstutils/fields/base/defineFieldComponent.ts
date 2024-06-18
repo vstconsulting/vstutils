@@ -4,7 +4,7 @@ import BaseFieldMixin from './BaseFieldMixin.vue';
 import { FieldEditEmitsNames, FieldEmitsDef, FieldEmitsNames, FieldReadonlyEmitsNames } from './emits';
 import { FieldEditPropsDef, FieldPropsDef, FieldReadonlyPropsDef } from './props';
 
-import type { SetupContext, VNode } from 'vue';
+import type { SetupFunction } from 'vue';
 import type { LooseRequired } from 'vue/types/common';
 import type { FieldEditEmitsDefType, FieldEmitsDefType, FieldReadonlyEmitsDefType } from './emits';
 import type {
@@ -15,20 +15,23 @@ import type {
     FieldReadonlyPropsDefType,
 } from './props';
 import type { Field } from './BaseField';
+import { EmitsOptions } from 'vue/types/v3-setup-context';
+
+type VueSetup<Props, Emits extends EmitsOptions> = SetupFunction<Readonly<LooseRequired<Props>>, {}, Emits>;
 
 // --- Edit component ---
 
-export type FieldEditSetupFunction<TField extends Field> = (
-    props: Readonly<LooseRequired<FieldEditProps<TField>>>,
-    context: SetupContext<FieldEditEmitsDefType<TField>>,
-) => () => VNode | null;
+export type FieldEditSetupFunction<TField extends Field> = VueSetup<
+    FieldEditProps<TField>,
+    FieldEditEmitsDefType<TField>
+>;
 
 // --- Readonly and list components ---
 
-export type FieldReadonlySetupFunction<TField extends Field> = (
-    props: Readonly<LooseRequired<FieldReadonlyProps<TField>>>,
-    context: SetupContext<FieldReadonlyEmitsDefType<TField>>,
-) => () => VNode | null;
+export type FieldReadonlySetupFunction<TField extends Field> = VueSetup<
+    FieldReadonlyProps<TField>,
+    FieldReadonlyEmitsDefType<TField>
+>;
 
 // --- Main component ---
 

@@ -16,7 +16,7 @@
     const props = defineProps(FieldEditPropsDef as FieldEditPropsDefType<DeepFKField>);
     const emit = defineEmits(FieldEditEmitsDef as FieldEditEmitsDefType<DeepFKField>);
 
-    function setValue(value: typeof props['value'][], options?: SetFieldValueParams) {
+    function setValue(value: (typeof props)['value'][], options?: SetFieldValueParams) {
         if (value && value.length === 0 && !props.value) {
             return;
         }
