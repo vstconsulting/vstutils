@@ -51,7 +51,7 @@ def get_session(session_key):
 class JWTBearerTokenAuthentication(BaseAuthentication):
     def authenticate(self, request: "Request"):
         if token := _get_request_token(request):
-            request._request.session = get_session(token['session_key'])  # pylint: disable=protected-access
+            request._request.session = get_session(token['jti'])  # pylint: disable=protected-access
             self.patch_vary(request)
             return get_user(request._request), token  # pylint: disable=protected-access
 

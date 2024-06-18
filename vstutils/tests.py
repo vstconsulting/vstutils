@@ -96,6 +96,7 @@ class BaseTestCase(TestCase):
     def _login(self):
         client = self.client
         client.force_login(self.user)
+        # TODO: Make OAuth2 auth
         return client
 
     def _logout(self, client):

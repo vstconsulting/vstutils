@@ -1,6 +1,5 @@
 import typing
 
-import orjson
 from django.conf import settings
 
 
@@ -29,7 +28,3 @@ class PWAManifest:
     @property
     def data(self) -> typing.Dict:
         return self.manifest_data
-
-    @property
-    def json(self) -> typing.Text:
-        return orjson.dumps(self.data, option=orjson.OPT_INDENT_2).decode('utf-8')

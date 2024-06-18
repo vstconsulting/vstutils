@@ -27,6 +27,7 @@ async function cleanAllCacheAndReloadPage({ resetAll = false } = {}) {
     } finally {
         if (resetAll) {
             localStorage.clear();
+            sessionStorage.clear();
         } else {
             localStorage.removeItem('gui_version');
             localStorage.removeItem('gui_user_version');

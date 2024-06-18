@@ -131,6 +131,7 @@ export async function _createUserManager(config: InitAppConfigRaw, apiConfig: Ap
         client_secret: providedConfig.clientSecret,
         redirect_uri: providedConfig.redirectUri ?? 'not_used',
         monitorSession: true,
+        automaticSilentRenew: true,
         scope: '',
         userStore: new WebStorageStateStore({ store: window.localStorage }),
     });
@@ -180,7 +181,7 @@ function registerSw() {
     }
 }
 
-async function isUserLoggedIn(config: InitAppConfig) {
+async function isUserLoggedIn(config: InitAppConfig): Promise<boolean> {
     const userManager = config.auth.userManager;
     if (!(await userManager.getUser())) {
         return false;
@@ -199,12 +200,13 @@ async function loadSchema(config: InitAppConfig) {
     window.schemaLoader = schemaLoader;
     const schema = await schemaLoader.loadSchema();
     signals.emit('openapi.loaded', schema);
+    sessionStorage.setItem('defaultSchema', JSON.stringify(schema));
     return schema;
 }
 
 function createSchemaOauthConfigProvider(apiConfig: ApiConfig) {
     const loadSchemaOnce = (() => {
-        let schema: AppSchema | null = null;
+        let schema: AppSchema | null = JSON.parse(sessionStorage.getItem('defaultSchema') || 'null');
 
         return async (): Promise<AppSchema> => {
             if (schema) {
@@ -214,6 +216,7 @@ function createSchemaOauthConfigProvider(apiConfig: ApiConfig) {
             url.searchParams.set('format', 'openapi');
             const response = await fetch(url);
             schema = await response.json();
+            sessionStorage.setItem('defaultSchema', JSON.stringify(schema));
             return schema as AppSchema;
         };
     })();

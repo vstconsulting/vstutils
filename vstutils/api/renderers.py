@@ -5,7 +5,7 @@ import ormsgpack
 from django.utils.functional import Promise, LazyObject
 from rest_framework.renderers import BaseRenderer
 from rest_framework.settings import api_settings
-from drf_orjson_renderer.renderers import ORJSONRenderer as BaseORJSONRenderer  # type: ignore
+from drf_orjson_renderer.renderers import ORJSONRenderer as BaseORJSONRenderer
 
 from ..utils import get_if_lazy
 

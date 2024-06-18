@@ -8,14 +8,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from django.template.response import TemplateResponse
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
 from jsmin import jsmin
 
 from ..utils import lazy_translate as __
-
-
-UserModel = get_user_model()
 
 
 class BaseView(TemplateView):
@@ -34,20 +30,9 @@ class BaseView(TemplateView):
         return cls.login_required and login_required(view, login_url=reverse_lazy('login')) or view  # type: ignore
 
 
-class GUIView(BaseView):
-    template_name = "gui/gui.html"
-
-
 class OfflineView(BaseView):
     login_required = False
     template_name = "gui/offline.html"
-
-
-class ManifestView(BaseView):
-    minify_response = False
-    login_required = False
-    template_name = "gui/manifest.json"
-    content_type = 'application/json'
 
 
 class JSMinTemplateResponse(TemplateResponse):

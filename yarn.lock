@@ -813,10 +813,10 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.14.3.tgz#5b2fb4d8cd44c05deef8a7b0e6deb9ccb8939d18"
   integrity sha512-/BypzV0H1y1HzgYpxqRaXGBRqfodgoBBCcsrujT6QRcakDQdfU+Lq9PENPh5jB4I44YWq+0C2eHsHya+nZY1sA==
 
-"@rushstack/eslint-patch@^1.10.2":
-  version "1.10.2"
-  resolved "https://registry.yarnpkg.com/@rushstack/eslint-patch/-/eslint-patch-1.10.2.tgz#053f1540703faa81dea2966b768ee5581c66aeda"
-  integrity sha512-hw437iINopmQuxWPSUEvqE56NCPsiU8N4AYtfHmJFckclktzK9YQJieD3XkDCDH4OjL+C7zgPUh73R/nrcHrqw==
+"@rushstack/eslint-patch@^1.10.3":
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/@rushstack/eslint-patch/-/eslint-patch-1.10.3.tgz#391d528054f758f81e53210f1a1eebcf1a8b1d20"
+  integrity sha512-qC/xYId4NMebE6w/V33Fh9gWxLgURiNYgVNObbJl2LZv0GUUItCcCqC5axQSwRaAgaxl2mELq1rMzlswaQ0Zxg==
 
 "@rushstack/node-core-library@4.0.2":
   version "4.0.2"
@@ -992,10 +992,10 @@
   resolved "https://registry.yarnpkg.com/@types/sizzle/-/sizzle-2.3.4.tgz#cd6531924f60834fa4a1b8081f9eecf9bb1117f0"
   integrity sha512-jA2llq2zNkg8HrALI7DtWzhALcVH0l7i89yhY3iBdOz6cBPeACoFq+fkQrjHA39t1hnSFOboZ7A/AY5MMZSlag==
 
-"@types/swagger-schema-official@^2.0.22":
-  version "2.0.23"
-  resolved "https://registry.yarnpkg.com/@types/swagger-schema-official/-/swagger-schema-official-2.0.23.tgz#c03bb5a0c3fe652f2f560026aacc4867d21143c1"
-  integrity sha512-9b+/Lh14ROankvt9sWprogb1vK6mn7pXzAhHiEG76I5O3RXJhtdv0IQSGvL5Huezj68IEH8KVPkNZzlNdanTYw==
+"@types/swagger-schema-official@^2.0.25":
+  version "2.0.25"
+  resolved "https://registry.yarnpkg.com/@types/swagger-schema-official/-/swagger-schema-official-2.0.25.tgz#c8073914004d0a9c5412aeaf458d96e34c504840"
+  integrity sha512-T92Xav+Gf/Ik1uPW581nA+JftmjWPgskw/WBf4TJzxRG/SJ+DfNnNE+WuZ4mrXuzflQMqMkm1LSYjzYW7MB1Cg==
 
 "@types/web-bluetooth@^0.0.20":
   version "0.0.20"
@@ -1098,10 +1098,10 @@
   resolved "https://registry.yarnpkg.com/@vitejs/plugin-vue2/-/plugin-vue2-2.3.1.tgz#53078d3d9d50d9863f1fbb1c1ef7791a5fcd4948"
   integrity sha512-/ksaaz2SRLN11JQhLdEUhDzOn909WEk99q9t9w+N12GjQCljzv7GyvAbD/p20aBUjHkvpGOoQ+FCOkG+mjDF4A==
 
-"@vitest/coverage-istanbul@^1.5.1":
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/@vitest/coverage-istanbul/-/coverage-istanbul-1.5.1.tgz#43aa3058542cb9b6ef38f3c70d99f00e61eb2f7a"
-  integrity sha512-E8H34Ul4djgxyF6yss767qbfqw+4HrXVfUUufolL9MdK6gVH568aWV/VYQCfnh3+AIwZyjZrdZZH9f2L6zYxig==
+"@vitest/coverage-istanbul@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@vitest/coverage-istanbul/-/coverage-istanbul-1.6.0.tgz#4df9310b085416f064f7e057373c546dcf14e41c"
+  integrity sha512-h/BwpXehkkS0qsNCS00QxiupAqVkNi0WT19BR0dQvlge5oHghoSVLx63fABYFoKxVb7Ue7+k6V2KokmQ1zdMpg==
   dependencies:
     debug "^4.3.4"
     istanbul-lib-coverage "^3.2.2"
@@ -1248,7 +1248,7 @@
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.4.23.tgz#e536a6dfd2f5f950d08c2e8ebcfe7e5329a851a1"
   integrity sha512-wBQ0gvf+SMwsCQOyusNw/GoXPV47WGd1xB5A1Pgzy0sQ3Bi5r5xm3n+92y3gCnB3MWqnRDdvfkRGxhKtbBRNgg==
 
-"@vue/test-utils@^1.3.0":
+"@vue/test-utils@^1.3.6":
   version "1.3.6"
   resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-1.3.6.tgz#6656bd8fa44dd088b4ad80ff1ee28abe7e5ddf87"
   integrity sha512-udMmmF1ts3zwxUJEIAj5ziioR900reDrt6C9H3XpWPsLBx2lpHKoA4BTdd9HNIYbkGltWw+JjWJ+5O6QBwiyEw==
@@ -1257,27 +1257,27 @@
     lodash "^4.17.15"
     pretty "^2.0.0"
 
-"@vueuse/core@^10.9.0":
-  version "10.9.0"
-  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-10.9.0.tgz#7d779a95cf0189de176fee63cee4ba44b3c85d64"
-  integrity sha512-/1vjTol8SXnx6xewDEKfS0Ra//ncg4Hb0DaZiwKf7drgfMsKFExQ+FnnENcN6efPen+1kIzhLQoGSy0eDUVOMg==
+"@vueuse/core@^10.11.0":
+  version "10.11.0"
+  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-10.11.0.tgz#b042585a8bf98bb29c177b33999bd0e3fcd9e65d"
+  integrity sha512-x3sD4Mkm7PJ+pcq3HX8PLPBadXCAlSDR/waK87dz0gQE+qJnaaFhc/dZVfJz+IUYzTMVGum2QlR7ImiJQN4s6g==
   dependencies:
     "@types/web-bluetooth" "^0.0.20"
-    "@vueuse/metadata" "10.9.0"
-    "@vueuse/shared" "10.9.0"
-    vue-demi ">=0.14.7"
+    "@vueuse/metadata" "10.11.0"
+    "@vueuse/shared" "10.11.0"
+    vue-demi ">=0.14.8"
 
-"@vueuse/metadata@10.9.0":
-  version "10.9.0"
-  resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-10.9.0.tgz#769a1a9db65daac15cf98084cbf7819ed3758620"
-  integrity sha512-iddNbg3yZM0X7qFY2sAotomgdHK7YJ6sKUvQqbvwnf7TmaVPxS4EJydcNsVejNdS8iWCtDk+fYXr7E32nyTnGA==
+"@vueuse/metadata@10.11.0":
+  version "10.11.0"
+  resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-10.11.0.tgz#27be47cf115ee98e947a1bfcd0b1b5b35d785fb6"
+  integrity sha512-kQX7l6l8dVWNqlqyN3ePW3KmjCQO3ZMgXuBMddIu83CmucrsBfXlH+JoviYyRBws/yLTQO8g3Pbw+bdIoVm4oQ==
 
-"@vueuse/shared@10.9.0":
-  version "10.9.0"
-  resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-10.9.0.tgz#13af2a348de15d07b7be2fd0c7fc9853a69d8fe0"
-  integrity sha512-Uud2IWncmAfJvRaFYzv5OHDli+FbOzxiVEQdLCKQKLyhz94PIyFC3CHcH7EDMwIn8NPtD06+PNbC/PiO0LGLtw==
+"@vueuse/shared@10.11.0":
+  version "10.11.0"
+  resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-10.11.0.tgz#be09262b2c5857069ed3dadd1680f22c4cb6f984"
+  integrity sha512-fyNoIXEq3PfX1L3NkNhtVQUSRtqYwJtJg+Bp9rIzculIZWHTkKSysujrOk2J+NrRulLTQH9+3gGSfYLWSEWU1A==
   dependencies:
-    vue-demi ">=0.14.7"
+    vue-demi ">=0.14.8"
 
 abbrev@^1.0.0:
   version "1.1.1"
@@ -5463,10 +5463,15 @@ vitest@^1.6.0:
     vite-node "1.6.0"
     why-is-node-running "^2.2.2"
 
-vue-demi@>=0.14.5, vue-demi@>=0.14.7:
+vue-demi@>=0.14.5:
   version "0.14.7"
   resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.14.7.tgz#8317536b3ef74c5b09f268f7782e70194567d8f2"
   integrity sha512-EOG8KXDQNwkJILkx/gPcoL/7vH+hORoBaKgGe+6W7VFMvCYJfmF2dGbvgDroVnI8LU7/kTu8mbjRZGBU1z9NTA==
+
+vue-demi@>=0.14.8:
+  version "0.14.8"
+  resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.14.8.tgz#00335e9317b45e4a68d3528aaf58e0cec3d5640a"
+  integrity sha512-Uuqnk9YE9SsWeReYqK2alDI5YzciATE0r2SkA6iMAtuXvNTMNACJLJEXNXaEy94ECuBe4Sk6RzRU80kjdbIo1Q==
 
 vue-eslint-parser@^9.3.1, vue-eslint-parser@^9.4.2:
   version "9.4.2"

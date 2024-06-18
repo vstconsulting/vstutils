@@ -243,6 +243,8 @@ HostWithoutAuthViewSet = create_view(
     Host,
     view_class=(HostCreateDummyMixin, 'read_only'),
     override_authentication_classes=None,
+    permission_classes=[AllowAny],
+    override_permission_classes=True,
 )
 
 CacheableView = create_view(CachableProxyModel)

@@ -97,9 +97,9 @@ function isLocalStorageAvailable() {
     }
 }
 
-export function getCache(): Cache {
+export function getCache(storage = window.sessionStorage): Cache {
     if (isLocalStorageAvailable()) {
-        return new StorageCache(window.localStorage);
+        return new StorageCache(storage);
     }
     return new DummyCache();
 }
