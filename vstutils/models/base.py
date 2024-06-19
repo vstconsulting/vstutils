@@ -506,7 +506,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
 
             serializer = serializers['serializer_class']()
             for field_name, field in cls.get_model_fields_mapping(iteration_filter_handler).items():
-                if isinstance(field, ForeignKey):
+                if isinstance(field, (ForeignKey, ManyToManyField)):
                     related_name = get_first_match_name([
                         f.name
                         for f in field.related_model._meta.fields
