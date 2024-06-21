@@ -794,6 +794,12 @@ class ViewsTestCase(BaseTestCase):
             }
         )
 
+        response = fclient.get('/manifest.json', headers={'if-none-match': response.headers['etag']})
+        self.assertEqual(response.status_code, 304)
+
+        response = fclient.get('/favicon.ico')
+        self.assertEqual(response.status_code, 200)
+
         # 404
         self.get_result('get', '/api/v1/some/', code=404)
         self.get_result('get', '/other_invalid_url/', code=404)
@@ -5748,6 +5754,10 @@ class ConfigParserCTestCase(BaseTestCase):
         self.assertEqual(settings.CELERY_RESULT_EXPIRES, 86400)
         self.assertEqual(settings.CREATE_INSTANCE_ATTEMPTS, 10)
         self.assertEqual(settings.CONCURRENCY, 4)
+        self.assertEqual(
+            settings.CELERY_BROKER_TRANSPORT_OPTIONS['predefined_queues']['test.fifo']['url'],
+            'https://ap-southeast-2.queue.amazonaws.com/123456/test.fifo'
+        )
 
         worker_options = {
             'app': 'test_proj.wapp:app',

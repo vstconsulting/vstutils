@@ -2,6 +2,7 @@ import typing
 import os
 import posixpath
 import functools
+import hashlib
 import time
 from datetime import timedelta
 
@@ -21,11 +22,11 @@ from fastapi.staticfiles import StaticFiles
 from starlette.staticfiles import NotModifiedResponse
 
 from .signals import before_mount_app
+from .api.base import check_request_etag
 
 if typing.TYPE_CHECKING:
     class ManifestProtocol(typing.Protocol):
         data: dict[str, typing.Any]
-
 
 SPA_STATIC_MAX_AGE = round(
     timedelta(days=30).total_seconds()
@@ -88,6 +89,7 @@ async def static(file_path: str, request: Request = None):
 
 if settings.OAUTH_SERVER_ENABLE:
     from vstutils.oauth2.endpoints import oauth_authorization_server, openid_configuration
+
     application.get('/.well-known/oauth-authorization-server')(oauth_authorization_server)
     application.get('/.well-known/openid-configuration')(openid_configuration)
 
@@ -108,8 +110,19 @@ if settings.ENABLE_BACKEND_MANIFEST and not any(m.path == '/manifest.json' for m
     manifest: 'ManifestProtocol' = import_string(settings.MANIFEST_CLASS)()
 
     @application.get('/manifest.json')
-    async def gui_manifest():
-        return ORJSONResponse(manifest.data)
+    async def gui_manifest(request: Request):
+        etag, is_valid = check_request_etag(
+            request,
+            hashlib.blake2s(settings.FULL_VERSION.encode(), digest_size=6).hexdigest()
+        )
+        if is_valid:
+            return Response(status_code=304, headers={'ETag': etag})
+        return ORJSONResponse(manifest.data, headers={'ETag': etag})
+
+
+@application.get("/favicon.ico")
+async def favicon(request: Request):
+    return await static('favicon.ico', request)
 
 
 @application.middleware('http')
@@ -122,8 +135,9 @@ async def add_server_timing_header(request: Request, call_next):
             response = Response(status_code=204)
         else:
             raise
-    response.headers['Server-Timing'] = f'total_full;dur={round((time.monotonic()-start_time)*1000, 2)}'
+    response.headers['Server-Timing'] = f'total_full;dur={round((time.monotonic() - start_time) * 1000, 2)}'
     return response
+
 
 if not settings.API_ONLY:
     @application.route("/")

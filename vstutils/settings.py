@@ -369,6 +369,11 @@ class RPCBrokerSection(BaseAppendSection):
         'polling_interval': FloatType(),
     }
 
+class RPCBrokerPredefinedQueuesSection(cconfig.Section):
+    def key_handler_to_all(self, key):
+        key = super().key_handler_to_all(key)
+        return key.replace('_fifo', '.fifo')
+
 
 class WorkerSection(BaseAppendSection):
     types_map = {
@@ -662,6 +667,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'uwsgi': UWSGISection,
         'rpc': RPCSection,
         'rpc.broker_transport_options': RPCBrokerSection,
+        'rpc.broker_transport_options.predefined_queues': RPCBrokerPredefinedQueuesSection,
         'centrifugo': CentrifugoSection,
         'throttle': ThrottleSection,
         'storages.boto3': Boto3Subsection,
