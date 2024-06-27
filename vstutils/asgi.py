@@ -153,10 +153,6 @@ if not settings.API_ONLY:
 
 if settings.ENABLE_ADMIN_PANEL:
     class ASGIRequest(ASGIHandler.request_class):
-        def __init__(self, scope, body_file):  # nocv
-            scope['root_path'] = ""
-            super().__init__(scope, body_file)
-
         @functools.cached_property
         def urlconf(self):  # nocv
             # pylint: disable=import-outside-toplevel
@@ -165,6 +161,10 @@ if settings.ENABLE_ADMIN_PANEL:
 
     class AdminASGIHandler(ASGIHandler):
         request_class = ASGIRequest
+
+        async def __call__(self, scope, receive, send):  # nocv
+            scope['root_path'] = ""
+            return await super().__call__(scope, receive, send)
 
     with override_settings(MIDDLEWARE=settings.ADMIN_MIDDLEWARE):
         django_admin_app = AdminASGIHandler()

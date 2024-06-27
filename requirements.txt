@@ -18,6 +18,7 @@ pyuwsgi==2.0.23.post0
 # uwsgi==2.0.23
 fastapi-slim~=0.111.0
 aiofiles==23.2.1
+asgiref>=3.8.1
 
 # Notifications
 cent~=4.1.0

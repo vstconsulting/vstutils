@@ -800,6 +800,11 @@ class ViewsTestCase(BaseTestCase):
         response = fclient.get('/favicon.ico')
         self.assertEqual(response.status_code, 200)
 
+        response = fclient.get('/admin/')
+        self.assertEqual(response.status_code, 200)
+        response = fclient.get('/admin/login/')
+        self.assertEqual(response.status_code, 200)
+
         # 404
         self.get_result('get', '/api/v1/some/', code=404)
         self.get_result('get', '/other_invalid_url/', code=404)

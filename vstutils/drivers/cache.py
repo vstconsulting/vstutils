@@ -68,7 +68,7 @@ class TarantoolCache(BaseCache):
         host, _, port = self._servers.rpartition(':')
         user = self._options.get('user', 'guest')
         password = self._options.get('password')
-        client = tarantool.connect(host, int(port), user, password)
+        client = tarantool.connect(host, int(port), None, user, password)
         return client
 
     @cached_property
