@@ -50,7 +50,7 @@ stages:
 
 .js_tests_template: &branch_js_tests
   <<: *branch_tests
-  image: registry.gitlab.com/vstconsulting/images:node18-tests
+  image: registry.gitlab.com/vstconsulting/images:node20-tests
   before_script:
     - yarn install --pure-lockfile --mutex network
   script:

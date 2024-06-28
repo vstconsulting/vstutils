@@ -1479,3 +1479,56 @@ def add_in_vary(headers: dict, value: str):
     if value not in vary:
         vary.append(value)
         headers['Vary'] = ', '.join(vary)
+
+
+def check_request_etag(request, etag_value, header_name="If-None-Match", operation_handler=str.__eq__):
+    """
+    The function plays a crucial role within the context of the ETag mechanism,
+    providing a flexible way to validate client-side ETags against the server-side version for both cache validation
+    and ensuring data consistency in web applications.
+    It supports conditional handling of HTTP requests based on the match or mismatch of ETag values,
+    accommodating various scenarios such as cache freshness checks and prevention of concurrent modifications.
+
+    :param request: The HTTP request object containing the client's headers,
+                    from which the ETag for comparison is retrieved.
+    :type request: :class:`rest_framework.request.Request`
+    :param etag_value: The server-generated ETag value that represents the current state of the resource.
+                       This unique identifier is recalculated whenever the resource's content changes.
+    :type etag_value: :class:`str`
+    :param header_name: Specifies the HTTP header to look for the client's ETag.
+                        Defaults to "If-None-Match", commonly used in GET requests for cache validation.
+                        For operations requiring confirmation that the client is acting on the latest version
+                        of a resource (e.g., PUT or DELETE), "If-Match" should be used instead.
+    :type header_name: :class:`str`
+    :param operation_handler: A function to compare the ETags. By default, this is set to ``str.__eq__``,
+                              which checks for an exact match between the client's and server's ETags,
+                              suitable for validating caches with ``If-None-Match``.
+                              To handle ``If-Match`` scenarios, where the operation should proceed only if the ETags
+                              do not match, indicating the resource has been modified, ``str.__ne__`` (not equal)
+                              can be used as the operation handler. This flexibility allows for precise control over how
+                              and when clients are allowed to read from or write to resources based on their version.
+
+    :return: Returns a tuple containing the server's ETag and a boolean flag.
+             The flag is ``True`` if the operation handler condition between the server's and client's ETag is met,
+             indicating the request should proceed based on the matching logic defined by the operation handler;
+             otherwise, it returns ``False``.
+    """
+    header = request.headers.get(header_name)
+
+    if not header:
+        return etag_value, False
+
+    header = str(header)
+    if header[:2] in {'W/', "w/"}:
+        header = header[2:]
+
+    if header[0] != '"':
+        header = f'"{header}"'
+
+    if etag_value[0] != '"':
+        etag_value = f'"{etag_value}"'
+
+    if operation_handler(etag_value, header):
+        return etag_value, True
+
+    return etag_value, False

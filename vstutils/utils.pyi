@@ -529,3 +529,11 @@ def get_session_store():
 
 def add_in_vary(headers: dict, value: str):
     ...
+
+def check_request_etag(
+        request: Request,
+        etag_value: T,
+        header_name: tp.Text = "If-None-Match",
+        operation_handler: tp.Callable[[tp.Text, tp.Text], bool] = str.__eq__
+) -> tp.Tuple[T, bool]:
+    ...

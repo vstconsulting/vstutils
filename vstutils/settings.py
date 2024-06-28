@@ -338,7 +338,6 @@ class MailSection(BaseAppendSection):
         'tls': ConfigBoolType,
         'ssl': ConfigBoolType,
         'send_confirmation': ConfigBoolType,
-        'authenticate_after_registration': ConfigBoolType,
         'agreement_terms': ConfigBoolType,
     }
 
@@ -564,7 +563,6 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'send_confirmation': os.getenv(f'{ENV_NAME}_SEND_CONFIRMATION_EMAIL', False),
             'send_email_retries': os.getenv(f'{ENV_NAME}_SEND_EMAIL_RETRIES', 3),
             'send_email_retry_delay': os.getenv(f'{ENV_NAME}_SEND_EMAIL_RETRY_DELAY', 10),
-            'authenticate_after_registration': os.getenv(f'{ENV_NAME}_AUTHENTICATE_AFTER_REGISTRATION', False),
         },
         'contact': {
             'name': 'System Administrator'
@@ -1084,7 +1082,6 @@ EMAIL_FROM_ADDRESS = mail.get("from_address", EMAIL_HOST_USER)
 SEND_CONFIRMATION_EMAIL: bool = mail["send_confirmation"]
 SEND_EMAIL_RETRIES: int = mail['send_email_retries']
 SEND_MESSAGE_RETRY_DELAY: int = mail['send_email_retry_delay']
-AUTHENTICATE_AFTER_REGISTRATION: bool = mail["authenticate_after_registration"]
 REGISTRATION_HASHERS: tuple = mail.getlist(
     'send_confirmation_uid_hashers',
     'django.contrib.auth.hashers.MD5PasswordHasher'
@@ -1590,6 +1587,11 @@ OAUTH_SERVER_CLIENTS: OauthServerClientsConfig = {
 if OAUTH_SERVER_ENABLE:
     if config['oauth']['server_allow_insecure']:
         os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+    if OAUTH_SERVER_ENABLE_ANON_LOGIN:
+        AUTHENTICATION_BACKENDS.append(
+            'vstutils.oauth2.anonymous.AnonymousUserAuthBackend',
+        )
 
     API['oauth2'].update({
         'token': {

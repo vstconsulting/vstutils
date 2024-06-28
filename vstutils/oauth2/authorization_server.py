@@ -28,7 +28,6 @@ from authlib.oauth2.rfc9068 import (
 from authlib.oauth2.rfc9068.claims import JWTAccessTokenClaims, JWTClaims
 from django.conf import settings
 from django.contrib.auth import authenticate, login, get_user
-from django.contrib.auth.models import AnonymousUser, AbstractBaseUser
 from django.utils.module_loading import import_string
 from vstutils.utils import get_session_store
 
@@ -40,9 +39,10 @@ from .user import UserWrapper
 
 if TYPE_CHECKING:  # nocv
     from authlib.jose import KeySet
+    from django.contrib.auth.models import AbstractBaseUser
 
 
-extra_claims_provider: Optional[Callable[[AbstractBaseUser], Optional[dict]]] = (
+extra_claims_provider: 'Optional[Callable[[AbstractBaseUser], Optional[dict]]]' = (
     import_string(settings.OAUTH_SERVER_JWT_EXTRA_CLAIMS_PROVIDER)
     if settings.OAUTH_SERVER_JWT_EXTRA_CLAIMS_PROVIDER
     else None
@@ -99,6 +99,9 @@ class JWTBearerTokenGenerator(BaseJWTBearerTokenGenerator):
         if user.is_anon():
             claims['anon'] = True
 
+        if user_claims := user.get_access_token_claims():
+            claims.update(user_claims)
+
         if extra_claims_provider:
             if extra_claims := extra_claims_provider(user.django_user):
                 claims.update(extra_claims)
@@ -149,11 +152,6 @@ class ResourceOwnerPasswordCredentialsGrant(BaseResourceOwnerPasswordCredentials
     TOKEN_ENDPOINT_AUTH_METHODS = settings.OAUTH_SERVER_CLIENT_AUTHENTICATION_METHODS
 
     def authenticate_user(self, username, password):
-        if (
-            settings.OAUTH_SERVER_ENABLE_ANON_LOGIN and
-            username == '' and password == ''  # nosec
-        ):
-            return UserWrapper(AnonymousUser())
         user = authenticate(
             self.request._request,  # pylint: disable=protected-access
             username=username,
@@ -246,8 +244,6 @@ class JWTSessionRefreshToken(TokenMixin):  # pylint: disable=abstract-method
     def get_user(self):
         if not self._session:
             return
-        if self.claims.get('anon'):
-            return UserWrapper(AnonymousUser())
         user = get_user(self.RequestMock(self._session))
         if user:
             return UserWrapper(user)

@@ -95,14 +95,6 @@ class EtagDependency(enum.Flag):
     SESSION: enum.auto()
     LANG: enum.auto()
 
-def check_request_etag(
-        request: Request,
-        etag_value: T,
-        header_name: _t.Text = "If-None-Match",
-        operation_handler: _t.Callable[[_t.Text, _t.Text], bool] = str.__eq__
-) -> _t.Tuple[T, bool]:
-    ...
-
 class CachableHeadMixin(GenericViewSet):
     class NotModifiedException(exceptions.APIException): ...
     class PreconditionFailedException(exceptions.APIException): ...

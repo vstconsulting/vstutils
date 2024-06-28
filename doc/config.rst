@@ -365,7 +365,6 @@ Developers often switch between these backends based on the context of their wor
 * **password** - Auth password for smtp-server connection. Default: ``""``.
 * **tls** - Enable/disable tls for smtp-server connection. Default: ``False``.
 * **send_confirmation** - Enable/disable confirmation message after registration. Default: ``False``.
-* **authenticate_after_registration** - Enable/disable autologin after registration confirmation. Default: ``False``.
 
 
 .. _web:
@@ -872,7 +871,7 @@ This section contains additional information for configure additional elements.
    For project without special settings and project levels named ``project`` these variables will start with ``PROJECT_`` prefix.
    There is a list of these variables: ``{ENV_NAME}_ENABLE_ADMIN_PANEL``, ``{ENV_NAME}_ENABLE_REGISTRATION``, ``{ENV_NAME}_MAX_TFA_ATTEMPTS``,
    ``{ENV_NAME}_ETAG_TIMEOUT``, ``{ENV_NAME}_SEND_CONFIRMATION_EMAIL``, ``{ENV_NAME}_SEND_EMAIL_RETRIES``,
-   ``{ENV_NAME}_SEND_EMAIL_RETRY_DELAY``, ``{ENV_NAME}_AUTHENTICATE_AFTER_REGISTRATION``,
+   ``{ENV_NAME}_SEND_EMAIL_RETRY_DELAY``,
    ``{ENV_NAME}_MEDIA_ROOT`` (dir with uploads), ``{ENV_NAME}_GLOBAL_THROTTLE_RATE``,
    and ``{ENV_NAME}_GLOBAL_THROTTLE_ACTIONS``.
 

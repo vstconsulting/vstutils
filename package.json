@@ -1,6 +1,6 @@
 {
   "name": "@vstconsulting/vstutils",
-  "version": "5.10.0b9",
+  "version": "5.10.0b14",
   "type": "module",
   "author": "VST Consulting",
   "license": "Apache-2.0",
@@ -12,7 +12,7 @@
     "url": "git+https://gitlab.com/vstconsulting/vstutils.git"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.15.0"
   },
   "exports": {
     ".": {
