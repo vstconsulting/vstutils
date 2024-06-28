@@ -22,7 +22,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.staticfiles import NotModifiedResponse
 
 from .signals import before_mount_app
-from .api.base import check_request_etag
+from .utils import check_request_etag
 
 if typing.TYPE_CHECKING:
     class ManifestProtocol(typing.Protocol):

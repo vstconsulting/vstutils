@@ -7606,3 +7606,30 @@ class Oauth2TestCase(BaseTestCase):
             headers={'authorization': f'Bearer {access_token}'},
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_custom_user_claims(self):
+        response = self.client_class().post(
+            '/api/oauth2/token/',
+            content_type='application/json',
+            data={
+                'client_id': 'test-client',
+                'client_secret': 'test-client-secret',
+                'grant_type': 'password',
+                'scope': 'openid',
+                'username': 'custom_user',
+                'password': '',
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+
+        access_token = jwt.decode(
+            response.json()['access_token'],
+            oauth2_server_jwk_set,
+        )
+        self.assertTrue(access_token['some_claim'])
+
+        id_token = jwt.decode(
+            response.json()['id_token'],
+            oauth2_server_jwk_set,
+        )
+        self.assertEqual(id_token['locale'], 'fr-CA')

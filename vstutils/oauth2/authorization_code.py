@@ -86,10 +86,13 @@ class OpenIDCode(BaseOpenIDCode):  # pylint: disable=abstract-method
         }
 
     def generate_user_info(self, user: UserWrapper, scope):
-        return UserInfo(
+        profile = UserInfo(
             sub=user.get_user_id(),
             anon=user.is_anon(),
         )
+        if profile_claims := user.get_profile_claims():
+            profile.update(profile_claims)
+        return profile
 
 
 class AuthorizationCodeGrant(BaseAuthorizationCodeGrant):
@@ -125,5 +128,6 @@ class AuthorizationCodeGrant(BaseAuthorizationCodeGrant):
     def authenticate_user(self, authorization_code: AuthorizationCode):
         backend = load_backend(authorization_code.auth_backend_path)
         user = backend.get_user(authorization_code.user_id)
+        user.backend = authorization_code.auth_backend_path
         if user:
             return UserWrapper(user)

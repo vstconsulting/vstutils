@@ -14,6 +14,10 @@ MIDDLEWARE.insert(6, 'django.contrib.sessions.middleware.SessionMiddleware')
 MIDDLEWARE.insert(8, 'django.contrib.auth.middleware.AuthenticationMiddleware')
 MIDDLEWARE.insert(9, 'django.contrib.messages.middleware.MessageMiddleware')
 
+AUTHENTICATION_BACKENDS.append(
+    'test_proj.user_claims_auth_backend.CustomUserAuthBackend',
+)
+
 HEALTH_BACKEND_CLASS = 'test_proj.health.TestDefaultBackend'
 
 API['v2'] = {}
