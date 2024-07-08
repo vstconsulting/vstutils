@@ -1,5 +1,7 @@
 import datetime
 import os
+
+import pydantic
 from django.db import models
 from django.db.models.functions import Now
 from rest_framework import permissions, fields as drf_fields
@@ -102,6 +104,18 @@ class List(ListModel):
     value = models.TextField()
 
 
+class ListOfFilesPydantic(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(
+        extra='ignore',
+        from_attributes=True,
+        title="TestBinaryFilesObject",
+        strict=True,
+    )
+    id: int
+    filename: str
+    test: str
+
+
 class ListOfFiles(ListModel):
     data = [
         {'id': i, 'value': 'File data', 'updated': datetime.datetime(2021, 3, 1, 16, 15, 51, 801564), 'test': 1}
@@ -115,6 +129,7 @@ class ListOfFiles(ListModel):
     class Meta:
         _view_class = (FileViewMixin, 'read_only')
         _list_fields = _detail_fields = ('id', 'filename', 'test',)
+        _extra_serializer_classes = {'serializer_class_list': ListOfFilesPydantic}
         _permission_classes = [permissions.AllowAny]
         _override_permission_classes = True
         _filterset_fields = {

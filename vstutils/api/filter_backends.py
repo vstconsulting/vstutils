@@ -2,6 +2,7 @@ import typing as _t
 import warnings
 import contextlib
 
+import pydantic
 from django.db import models
 from django.utils.encoding import force_str
 from django_filters import filters, filterset
@@ -96,7 +97,13 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
 
 class OrderingFilterBackend(OrderingFilter):
     def _get_fields_for_schema(self, view):
-        for field in self.get_valid_fields(view.get_queryset(), view, {'request': view.request}):
+        serializer_class = view.get_serializer_class()
+        if issubclass(serializer_class, pydantic.BaseModel):
+            valid_fields = serializer_class.model_fields.items()
+        else:
+            valid_fields = self.get_valid_fields(view.get_queryset(), view, {'request': view.request})
+
+        for field in valid_fields:
             yield field[0]
             yield f'-{field[0]}'
 

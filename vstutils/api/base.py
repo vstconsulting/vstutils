@@ -12,6 +12,7 @@ from functools import partial
 from copy import deepcopy
 
 import orjson
+import pydantic
 from django.conf import settings
 from django.core import exceptions as djexcs
 from django.http.response import Http404, FileResponse, HttpResponseNotModified
@@ -193,6 +194,30 @@ def exception_handler(exc, context):
         default_response["X-Anonymous"] = "true"  # type: ignore
 
     return default_response
+
+
+class ProxyPydanticSerializer:
+    __slots__ = ('_obj', 'schema_model', 'many', 'context')
+
+    def __init__(self, instance=None, data=None, **kwargs):
+        self.many = kwargs.pop('many', False)
+        self.context = kwargs.pop('context', None)
+        self._obj = instance
+        self.schema_model: pydantic.BaseModel = kwargs.pop('schema_model', None)
+
+    def to_representation(self, value):
+        return self.schema_model\
+            .model_validate(value, context=self.context, from_attributes=True, strict=True)\
+            .model_dump(round_trip=True, warnings=False)
+
+    @property
+    def data(self):
+        if self.many:
+            return [
+                self.to_representation(i)
+                for i in self._obj
+            ]
+        return self.to_representation(self._obj)
 
 
 class AutoSchema(DRFAutoSchema):
@@ -451,6 +476,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         serializer_class = self.get_serializer_class()
         if issubclass(serializer_class, BaseSerializer):
             kwargs.setdefault('context', self.get_serializer_context())
+        elif self.request.method == 'GET' and issubclass(serializer_class, pydantic.BaseModel):
+            kwargs.setdefault('context', self.get_serializer_context())
+            kwargs.setdefault('schema_model', serializer_class)
+            serializer_class = ProxyPydanticSerializer
         return serializer_class(*args, **kwargs)
 
     def nested_allow_check(self):
