@@ -4617,6 +4617,8 @@ class ProjectTestCase(BaseTestCase):
             },
             {'method': 'get', 'path': ['testbinaryfiles', instance_without_mediaType.id]},
             {'method': 'post', 'path': ['testbinaryfiles'], 'data': {'some_validatedmultiplenamedbinimage': [valid_image_content_dict]}},
+            {'method': 'get', 'path': ['testbinaryfiles', instance_without_mediaType.id, 'test_pydantic']},
+            {'method': 'get', 'path': ['testbinaryfiles', instance_without_mediaType.id, 'test_pydantic_list']},
         ]
         results = self.bulk(bulk_data)
         self.assertEqual(results[0]['status'], 201)
@@ -4676,6 +4678,9 @@ class ProjectTestCase(BaseTestCase):
             ''.join(results[35]['data']['some_validatedmultiplenamedbinimage'][0]),
             'Invalid image size orientations'
         )
+        self.assertEqual(results[36]['data']['id'], instance_without_mediaType.id)
+        self.assertEqual(results[37]['data']['count'], 2)
+        self.assertEqual(results[37]['data']['results'], [{'id': 1}, {'id': 2}])
 
     def test_file_field(self):
         with open(os.path.join(DIR_PATH, 'cat.jpeg'), 'rb') as cat1:

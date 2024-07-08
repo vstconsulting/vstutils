@@ -2,6 +2,9 @@ import typing as _t
 import collections
 import enum
 import logging
+
+import pydantic
+
 from . import fields as fields, responses as responses
 from ..utils import classproperty as classproperty, get_if_lazy as get_if_lazy, patch_gzip_response_decorator as patch_gzip_response_decorator, raise_context_decorator_with_default as raise_context_decorator_with_default
 from .filter_backends import get_serializer_readable_fields as get_serializer_readable_fields
@@ -51,6 +54,22 @@ http404_re_translate: _t.Pattern
 def _get_cleared(qs: QuerySet) -> QuerySet: ...
 def apply_translation(obj: T, trans_function: _t.Callable[[...], _t.Text]) -> T: ...
 def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestResponse]: ...
+
+class ProxyPydanticSerializer:
+    __slots__ = ('_obj', 'schema_model', 'many', 'context')
+    many: bool
+    context: _t.Optional[dict]
+    schema_model: pydantic.BaseModel
+
+    def __init__(self, instance=None, data=None, **kwargs):
+        ...
+
+    def to_representation(self, value) -> dict[str, _t.Any]:
+        ...
+
+    @property
+    def data(self) -> dict[str, _t.Any]:
+        ...
 
 class AutoSchema(DRFAutoSchema): ...
 

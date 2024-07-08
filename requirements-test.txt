@@ -1,5 +1,5 @@
 # Packages needed for test
-coverage~=7.5.3
+coverage~=7.5.4
 fakeldap~=0.6.6
 tblib==3.0.0
 beautifulsoup4~=4.12.3

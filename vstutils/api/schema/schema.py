@@ -175,6 +175,7 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
         vst_inspectors.DynamicJsonTypeFieldInspector,
         vst_inspectors.AutoCompletionFieldInspector,
         vst_inspectors.VSTFieldInspector,
+        vst_inspectors.PydanticSerializerInspector,
         vst_inspectors.VSTReferencingSerializerInspector,
         vst_inspectors.RelatedListFieldInspector,
         vst_inspectors.RatingFieldInspector,

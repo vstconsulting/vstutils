@@ -1,7 +1,9 @@
+import typing as _t
 import mimetypes
 import time
 import json
 
+import pydantic
 from django.utils.functional import SimpleLazyObject
 from rest_framework.permissions import AllowAny
 
@@ -11,7 +13,7 @@ from vstutils.api.base import GenericViewSet, NonModelsViewSet
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
 from vstutils.api.serializers import DataSerializer, JsonObjectSerializer, EmptySerializer
 from vstutils.api.auth import UserViewSet
-from vstutils.api.actions import Action, SimpleFileAction
+from vstutils.api.actions import Action, SimpleAction, SimpleFileAction
 from vstutils.utils import create_view
 from vstutils.gui.context import gui_version
 
@@ -132,7 +134,24 @@ except AssertionError:
     pass
 
 
+class TestBinaryFilesPydantic(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(
+        extra='ignore',
+        from_attributes=True,
+        title="TestBinaryFilesObject",
+        strict=True,
+    )
+    id: int
+
+
 class TestBinaryFilesViewSet(ModelWithBinaryFiles.generated_view):
+    @SimpleAction(serializer_class=TestBinaryFilesPydantic)
+    def test_pydantic(self, request, *args, **kwargs):
+        return self.get_object()
+
+    @SimpleAction(serializer_class=TestBinaryFilesPydantic, is_list=True)
+    def test_pydantic_list(self, request, *args, **kwargs):
+        return self.get_queryset()
 
     @SimpleFileAction(as_attachment=True)
     def test_some_filefield_default(self, request, *args, **kwargs):
