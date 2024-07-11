@@ -163,7 +163,7 @@ The vstutils library offers a convenient request handler class for elegant OOP d
 Middleware is used to process incoming requests and send responses before they reach final destination.
 
 .. automodule:: vstutils.middleware
-    :members: BaseMiddleware
+    :members: BaseMiddleware,AsyncBaseMiddleware
 
 Filter Backends
 ~~~~~~~~~~~~~~~
