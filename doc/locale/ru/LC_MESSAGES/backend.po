@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-11 22:49+0000\n"
+"POT-Creation-Date: 2024-07-10 19:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -560,6 +560,7 @@ msgstr ""
 #: vstutils.api.filters.FkFilterHandler:15
 #: vstutils.api.serializers.BaseSerializer:12
 #: vstutils.api.serializers.VSTSerializer:10
+#: vstutils.middleware.AsyncBaseMiddleware:41
 #: vstutils.middleware.BaseMiddleware:38
 #: vstutils.models.decorators.register_view_action:24
 #: vstutils.tasks.TaskClass:4 vstutils.utils.BaseEnum:4 vstutils.utils.Lock:35
@@ -686,9 +687,8 @@ msgstr "is_sliced (bool): Булево значение, указывающее,
 #: vstutils.api.actions.SimpleFileAction.pre_data
 #: vstutils.api.base.GenericViewSet.create_action_serializer
 #: vstutils.api.base.GenericViewSet.get_query_serialized_data
-#: vstutils.api.base.check_request_etag vstutils.api.base.get_etag_value
-#: vstutils.api.decorators.nested_view vstutils.api.decorators.subaction
-#: vstutils.api.endpoint.EndpointViewSet.get
+#: vstutils.api.base.get_etag_value vstutils.api.decorators.nested_view
+#: vstutils.api.decorators.subaction vstutils.api.endpoint.EndpointViewSet.get
 #: vstutils.api.endpoint.EndpointViewSet.get_client
 #: vstutils.api.endpoint.EndpointViewSet.operate
 #: vstutils.api.endpoint.EndpointViewSet.post
@@ -744,11 +744,11 @@ msgstr "is_sliced (bool): Булево значение, указывающее,
 #: vstutils.utils.ModelHandlers.get_object vstutils.utils.ObjectHandlers
 #: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers
 #: vstutils.utils.URLHandlers.get_object vstutils.utils.UnhandledExecutor
-#: vstutils.utils.add_in_vary vstutils.utils.classproperty
-#: vstutils.utils.create_view vstutils.utils.decode vstutils.utils.deprecated
-#: vstutils.utils.encode vstutils.utils.get_render
-#: vstutils.utils.lazy_translate vstutils.utils.list_to_choices
-#: vstutils.utils.send_template_email
+#: vstutils.utils.add_in_vary vstutils.utils.check_request_etag
+#: vstutils.utils.classproperty vstutils.utils.create_view
+#: vstutils.utils.decode vstutils.utils.deprecated vstutils.utils.encode
+#: vstutils.utils.get_render vstutils.utils.lazy_translate
+#: vstutils.utils.list_to_choices vstutils.utils.send_template_email
 #: vstutils.utils.send_template_email_handler vstutils.utils.tmp_file
 #: vstutils.utils.tmp_file.write vstutils.utils.translate
 msgid "Parameters"
@@ -761,9 +761,8 @@ msgstr "Объект, содержащий параметры фильтраци
 #: of vstutils.api.actions.SimpleFileAction.modified_since
 #: vstutils.api.actions.SimpleFileAction.pre_data
 #: vstutils.api.base.GenericViewSet.create_action_serializer
-#: vstutils.api.base.check_request_etag vstutils.api.base.get_etag_value
-#: vstutils.api.filters.extra_filter vstutils.api.filters.name_filter
-#: vstutils.api.validators.resize_image
+#: vstutils.api.base.get_etag_value vstutils.api.filters.extra_filter
+#: vstutils.api.filters.name_filter vstutils.api.validators.resize_image
 #: vstutils.api.validators.resize_image_from_to
 #: vstutils.middleware.BaseMiddleware.handler
 #: vstutils.middleware.BaseMiddleware.request_handler
@@ -779,7 +778,8 @@ msgstr "Объект, содержащий параметры фильтраци
 #: vstutils.utils.Executor.aexecute vstutils.utils.Executor.execute
 #: vstutils.utils.Executor.write_output vstutils.utils.ModelHandlers.get_object
 #: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
-#: vstutils.utils.decode vstutils.utils.encode vstutils.utils.get_render
+#: vstutils.utils.check_request_etag vstutils.utils.decode
+#: vstutils.utils.encode vstutils.utils.get_render
 #: vstutils.utils.list_to_choices vstutils.utils.send_template_email_handler
 #: vstutils.utils.tmp_file.write
 msgid "Returns"
@@ -2619,16 +2619,23 @@ msgid ""
 msgstr ""
 "Поле, расширяющее :class:`.FileInStringField`, но скрывающее свое "
 "значение в интерфейсе администратора."
+
 #: of vstutils.api.fields.TextareaField:1
 msgid "A specialized field that allows the input and display of multiline text."
-msgstr "Специализированное поле, которое позволяет вводить и отображать многострочный текст."
+msgstr ""
+"Специализированное поле, которое позволяет вводить и отображать "
+"многострочный текст."
 
 #: of vstutils.api.fields.TextareaField:8
 msgid ""
 "Suppose you have a model with a `description` field that can contain "
 "multiline text. You can use `TextareaField` in your serializer to enable "
 "users to input and view multiline text in the GUI:"
-msgstr "Предположим, у вас есть модель с полем `description`, которое может содержать многострочный текст. Вы можете использовать `TextareaField` в вашем сериализаторе, чтобы пользователи могли вводить и просматривать многострочный текст в графическом интерфейсе:"
+msgstr ""
+"Предположим, у вас есть модель с полем `description`, которое может "
+"содержать многострочный текст. Вы можете использовать `TextareaField` в "
+"вашем сериализаторе, чтобы пользователи могли вводить и просматривать "
+"многострочный текст в графическом интерфейсе:"
 
 #: of vstutils.api.fields.UptimeField:1
 msgid ""
@@ -3570,90 +3577,6 @@ msgstr "Указывает на зависимость от сессии пол�
 msgid "Indicates dependency on the user's identity."
 msgstr "Указывает на зависимость от идентичности пользователя."
 
-#: of vstutils.api.base.check_request_etag:1
-msgid ""
-"The function plays a crucial role within the context of the ETag "
-"mechanism, providing a flexible way to validate client-side ETags against"
-" the server-side version for both cache validation and ensuring data "
-"consistency in web applications. It supports conditional handling of HTTP"
-" requests based on the match or mismatch of ETag values, accommodating "
-"various scenarios such as cache freshness checks and prevention of "
-"concurrent modifications."
-msgstr ""
-"Функция играет ключевую роль в контексте механизма ETag, предоставляя "
-"гибкий способ проверки ETags на стороне клиента по сравнению с версией на"
-" стороне сервера как для проверки кэша, так и для обеспечения "
-"согласованности данных в веб-приложениях. Она поддерживает условную "
-"обработку HTTP-запросов на основе совпадения или несовпадения значений "
-"ETag, адаптируясь к различным сценариям, таким как проверки свежести кэша"
-" и предотвращение одновременных изменений."
-
-#: of vstutils.api.base.check_request_etag:8
-msgid ""
-"The HTTP request object containing the client's headers, from which the "
-"ETag for comparison is retrieved."
-msgstr ""
-"Объект HTTP-запроса, содержащий заголовки клиента, из которых извлекается"
-" ETag для сравнения."
-
-#: of vstutils.api.base.check_request_etag:12
-msgid ""
-"The server-generated ETag value that represents the current state of the "
-"resource. This unique identifier is recalculated whenever the resource's "
-"content changes."
-msgstr ""
-"ETag, сгенерированный сервером, представляет текущее состояние ресурса. "
-"Этот уникальный идентификатор пересчитывается при каждом изменении "
-"содержимого ресурса."
-
-#: of vstutils.api.base.check_request_etag:16
-msgid ""
-"Specifies the HTTP header to look for the client's ETag. Defaults to "
-"\"If-None-Match\", commonly used in GET requests for cache validation. "
-"For operations requiring confirmation that the client is acting on the "
-"latest version of a resource (e.g., PUT or DELETE), \"If-Match\" should "
-"be used instead."
-msgstr ""
-"Указывает HTTP-заголовок для поиска ETag клиента. По умолчанию "
-"используется \"If-None-Match\", обычно используемый в GET-запросах для "
-"проверки кэша. Для операций, требующих подтверждения того, что клиент "
-"действует с последней версией ресурса (например, PUT или DELETE), вместо "
-"этого следует использовать \"If-Match\"."
-
-#: of vstutils.api.base.check_request_etag:22
-msgid ""
-"A function to compare the ETags. By default, this is set to "
-"``str.__eq__``, which checks for an exact match between the client's and "
-"server's ETags, suitable for validating caches with ``If-None-Match``. To"
-" handle ``If-Match`` scenarios, where the operation should proceed only "
-"if the ETags do not match, indicating the resource has been modified, "
-"``str.__ne__`` (not equal) can be used as the operation handler. This "
-"flexibility allows for precise control over how and when clients are "
-"allowed to read from or write to resources based on their version."
-msgstr ""
-"Функция для сравнения ETags. По умолчанию установлено ``str.__eq__``, "
-"которое проверяет точное совпадение ETags клиента и сервера, подходящее "
-"для проверки кэшей с ``If-None-Match``. Для обработки сценариев ``If-"
-"Match``, когда операция должна продолжаться только в случае, если ETags "
-"не совпадают, указывая на то, что ресурс был изменен, можно использовать "
-"``str.__ne__`` (не равно) в качестве обработчика операции. Эта гибкость "
-"позволяет точно контролировать, как и когда клиентам разрешено читать или"
-" записывать ресурсы на основе их версии."
-
-#: of vstutils.api.base.check_request_etag:30
-msgid ""
-"Returns a tuple containing the server's ETag and a boolean flag. The flag"
-" is ``True`` if the operation handler condition between the server's and "
-"client's ETag is met, indicating the request should proceed based on the "
-"matching logic defined by the operation handler; otherwise, it returns "
-"``False``."
-msgstr ""
-"Возвращает кортеж, содержащий ETag сервера и булев флаг. Флаг равен "
-"``True``, если условие обработчика операции между ETag сервера и клиента "
-"выполнено, указывая на то, что запрос должен продолжаться на основе "
-"логики сопоставления, определенной обработчиком операции; в противном "
-"случае возвращает ``False``."
-
 #: of vstutils.api.base.get_etag_value:1
 msgid ""
 "The get_etag_value function is designed to compute a unique ETag value "
@@ -3759,11 +3682,95 @@ msgstr ""
 "пользовательского метода get_etag_value функция генерирует ETag на основе"
 " имени класса модели и хеша полной строки версии приложения."
 
-#: ../../backend.rst:108
+#: of vstutils.utils.check_request_etag:1
+msgid ""
+"The function plays a crucial role within the context of the ETag "
+"mechanism, providing a flexible way to validate client-side ETags against"
+" the server-side version for both cache validation and ensuring data "
+"consistency in web applications. It supports conditional handling of HTTP"
+" requests based on the match or mismatch of ETag values, accommodating "
+"various scenarios such as cache freshness checks and prevention of "
+"concurrent modifications."
+msgstr ""
+"Функция играет ключевую роль в контексте механизма ETag, предоставляя "
+"гибкий способ проверки ETags на стороне клиента по сравнению с версией на"
+" стороне сервера как для проверки кэша, так и для обеспечения "
+"согласованности данных в веб-приложениях. Она поддерживает условную "
+"обработку HTTP-запросов на основе совпадения или несовпадения значений "
+"ETag, адаптируясь к различным сценариям, таким как проверки свежести кэша"
+" и предотвращение одновременных изменений."
+
+#: of vstutils.utils.check_request_etag:8
+msgid ""
+"The HTTP request object containing the client's headers, from which the "
+"ETag for comparison is retrieved."
+msgstr ""
+"Объект HTTP-запроса, содержащий заголовки клиента, из которых извлекается"
+" ETag для сравнения."
+
+#: of vstutils.utils.check_request_etag:12
+msgid ""
+"The server-generated ETag value that represents the current state of the "
+"resource. This unique identifier is recalculated whenever the resource's "
+"content changes."
+msgstr ""
+"ETag, сгенерированный сервером, представляет текущее состояние ресурса. "
+"Этот уникальный идентификатор пересчитывается при каждом изменении "
+"содержимого ресурса."
+
+#: of vstutils.utils.check_request_etag:16
+msgid ""
+"Specifies the HTTP header to look for the client's ETag. Defaults to "
+"\"If-None-Match\", commonly used in GET requests for cache validation. "
+"For operations requiring confirmation that the client is acting on the "
+"latest version of a resource (e.g., PUT or DELETE), \"If-Match\" should "
+"be used instead."
+msgstr ""
+"Указывает HTTP-заголовок для поиска ETag клиента. По умолчанию "
+"используется \"If-None-Match\", обычно используемый в GET-запросах для "
+"проверки кэша. Для операций, требующих подтверждения того, что клиент "
+"действует с последней версией ресурса (например, PUT или DELETE), вместо "
+"этого следует использовать \"If-Match\"."
+
+#: of vstutils.utils.check_request_etag:22
+msgid ""
+"A function to compare the ETags. By default, this is set to "
+"``str.__eq__``, which checks for an exact match between the client's and "
+"server's ETags, suitable for validating caches with ``If-None-Match``. To"
+" handle ``If-Match`` scenarios, where the operation should proceed only "
+"if the ETags do not match, indicating the resource has been modified, "
+"``str.__ne__`` (not equal) can be used as the operation handler. This "
+"flexibility allows for precise control over how and when clients are "
+"allowed to read from or write to resources based on their version."
+msgstr ""
+"Функция для сравнения ETags. По умолчанию установлено ``str.__eq__``, "
+"которое проверяет точное совпадение ETags клиента и сервера, подходящее "
+"для проверки кэшей с ``If-None-Match``. Для обработки сценариев ``If-"
+"Match``, когда операция должна продолжаться только в случае, если ETags "
+"не совпадают, указывая на то, что ресурс был изменен, можно использовать "
+"``str.__ne__`` (не равно) в качестве обработчика операции. Эта гибкость "
+"позволяет точно контролировать, как и когда клиентам разрешено читать или"
+" записывать ресурсы на основе их версии."
+
+#: of vstutils.utils.check_request_etag:30
+msgid ""
+"Returns a tuple containing the server's ETag and a boolean flag. The flag"
+" is ``True`` if the operation handler condition between the server's and "
+"client's ETag is met, indicating the request should proceed based on the "
+"matching logic defined by the operation handler; otherwise, it returns "
+"``False``."
+msgstr ""
+"Возвращает кортеж, содержащий ETag сервера и булев флаг. Флаг равен "
+"``True``, если условие обработчика операции между ETag сервера и клиента "
+"выполнено, указывая на то, что запрос должен продолжаться на основе "
+"логики сопоставления, определенной обработчиком операции; в противном "
+"случае возвращает ``False``."
+
+#: ../../backend.rst:111
 msgid "Actions"
 msgstr "Actions (Действия)"
 
-#: ../../backend.rst:110
+#: ../../backend.rst:113
 msgid ""
 "Vstutils has the advanced system of working with actions. REST API works "
 "with data through verbs, which are called methods. However, to work with "
@@ -3773,7 +3780,7 @@ msgstr ""
 "данными через глаголы, которые называются методами. Однако для работы с "
 "одной или списком сущностей этих действий может быть недостаточно."
 
-#: ../../backend.rst:114
+#: ../../backend.rst:117
 msgid ""
 "To expand the set of actions, you need to create an action that will work"
 " with some aspect of the described model. For these purposes, there is a "
@@ -3788,7 +3795,7 @@ msgstr ""
 "также можно расширить с помощью схемы. Но для большего удобства в "
 "vstutils есть набор декораторов, которые позволяют избежать написания "
 
-#: ../../backend.rst:118
+#: ../../backend.rst:121
 msgid ""
 "The main philosophy for these wrappers is that the developer writes "
 "business logic without being distracted by the boilerplate code. Often, "
@@ -4033,11 +4040,11 @@ msgstr ""
 msgid "A tuple containing the file, its name, and its content type."
 msgstr "Кортеж, содержащий файл, его имя и тип содержимого."
 
-#: ../../backend.rst:127
+#: ../../backend.rst:130
 msgid "Filtersets"
 msgstr "Filterset'ы"
 
-#: ../../backend.rst:129
+#: ../../backend.rst:132
 msgid ""
 "For greater development convenience, the framework provides additional "
 "classes and functions for filtering elements by fields."
@@ -4123,11 +4130,11 @@ msgstr ""
 msgid "searching part of name."
 msgstr "часть названия для поиска."
 
-#: ../../backend.rst:137
+#: ../../backend.rst:140
 msgid "Responses"
 msgstr "Ответы (responses)"
 
-#: ../../backend.rst:139
+#: ../../backend.rst:142
 msgid ""
 "DRF provides a standard set of variables whose names correspond to the "
 "human-readable name of the HTTP code. For convenience, we have "
@@ -4139,7 +4146,7 @@ msgstr ""
 "оборачиваем их в набор классов с соответствующими именами и дополнительно"
 " обеспечиваем следующие возможности:"
 
-#: ../../backend.rst:144
+#: ../../backend.rst:147
 msgid ""
 "String responses are wrapped in json like ``{ \"detail\": \"string "
 "response\" }``."
@@ -4147,11 +4154,11 @@ msgstr ""
 "Строковые ответы оборачиваются в json, например ``{ \"detail\": \"string "
 "response\" }``."
 
-#: ../../backend.rst:145
+#: ../../backend.rst:148
 msgid "Attribute timings are kept for further processing in middleware."
 msgstr "Тайминги атрибутов сохраняются для дальнейшей обработки в middleware."
 
-#: ../../backend.rst:146
+#: ../../backend.rst:149
 msgid ""
 "Status code is set by class name (e.g. ``HTTP_200_OK`` or ``Response200``"
 " has code 200)."
@@ -4159,7 +4166,7 @@ msgstr ""
 "Код состояния задается именем класса (например ``HTTP_200_OK`` или "
 "``Response200`` имеют код 200)."
 
-#: ../../backend.rst:148
+#: ../../backend.rst:151
 msgid "All classes inherit from:"
 msgstr "Все классы наследуются от:"
 
@@ -4176,11 +4183,11 @@ msgstr "Код состояния HTTP."
 msgid "Response timings."
 msgstr "Тайминги ответов."
 
-#: ../../backend.rst:155
+#: ../../backend.rst:158
 msgid "Middleware"
 msgstr "Middleware"
 
-#: ../../backend.rst:157
+#: ../../backend.rst:160
 msgid ""
 "By default, Django `supposes "
 "<https://docs.djangoproject.com/en/4.1/topics/http/middleware/#writing-"
@@ -4197,6 +4204,33 @@ msgstr ""
 "удобный класс request handler'а для изящной разработки в стиле ООП. "
 "Middleware используются для обработки входящих запросов и отправления "
 "ответов до того, как они достигнут получателя."
+
+#: of vstutils.middleware.AsyncBaseMiddleware:1
+msgid "Middleware base class for handling asynchronously:"
+msgstr "Базовый класс middleware для обработки:"
+
+#: of vstutils.middleware.AsyncBaseMiddleware:3
+msgid "Incoming requests by :meth:`.AsyncBaseMiddleware.request_handler()`;"
+msgstr "Входящие запросы от :meth:`.AsyncBaseMiddleware.request_handler()`;"
+
+#: of vstutils.middleware.AsyncBaseMiddleware:4
+msgid ""
+"Outgoing response before any calling on server by "
+":meth:`.AsyncBaseMiddleware.get_response_handler()`;"
+msgstr ""
+"Исходящий ответ перед любым обращением к серверу от "
+":meth:`.AsyncBaseMiddleware.get_response_handler()`;"
+
+#: of vstutils.middleware.AsyncBaseMiddleware:5
+msgid "Outgoing responses by :meth:`.AsyncBaseMiddleware.handler()`."
+msgstr "Исходящие ответы от :meth:`.AsyncBaseMiddleware.handler()`."
+
+#: of vstutils.middleware.AsyncBaseMiddleware:7
+#: vstutils.middleware.BaseMiddleware:7
+msgid "Middleware must be added to `MIDDLEWARE` list in settings."
+msgstr ""
+"Middleware должен быть добавлен в список `MIDDLEWARE`, находящийся в "
+"настройках."
 
 #: of vstutils.middleware.BaseMiddleware:1
 msgid "Middleware base class for handling:"
@@ -4217,12 +4251,6 @@ msgstr ""
 #: of vstutils.middleware.BaseMiddleware:5
 msgid "Outgoing responses by :meth:`.BaseMiddleware.handler()`."
 msgstr "Исходящие ответы от :meth:`.BaseMiddleware.handler()`."
-
-#: of vstutils.middleware.BaseMiddleware:7
-msgid "Middleware must be added to `MIDDLEWARE` list in settings."
-msgstr ""
-"Middleware должен быть добавлен в список `MIDDLEWARE`, находящийся в "
-"настройках."
 
 #: of vstutils.middleware.BaseMiddleware.get_response_handler:1
 msgid ""
@@ -4291,11 +4319,11 @@ msgstr "Handler запроса. Вызывается перед обработк
 msgid "Handled request object."
 msgstr "Обработанный объект запроса."
 
-#: ../../backend.rst:166
+#: ../../backend.rst:169
 msgid "Filter Backends"
 msgstr "Filter Backend'ы"
 
-#: ../../backend.rst:167
+#: ../../backend.rst:170
 msgid ""
 "`Filter Backends <https://www.django-rest-framework.org/api-"
 "guide/filtering/#djangofilterbackend>`_ are used to modify model "
@@ -4441,11 +4469,11 @@ msgstr ""
 "автогенерации схемы, предоставляемой REST-фреймворком, реализуя этот "
 "метод. Метод должен возвращать список OpenAPI сопоставлений схемы."
 
-#: ../../backend.rst:176
+#: ../../backend.rst:179
 msgid "Celery"
 msgstr "Celery"
 
-#: ../../backend.rst:178
+#: ../../backend.rst:181
 msgid ""
 "Celery is a distributed task queue. It's used to execute some actions "
 "asynchronously in a separate worker. For more details on Celery, check "
@@ -4464,7 +4492,7 @@ msgstr ""
 "settings>`_ в settings.ini. Также вам понадобится установить "
 "дополнительные [rpc] зависимости."
 
-#: ../../backend.rst:184
+#: ../../backend.rst:187
 msgid "Tasks"
 msgstr "Tasks"
 
@@ -4526,11 +4554,11 @@ msgstr ""
 msgid "The body of the task executed by workers."
 msgstr "Тело задачи выполняется worker'ами."
 
-#: ../../backend.rst:190
+#: ../../backend.rst:193
 msgid "Endpoint"
 msgstr "Endpoint"
 
-#: ../../backend.rst:192
+#: ../../backend.rst:195
 msgid ""
 "Endpoint view has two purposes: bulk requests execution and providing "
 "OpenAPI schema."
@@ -4538,7 +4566,7 @@ msgstr ""
 "Endpoint-view имеет две цели: выполнение bulk-запросов и предоставление "
 "схемы OpenAPI."
 
-#: ../../backend.rst:194
+#: ../../backend.rst:197
 msgid ""
 "Endpoint url is ``/{API_URL}/endpoint/``, for example value with default "
 "settings is ``/api/endpoint/``."
@@ -4546,7 +4574,7 @@ msgstr ""
 "URL endpoint'а - ``/{API_URL}/endpoint/``, например значение с "
 "настройками по умолчанию - ``/api/endpoint/``."
 
-#: ../../backend.rst:196
+#: ../../backend.rst:199
 msgid "``API_URL`` can be changed in ``settings.py``."
 msgstr "``API_URL`` может быть изменен в ``settings.py``."
 
@@ -4620,11 +4648,11 @@ msgstr "Выполнить нетранзакционный bulk-запрос"
 msgid "One operation serializer class."
 msgstr "Класс сериализатора одной операции."
 
-#: ../../backend.rst:203
+#: ../../backend.rst:206
 msgid "Bulk requests"
 msgstr "Bulk-запросы"
 
-#: ../../backend.rst:205
+#: ../../backend.rst:208
 msgid ""
 "Bulk request allows you send multiple requests to api at once, it accepts"
 " json list of operations."
@@ -4632,39 +4660,39 @@ msgstr ""
 "Bulk-запрос позволяет вам отсылать несколько запросов к api в одном. Он "
 "принимает json-список операций."
 
-#: ../../backend.rst:208
+#: ../../backend.rst:211
 msgid "Method"
 msgstr "Метод"
 
-#: ../../backend.rst:208
+#: ../../backend.rst:211
 msgid "Transactional (all operations in one transaction)"
 msgstr "Транзакционный (все операции в одной транзакции)"
 
-#: ../../backend.rst:208
+#: ../../backend.rst:211
 msgid "Synchronous (operations executed one by one in given order)"
 msgstr "Синхронный (операции выполняются одна за другой в указанном порядке)"
 
-#: ../../backend.rst:212
+#: ../../backend.rst:215
 msgid "``PUT /{API_URL}/endpoint/``"
 msgstr "``PUT /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:212 ../../backend.rst:216
+#: ../../backend.rst:215 ../../backend.rst:219
 msgid "NO"
 msgstr "НЕТ"
 
-#: ../../backend.rst:212 ../../backend.rst:214
+#: ../../backend.rst:215 ../../backend.rst:217
 msgid "YES"
 msgstr "ДА"
 
-#: ../../backend.rst:214
+#: ../../backend.rst:217
 msgid "``POST /{API_URL}/endpoint/``"
 msgstr "``POST /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:216
+#: ../../backend.rst:219
 msgid "``PATCH /{API_URL}/endpoint/``"
 msgstr "``PATCH /{API_URL}/endpoint/``"
 
-#: ../../backend.rst:219
+#: ../../backend.rst:222
 msgid ""
 "Parameters of one operation (required parameter marked by "
 ":superscript:`*`):"
@@ -4672,25 +4700,25 @@ msgstr ""
 "Параметры одной операции (обязательный параметр помечается "
 ":superscript:`*`):"
 
-#: ../../backend.rst:221
+#: ../../backend.rst:224
 msgid "``method``:superscript:`*` - http method of request"
 msgstr "``method``:superscript:`*` - http-метод запроса"
 
-#: ../../backend.rst:222
+#: ../../backend.rst:225
 msgid "``path``:superscript:`*` - path of request, can be ``str`` or ``list``"
 msgstr ""
 "``path``:superscript:`*` - путь запроса, может быть типа ``str`` или  "
 "``list``"
 
-#: ../../backend.rst:223
+#: ../../backend.rst:226
 msgid "``data`` - data to send"
 msgstr "``data`` - данные для отправки"
 
-#: ../../backend.rst:224
+#: ../../backend.rst:227
 msgid "``query`` - query parameters as ``str``"
 msgstr "``query`` - query-параметры типа ``str``"
 
-#: ../../backend.rst:225
+#: ../../backend.rst:228
 msgid ""
 "``let`` - string with name of variable (used for access to response "
 "result in templates)"
@@ -4698,7 +4726,7 @@ msgstr ""
 "``let`` - строка с именем переменной (используется для доступа к "
 "результату ответа в шаблонах)"
 
-#: ../../backend.rst:226
+#: ../../backend.rst:229
 msgid ""
 "``headers`` - ``dict`` with headers which will be sent (key - header's "
 "name, value - header's value string)."
@@ -4706,7 +4734,7 @@ msgstr ""
 "``headers`` - словарь с заголовками, которые будут переданы в запрос "
 "(ключ - имя заголовка, значение - строка со значением заголовка."
 
-#: ../../backend.rst:227
+#: ../../backend.rst:230
 msgid ""
 "``version`` - ``str`` with specified version of api, if not provided then"
 " ``VST_API_VERSION`` will be used"
@@ -4714,7 +4742,7 @@ msgstr ""
 "``version`` - ``str`` с указанной версией api, если не задано, то "
 "используется ``VST_API_VERSION``"
 
-#: ../../backend.rst:231
+#: ../../backend.rst:234
 msgid ""
 "In previous versions header's names must follow `CGI specification "
 "<https://www.w3.org/CGI/>`_ (e.g., ``CONTENT_TYPE``, "
@@ -4724,7 +4752,7 @@ msgstr ""
 "`спецификации CGI <https://www.w3.org/CGI/>`_ (например, "
 "``CONTENT_TYPE``, ``GATEWAY_INTERFACE``, ``HTTP_*``)."
 
-#: ../../backend.rst:235
+#: ../../backend.rst:238
 msgid ""
 "Since version 5.3 and after migrate to Django 4 names must follow HTTP "
 "specification instead of CGI."
@@ -4732,7 +4760,7 @@ msgstr ""
 "Начиная с версии 5.3 и после миграции на Django 4 имена должны "
 "соответствовать HTTP спецификации вместо CGI."
 
-#: ../../backend.rst:237
+#: ../../backend.rst:240
 msgid ""
 "In any request parameter you can insert result value of previous "
 "operations (``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), "
@@ -4742,27 +4770,27 @@ msgstr ""
 " операции (``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), "
 "например:"
 
-#: ../../backend.rst:247
+#: ../../backend.rst:250
 msgid "Result of bulk request is json list of objects for operation:"
 msgstr "Результат bulk-запроса - это список json-объектов, описывающих операцию:"
 
-#: ../../backend.rst:249
+#: ../../backend.rst:252
 msgid "``method`` - http method"
 msgstr "``method`` - http-метод"
 
-#: ../../backend.rst:250
+#: ../../backend.rst:253
 msgid "``path`` - path of request, always str"
 msgstr "``path`` - путь запроса, всегда строка"
 
-#: ../../backend.rst:251
+#: ../../backend.rst:254
 msgid "``data`` - data that needs to be sent"
 msgstr "``data`` - данные, которые нужно отправить"
 
-#: ../../backend.rst:252
+#: ../../backend.rst:255
 msgid "``status`` - response status code"
 msgstr "``status`` - код состояния ответа"
 
-#: ../../backend.rst:254
+#: ../../backend.rst:257
 msgid ""
 "Transactional bulk request returns ``502 BAG GATEWAY`` and does rollback "
 "after first failed request."
@@ -4770,7 +4798,7 @@ msgstr ""
 "Транзакционный bulk-запрос возвращает ``502 BAG GATEWAY`` и делает откат "
 "к состоянию до запроса после первого неудачного запроса."
 
-#: ../../backend.rst:257
+#: ../../backend.rst:260
 msgid ""
 "If you send non-transactional bulk request, you will get ``200`` status "
 "and must validate statuses on each operation responses."
@@ -4778,15 +4806,15 @@ msgstr ""
 "Если вы отправили нетранзакционный bulk-запрос, вы получите код 200 и "
 "должны будете проверить статус каждого ответа операции отдельно."
 
-#: ../../backend.rst:261
+#: ../../backend.rst:264
 msgid "OpenAPI schema"
 msgstr "Схема OpenAPI"
 
-#: ../../backend.rst:263
+#: ../../backend.rst:266
 msgid "Request on ``GET /{API_URL}/endpoint/`` returns Swagger UI."
 msgstr "Запрос на ``GET /{API_URL}/endpoint/`` возвращает Swagger UI."
 
-#: ../../backend.rst:265
+#: ../../backend.rst:268
 msgid ""
 "Request on ``GET /{API_URL}/endpoint/?format=openapi`` returns OpenAPI "
 "schema in json format. Also you can specify required version of schema "
@@ -4797,7 +4825,7 @@ msgstr ""
 "OpenAPI в формате json. Также вы можете указать нужную версию схемы, "
 "используя query-параметр ``version`` "
 
-#: ../../backend.rst:268
+#: ../../backend.rst:271
 msgid ""
 "To change the schema after generating and before sending to user use "
 "hooks. Define one or more function, each taking 2 named arguments:"
@@ -4806,15 +4834,15 @@ msgstr ""
 "используйте хуки. Напишите одну или несколько функций, каждая из которых "
 "принимает 2 именованных аргумента:"
 
-#: ../../backend.rst:271
+#: ../../backend.rst:274
 msgid "``request`` - user request object."
 msgstr "``request`` - объект запроса пользователя."
 
-#: ../../backend.rst:272
+#: ../../backend.rst:275
 msgid "``schema`` - ordered dict with OpenAPI schema."
 msgstr "``schema`` - ordered dict, содержащий схему OpenAPI."
 
-#: ../../backend.rst:275
+#: ../../backend.rst:278
 msgid ""
 "Sometimes hooks may raise an exception; in order to keep a chain of data "
 "modification, such exceptions are handled. The changes made to the schema"
@@ -4824,11 +4852,11 @@ msgstr ""
 "модификации данных, такие исключения обрабатываются. Изменения, сделанные"
 " в схеме перед выбросом исключения, в любом случае сохраняются."
 
-#: ../../backend.rst:284
+#: ../../backend.rst:287
 msgid "Example hook:"
 msgstr "Пример хука:"
 
-#: ../../backend.rst:286
+#: ../../backend.rst:289
 msgid ""
 "To connect hook(s) to your app add function import name to the "
 "``OPENAPI_HOOKS`` list in ``settings.py``"
@@ -4836,11 +4864,11 @@ msgstr ""
 "Чтобы присоединить хук(-и) к вашему приложению, добавьте строку импорта "
 "вашей функции в список ``OPENAPI_HOOKS`` в ``settings.py``"
 
-#: ../../backend.rst:296
+#: ../../backend.rst:299
 msgid "Testing Framework"
 msgstr "Фреймворк для тестирования"
 
-#: ../../backend.rst:298
+#: ../../backend.rst:301
 msgid ""
 "VST Utils Framework includes a helper in base test case class and "
 "improves support for making API requests. That means if you want make "
@@ -4852,11 +4880,11 @@ msgstr ""
 " что для отправления bulk-запроса на endpoint нет необходимости создавать"
 " и инициализировать test client, а можно сразу делать запрос."
 
-#: ../../backend.rst:309
+#: ../../backend.rst:312
 msgid "Creating test case"
 msgstr "Создание тест-кейса"
 
-#: ../../backend.rst:310
+#: ../../backend.rst:313
 msgid ""
 "``test.py`` module contains test case classes based on "
 ":class:`vstutils.tests.BaseTestCase`. At the moment, we officially "
@@ -4870,11 +4898,11 @@ msgstr ""
 "оберток запросов с проверкой выполнения и runtime-оптимизацией "
 "bulk-запросов с ручной проверкой значений."
 
-#: ../../backend.rst:317
+#: ../../backend.rst:320
 msgid "Simple example with classic tests"
 msgstr "Простой пример с классическими тестами"
 
-#: ../../backend.rst:319
+#: ../../backend.rst:322
 msgid ""
 "For example, if you have api endpoint like ``/api/v1/project/`` and model"
 " Project you can write test case like this:"
@@ -4882,7 +4910,7 @@ msgstr ""
 "Например, если у вас endpoint вида ``/api/v1/project/`` и модель Project,"
 " вы можете написать такой тест:"
 
-#: ../../backend.rst:354
+#: ../../backend.rst:357
 msgid ""
 "This example demonstrates functionality of default test case class. "
 "Default projects are initialized for the fastest and most efficient "
@@ -4896,11 +4924,11 @@ msgstr ""
 " в разные классы. В данном примере показан классический подход к "
 "тестированию, однако вы можете использовать bulk-запросы в ваших тестах."
 
-#: ../../backend.rst:362
+#: ../../backend.rst:365
 msgid "Bulk requests in tests"
 msgstr "Bulk-запросы в тестах"
 
-#: ../../backend.rst:364
+#: ../../backend.rst:367
 msgid ""
 "Bulk query system is well suited for testing and executing valid queries."
 " Previous example could be rewritten as follows:"
@@ -4908,7 +4936,7 @@ msgstr ""
 "Система bulk-запросов хорошо подходит для тестирования и запуска валидных"
 " запросов. Предыдущий пример может быть переписан так:"
 
-#: ../../backend.rst:414
+#: ../../backend.rst:417
 msgid ""
 "In this case, you have more code, but your tests are closer to GUI "
 "workflow, because vstutils-projects uses ``/api/endpoint/`` for requests."
@@ -4923,7 +4951,7 @@ msgstr ""
 " котором используется bulk меньше по сравнению с тестом, использующим "
 "стандартный механизм."
 
-#: ../../backend.rst:421
+#: ../../backend.rst:424
 msgid "Test case API"
 msgstr "API тест-кейса"
 
@@ -5281,11 +5309,11 @@ msgstr ""
 msgid "new user object for execution."
 msgstr "новый объект пользователя, от которого будет выполнение."
 
-#: ../../backend.rst:428
+#: ../../backend.rst:431
 msgid "Utils"
 msgstr "Утилиты"
 
-#: ../../backend.rst:430
+#: ../../backend.rst:433
 msgid ""
 "This is tested set of development utilities. Utilities include a "
 "collection of code that will be useful in one way or another for "
@@ -5941,11 +5969,11 @@ msgstr ""
 "Использует функцию :func:`django.utils.translation.get_language` для "
 "получения кода языка и пытается получить перевод из списка доступных."
 
-#: ../../backend.rst:442
+#: ../../backend.rst:445
 msgid "Integrating Web Push Notifications"
 msgstr "Интеграция Web Push-уведомлений"
 
-#: ../../backend.rst:444
+#: ../../backend.rst:447
 msgid ""
 "Web push notifications are an effective way to engage users with real-"
 "time messaging. To integrate web push notifications in your VSTUtils "
@@ -5955,7 +5983,7 @@ msgstr ""
 "с помощью реального времени. Чтобы интегрировать web-уведомления в ваш "
 "проект VSTUtils, выполните следующие шаги:"
 
-#: ../../backend.rst:447
+#: ../../backend.rst:450
 msgid ""
 "**Configuration**: First, include the ``vstutils.webpush`` module in the "
 "``INSTALLED_APPS`` section of your ``settings.py`` file. This enables the"
@@ -5970,7 +5998,7 @@ msgstr ""
 "настроек web-уведомлений (см. :ref:`здесь<webpush-settings>` для "
 "подробностей)."
 
-#: ../../backend.rst:450
+#: ../../backend.rst:453
 msgid ""
 "**Creating Notifications**: To create a web push notification, you need "
 "to define a class that inherits from either "
@@ -5988,19 +6016,19 @@ msgstr ""
 "``webpushes`` всех ``INSTALLED_APPS``. Ниже приведен пример, "
 "иллюстрирующий, как реализовать пользовательские классы web-уведомлений:"
 
-#: ../../backend.rst:460
+#: ../../backend.rst:463
 msgid "This example contains three classes:"
 msgstr "Этот пример содержит три класса:"
 
-#: ../../backend.rst:462
+#: ../../backend.rst:465
 msgid "`TestWebPush`: Sends notifications to all subscribed users."
 msgstr "`TestWebPush`: Отправляет уведомления всем подписанным пользователям."
 
-#: ../../backend.rst:463
+#: ../../backend.rst:466
 msgid "`TestNotification`: Targets notifications to specific users."
 msgstr "`TestNotification`: Направляет уведомления конкретным пользователям."
 
-#: ../../backend.rst:464
+#: ../../backend.rst:467
 msgid ""
 "`StaffOnlyNotification`: Restricts notifications to staff users only. "
 "Sometimes you may want to allow only some users to subscribe on specific "
@@ -6010,7 +6038,7 @@ msgstr ""
 " Иногда вы можете хотеть разрешить подписку на конкретные уведомления "
 "только некоторым пользователям."
 
-#: ../../backend.rst:466
+#: ../../backend.rst:469
 msgid ""
 "**Sending Notifications**: To dispatch a web push notification, invoke "
 "the ``send`` or ``send_in_task`` method on an instance of your web push "
@@ -6022,7 +6050,7 @@ msgstr ""
 "web-уведомления. Например, чтобы отправить уведомление с использованием "
 "`TestNotification`, вы можете сделать следующее:"
 
-#: ../../backend.rst:481
+#: ../../backend.rst:484
 msgid ""
 "The asynchronous sending of web push notifications (using methods like "
 "``send_in_task``) requires a configured Celery setup in your project, as "
@@ -6036,7 +6064,7 @@ msgstr ""
 "Убедитесь, что Celery правильно настроен и работает, чтобы использовать "
 "асинхронную отправку уведомлений."
 
-#: ../../backend.rst:486
+#: ../../backend.rst:489
 msgid ""
 "By following these steps, you can fast integrate and utilize web push "
 "notifications in projects with VSTUtils."
@@ -6044,11 +6072,11 @@ msgstr ""
 "Следуя этим шагам, вы быстро сможете интегрировать и использовать "
 "web-уведомления в проектах с VSTUtils."
 
-#: ../../backend.rst:490
+#: ../../backend.rst:493
 msgid "Troubleshooting"
 msgstr "Устранение и поиск неисправностей"
 
-#: ../../backend.rst:492
+#: ../../backend.rst:495
 msgid ""
 "Vstutils makes some errors more readable for common users and provides "
 "special error codes for administration to simplify troubleshooting."
@@ -6057,14 +6085,15 @@ msgstr ""
 "пользователей и предоставляет специальные коды ошибок для администрации, "
 "чтобы упростить поиск и устранение проблем."
 
-#: ../../backend.rst:494
+#: ../../backend.rst:497
 msgid "``VE100-VE199`` - Database related errors."
 msgstr "``VE100-VE199`` - Ошибки, связанные с базой данных."
 
-#: ../../backend.rst:495
+#: ../../backend.rst:498
 msgid ""
 "``VE100`` - Integrity error code. Used when "
 "``django.db.utils.IntegrityError`` appears."
 msgstr ""
 "``VE100`` - Код ошибки целостности. Используется при появляении "
 "``django.db.utils.IntegrityError``."
+

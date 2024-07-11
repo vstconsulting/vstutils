@@ -1532,3 +1532,9 @@ def check_request_etag(request, etag_value, header_name="If-None-Match", operati
         return etag_value, True
 
     return etag_value, False
+
+
+try:
+    from ._utils import encode, decode  # noqa: F811
+except ImportError:  # nocv
+    pass

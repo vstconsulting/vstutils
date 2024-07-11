@@ -1,6 +1,10 @@
 import os
 import sys
 from vstcompile import make_setup, load_requirements
+try:
+    from setuptools_rust import RustExtension, Binding
+except ImportError:
+    RustExtension = None
 
 
 # allow setup.py to be run from any path
@@ -38,8 +42,9 @@ requirements_rpc = load_requirements('requirements-rpc.txt')
 kwargs = dict(
     ext_modules_list=ext_list,
     static_exclude_min=[
-        'vstutils/templates/.*\.js$',
-        'vstutils/static/bundle/.*\.js$'
+        r'vstutils/templates/.*\.js$',
+        r'vstutils/static/spa/.*\.js$'
+        r'vstutils/static/spa/.*\.css$'
     ],
     install_requires=[
         "django~=" + (os.environ.get('DJANGO_DEP', "") or "5.0.6"),
@@ -66,6 +71,11 @@ kwargs = dict(
         'console_scripts': ['vstutilsctl=vstutils.__main__:cmd_execution']
     },
 )
+
+if RustExtension is not None and os.path.exists("vstutils_utils/Cargo.toml") and os.environ.get('BUILD_OPTIMIZATION', 'false') == 'true':
+    kwargs['rust_extensions'] = [
+        RustExtension("vstutils._utils", path="vstutils_utils/Cargo.toml", binding=Binding.PyO3),
+    ]
 
 all_deps = []
 for key, deps in kwargs['extras_require'].items():

@@ -110,6 +110,10 @@ class Notificator:
             logger.debug(f'Send notifications about {len(objects)} updates to channel(s) {sent_channels}.')
             return self.cent_client.send()
 
+    async def asend(self):
+        # TODO: Migrate main code here after updating to new cent package with async support.
+        return self.send()
+
     def disconnect_all(self):
         for signal in self._signals:
             self.disconnect_signal(signal)

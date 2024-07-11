@@ -81,6 +81,8 @@ class BaseMiddleware(BaseVstObject):
 
     """
     __slots__ = 'get_response', 'logger'
+    sync_capable = True
+    async_capable = False
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -88,9 +90,9 @@ class BaseMiddleware(BaseVstObject):
         super().__init__()
 
     def get_setting(self, value):
-        return self.get_django_settings(value)
+        return self.get_django_settings(value)  # nocv
 
-    def handler(self, request, response):  # nocv
+    def handler(self, request, response):
         # pylint: disable=unused-argument
 
         """
@@ -149,10 +151,84 @@ class BaseMiddleware(BaseVstObject):
         )
 
 
-class TimezoneHeadersMiddleware(BaseMiddleware):
+class AsyncBaseMiddleware(BaseVstObject):
+    """
+    Middleware base class for handling asynchronously:
+
+    * Incoming requests by :meth:`.AsyncBaseMiddleware.request_handler()`;
+    * Outgoing response before any calling on server by :meth:`.AsyncBaseMiddleware.get_response_handler()`;
+    * Outgoing responses by :meth:`.AsyncBaseMiddleware.handler()`.
+
+    Middleware must be added to `MIDDLEWARE` list in settings.
+
+    Example:
+        .. sourcecode:: python
+
+            from vstutils.middleware import AsyncBaseMiddleware
+            from django.http import HttpResponse
+            import aiohttp
+
+            class CustomMiddleware(AsyncBaseMiddleware):
+                async def request_handler(self, request):
+                    # Perform an async HTTP request to get user-agent
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get('http://httpbin.org/user-agent') as resp:
+                            data = await resp.json()
+                            request.headers['User-Agent'] = data['user-agent']
+                    return request
+
+                async def get_response_handler(self, request):
+                    if not request.user.is_staff:
+                        # Return 403 HTTP status for non-staff users.
+                        # This request never gets to any view.
+                        return HttpResponse(
+                            "Access denied!",
+                            content_type="text/plain",
+                            status=403
+                        )
+                    return await super().get_response_handler(request)
+
+                async def handler(self, request, response):
+                    # Perform an async HTTP request to get a custom header value
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get('http://httpbin.org/headers') as resp:
+                            data = await resp.json()
+                            response['Custom-Header'] = data['headers'].get('Custom-Header', 'Some value')
+                    return response
+
+    """
+
+    __slots__ = 'get_response', 'logger'
+    sync_capable = False
+    async_capable = True
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.logger = logger
+        super().__init__()
+
+    def get_setting(self, value):
+        return self.get_django_settings(value)
+
+    async def handler(self, request, response):
+        return response  # nocv
+
+    async def request_handler(self, request):
+        return request
+
+    async def get_response_handler(self, request):
+        return await self.get_response(request)
+
+    async def __call__(self, request):
+        request = await self.request_handler(request)
+        response = await self.get_response_handler(request)
+        return await self.handler(request, response)
+
+
+class TimezoneHeadersMiddleware(AsyncBaseMiddleware):
     __slots__ = ()
 
-    def handler(self, request, response):
+    async def handler(self, request, response):
         response['Server-Timezone'] = self.get_setting('TIME_ZONE')
         response['VSTutils-Version'] = self.get_setting('VSTUTILS_VERSION')
         return response
@@ -234,19 +310,19 @@ class LangMiddleware(BaseMiddleware):
         return response
 
 
-class FrontendChangesNotifications(BaseMiddleware):
+class FrontendChangesNotifications(AsyncBaseMiddleware):
     __slots__ = ('notificator',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.notificator = apps.get_app_config('vstutils_api').module.notificator_class([])
 
-    def request_handler(self, request):
+    async def request_handler(self, request):
         if self.notificator.is_usable():
             request.notificator = self.notificator
         return request
 
-    def handler(self, request, response):
+    async def handler(self, request, response):
         if self.notificator.is_usable():
-            request.notificator.send()
+            await self.notificator.asend()
         return response
