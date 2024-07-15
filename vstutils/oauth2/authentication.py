@@ -1,3 +1,4 @@
+from authlib.jose.errors import BadSignatureError
 from authlib.oauth2.base import OAuth2Error
 from authlib.oauth2.rfc6749 import MissingAuthorizationError, UnsupportedTokenTypeError
 from authlib.oauth2.rfc6750 import InvalidTokenError
@@ -40,6 +41,8 @@ def _get_request_token(request: "Request"):
         pass
     except InvalidTokenError as exc:
         raise OAuth2ErrorWrapper(exc) from exc
+    except BadSignatureError as exc:
+        raise AuthenticationFailed() from exc
 
 
 def get_session(session_key):

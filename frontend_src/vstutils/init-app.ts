@@ -1,13 +1,15 @@
-import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import OpenAPILoader from '@/vstutils/OpenAPILoader';
 import { createApiFetch } from '@/vstutils/api-fetch';
-import { type AuthAppFactory } from './auth-app';
-import { signals } from '@/vstutils/signals';
 import { App } from '@/vstutils/app';
-import { type Cache, globalCache } from '@/cache';
+import { signals } from '@/vstutils/signals';
+import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import type Vue from 'vue';
+import { type AuthAppFactory } from './auth-app';
 import { createDefaultPageLoader } from './default-page-loader';
-import { type AppSchema } from './schema';
+import type { AppSchema } from './schema';
+import { cleanAllCacheAndReloadPage } from './cleanCacheHelpers';
+
+const SILENT_REDIRECT_URL = new URL('/#/__oauth2_silent_redirect', window.location.origin);
 
 export type LogoutHandler = (params: { config: InitAppConfig }) => void | Promise<void>;
 
@@ -23,7 +25,6 @@ export interface InitAppConfigRaw {
         redirectUri?: string;
     };
     createAuthApp?: AuthAppFactory;
-    cache?: Cache;
     vue?: typeof Vue;
     api: {
         url: string;
@@ -39,7 +40,6 @@ export interface InitAppConfig {
     fatalErrorHandler: FatalErrorHandler;
     logoutHandler: LogoutHandler;
     createAuthApp?: AuthAppFactory;
-    cache: Cache;
     vue?: typeof Vue;
     api: ApiConfig;
 }
@@ -48,18 +48,35 @@ interface Oauth2Config {
     userManager: UserManager;
 }
 
-interface ApiConfig {
+type InitAppContext = {
+    rawConfig: InitAppConfigRaw;
+};
+
+type InitAppContextWithConfig = InitAppContext & {
+    config: InitAppConfig;
+    isCachedOauthAuthorityUsed: boolean;
+    isCachedOauthClientIdUsed: boolean;
+};
+
+export interface ApiConfig {
     url: URL;
     endpointPath: string;
     disableBulk: boolean;
 }
 
-export async function initApp(rawConf: InitAppConfigRaw) {
+export async function initApp(rawConfig: InitAppConfigRaw) {
     try {
-        const config = await getConfig(rawConf);
-        await _initApp(config);
+        const ctx = await prepareConfig({ rawConfig });
+        if (window.location.hash === SILENT_REDIRECT_URL.hash) {
+            await ctx.config.auth.userManager.signinSilentCallback();
+            return;
+        }
+        await _initApp(ctx);
     } catch (e) {
-        (rawConf.fatalErrorHandler ?? defaultStartupFatalErrorHandler)({ error: e });
+        if (e instanceof RestartAppError) {
+            return initApp(rawConfig);
+        }
+        (rawConfig.fatalErrorHandler ?? defaultStartupFatalErrorHandler)({ error: e });
     }
 }
 
@@ -68,76 +85,85 @@ export interface PageLoader {
     hide: () => void | Promise<void>;
 }
 
-async function _initApp(config: InitAppConfig) {
-    config.pageLoader.show();
+async function _initApp(ctx: InitAppContextWithConfig) {
+    ctx.config.pageLoader.show();
 
     registerSw();
 
-    if (!(await isUserLoggedIn(config))) {
-        await openAuthApp(config);
+    if (!(await isUserLoggedIn(ctx.config))) {
+        await openAuthApp(ctx);
         return;
     }
 
-    const schema = await loadSchema(config);
+    const schema = await loadSchema(ctx.config);
+    if (!verifyAndSetCachedOauthParams(ctx, schema)) {
+        throw new RestartAppError();
+    }
 
-    const app = new App({ config, schema });
+    const app = new App({ config: ctx.config, schema });
     // @ts-expect-error It's a global variable
     window.app = app;
     await app.start();
-    app.mount(createChildEl(config.el));
-    await config.pageLoader.hide();
+    app.mount(createChildEl(ctx.config.el));
+    await ctx.config.pageLoader.hide();
     return app;
 }
 
-async function getConfig(config: InitAppConfigRaw): Promise<InitAppConfig> {
-    const pageLoader = config.pageLoader ?? createDefaultPageLoader();
+function verifyAndSetCachedOauthParams(ctx: InitAppContextWithConfig, schema: AppSchema) {
+    const storageConfig = createStorageOauthConfigProvider(window.localStorage);
+    let ok = true;
+    if (ctx.isCachedOauthAuthorityUsed) {
+        const actualAuthority = getAuthorityUrlFromSchema(schema);
+        if (actualAuthority && actualAuthority !== ctx.config.auth.userManager.settings.authority) {
+            ok = false;
+            storageConfig.setAuthorityUrl(actualAuthority);
+        }
+    }
+    if (ctx.isCachedOauthClientIdUsed) {
+        const actualClientId = getClientIdFromSchema(schema);
+        if (actualClientId && actualClientId !== ctx.config.auth.userManager.settings.client_id) {
+            ok = false;
+            storageConfig.setClientId(actualClientId);
+        }
+    }
+    return ok;
+}
+
+async function prepareConfig({ rawConfig }: InitAppContext): Promise<InitAppContextWithConfig> {
+    const pageLoader = rawConfig.pageLoader ?? createDefaultPageLoader();
     pageLoader.show();
 
     const apiConfig = {
-        url: new URL(config.api.url.endsWith('/') ? config.api.url : `${config.api.url}/`),
-        endpointPath: config.api.endpointPath ?? 'endpoint/',
-        disableBulk: config.api.disableBulk ?? false,
+        url: new URL(rawConfig.api.url.endsWith('/') ? rawConfig.api.url : `${rawConfig.api.url}/`),
+        endpointPath: rawConfig.api.endpointPath ?? 'endpoint/',
+        disableBulk: rawConfig.api.disableBulk ?? false,
     } satisfies ApiConfig;
 
+    const { userManager, isCachedOauthAuthorityUsed, isCachedOauthClientIdUsed } = await _createUserManager(
+        rawConfig,
+        apiConfig,
+    );
+
     return {
-        el: getRootEl(config.el),
-        pageLoader,
-        fatalErrorHandler: config.fatalErrorHandler ?? defaultStartupFatalErrorHandler,
-        logoutHandler: config.logoutHandler ?? defaultLogoutHandler,
-        createAuthApp: config.createAuthApp,
-        auth: {
-            userManager: await _createUserManager(config, apiConfig),
+        rawConfig,
+        config: {
+            el: getRootEl(rawConfig.el),
+            pageLoader,
+            fatalErrorHandler: rawConfig.fatalErrorHandler ?? defaultStartupFatalErrorHandler,
+            logoutHandler: rawConfig.logoutHandler ?? defaultLogoutHandler,
+            createAuthApp: rawConfig.createAuthApp,
+            auth: {
+                userManager,
+            },
+            api: apiConfig,
         },
-        cache: config.cache ?? globalCache,
-        api: apiConfig,
+        isCachedOauthAuthorityUsed,
+        isCachedOauthClientIdUsed,
     };
 }
 
-export async function _createUserManager(config: InitAppConfigRaw, apiConfig: ApiConfig) {
-    const schemaConfig = createSchemaOauthConfigProvider(apiConfig);
-    const providedConfig = config.auth ?? {};
-
-    const authority = providedConfig.authorityUrl || (await schemaConfig.getAuthorityUrl());
-    if (!authority) {
-        throw new Error('Authority is not provided');
-    }
-    const clientId = providedConfig.clientId || (await schemaConfig.getClientId());
-    if (!clientId) {
-        throw new Error('Client id is not provided');
-    }
-    return new UserManager({
-        authority,
-        client_id: clientId,
-        client_secret: providedConfig.clientSecret,
-        redirect_uri: providedConfig.redirectUri ?? 'not_used',
-        monitorSession: true,
-        automaticSilentRenew: true,
-        scope: '',
-        userStore: new WebStorageStateStore({ store: window.localStorage }),
-    });
-}
-
-async function openAuthApp(config: InitAppConfig) {
+async function openAuthApp(ctx: InitAppContextWithConfig) {
+    const config = ctx.config;
     const authAppFactory =
         config.createAuthApp ?? (await import('@/vstutils/default-auth-app')).createDefaultAuthApp;
     const child = createChildEl(config.el);
@@ -151,7 +177,7 @@ async function openAuthApp(config: InitAppConfig) {
         authApp.destroy();
         config.el.innerHTML = '';
         window.location.hash = path ?? '/';
-        await _initApp(config);
+        await _initApp(ctx);
     }
     config.pageLoader.hide();
     authApp.mount(child);
@@ -183,16 +209,36 @@ function registerSw() {
 
 async function isUserLoggedIn(config: InitAppConfig): Promise<boolean> {
     const userManager = config.auth.userManager;
-    if (!(await userManager.getUser())) {
+    let user = await userManager.getUser();
+    if (!user) {
         return false;
+    }
+    if (user.expired) {
+        if (!user.refresh_token) {
+            return false;
+        }
+        try {
+            user = await userManager.signinSilent();
+        } catch {
+            return false;
+        }
+        if (!user) {
+            return false;
+        }
     }
     const userInfoEndpoint = await userManager.metadataService.getUserInfoEndpoint();
     const apiFetch = createApiFetch({ config });
     const response = await apiFetch(userInfoEndpoint);
-    if (response.status === 200) {
-        return true;
+    if (response.status !== 200) {
+        await userManager.removeUser();
+        return false;
     }
-    return false;
+    const data = await response.json();
+    if (Boolean(data.anon) !== Boolean(user.profile.anon)) {
+        await userManager.removeUser();
+        return false;
+    }
+    return true;
 }
 
 async function loadSchema(config: InitAppConfig) {
@@ -200,58 +246,7 @@ async function loadSchema(config: InitAppConfig) {
     window.schemaLoader = schemaLoader;
     const schema = await schemaLoader.loadSchema();
     signals.emit('openapi.loaded', schema);
-    sessionStorage.setItem('defaultSchema', JSON.stringify(schema));
     return schema;
-}
-
-function createSchemaOauthConfigProvider(apiConfig: ApiConfig) {
-    const loadSchemaOnce = (() => {
-        let schema: AppSchema | null = JSON.parse(sessionStorage.getItem('defaultSchema') || 'null');
-
-        return async (): Promise<AppSchema> => {
-            if (schema) {
-                return schema;
-            }
-            const url = new URL(apiConfig.endpointPath, apiConfig.url);
-            url.searchParams.set('format', 'openapi');
-            const response = await fetch(url);
-            schema = await response.json();
-            sessionStorage.setItem('defaultSchema', JSON.stringify(schema));
-            return schema as AppSchema;
-        };
-    })();
-
-    async function getAuthorityUrl() {
-        const schema = await loadSchemaOnce();
-        for (const def of Object.values(schema.securityDefinitions ?? {})) {
-            if (def.type === 'oauth2') {
-                if ('authorizationUrl' in def) {
-                    return new URL(def.authorizationUrl).origin;
-                }
-                if ('tokenUrl' in def) {
-                    return new URL(def.tokenUrl).origin;
-                }
-            }
-        }
-        return;
-    }
-
-    async function getClientId() {
-        const schema = await loadSchemaOnce();
-        for (const def of Object.values(schema.securityDefinitions ?? {})) {
-            if (def.type === 'oauth2') {
-                if ('x-clientId' in def && def['x-clientId']) {
-                    return def['x-clientId'] as string;
-                }
-            }
-        }
-        return;
-    }
-
-    return {
-        getAuthorityUrl,
-        getClientId,
-    };
 }
 
 type FatalErrorHandler = (params: { error: unknown }) => any;
@@ -267,8 +262,17 @@ const defaultStartupFatalErrorHandler = createStartupFatalErrorHandler(({ error 
         'style',
         `
             font-size: 2rem;
+            margin: 0;
         `,
     );
+
+    const clearCacheAndReloadButton = document.createElement('button');
+    clearCacheAndReloadButton.textContent = 'Clear cache';
+    clearCacheAndReloadButton.className = 'btn btn-secondary';
+    clearCacheAndReloadButton.type = 'button';
+    clearCacheAndReloadButton.addEventListener('click', () => {
+        cleanAllCacheAndReloadPage({ resetAll: true });
+    });
 
     const text = document.createElement('p');
     text.textContent = `Details: ${error}`;
@@ -295,9 +299,11 @@ const defaultStartupFatalErrorHandler = createStartupFatalErrorHandler(({ error 
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            gap: 20px;
         `,
     );
     wrapper.appendChild(title);
+    wrapper.appendChild(clearCacheAndReloadButton);
     wrapper.appendChild(text);
     document.body.innerHTML = '';
     document.body.insertAdjacentElement('beforeend', wrapper);
@@ -314,3 +320,136 @@ const defaultLogoutHandler: LogoutHandler = async ({ config }) => {
     await config.auth.userManager.removeUser();
     window.location.href = '/';
 };
+
+export async function _createUserManager(config: InitAppConfigRaw, apiConfig: ApiConfig) {
+    const schemaConfig = createSchemaOauthConfigProvider(apiConfig);
+    const storageConfig = createStorageOauthConfigProvider(window.localStorage);
+    const providedConfig = config.auth ?? {};
+
+    let isCachedOauthAuthorityUsed = false;
+    let authority: string | null | undefined = providedConfig.authorityUrl;
+    if (!authority) {
+        authority = storageConfig.getAuthorityUrl();
+        if (authority) {
+            isCachedOauthAuthorityUsed = true;
+        } else {
+            authority = await schemaConfig.getAuthorityUrl();
+            if (authority) {
+                storageConfig.setAuthorityUrl(authority);
+            }
+        }
+    }
+    if (!authority) {
+        throw new Error('Authority is not provided');
+    }
+
+    let isCachedOauthClientIdUsed = false;
+    let clientId: string | null | undefined = providedConfig.clientId;
+    if (!clientId) {
+        clientId = storageConfig.getClientId();
+        if (clientId) {
+            isCachedOauthClientIdUsed = true;
+        } else {
+            clientId = await schemaConfig.getClientId();
+            if (clientId) {
+                storageConfig.setClientId(clientId);
+            }
+        }
+    }
+    if (!clientId) {
+        throw new Error('Client id is not provided');
+    }
+
+    return {
+        isCachedOauthAuthorityUsed,
+        isCachedOauthClientIdUsed,
+        userManager: new UserManager({
+            authority,
+            client_id: clientId,
+            client_secret: providedConfig.clientSecret,
+            redirect_uri: providedConfig.redirectUri ?? 'not_used',
+            automaticSilentRenew: true,
+            scope: 'openid',
+            userStore: new WebStorageStateStore({ store: window.localStorage }),
+            silent_redirect_uri: SILENT_REDIRECT_URL.toString(),
+        }),
+    };
+}
+
+export function verifyAndSaveToCache(schema: AppSchema) {
+    const storageConfig = createStorageOauthConfigProvider(window.localStorage);
+    const clientId = getClientIdFromSchema(schema);
+    if (clientId) {
+        storageConfig.setClientId(clientId);
+    }
+    const authorityUrl = getAuthorityUrlFromSchema(schema);
+    if (authorityUrl) {
+        storageConfig.setAuthorityUrl(authorityUrl);
+    }
+}
+
+function createStorageOauthConfigProvider(storage: Storage) {
+    return {
+        getAuthorityUrl: () => storage.getItem('oidc-cache:authorityUrl'),
+        getClientId: () => storage.getItem('oidc-cache:clientId'),
+        setAuthorityUrl: (value: string) => storage.setItem('oidc-cache:authorityUrl', value),
+        setClientId: (value: string) => storage.setItem('oidc-cache:clientId', value),
+    };
+}
+
+function getAuthorityUrlFromSchema(schema: AppSchema) {
+    for (const def of Object.values(schema.securityDefinitions ?? {})) {
+        if (def.type === 'oauth2') {
+            if ('authorizationUrl' in def) {
+                return new URL(def.authorizationUrl).origin;
+            }
+            if ('tokenUrl' in def) {
+                return new URL(def.tokenUrl).origin;
+            }
+        }
+    }
+    return;
+}
+
+function getClientIdFromSchema(schema: AppSchema) {
+    for (const def of Object.values(schema.securityDefinitions ?? {})) {
+        if (def.type === 'oauth2') {
+            if ('x-clientId' in def && def['x-clientId']) {
+                return def['x-clientId'] as string;
+            }
+        }
+    }
+    return;
+}
+
+function createSchemaOauthConfigProvider(apiConfig: ApiConfig) {
+    const loadSchemaOnce = (() => {
+        let schema: AppSchema | null = null;
+
+        return async (): Promise<AppSchema> => {
+            if (schema) {
+                return schema;
+            }
+            const url = new URL(apiConfig.endpointPath, apiConfig.url);
+            url.searchParams.set('format', 'openapi');
+            const response = await fetch(url);
+            schema = await response.json();
+            return schema as AppSchema;
+        };
+    })();
+
+    async function getAuthorityUrl() {
+        return getAuthorityUrlFromSchema(await loadSchemaOnce());
+    }
+
+    async function getClientId() {
+        return getClientIdFromSchema(await loadSchemaOnce());
+    }
+
+    return {
+        getAuthorityUrl,
+        getClientId,
+    };
+}
+
+class RestartAppError extends Error {}

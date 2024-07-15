@@ -1476,7 +1476,7 @@ def add_in_vary(headers: dict, value: str):
     vary = cc_delim_re.split(
         headers.get('Vary', '').lower()
     )
-    if value not in vary:
+    if value.lower() not in vary:
         vary.append(value)
         headers['Vary'] = ', '.join(vary)
 

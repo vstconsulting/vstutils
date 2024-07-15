@@ -15,3 +15,5 @@ export {
     onSchemaViewsCreated,
 } from './vstutils/signals';
 export { type AppSchema } from './vstutils/schema';
+export { defineFieldComponent } from './vstutils/fields/base/defineFieldComponent';
+export { BaseField } from './vstutils/fields/base/BaseField';

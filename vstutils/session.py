@@ -24,11 +24,7 @@ class MsgpackSessionSerializer:
     __slots__ = ()
     options = (
         ormsgpack.OPT_SERIALIZE_PYDANTIC |
-        ormsgpack.OPT_NON_STR_KEYS |
-        ormsgpack.OPT_PASSTHROUGH_TUPLE |
-        ormsgpack.OPT_PASSTHROUGH_BIG_INT |
-        ormsgpack.OPT_PASSTHROUGH_SUBCLASS |
-        ormsgpack.OPT_PASSTHROUGH_DATETIME
+        ormsgpack.OPT_NON_STR_KEYS
     )
 
     def dumps(self, obj):

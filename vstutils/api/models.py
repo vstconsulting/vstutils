@@ -31,8 +31,6 @@ class Language(ListModel):
     @classmethod
     def get_etag_value(cls, pk=None):
         hashable_str = '_'.join(c for c, _ in settings.LANGUAGES) + (f'_{pk}' if pk is not None else '')
-        if settings.ENABLE_CUSTOM_TRANSLATIONS:
-            hashable_str += CustomTranslations.get_etag_value(pk)
         return hashlib.md5(hashable_str.encode('utf-8')).hexdigest()  # nosec
 
     def _get_translation_data(self, module_path_string, code, for_server=False):
@@ -59,10 +57,6 @@ class Language(ListModel):
             translation_data.update(
                 self._get_translation_data(attr_name, code, for_server)
             )
-        if settings.ENABLE_CUSTOM_TRANSLATIONS:
-            translation_data.update(
-                CustomTranslations.objects.filter(code=code).values_list('original', 'translated')
-            )
         return translation_data
 
     @cached_property
@@ -79,21 +73,6 @@ class Language(ListModel):
             # place for additional translation methods
             return text
         return translated
-
-
-class CustomTranslations(BaseModel):
-    objects: Manager.from_queryset(BQuerySet)
-    _cache_responses = True
-
-    original = CharField(primary_key=True, max_length=380)
-    translated = CharField(max_length=380)
-    code = CharField(max_length=5)
-
-    class Meta:
-        default_related_name = 'custom_translations'
-        indexes = [
-            models.Index(fields=('original', 'translated', 'code'), name='%(app_label)s_translations')
-        ]
 
 
 class TwoFactor(BaseModel):

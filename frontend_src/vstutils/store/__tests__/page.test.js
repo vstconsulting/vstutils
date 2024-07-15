@@ -130,7 +130,7 @@ test('createListViewStore', async () => {
 
     // Check delete instance
     fetchMock.resetMocks();
-    fetchMock.mockResponseOnce('{}', { status: 204 });
+    fetchMock.mockResponseOnce('[{"status": 204}]');
     await app.store.page.removeInstance({
         instance: app.store.page.instances[0],
         fromList: true,

@@ -1,4 +1,5 @@
 import { onBeforeUnmount, onMounted, getCurrentInstance, onScopeDispose } from 'vue';
+import { State } from 'centrifuge';
 
 import { getApp, getUniqueId } from '@/vstutils/utils';
 import type {
@@ -25,7 +26,7 @@ export function useAutoUpdate({
     const id = getUniqueId();
 
     const autoUpdateAction: TimerAutoUpdateAction | Omit<CentrifugoAutoUpdateAction, 'pk'> =
-        app.centrifugoClient?.isConnected() && labels
+        app.centrifugoClient?.state === State.Connected && labels
             ? {
                   id,
                   callback,

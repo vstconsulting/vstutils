@@ -3242,13 +3242,9 @@ class LangTestCase(BaseTestCase):
             }
         ]
 
-        CustomTranslations = self.get_model_class('vstutils_api.CustomTranslations')
-        CustomTranslations.objects.create(original='проверка перевода', translated="Успешно переведено", code='ru')
-
         bulk_data = [
             dict(path=['_lang', 'ru', 'translate'], method='post', data=dict(original='enter value')),
             dict(path=['_lang', 'en', 'translate'], method='post', data=dict(original='репозиторий')),
-            dict(path=['_lang', 'ru', 'translate'], method='post', data=dict(original='проверка перевода')),
         ]
         results = self.bulk(bulk_data)
         # test successful translation
@@ -3257,9 +3253,6 @@ class LangTestCase(BaseTestCase):
         # test not translated
         self.assertEqual(201, results[1]['status'])
         self.assertEqual(test_results[1], results[1]['data'])
-        # Custom translations
-        self.assertEqual(201, results[2]['status'])
-        self.assertEqual("Успешно переведено", results[2]['data']['translated'])
 
         # all translations equal
         ru: Language = Language.objects.get(code='ru')
@@ -5855,63 +5848,66 @@ class WebSocketTestCase(BaseTestCase):
         CreateHostTask.do(name='centrifugafromtask')
 
         # notify
-        self.assertEqual(len(messages_log[0]), 1, messages_log[0])
-        self.assertEqual(messages_log[0][0]['method'], 'publish')
-        self.assertDictEqual(messages_log[0][0]['params'], {
-            **messages_log[0][0]['params'],
-            'channel': f'{settings.VST_PROJECT}.update.test_proj.Host',
-            'data': {'pk': host_obj.id},
+        req = messages_log[0]
+        self.assertEqual(req.api_method, 'batch')
+        self.assertDictEqual(req.api_payload, {
+            "commands": [
+                {"publish": {"channel": "test_proj.update.test_proj.Host", "data": {"pk": host_obj.id}}},
+            ],
+            "parallel": False,
         })
 
         # bulk notify
-        self.assertEqual(len(messages_log[1]), 1, messages_log[1])
-        self.assertEqual(messages_log[1][0]['method'], 'publish')
-        self.assertDictEqual(messages_log[1][0]['params'], {
-            **messages_log[1][0]['params'],
-            'channel': f'{settings.VST_PROJECT}.update.test_proj.Host',
-            'data': {'pk': host_obj.id},
+        req = messages_log[1]
+        self.assertEqual(req.api_method, 'batch')
+        self.assertDictEqual(req.api_payload, {
+            'commands': [
+                {'publish': {'channel': 'test_proj.update.test_proj.Host', 'data': {'pk': host_obj.id}}},
+            ],
+            'parallel': False,
         })
 
         # bulk notify with channel provided
-        self.assertEqual(len(messages_log[2]), 2, messages_log[2])
-        for msg in messages_log[2]:
-            self.assertEqual(msg['method'], 'publish')
-            self.assertDictEqual(msg['params'], {
-                **msg['params'],
-                'channel': 'test_proj.update.some-channel',
-                'data': {'pk': host_obj.id},
-            })
+        req = messages_log[2]
+        self.assertEqual(req.api_method, 'batch')
+        self.assertDictEqual(req.api_payload, {
+            "commands": [
+                {"publish": {"channel": "test_proj.update.some-channel", "data": {"pk": host_obj.id}}},
+                {'publish': {'channel': 'test_proj.update.some-channel', 'data': {'pk': host_obj.id}}},
+            ],
+            "parallel": False,
+        })
 
         # notify for uuid model
-        self.assertEqual(len(messages_log[3]), 1, messages_log[3])
-        self.assertEqual(messages_log[3][0]['method'], 'publish')
-        self.assertDictEqual(messages_log[3][0]['params'], {
-            **messages_log[3][0]['params'],
-            'channel': f'{settings.VST_PROJECT}.update.test_proj.ModelWithUuid',
-            'data': {'pk': str(mwu.id), 'some-data': mwu.data},
+        req = messages_log[3]
+        self.assertEqual(req.api_method, 'batch')
+        self.assertDictEqual(req.api_payload, {
+            'commands': [
+                {'publish': {
+                    'channel': 'test_proj.update.test_proj.ModelWithUuid',
+                    'data': {'pk': str(mwu.id), 'some-data': '123'}
+                }},
+            ],
+            'parallel': False,
         })
 
         # api call
-        self.assertEqual(len(messages_log[4]), 2, messages_log[4])
-        self.assertEqual(messages_log[4][0]['method'], 'publish')
-        self.assertDictEqual(messages_log[4][0]['params'], {
-            **messages_log[4][0]['params'],
-            'channel': f'{settings.VST_PROJECT}.update.test_proj.Host',
-            'data': {'pk': host_obj.id},
-        })
-        self.assertEqual(messages_log[4][1]['method'], 'publish')
-        self.assertDictEqual(messages_log[4][1]['params'], {
-            **messages_log[4][1]['params'],
-            'channel': f'{settings.VST_PROJECT}.update.test_proj.Host',
-            'data': {'pk': host_obj2.id},
+        req = messages_log[4]
+        self.assertEqual(req.api_method, 'batch')
+        self.assertDictEqual(req.api_payload, {
+            'commands': [
+                {'publish': {'channel': 'test_proj.update.test_proj.Host', 'data': {'pk': host_obj.id}}},
+                {'publish': {'channel': 'test_proj.update.test_proj.Host', 'data': {'pk': host_obj2.id}}},
+            ],
+            'parallel': False,
         })
 
         # celery
-        self.assertEqual(len(messages_log[5]), 1, messages_log[5])
-        self.assertEqual(messages_log[5][0]['method'], 'publish')
-        self.assertDictEqual(messages_log[5][0]['params'], {
-            **messages_log[5][0]['params'],
-            'channel': f'{settings.VST_PROJECT}.update.test_proj.Host',
+        req = messages_log[5]
+        self.assertEqual(req.api_method, 'batch')
+        self.assertDictEqual(req.api_payload['commands'][0]['publish'], {
+            **req.api_payload['commands'][0]['publish'],
+            'channel': f'test_proj.update.test_proj.Host',
         })
 
 
@@ -6674,6 +6670,14 @@ class Oauth2TestCase(BaseTestCase):
             'aud':'test-client',
             'sup': False,
         })
+
+        # Check token with invalid signature
+        with self.patch('time.time', return_value=1000):
+            response = client.get(
+                '/api/v1/user/profile/',
+                HTTP_AUTHORIZATION=f'Bearer {token[:-7]}invalid',
+            )
+        self.assertEqual(response.status_code, 403)
 
         # Check token after expiration
         with self.patch('time.time', return_value=1061):

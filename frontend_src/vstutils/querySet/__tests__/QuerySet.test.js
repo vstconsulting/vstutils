@@ -4,6 +4,7 @@ import { makeModel, BaseModel } from '../../models';
 import StringField from '../../fields/text/StringField';
 import { QuerySet } from '../QuerySet';
 import { HttpMethods, RequestTypes } from '../../utils';
+import { createApp, createSchema, expectNthRequest } from '@/unittests';
 
 describe('QuerySet', () => {
     const idField = new IntegerField({ name: 'id', readOnly: true });
@@ -17,7 +18,8 @@ describe('QuerySet', () => {
         { id: 4, name: 'vitya' },
     ];
 
-    beforeAll(() => {
+    beforeAll(async () => {
+        await createApp({ schema: createSchema({}) });
         apiConnector.defaultVersion = 'v1';
         apiConnector.baseURL = 'http://localhost/api';
         apiConnector.endpointURL = 'http://localhost/api/endpoint/';
@@ -62,9 +64,7 @@ describe('QuerySet', () => {
     test('get list', async () => {
         fetchMock.mockResponseOnce(JSON.stringify({ count: 0, next: null, previous: null, results: [] }));
         expect((await qs.items()).length).toBe(0);
-        let [url, request] = fetchMock.mock.calls[0];
-        expect(url).toBe('http://localhost/api/v1/users/');
-        expect(request.method).toBe('get');
+        expectNthRequest(0, { method: 'get', url: 'http://localhost/api/v1/users/' });
     });
 
     test('create', async () => {
@@ -74,9 +74,7 @@ describe('QuerySet', () => {
         expect(user.id).toBe(1);
         expect(user.name).toBe('test_name');
         expect(user.email).toBe('test_mail');
-        let [url, request] = fetchMock.mock.calls[0];
-        expect(url).toBe('http://localhost/api/v1/users/');
-        expect(request.method).toBe('post');
+        expectNthRequest(0, { method: 'post', url: 'http://localhost/api/v1/users/' });
     });
 
     test('create with invalid instance', async () => {
@@ -93,9 +91,10 @@ describe('QuerySet', () => {
         fetchMock.mockResponses('{"id": 2}');
         let [user] = await qs.update(new OneUser({ id: 2 }), [new User({ id: 2 })]);
         expect(user.id).toBe(2);
-        let [url, request] = fetchMock.mock.calls[0];
-        expect(url).toBe('http://localhost/api/v1/users/2/');
-        expect(request.method).toBe('patch');
+        expectNthRequest(0, {
+            method: 'patch',
+            url: 'http://localhost/api/v1/users/2/',
+        });
     });
 
     test('method "update" with instances == undefined returns updated model', async () => {
@@ -115,22 +114,24 @@ describe('QuerySet', () => {
         expect(user).toBeTruthy();
         expect(user.id).toBe(2);
 
-        let [urlGet, requestGet] = fetchMock.mock.calls[0];
-        let [urlPatch, requestPatch] = fetchMock.mock.calls[1];
-
-        expect(urlGet).toBe('http://localhost/api/v1/users/');
-        expect(urlPatch).toBe('http://localhost/api/v1/users/2/');
-        expect(requestGet.method).toBe('get');
-        expect(requestPatch.method).toBe('patch');
+        expectNthRequest(0, {
+            method: 'get',
+            url: 'http://localhost/api/v1/users/',
+        });
+        expectNthRequest(1, {
+            method: 'patch',
+            url: 'http://localhost/api/v1/users/2/',
+        });
     });
 
     test('get by id', async () => {
         fetchMock.mockResponses('{"id": 1}');
         let user = await qs.get(1);
         expect(user.id).toBe(1);
-        let [url, request] = fetchMock.mock.calls[0];
-        expect(url).toBe('http://localhost/api/v1/users/1/');
-        expect(request.method).toBe('get');
+        expectNthRequest(0, {
+            method: 'get',
+            url: 'http://localhost/api/v1/users/1/',
+        });
     });
 
     test('get first', async () => {
@@ -142,9 +143,10 @@ describe('QuerySet', () => {
     test('delete', async () => {
         fetchMock.resetMocks();
         await qs.delete([new User({ id: 3 })]);
-        let [url, request] = fetchMock.mock.calls[0];
-        expect(url).toBe('http://localhost/api/v1/users/3/');
-        expect(request.method).toBe('delete');
+        expectNthRequest(0, {
+            method: 'delete',
+            url: 'http://localhost/api/v1/users/3/',
+        });
     });
 
     test('get one with error', async () => {
@@ -207,6 +209,10 @@ describe('QuerySet', () => {
                         results: { id: 5, name: 'User 1' },
                     },
                 },
+                {
+                    status: 500,
+                    data: {},
+                },
             ]),
         );
 
@@ -222,6 +228,10 @@ describe('QuerySet', () => {
                         previous: null,
                         results: { id: 5, name: 'User 1' },
                     },
+                },
+                {
+                    status: 500,
+                    data: {},
                 },
             ]),
         );
@@ -376,7 +386,7 @@ describe('QuerySet', () => {
 
         test('update/create with error', async () => {
             const testData = { status: 400, data: { name: ['Error text'] } };
-            fetchMock.mockResponse(JSON.stringify([testData]));
+            fetchMock.mockResponse(JSON.stringify([testData, { status: 500, data: {} }]));
 
             // Create with error
             await expect(new CreateUser({ name: '' }, qs).create()).rejects.toMatchObject(testData);
@@ -429,11 +439,11 @@ describe('QuerySet', () => {
         fetchMock.once(JSON.stringify({ count: 0, next: null, previous: null, results: [] }));
         const itemsRequest = qs.items(true, { pk1: 12, pk2: 15 }).then((items) => items.length);
         await expect(itemsRequest).resolves.toBe(0);
-        expect(fetchMock.mock.calls[0][0]).toBe('http://localhost/api/v1/fragment1/12/fragment2/15/');
+        expectNthRequest(0, { url: 'http://localhost/api/v1/fragment1/12/fragment2/15/' });
 
         fetchMock.once(JSON.stringify({ id: 1337 }));
         const itemRequest = qs.get(1337, { pk1: 9, pk2: 8 }).then((instance) => instance.id);
         await expect(itemRequest).resolves.toBe(1337);
-        expect(fetchMock.mock.calls[1][0]).toBe('http://localhost/api/v1/fragment1/9/fragment2/8/1337/');
+        expectNthRequest(1, { url: 'http://localhost/api/v1/fragment1/9/fragment2/8/1337/' });
     });
 });

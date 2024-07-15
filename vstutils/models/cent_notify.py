@@ -2,13 +2,12 @@
 import typing as _t
 import logging
 import contextlib
-import json
 
 import orjson
 from django.db.models import signals
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from cent import Client as CentrifugoClient  # type: ignore
+from cent import Client as CentrifugoClient, BatchRequest, PublishRequest
 
 from .base import get_proxy_labels
 from ..utils import raise_context_decorator_with_default
@@ -16,11 +15,6 @@ from .model import BaseModel
 from ..api.renderers import ORJSONRenderer
 
 logger = logging.getLogger('vstutils')
-
-
-class JsonEncoder(json.JSONEncoder):
-    def default(self, o):
-        return str(o)  # nocv
 
 
 class Notificator:
@@ -59,10 +53,11 @@ class Notificator:
 
     @raise_context_decorator_with_default(verbose=False)
     def get_client(self):
-        centrifugo_client_kwargs = {**settings.CENTRIFUGO_CLIENT_KWARGS}
-        centrifugo_client_kwargs.pop('token_hmac_secret_key', None)
-        if 'json_encoder' not in centrifugo_client_kwargs:
-            centrifugo_client_kwargs['json_encoder'] = JsonEncoder
+        centrifugo_client_kwargs = {
+            'api_url': settings.CENTRIFUGO_CLIENT_KWARGS['address'],
+            'api_key': settings.CENTRIFUGO_CLIENT_KWARGS['api_key'],
+            'timeout': settings.CENTRIFUGO_CLIENT_KWARGS.get('timeout'),
+        }
         logger.debug(f"Getting Centrifugo client with kwargs: {centrifugo_client_kwargs}")
         return self.client_class(**centrifugo_client_kwargs)
 
@@ -96,19 +91,25 @@ class Notificator:
 
         if objects and self.cent_client is None:
             self.cent_client = self.get_client()
+            if not self.cent_client:
+                return
+
+        publish_requests: list[PublishRequest] = []
 
         for obj_labels, data in objects:
             with contextlib.suppress(Exception):
                 for obj_label in obj_labels:
                     channel = self.get_subscription_channel(provided_label or obj_label)
-                    self.cent_client.add("publish", self.cent_client.get_publish_params(
+                    publish_requests.append(PublishRequest(
                         channel=channel,
                         data=data,
                     ))
                     sent_channels.add(channel)
-        if objects and sent_channels:
+        if publish_requests:
             logger.debug(f'Send notifications about {len(objects)} updates to channel(s) {sent_channels}.')
-            return self.cent_client.send()
+            return self.cent_client.batch(
+                BatchRequest(requests=publish_requests),
+            )
 
     async def asend(self):
         # TODO: Migrate main code here after updating to new cent package with async support.

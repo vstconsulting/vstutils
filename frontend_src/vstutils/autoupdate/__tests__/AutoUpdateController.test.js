@@ -1,4 +1,4 @@
-import Centrifuge from 'centrifuge';
+import { Centrifuge } from 'centrifuge';
 import { AutoUpdateController } from '../AutoUpdateController.ts';
 
 describe('AutoUpdateController', () => {
