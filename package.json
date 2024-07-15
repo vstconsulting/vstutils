@@ -70,7 +70,7 @@
     "admin-lte": "3.2.0-rc",
     "ansi_up": "^5.0.0",
     "bootstrap": "4.6.0",
-    "centrifuge": "^2.8.5",
+    "centrifuge": "^5.2.2",
     "compressorjs": "^1.2.1",
     "concurrently": "^8.2.2",
     "cropperjs": "^1.6.2",

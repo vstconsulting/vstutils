@@ -39,17 +39,17 @@ export const { provide: provideInitAppConfig, inject: useInitAppConfig } =
 export async function createTranslationsManager(config: InitAppConfig) {
     const baseTranslationsManager = new TranslationsManager(config);
     const i18n = createVueI18n();
-    const availableLanguages = await baseTranslationsManager.getLanguages();
+    const availableLanguages = await baseTranslationsManager.loadLanguages();
     i18n.locale = document.documentElement.lang || getCookie('lang') || availableLanguages[0]?.code || 'en';
     if (availableLanguages.length > 0) {
-        i18n.setLocaleMessage(i18n.locale, await baseTranslationsManager.getTranslations(i18n.locale));
+        i18n.setLocaleMessage(i18n.locale, await baseTranslationsManager.loadTranslations(i18n.locale));
     }
     return {
         availableLanguages,
         i18n,
         async setLanguage(code: string) {
             i18n.locale = code;
-            i18n.setLocaleMessage(code, await baseTranslationsManager.getTranslations(code));
+            i18n.setLocaleMessage(code, await baseTranslationsManager.loadTranslations(code));
         },
     };
 }

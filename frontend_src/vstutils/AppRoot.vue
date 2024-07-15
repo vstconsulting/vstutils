@@ -202,7 +202,6 @@
             async setLanguage(value: string) {
                 if (value && this.$i18n.locale !== value) {
                     await this.$app.setLanguage(value);
-                    await this.$app.cache.delete(window.schemaLoader.cacheKey);
                     await window.schemaLoader.loadSchema();
                 }
             },

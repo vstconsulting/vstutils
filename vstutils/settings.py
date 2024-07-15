@@ -158,7 +158,6 @@ class MainSection(BaseAppendSection):
         'debug': ConfigBoolType,
         'enable_admin_panel': ConfigBoolType,
         'enable_registration': ConfigBoolType,
-        'enable_custom_translations': ConfigBoolType,
         'allowed_hosts': ConfigListType,
         'first_day_of_week': ConfigIntType,
         'enable_agreement_terms': ConfigBoolType,
@@ -479,7 +478,6 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'log_level': env('DJANGO_LOG_LEVEL'),
             'enable_admin_panel': env.bool(f'{ENV_NAME}_ENABLE_ADMIN_PANEL', default=False),
             'enable_registration': env.bool(f'{ENV_NAME}_ENABLE_REGISTRATION', default=False),
-            'enable_custom_translations': False,
             'ldap-server': env.str(f'{ENV_NAME}_LDAP_CONNECTION', default=None),
             'ldap-default-domain': env.str(f'{ENV_NAME}_LDAP_DOMAIN', default=''),
             'ldap-auth_format': env.str(f'{ENV_NAME}_LDAP_AUTH_FORMAT', default='cn=<username>,<domain>'),
@@ -1227,7 +1225,6 @@ USE_L10N: bool = True
 USE_TZ: bool = True
 FIRST_DAY_OF_WEEK = main['first_day_of_week']
 LANGUAGE_COOKIE_NAME = main['language_cookie_name']
-ENABLE_CUSTOM_TRANSLATIONS = main['enable_custom_translations']
 
 
 # LOGGING settings

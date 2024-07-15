@@ -64,7 +64,7 @@ test('createDetailViewStore', async () => {
     expect(app.store.page.sublinks[0].name).toEqual('edit');
 
     fetchMock.resetMocks();
-    fetchMock.mockResponseOnce('{}', { status: 204 });
+    fetchMock.mockResponseOnce('[{"status":204}]');
     await app.store.page.removeInstance({ instance: app.store.page.instance, fromList: false, purge: false });
     expectRequest(fetchMockCallAt(0), {
         body: [{ method: 'delete', path: ['some_list', 15] }],

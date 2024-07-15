@@ -2,7 +2,7 @@ import type { ComponentOptions } from 'vue';
 import type VueRouter from 'vue-router';
 import Vue from 'vue';
 
-import Centrifuge from 'centrifuge';
+import { Centrifuge } from 'centrifuge';
 import { defineStore } from 'pinia';
 import type VueI18n from 'vue-i18n';
 
@@ -39,7 +39,6 @@ import ViewConstructor from '@/vstutils/views/ViewConstructor.js';
 import { setupPushNotifications } from '@/vstutils/webpush';
 import { type InitAppConfig } from '@/vstutils/init-app';
 
-import type { Cache } from '@/cache';
 import type { InnerData } from '@/vstutils/utils';
 import type { GlobalStoreInitialized } from '@/vstutils/store/globalStore';
 
@@ -59,7 +58,6 @@ type TAppRoot = InstanceType<typeof AppRoot>;
 export interface IApp {
     config: InitAppConfig;
     vue: typeof Vue;
-    cache: Cache;
     version: string;
     defaultPageLimit: number;
     schema: AppSchema;
@@ -131,7 +129,6 @@ interface AppParams {
 export class App implements IApp {
     config: InitAppConfig;
     vue: typeof Vue;
-    cache: Cache;
     version: string;
     defaultPageLimit: number;
     schema: AppSchema;
@@ -181,7 +178,6 @@ export class App implements IApp {
         this.vue = vue ?? Vue;
         this.schema = schema;
         this.router = null;
-        this.cache = config.cache;
         this.i18n = i18n;
         this.version = this.schema.info['x-versions'].application;
         this.defaultPageLimit = this.schema.info['x-page-limit'] ?? 20;
@@ -271,16 +267,16 @@ export class App implements IApp {
         this.userSettingsStore = createUserSettingsStore(this.api, userSettingsModel)(pinia);
 
         const [languages, translations, rawUser] = await Promise.all([
-            this.translationsManager.getLanguages(),
-            this.translationsManager.getTranslations(this.i18n.locale),
+            this.translationsManager.loadLanguages(),
+            this.translationsManager.loadTranslations(this.i18n.locale),
             this.api.loadUser(),
             this.userSettingsStore.init(),
         ]);
         this.languages = languages;
-        this.i18n.messages[this.i18n.locale] = translations;
+        this.i18n.setLocaleMessage(this.i18n.locale, translations);
         this.rawUser = rawUser;
 
-        void this.setLanguage(this.i18n.locale);
+        void this.setLanguage(this.i18n.locale, { skipLoad: true });
 
         this.afterInitialDataBeforeMount();
 
@@ -397,14 +393,15 @@ export class App implements IApp {
      * Method returns a promise of applying some language to app interface.
      * This method is supposed to be called after app was mounted.
      */
-    setLanguage(lang: string) {
-        return this._prefetchTranslation(lang).then(() => {
-            this.i18n.locale = lang;
-            signals.emit('app.language.changed', { lang });
-            document.documentElement.setAttribute('lang', lang);
-            document.cookie = `lang=${lang}`;
-            return lang;
-        });
+    async setLanguage(lang: string, opts?: { skipLoad?: boolean }) {
+        if (!opts?.skipLoad) {
+            await this._prefetchTranslation(lang);
+        }
+        this.i18n.locale = lang;
+        signals.emit('app.language.changed', { lang });
+        document.documentElement.setAttribute('lang', lang);
+        document.cookie = `lang=${lang}`;
+        return lang;
     }
 
     /**
@@ -417,7 +414,7 @@ export class App implements IApp {
         }
 
         return this.translationsManager
-            .getTranslations(lang)
+            .loadTranslations(lang)
             .then((transitions) => this.i18n.setLocaleMessage(lang, transitions));
     }
 

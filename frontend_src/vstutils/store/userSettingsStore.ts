@@ -58,6 +58,7 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: ModelCons
             const { data } = await api.makeRequest<InnerData<Settings>>({
                 method: HttpMethods.GET,
                 path: USER_SETTINGS_PATH,
+                useBulk: true,
             });
             signals.once('app.afterInit', () => {
                 setData(data);

@@ -1,7 +1,6 @@
 import { User } from 'oidc-client-ts';
 import { createLocalVue } from '@vue/test-utils';
 import VueI18n from 'vue-i18n';
-import { DummyCache } from '@/cache';
 import { type AppSchema } from '@/vstutils/schema';
 import { type InitAppConfigRaw, _createUserManager } from '@/vstutils/init-app';
 import { getApp } from '@/vstutils/utils';
@@ -29,26 +28,31 @@ export async function createApp(params?: { schema?: Partial<AppSchema>; disableB
     const config: InitAppConfigRaw = {
         el,
         vue,
-        cache: new DummyCache(),
         auth: { authorityUrl: 'https://auth.test', clientId: 'test-id', clientSecret: 'test-secret' },
         api: { url: 'http://localhost/api/', disableBulk: true },
     };
     const schema = params?.schema ?? testSchema;
 
     // Emulate previously authenticated user
-    const userManger = await _createUserManager(config, {
+    const { userManager } = await _createUserManager(config, {
         url: new URL('http://localhost/api/'),
         endpointPath: '/endpoint/',
         disableBulk: false,
     });
 
-    // @ts-expect-error Skip some properties
     const user = new User({
         access_token: 'test-access_token',
         refresh_token: 'test-refresh_token',
         token_type: 'Bearer',
+        profile: {
+            sub: '1',
+            iss: 'https://auth.test',
+            aud: ['test-id'],
+            exp: Math.round(Date.now() / 1000) + 60 * 60,
+            iat: 1,
+        },
     });
-    await userManger.storeUser(user);
+    await userManager.storeUser(user);
 
     // Start app
 
@@ -118,7 +122,7 @@ export async function createApp(params?: { schema?: Partial<AppSchema>; disableB
         if (
             request.method === 'PUT' &&
             request.url === 'http://localhost/api/endpoint/' &&
-            body === '[{"method":"GET","path":["_lang"]}]'
+            body === '[{"method":"GET","path":["_lang"]},{"method":"GET","path":["_lang","en"]}]'
         ) {
             return {
                 headers: { 'Content-Type': 'application/json' },
@@ -132,18 +136,6 @@ export async function createApp(params?: { schema?: Partial<AppSchema>; disableB
                             ],
                         },
                     },
-                ]),
-            };
-        }
-
-        if (
-            request.method === 'PUT' &&
-            request.url === 'http://localhost/api/endpoint/' &&
-            body === '[{"method":"GET","path":["_lang","en"]}]'
-        ) {
-            return {
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify([
                     {
                         status: 200,
                         data: {
@@ -175,7 +167,7 @@ export async function createApp(params?: { schema?: Partial<AppSchema>; disableB
             };
         }
 
-        throw new Error(`Unexpected request: ${request.url}`);
+        throw new Error(`Unexpected request: ${request.method} ${request.url} ${body}`);
     });
 
     await initApp(config);

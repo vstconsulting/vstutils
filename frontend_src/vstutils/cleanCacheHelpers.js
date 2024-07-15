@@ -1,5 +1,3 @@
-import { globalCache } from '@/cache';
-
 /**
  * Function, that cleans files cache, unregisters current Service Worker instance and reloads page.
  */
@@ -22,29 +20,11 @@ async function cleanAllCacheAndReloadPage({ resetAll = false } = {}) {
         window.location.reload(true);
     }
 
-    try {
-        await globalCache.clear();
-    } finally {
-        if (resetAll) {
-            localStorage.clear();
-            sessionStorage.clear();
-        } else {
-            localStorage.removeItem('gui_version');
-            localStorage.removeItem('gui_user_version');
-        }
-        await cleanServiceWorkerCache();
+    if (resetAll) {
+        localStorage.clear();
+        sessionStorage.clear();
     }
+    await cleanServiceWorkerCache();
 }
 
-/**
- * Function, that removes OpenAPI schema from gui cache and reloads page.
- */
-async function cleanOpenApiCacheAndReloadPage() {
-    try {
-        await globalCache.delete('openapi');
-    } finally {
-        window.location.reload(true);
-    }
-}
-
-export { cleanAllCacheAndReloadPage, cleanOpenApiCacheAndReloadPage };
+export { cleanAllCacheAndReloadPage };
