@@ -13,7 +13,6 @@ variables:
   RESTORE_CACHE_ATTEMPTS: 3
   DJANGO_LOG_LEVEL: 'CRITICAL'
   TOX_ARGS: "--workdir /cache/.tox_vstutils_${CI_COMMIT_REF_NAME}"
-  CC: "ccache gcc"
   UWSGI_PROFILE: "minimal"
 
 stages:
@@ -30,6 +29,7 @@ stages:
   variables:
     TOX_ENVS: ""
     YARN_CACHE_FOLDER: "${CI_PROJECT_DIR}/yarn"
+    CC: "ccache gcc"
   before_script:
     - >
       if [ "${CI_COMMIT_REF_NAME}" != "master" -a "${CI_COMMIT_REF_NAME}" != "developer" ]; then
