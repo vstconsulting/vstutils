@@ -115,6 +115,8 @@ release:
       when: on_success
     - if: '$CI_COMMIT_BRANCH =~ /^release_/ && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
       when: on_success
+    - if: '$CI_COMMIT_BRANCH =~ /^collect-release-/ && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
+      when: manual
     - when: never
   before_script:
     - url_host=`echo "${CI_REPOSITORY_URL}" | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
@@ -126,7 +128,7 @@ release:
 
 release_packages:
   stage: release
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v3
+  image: registry.gitlab.com/vstconsulting/images:manylinux_2_17
   artifacts:
     reports:
       dotenv: variables.env

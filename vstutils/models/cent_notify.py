@@ -1,4 +1,5 @@
 # cython: binding=True
+import asyncio
 import typing as _t
 import logging
 import contextlib
@@ -7,7 +8,7 @@ import orjson
 from django.db.models import signals
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from cent import Client as CentrifugoClient, BatchRequest, PublishRequest
+from cent import AsyncClient as CentrifugoClient, BatchRequest, PublishRequest
 
 from .base import get_proxy_labels
 from ..utils import raise_context_decorator_with_default
@@ -82,8 +83,11 @@ class Notificator:
     def clear_messages(self):
         self.queue.clear()
 
-    @raise_context_decorator_with_default()
     def send(self):
+        with contextlib.suppress(Exception):
+            return asyncio.run(self.asend())
+
+    async def asend(self):
         self.queue, objects = [], tuple(self.queue)
 
         sent_channels = set()
@@ -107,13 +111,9 @@ class Notificator:
                     sent_channels.add(channel)
         if publish_requests:
             logger.debug(f'Send notifications about {len(objects)} updates to channel(s) {sent_channels}.')
-            return self.cent_client.batch(
+            return await self.cent_client.batch(
                 BatchRequest(requests=publish_requests),
             )
-
-    async def asend(self):
-        # TODO: Migrate main code here after updating to new cent package with async support.
-        return self.send()
 
     def disconnect_all(self):
         for signal in self._signals:
