@@ -319,7 +319,7 @@ export async function openSublink(sublink: Sublink, instance?: Model) {
         try {
             const response = sublink.external
                 ? await fetch(path)
-                : await api.makeRequest({ rawResponse: true, method: 'get', path: path });
+                : await api.makeRequest({ rawResponse: true, method: 'get', path: path, auth: sublink.auth });
             await downloadResponse(response);
         } catch (e) {
             error_handler.defineErrorAndShow(e);

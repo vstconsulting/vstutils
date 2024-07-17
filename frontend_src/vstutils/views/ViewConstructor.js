@@ -37,6 +37,7 @@ const FILTERS_TO_EXCLUDE = ['limit', 'offset'];
 const EDIT_STYLE_PROPERTY_NAME = 'x-edit-style';
 const ACTION_NAME = 'x-action-name';
 const IS_MULTI_ACTION_PROPERTY_NAME = 'x-multiaction';
+const OAUTH2_SECURITY_DEF_NAME = 'oauth2';
 
 /**
  * Class used to create views objects from schema
@@ -126,7 +127,7 @@ export default class ViewConstructor {
 
     /**
      * Method, that creates views based on OpenApi schema.
-     * @param {object} schema OpenApi Schema.
+     * @param {import('../schema').AppSchema} schema OpenApi Schema.
      * @return {Map<string, View>} views Dict of views objects.
      */
     getViews(schema) {
@@ -140,6 +141,7 @@ export default class ViewConstructor {
         paths.sort();
 
         const editStyleViewDefault = schema.info[EDIT_STYLE_PROPERTY_NAME];
+        const hasOauth2SecurityDef = schema.securityDefinitions[OAUTH2_SECURITY_DEF_NAME]?.type === 'oauth2';
 
         const deepNestedParents = [];
 
@@ -167,6 +169,7 @@ export default class ViewConstructor {
             /** @type {PageNewView} */
             let newView = null;
             let hasRemoveAction = false;
+            let isRemoveActionSecure = false;
 
             /**
              * @type {ActionView}
@@ -190,6 +193,9 @@ export default class ViewConstructor {
             );
 
             for (const httpMethod of Object.values(HttpMethods)) {
+                /**
+                 * @type {import('../schema').Operation}
+                 */
                 const operationSchema = pathSchema[httpMethod];
                 if (!operationSchema) continue;
                 const operationId = operationSchema[this.dictionary.paths.operation_id.name];
@@ -203,8 +209,20 @@ export default class ViewConstructor {
                 const isFileResponse = responseSchemaType === 'file';
                 const responseModel = this._getOperationModel(response);
 
+                // TODO improve auth vst/vst-utils#646
+                const isSecure =
+                    hasOauth2SecurityDef &&
+                    operationSchema.security &&
+                    operationSchema.security.some((sec) => sec[OAUTH2_SECURITY_DEF_NAME]);
+
                 const operationOptions = mergeDeep(
-                    { method: httpMethod, requestModel, responseModel, isDeepNested: Boolean(deepNestedOn) },
+                    {
+                        method: httpMethod,
+                        requestModel,
+                        responseModel,
+                        isDeepNested: Boolean(deepNestedOn),
+                        isSecure,
+                    },
                     commonOptions,
                     operationSchema,
                     this.getOperationOptions(operationId, path, httpMethod),
@@ -254,6 +272,7 @@ export default class ViewConstructor {
                     views.set(editView.path, editView);
                 } else if (operationOptions.type === ViewTypes.PAGE_REMOVE) {
                     hasRemoveAction = true;
+                    isRemoveActionSecure = isSecure;
                 } else if (operationOptions.type === ViewTypes.ACTION) {
                     const isEmpty =
                         !requestModel || requestModel.writableFields.length === 0 || requestModel === NoModel;
@@ -276,6 +295,7 @@ export default class ViewConstructor {
                         isFileResponse,
                         hidden: operationOptions['x-hidden'],
                         iconClasses: operationOptions['x-icons'] || operationOptions.iconClasses,
+                        auth: isSecure,
                     };
                     if (!isEmpty) {
                         operationOptions.action = params;
@@ -305,15 +325,21 @@ export default class ViewConstructor {
             const isDetailWithoutList = isDetailPath && !dataType[dataType.length - 1].includes('{');
             const isListDetail = parentIsList && isDetailPath && dataType[dataType.length - 1].includes('{');
 
+            if (isListPath) {
+                listView.objects.setOperationIsSecure(RequestTypes.LIST, listView.isSecure);
+            }
+
             // Set list path models
             if (isListDetail) {
                 parent.objects.models[RequestTypes.RETRIEVE] = pageView.modelsList;
                 pageView.objects = parent.objects;
+                parent.objects.setOperationIsSecure(RequestTypes.RETRIEVE, pageView.isSecure);
                 if (editView) {
                     const requestType = editView.isPartial
                         ? RequestTypes.PARTIAL_UPDATE
                         : RequestTypes.UPDATE;
                     parent.objects.models[requestType] = editView.modelsList;
+                    parent.objects.setOperationIsSecure(requestType, editView.isSecure);
                     editView.objects = parent.objects;
                 }
             }
@@ -322,6 +348,7 @@ export default class ViewConstructor {
             if (isListPath && newView) {
                 listView.objects.models[RequestTypes.CREATE] = newView.modelsList;
                 newView.objects = listView.objects;
+                newView.objects.setOperationIsSecure(RequestTypes.CREATE, newView.isSecure);
             }
 
             // Set detail path models
@@ -333,10 +360,12 @@ export default class ViewConstructor {
                     {},
                     pathParameters,
                 );
+                pageView.objects.setOperationIsSecure(RequestTypes.RETRIEVE, pageView.isSecure);
                 if (newView) {
                     newView.mixins.push(DetailWithoutListPageMixin);
                     pageView.objects.models[RequestTypes.CREATE] = newView.modelsList;
                     newView.objects = pageView.objects;
+                    newView.objects.setOperationIsSecure(RequestTypes.CREATE, newView.isSecure);
                 }
                 if (editView) {
                     editView.mixins.push(DetailWithoutListPageMixin);
@@ -345,6 +374,7 @@ export default class ViewConstructor {
                         : RequestTypes.UPDATE;
                     pageView.objects.models[requestType] = editView.modelsList;
                     editView.objects = pageView.objects;
+                    editView.objects.setOperationIsSecure(requestType, editView.isSecure);
                 }
             }
 
@@ -372,6 +402,7 @@ export default class ViewConstructor {
                     title: pageView.title,
                     href: pageView.path,
                     isFileResponse: pageView.isFileResponse,
+                    auth: pageView.isSecure,
                 });
             }
 
@@ -403,11 +434,16 @@ export default class ViewConstructor {
             if (hasRemoveAction) {
                 const baseOperations = this.dictionary.paths.operations.base;
                 let pageRemoveAction = mergeDeep(
-                    {},
+                    { auth: isRemoveActionSecure },
                     parent?.actions.get('add') ? baseOperations.nested_remove : baseOperations.remove,
                 );
-                if (pageView) pageView.actions.set(pageRemoveAction.name, pageRemoveAction);
-                if (parentIsList) parent.multiActions.set(pageRemoveAction.name, pageRemoveAction);
+                if (pageView) {
+                    pageView.actions.set(pageRemoveAction.name, pageRemoveAction);
+                    pageView.objects.setOperationIsSecure(RequestTypes.REMOVE, isRemoveActionSecure);
+                }
+                if (parentIsList) {
+                    parent.multiActions.set(pageRemoveAction.name, pageRemoveAction);
+                }
             }
 
             // Set new sublink/action

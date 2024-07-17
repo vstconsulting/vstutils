@@ -10,6 +10,7 @@
             <button
                 v-if="hideable"
                 class="btn input-group-text"
+                type="button"
                 :title="$ts('Hide field')"
                 @click="emit('hide')"
             >
@@ -18,6 +19,7 @@
             <button
                 v-if="clearable"
                 class="btn input-group-text"
+                type="button"
                 :title="$ts('Clear field')"
                 @click="emit('clear')"
             >

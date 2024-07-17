@@ -57,12 +57,8 @@ export function expectRequest(
         throw new Error('Request expected');
     }
     if (Array.isArray(request)) {
-        if (request[0] instanceof Request) {
-            request = request[0];
-        } else {
-            // @ts-expect-error It's actually a Request
-            request = new Request(request);
-        }
+        // @ts-expect-error It's actually a Request
+        request = new Request(...request);
     }
     if (expected.url) {
         expect(request.url).toBe(expected.url);

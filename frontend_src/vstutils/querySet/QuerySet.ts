@@ -52,6 +52,7 @@ export class QuerySet {
 
     listSubscriptionLabels: string[];
     prefetchEnabled: boolean;
+    secureOperations = new Set<RequestType>();
 
     constructor(
         pattern: string,
@@ -160,6 +161,18 @@ export class QuerySet {
         return model;
     }
 
+    isAuthRequired(operation: RequestType) {
+        return this.secureOperations.has(operation);
+    }
+
+    setOperationIsSecure(operation: RequestType, isSecure: boolean) {
+        if (isSecure) {
+            this.secureOperations.add(operation);
+        } else {
+            this.secureOperations.delete(operation);
+        }
+    }
+
     /**
      * Getter that returns queryset urls as string array
      */
@@ -250,6 +263,7 @@ export class QuerySet {
                 path: this._getDetailPath(id),
                 query: this.query,
                 useBulk: model.shouldUseBulk(HttpMethods.GET),
+                auth: this.isAuthRequired(RequestTypes.RETRIEVE),
             });
             instance = new model(response.data, this);
             instance._response = response;
@@ -328,6 +342,7 @@ export class QuerySet {
             path: this.getDataType(),
             query: this.query,
             useBulk: model.shouldUseBulk(HttpMethods.GET),
+            auth: this.isAuthRequired(RequestTypes.LIST),
         });
 
         const instances = createInstancesList(
@@ -370,8 +385,17 @@ export class QuerySet {
         ) {
             const pkFieldName = retrieveModel.pkField!.name;
             const results = await apiConnector.sendBulk<[Record<string, unknown>, InnerData]>([
-                { method, path: dataType, data: instance._getInnerData() },
-                { method: HttpMethods.GET, path: this._getCreateBulkPath(pkFieldName) },
+                {
+                    method,
+                    path: dataType,
+                    data: instance._getInnerData(),
+                    auth: this.isAuthRequired(RequestTypes.CREATE),
+                },
+                {
+                    method: HttpMethods.GET,
+                    path: this._getCreateBulkPath(pkFieldName),
+                    auth: this.isAuthRequired(RequestTypes.RETRIEVE),
+                },
             ]);
             APIResponse.checkStatus(results[0].status, results[0].data);
             return new retrieveModel(results[1].data, this);
@@ -382,6 +406,7 @@ export class QuerySet {
                 path: dataType,
                 query: this.query,
                 useBulk: createModel.shouldUseBulk(method),
+                auth: this.isAuthRequired(RequestTypes.CREATE),
             });
             const createdInstance = new createModel(response.data, this);
             if (createModelSameAsRetrieve) {
@@ -421,8 +446,8 @@ export class QuerySet {
             const requests = instances.flatMap((instance) => {
                 const path = this._getDetailPath(instance.getPkValue()!);
                 return [
-                    { method, path, data },
-                    { method: HttpMethods.GET, path },
+                    { method, path, data, auth: this.isAuthRequired(requestType) },
+                    { method: HttpMethods.GET, path, auth: this.isAuthRequired(RequestTypes.RETRIEVE) },
                 ];
             });
 
@@ -444,6 +469,7 @@ export class QuerySet {
                         query: this.query,
                         useBulk: modelUpdate.shouldUseBulk(method),
                         headers: Object.keys(headers).length > 0 ? headers : undefined,
+                        auth: this.isAuthRequired(requestType),
                     });
                     return new modelUpdate(response.data, this);
                 }),
@@ -473,6 +499,7 @@ export class QuerySet {
                     path: this._getDetailPath(instance.getPkValue()!),
                     headers,
                     useBulk,
+                    auth: this.isAuthRequired(RequestTypes.REMOVE),
                 });
             }),
         );
@@ -499,6 +526,7 @@ export class QuerySet {
             query: req.query,
             headers: req.headers,
             version: req.version,
+            auth: req.auth,
         };
 
         if (data !== undefined) {
@@ -529,6 +557,7 @@ interface InternalRequest {
     headers?: Record<string, unknown>;
     useBulk?: boolean;
     version?: string;
+    auth?: boolean;
 }
 
 export default QuerySet;

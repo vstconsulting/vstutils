@@ -15,20 +15,20 @@
         <ul class="navbar-nav ml-auto">
             <li v-if="is_authenticated" class="nav-item dropdown">
                 <a class="nav-link" data-toggle="dropdown" href="#">
-                    <template v-if="enable_gravatar">
+                    <template v-if="enableGravatar">
                         <img
-                            :src="gravatar_img"
+                            :src="gravatarUrl"
                             class="img-circle elevation-1 gravatar-img"
                             alt="User gravatar"
-                            @error="setDefaultGravatar($event.target)"
+                            @error="handleGravatarError"
                         />
                     </template>
                     <template v-else>
                         <i class="fa fa-user mr-2 ico-data-default" />
                     </template>
                     <span class="text-data hidden-480">
-                        {{ $u.capitalize(user.first_name) }}
-                        {{ $u.capitalize(user.last_name) }}
+                        {{ user.given_name ? $u.capitalize(user.given_name) : '' }}
+                        {{ user.family_name ? $u.capitalize(user.family_name) : '' }}
                     </span>
                 </a>
 
@@ -37,7 +37,7 @@
                 >
                     <router-link :to="profile_url" class="dropdown-item text-data">
                         <i class="fa fa-id-card-o mr-2 ico-data-default" />
-                        {{ $u.capitalize($t('profile')) }}
+                        {{ $u.capitalize($ts('profile')) }}
                     </router-link>
                     <div class="dropdown-divider" />
 
@@ -45,25 +45,19 @@
                         <router-link :to="profile_settings_url" class="dropdown-item text-data">
                             >
                             <i class="fa fa-cogs mr-2 ico-data-default" />
-                            {{ $u.capitalize($t('settings')) }}
+                            {{ $u.capitalize($ts('settings')) }}
                         </router-link>
                         <div class="dropdown-divider" />
                     </template>
 
                     <button type="button" class="dropdown-item" @click="logout">
                         <i class="fas fa-sign-out-alt mr-2 ico-data-default" />
-                        {{ $u.capitalize($t('logout')) }}
+                        {{ $u.capitalize($ts('logout')) }}
                     </button>
                 </div>
             </li>
-            <li v-else class="nav-item">
-                <a class="nav-link" :href="login_url">
-                    <i class="fas fa-sign-out-alt text-data" />
-                    <span>{{ $u.capitalize($t('login')) }}</span>
-                </a>
-            </li>
             <li class="nav-item">
-                <a class="nav-link" role="button" @click.stop="$root.toggleUserSettings()">
+                <a class="nav-link" role="button" @click.stop="toggleControlSidebar">
                     <i class="fas fa-th-large" />
                 </a>
             </li>
@@ -71,19 +65,30 @@
     </nav>
 </template>
 
-<script>
+<script lang="ts">
     import $ from 'jquery';
-    import Gravatar from '../../../users/Gravatar.js';
-    import { saveHideMenuSettings } from '../../../utils';
+    import { computed } from 'vue';
+    import { useGravatarUrl } from '../../../users/Gravatar';
+    import { getApp, saveHideMenuSettings } from '../../../utils';
 
     /**
      * Component of top navigation menu.
      */
     export default {
         name: 'TopNav',
-        data() {
+        setup() {
+            const app = getApp();
+
+            const { gravatarUrl, handleGravatarError } = useGravatarUrl(() => app.userProfile.email);
+            const enableGravatar = computed(() => {
+                return app.schema.info['x-settings'].enable_gravatar;
+            });
+
             return {
-                gravatar: new Gravatar(),
+                user: app.userProfile,
+                gravatarUrl,
+                enableGravatar,
+                handleGravatarError,
             };
         },
         computed: {
@@ -92,24 +97,6 @@
              */
             is_authenticated() {
                 return Boolean(this.$app.api.getUserId());
-            },
-            /**
-             * Boolean property, that returns true if gravatar_mode is activated.
-             */
-            enable_gravatar() {
-                return this.$app.api.openapi.info['x-settings'].enable_gravatar;
-            },
-            /**
-             * Property, that returns object with properties of current application user.
-             */
-            user() {
-                return this.$app.user;
-            },
-            /**
-             * Property, that returns URL to user's gravatar.
-             */
-            gravatar_img() {
-                return this.gravatar.getGravatarByEmail(this.user.email);
             },
             /**
              * Property, that returns URL to profile page.
@@ -131,25 +118,16 @@
             },
         },
         mounted() {
+            // @ts-expect-error JQuery :(
             $(this.$refs.sidebarControl).PushMenu();
         },
         methods: {
             saveHideMenuSettings() {
                 saveHideMenuSettings();
             },
-            /**
-             * Method, that returns URL to default gravatar img.
-             */
-            getDefaultGravatarImg() {
-                return this.gravatar.getDefaultGravatar();
-            },
-            /**
-             * Method, that sets default gravatar img to some <img>.
-             * @param {object} el DOM img element.
-             */
-            setDefaultGravatar(el) {
-                el.src = this.getDefaultGravatarImg();
-                return false;
+            toggleControlSidebar() {
+                // @ts-expect-error No types here
+                this.$root.toggleUserSettings();
             },
             async logout() {
                 await this.$app.config.logoutHandler({ config: this.$app.config });

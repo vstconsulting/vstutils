@@ -2,7 +2,7 @@ import { User } from 'oidc-client-ts';
 import { createLocalVue } from '@vue/test-utils';
 import VueI18n from 'vue-i18n';
 import { type AppSchema } from '@/vstutils/schema';
-import { type InitAppConfigRaw, _createUserManager } from '@/vstutils/init-app';
+import { type InitAppConfigRaw, _createUserManager, type UserProfile } from '@/vstutils/init-app';
 import { getApp } from '@/vstutils/utils';
 import testSchema from '../__mocks__/testSchema.json';
 
@@ -86,7 +86,8 @@ export async function createApp(params?: { schema?: Partial<AppSchema>; disableB
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     sub: '1',
-                }),
+                    preferred_username: 'testUser',
+                } satisfies UserProfile),
             };
         }
 

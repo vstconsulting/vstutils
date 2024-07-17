@@ -4,7 +4,7 @@ import {
     schemaListOf,
     waitForPageLoading,
     openPage,
-    expectRequest,
+    expectNthRequest,
 } from '@/unittests';
 
 const schema = createSchema({
@@ -168,7 +168,7 @@ describe('DependFromFkField', () => {
 
         expect(fetchMock).toBeCalledTimes(2);
         // page hit
-        expectRequest(fetchMock.mock.calls[0][0], {
+        expectNthRequest(0, {
             method: 'put',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify([
@@ -179,7 +179,7 @@ describe('DependFromFkField', () => {
             ]),
         });
         // prefetch hit
-        expectRequest(fetchMock.mock.calls[1][0], {
+        expectNthRequest(1, {
             method: 'put',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify([

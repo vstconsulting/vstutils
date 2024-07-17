@@ -104,13 +104,16 @@ export class ActionsManager {
         instance,
         redirect = true,
         disablePopUp = false,
+        auth,
     }: {
         action: Action;
         instance?: Model;
         redirect?: boolean;
         disablePopUp?: boolean;
+        auth?: boolean;
     }): Promise<void> {
         const path = formatPath(action.path!, this.app.router.currentRoute.params, instance);
+        auth = auth || action.auth;
 
         try {
             let response: APIResponse<InnerData> | undefined;
@@ -120,10 +123,16 @@ export class ActionsManager {
                     method: action.method!,
                     path,
                     rawResponse: true,
+                    auth,
                 });
                 await downloadResponse(response);
             } else {
-                response = await this.app.api.makeRequest({ useBulk: true, method: action.method!, path });
+                response = await this.app.api.makeRequest({
+                    useBulk: true,
+                    method: action.method!,
+                    path,
+                    auth,
+                });
             }
 
             if (!disablePopUp) {
@@ -175,6 +184,7 @@ export class ActionsManager {
         throwError = false,
         disablePopUp = false,
         sendAll,
+        auth,
     }: {
         action: NotEmptyAction;
         instance: Model;
@@ -183,6 +193,7 @@ export class ActionsManager {
         throwError?: boolean;
         disablePopUp?: boolean;
         sendAll?: boolean;
+        auth?: boolean;
     }): Promise<void | APIResponse<T>> {
         if (!method) {
             method = action.method!;
@@ -213,6 +224,7 @@ export class ActionsManager {
                     path: path ?? formatPath(action.path!, this.app.router.currentRoute.params),
                     data,
                     rawResponse: true,
+                    auth,
                 });
                 await downloadResponse(response);
             } else {
@@ -221,6 +233,7 @@ export class ActionsManager {
                     path: path ?? formatPath(action.path!, this.app.router.currentRoute.params),
                     data,
                     useBulk: instance.shouldUseBulk(method),
+                    auth,
                 });
             }
 

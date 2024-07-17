@@ -17,7 +17,7 @@ import { AutoUpdateController } from '@/vstutils/autoupdate';
 import type { ComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
 import { globalComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
 import { addDefaultFields, FieldsResolver } from '@/vstutils/fields';
-import type { Model, ModelConstructor } from '@/vstutils/models';
+import type { ModelConstructor } from '@/vstutils/models';
 import { ModelsResolver } from '@/vstutils/models';
 import { ErrorHandler } from '@/vstutils/popUp';
 import { QuerySetsResolver } from '@/vstutils/querySet';
@@ -37,9 +37,8 @@ import type { IView, BaseView } from '@/vstutils/views';
 import { ListView, PageNewView, PageView, ViewsTree } from '@/vstutils/views';
 import ViewConstructor from '@/vstutils/views/ViewConstructor.js';
 import { setupPushNotifications } from '@/vstutils/webpush';
-import { type InitAppConfig } from '@/vstutils/init-app';
+import type { UserProfile, InitAppConfig } from './init-app';
 
-import type { InnerData } from '@/vstutils/utils';
 import type { GlobalStoreInitialized } from '@/vstutils/store/globalStore';
 
 export function getCentrifugoClient(address?: string, token?: string) {
@@ -61,6 +60,7 @@ export interface IApp {
     version: string;
     defaultPageLimit: number;
     schema: AppSchema;
+    userProfile: UserProfile;
     projectName: string;
 
     fieldsResolver: FieldsResolver;
@@ -78,7 +78,6 @@ export interface IApp {
 
     api: ApiConnector;
     languages: Language[] | null;
-    user: Model | null;
 
     appRootComponent: ComponentOptions<Vue>;
     additionalRootMixins: ComponentOptions<Vue>[];
@@ -111,7 +110,6 @@ export interface IApp {
 
 export interface IAppInitialized extends IApp {
     router: VueRouter;
-    user: Model;
     rootVm: TAppRoot;
     localSettingsStore: LocalSettingsStore;
     localSettingsModel: ModelConstructor;
@@ -123,6 +121,7 @@ export interface IAppInitialized extends IApp {
 interface AppParams {
     config: InitAppConfig;
     schema: AppSchema;
+    userProfile: UserProfile;
     vue?: typeof Vue;
 }
 
@@ -149,8 +148,7 @@ export class App implements IApp {
 
     api: ApiConnector;
     languages: Language[] | null;
-    rawUser: InnerData | null;
-    user: Model | null;
+    userProfile: UserProfile;
 
     appRootComponent: ComponentOptions<Vue>;
     additionalRootMixins: ComponentOptions<Vue>[];
@@ -171,12 +169,13 @@ export class App implements IApp {
     application: unknown | null = null;
     _mounted?: InstanceType<typeof Vue>;
 
-    constructor({ config, schema, vue }: AppParams) {
+    constructor({ config, schema, vue, userProfile }: AppParams) {
         globalThis.__currentApp = this;
         this.config = config;
 
         this.vue = vue ?? Vue;
         this.schema = schema;
+        this.userProfile = userProfile;
         this.router = null;
         this.i18n = i18n;
         this.version = this.schema.info['x-versions'].application;
@@ -201,14 +200,6 @@ export class App implements IApp {
         this.error_handler = new ErrorHandler();
 
         this.languages = null;
-        /**
-         * Property that stores raw user response
-         */
-        this.rawUser = null;
-        /**
-         * Object, that stores data of authorized user.
-         */
-        this.user = null;
         /**
          * Object that stores Vue components which are must be registered globally
          */
@@ -266,23 +257,17 @@ export class App implements IApp {
         }
         this.userSettingsStore = createUserSettingsStore(this.api, userSettingsModel)(pinia);
 
-        const [languages, translations, rawUser] = await Promise.all([
+        const [languages, translations] = await Promise.all([
             this.translationsManager.loadLanguages(),
             this.translationsManager.loadTranslations(this.i18n.locale),
-            this.api.loadUser(),
             this.userSettingsStore.init(),
         ]);
         this.languages = languages;
         this.i18n.setLocaleMessage(this.i18n.locale, translations);
-        this.rawUser = rawUser;
 
         void this.setLanguage(this.i18n.locale, { skipLoad: true });
 
         this.afterInitialDataBeforeMount();
-
-        const usersQs = this.views.get('/user/')?.objects;
-        const UserModel = usersQs?.getResponseModelClass(utils.RequestTypes.RETRIEVE);
-        this.user = new UserModel!(this.rawUser, usersQs);
 
         this.global_components.registerAll(this.vue);
 

@@ -27,6 +27,7 @@ export interface AppInfo extends swagger.Info {
         static_path: string;
         login_url: string;
         logout_url: string;
+        enable_gravatar?: boolean;
         [key: string]: any;
     };
     'x-versions': {

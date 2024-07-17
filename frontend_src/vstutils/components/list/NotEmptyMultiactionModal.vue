@@ -76,6 +76,7 @@
                     path,
                     data: instance._getInnerData(),
                     useBulk: instance.shouldUseBulk(method),
+                    auth: view.value.isSecure,
                 }),
             ),
         );

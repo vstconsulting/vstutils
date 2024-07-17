@@ -2,7 +2,7 @@ import OpenAPILoader from '@/vstutils/OpenAPILoader';
 import { createApiFetch } from '@/vstutils/api-fetch';
 import { App } from '@/vstutils/app';
 import { signals } from '@/vstutils/signals';
-import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
+import { type OidcStandardClaims, UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import type Vue from 'vue';
 import { type AuthAppFactory } from './auth-app';
 import { createDefaultPageLoader } from './default-page-loader';
@@ -58,6 +58,8 @@ type InitAppContextWithConfig = InitAppContext & {
     isCachedOauthClientIdUsed: boolean;
 };
 
+export type UserProfile = Omit<OidcStandardClaims, 'sub'> & { sub: string };
+
 export interface ApiConfig {
     url: URL;
     endpointPath: string;
@@ -90,7 +92,9 @@ async function _initApp(ctx: InitAppContextWithConfig) {
 
     registerSw();
 
-    if (!(await isUserLoggedIn(ctx.config))) {
+    const userProfile = await getUserProfile(ctx.config);
+    if (!userProfile) {
+        await ctx.config.auth.userManager.removeUser();
         await openAuthApp(ctx);
         return;
     }
@@ -100,7 +104,7 @@ async function _initApp(ctx: InitAppContextWithConfig) {
         throw new RestartAppError();
     }
 
-    const app = new App({ config: ctx.config, schema });
+    const app = new App({ config: ctx.config, schema, userProfile });
     // @ts-expect-error It's a global variable
     window.app = app;
     await app.start();
@@ -207,38 +211,36 @@ function registerSw() {
     }
 }
 
-async function isUserLoggedIn(config: InitAppConfig): Promise<boolean> {
+async function getUserProfile(config: InitAppConfig): Promise<UserProfile | undefined> {
     const userManager = config.auth.userManager;
     let user = await userManager.getUser();
     if (!user) {
-        return false;
+        return;
     }
     if (user.expired) {
         if (!user.refresh_token) {
-            return false;
+            return;
         }
         try {
             user = await userManager.signinSilent();
         } catch {
-            return false;
+            return;
         }
         if (!user) {
-            return false;
+            return;
         }
     }
     const userInfoEndpoint = await userManager.metadataService.getUserInfoEndpoint();
     const apiFetch = createApiFetch({ config });
     const response = await apiFetch(userInfoEndpoint);
     if (response.status !== 200) {
-        await userManager.removeUser();
-        return false;
+        return;
     }
     const data = await response.json();
     if (Boolean(data.anon) !== Boolean(user.profile.anon)) {
-        await userManager.removeUser();
-        return false;
+        return;
     }
-    return true;
+    return data;
 }
 
 async function loadSchema(config: InitAppConfig) {

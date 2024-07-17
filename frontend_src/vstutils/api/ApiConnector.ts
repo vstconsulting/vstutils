@@ -67,21 +67,22 @@ export class APIResponse<T extends BulkResponse['data'] = { detail?: string }> i
 
 // makeRequest types
 
-interface BaseRequest {
+interface FetchRequest {
     method: HttpMethod;
     path: string | (string | number)[];
     version?: string;
     query?: Record<string, unknown> | string | URLSearchParams;
     headers?: Record<string, unknown>;
-}
-
-interface FetchRequest extends BaseRequest {
     data?: Record<string, unknown> | FormData;
+    auth?: boolean;
 }
 
-type MakeRequestParamsBulk = { useBulk: true; rawResponse?: false } & Omit<BaseBulkRequest, 'query'> & {
-        query?: string | Record<string, unknown> | URLSearchParams;
-    };
+type MakeRequestParamsBulk = Omit<BaseBulkRequest, 'query'> & {
+    rawResponse?: false;
+    useBulk: true;
+    query?: string | Record<string, unknown> | URLSearchParams;
+    auth?: boolean;
+};
 type MakeRequestParamsFetch = { useBulk?: false; rawResponse?: false } & FetchRequest;
 type MakeRequestParamsFetchRaw = { useBulk?: false; rawResponse: true } & FetchRequest;
 
@@ -98,6 +99,7 @@ export class ApiConnector {
     headers: Record<string, string | null | undefined>;
     baseURL: string | null = null;
     disableBulk = false;
+    fetchAuth: typeof fetch = window.fetch;
     fetch: typeof fetch = window.fetch;
     bulk?: BulkApiFetch;
 
@@ -125,7 +127,7 @@ export class ApiConnector {
         this.baseURL = new URL(app.config.api.url).toString().replace(/\/$/, '');
         this.bulk = createBulkApiFetch({ config: this.appConfig });
 
-        this.fetch = createApiFetch({ config: app.config });
+        this.fetchAuth = createApiFetch({ config: app.config });
         this.disableBulk = app.config.api.disableBulk;
 
         return this;
@@ -140,6 +142,7 @@ export class ApiConnector {
             const realBulk: BaseBulkRequest = {
                 method: req.method,
                 path: req.path,
+                auth: req.auth,
             };
             if (req.version) {
                 realBulk.version = req.version;
@@ -172,7 +175,7 @@ export class ApiConnector {
             const pathStr = Array.isArray(req.path) ? req.path.join('/') : req.path.replace(/^\//, '');
             const pathToSend = `${this.getFullUrl(pathStr)}${makeQueryString(req.query)}`;
 
-            const response = await this.fetch(pathToSend, {
+            const response = await (req.auth ? this.fetchAuth : this.fetch)(pathToSend, {
                 method: req.method,
                 headers,
                 body: preparedData,
@@ -192,11 +195,11 @@ export class ApiConnector {
     }
 
     async sendBulk<Responses = undefined>(requests: BaseBulkRequest[], type?: BulkType) {
-        return this.bulk!.raw<Responses>(requests, { type, forceAuthRequired: true });
+        return this.bulk!.raw<Responses>(requests, { type });
     }
 
     bulkQuery<T = Record<string, unknown>>(data: BaseBulkRequest): Promise<APIResponse<T>> {
-        return this.bulk!<T>({ ...data, authRequired: true }).then((response) => {
+        return this.bulk!<T>(data).then((response) => {
             return new APIResponse(response);
         });
     }
@@ -234,6 +237,7 @@ export class ApiConnector {
             path: ['user', 'profile'],
             method: 'get',
             useBulk: true,
+            auth: true,
         }).then((response) => {
             return response.data;
         });

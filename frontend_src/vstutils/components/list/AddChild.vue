@@ -125,6 +125,7 @@
                     method: 'post',
                     path,
                     data: { id },
+                    auth: qs.isAuthRequired(RequestTypes.CREATE),
                 }),
             ),
         );
