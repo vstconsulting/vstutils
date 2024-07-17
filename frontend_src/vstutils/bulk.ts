@@ -15,7 +15,7 @@ type RawBulk = {
 };
 
 export type BulkRequest = RawBulk & {
-    authRequired?: boolean;
+    auth?: boolean;
 };
 
 export interface BulkResponseHeaders {
@@ -68,9 +68,9 @@ function _createBulkApiFetch({ config }: { config: InitAppConfig }): BulkApiFetc
 
     const sendBulkNotCached: _BulkApiFetchRaw = async <Responses = unknown>(
         requests: BulkRequest[],
-        params?: { type?: BulkType; forceAuthRequired?: boolean },
+        params?: { type?: BulkType; forceAuth?: boolean },
     ) => {
-        const authRequired = params?.forceAuthRequired || requests.some((req) => req.authRequired);
+        const auth = params?.forceAuth || requests.some((req) => req.auth);
         const rawRequests: RawBulk[] = requests.map((req) => {
             return {
                 method: req.method,
@@ -80,7 +80,7 @@ function _createBulkApiFetch({ config }: { config: InitAppConfig }): BulkApiFetc
                 data: req.data,
             };
         });
-        const _fetch = authRequired ? apiFetch : fetch;
+        const _fetch = auth ? apiFetch : fetch;
         const response = await _fetch(endpointUrl, {
             method: params?.type || BulkType.SIMPLE,
             headers: { 'Content-Type': 'application/json' },

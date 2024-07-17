@@ -61,6 +61,7 @@ export interface Operation {
     doNotShowOnList?: boolean;
     doNotGroup?: boolean;
     isFileResponse?: boolean;
+    auth?: boolean;
 }
 
 export interface Sublink extends Operation {
@@ -84,6 +85,7 @@ export interface Action extends Operation {
     path?: string;
     href?: string;
     method?: HttpMethod;
+    auth?: boolean;
     confirmationRequired?: boolean;
     view?: ActionView;
     responseModel?: ModelConstructor;
@@ -124,6 +126,7 @@ export interface ViewParams extends SwaggerOperation {
     responseModel?: ModelConstructor;
     autoupdate?: boolean;
     routeName?: string;
+    isSecure?: boolean;
     [key: string]: any;
 }
 
@@ -151,6 +154,7 @@ export interface IView<
     hidden: boolean;
     routeName: string;
     mixins: ViewMixin[];
+    isSecure?: boolean;
 
     sublinks: Map<string, Sublink>;
     actions: Map<string, Action>;
@@ -212,6 +216,7 @@ export abstract class BaseView<
     autoupdate: boolean;
     subscriptionLabels: string[] | null;
     mixins: ViewMixin[];
+    isSecure?: boolean;
 
     sublinks = new Map<string, Sublink>();
     actions = new Map<string, Action>();
@@ -237,6 +242,7 @@ export abstract class BaseView<
         this.autoupdate = params.autoupdate ?? false;
         this.subscriptionLabels = params['x-subscribe-labels'] || null;
         this.mixins = mixins;
+        this.isSecure = params.isSecure;
     }
 
     isEditPage(): this is PageEditView {

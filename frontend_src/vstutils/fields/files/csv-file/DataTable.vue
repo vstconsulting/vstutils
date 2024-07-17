@@ -1,6 +1,6 @@
 <template>
     <div class="csv-table">
-        <button v-if="!readonly" class="btn btn-outline-primary my-2" @click="add">
+        <button v-if="!readonly" class="btn btn-outline-primary my-2" type="button" @click="add">
             <i class="fa fa-plus" />
         </button>
         <CustomVirtualTable
@@ -13,10 +13,15 @@
             language="en"
         >
             <template v-if="!readonly" #actionCommon="{ index, row }">
-                <button class="btn btn-outline-secondary" @click="edit(index, row)">
+                <button class="btn btn-outline-secondary" type="button" @click="edit(index, row)">
                     <i class="fa fa-edit" />
                 </button>
-                <button class="btn btn-outline-warning" style="margin-left: 5px" @click="del(index)">
+                <button
+                    class="btn btn-outline-warning"
+                    type="button"
+                    style="margin-left: 5px"
+                    @click="del(index)"
+                >
                     <i class="fa fa-times" />
                 </button>
             </template>

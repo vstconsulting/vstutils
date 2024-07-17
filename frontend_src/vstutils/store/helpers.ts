@@ -473,6 +473,7 @@ export const createActionStore = (view: ActionView) => {
                 method: view.method,
                 path: view.getRequestPath(app.router.currentRoute),
                 throwError: true,
+                auth: view.isSecure,
             });
             pageWithEditableData.instance.value!.sandbox.markUnchanged();
             pageWithEditableData.fieldsErrors.value = {};

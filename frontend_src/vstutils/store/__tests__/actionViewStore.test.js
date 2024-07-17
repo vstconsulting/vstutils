@@ -1,4 +1,4 @@
-import { createApp, createSchema, expectRequest, waitForPageLoading } from '@/unittests';
+import { createApp, createSchema, expectNthRequest, waitForPageLoading } from '@/unittests';
 import detailPageSchema from './detailPage-schema.json';
 import { ActionView } from '../../views';
 
@@ -45,8 +45,7 @@ test('createActionViewStore', async () => {
         );
         await store.execute();
         expect(fetchMock).toBeCalledTimes(1);
-        let [request] = fetchMock.mock.calls[0];
-        expectRequest(request, {
+        expectNthRequest(0, {
             body: [
                 {
                     method: 'post',

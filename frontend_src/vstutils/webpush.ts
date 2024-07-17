@@ -120,6 +120,7 @@ async function setupAppNotifications(app: IApp, view: PageEditView) {
             throw new Error(`WebPush subscription data is missing ${JSON.stringify(data)}`);
         }
         await app.api.makeRequest({
+            auth: true,
             useBulk: true,
             method: HttpMethods.PATCH,
             path: qs.url,
@@ -240,8 +241,7 @@ export function setupPushNotifications(app: IApp) {
 
     onFilterOperations('sublinks', '/user/{id}/', (obj) => {
         const notificationSettingsViewSubpath = getUserNotificationSettingsViewSubpath(app);
-        // @ts-expect-error User actually has id
-        if (obj.data!.id !== app.user!.id) {
+        if (String(obj.data!.id) !== app.userProfile.sub) {
             obj.sublinks = obj.sublinks.filter((sublink) => sublink.name !== notificationSettingsViewSubpath);
         }
     });
@@ -278,6 +278,7 @@ export function setupPushNotifications(app: IApp) {
                         throw new Error(`WebPush subscription data is missing ${JSON.stringify(data)}`);
                     }
                     await app.api.makeRequest({
+                        auth: true,
                         useBulk: true,
                         method: HttpMethods.PATCH,
                         path: app.router!.currentRoute.path,

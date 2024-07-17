@@ -59,6 +59,7 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: ModelCons
                 method: HttpMethods.GET,
                 path: USER_SETTINGS_PATH,
                 useBulk: true,
+                auth: true,
             });
             signals.once('app.afterInit', () => {
                 setData(data);
