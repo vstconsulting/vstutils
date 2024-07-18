@@ -45,11 +45,11 @@ class DeepFKField extends FKField {
 
     createTreeData(rawData) {
         const data = JSON.parse(JSON.stringify(rawData));
-        const idsByIndex = new Map();
+        const idxById = new Map();
         const roots = [];
 
         for (let idx = 0; idx < data.length; idx++) {
-            idsByIndex.set(this.getValueFieldValue(rawData[idx]), idx);
+            idxById.set(this.getValueFieldValue(rawData[idx]), idx);
             data[idx].children = [];
         }
 
@@ -60,14 +60,28 @@ class DeepFKField extends FKField {
                 text: this.getViewFieldValue(rawData[i]),
                 parent: this.getParentFieldValue(rawData[i]),
                 children: data[i].children,
+                state: {},
             };
 
-            if (![null, node.id].includes(node.parent) && idsByIndex.has(node.parent)) {
-                data[idsByIndex.get(node.parent)].children.push(node);
+            if (![null, node.id].includes(node.parent) && idxById.has(node.parent)) {
+                data[idxById.get(node.parent)].children.push(node);
             } else {
                 roots.push(node);
             }
         }
+
+        if (this.onlyLastChild) {
+            const setIsSelectable = (nodes) => {
+                for (const node of nodes) {
+                    if (node.children.length > 0) {
+                        node.state.selectable = false;
+                        setIsSelectable(node.children);
+                    }
+                }
+            };
+            setIsSelectable(roots);
+        }
+
         return roots;
     }
 

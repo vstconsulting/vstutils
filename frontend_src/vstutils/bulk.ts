@@ -131,7 +131,7 @@ function _createBulkApiFetch({ config }: { config: InitAppConfig }): BulkApiFetc
             if (response.status === 304 && cachedValues.has(i)) {
                 responses[i] = await cachedValues.get(i);
             }
-            if (response.method.toUpperCase() === 'GET' && response.status < 300 && response.headers.ETag) {
+            if (response.status < 300 && response.method.toUpperCase() === 'GET' && response.headers.ETag) {
                 try {
                     void cache.put(_bulkItemToRequest(requests[i]), _bulkResultItemToResponse(response));
                 } catch (e) {
