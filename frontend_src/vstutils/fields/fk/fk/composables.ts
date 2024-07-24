@@ -1,6 +1,6 @@
 import { computed, getCurrentInstance, readonly, ref, watch } from 'vue';
-import { fetchPKs } from '@/vstutils/fetch-values';
-import { getApp } from '@/vstutils/utils';
+import { fetchPKs } from '#vstutils/fetch-values';
+import { getApp } from '#vstutils/utils';
 
 import type { Ref } from 'vue';
 import type { FKField, TRepresent } from './FKField';

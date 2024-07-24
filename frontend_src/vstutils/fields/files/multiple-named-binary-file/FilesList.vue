@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-    import { downloadBase64File } from '@/vstutils/utils';
+    import { downloadBase64File } from '#vstutils/utils';
     import type { NamedFile } from '../named-binary-file';
 
     defineProps<{

@@ -1,7 +1,7 @@
 import { CsvFileField } from '../index';
 import { getTableConfig } from '../DataTable.vue';
-import { createApp, createSchema } from '@/unittests';
-import { guiPopUp } from '@/vstutils/popUp';
+import { createApp, createSchema } from '#unittests';
+import { guiPopUp } from '#vstutils/popUp';
 
 const tableConfig = [
     { prop: '_index', name: 'Index' },

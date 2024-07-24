@@ -1,5 +1,5 @@
 import { defineComponent } from 'vue';
-import { BaseFieldMixin } from '@/vstutils/fields/base';
+import { BaseFieldMixin } from '#vstutils/fields/base';
 import MultipleNamedBinaryImageFieldContentReadonly from './MultipleNamedBinaryImageFieldContentReadonly.vue';
 import MultipleNamedBinaryImageFieldContentEdit from './MultipleNamedBinaryImageFieldContentEdit.vue';
 import MultipleNamedBinaryImageFieldListView from './MultipleNamedBinaryImageFieldListView.vue';

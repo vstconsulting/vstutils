@@ -41,7 +41,7 @@
 </template>
 
 <script>
-    import { filterOperations } from '@/vstutils/signals';
+    import { filterOperations } from '#vstutils/signals';
     import Popover from '../Popover.vue';
     import SelectToggleButton from './SelectToggleButton.vue';
     import ListTableRow from './ListTableRow.vue';

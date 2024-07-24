@@ -4,8 +4,8 @@
 
 <script setup lang="ts">
     import { computed, toRef } from 'vue';
-    import { makeDataImageUrl } from '@/vstutils/utils';
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import { makeDataImageUrl } from '#vstutils/utils';
+    import type { ExtractRepresent } from '#vstutils/fields/base';
     import type NamedBinaryFileField from './NamedBinaryFileField';
     import { useNamedFileText } from './utils';
 

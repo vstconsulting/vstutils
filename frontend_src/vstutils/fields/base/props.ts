@@ -1,4 +1,4 @@
-import type { RepresentData } from '@/vstutils/utils';
+import type { RepresentData } from '#vstutils/utils';
 import type { ExtractPropTypes, PropType } from 'vue';
 import type { Field } from './BaseField';
 import type { ExtractRepresent } from './types';

@@ -1,7 +1,7 @@
 import { waitFor } from '@testing-library/dom';
-import { createApp, expectNthRequest } from '@/unittests';
-import { fetchInstances } from '@/vstutils/fetch-values';
-import { ArrayField } from '@/vstutils/fields/array';
+import { createApp, expectNthRequest } from '#unittests';
+import { fetchInstances } from '#vstutils/fetch-values';
+import { ArrayField } from '#vstutils/fields/array';
 
 let app;
 let User;

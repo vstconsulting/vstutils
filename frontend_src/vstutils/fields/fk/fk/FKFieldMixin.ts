@@ -1,5 +1,5 @@
 import { defineComponent } from 'vue';
-import { BaseFieldMixin } from '@/vstutils/fields/base';
+import { BaseFieldMixin } from '#vstutils/fields/base';
 import FKFieldContentEditable from './FKFieldContentEditable.vue';
 import FKFieldContentReadonly from './FKFieldContentReadonly.vue';
 

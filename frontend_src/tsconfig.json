@@ -23,7 +23,10 @@
             "bootstrap",
         ],
         "paths": {
-            "@/*": ["./*"]
+            "#vstutils/*": ["./vstutils/*"],
+            "#libs/*": ["./libs/*"],
+            "#unittests/*": ["./unittests/*"],
+            "#unittests": ["./unittests"],
         }
     },
     "vueCompilerOptions": {

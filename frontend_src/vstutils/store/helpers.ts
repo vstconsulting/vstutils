@@ -15,11 +15,11 @@ import {
     watch,
 } from 'vue';
 
-import { useAutoUpdate } from '@/vstutils/autoupdate';
-import { useBreadcrumbs } from '@/vstutils/breadcrumbs';
-import { ModelValidationError } from '@/vstutils/models';
-import { filterOperations, signals } from '@/vstutils/signals';
-import { i18n } from '@/vstutils/translation';
+import { useAutoUpdate } from '#vstutils/autoupdate';
+import { useBreadcrumbs } from '#vstutils/breadcrumbs';
+import { ModelValidationError } from '#vstutils/models';
+import { filterOperations, signals } from '#vstutils/signals';
+import { i18n } from '#vstutils/translation';
 import { useRoute } from 'vue-router/composables';
 import {
     getApp,
@@ -33,15 +33,15 @@ import {
     emptyRepresentData,
     emptyInnerData,
     classesFromFields,
-} from '@/vstutils/utils';
+} from '#vstutils/utils';
 
 import type { Ref } from 'vue';
 import type { NavigationGuard, Route } from 'vue-router';
-import type { QuerySet } from '@/vstutils/querySet';
-import type { IView, ActionView, NotEmptyAction, ViewStore, DetailView } from '@/vstutils/views';
-import type { Model, ModelConstructor } from '@/vstutils/models';
-import type { IApp } from '@/vstutils/app';
-import type { RepresentData, InnerData } from '@/vstutils/utils';
+import type { QuerySet } from '#vstutils/querySet';
+import type { IView, ActionView, NotEmptyAction, ViewStore, DetailView } from '#vstutils/views';
+import type { Model, ModelConstructor } from '#vstutils/models';
+import type { IApp } from '#vstutils/app';
+import type { RepresentData, InnerData } from '#vstutils/utils';
 import type { BaseViewStore } from './page-types';
 import type { SetFieldValueOptions } from '../fields/base';
 

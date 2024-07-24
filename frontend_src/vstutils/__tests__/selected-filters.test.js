@@ -1,4 +1,4 @@
-import { createApp, createSchema, useTestCtx, waitForPageLoading } from '@/unittests';
+import { createApp, createSchema, useTestCtx, waitForPageLoading } from '#unittests';
 
 test('Selected filters', async () => {
     const app = await createApp({ schema: createSchema() });

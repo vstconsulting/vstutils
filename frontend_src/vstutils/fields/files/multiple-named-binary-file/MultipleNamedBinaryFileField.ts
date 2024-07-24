@@ -1,16 +1,16 @@
-import { BaseField } from '@/vstutils/fields/base';
-import { pop_up_msg } from '@/vstutils/popUp';
-import { i18n } from '@/vstutils/translation';
+import { BaseField } from '#vstutils/fields/base';
+import { pop_up_msg } from '#vstutils/popUp';
+import { i18n } from '#vstutils/translation';
 
 import MultipleNamedBinaryFileFieldMixin from './MultipleNamedBinaryFileFieldMixin';
 
 import type { ComponentOptions } from 'vue';
-import type { FieldOptions } from '@/vstutils/fields/base';
+import type { FieldOptions } from '#vstutils/fields/base';
 import type { NamedFile } from '../named-binary-file';
 import { ensureMediaTypeExists } from '../named-binary-file';
 import type { FileFieldXOptions, IFileField } from '../file';
 import { parseAllowedMediaTypes } from '../file';
-import type { InnerData, RepresentData } from '@/vstutils/utils';
+import type { InnerData, RepresentData } from '#vstutils/utils';
 
 class MultipleNamedBinaryFileField<XOptions extends FileFieldXOptions = FileFieldXOptions>
     extends BaseField<NamedFile[] | string, NamedFile[], XOptions>

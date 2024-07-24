@@ -1,0 +1,26 @@
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import vue from '@vitejs/plugin-vue2';
+import vueJsx from '@vitejs/plugin-vue2-jsx';
+import { defineConfig } from 'vite';
+
+const currentDir = dirname(fileURLToPath(import.meta.url));
+
+export default defineConfig(({ mode }) => {
+  const isDev = mode === 'development';
+
+  return {
+    root: currentDir,
+    base: '/spa/',
+    plugins: [vue(), vueJsx()],
+    build: {
+      emptyOutDir: true,
+      outDir: join(currentDir, '..', '{{ project_name }}', 'static', 'spa'),
+      sourcemap: isDev,
+      minify: !isDev,
+    },
+    resolve: {
+      dedupe: ['vue'],
+    },
+  };
+});

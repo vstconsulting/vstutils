@@ -1,8 +1,8 @@
 import VueRouter from 'vue-router';
-import { signals, ROUTES_CREATED } from '@/vstutils/signals';
+import { signals, ROUTES_CREATED } from '#vstutils/signals';
 
 import type { RouteConfig } from 'vue-router';
-import type { IView } from '@/vstutils/views';
+import type { IView } from '#vstutils/views';
 
 export default class RouterConstructor {
     private views: Map<string, IView>;

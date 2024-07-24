@@ -5,8 +5,8 @@
 
 <script setup lang="ts">
     import { computed } from 'vue';
-    import { ViewPropsDef } from '@/vstutils/views/props';
-    import { type ViewPropsDefType, type DetailView } from '@/vstutils/views';
+    import { ViewPropsDef } from '#vstutils/views/props';
+    import { type ViewPropsDefType, type DetailView } from '#vstutils/views';
     import DefaultView from './DefaultView.vue';
     import SteppedView from './tabbed/SteppedView.vue';
 

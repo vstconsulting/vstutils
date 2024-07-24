@@ -1,7 +1,7 @@
 import { type UserManager } from 'oidc-client-ts';
 import { provide, type InjectionKey, inject } from 'vue';
 import type VueI18n from 'vue-i18n';
-import { type InitAppConfig } from '@/vstutils/init-app';
+import { type InitAppConfig } from '#vstutils/init-app';
 import { TranslationsManager } from '../api/TranslationsManager';
 import { createVueI18n } from '../translation';
 import { getCookie } from '../utils';

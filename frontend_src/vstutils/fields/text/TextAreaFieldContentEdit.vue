@@ -12,8 +12,8 @@
         FieldEditEmitsDef,
         type FieldEditEmitsDefType,
         type FieldEditPropsDefType,
-    } from '@/vstutils/fields/base';
-    import FileInputButton from '@/vstutils/components/FileInputButton.vue';
+    } from '#vstutils/fields/base';
+    import FileInputButton from '#vstutils/components/FileInputButton.vue';
     import FieldTextarea from './FieldTextarea.vue';
     import type { TextAreaField } from './TextAreaField';
     import type { IFileField } from '../files/file/utils';

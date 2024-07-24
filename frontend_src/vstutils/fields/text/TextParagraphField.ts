@@ -1,8 +1,8 @@
 import { defineComponent } from 'vue';
-import { BaseField } from '@/vstutils/fields/base';
+import { BaseField } from '#vstutils/fields/base';
 import TextParagraphFieldContentReadonly from './TextParagraphFieldContentReadonly.vue';
 import TextAreaFieldContentEdit from './TextAreaFieldContentEdit.vue';
-import type { InnerData } from '@/vstutils/utils';
+import type { InnerData } from '#vstutils/utils';
 
 const TextParagraphFieldMixin = defineComponent({
     components: {

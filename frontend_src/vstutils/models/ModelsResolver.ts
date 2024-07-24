@@ -1,14 +1,14 @@
-import { signals } from '@/vstutils/signals';
-import type { Field } from '@/vstutils/fields/base';
-import { BaseField } from '@/vstutils/fields/base';
+import { signals } from '#vstutils/signals';
+import type { Field } from '#vstutils/fields/base';
+import { BaseField } from '#vstutils/fields/base';
 
 import type { ModelConstructor } from './Model';
 import { BaseModel } from './Model';
 import { makeModel } from './utils';
 
-import { MODEL_MODES } from '@/vstutils/schema';
-import type { AppSchema, ModelDefinition } from '@/vstutils/schema';
-import type { FieldsResolver } from '@/vstutils/fields';
+import { MODEL_MODES } from '#vstutils/schema';
+import type { AppSchema, ModelDefinition } from '#vstutils/schema';
+import type { FieldsResolver } from '#vstutils/fields';
 import AddKeyField from '../additionalProperties/AddKeyField.vue';
 import type { FieldDefinition } from '../fields/FieldsResolver';
 import { getUniqueId } from '../utils';

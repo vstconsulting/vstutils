@@ -28,14 +28,14 @@
 
 <script setup lang="ts">
     import { computed, toRef } from 'vue';
-    import { FieldEditPropsDef } from '@/vstutils/fields/base';
+    import { FieldEditPropsDef } from '#vstutils/fields/base';
     import { useNamedFileText } from '../named-binary-file';
     import ImageBlock from './ImageBlock.vue';
     import { useResolutionValidator } from './useResolutionValidator';
     import ResolutionValidatorModal from './ResolutionValidatorModal.vue';
     import SingleFileInput from '../SingleFileInput.vue';
 
-    import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import type { ExtractRepresent, FieldEditPropsDefType } from '#vstutils/fields/base';
     import type { NamedFile } from '../named-binary-file';
     import type NamedBinaryImageField from './NamedBinaryImageField';
 

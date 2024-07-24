@@ -1,4 +1,4 @@
-import { createApp, createSchema, mount } from '@/unittests';
+import { createApp, createSchema, mount } from '#unittests';
 
 describe('PhoneField', () => {
     test('country code selector is rendered', async () => {

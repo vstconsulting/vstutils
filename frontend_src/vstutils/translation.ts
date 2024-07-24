@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import VueI18n from 'vue-i18n';
+import VueI18n, { type Values, type Path } from 'vue-i18n';
 import '../libs/vue.js';
 import { getCookie, capitalize } from './utils';
 
@@ -24,45 +24,40 @@ export const RUPluralizationRule = (choice: number, choicesLength: number) => {
     return choicesLength < 4 ? 2 : 3;
 };
 
-declare module 'vue-i18n' {
-    export default class VueI18n {
-        /**
-         * If translation doesn't exist, checks if translation for lowercased text exists and returns it capitalized,
-         * also null and undefined are converted to empty string
-         */
-        st(text: string | null | undefined): string;
-        /**
-         * Works the same as `t` but always converts result to string
-         */
-        ts(key: VueI18n.Path, values?: VueI18n.Values): string;
+export class CustomVueI18n extends VueI18n {
+    /**
+     * If translation doesn't exist, checks if translation for lowercased text exists and returns it capitalized,
+     * also null and undefined are converted to empty string
+     */
+    st(text: string | null | undefined): string {
+        if (text === undefined || text === null) {
+            return '';
+        }
+
+        text = String(text);
+
+        if (this.te(text)) {
+            return this.t(text) as string;
+        }
+
+        const lower = text.toLowerCase();
+        if (this.te(lower)) {
+            return capitalize(this.t(lower) as string);
+        }
+
+        return text;
+    }
+
+    /**
+     * Works the same as `t` but always converts result to string
+     */
+    ts(key: Path, values?: Values): string {
+        return String(this.t(key, values));
     }
 }
 
-VueI18n.prototype.st = function st(text: string | null | undefined): string {
-    if (text === undefined || text === null) {
-        return '';
-    }
-
-    text = String(text);
-
-    if (this.te(text)) {
-        return this.t(text) as string;
-    }
-
-    const lower = text.toLowerCase();
-    if (this.te(lower)) {
-        return capitalize(this.t(lower) as string);
-    }
-
-    return text;
-};
-
-VueI18n.prototype.ts = function ts(key: VueI18n.Path, values?: VueI18n.Values): string {
-    return String(this.t(key, values));
-};
-
 export function createVueI18n() {
-    return new VueI18n({
+    return new CustomVueI18n({
         locale: document.documentElement.lang || getCookie('lang') || 'en',
         messages: {},
         silentTranslationWarn: true,

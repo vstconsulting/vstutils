@@ -1,5 +1,5 @@
-import { signals } from '@/vstutils/signals';
-import { CameraSelectField } from '@/vstutils/fields/camera-select';
+import { signals } from '#vstutils/signals';
+import { CameraSelectField } from '#vstutils/fields/camera-select';
 
 signals.once('models[_LocalSettings].fields.beforeInit', (fields) => {
     const scannerCameraField = new CameraSelectField({

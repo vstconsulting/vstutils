@@ -84,13 +84,13 @@
         getFieldsInstancesGroups,
         getModelFieldsInstancesGroups,
         useHideableFieldsGroups,
-    } from '@/vstutils/composables';
-    import Card from '@/vstutils/components/Card.vue';
+    } from '#vstutils/composables';
+    import Card from '#vstutils/components/Card.vue';
     import HideNotRequiredSelect from './HideNotRequiredSelect.vue';
 
-    import type { Field, FieldComponentType, SetFieldValueOptions } from '@/vstutils/fields/base';
-    import type { FieldsGroup, ModelConstructor } from '@/vstutils/models';
-    import type { RepresentData } from '@/vstutils/utils';
+    import type { Field, FieldComponentType, SetFieldValueOptions } from '#vstutils/fields/base';
+    import type { FieldsGroup, ModelConstructor } from '#vstutils/models';
+    import type { RepresentData } from '#vstutils/utils';
 
     const props = defineProps<{
         data: RepresentData;

@@ -22,7 +22,7 @@
 
 <script lang="ts">
     import { defineComponent } from 'vue';
-    import { BaseFieldContentEdit } from '@/vstutils/fields/base';
+    import { BaseFieldContentEdit } from '#vstutils/fields/base';
     import FileFieldReadFileButton from './FileFieldReadFileButton.vue';
 
     export default defineComponent({

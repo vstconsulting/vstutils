@@ -13,10 +13,10 @@ import {
     pathToArray,
     RequestTypes,
     ViewTypes,
-} from '@/vstutils/utils';
+} from '#vstutils/utils';
 
-import ListViewComponent from '@/vstutils/components/list/ListViewComponent.vue';
-import OneEntity from '@/vstutils/components/page/OneEntity.vue';
+import ListViewComponent from '#vstutils/components/list/ListViewComponent.vue';
+import OneEntity from '#vstutils/components/page/OneEntity.vue';
 import {
     createActionViewStore,
     createDetailViewStore,
@@ -24,12 +24,12 @@ import {
     createListViewStore,
     createNewViewStore,
     useBasePageData,
-} from '@/vstutils/store';
-import { i18n } from '@/vstutils/translation';
+} from '#vstutils/store';
+import { i18n } from '#vstutils/translation';
 
 import type { ComponentOptionsMixin } from 'vue/types/v3-component-options';
-import type { IAppInitialized } from '@/vstutils/app';
-import type { Model, ModelConstructor } from '@/vstutils/models';
+import type { IAppInitialized } from '#vstutils/app';
+import type { Model, ModelConstructor } from '#vstutils/models';
 import type {
     BaseViewStore,
     ListViewStore,
@@ -38,9 +38,9 @@ import type {
     ActionStore,
     PageEditStore,
     DetailViewStore,
-} from '@/vstutils/store';
+} from '#vstutils/store';
 
-import type { HttpMethod, RepresentData } from '@/vstutils/utils';
+import type { HttpMethod, RepresentData } from '#vstutils/utils';
 import type { Vue } from 'vue/types/vue';
 import type { Route, RouteConfig } from 'vue-router';
 import type { Operation as SwaggerOperation } from 'swagger-schema-official';
@@ -132,7 +132,7 @@ export interface ViewParams extends SwaggerOperation {
 
 export type ViewStore<T extends IView> = ReturnType<T['_createStore']>;
 
-interface ResolveStateArg<S> {
+export interface ResolveStateArg<S> {
     route: Route;
     store?: S;
 }
@@ -327,7 +327,7 @@ export abstract class BaseView<
         return props;
     }
 
-    toRoute() {
+    toRoute(): RouteConfig | undefined {
         if (this.hidden) {
             return;
         }

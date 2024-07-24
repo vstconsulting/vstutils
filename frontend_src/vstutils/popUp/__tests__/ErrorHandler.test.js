@@ -1,7 +1,7 @@
 import ErrorHandler from '../ErrorHandler.js';
 import { StringField } from '../../fields/text';
 import { guiPopUp } from '../PopUp';
-import { ModelValidationError } from '@/vstutils/models';
+import { ModelValidationError } from '#vstutils/models';
 
 vitest.mock('../PopUp');
 

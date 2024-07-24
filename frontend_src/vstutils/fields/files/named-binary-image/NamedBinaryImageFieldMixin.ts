@@ -1,5 +1,5 @@
 import { defineComponent } from 'vue';
-import { BaseFieldMixin } from '@/vstutils/fields/base';
+import { BaseFieldMixin } from '#vstutils/fields/base';
 import NamedBinaryImageFieldContentReadonly from './NamedBinaryImageFieldContentReadonly.vue';
 import NamedBinaryImageFieldContentEdit from './NamedBinaryImageFieldContentEdit.vue';
 

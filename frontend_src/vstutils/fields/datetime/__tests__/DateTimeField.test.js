@@ -1,7 +1,7 @@
 import { DateTimeField } from '../index';
 import { mount } from '@vue/test-utils';
 import moment from 'moment-timezone';
-import { createApp } from '@/unittests/create-app.ts';
+import { createApp } from '#unittests/create-app.ts';
 import VueI18n from 'vue-i18n';
 
 let app;

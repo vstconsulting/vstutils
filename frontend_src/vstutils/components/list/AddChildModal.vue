@@ -10,9 +10,9 @@
 </template>
 
 <script setup lang="ts">
-    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
+    import BootstrapModal from '#vstutils/components/BootstrapModal.vue';
     import AddChild from './AddChild.vue';
-    import type { ListView } from '@/vstutils/views';
+    import type { ListView } from '#vstutils/views';
 
     defineProps<{ view: ListView }>();
 </script>

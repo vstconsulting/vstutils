@@ -1,22 +1,22 @@
 import Papa from 'papaparse';
 import { defineComponent } from 'vue';
 
-import { BaseField, BaseFieldMixin } from '@/vstutils/fields/base';
-import { onAppBeforeInit } from '@/vstutils/signals';
-import { emptyInnerData } from '@/vstutils/utils';
+import { BaseField, BaseFieldMixin } from '#vstutils/fields/base';
+import { onAppBeforeInit } from '#vstutils/signals';
+import { emptyInnerData } from '#vstutils/utils';
 
 import { validateSimpleFileLength } from '../file';
 import CsvFileFieldEdit from './CSVFileFieldEdit.vue';
 import CsvFileFieldReadonly from './CsvFileFieldReadonly.vue';
 
 import type { ParseConfig } from 'papaparse';
-import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
-import type { InnerData, RepresentData } from '@/vstutils/utils';
-import type { ModelConstructor } from '@/vstutils/models';
-import type { ModelDefinition } from '@/vstutils/schema';
+import type { FieldOptions, FieldXOptions } from '#vstutils/fields/base';
+import type { InnerData, RepresentData } from '#vstutils/utils';
+import type { ModelConstructor } from '#vstutils/models';
+import type { ModelDefinition } from '#vstutils/schema';
 import type { IFileField } from '../file';
-import { guiPopUp } from '@/vstutils/popUp';
-import { i18n } from '@/vstutils/translation';
+import { guiPopUp } from '#vstutils/popUp';
+import { i18n } from '#vstutils/translation';
 
 export { CsvFileFieldEdit, CsvFileFieldReadonly };
 

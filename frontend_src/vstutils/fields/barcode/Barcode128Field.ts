@@ -1,13 +1,13 @@
 import { defineComponent, h, ref } from 'vue';
 
-import type { FieldReadonlyPropsDefType } from '@/vstutils/fields/base';
-import { BaseField, BaseFieldMixin, FieldReadonlyPropsDef } from '@/vstutils/fields/base';
+import type { FieldReadonlyPropsDefType } from '#vstutils/fields/base';
+import { BaseField, BaseFieldMixin, FieldReadonlyPropsDef } from '#vstutils/fields/base';
 import { Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import type { BarcodeField, BarcodeFieldXOptions } from './base';
 import BarcodeFieldContentEdit from './BarcodeFieldContentEdit.vue';
-import FullScreenView from '@/vstutils/components/FullScreenView.vue';
+import FullScreenView from '#vstutils/components/FullScreenView.vue';
 import CanvasRenderer from './CanvasRenderer.vue';
-import { getApp } from '@/vstutils/utils';
+import { getApp } from '#vstutils/utils';
 
 const Barcode128FieldReadOnly = defineComponent({
     props: FieldReadonlyPropsDef as FieldReadonlyPropsDefType<Barcode128Field>,

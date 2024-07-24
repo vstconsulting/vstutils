@@ -1,10 +1,10 @@
 import type { Route } from 'vue-router';
 import type { StoreGeneric } from 'pinia';
-import type { Action, IView, Sublink } from '@/vstutils/views';
-import type { Breadcrumb } from '@/vstutils/breadcrumbs';
-import type { InnerData, RepresentData } from '@/vstutils/utils';
-import type { FieldsGroup, InstancesList, Model, ModelConstructor } from '@/vstutils/models';
-import type { SetFieldValueOptions } from '@/vstutils/fields/base';
+import type { Action, IView, Sublink } from '#vstutils/views';
+import type { Breadcrumb } from '#vstutils/breadcrumbs';
+import type { InnerData, RepresentData } from '#vstutils/utils';
+import type { FieldsGroup, InstancesList, Model, ModelConstructor } from '#vstutils/models';
+import type { SetFieldValueOptions } from '#vstutils/fields/base';
 import type { PaginationItem } from './helpers';
 
 export interface BaseViewStore extends StoreGeneric {

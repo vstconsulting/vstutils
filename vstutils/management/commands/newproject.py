@@ -1,5 +1,6 @@
 import typing as _t
 import os
+import re
 from pathlib import Path
 
 from ._base import BaseCommand
@@ -20,12 +21,12 @@ class Command(BaseCommand):
 
     files_to_create = {
         'frontend_src': {
-            'app': {
-                'index.js': Path('index.js')
-            },
             '.editorconfig': Path('.editorconfig'),
-            '.eslintrc.js': Path('.eslintrc.js'),
-            '.prettierrc': Path('.prettierrc')
+            '.prettierrc': Path('.prettierrc'),
+            'index.html': Path('index.html'),
+            'index.ts': Path('index.ts'),
+            'tsconfig.json': Path('tsconfig.json'),
+            'vite.config.ts': Path('vite.config.ts'),
         },
         '{project_name}': {
             'models': {
@@ -40,7 +41,7 @@ class Command(BaseCommand):
         },
         '.gitignore': Path('.gitignore'),
         'MANIFEST.in': Path('MANIFEST.in'),
-        'package.json': Path('package.json'),
+        'package.json.default': Path('package.json.default'),
         'README.rst': Path('README.rst'),
         'requirements.txt': Path('requirements.txt'),
         'requirements-test.txt': Path('requirements-test.txt'),
@@ -49,7 +50,6 @@ class Command(BaseCommand):
         'test.py': Path('test.py'),
         'tox.ini': Path('tox.ini'),
         'tox_build.ini': Path('tox_build.ini'),
-        'webpack.config.js.default': Path('webpack.config.js.default')
     }
 
     def add_arguments(self, parser):
@@ -86,6 +86,7 @@ class Command(BaseCommand):
             'project_place': self._from_user('dir', options),
             'project_gui_name': project_gui_name,
             'vstutils_version': __version__,
+            'vstutils_version_npm': re.sub(r'b(\d+)$', '-b$1', __version__, count=1),
             'project_gui_name_head_lines': '=' * len(project_gui_name)
         }
 

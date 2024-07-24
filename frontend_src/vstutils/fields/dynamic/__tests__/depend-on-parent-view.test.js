@@ -1,7 +1,7 @@
 import { waitFor } from '@testing-library/dom';
-import { expectNthRequest, createApp, createSchema } from '@/unittests';
-import { PhoneField } from '@/vstutils/fields/text/phone';
-import { ColorField } from '@/vstutils/fields/color';
+import { expectNthRequest, createApp, createSchema } from '#unittests';
+import { PhoneField } from '#vstutils/fields/text/phone';
+import { ColorField } from '#vstutils/fields/color';
 import schema from './depend-on-parent-view-schema.json';
 
 test('DynamicField depending on value from parent view', async () => {

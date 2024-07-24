@@ -17,7 +17,7 @@
     import { computed, ref } from 'vue';
     import DataTable from './DataTable.vue';
 
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type { ExtractRepresent } from '#vstutils/fields/base';
     import type { CsvFileField } from './index';
 
     const props = defineProps<{

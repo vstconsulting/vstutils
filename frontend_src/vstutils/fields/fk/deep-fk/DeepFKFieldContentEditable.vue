@@ -9,7 +9,7 @@
         type FieldEditPropsDefType,
         type FieldEditEmitsDefType,
         type SetFieldValueParams,
-    } from '@/vstutils/fields/base';
+    } from '#vstutils/fields/base';
     import type DeepFKField from './DeepFKField';
     import FkTree from './FkTree.vue';
 

@@ -7,7 +7,8 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 
-const frontendSrc = currentDir;
+export const frontendSrc = currentDir;
+export const dist = join(frontendSrc, '..', 'dist');
 
 export default defineConfig(() => ({
     plugins: [
@@ -17,6 +18,7 @@ export default defineConfig(() => ({
             insertTypesEntry: true,
             exclude: ['**/__tests__', '**/*.test.ts', '**/dist', 'unittests', '**/vite.config.ts'],
             tsconfigPath: join(frontendSrc, 'tsconfig.json'),
+            rollupTypes: true,
         }),
     ],
     build: {
@@ -30,6 +32,8 @@ export default defineConfig(() => ({
         rollupOptions: {
             external: ['vue', /@toast-ui\/vue-editor/, /@toast-ui\/editor/],
         },
+        outDir: dist,
+        emptyOutDir: true,
     },
     resolve: {
         alias: {

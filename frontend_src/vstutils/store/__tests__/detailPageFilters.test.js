@@ -1,4 +1,4 @@
-import { waitForPageLoading, createApp, createSchema } from '@/unittests';
+import { waitForPageLoading, createApp, createSchema } from '#unittests';
 import schema from './detailPageFilters-schema.json';
 
 beforeEach(() => {

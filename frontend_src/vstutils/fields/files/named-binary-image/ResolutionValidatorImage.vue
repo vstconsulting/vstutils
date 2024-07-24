@@ -71,9 +71,9 @@
 
 <script setup lang="ts">
     import { ref, computed, reactive } from 'vue';
-    import { i18n } from '@/vstutils/translation';
-    import { makeDataImageUrl, readFileAsDataUrl } from '@/vstutils/utils';
-    import type { NamedFile } from '@/vstutils/fields/files/named-binary-file';
+    import { i18n } from '#vstutils/translation';
+    import { makeDataImageUrl, readFileAsDataUrl } from '#vstutils/utils';
+    import type { NamedFile } from '#vstutils/fields/files/named-binary-file';
     import type ResolutionValidatorConfig from './ResolutionValidatorConfig';
     import type { IImageField } from './NamedBinaryImageField';
     import Cropper from 'cropperjs';

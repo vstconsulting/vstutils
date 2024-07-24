@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
     import { computed, toRef } from 'vue';
-    import { type Model } from '@/vstutils/models';
+    import { type Model } from '#vstutils/models';
     import { useTabbedDetailState } from './state';
 
     const props = defineProps<{

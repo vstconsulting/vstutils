@@ -1,5 +1,5 @@
-import { createApp } from '@/unittests/create-app';
-import { createSchema } from '@/unittests/schema';
+import { createApp } from '#unittests/create-app';
+import { createSchema } from '#unittests/schema';
 import emptyActionSchema from './empty-action-schema.json';
 
 describe('ViewConstructor', () => {

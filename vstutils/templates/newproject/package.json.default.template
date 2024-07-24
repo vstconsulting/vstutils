@@ -1,0 +1,30 @@
+{
+  "name": "{{ project_name }}",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=20.15.0"
+  },
+  "scripts": {
+    "build": "vite build --config ./frontend_src/vite.config.ts --mode development",
+    "devBuild": "vite build --config ./frontend_src/vite.config.ts",
+    "lint:format": "prettier --check frontend_src",
+    "lint:code": "oxlint frontend_src",
+    "lint:types": "vue-tsc --noEmit -p ./frontend_src/tsconfig.json",
+    "lint": "conc npm:lint:* --group --timings"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.12",
+    "@vitejs/plugin-vue2": "^2.3.1",
+    "@vitejs/plugin-vue2-jsx": "^1.1.1",
+    "@vstconsulting/vstutils": "{{ vstutils_version }}",
+    "concurrently": "^8.2.2",
+    "oxlint": "^0.3.5",
+    "prettier": "3.2.5",
+    "sass": "^1.48.0",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.4",
+    "vue": "^2.7.16",
+    "vue-i18n": "8",
+    "vue-tsc": "^2.0.16"
+  }
+}

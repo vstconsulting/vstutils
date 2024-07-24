@@ -1,8 +1,8 @@
 import type { APIResponse } from '../api';
 import type { Field } from '../fields/base';
 import type { QuerySet } from '../querySet';
-import type { HttpMethod, InnerData, RepresentData } from '@/vstutils/utils';
-import type { MODEL_MODES } from '@/vstutils/schema';
+import type { HttpMethod, InnerData, RepresentData } from '#vstutils/utils';
+import type { MODEL_MODES } from '#vstutils/schema';
 import {
     deepEqual,
     escapeHtml,
@@ -10,7 +10,7 @@ import {
     mergeDeep,
     emptyInnerData,
     emptyRepresentData,
-} from '@/vstutils/utils';
+} from '#vstutils/utils';
 import { createModelSandbox, type ModelSandbox } from './sandbox';
 import { ModelValidationError } from './errors';
 import { getAdditionalPropertiesField, hasAdditionalProperties } from '../additionalProperties';

@@ -1,6 +1,6 @@
 import type { LocaleMessageObject } from 'vue-i18n';
-import { type InitAppConfig } from '@/vstutils/init-app';
-import { createBulkApiFetch, type BulkApiFetch } from '@/vstutils/bulk';
+import { type InitAppConfig } from '#vstutils/init-app';
+import { createBulkApiFetch, type BulkApiFetch } from '#vstutils/bulk';
 
 export interface Language {
     code: string;

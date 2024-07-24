@@ -23,7 +23,7 @@
 <script setup lang="ts">
     import type { RawLocation } from 'vue-router';
     import { useRoute } from 'vue-router/composables';
-    import type { PaginationItem } from '@/vstutils/store';
+    import type { PaginationItem } from '#vstutils/store';
 
     defineProps<{
         useEmits?: boolean;

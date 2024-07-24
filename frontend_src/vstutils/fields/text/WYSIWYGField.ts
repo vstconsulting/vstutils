@@ -1,7 +1,7 @@
 import { h } from 'vue';
 
-import { WYSIWYGEditor } from '@/vstutils/components/wysiwyg-editor';
-import { defineFieldComponent } from '@/vstutils/fields/base';
+import { WYSIWYGEditor } from '#vstutils/components/wysiwyg-editor';
+import { defineFieldComponent } from '#vstutils/fields/base';
 
 import { TextAreaField } from './TextAreaField';
 

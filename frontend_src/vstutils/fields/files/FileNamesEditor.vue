@@ -24,8 +24,8 @@
 
 <script setup lang="ts">
     import { computed, ref, set } from 'vue';
-    import { i18n } from '@/vstutils/translation';
-    import Card from '@/vstutils/components/Card.vue';
+    import { i18n } from '#vstutils/translation';
+    import Card from '#vstutils/components/Card.vue';
 
     const props = defineProps<{
         files: File[];

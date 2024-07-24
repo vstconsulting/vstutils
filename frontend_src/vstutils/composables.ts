@@ -2,9 +2,9 @@ import { computed, ref, unref } from 'vue';
 import { useResizeObserver } from '@vueuse/core';
 
 import type { ComputedRef, Ref } from 'vue';
-import type { FieldsGroup, FieldsInstancesGroup, ModelConstructor } from '@/vstutils/models';
-import type { RepresentData } from '@/vstutils/utils';
-import type { Field } from '@/vstutils/fields/base';
+import type { FieldsGroup, FieldsInstancesGroup, ModelConstructor } from '#vstutils/models';
+import type { RepresentData } from '#vstutils/utils';
+import type { Field } from '#vstutils/fields/base';
 import { getAdditionalPropertiesField, hasAdditionalProperties } from './additionalProperties';
 
 export function getFieldsInstancesGroups(model: ModelConstructor, groups: FieldsGroup[]) {

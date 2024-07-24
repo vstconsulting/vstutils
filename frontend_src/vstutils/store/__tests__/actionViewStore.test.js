@@ -1,4 +1,4 @@
-import { createApp, createSchema, expectNthRequest, waitForPageLoading } from '@/unittests';
+import { createApp, createSchema, expectNthRequest, waitForPageLoading } from '#unittests';
 import detailPageSchema from './detailPage-schema.json';
 import { ActionView } from '../../views';
 

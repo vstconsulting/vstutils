@@ -1,4 +1,4 @@
-import { BaseFieldButton } from '@/vstutils/fields/buttons';
+import { BaseFieldButton } from '#vstutils/fields/buttons';
 
 const FileFieldButtonMixin = {
     extends: BaseFieldButton,

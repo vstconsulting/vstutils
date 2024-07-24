@@ -22,8 +22,8 @@
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import { i18n } from '@/vstutils/translation';
-    import { getUniqueId } from '@/vstutils/utils';
+    import { i18n } from '#vstutils/translation';
+    import { getUniqueId } from '#vstutils/utils';
     import { useDragAndDrop } from './useDragAndDrop';
 
     const props = withDefaults(

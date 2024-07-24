@@ -1,4 +1,4 @@
-import { createApp, createSchema } from '@/unittests';
+import { createApp, createSchema } from '#unittests';
 import deepNestedSchema from './deep-nested-schema.json';
 import { waitFor } from '@testing-library/dom';
 

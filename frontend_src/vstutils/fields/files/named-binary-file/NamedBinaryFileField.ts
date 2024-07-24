@@ -1,7 +1,7 @@
-import type { FieldOptions } from '@/vstutils/fields/base';
-import { BaseField } from '@/vstutils/fields/base';
-import { pop_up_msg } from '@/vstutils/popUp';
-import { i18n } from '@/vstutils/translation';
+import type { FieldOptions } from '#vstutils/fields/base';
+import { BaseField } from '#vstutils/fields/base';
+import { pop_up_msg } from '#vstutils/popUp';
+import { i18n } from '#vstutils/translation';
 
 import { parseAllowedMediaTypes } from '../file';
 import NamedBinaryFileFieldMixin from './NamedBinaryFileFieldMixin';
@@ -9,7 +9,7 @@ import NamedBinaryFileFieldMixin from './NamedBinaryFileFieldMixin';
 import type { FileFieldXOptions, IFileField } from '../file';
 import type { NamedFile } from './utils';
 import { ensureMediaTypeExists, validateNamedFileJson } from './utils';
-import type { InnerData, RepresentData } from '@/vstutils/utils';
+import type { InnerData, RepresentData } from '#vstutils/utils';
 
 /**
  * This field takes and returns JSON with 3 properties:

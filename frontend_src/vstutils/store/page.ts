@@ -1,11 +1,11 @@
 import { computed, ref } from 'vue';
 
-import { createInstancesList, ModelValidationError } from '@/vstutils/models';
-import { guiPopUp, pop_up_msg } from '@/vstutils/popUp';
-import { i18n } from '@/vstutils/translation';
-import { emptyInnerData } from '@/vstutils/utils';
-import { getApp, isInstancesEqual, openPage, RequestTypes } from '@/vstutils/utils';
-import { fetchInstances } from '@/vstutils/fetch-values';
+import { createInstancesList, ModelValidationError } from '#vstutils/models';
+import { guiPopUp, pop_up_msg } from '#vstutils/popUp';
+import { i18n } from '#vstutils/translation';
+import { emptyInnerData } from '#vstutils/utils';
+import { getApp, isInstancesEqual, openPage, RequestTypes } from '#vstutils/utils';
+import { fetchInstances } from '#vstutils/fetch-values';
 import {
     createActionStore,
     filterNonEmpty,
@@ -24,10 +24,11 @@ import {
 } from './helpers';
 
 import type { Route } from 'vue-router';
-import type { InnerData, RepresentData } from '@/vstutils/utils';
-import type { Model, InstancesList } from '@/vstutils/models';
-import type { PageEditView, PageNewView, PageView, ActionView, Action, ListView } from '@/vstutils/views';
+import type { InnerData, RepresentData } from '#vstutils/utils';
+import type { Model, InstancesList } from '#vstutils/models';
+import type { PageEditView, PageNewView, PageView, ActionView, Action, ListView } from '#vstutils/views';
 import type { PageViewStore } from './page-types';
+export { innerDataMarker, representDataMarker } from './../utils/index';
 
 const createRemoveInstance =
     ({ pageView, unselect }: { pageView?: PageView | null; unselect?: (id: string | number) => void }) =>
@@ -182,7 +183,7 @@ export const createListViewStore = (view: ListView) => {
             guiPopUp.success(i18n.t(pop_up_msg.instance.success.removeMany) as string);
         } catch (error) {
             const str = app.error_handler.errorToString(error) as string;
-            const strToShow = i18n.t(pop_up_msg.instance.error.removeMany, [str]) as string;
+            const strToShow = i18n.ts(pop_up_msg.instance.error.removeMany, [str]) as string;
             app.error_handler.showError(strToShow, str);
         }
         selection.unselectIds(removedInstancesIds);

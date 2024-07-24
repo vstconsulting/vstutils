@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import { i18n } from '@/vstutils/translation';
+    import { i18n } from '#vstutils/translation';
     import type { InputHTMLAttributes } from 'vue/types/jsx';
 
     const props = defineProps<{

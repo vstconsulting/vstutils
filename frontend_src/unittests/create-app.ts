@@ -1,13 +1,13 @@
 import { User } from 'oidc-client-ts';
 import { createLocalVue } from '@vue/test-utils';
 import VueI18n from 'vue-i18n';
-import { type AppSchema } from '@/vstutils/schema';
-import { type InitAppConfigRaw, _createUserManager, type UserProfile } from '@/vstutils/init-app';
-import { getApp } from '@/vstutils/utils';
+import { type AppSchema } from '#vstutils/schema';
+import { type InitAppConfigRaw, _createUserManager, type UserProfile } from '#vstutils/init-app';
+import { getApp } from '#vstutils/utils';
 import testSchema from '../__mocks__/testSchema.json';
 
 // Important to import from index to trigger side effects as if it was a real app
-import { initApp } from '@/index';
+import { initApp } from '../index';
 
 export async function createApp(params?: { schema?: Partial<AppSchema>; disableBulk?: boolean }) {
     // Remove old app

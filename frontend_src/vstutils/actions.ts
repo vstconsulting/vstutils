@@ -1,4 +1,4 @@
-import type { IApp, IAppInitialized } from '@/vstutils/app';
+import type { IApp, IAppInitialized } from '#vstutils/app';
 import { guiPopUp, pop_up_msg } from './popUp';
 import { downloadResponse, emptyInnerData } from './utils';
 import {

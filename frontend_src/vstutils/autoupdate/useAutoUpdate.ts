@@ -1,7 +1,7 @@
 import { onBeforeUnmount, onMounted, getCurrentInstance, onScopeDispose } from 'vue';
 import { State } from 'centrifuge';
 
-import { getApp, getUniqueId } from '@/vstutils/utils';
+import { getApp, getUniqueId } from '#vstutils/utils';
 import type {
     AutoUpdateAction,
     CentrifugoAutoUpdateAction,

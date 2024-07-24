@@ -1,6 +1,6 @@
 import { defineComponent } from 'vue';
-import type { FieldPropsDefType } from '@/vstutils/fields/base';
-import { BaseFieldMixin, FieldPropsDef } from '@/vstutils/fields/base';
+import type { FieldPropsDefType } from '#vstutils/fields/base';
+import { BaseFieldMixin, FieldPropsDef } from '#vstutils/fields/base';
 import FileFieldContentEdit from './FileFieldContentEdit.vue';
 import type FileField from './FileField';
 

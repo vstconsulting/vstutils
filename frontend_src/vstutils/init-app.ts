@@ -1,7 +1,7 @@
-import OpenAPILoader from '@/vstutils/OpenAPILoader';
-import { createApiFetch } from '@/vstutils/api-fetch';
-import { App } from '@/vstutils/app';
-import { signals } from '@/vstutils/signals';
+import OpenAPILoader from '#vstutils/OpenAPILoader';
+import { createApiFetch } from '#vstutils/api-fetch';
+import { App } from '#vstutils/app';
+import { signals } from '#vstutils/signals';
 import { type OidcStandardClaims, UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import type Vue from 'vue';
 import { type AuthAppFactory } from './auth-app';
@@ -169,7 +169,7 @@ async function prepareConfig({ rawConfig }: InitAppContext): Promise<InitAppCont
 async function openAuthApp(ctx: InitAppContextWithConfig) {
     const config = ctx.config;
     const authAppFactory =
-        config.createAuthApp ?? (await import('@/vstutils/default-auth-app')).createDefaultAuthApp;
+        config.createAuthApp ?? (await import('#vstutils/default-auth-app')).createDefaultAuthApp;
     const child = createChildEl(config.el);
 
     const authApp = await authAppFactory({

@@ -32,8 +32,8 @@
 
 <script setup lang="ts">
     import { ref } from 'vue';
-    import { i18n } from '@/vstutils/translation';
-    import { getApp, saveAllSettings } from '@/vstutils/utils';
+    import { i18n } from '#vstutils/translation';
+    import { getApp, saveAllSettings } from '#vstutils/utils';
     import ConfirmModal from './ConfirmModal.vue';
 
     const app = getApp();

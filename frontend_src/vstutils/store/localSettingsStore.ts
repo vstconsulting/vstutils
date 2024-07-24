@@ -1,8 +1,8 @@
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
-import type { Model, ModelConstructor } from '@/vstutils/models';
-import type { SetFieldValueOptions } from '@/vstutils/fields/base';
-import type { InnerData } from '@/vstutils/utils';
+import type { Model, ModelConstructor } from '#vstutils/models';
+import type { SetFieldValueOptions } from '#vstutils/fields/base';
+import type { InnerData } from '#vstutils/utils';
 
 type Settings = Record<string, unknown>;
 

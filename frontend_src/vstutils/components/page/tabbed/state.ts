@@ -1,9 +1,9 @@
 import { computed, ref, del, type Ref } from 'vue';
-import { pop_up_msg } from '@/vstutils/popUp';
-import { getModelFieldsInstancesGroups, useHideableFieldsGroups } from '@/vstutils/composables';
-import type { SetFieldValueOptions } from '@/vstutils/fields/base';
-import { ModelValidationError, type Model, type ModelConstructor } from '@/vstutils/models';
-import { getApp } from '@/vstutils/utils';
+import { pop_up_msg } from '#vstutils/popUp';
+import { getModelFieldsInstancesGroups, useHideableFieldsGroups } from '#vstutils/composables';
+import type { SetFieldValueOptions } from '#vstutils/fields/base';
+import { ModelValidationError, type Model, type ModelConstructor } from '#vstutils/models';
+import { getApp } from '#vstutils/utils';
 
 export function useTabbedDetailState(opts: { instance: Ref<Model>; requireStepValidation?: boolean }) {
     const { instance, requireStepValidation = false } = opts;

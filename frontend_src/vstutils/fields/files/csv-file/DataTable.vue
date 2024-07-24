@@ -48,10 +48,10 @@
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import { i18n } from '@/vstutils/translation';
-    import { guiPopUp } from '@/vstutils/popUp';
-    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
-    import type { Model, ModelConstructor } from '@/vstutils/models';
+    import { i18n } from '#vstutils/translation';
+    import { guiPopUp } from '#vstutils/popUp';
+    import BootstrapModal from '#vstutils/components/BootstrapModal.vue';
+    import type { Model, ModelConstructor } from '#vstutils/models';
 
     const props = withDefaults(
         defineProps<{
@@ -125,9 +125,9 @@
     import { defineComponent } from 'vue';
     // @ts-expect-error - no types
     import VueVirtualTable from 'vue-virtual-table';
-    import ModelFields from '@/vstutils/components/page/ModelFields.vue';
-    import type { InnerData } from '@/vstutils/utils';
-    import { getApp } from '@/vstutils/utils';
+    import ModelFields from '#vstutils/components/page/ModelFields.vue';
+    import type { InnerData } from '#vstutils/utils';
+    import { getApp } from '#vstutils/utils';
 
     const CustomVirtualTable = defineComponent({
         mixins: [VueVirtualTable],

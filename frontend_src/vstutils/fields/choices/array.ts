@@ -1,6 +1,6 @@
 import { type Component, defineComponent } from 'vue';
 import ChoicesArrayFieldEdit from './ChoicesArrayFieldEdit.vue';
-import { StringArrayFieldMixin } from '@/vstutils/fields/text/string-array';
+import { StringArrayFieldMixin } from '#vstutils/fields/text/string-array';
 
 export const ChoicesArrayFieldMixin: Component = defineComponent({
     components: {

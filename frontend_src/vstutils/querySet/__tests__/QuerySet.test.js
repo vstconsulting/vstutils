@@ -4,7 +4,7 @@ import { makeModel, BaseModel } from '../../models';
 import StringField from '../../fields/text/StringField';
 import { QuerySet } from '../QuerySet';
 import { HttpMethods, RequestTypes } from '../../utils';
-import { createApp, createSchema, expectNthRequest } from '@/unittests';
+import { createApp, createSchema, expectNthRequest } from '#unittests';
 
 describe('QuerySet', () => {
     const idField = new IntegerField({ name: 'id', readOnly: true });

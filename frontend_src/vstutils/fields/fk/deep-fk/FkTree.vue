@@ -52,8 +52,8 @@
     import { ref, computed, onMounted, nextTick, shallowRef } from 'vue';
     // @ts-expect-error liquor-tree has no types
     import * as LiquorTree from 'liquor-tree';
-    import { i18n } from '@/vstutils/translation';
-    import { type Model } from '@/vstutils/models';
+    import { i18n } from '#vstutils/translation';
+    import { type Model } from '#vstutils/models';
     import type DeepFKField from './DeepFKField';
     import { type SetFieldValueParams } from '../../base';
 

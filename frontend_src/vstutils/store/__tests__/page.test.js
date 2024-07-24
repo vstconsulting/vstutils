@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { waitFor } from '@testing-library/dom';
-import { expectNthRequest, createApp, createSchema } from '@/unittests';
+import { expectNthRequest, createApp, createSchema } from '#unittests';
 import { useSelection } from '../helpers';
 import pageSchema from './page-schema.json';
 

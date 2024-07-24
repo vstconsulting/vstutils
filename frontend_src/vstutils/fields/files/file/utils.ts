@@ -1,5 +1,5 @@
-import { i18n } from '@/vstutils/translation';
-import type { Field } from '@/vstutils/fields/base';
+import { i18n } from '#vstutils/translation';
+import type { Field } from '#vstutils/fields/base';
 
 export interface IFileField extends Field {
     allowedMediaTypes: string[] | undefined;

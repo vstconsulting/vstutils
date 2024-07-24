@@ -1,5 +1,5 @@
 import { waitFor } from '@testing-library/dom';
-import { createApp, useTestCtx } from '@/unittests';
+import { createApp, useTestCtx } from '#unittests';
 
 describe('App', () => {
     test('Create and init', async () => {

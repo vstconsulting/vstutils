@@ -1,4 +1,4 @@
-import { i18n } from '@/vstutils/translation';
+import { i18n } from '#vstutils/translation';
 import { type RawEnumItem, ChoicesField } from './ChoicesField';
 import { ChoicesArrayFieldMixin } from './array';
 

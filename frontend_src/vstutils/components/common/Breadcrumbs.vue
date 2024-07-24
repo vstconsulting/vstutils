@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-    import type { Breadcrumb } from '@/vstutils/breadcrumbs';
+    import type { Breadcrumb } from '#vstutils/breadcrumbs';
 
     defineProps<{
         items: Breadcrumb[];
