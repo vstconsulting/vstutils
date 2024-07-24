@@ -1,6 +1,6 @@
-import type { AppSchema } from '@/vstutils/schema';
-import type { BulkType, HttpMethod, InnerData } from '@/vstutils/utils';
-import { makeQueryString } from '@/vstutils/utils';
+import type { AppSchema } from '#vstutils/schema';
+import type { BulkType, HttpMethod, InnerData } from '#vstutils/utils';
+import { makeQueryString } from '#vstutils/utils';
 import { createApiFetch } from '../api-fetch';
 import { type IApp } from '../app';
 import {

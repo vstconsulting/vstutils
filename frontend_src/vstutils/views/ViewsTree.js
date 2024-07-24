@@ -3,7 +3,7 @@ import { pathToArray } from '../utils';
 class Node {
     /**
      * @param {string|null} fragment - Part of view path
-     * @param {View} view
+     * @param {import('./View').View} view
      */
     constructor(fragment = null, view = null) {
         this.fragment = fragment;
@@ -73,7 +73,7 @@ export class ViewsTree {
     }
 
     /**
-     * @param {Map<string, View>} views
+     * @param {Map<string, import('./View').View>} views
      * @return {Node}
      */
     static buildViewsTree(views) {
@@ -93,7 +93,7 @@ export class ViewsTree {
 
     /**
      * @callback ViewMatcher
-     * @param {View} view
+     * @param {import('./View').View} view
      * @return {boolean}
      */
 

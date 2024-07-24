@@ -9,13 +9,13 @@ import {
     RequestTypes,
     ViewTypes,
 } from '../utils';
-import { signals } from '@/vstutils/signals';
+import { signals } from '#vstutils/signals';
 import { QuerySet, SingleEntityQueryset } from '../querySet';
 import { NoModel } from '../models';
 import { ActionView, ListView, PageEditView, PageNewView, PageView, View } from './View.ts';
 import DetailWithoutListPageMixin from '../components/page/DetailWithoutListPageMixin.js';
 import NotEmptyMultiactionModal from '../components/list/NotEmptyMultiactionModal.vue';
-import { NotFound, Home } from '@/vstutils/router/customPages';
+import { NotFound, Home } from '#vstutils/router/customPages';
 import { openapi_dictionary } from './openapi';
 
 /**
@@ -47,8 +47,8 @@ export default class ViewConstructor {
      * Constructor of ViewConstructor class.
      * @param {object|undefined} dictionary Dict, that has info about properties names in OpenApi Schema
      * and some settings for views of different types.
-     * @param {ModelsResolver} modelsResolver
-     * @param {FieldsResolver} fieldsResolver
+     * @param {import('../models/ModelsResolver').ModelsResolver} modelsResolver
+     * @param {import('../fields/FieldsResolver').FieldsResolver} fieldsResolver
      */
     constructor(dictionary, modelsResolver, fieldsResolver) {
         this.dictionary = dictionary ?? openapi_dictionary;
@@ -538,7 +538,7 @@ export default class ViewConstructor {
 
     /**
      * Method, that generates new guiField objects for View filters.
-     * @return {Object<string, BaseField>}
+     * @return {Object<string, import('../fields/base/Field').Field>}
      */
     _generateFilters(path, parameters, listModel) {
         const filters = {};

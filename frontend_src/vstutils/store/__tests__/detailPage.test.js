@@ -6,7 +6,7 @@ import {
     fetchMockCallAt,
     waitFor,
     waitForPageLoading,
-} from '@/unittests';
+} from '#unittests';
 import detailPageSchema from './detailPage-schema.json';
 import putDetailPageSchema from './putDetailPage-schema.json';
 

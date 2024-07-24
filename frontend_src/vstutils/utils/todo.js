@@ -39,7 +39,7 @@ String.prototype.format = function () {
 
 /**
  * Function search and return all `{key}` in string.
- * @return {array} array of {key} in string.
+ * @return {Array} array of {key} in string.
  */
 String.prototype.format_keys = function () {
     let thisObj = this;
@@ -577,7 +577,7 @@ export const obj_prop_retriever = new ObjectPropertyRetriever();
  * Function, that finds the most appropriate (closest) path from path array to current_path.
  * It's supposed, that values in 'paths' array' were previously sorted.
  * It's supposed, that 'paths' array does not contain all application paths.
- * @param {array} paths Array with paths({string}).
+ * @param {Array} paths Array with paths({string}).
  * @param {string} current_path Path, based on which function makes search.
  */
 export function findClosestPath(paths, current_path) {
@@ -858,8 +858,8 @@ export function generateBase32String(length = 32) {
 }
 
 /**
- * @param {Iterable<import('@/vstutils/fields/base').Field>} fields
- * @param {RepresentData} data
+ * @param {Iterable<import('#vstutils/fields/base').Field>} fields
+ * @param {import('../utils/index').RepresentData} data
  * @return {string[]}
  */
 export function classesFromFields(fields, data) {
@@ -909,8 +909,8 @@ export function pathToArray(path) {
 
 /**
  * Function that checks if instances in two lists are the same
- * @param {Model[]} a
- * @param {Model[]} b
+ * @param {(import('../models/Model').Model)[]} a
+ * @param {(import('../models/Model').Model)[]} b
  */
 export function isInstancesEqual(a, b) {
     if (a === b) return true;

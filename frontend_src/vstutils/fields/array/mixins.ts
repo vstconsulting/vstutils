@@ -1,7 +1,7 @@
 import { set, defineComponent, h } from 'vue';
 
-import { FieldReadonlyEmitsDef, FieldReadonlyPropsDef } from '@/vstutils/fields/base';
-import { BaseFieldMixin } from '@/vstutils/fields/base';
+import { FieldReadonlyEmitsDef, FieldReadonlyPropsDef } from '#vstutils/fields/base';
+import { BaseFieldMixin } from '#vstutils/fields/base';
 import ArrayFieldEdit from './ArrayFieldEdit.vue';
 
 import type { VNode } from 'vue';
@@ -10,7 +10,7 @@ import type {
     FieldReadonlyEmitsDefType,
     FieldReadonlyPropsDefType,
     SetFieldValueOptions,
-} from '@/vstutils/fields/base';
+} from '#vstutils/fields/base';
 import type ArrayField from './ArrayField';
 
 const NOT_INLINE_FIELDS = ['textarea', 'uri'];

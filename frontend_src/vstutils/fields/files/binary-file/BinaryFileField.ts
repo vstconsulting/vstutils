@@ -1,8 +1,8 @@
-import { FileField, fileIsTooLarge, fileIsTooSmall } from '@/vstutils/fields/files/file';
+import { FileField, fileIsTooLarge, fileIsTooSmall } from '#vstutils/fields/files/file';
 import BinaryFileFieldMixin from './BinaryFileFieldMixin';
 
 import type { ComponentOptions } from 'vue';
-import type { RepresentData } from '@/vstutils/utils';
+import type { RepresentData } from '#vstutils/utils';
 
 /**
  * BinFile guiField class.

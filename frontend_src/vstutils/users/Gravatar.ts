@@ -1,6 +1,6 @@
 // @ts-expect-error md5 has no types
 import md5 from 'md5';
-import { getApp } from '@/vstutils/utils';
+import { getApp } from '#vstutils/utils';
 import { type ReadonlyRefOrGetter, toValue } from '@vueuse/core';
 import { computed, ref } from 'vue';
 

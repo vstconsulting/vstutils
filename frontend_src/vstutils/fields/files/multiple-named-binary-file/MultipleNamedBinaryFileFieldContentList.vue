@@ -11,11 +11,11 @@
 </template>
 
 <script setup lang="ts">
-    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import BootstrapModal from '#vstutils/components/BootstrapModal.vue';
+    import type { ExtractRepresent } from '#vstutils/fields/base';
     import type MultipleNamedBinaryFileField from './MultipleNamedBinaryFileField';
     import FilesList from './FilesList.vue';
-    import { i18n } from '@/vstutils/translation';
+    import { i18n } from '#vstutils/translation';
     import { computed } from 'vue';
 
     const props = defineProps<{

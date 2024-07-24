@@ -10,7 +10,7 @@
 </template>
 
 <script>
-    import { BaseFieldContentEdit } from '@/vstutils/fields/base';
+    import { BaseFieldContentEdit } from '#vstutils/fields/base';
     import FkTree from './FkTree.vue';
 
     export default {

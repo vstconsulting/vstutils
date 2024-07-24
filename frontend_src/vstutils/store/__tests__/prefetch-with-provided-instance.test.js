@@ -1,5 +1,5 @@
-import { createApp } from '@/unittests/create-app';
-import { createSchema, expectRequest, fetchMockCallAt, waitFor } from '@/unittests';
+import { createApp } from '#unittests/create-app';
+import { createSchema, expectRequest, fetchMockCallAt, waitFor } from '#unittests';
 import schema from './prefetch-with-provided-instance-schema.json';
 
 test('prefetch with provided instance', async () => {

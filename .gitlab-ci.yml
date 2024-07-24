@@ -146,7 +146,7 @@ release_packages:
       VERSION=$(grep "__version__" vstutils/__init__.py | sed -E "s/__version__: str = '(.+)'/\1/")
       sed -i -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" package.json
     - yarn build-lib
-    - cp -v README.rst dist/README.rst
+    - cd dist
     - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'>.npmrc
     - npm publish --access public
   allow_failure: true

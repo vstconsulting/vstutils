@@ -1,5 +1,5 @@
-import { createApp, createSchema, schemaListOf } from '@/unittests';
-import { getApp } from '@/vstutils/utils';
+import { createApp, createSchema, schemaListOf } from '#unittests';
+import { getApp } from '#vstutils/utils';
 
 beforeAll(async () => {
     const some = {

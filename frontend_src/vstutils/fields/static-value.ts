@@ -1,7 +1,7 @@
 import { computed, h } from 'vue';
 
-import { BaseField, defineFieldComponent } from '@/vstutils/fields/base';
-import { onAppBeforeInit } from '@/vstutils/signals';
+import { BaseField, defineFieldComponent } from '#vstutils/fields/base';
+import { onAppBeforeInit } from '#vstutils/signals';
 
 import type {
     ExtractInner,
@@ -9,7 +9,7 @@ import type {
     Field,
     FieldOptions,
     FieldXOptions,
-} from '@/vstutils/fields/base';
+} from '#vstutils/fields/base';
 import type { FieldDefinition } from './FieldsResolver';
 import type { InnerData } from '../utils';
 

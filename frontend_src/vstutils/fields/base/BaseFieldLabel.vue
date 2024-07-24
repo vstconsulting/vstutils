@@ -9,8 +9,8 @@
 
 <script setup lang="ts">
     import { computed } from 'vue';
-    import Popover from '@/vstutils/components/Popover.vue';
-    import { i18n } from '@/vstutils/translation';
+    import Popover from '#vstutils/components/Popover.vue';
+    import { i18n } from '#vstutils/translation';
     import type { FieldLabelPropsDefType } from './props';
     import { FieldLabelPropsDef } from './props';
 

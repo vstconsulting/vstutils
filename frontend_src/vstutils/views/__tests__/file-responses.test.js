@@ -6,8 +6,8 @@ import {
     fetchMockCallAt,
     schemaListOf,
     waitForPageLoading,
-} from '@/unittests';
-import { openPage } from '@/vstutils/utils';
+} from '#unittests';
+import { openPage } from '#vstutils/utils';
 
 async function assertFileDownloaded(filename, url, f) {
     const HTMLAnchorElement = Object.getPrototypeOf(document.createElement('a'));

@@ -1,7 +1,7 @@
 import { computed, ref, watch } from 'vue';
 import { useParentViews } from './helpers';
 
-import type { StoreInstance } from '@/vstutils/utils';
+import type { StoreInstance } from '#vstutils/utils';
 import type { BaseViewStore } from './page-types';
 
 export const GLOBAL_STORE = () => {

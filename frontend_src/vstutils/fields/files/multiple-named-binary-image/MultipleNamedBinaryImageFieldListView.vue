@@ -24,11 +24,11 @@
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import { makeDataImageUrl } from '@/vstutils/utils';
-    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
+    import { makeDataImageUrl } from '#vstutils/utils';
+    import BootstrapModal from '#vstutils/components/BootstrapModal.vue';
 
     import type MultipleNamedBinaryImageField from './MultipleNamedBinaryImageField';
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type { ExtractRepresent } from '#vstutils/fields/base';
 
     const props = defineProps<{
         field: MultipleNamedBinaryImageField;

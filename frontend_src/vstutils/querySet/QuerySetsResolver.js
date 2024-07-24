@@ -5,7 +5,7 @@ import { pathToArray, RequestTypes, ViewTypes } from '../utils';
  */
 export class QuerySetsResolver {
     /**
-     * @param {ViewsTree} viewsTree
+     * @param {import('../views/ViewsTree').ViewsTree} viewsTree
      */
     constructor(viewsTree) {
         this.viewsTree = viewsTree;

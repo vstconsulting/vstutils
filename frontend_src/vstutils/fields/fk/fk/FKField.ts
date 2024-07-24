@@ -1,19 +1,19 @@
-import { BaseField } from '@/vstutils/fields/base';
-import { onAppBeforeInit } from '@/vstutils/signals';
-import { i18n } from '@/vstutils/translation';
-import { type RepresentData, OBJECT_NOT_FOUND_TEXT } from '@/vstutils/utils';
-import { formatPath, getApp, getDependenceValueAsString, RequestTypes } from '@/vstutils/utils';
+import { BaseField } from '#vstutils/fields/base';
+import { onAppBeforeInit } from '#vstutils/signals';
+import { i18n } from '#vstutils/translation';
+import { type RepresentData, OBJECT_NOT_FOUND_TEXT } from '#vstutils/utils';
+import { formatPath, getApp, getDependenceValueAsString, RequestTypes } from '#vstutils/utils';
 
 import FKFieldMixin from './FKFieldMixin';
 import { FKArrayFieldMixin } from './array';
 
 import type { Component, ComponentOptions } from 'vue';
-import type { ModelDefinition } from '@/vstutils/schema';
-import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
-import type { PageView, ViewStore } from '@/vstutils/views';
-import type { Model, ModelConstructor } from '@/vstutils/models';
-import type { QuerySet } from '@/vstutils/querySet';
-import type { IFetchableField } from '@/vstutils/fetch-values';
+import type { ModelDefinition } from '#vstutils/schema';
+import type { FieldOptions, FieldXOptions } from '#vstutils/fields/base';
+import type { PageView, ViewStore } from '#vstutils/views';
+import type { Model, ModelConstructor } from '#vstutils/models';
+import type { QuerySet } from '#vstutils/querySet';
+import type { IFetchableField } from '#vstutils/fetch-values';
 
 const dependenceTemplateRegexp = /<<\w+>>/g;
 

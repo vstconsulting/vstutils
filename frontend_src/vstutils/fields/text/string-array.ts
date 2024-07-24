@@ -1,13 +1,13 @@
 import type { PropType } from 'vue';
 import { defineComponent, h } from 'vue';
 
-import TagsSelector from '@/vstutils/components/TagsSelector.vue';
-import { HideButton } from '@/vstutils/fields/buttons';
-import { resumeEnterPropagation, stopEnterPropagation } from '@/vstutils/utils';
+import TagsSelector from '#vstutils/components/TagsSelector.vue';
+import { HideButton } from '#vstutils/fields/buttons';
+import { resumeEnterPropagation, stopEnterPropagation } from '#vstutils/utils';
 
-import { ArrayFieldMixin } from '@/vstutils/fields/array/mixins';
+import { ArrayFieldMixin } from '#vstutils/fields/array/mixins';
 
-import { type ArrayField } from '@/vstutils/fields/array/ArrayField';
+import { type ArrayField } from '#vstutils/fields/array/ArrayField';
 
 import './string-array.scss';
 

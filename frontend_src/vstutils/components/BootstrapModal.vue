@@ -49,7 +49,7 @@
     import $ from 'jquery';
     import type JQuery from 'jquery';
     import { defineComponent } from 'vue';
-    import OverlayLoader from '@/vstutils/components/OverlayLoader.vue';
+    import OverlayLoader from '#vstutils/components/OverlayLoader.vue';
 
     // When at least one modal window is open we ensure that 'modal-open' css class is applied to body
     const [onModalOpened, onModalClosed] = (() => {

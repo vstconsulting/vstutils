@@ -4,8 +4,11 @@
     </p>
     <div v-else>
         <p>
-            <!-- eslint-disable-next-line prettier/prettier -->
-            {{ $t('Scan the image with the two-factor authentication app on your phone. If you can’t use a QR code, enter this text code instead.') }}
+            {{
+                $t(
+                    'Scan the image with the two-factor authentication app on your phone. If you can’t use a QR code, enter this text code instead.',
+                )
+            }}
         </p>
         <div class="qr-code-container">
             <img :src="qrcode" />
@@ -25,8 +28,11 @@
         />
         <hr />
         <p>
-            <!-- eslint-disable-next-line prettier/prettier -->
-            {{ $t('Recovery codes are used to access your account in the event you cannot receive two-factor authentication codes.') }}
+            {{
+                $t(
+                    'Recovery codes are used to access your account in the event you cannot receive two-factor authentication codes.',
+                )
+            }}
         </p>
         <div class="card recovery-codes">
             <div class="card-header">
@@ -49,10 +55,10 @@
 <script lang="ts" setup>
     import QRCode from 'qrcode';
     import { computed, ref, watch } from 'vue';
-    import { useViewStore } from '@/vstutils/store';
-    import { copyToClipboard } from '@/vstutils/utils';
+    import { useViewStore } from '#vstutils/store';
+    import { copyToClipboard } from '#vstutils/utils';
 
-    import type { PageEditView } from '@/vstutils/views';
+    import type { PageEditView } from '#vstutils/views';
 
     const store = useViewStore<PageEditView>();
 

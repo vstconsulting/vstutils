@@ -6,7 +6,7 @@ import {
     waitForPageLoading,
     useTestCtx,
     expectNthRequest,
-} from '@/unittests';
+} from '#unittests';
 
 describe('main action execution', () => {
     beforeAll(async () => {

@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import { getApp, isNotFoundView } from '@/vstutils/utils';
+import { getApp, isNotFoundView } from '#vstutils/utils';
 
 export interface Breadcrumb {
     link?: string;

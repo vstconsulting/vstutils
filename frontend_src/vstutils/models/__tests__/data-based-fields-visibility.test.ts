@@ -1,4 +1,4 @@
-import { createApp, createSchema, schemaListOf, useTestCtx } from '@/unittests';
+import { createApp, createSchema, schemaListOf, useTestCtx } from '#unittests';
 
 const schema = createSchema({
     paths: {

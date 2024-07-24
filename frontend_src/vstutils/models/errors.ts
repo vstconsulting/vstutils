@@ -1,6 +1,6 @@
-import type { Field } from '@/vstutils/fields/base/BaseField';
-import { i18n } from '@/vstutils/translation';
-import { escapeHtml } from '@/vstutils/utils';
+import type { Field } from '#vstutils/fields/base/BaseField';
+import { i18n } from '#vstutils/translation';
+import { escapeHtml } from '#vstutils/utils';
 
 export interface FieldValidationErrorInfo {
     field: Field;

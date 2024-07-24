@@ -12,10 +12,10 @@
 </template>
 
 <script setup lang="ts">
-    import type { FieldLabelEmitsDefType, FieldLabelPropsDefType } from '@/vstutils/fields/base';
-    import { FieldLabelEmitsDef } from '@/vstutils/fields/base';
-    import { BaseFieldLabel } from '@/vstutils/fields/base';
-    import { FieldLabelPropsDef } from '@/vstutils/fields/base';
+    import type { FieldLabelEmitsDefType, FieldLabelPropsDefType } from '#vstutils/fields/base';
+    import { FieldLabelEmitsDef } from '#vstutils/fields/base';
+    import { BaseFieldLabel } from '#vstutils/fields/base';
+    import { FieldLabelPropsDef } from '#vstutils/fields/base';
 
     const props = defineProps(FieldLabelPropsDef as FieldLabelPropsDefType);
     const emit = defineEmits(FieldLabelEmitsDef as FieldLabelEmitsDefType);

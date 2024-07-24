@@ -8,7 +8,7 @@ import { createSchema } from '../../../unittests/schema';
 import { StringField } from '../../fields/text';
 import { ArrayField } from '../../fields/array';
 import { NumberField } from '../../fields/numbers';
-import { OrderingChoicesField } from '@/vstutils/fields/choices';
+import { OrderingChoicesField } from '#vstutils/fields/choices';
 import { createApp } from '../../../unittests/create-app';
 
 describe('ViewConstructor', () => {

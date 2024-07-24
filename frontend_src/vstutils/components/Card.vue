@@ -28,7 +28,7 @@
 </template>
 
 <script>
-    import OverlayLoader from '@/vstutils/components/OverlayLoader.vue';
+    import OverlayLoader from '#vstutils/components/OverlayLoader.vue';
 
     export default {
         components: { OverlayLoader },

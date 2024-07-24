@@ -1,12 +1,12 @@
-import { BaseField, BaseFieldMixin } from '@/vstutils/fields/base';
-import { onSchemaModelsCreated } from '@/vstutils/signals';
+import { BaseField, BaseFieldMixin } from '#vstutils/fields/base';
+import { onSchemaModelsCreated } from '#vstutils/signals';
 import RelatedListFieldListView from './RelatedListFieldListView.vue';
 import RelatedListFieldReadonlyView from './RelatedListFieldReadonlyView.vue';
 
-import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
-import type { ModelDefinition } from '@/vstutils/schema';
-import type { ModelConstructor } from '@/vstutils/models';
-import type { InnerData } from '@/vstutils/utils';
+import type { FieldOptions, FieldXOptions } from '#vstutils/fields/base';
+import type { ModelDefinition } from '#vstutils/schema';
+import type { ModelConstructor } from '#vstutils/models';
+import type { InnerData } from '#vstutils/utils';
 
 export const RelatedListFieldMixin = {
     components: {

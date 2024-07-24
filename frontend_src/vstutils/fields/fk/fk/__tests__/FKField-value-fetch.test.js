@@ -1,5 +1,5 @@
-import { createApp, mount } from '@/unittests';
-import { deferredPromise } from '@/vstutils/utils';
+import { createApp, mount } from '#unittests';
+import { deferredPromise } from '#vstutils/utils';
 
 describe('FKField value loader indicator', () => {
     let app;

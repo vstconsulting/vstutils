@@ -10,8 +10,8 @@ import {
     stringToBoolean,
     generatePassword,
     getRedirectUrlFromResponse,
-} from '@/vstutils/utils';
-import { i18n } from '@/vstutils/translation';
+} from '#vstutils/utils';
+import { i18n } from '#vstutils/translation';
 import { createApp } from '../../../unittests/create-app';
 
 describe('utils', () => {

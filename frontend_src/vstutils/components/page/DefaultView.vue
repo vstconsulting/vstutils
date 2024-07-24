@@ -22,11 +22,11 @@
 <script setup lang="ts">
     import { computed, getCurrentInstance } from 'vue';
     import { storeToRefs } from 'pinia';
-    import { ViewTypes } from '@/vstutils/utils';
-    import { useViewStore } from '@/vstutils/store';
-    import ModelFields from '@/vstutils/components/page/ModelFields.vue';
+    import { ViewTypes } from '#vstutils/utils';
+    import { useViewStore } from '#vstutils/store';
+    import ModelFields from '#vstutils/components/page/ModelFields.vue';
 
-    import type { DetailView } from '@/vstutils/views';
+    import type { DetailView } from '#vstutils/views';
 
     const store = useViewStore<DetailView>();
     const view = computed(() => store.view as DetailView);

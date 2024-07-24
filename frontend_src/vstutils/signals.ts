@@ -1,12 +1,12 @@
 import { onScopeDispose } from 'vue';
 import TabSignal from '@vstconsulting/tabsignal';
 
-import { capitalize, getApp } from '@/vstutils/utils';
+import { capitalize, getApp } from '#vstutils/utils';
 
-import type { Model } from '@/vstutils/models';
-import type { IAppInitialized } from '@/vstutils/app';
-import type { RepresentData } from '@/vstutils/utils';
-import type { Action, Sublink } from '@/vstutils/views';
+import type { Model } from '#vstutils/models';
+import type { IAppInitialized } from '#vstutils/app';
+import type { RepresentData } from '#vstutils/utils';
+import type { Action, Sublink } from '#vstutils/views';
 import type { RouteConfig } from 'vue-router';
 import type { AppSchema } from './schema';
 

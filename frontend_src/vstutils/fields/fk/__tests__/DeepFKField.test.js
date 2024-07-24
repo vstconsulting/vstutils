@@ -1,7 +1,7 @@
 import { reactive } from 'vue';
 import { within } from '@testing-library/dom';
 import { userEvent } from '@testing-library/user-event';
-import { createApp, createSchema, waitFor, mount } from '@/unittests';
+import { createApp, createSchema, waitFor, mount } from '#unittests';
 import schema from './DeepFKField-schema.json';
 
 describe('DeepFKfield', () => {

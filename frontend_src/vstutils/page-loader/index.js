@@ -1,10 +1,10 @@
 import './style.css';
-import { cleanAllCacheAndReloadPage } from '@/vstutils/cleanCacheHelpers.js';
+import { cleanAllCacheAndReloadPage } from '#vstutils/cleanCacheHelpers.js';
 
 /**
  * Function creates DOM element and sets it attributes and props.
  * @param {string} type Type (tag) of DOM element.
- * @param {array} attributes Array of objects -
+ * @param {Array} attributes Array of objects -
  * DOM element attributes(key, value).
  * @param {object} props Object with properties of DOM element.
  */

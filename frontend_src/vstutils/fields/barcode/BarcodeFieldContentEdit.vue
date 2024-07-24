@@ -60,12 +60,12 @@
 
 <script setup lang="ts">
     import { ref, computed } from 'vue';
-    import { getApp } from '@/vstutils/utils';
-    import type { FieldEditPropsDefType } from '@/vstutils/fields/base';
-    import { FieldEditPropsDef } from '@/vstutils/fields/base';
+    import { getApp } from '#vstutils/utils';
+    import type { FieldEditPropsDefType } from '#vstutils/fields/base';
+    import { FieldEditPropsDef } from '#vstutils/fields/base';
     import type { BarcodeField } from './base';
     import ScannerCamera from './ScannerCamera.vue';
-    import { useWidthResizeObserver } from '@/vstutils/composables';
+    import { useWidthResizeObserver } from '#vstutils/composables';
 
     const emit = defineEmits<{
         (e: 'set-value', value: string | null | undefined): void;

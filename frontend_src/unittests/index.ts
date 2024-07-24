@@ -1,7 +1,7 @@
 import { mount as vueMount, createWrapper, type Wrapper } from '@vue/test-utils';
 import { waitFor as _waitFor, within } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
-import { getApp } from '@/vstutils/utils';
+import { getApp } from '#vstutils/utils';
 
 import type { ComponentOptions } from 'vue';
 

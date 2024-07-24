@@ -1,6 +1,6 @@
-import { StringField } from '@/vstutils/fields/text';
+import { StringField } from '#vstutils/fields/text';
 import { DynamicField } from '../DynamicField';
-import { createApp } from '@/unittests';
+import { createApp } from '#unittests';
 import VueI18n from 'vue-i18n';
 import { nextTick, reactive } from 'vue';
 import { mount } from '@vue/test-utils';

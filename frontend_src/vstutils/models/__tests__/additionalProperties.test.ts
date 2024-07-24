@@ -1,7 +1,7 @@
-import { createApp, createSchema, schemaListOf, waitForPageLoading, openPage } from '@/unittests';
-import type { getApp } from '@/vstutils/utils';
+import { createApp, createSchema, schemaListOf, waitForPageLoading, openPage } from '#unittests';
+import type { getApp } from '#vstutils/utils';
 import { ModelValidationError } from '..';
-import { emptyInnerData } from '@/vstutils/utils';
+import { emptyInnerData } from '#vstutils/utils';
 import { screen } from '@testing-library/dom';
 
 let app: Awaited<ReturnType<typeof getApp>>;

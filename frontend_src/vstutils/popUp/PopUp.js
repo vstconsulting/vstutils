@@ -1,5 +1,5 @@
 import iziToast from 'izitoast';
-import { i18n } from '@/vstutils/translation';
+import { i18n } from '#vstutils/translation';
 
 /**
  * Class, that is responsible for showing of pop up notification.
@@ -113,9 +113,9 @@ export class PopUp {
      * Method, that generates question pop up.
      * Returns promise of getting user's answer.
      * @param {string} message Question text.
-     * @param {array} answer_buttons Array of strings - titles for answer buttons.
+     * @param {Array} answer_buttons Array of strings - titles for answer buttons.
      * @param {object} opt Object with custom settings for question pop up.
-     * @return {promise}.
+     * @return {Promise}.
      */
     question(message = '', answer_buttons = [], opt = {}) {
         let buttons = [];

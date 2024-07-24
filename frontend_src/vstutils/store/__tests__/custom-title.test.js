@@ -1,5 +1,5 @@
 import { waitFor } from '@testing-library/dom';
-import { createApp, createSchema } from '@/unittests';
+import { createApp, createSchema } from '#unittests';
 import detailPageSchema from './detailPage-schema.json';
 
 test('title customization using View.getTitle', async () => {

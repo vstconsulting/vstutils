@@ -6,10 +6,10 @@ import type {
     Field,
     FieldOptions,
     FieldXOptions,
-} from '@/vstutils/fields/base';
-import { BaseField } from '@/vstutils/fields/base';
-import { onAppBeforeInit } from '@/vstutils/signals';
-import type { InnerData, RepresentData } from '@/vstutils/utils';
+} from '#vstutils/fields/base';
+import { BaseField } from '#vstutils/fields/base';
+import { onAppBeforeInit } from '#vstutils/signals';
+import type { InnerData, RepresentData } from '#vstutils/utils';
 
 import { ArrayFieldMixin } from './mixins';
 

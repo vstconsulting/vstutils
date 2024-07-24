@@ -1,10 +1,10 @@
 import { defineComponent } from 'vue';
 import JsonFieldContentReadonly from './JsonFieldContentReadonly.vue';
 import type { DefaultXOptions, FieldOptions, FieldPropsDefType } from '../base';
-import { BaseField, BaseFieldMixin, FieldPropsDef } from '@/vstutils/fields/base';
+import { BaseField, BaseFieldMixin, FieldPropsDef } from '#vstutils/fields/base';
 import JsonMapper from './JsonMapper.js';
-import type { InnerData } from '@/vstutils/utils';
-import TextAreaFieldContentEdit from '@/vstutils/fields/text/TextAreaFieldContentEdit.vue';
+import type { InnerData } from '#vstutils/utils';
+import TextAreaFieldContentEdit from '#vstutils/fields/text/TextAreaFieldContentEdit.vue';
 
 const JSONFieldComponent = defineComponent({
     components: {

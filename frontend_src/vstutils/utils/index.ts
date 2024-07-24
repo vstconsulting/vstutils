@@ -5,8 +5,8 @@ import type { ParameterType } from 'swagger-schema-official';
 import type { defineStore } from 'pinia';
 import type { Field } from '../fields/base/Field';
 import type { Route, Location } from 'vue-router';
-import type { Model, ModelConstructor } from '@/vstutils/models';
-import type { IView, PageView, Sublink } from '@/vstutils/views';
+import type { Model, ModelConstructor } from '#vstutils/models';
+import type { IView, PageView, Sublink } from '#vstutils/views';
 
 export * from './todo.js';
 export * from './app-helpers';
@@ -192,10 +192,12 @@ export function createPropertyProxy<Obj extends object, Prop extends keyof Obj>(
     });
 }
 
-declare const innerDataMarker: unique symbol;
-declare const representDataMarker: unique symbol;
+export const innerDataMarker = '__inner_data';
+export const representDataMarker = '__represent_data';
 
-export type InnerData<T extends object = Record<string, unknown>> = T & { readonly [innerDataMarker]: true };
+export type InnerData<T extends object = Record<string, unknown>> = T & {
+    readonly [innerDataMarker]: true;
+};
 
 export type RepresentData<T extends object = Record<string, unknown>> = T & {
     readonly [representDataMarker]: true;
@@ -287,10 +289,6 @@ export function joinPaths(...paths: (string | number | undefined | null)[]) {
 
 /**
  * Function that formats path from params and replaces last param with instance's id
- * @param {string} path
- * @param {Object} params
- * @param {Model} instance
- * @return {string}
  */
 export function formatPath(path: string, params: Record<string, unknown>, instance?: Model) {
     for (const [name, value] of Object.entries(params)) {

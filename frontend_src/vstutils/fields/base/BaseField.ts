@@ -6,9 +6,9 @@ import { pop_up_msg } from '../../popUp';
 import type { ModelConstructor } from '../../models';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 import { i18n } from '../../translation';
-import type { IApp } from '@/vstutils/app';
+import type { IApp } from '#vstutils/app';
 import type { Component } from 'vue';
-import { BaseFieldLabel } from '@/vstutils/fields/base';
+import { BaseFieldLabel } from '#vstutils/fields/base';
 import type {
     DefaultXOptions,
     Field,
@@ -174,7 +174,6 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
 
     /**
      * Method that validates value.
-     * @param {RepresentData} data - Object with all values.
      */
     validateValue(data: RepresentData): Represent | null | undefined {
         let value = this.getValue(data);

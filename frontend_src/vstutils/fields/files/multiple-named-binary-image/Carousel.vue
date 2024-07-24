@@ -41,8 +41,8 @@
 
 <script setup lang="ts">
     import { useEventListener } from '@vueuse/core';
-    import { makeDataImageUrl } from '@/vstutils/utils';
-    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
+    import { makeDataImageUrl } from '#vstutils/utils';
+    import BootstrapModal from '#vstutils/components/BootstrapModal.vue';
     import type { NamedFile } from '../named-binary-file';
     import { computed, ref } from 'vue';
 

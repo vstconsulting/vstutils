@@ -30,15 +30,15 @@
     import { computed, ref } from 'vue';
     import { useRoute } from 'vue-router/composables';
 
-    import { getApp, openSublink as _openSublink } from '@/vstutils/utils';
-    import { createViewStore } from '@/vstutils/store';
+    import { getApp, openSublink as _openSublink } from '#vstutils/utils';
+    import { createViewStore } from '#vstutils/store';
     import Preloader from './Preloader.vue';
     import ButtonsRow from './ButtonsRow.vue';
     import SelectedFilters from './SelectedFilters.vue';
     import ErrorPage from '../ErrorPage.vue';
 
-    import type { BaseViewStore } from '@/vstutils/store';
-    import type { Action, Sublink } from '@/vstutils/views';
+    import type { BaseViewStore } from '#vstutils/store';
+    import type { Action, Sublink } from '#vstutils/views';
 
     const props = withDefaults(
         defineProps<{

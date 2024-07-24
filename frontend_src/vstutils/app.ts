@@ -4,42 +4,42 @@ import Vue from 'vue';
 
 import { Centrifuge } from 'centrifuge';
 import { defineStore } from 'pinia';
-import type VueI18n from 'vue-i18n';
+import type { CustomVueI18n } from './translation';
 
-import { ActionsManager } from '@/vstutils/actions';
-import type { ApiConnector } from '@/vstutils/api';
-import { apiConnector } from '@/vstutils/api';
-import type { Language } from '@/vstutils/api/TranslationsManager';
-import { TranslationsManager } from '@/vstutils/api/TranslationsManager';
-import type { AppSchema } from '@/vstutils/schema';
-import AppRoot from '@/vstutils/AppRoot.vue';
-import { AutoUpdateController } from '@/vstutils/autoupdate';
-import type { ComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
-import { globalComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
-import { addDefaultFields, FieldsResolver } from '@/vstutils/fields';
-import type { ModelConstructor } from '@/vstutils/models';
-import { ModelsResolver } from '@/vstutils/models';
-import { ErrorHandler } from '@/vstutils/popUp';
-import { QuerySetsResolver } from '@/vstutils/querySet';
-import { RouterConstructor } from '@/vstutils/router';
+import { ActionsManager } from '#vstutils/actions';
+import type { ApiConnector } from '#vstutils/api';
+import { apiConnector } from '#vstutils/api';
+import type { Language } from '#vstutils/api/TranslationsManager';
+import { TranslationsManager } from '#vstutils/api/TranslationsManager';
+import type { AppSchema } from '#vstutils/schema';
+import AppRoot from '#vstutils/AppRoot.vue';
+import { AutoUpdateController } from '#vstutils/autoupdate';
+import type { ComponentsRegistrator } from '#vstutils/ComponentsRegistrator';
+import { globalComponentsRegistrator } from '#vstutils/ComponentsRegistrator';
+import { addDefaultFields, FieldsResolver } from '#vstutils/fields';
+import type { ModelConstructor } from '#vstutils/models';
+import { ModelsResolver } from '#vstutils/models';
+import { ErrorHandler } from '#vstutils/popUp';
+import { QuerySetsResolver } from '#vstutils/querySet';
+import { RouterConstructor } from '#vstutils/router';
 import {
     APP_AFTER_INIT,
     APP_BEFORE_INIT,
     APP_CREATED,
     SCHEMA_MODELS_CREATED,
     signals,
-} from '@/vstutils/signals';
-import type { GlobalStore, LocalSettingsStore, UserSettingsStore } from '@/vstutils/store';
-import { createLocalSettingsStore, createUserSettingsStore, GLOBAL_STORE, pinia } from '@/vstutils/store';
-import { i18n } from '@/vstutils/translation';
-import * as utils from '@/vstutils/utils';
-import type { IView, BaseView } from '@/vstutils/views';
-import { ListView, PageNewView, PageView, ViewsTree } from '@/vstutils/views';
-import ViewConstructor from '@/vstutils/views/ViewConstructor.js';
-import { setupPushNotifications } from '@/vstutils/webpush';
+} from '#vstutils/signals';
+import type { GlobalStore, LocalSettingsStore, UserSettingsStore } from '#vstutils/store';
+import { createLocalSettingsStore, createUserSettingsStore, GLOBAL_STORE, pinia } from '#vstutils/store';
+import { i18n } from '#vstutils/translation';
+import * as utils from '#vstutils/utils';
+import type { IView, BaseView } from '#vstutils/views';
+import { ListView, PageNewView, PageView, ViewsTree } from '#vstutils/views';
+import ViewConstructor from '#vstutils/views/ViewConstructor.js';
+import { setupPushNotifications } from '#vstutils/webpush';
 import type { UserProfile, InitAppConfig } from './init-app';
 
-import type { GlobalStoreInitialized } from '@/vstutils/store/globalStore';
+import type { GlobalStoreInitialized } from '#vstutils/store/globalStore';
 
 export function getCentrifugoClient(address?: string, token?: string) {
     if (!address) {
@@ -74,7 +74,7 @@ export interface IApp {
     centrifugoClient: Centrifuge | null;
 
     router: VueRouter | null;
-    i18n: VueI18n;
+    i18n: CustomVueI18n;
 
     api: ApiConnector;
     languages: Language[] | null;
@@ -144,7 +144,7 @@ export class App implements IApp {
     centrifugoClient: Centrifuge | null;
 
     router: VueRouter | null;
-    i18n: VueI18n;
+    i18n: CustomVueI18n;
 
     api: ApiConnector;
     languages: Language[] | null;

@@ -1,12 +1,12 @@
 /* eslint-disable */
 
-import { type IApp } from '@/vstutils/app';
-import { BooleanField, BooleanFieldMixin } from '@/vstutils/fields/boolean';
-import { type Model } from '@/vstutils/models';
-import { guiPopUp } from '@/vstutils/popUp';
-import { onFilterOperations, onSchemaViewsCreated, signals, useSignalSubscription } from '@/vstutils/signals';
-import { HttpMethods, formatPath, getApp, joinPaths } from '@/vstutils/utils';
-import { type PageEditView } from '@/vstutils/views';
+import { type IApp } from '#vstutils/app';
+import { BooleanField, BooleanFieldMixin } from '#vstutils/fields/boolean';
+import { type Model } from '#vstutils/models';
+import { guiPopUp } from '#vstutils/popUp';
+import { onFilterOperations, onSchemaViewsCreated, signals, useSignalSubscription } from '#vstutils/signals';
+import { HttpMethods, formatPath, getApp, joinPaths } from '#vstutils/utils';
+import { type PageEditView } from '#vstutils/views';
 import { defineComponent, ref } from 'vue';
 import { type DefaultXOptions, type FieldOptions } from './fields/base';
 

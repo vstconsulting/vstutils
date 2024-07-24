@@ -1,5 +1,5 @@
-import type { ModelConstructor } from '@/vstutils/models';
-import { instantiateFieldFromAnother } from '@/vstutils/models';
+import type { ModelConstructor } from '#vstutils/models';
+import { instantiateFieldFromAnother } from '#vstutils/models';
 import type { DefaultXOptions, ExtractInner, Field, FieldOptions } from '../fields/base';
 import EditKeyField from './EditKeyField.vue';
 

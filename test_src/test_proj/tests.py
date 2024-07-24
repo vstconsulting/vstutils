@@ -127,43 +127,6 @@ test_handler_structure = {
     }
 }
 
-packaje_json_data = {
-    "name": "test_project",
-    "version": "1.0.0",
-    "browserslist": [
-        "> 0.25%",
-        "not dead"
-    ],
-    "scripts": {
-        "build": "APP_ENV=prod webpack --json test_project/static/test_project/bundle/output.json",
-        "devBuild": "webpack --json test_project/static/test_project/bundle/output.json",
-        "lint": "eslint --ext .js,.vue frontend_src/"
-    },
-    "dependencies": {},
-    "devDependencies": {
-        "@babel/core": "^7.23.6",
-        "@babel/eslint-parser": "^7.23.3",
-        "@babel/plugin-transform-runtime": "^7.23.6",
-        "@babel/preset-env": "^7.23.6",
-        "babel-loader": "^9.1.3",
-        "css-loader": "^6.8.1",
-        "dotenv": "^16.3.1",
-        "eslint": "^8.56.0",
-        "eslint-config-prettier": "^9.1.0",
-        "eslint-plugin-prettier": "^5.1.2",
-        "eslint-plugin-vue": "^9.19.2",
-        "prettier": "^3.1.1",
-        "sass": "^1.69.5",
-        "sass-loader": "^13.3.3",
-        "style-loader": "^3.3.3",
-        "vue": "^2.7.16",
-        "vue-loader": "^15.11.1",
-        "webpack": "^5.89.0",
-        "webpack-bundle-analyzer": "^4.10.1",
-        "webpack-cli": "^5.1.4"
-    }
-}
-
 validator_dict = {
     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
 }
@@ -241,7 +204,37 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         self.assertTrue(os.path.isfile(self.project_place + '/README.rst'))
         self.assertTrue(os.path.isfile(self.project_place + '/MANIFEST.in'))
         self.assertTrue(os.path.isfile(self.project_place + '/test.py'))
-        self.assertDictEqual(json.loads(Path(self.project_place + '/package.json').read_text()), packaje_json_data)
+        actual_package_json = json.loads(Path(self.project_place + '/package.json.default').read_text())
+        self.assertDictEqual(actual_package_json, {
+            "name": "test_project",
+            "version": "1.0.0",
+            "engines": {
+                "node": ">=20.15.0"
+            },
+            "scripts": {
+                "build": "vite build --config ./frontend_src/vite.config.ts --mode development",
+                "devBuild": "vite build --config ./frontend_src/vite.config.ts",
+                "lint:format": "prettier --check frontend_src",
+                "lint:code": "oxlint frontend_src",
+                "lint:types": "vue-tsc --noEmit -p ./frontend_src/tsconfig.json",
+                "lint": "conc npm:lint:* --group --timings"
+            },
+            "devDependencies": {
+                "@types/node": "^20.14.12",
+                "@vitejs/plugin-vue2": "^2.3.1",
+                "@vitejs/plugin-vue2-jsx": "^1.1.1",
+                "@vstconsulting/vstutils": actual_package_json["devDependencies"].get("@vstconsulting/vstutils"),
+                "concurrently": "^8.2.2",
+                "oxlint": "^0.3.5",
+                "prettier": "3.2.5",
+                "sass": "^1.48.0",
+                "typescript": "^5.5.3",
+                "vite": "^5.3.4",
+                "vue": "^2.7.16",
+                "vue-i18n": "8",
+                "vue-tsc": "^2.0.16",
+            }
+        })
 
         self.remove_project_place(self.project_place)
         with self.assertRaises(Exception):

@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
     import { onMounted, onBeforeUnmount } from 'vue';
-    import { fitToWrapper, getUniqueId } from '@/vstutils/utils';
+    import { fitToWrapper, getUniqueId } from '#vstutils/utils';
     import type { Html5QrcodeSupportedFormats } from 'html5-qrcode';
     import { Html5Qrcode } from 'html5-qrcode';
     import { useTimeoutFn } from '@vueuse/core';

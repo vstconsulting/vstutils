@@ -1,4 +1,4 @@
-import { createApiFetch } from '@/vstutils/api-fetch';
+import { createApiFetch } from '#vstutils/api-fetch';
 import { InitAppConfig } from './init-app';
 import { type AppSchema } from './schema';
 

@@ -11,7 +11,7 @@
     import { ref } from 'vue';
     import { useRoute, useRouter } from 'vue-router/composables';
     import { useTranslationsManager, useInitAppConfig } from './../helpers';
-    import Spinner from '@/vstutils/components/Spinner.vue';
+    import Spinner from '#vstutils/components/Spinner.vue';
 
     const router = useRouter();
     const route = useRoute();

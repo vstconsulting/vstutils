@@ -38,7 +38,7 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.css';
 window.iziToast = iziToast;
 
-import autoComplete from '@/libs/auto-complete.js';
+import autoComplete from '#libs/auto-complete.js';
 window.autoComplete = autoComplete;
 
 import './libs/bootstrap-adminlte.js';

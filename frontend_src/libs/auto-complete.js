@@ -7,6 +7,9 @@
     License: http://www.opensource.org/licenses/mit-license.php
 */
 
+/**
+ * @type {new (params: any) => any}
+ */
 var autoComplete = (function () {
     // "use strict";
     function autoComplete(options) {

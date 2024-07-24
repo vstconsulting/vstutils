@@ -20,6 +20,9 @@ export * from './StringArrayField';
 export * from './HTMLField';
 export * from './TextParagraphField';
 
-export * as masked from './masked';
-export * as phone from './phone';
-export * as wysiwyg from './WYSIWYGField';
+import * as masked from './masked';
+export { masked };
+import * as phone from './phone';
+export { phone };
+import * as wysiwyg from './WYSIWYGField';
+export { wysiwyg };

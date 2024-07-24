@@ -1,14 +1,14 @@
 import $ from 'jquery';
 import { readonly } from 'vue';
 
-import { apiConnector, APIResponse, StatusError } from '@/vstutils/api';
-import { createInstancesList } from '@/vstutils/models';
-import { BulkType, HttpMethods, makeQueryString, objectToFormData, RequestTypes } from '@/vstutils/utils';
-import { fetchInstances } from '@/vstutils/fetch-values';
+import { apiConnector, APIResponse, StatusError } from '#vstutils/api';
+import { createInstancesList } from '#vstutils/models';
+import { BulkType, HttpMethods, makeQueryString, objectToFormData, RequestTypes } from '#vstutils/utils';
+import { fetchInstances } from '#vstutils/fetch-values';
 
-import type { RequestType, HttpMethod, InnerData, RepresentData } from '@/vstutils/utils';
-import type { InstancesList, Model, ModelConstructor } from '@/vstutils/models';
-import type { Field } from '@/vstutils/fields/base';
+import type { RequestType, HttpMethod, InnerData, RepresentData } from '#vstutils/utils';
+import type { InstancesList, Model, ModelConstructor } from '#vstutils/models';
+import type { Field } from '#vstutils/fields/base';
 import type { ListResponseData } from './types';
 
 const REQUEST_MODEL = 0;
@@ -549,7 +549,7 @@ export class QuerySet {
     }
 }
 
-interface InternalRequest {
+export interface InternalRequest {
     method: HttpMethod;
     path: string | (string | number)[];
     query?: string | Record<string, unknown> | URLSearchParams;

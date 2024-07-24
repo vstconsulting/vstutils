@@ -1,4 +1,4 @@
-import { createApp, createSchema, openPage } from '@/unittests';
+import { createApp, createSchema, openPage } from '#unittests';
 
 describe('List store module', () => {
     let app;

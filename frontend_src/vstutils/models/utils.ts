@@ -4,7 +4,7 @@ import type {
     Field,
     FieldConstructor,
     FieldOptions,
-} from '@/vstutils/fields/base';
+} from '#vstutils/fields/base';
 import type { BaseModel } from './Model';
 
 const pkFields = ['id', 'pk'];

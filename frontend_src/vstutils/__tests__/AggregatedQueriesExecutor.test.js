@@ -1,4 +1,4 @@
-import { createSchema, createApp } from '@/unittests';
+import { createSchema, createApp } from '#unittests';
 import { makeModel, BaseModel } from '../models';
 import { QuerySet } from '../querySet/QuerySet.ts';
 import { StringField } from '../fields/text/';

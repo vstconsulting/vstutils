@@ -1,4 +1,4 @@
-import type { InitAppConfig } from '@/vstutils/init-app';
+import type { InitAppConfig } from '#vstutils/init-app';
 
 type InternalFetch = (req: Request) => Promise<Response>;
 

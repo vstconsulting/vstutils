@@ -5,7 +5,7 @@ import {
     waitForPageLoading,
     openPage,
     expectNthRequest,
-} from '@/unittests';
+} from '#unittests';
 
 const schema = createSchema({
     paths: {

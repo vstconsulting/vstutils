@@ -1,5 +1,5 @@
-import { createApp, createSchema } from '@/unittests';
-import { getApp } from '@/vstutils/utils';
+import { createApp, createSchema } from '#unittests';
+import { getApp } from '#vstutils/utils';
 
 describe('Models generation', () => {
     beforeAll(async () => {

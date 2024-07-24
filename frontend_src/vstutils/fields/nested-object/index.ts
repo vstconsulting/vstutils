@@ -1,6 +1,6 @@
 import { type Component, computed, defineComponent, h } from 'vue';
 
-import { ModelFields } from '@/vstutils/components/page';
+import { ModelFields } from '#vstutils/components/page';
 import type {
     Field,
     FieldOptions,
@@ -8,15 +8,15 @@ import type {
     FieldXOptions,
     ReplaceAdditionalPropertyKeyParams,
     SetFieldValueOptions,
-} from '@/vstutils/fields/base';
-import { BaseField, FieldPropsDef, useFieldWrapperClasses } from '@/vstutils/fields/base';
-import { onAppBeforeInit } from '@/vstutils/signals';
-import { emptyInnerData, emptyRepresentData, mapObjectValues } from '@/vstutils/utils';
+} from '#vstutils/fields/base';
+import { BaseField, FieldPropsDef, useFieldWrapperClasses } from '#vstutils/fields/base';
+import { onAppBeforeInit } from '#vstutils/signals';
+import { emptyInnerData, emptyRepresentData, mapObjectValues } from '#vstutils/utils';
 import { NestedObjectArrayFieldMixin } from './array';
 
-import type { ModelConstructor } from '@/vstutils/models';
-import type { InnerData, RepresentData } from '@/vstutils/utils';
-import type { ModelDefinition } from '@/vstutils/schema';
+import type { ModelConstructor } from '#vstutils/models';
+import type { InnerData, RepresentData } from '#vstutils/utils';
+import type { ModelDefinition } from '#vstutils/schema';
 
 type TInner = InnerData;
 type TRepresent = RepresentData;

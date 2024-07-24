@@ -1,6 +1,6 @@
-import { createApp, mount } from '@/unittests';
+import { createApp, mount } from '#unittests';
 import { h } from 'vue';
-import { deferredPromise } from '@/vstutils/utils';
+import { deferredPromise } from '#vstutils/utils';
 
 let app;
 

@@ -1,5 +1,5 @@
-import { RequestTypes } from '@/vstutils/utils';
-import { createApp } from '@/unittests';
+import { RequestTypes } from '#vstutils/utils';
+import { createApp } from '#unittests';
 import { QuerySet } from '../QuerySet';
 
 describe('QuerySet prefetch', () => {

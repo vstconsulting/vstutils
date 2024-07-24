@@ -1,6 +1,6 @@
 import { defineComponent } from 'vue';
 
-import { StringArrayFieldEdit, StringArrayFieldMixin } from '@/vstutils/fields/text/string-array';
+import { StringArrayFieldEdit, StringArrayFieldMixin } from '#vstutils/fields/text/string-array';
 
 function validateNumber(text: string) {
     const number = Number.parseFloat(text.trim());

@@ -1,8 +1,8 @@
-import { createApp, createSchema, expectRequest, fetchMockCallAt, waitForPageLoading } from '@/unittests';
+import { createApp, createSchema, expectRequest, fetchMockCallAt, waitForPageLoading } from '#unittests';
 import { screen, fireEvent, waitFor } from '@testing-library/dom';
-import { getApp } from '@/vstutils/utils';
-import { useViewStore } from '@/vstutils/store';
-import type { PageEditView } from '@/vstutils/views';
+import { getApp } from '#vstutils/utils';
+import { useViewStore } from '#vstutils/store';
+import type { PageEditView } from '#vstutils/views';
 
 beforeAll(async () => {
     await createApp({ schema: createSchema() });

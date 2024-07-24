@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia';
-import { signals } from '@/vstutils/signals';
-import { HttpMethods } from '@/vstutils/utils';
+import { signals } from '#vstutils/signals';
+import { HttpMethods } from '#vstutils/utils';
 
-import type { ApiConnector } from '@/vstutils/api';
-import type { ModelConstructor } from '@/vstutils/models';
-import type { InnerData } from '@/vstutils/utils';
-import type { SetFieldValueOptions } from '@/vstutils/fields/base';
+import type { ApiConnector } from '#vstutils/api';
+import type { ModelConstructor } from '#vstutils/models';
+import type { InnerData } from '#vstutils/utils';
+import type { SetFieldValueOptions } from '#vstutils/fields/base';
 import { computed, readonly, ref } from 'vue';
 
 type Section = Record<string, unknown>;

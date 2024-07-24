@@ -22,8 +22,8 @@
 
 <script setup lang="ts">
     import { ref } from 'vue';
-    import { getUniqueId } from '@/vstutils/utils';
-    import type { Field } from '@/vstutils/fields/base';
+    import { getUniqueId } from '#vstutils/utils';
+    import type { Field } from '#vstutils/fields/base';
 
     const props = defineProps<{
         fields: Field[];

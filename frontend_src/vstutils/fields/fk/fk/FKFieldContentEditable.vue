@@ -11,13 +11,13 @@
 </template>
 
 <script lang="ts">
-    import $ from '@/libs/jquery';
+    import $ from '#libs/jquery';
     import { toRef, ref, defineComponent } from 'vue';
     import { createTransport } from './transport';
     import { ensureValueFetched, useQuerySets } from './composables';
-    import { FieldEditPropsDef } from '@/vstutils/fields/base';
-    import { HideButton } from '@/vstutils/fields/buttons';
-    import type { FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import { FieldEditPropsDef } from '#vstutils/fields/base';
+    import { HideButton } from '#vstutils/fields/buttons';
+    import type { FieldEditPropsDefType } from '#vstutils/fields/base';
     import type { FKField, TRepresent } from './FKField';
 
     export default defineComponent({

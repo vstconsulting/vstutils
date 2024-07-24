@@ -1,5 +1,5 @@
-import type { ModelConstructor, Model } from '@/vstutils/models/Model';
-import type { RepresentData, InnerData } from '@/vstutils/utils';
+import type { ModelConstructor, Model } from '#vstutils/models/Model';
+import type { RepresentData, InnerData } from '#vstutils/utils';
 import type { Schema, ParameterCollectionFormat, ParameterType } from 'swagger-schema-official';
 import type { Component } from 'vue';
 

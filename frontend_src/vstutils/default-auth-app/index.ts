@@ -1,6 +1,6 @@
 import Vue, { type Component, type AsyncComponent, h, defineAsyncComponent } from 'vue';
 import VueRouter, { type RouteConfig } from 'vue-router';
-import { type AuthAppFactory } from '@/vstutils/auth-app';
+import { type AuthAppFactory } from '#vstutils/auth-app';
 import {
     provideOauth2UserManager,
     provideMainAppOpener,

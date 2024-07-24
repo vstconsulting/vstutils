@@ -1,11 +1,11 @@
-import { createApp, createSchema, useTestCtx, waitForPageLoading } from '@/unittests';
+import { createApp, createSchema, useTestCtx, waitForPageLoading } from '#unittests';
 import schema from './fields-schema.json';
-import type { BaseModel } from '@/vstutils/models';
+import type { BaseModel } from '#vstutils/models';
 import { QRCodeField } from '../QRCodeField';
 import { Barcode128Field } from '../Barcode128Field';
 import { fireEvent } from '@testing-library/dom';
 import { nextTick } from 'vue';
-import { fitToWrapper } from '@/vstutils/utils';
+import { fitToWrapper } from '#vstutils/utils';
 
 // this function is used for box finder sizes calculation
 describe('fitToBox', () => {

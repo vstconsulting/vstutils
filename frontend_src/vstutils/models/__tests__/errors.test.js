@@ -1,4 +1,4 @@
-import { StringField } from '@/vstutils/fields/text';
+import { StringField } from '#vstutils/fields/text';
 import { ModelValidationError } from './../errors';
 
 describe('ModelValidationError', () => {

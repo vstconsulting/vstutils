@@ -1,8 +1,8 @@
 import { reactive, computed } from 'vue';
-import { createApp } from '@/unittests';
-import { StringField } from '@/vstutils/fields/text';
+import { createApp } from '#unittests';
+import { StringField } from '#vstutils/fields/text';
 
-import { getModelFieldsInstancesGroups, useHideableFieldsGroups } from '@/vstutils/composables';
+import { getModelFieldsInstancesGroups, useHideableFieldsGroups } from '#vstutils/composables';
 
 let app;
 

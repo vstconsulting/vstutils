@@ -1,4 +1,4 @@
-import { expectNthRequest, createApp } from '@/unittests';
+import { expectNthRequest, createApp } from '#unittests';
 
 describe('Actions', () => {
     /** @type {App} */

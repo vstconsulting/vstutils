@@ -44,15 +44,15 @@
 </template>
 
 <script lang="ts">
-    import { cleanAllCacheAndReloadPage } from '@/vstutils/cleanCacheHelpers.js';
+    import { cleanAllCacheAndReloadPage } from '#vstutils/cleanCacheHelpers.js';
     import { HelpModal } from './modal';
     import ControlSidebarButton from './ControlSidebarButton.vue';
     import ConfirmModal from '../common/ConfirmModal.vue';
-    import { saveAllSettings } from '@/vstutils/utils';
+    import { saveAllSettings } from '#vstutils/utils';
 
-    import type { Field, SetFieldValueOptions } from '@/vstutils/fields/base';
-    import type { NestedObjectField } from '@/vstutils/fields/nested-object';
-    import type AppRoot from '@/vstutils/AppRoot.vue';
+    import type { Field, SetFieldValueOptions } from '#vstutils/fields/base';
+    import type { NestedObjectField } from '#vstutils/fields/nested-object';
+    import type AppRoot from '#vstutils/AppRoot.vue';
 
     type AppRootEl = InstanceType<typeof AppRoot>;
 

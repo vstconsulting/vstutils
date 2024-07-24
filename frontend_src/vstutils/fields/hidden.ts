@@ -1,7 +1,7 @@
 import { defineComponent, h } from 'vue';
-import { BaseField, FieldPropsDef } from '@/vstutils/fields/base';
+import { BaseField, FieldPropsDef } from '#vstutils/fields/base';
 
-import type { DefaultXOptions, FieldOptions, FieldPropsDefType } from '@/vstutils/fields/base';
+import type { DefaultXOptions, FieldOptions, FieldPropsDefType } from '#vstutils/fields/base';
 
 export const HiddenFieldMixin = defineComponent({
     props: FieldPropsDef as FieldPropsDefType<HiddenField>,

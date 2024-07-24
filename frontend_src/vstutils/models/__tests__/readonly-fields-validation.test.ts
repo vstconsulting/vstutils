@@ -1,4 +1,4 @@
-import { createApp, createSchema, useTestCtx } from '@/unittests';
+import { createApp, createSchema, useTestCtx } from '#unittests';
 
 beforeAll(async () => {
     await createApp({
