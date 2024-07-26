@@ -7,7 +7,7 @@ the ability to generate documentation for the API based on the schema.
 By default GUI based on AdminLTE dashboard and Vue templates.
 
 Review a special section in the documentation for a QuickStart
-development - <https://vstutils.vstconsulting.net/quickstart.html>.
+development - <https://vstutils.vstconsulting.net/en/latest/quickstart-front.html#frontend-customization>.
 
 [![License](https://img.shields.io/github/license/vstconsulting/vstutils.svg)](https://github.com/vstconsulting/vstutils/blob/master/LICENSE)
 
@@ -15,7 +15,7 @@ development - <https://vstutils.vstconsulting.net/quickstart.html>.
 
 ![NPM - Downloads](https://img.shields.io/npm/dm/%40vstconsulting%2Fvstutils)
 
-[![Documentation Status](https://readthedocs.org/projects/vstutils/badge/?version=latest)](https://vstutils.vstconsulting.net/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/vstutils/badge/?version=latest)](https://vstutils.vstconsulting.net/en/latest/quickstart-front.html#frontend-customization?badge=latest)
 
 ## Development Status
 

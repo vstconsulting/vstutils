@@ -8,14 +8,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 08:36+0000\n"
+"POT-Creation-Date: 2024-07-26 04:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.15.0\n"
+
 #: ../../quickstart-front.rst:2
 msgid "Frontend Quickstart"
 msgstr "Быстрый старт фронтенда"
@@ -28,9 +29,9 @@ msgid ""
 ":doc:`Backend Section <quickstart>` of this docs."
 msgstr ""
 "Фреймворк VST utils использует экосистему Vue для отображения фронтенда. "
-"Руководство по быстрому старту проведет вас через наиболее важные шаги по "
-"настройке функций фронтенда. Установка приложения и настройка описаны в - "
-":doc:`разделе Backend <quickstart>` этой документации."
+"Руководство по быстрому старту проведет вас через наиболее важные шаги по"
+" настройке функций фронтенда. Установка приложения и настройка описаны в "
+"- :doc:`разделе Backend <quickstart>` этой документации."
 
 #: ../../quickstart-front.rst:8
 msgid "There are several stages in vstutils app:"
@@ -50,8 +51,7 @@ msgstr ""
 
 #: ../../quickstart-front.rst:13
 msgid "loading open api schema from backend. Emits 'openapi.loaded' signal;"
-msgstr ""
-"загрузка схемы OpenAPI с бэкенда. Генерирует сигнал 'openapi.loaded';"
+msgstr "загрузка схемы OpenAPI с бэкенда. Генерирует сигнал 'openapi.loaded';"
 
 #: ../../quickstart-front.rst:14
 msgid "loading all static files from `SPA_STATIC` in setting.py;"
@@ -70,8 +70,9 @@ msgid ""
 "if there is centrifugoClient in settings.py connects it. To read more "
 "about centrifugo configuration check \":ref:`centrifugo`\";"
 msgstr ""
-"если в settings.py есть centrifugoClient, подключается к нему. Дополнительные "
-"сведения о конфигурации centrifugo можно найти в разделе \":ref:`centrifugo`\";"
+"если в settings.py есть centrifugoClient, подключается к нему. "
+"Дополнительные сведения о конфигурации centrifugo можно найти в разделе "
+"\":ref:`centrifugo`\";"
 
 #: ../../quickstart-front.rst:20
 msgid "downloading a list of available languages and translations;"
@@ -120,15 +121,17 @@ msgid ""
 "initialize model with `LocalSettings`. Find out more about this in the "
 "section :ref:`localSettings`;"
 msgstr ""
-"инициализация модели с `LocalSettings`. Узнайте больше об этом в разделе :ref:`localSettings`;"
+"инициализация модели с `LocalSettings`. Узнайте больше об этом в разделе "
+":ref:`localSettings`;"
 
 #: ../../quickstart-front.rst:28
 msgid ""
 "creates routerConstructor from `this.views`, emits 'app.beforeInitRouter'"
 " with { routerConstructor } and gets new VueRouter({this.routes});"
 msgstr ""
-"создание routerConstructor из `this.views`, генерация сигнала 'app.beforeInitRouter'"
-" с { routerConstructor } и получение нового VueRouter({this.routes});"
+"создание routerConstructor из `this.views`, генерация сигнала "
+"'app.beforeInitRouter' с { routerConstructor } и получение нового "
+"VueRouter({this.routes});"
 
 #: ../../quickstart-front.rst:29
 msgid ""
@@ -147,170 +150,208 @@ msgid ""
 "There is a flowchart representing application initialization process "
 "(signal names have red font):"
 msgstr ""
-"Есть схема, представляющая процесс инициализации приложения (названия сигналов красным шрифтом):"
+"Есть схема, представляющая процесс инициализации приложения (названия "
+"сигналов красным шрифтом):"
 
-#: ../../quickstart-front.rst:75
+#: ../../quickstart-front.rst:76
+msgid "Frontend customization"
+msgstr "Настройка фронтенда"
+
+#: ../../quickstart-front.rst:77
+msgid ""
+"To use custom frontend in you project rename `vite.config.ts.default` to "
+"`vite.config.ts`. Every project based on vst-utils contains `index.ts` in"
+" `/frontend_src/` directory. This file is intended for your code. Run "
+"`yarn` command to install all dependencies. Then run `yarn devBuild` from"
+" root dir of your project to build static files."
+msgstr ""
+"Для настройки фронтенда переименуйте файл `vite.config.ts.default` в "
+"`vite.config.ts`. Каждый проект, основанный на vst-utils, содержит "
+"`index.ts` в каталоге `/frontend_src/`. Этот файл предназначен для вашего"
+" кода. Запустите команду `yarn` для установки всех зависимостей. Затем "
+"выполните `yarn devBuild` из корневого каталога вашего проекта для сборки"
+" статических файлов."
+
+#: ../../quickstart-front.rst:82
+msgid ""
+"Output files will be built into `{AppName}/static/spa` directory. During "
+"vstutils installation through `pip` frontend code are being build "
+"automatically, so you may need to add `spa` directory to `.gitignore`."
+msgstr ""
+"Выходные файлы будут собраны в каталоге `{AppName}/static/spa`. При "
+"установке vstutils через `pip` фронтенд код собирается автоматически, "
+"поэтому вам может потребоваться добавить каталог `spa` в `gitignore`."
+
+#: ../../quickstart-front.rst:85
+msgid "Example of simple frontend entrypoint:"
+msgstr "Пример точки входа фронтенда:"
+
+#: ../../quickstart-front.rst:102
 msgid "Field customization"
 msgstr "Настройка поля"
 
-#: ../../quickstart-front.rst:76
-msgid "To add custom script to the project, set script name in settings.py"
-msgstr "Чтобы добавить собственный скрипт в проект, укажите его имя в settings.py"
-
-#: ../../quickstart-front.rst:85
-msgid "and put the script (`main.js`) in `{appName}/static/` directory."
-msgstr "и поместите скрипт (`main.js`) в каталог `{appName}/static/`."
-
-#: ../../quickstart-front.rst:87
+#: ../../quickstart-front.rst:103
 msgid ""
 "In `main.js` create new field by extending it from BaseField (or any "
 "other appropriate field)"
 msgstr ""
-"В `main.js` создайте новое поле, расширив его от BaseField (или любого другого соответствующего поля)"
+"В `main.js` создайте новое поле, расширив его от BaseField (или любого "
+"другого подходящего поля)"
 
-#: ../../quickstart-front.rst:89
+#: ../../quickstart-front.rst:105
 msgid ""
 "For example lets create a field that renders HTML h1 element with 'Hello "
 "World!` text:"
 msgstr ""
-"Например, создадим поле, которое отображает элемент HTML h1 с текстом 'Привет, мир!'"
+"Например, создадим поле, которое отображает элемент HTML h1 с текстом "
+"'Привет, мир!'"
 
-#: ../../quickstart-front.rst:103
+#: ../../quickstart-front.rst:119
 msgid "Or render person's name with some prefix"
 msgstr "Или отобразите имя человека с некоторым префиксом"
 
-#: ../../quickstart-front.rst:118
+#: ../../quickstart-front.rst:134
 msgid ""
 "Register this field to `app.fieldsResolver` to provide appropriate field "
 "format and type to a new field"
 msgstr ""
-"Зарегистрируйте это поле в `app.fieldsResolver`, чтобы предоставить соответствующий формат и тип поля для нового поля"
+"Зарегистрируйте это поле в `app.fieldsResolver`, чтобы предоставить "
+"соответствующий формат и тип поля для нового поля"
 
-#: ../../quickstart-front.rst:125
+#: ../../quickstart-front.rst:141
 msgid ""
 "Listen for a appropriate "
 "`models[ModelWithFieldToChange].fields.beforeInit` signal to change field"
 " Format"
 msgstr ""
-"Слушайте подходящий сигнал `models[ModelWithFieldToChange].fields.beforeInit` для изменения формата поля"
+"Слушайте подходящий сигнал "
+"`models[ModelWithFieldToChange].fields.beforeInit` для изменения формата "
+"поля"
 
-#: ../../quickstart-front.rst:134
+#: ../../quickstart-front.rst:150
 msgid ""
 "List of  models and their fields is available during runtime in console "
 "at `app.modelsClasses`"
 msgstr ""
-"Список моделей и их полей доступен во время выполнения в консоли по адресу `app.modelsClasses`"
+"Список моделей и их полей доступен во время выполнения в консоли по "
+"адресу `app.modelsClasses`"
 
-#: ../../quickstart-front.rst:136
+#: ../../quickstart-front.rst:152
 msgid ""
 "To change Filed behavior, create new field class with a desired logic. "
 "Let's say you need to send number of milliseconds to API, user however "
 "wants to type in number of seconds. A solution would be to override "
 "field's `toInner` and `toRepresent` methods."
 msgstr ""
-"Чтобы изменить поведение поля, создайте новый класс поля с необходимой логикой. "
-"Допустим, вам нужно отправить API количество миллисекунд, но пользователь хочет "
-"вводить количество секунд. Решением будет переопределить методы `toInner` и `toRepresent` поля."
+"Чтобы изменить поведение поля, создайте новый класс поля с необходимой "
+"логикой. Допустим, вам нужно отправить API количество миллисекунд, но "
+"пользователь хочет вводить количество секунд. Решением будет "
+"переопределить методы `toInner` и `toRepresent` поля."
 
-#: ../../quickstart-front.rst:157
+#: ../../quickstart-front.rst:173
 msgid ""
 "Now you have field that show seconds, but saves/receives data in "
 "milliseconds on detail view of AllFieldsModel."
 msgstr ""
-"Теперь у вас есть поле, которое отображает секунды, но сохраняет/получает данные в "
-"миллисекундах в виде детализированного представления модели AllFieldsModel."
+"Теперь у вас есть поле, которое отображает секунды, но сохраняет/получает"
+" данные в миллисекундах в виде детализированного представления модели "
+"AllFieldsModel."
 
-#: ../../quickstart-front.rst:160
+#: ../../quickstart-front.rst:176
 msgid ""
 "If you need to show some warning or error to developer console you can "
 "use field `warn` and `error` methods. You can pass some message and it "
 "will print it with field type, model name and field name."
 msgstr ""
-"Если вам нужно показать какое-то предупреждение или ошибку в консоли разработчика, "
-"вы можете использовать методы `warn` и `error` поля. Вы можете передать сообщение, "
-"и оно будет выведено с типом поля, именем модели и именем поля."
+"Если вам нужно показать какое-то предупреждение или ошибку в консоли "
+"разработчика, вы можете использовать методы `warn` и `error` поля. Вы "
+"можете передать сообщение, и оно будет выведено с типом поля, именем "
+"модели и именем поля."
 
-#: ../../quickstart-front.rst:164
+#: ../../quickstart-front.rst:180
 msgid "Change path to FkField"
 msgstr "Изменение пути к полю FkField"
 
-#: ../../quickstart-front.rst:165
+#: ../../quickstart-front.rst:181
 msgid ""
 "Sometime you may need to request different set of objects for FkField. "
 "For example to choose from only famous authors, create `famous_author` "
 "endpoint on backend and set FkField request path to `famous_author`. "
 "Listen for `app.beforeInit` signal."
 msgstr ""
-"Иногда вам может потребоваться запросить другой набор объектов для FkField. "
-"Например, чтобы выбрать только известных авторов, создайте конечную точку `famous_author` "
-"на бэкенде и установите путь запроса FkField в `famous_author`. "
-"Слушайте сигнал `app.beforeInit`."
+"Иногда вам может потребоваться запросить другой набор объектов для "
+"FkField. Например, чтобы выбрать только известных авторов, создайте "
+"конечную точку `famous_author` на бэкенде и установите путь запроса "
+"FkField в `famous_author`. Слушайте сигнал `app.beforeInit`."
 
-#: ../../quickstart-front.rst:175
+#: ../../quickstart-front.rst:191
 msgid ""
 "Now when we create new post on `/post/` endpoint Author FkField makes get"
 " request to `/famous_author/` instead of `/author/`. It's useful to get "
 "different set of authors (that may have been previously filtered on "
 "backend)."
 msgstr ""
-"Теперь, когда мы создаем новый пост на конечной точке `/post/`, Author FkField выполняет GET-запрос "
-"к `/famous_author/` вместо `/author/`. Это полезно для получения другого набора авторов (которые могли быть "
-"ранее отфильтрованы на бэкенде)."
+"Теперь, когда мы создаем новый пост на конечной точке `/post/`, Author "
+"FkField выполняет GET-запрос к `/famous_author/` вместо `/author/`. Это "
+"полезно для получения другого набора авторов (которые могли быть ранее "
+"отфильтрованы на бэкенде)."
 
-#: ../../quickstart-front.rst:179
+#: ../../quickstart-front.rst:195
 msgid "CSS Styling"
 msgstr "Стилизация CSS"
 
-#: ../../quickstart-front.rst:181
-msgid "Like scripts, css files may be added to SPA_STATIC in setting.py"
-msgstr "Как и скрипты, файлы CSS можно добавить в SPA_STATIC в setting.py"
+#: ../../quickstart-front.rst:197
+msgid "Like scripts, css files may be added to `index.ts`"
+msgstr "Как скрипты, файлы CSS могут быть добавлены в `index.ts`"
 
-#: ../../quickstart-front.rst:192
+#: ../../quickstart-front.rst:212
 msgid ""
 "Let's inspect page and find css class for our customField. It is `column-"
 "format-customField` and  generated with `column-format-{Field.format}` "
 "pattern."
 msgstr ""
-"Давайте проанализируем страницу и найдем класс CSS для нашего пользовательского поля. "
-"Это `column-format-customField` и создается с использованием шаблона `column-format-{Field.format}`."
+"Давайте проанализируем страницу и найдем класс CSS для нашего "
+"пользовательского поля. Это `column-format-customField` и создается с "
+"использованием шаблона `column-format-{Field.format}`."
 
-#: ../../quickstart-front.rst:195
+#: ../../quickstart-front.rst:215
 msgid "Use regular css styling to change appearance of the field."
 msgstr "Используйте обычные стили CSS для изменения внешнего вида поля."
 
-#: ../../quickstart-front.rst:205
+#: ../../quickstart-front.rst:225
 msgid ""
 "Other page elements are also available for styling: for example, to hide "
 "certain column set corresponding field to none."
 msgstr ""
-"Другие элементы страницы также доступны для стилизации: например, чтобы скрыть "
-"определенный столбец, установите соответствующее поле в значение none."
+"Другие элементы страницы также доступны для стилизации: например, чтобы "
+"скрыть определенный столбец, установите соответствующее поле в значение "
+"none."
 
-#: ../../quickstart-front.rst:214
+#: ../../quickstart-front.rst:234
 msgid "Show primary key column on list"
 msgstr "Показать столбец первичных ключей в списке"
 
-#: ../../quickstart-front.rst:216
+#: ../../quickstart-front.rst:236
 msgid ""
 "Every pk column has `pk-column` CSS class and hidden by default (using "
 "`display: none;`)."
 msgstr ""
-"Каждый столбец первичного ключа имеет класс CSS `pk-column` и по умолчанию "
-"скрыт (с использованием `display: none;`)."
+"Каждый столбец первичного ключа имеет класс CSS `pk-column` и по "
+"умолчанию скрыт (с использованием `display: none;`)."
 
-#: ../../quickstart-front.rst:218
+#: ../../quickstart-front.rst:238
 msgid ""
 "For example this style will show pk column on all list views of `Order` "
 "model:"
 msgstr ""
-"Например, этот стиль покажет столбец первичных ключей во всех представлениях "
-"списка модели `Order`."
+"Например, этот стиль покажет столбец первичных ключей во всех "
+"представлениях списка модели `Order`."
 
-#: ../../quickstart-front.rst:228
+#: ../../quickstart-front.rst:248
 msgid "View customization"
 msgstr "Настройка представления"
 
-#: ../../quickstart-front.rst:230
+#: ../../quickstart-front.rst:250
 msgid ""
 "Listen for signal `\"allViews.created\"` and add new custom mixin to the "
 "view."
@@ -318,11 +359,13 @@ msgstr ""
 "Слушайте сигнал `\"allViews.created\"` и добавьте новый пользовательский "
 "миксин в представление."
 
-#: ../../quickstart-front.rst:232
+#: ../../quickstart-front.rst:252
 msgid "Next code snippet depicts rendering new view instead of default view."
-msgstr "В следующем фрагменте кода показано отображение нового представления вместо представления по умолчанию."
+msgstr ""
+"В следующем фрагменте кода показано отображение нового представления "
+"вместо представления по умолчанию."
 
-#: ../../quickstart-front.rst:245
+#: ../../quickstart-front.rst:265
 msgid ""
 "Learn more about Vue `render()` function at `Vue documentation "
 "<https://v3.vuejs.org/guide/render-function.html>`_."
@@ -330,135 +373,94 @@ msgstr ""
 "Узнайте больше о функции `render()` Vue в `документации Vue "
 "<https://v3.vuejs.org/guide/render-function.html>`_."
 
-#: ../../quickstart-front.rst:248
+#: ../../quickstart-front.rst:268
 msgid ""
 "It is also possible to fine tune View by overriding default computed "
 "properties and methods of existing mixins. For example, override "
 "breadcrumbs computed property to turn off breadcrumbs on Author list View"
 msgstr ""
-"Также можно настроить представление, переопределив вычисляемые свойства и "
-"методы по умолчанию существующих миксинов. Например, переопределите вычисляемое "
-"свойство `breadcrumbs` для отключения хлебных крошек в представлении списка авторов."
+"Также можно настроить представление, переопределив вычисляемые свойства и"
+" методы по умолчанию существующих миксинов. Например, переопределите "
+"вычисляемое свойство `breadcrumbs` для отключения хлебных крошек в "
+"представлении списка авторов."
 
-#: ../../quickstart-front.rst:265
+#: ../../quickstart-front.rst:285
 msgid ""
 "Sometimes you may need to hide detail page for some reason, but still "
 "want all actions and sublinks to be accessible from list page. To do it "
 "you also should listen signal `\"allViews.created\"` and change parameter"
 " `hidden` from default `false` to `true`, for example:"
 msgstr ""
-"Иногда вам может потребоваться скрыть страницу с деталями по какой-то причине, "
-"но при этом сохранить доступ ко всем действиям и подссылкам с страницы списка. "
-"Чтобы сделать это, также следует слушать сигнал `\"allViews.created\"` и изменить параметр "
-"`hidden` с значения `false` по умолчанию на `true`, например:"
+"Иногда вам может потребоваться скрыть страницу с деталями по какой-то "
+"причине, но при этом сохранить доступ ко всем действиям и подссылкам с "
+"страницы списка. Чтобы сделать это, также следует слушать сигнал "
+"`\"allViews.created\"` и изменить параметр `hidden` с значения `false` по"
+" умолчанию на `true`, например:"
 
-#: ../../quickstart-front.rst:277
+#: ../../quickstart-front.rst:297
 msgid "Changing title of the view"
 msgstr "Изменение заголовка представления"
 
-#: ../../quickstart-front.rst:279
+#: ../../quickstart-front.rst:299
 msgid ""
 "To change title and string displayed in the breadcrumbs change `title` "
 "property of the view or method `getTitle` for more complex logic."
 msgstr ""
-"Чтобы изменить заголовок и строку, отображаемую в хлебных крошках, измените "
-"свойство `title` представления или метод `getTitle` для более сложной логики."
+"Чтобы изменить заголовок и строку, отображаемую в хлебных крошках, "
+"измените свойство `title` представления или метод `getTitle` для более "
+"сложной логики."
 
-#: ../../quickstart-front.rst:293
-msgid "Basic Webpack configuration"
-msgstr "Базовая конфигурация Webpack"
-
-#: ../../quickstart-front.rst:294
-msgid ""
-"To use webpack in you project rename `webpack.config.js.default` to "
-"`webpack.config.js`. Every project based on vst-utils contains `index.js`"
-" in `/frontend_src/app/` directory. This file is intended for your code. "
-"Run `yarn` command to install all dependencies. Then run `yarn devBuild` "
-"from root dir of your project to build static files. Final step is to add"
-" built file to `SPA_STATIC` in `settings.py`"
-msgstr ""
-"Чтобы использовать webpack в вашем проекте, переименуйте `webpack.config.js.default` в "
-"`webpack.config.js`. Каждый проект, основанный на vst-utils, содержит `index.js`"
-" в каталоге `/frontend_src/app/`. Этот файл предназначен для вашего кода. "
-"Запустите команду `yarn` для установки всех зависимостей. Затем выполните `yarn devBuild` "
-"из корневого каталога вашего проекта для сборки статических файлов. Последним шагом является добавление "
-"собранного файла в `SPA_STATIC` в `settings.py`."
-
-#: ../../quickstart-front.rst:305
-msgid ""
-"Webpack configuration file allows to add more static files. In "
-"`webpack.config.js` add more entries"
-msgstr ""
-"Файл конфигурации Webpack позволяет добавлять дополнительные статические файлы. В "
-"`webpack.config.js` добавьте дополнительные записи"
-
-#: ../../quickstart-front.rst:316
-msgid ""
-"Output files will be built into "
-"`frontend_src/{AppName}/static/{AppName}/bundle` directory. Name of "
-"output file corresponds to name of entry in `config`. In the example "
-"above output files will have names `app.js` and `myapp.js`. Add all of "
-"these files to `STATIC_SPA` in `settings.py`. During vstutils "
-"installation trough `pip` frontend code are being build automatically, so"
-" you may need to add `bundle` directory to `gitignore`."
-msgstr ""
-"Выходные файлы будут собраны в каталоге "
-"`frontend_src/{AppName}/static/{AppName}/bundle`. Имя "
-"выходного файла соответствует имени записи в `config`. В приведенном выше "
-"примере выходные файлы будут называться `app.js` и `myapp.js`. Добавьте все эти "
-"файлы в `STATIC_SPA` в `settings.py`. Во время установки vstutils через `pip` "
-"фронтенд-код собирается автоматически, поэтому вам может потребоваться добавить "
-"каталог `bundle` в `gitignore`."
-
-#: ../../quickstart-front.rst:323
+#: ../../quickstart-front.rst:313
 msgid "Page store"
 msgstr "Хранилище страницы"
 
-#: ../../quickstart-front.rst:324
+#: ../../quickstart-front.rst:314
 msgid ""
 "Every page has store that can be accessed globally `app.store.page` or "
 "from page component using `this.store`."
 msgstr ""
-"У каждой страницы есть хранилище, которое можно получить глобально `app.store.page` "
-"или из компонента страницы с использованием `this.store`."
+"У каждой страницы есть хранилище, которое можно получить глобально "
+"`app.store.page` или из компонента страницы с использованием "
+"`this.store`."
 
-#: ../../quickstart-front.rst:326
+#: ../../quickstart-front.rst:316
 msgid "View method `extendStore` can be used to add custom logic to page's store."
 msgstr ""
-"Метод представления `extendStore` можно использовать для добавления пользовательской "
-"логики в хранилище страницы."
+"Метод представления `extendStore` можно использовать для добавления "
+"пользовательской логики в хранилище страницы."
 
-#: ../../quickstart-front.rst:352
+#: ../../quickstart-front.rst:342
 msgid "Overriding root component"
 msgstr "Переопределение корневого компонента"
 
-#: ../../quickstart-front.rst:353
+#: ../../quickstart-front.rst:343
 msgid ""
 "Root component of the application can be overridden using "
 "`app.beforeInit` signal. This can be useful for such things as changing "
 "layout CSS classes, back button behaviour or main layout components."
 msgstr ""
-"Корневой компонент приложения можно переопределить с использованием сигнала `app.beforeInit`. "
-"Это может быть полезно, например, для изменения классов CSS макета, поведения кнопки "
-"назад или основных компонентов макета."
+"Корневой компонент приложения можно переопределить с использованием "
+"сигнала `app.beforeInit`. Это может быть полезно, например, для изменения"
+" классов CSS макета, поведения кнопки назад или основных компонентов "
+"макета."
 
-#: ../../quickstart-front.rst:356
+#: ../../quickstart-front.rst:346
 msgid "Example of customizing sidebar component:"
 msgstr "Пример настройки компонента боковой панели:"
 
-#: ../../quickstart-front.rst:370
+#: ../../quickstart-front.rst:360
 msgid "Translating values of fields"
 msgstr "Перевод значений полей"
 
-#: ../../quickstart-front.rst:371
+#: ../../quickstart-front.rst:361
 msgid ""
 "Values tha displayed by `FKField` of `ChoicesField` can be translated "
 "using standard translations files."
 msgstr ""
-"Значения, отображаемые с использованием `FKField` или `ChoicesField`, могут быть переведены "
-"с использованием стандартных файлов перевода."
+"Значения, отображаемые с использованием `FKField` или `ChoicesField`, "
+"могут быть переведены с использованием стандартных файлов перевода."
 
-#: ../../quickstart-front.rst:373
+#: ../../quickstart-front.rst:363
 msgid ""
 "Translation key must be defined as "
 "`:model:<ModelName>:<fieldName>:<value>`. For example:"
@@ -466,92 +468,97 @@ msgstr ""
 "Ключ перевода должен быть определен как "
 "`:model:<ModelName>:<fieldName>:<value>`. Например:"
 
-#: ../../quickstart-front.rst:381
+#: ../../quickstart-front.rst:371
 msgid ""
 "Translation of values can be taxing as every model on backend usually "
 "generates more than one model on frontend, To avoid this, add "
 "`_translate_model = 'Category'` attribute to model on backend. It "
 "shortens"
 msgstr ""
-"Перевод значений может быть трудоемким, поскольку каждая модель на бэкенде обычно "
-"генерирует более одной модели на фронтенде. Для избежания этого добавьте "
-"атрибут `_translate_model = 'Category'` к модели на бэкенде. Это сокращает"
+"Перевод значений может быть трудоемким, поскольку каждая модель на "
+"бэкенде обычно генерирует более одной модели на фронтенде. Для избежания "
+"этого добавьте атрибут `_translate_model = 'Category'` к модели на "
+"бэкенде. Это сокращает"
 
-#: ../../quickstart-front.rst:391
+#: ../../quickstart-front.rst:381
 msgid "to"
 msgstr "в"
 
-#: ../../quickstart-front.rst:397
+#: ../../quickstart-front.rst:387
 msgid ""
 "For `FKField` name of the related model is used. And `fieldName` should "
 "be equal to `viewField`."
 msgstr ""
-"Для `FKField` используется имя связанной модели. И `fieldName` должно быть равно `viewField`."
+"Для `FKField` используется имя связанной модели. И `fieldName` должно "
+"быть равно `viewField`."
 
-#: ../../quickstart-front.rst:403
+#: ../../quickstart-front.rst:393
 msgid "Changing actions or sublinks"
 msgstr "Изменение действий или подссылок"
 
-#: ../../quickstart-front.rst:405
+#: ../../quickstart-front.rst:395
 msgid ""
 "Sometimes using only schema for defining actions or sublinks is not "
 "enough."
 msgstr ""
-"Иногда использование только схемы для определения действий или подссылок недостаточно."
+"Иногда использование только схемы для определения действий или подссылок "
+"недостаточно."
 
-#: ../../quickstart-front.rst:407
+#: ../../quickstart-front.rst:397
 msgid ""
 "For example we have an action to make user a superuser "
 "(`/user/{id}/make_superuser/`) and we want to hide that action if user is"
 " already a superuser (`is_superuser` is `true`). `<${PATH}>filterActions`"
 " signal can be used to achieve such result."
 msgstr ""
-"Например, у нас есть действие, которое делает пользователя суперпользователем "
-"(`/user/{id}/make_superuser/`), и мы хотим скрыть это действие, если пользователь уже "
-"является суперпользователем (`is_superuser` равно `true`). Сигнал `<${PATH}>filterActions` "
-"может быть использован для достижения такого результата."
+"Например, у нас есть действие, которое делает пользователя "
+"суперпользователем (`/user/{id}/make_superuser/`), и мы хотим скрыть это "
+"действие, если пользователь уже является суперпользователем "
+"(`is_superuser` равно `true`). Сигнал `<${PATH}>filterActions` может быть"
+" использован для достижения такого результата."
 
-#: ../../quickstart-front.rst:419
+#: ../../quickstart-front.rst:409
 msgid "`<${PATH}>filterActions` recieves {actions, data}"
 msgstr "`<${PATH}>filterActions` получает {actions, data}"
 
-#: ../../quickstart-front.rst:420
+#: ../../quickstart-front.rst:410
 msgid "`<${PATH}>filterSublinks` recieves {sublinks, data}"
 msgstr "`<${PATH}>filterSublinks` получает {sublinks, data}"
 
-#: ../../quickstart-front.rst:422
+#: ../../quickstart-front.rst:412
 msgid ""
 "Data property will contain instance's data. Actions and sublinks "
 "properties will contain arrays with default items (not hidden action or "
 "sublinks), it can be changed or replaced completely."
 msgstr ""
-"Свойство `data` будет содержать данные экземпляра. Свойства `actions` и `sublinks` "
-"будут содержать массивы с элементами по умолчанию (не скрытыми действиями или "
-"подссылками), их можно изменить или полностью заменить."
+"Свойство `data` будет содержать данные экземпляра. Свойства `actions` и "
+"`sublinks` будут содержать массивы с элементами по умолчанию (не скрытыми"
+" действиями или подссылками), их можно изменить или полностью заменить."
 
-#: ../../quickstart-front.rst:428
+#: ../../quickstart-front.rst:418
 msgid "LocalSettings"
 msgstr "Локальные настройки"
 
-#: ../../quickstart-front.rst:430
+#: ../../quickstart-front.rst:420
 msgid ""
 "This model's fields are displayed in the left sidebar. All data from this"
 " model saves in browser Local Storage. If you want to add another "
 "options, you can do it using `beforeInit` signal, for example:"
 msgstr ""
 "Поля этой модели отображаются в левой боковой панели. Все данные из этой "
-"модели сохраняются в локальном хранилище браузера. Если вы хотите добавить другие "
-"варианты, вы можете сделать это, используя сигнал `beforeInit`, например:"
+"модели сохраняются в локальном хранилище браузера. Если вы хотите "
+"добавить другие варианты, вы можете сделать это, используя сигнал "
+"`beforeInit`, например:"
 
-#: ../../quickstart-front.rst:444
+#: ../../quickstart-front.rst:434
 msgid "Store"
 msgstr "Хранилище"
 
-#: ../../quickstart-front.rst:446
+#: ../../quickstart-front.rst:436
 msgid "There are three ways to store data:"
 msgstr "Есть три способа сохранения данных:"
 
-#: ../../quickstart-front.rst:448
+#: ../../quickstart-front.rst:438
 msgid ""
 "userSettingsStore - saves data on the server. By default, there are "
 "options for changing language and a button to turn on/off the dark mode. "
@@ -561,55 +568,59 @@ msgstr ""
 "варианты изменения языка и кнопка включения/выключения темного режима. "
 "Данные для userSettingsStore поступают из схемы."
 
-#: ../../quickstart-front.rst:450
+#: ../../quickstart-front.rst:440
 msgid ""
 "localSettingsStore - saves data in the browser Local Storage. This is "
 "where you can store your own fields, as described in "
 ":ref:`localSettings`."
 msgstr ""
-"localSettingsStore - сохраняет данные в локальном хранилище браузера. Здесь вы можете "
-"хранить свои собственные поля, как описано в :ref:`localSettings`."
+"localSettingsStore - сохраняет данные в локальном хранилище браузера. "
+"Здесь вы можете хранить свои собственные поля, как описано в "
+":ref:`localSettings`."
 
-#: ../../quickstart-front.rst:451
+#: ../../quickstart-front.rst:441
 msgid "store - stores current page data."
 msgstr "store - хранит данные текущей страницы."
 
-#: ../../quickstart-front.rst:453
+#: ../../quickstart-front.rst:443
 msgid ""
 "To use any of this stores you need to run the following command: "
 ":code:`app.[storeName]`, for example: :code:`app.userSettingsStore`."
 msgstr ""
-"Чтобы использовать любое из этих хранилищ, вам нужно выполнить следующую команду: "
-":code:`app.[storeName]`, например: :code:`app.userSettingsStore`."
+"Чтобы использовать любое из этих хранилищ, вам нужно выполнить следующую "
+"команду: :code:`app.[storeName]`, например: "
+":code:`app.userSettingsStore`."
 
-#: ../../quickstart-front.rst:455
+#: ../../quickstart-front.rst:445
 msgid ""
 "If you are accessing the userSettingsStore from within the component then"
 " you need to use :code:`this.$app` instead :code:`app`."
 msgstr ""
-"Если вы обращаетесь к userSettingsStore изнутри компонента, тогда "
-"вам нужно использовать :code:`this.$app` вместо :code:`app`."
+"Если вы обращаетесь к userSettingsStore изнутри компонента, тогда вам "
+"нужно использовать :code:`this.$app` вместо :code:`app`."
 
-#: ../../quickstart-front.rst:457
+#: ../../quickstart-front.rst:447
 msgid "From `app.store` you may need:"
 msgstr "Из `app.store` вам может потребоваться:"
 
-#: ../../quickstart-front.rst:459
+#: ../../quickstart-front.rst:449
 msgid ""
 "`vewsItems` and `viewItemsMap` - stores information about parent views "
 "for this page. It is used for example in breadcrumbs. The difference "
 "between them is only in the way information is stored: `viewItems` is an "
 "Array of Objects and `viewItemsMap` is a Map."
 msgstr ""
-"`vewsItems` и `viewItemsMap` - хранят информацию о родительских представлениях "
-"для этой страницы. Они используются, например, в хлебных крошках. Различие "
-"между ними заключается только в способе хранения информации: `viewItems` - это "
-"массив объектов, а `viewItemsMap` - это карта."
+"`vewsItems` и `viewItemsMap` - хранят информацию о родительских "
+"представлениях для этой страницы. Они используются, например, в хлебных "
+"крошках. Различие между ними заключается только в способе хранения "
+"информации: `viewItems` - это массив объектов, а `viewItemsMap` - это "
+"карта."
 
-#: ../../quickstart-front.rst:461
+#: ../../quickstart-front.rst:451
 msgid "`page` - saves all information about current page."
 msgstr "`page` - сохраняет всю информацию о текущей странице."
 
-#: ../../quickstart-front.rst:462
+#: ../../quickstart-front.rst:452
 msgid "`title` - title of current page."
 msgstr "`title` - заголовок текущей страницы."
+
