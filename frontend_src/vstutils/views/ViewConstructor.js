@@ -38,6 +38,7 @@ const EDIT_STYLE_PROPERTY_NAME = 'x-edit-style';
 const ACTION_NAME = 'x-action-name';
 const IS_MULTI_ACTION_PROPERTY_NAME = 'x-multiaction';
 const OAUTH2_SECURITY_DEF_NAME = 'oauth2';
+const X_LIST = 'x-list';
 
 /**
  * Class used to create views objects from schema
@@ -71,16 +72,21 @@ export default class ViewConstructor {
      * @param {string} operationId  Operation_id value.
      * @param {string} path Key of path object, from OpenApi's path dict.
      * @param {string} method Http method
+     * @param {object} operationSchema
      */
-    getOperationOptions(operationId, path, method) {
+    getOperationOptions(operationId, path, method, operationSchema) {
         const opt = { operationId };
         let operationOptions =
             this.dictionary.schema_types[
                 Object.keys(this.dictionary.schema_types).find((suffix) => operationId.endsWith(suffix))
             ];
 
-        if (!operationOptions && method === HttpMethods.GET) {
-            operationOptions = this.dictionary.schema_types['_get'];
+        if (!operationOptions) {
+            if (operationSchema[X_LIST]) {
+                operationOptions = this.dictionary.schema_types['_list'];
+            } else if (method === HttpMethods.GET) {
+                operationOptions = this.dictionary.schema_types['_get'];
+            }
         }
 
         if (operationOptions) {
@@ -225,7 +231,7 @@ export default class ViewConstructor {
                     },
                     commonOptions,
                     operationSchema,
-                    this.getOperationOptions(operationId, path, httpMethod),
+                    this.getOperationOptions(operationId, path, httpMethod, operationSchema),
                 );
 
                 if (operationOptions['x-label']) operationOptions.title = operationOptions['x-label'];

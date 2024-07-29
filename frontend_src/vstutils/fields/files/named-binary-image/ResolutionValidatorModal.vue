@@ -17,11 +17,12 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, onMounted } from 'vue';
+    import { ref, computed, onMounted, defineAsyncComponent } from 'vue';
     import BootstrapModal from '#vstutils/components/BootstrapModal.vue';
-    import ResolutionValidatorImage from './ResolutionValidatorImage.vue';
     import type { NamedFile } from '#vstutils/fields/files/named-binary-file';
     import type { IImageField } from './NamedBinaryImageField';
+
+    const ResolutionValidatorImage = defineAsyncComponent(() => import('./ResolutionValidatorImage.vue'));
 
     const props = defineProps<{
         field: IImageField;

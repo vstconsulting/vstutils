@@ -10,8 +10,10 @@
 </template>
 
 <script>
+    import { defineAsyncComponent } from 'vue';
     import { BaseFieldContentEdit } from '#vstutils/fields/base';
-    import FkTree from './FkTree.vue';
+
+    const FkTree = defineAsyncComponent(() => import('./FkTree.vue'));
 
     export default {
         components: { FkTree },

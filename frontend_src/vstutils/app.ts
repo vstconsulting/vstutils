@@ -2,7 +2,7 @@ import type { ComponentOptions } from 'vue';
 import type VueRouter from 'vue-router';
 import Vue from 'vue';
 
-import { Centrifuge } from 'centrifuge';
+import type { Centrifuge as CentrifugeBase } from 'centrifuge';
 import { defineStore } from 'pinia';
 import type { CustomVueI18n } from './translation';
 
@@ -41,11 +41,21 @@ import type { UserProfile, InitAppConfig } from './init-app';
 
 import type { GlobalStoreInitialized } from '#vstutils/store/globalStore';
 
-export function getCentrifugoClient(address?: string, token?: string) {
+export interface Centrifuge extends CentrifugeBase {
+    isConnected: boolean;
+}
+
+export async function getCentrifugoClient(address?: string, token?: string): Promise<Centrifuge | undefined> {
     if (!address) {
-        return null;
+        return;
     }
-    const client = new Centrifuge(address);
+    const { Centrifuge, State } = await import('centrifuge');
+    class CentrifugoClient extends Centrifuge {
+        get isConnected() {
+            return this.state === State.Connected;
+        }
+    }
+    const client = new CentrifugoClient(address);
     if (token) {
         client.setToken(token);
     }
@@ -71,7 +81,7 @@ export interface IApp {
     viewsTree: ViewsTree | null;
     global_components: ComponentsRegistrator;
 
-    centrifugoClient: Centrifuge | null;
+    centrifugoClient?: Centrifuge;
 
     router: VueRouter | null;
     i18n: CustomVueI18n;
@@ -141,7 +151,8 @@ export class App implements IApp {
     viewsTree: ViewsTree | null = null;
     global_components: ComponentsRegistrator;
 
-    centrifugoClient: Centrifuge | null;
+    centrifugoClientPromise: Promise<Centrifuge | undefined>;
+    centrifugoClient?: Centrifuge;
 
     router: VueRouter | null;
     i18n: CustomVueI18n;
@@ -189,7 +200,7 @@ export class App implements IApp {
 
         this.translationsManager = new TranslationsManager(config);
 
-        this.centrifugoClient = getCentrifugoClient(
+        this.centrifugoClientPromise = getCentrifugoClient(
             this.schema.info['x-centrifugo-address'],
             this.schema.info['x-centrifugo-token'],
         );
@@ -244,8 +255,11 @@ export class App implements IApp {
 
     async start() {
         await this.api.initialized();
-        if (this.centrifugoClient) {
-            this.centrifugoClient.connect();
+        if (this.centrifugoClientPromise) {
+            this.centrifugoClient = await this.centrifugoClientPromise;
+            if (this.centrifugoClient) {
+                this.centrifugoClient.connect();
+            }
         }
 
         let userSettingsModel: ModelConstructor;
