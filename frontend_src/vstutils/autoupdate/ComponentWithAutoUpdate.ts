@@ -2,7 +2,6 @@ import { defineComponent } from 'vue';
 import type { CentrifugoAutoUpdateAction, TimerAutoUpdateAction } from './AutoUpdateController';
 import type { BaseView } from './../views';
 import ComponentIDMixin from '../ComponentIDMixin.js';
-import { State } from 'centrifuge';
 
 export default defineComponent({
     mixins: [ComponentIDMixin],
@@ -17,7 +16,7 @@ export default defineComponent({
             return (this.view as BaseView | null)?.subscriptionLabels;
         },
         autoupdateTriggerType() {
-            if (this.$app.centrifugoClient?.state === State.Connected && this.autoupdateSubscriptionLabels) {
+            if (this.$app.centrifugoClient?.isConnected && this.autoupdateSubscriptionLabels) {
                 return 'centrifugo';
             }
             return 'timer';

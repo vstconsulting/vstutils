@@ -66,6 +66,7 @@ export type ModelDefinition = swagger.Schema & {
 
 export interface Operation extends swagger.Operation {
     'x-hidden'?: boolean;
+    'x-list'?: boolean;
 }
 
 export type Path = swagger.Path & {

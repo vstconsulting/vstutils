@@ -77,6 +77,7 @@
     import type ResolutionValidatorConfig from './ResolutionValidatorConfig';
     import type { IImageField } from './NamedBinaryImageField';
     import Cropper from 'cropperjs';
+    import 'cropperjs/dist/cropper.css';
     import Compressor from 'compressorjs';
 
     const allowedExtensions = ['jpeg', 'png', 'webp'];

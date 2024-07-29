@@ -13,12 +13,11 @@ import 'jquery.scrollto';
 
 import 'jquery-slimscroll';
 
-import 'jquery-touchswipe/jquery.touchSwipe.js';
+import('jquery-touchswipe/jquery.touchSwipe.js');
 
 import './libs/vue.js';
 
-import { register } from 'swiper/element/bundle';
-register();
+import('swiper/element/bundle').then(({ register }) => register());
 
 import moment from 'moment-timezone';
 window.moment = moment;
@@ -28,11 +27,6 @@ window.md5 = md5;
 
 import Visibility from 'visibilityjs';
 window.Visibility = Visibility;
-
-import IMask from 'imask';
-window.IMask = IMask;
-
-import 'cropperjs/dist/cropper.css';
 
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.css';

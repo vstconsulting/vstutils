@@ -3,7 +3,7 @@ import schema from './fields-schema.json';
 import type { BaseModel } from '#vstutils/models';
 import { QRCodeField } from '../QRCodeField';
 import { Barcode128Field } from '../Barcode128Field';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent, waitFor } from '@testing-library/dom';
 import { nextTick } from 'vue';
 import { fitToWrapper } from '#vstutils/utils';
 
@@ -184,8 +184,10 @@ describe('Barcode fields', () => {
         expect(fetchMock).toBeCalledTimes(1);
 
         // check qrcode's canvas rendered
-        const qrCodeCanvas = document.querySelector('.field-component.name-qrcode canvas');
-        expect(qrCodeCanvas).toBeTruthy();
+        await waitFor(() => {
+            const qrCodeCanvas = document.querySelector('.field-component.name-qrcode canvas');
+            expect(qrCodeCanvas).toBeTruthy();
+        });
 
         // check barcode128's canvas rendered
         const barcode128Canvas = document.querySelector('.field-component.name-barcode128 canvas');

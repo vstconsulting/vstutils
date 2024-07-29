@@ -3,6 +3,7 @@
 </template>
 
 <script setup lang="ts">
+    import { defineAsyncComponent } from 'vue';
     import {
         FieldEditPropsDef,
         FieldEditEmitsDef,
@@ -11,7 +12,8 @@
         type SetFieldValueParams,
     } from '#vstutils/fields/base';
     import type DeepFKField from './DeepFKField';
-    import FkTree from './FkTree.vue';
+
+    const FkTree = defineAsyncComponent(() => import('./FkTree.vue'));
 
     const props = defineProps(FieldEditPropsDef as FieldEditPropsDefType<DeepFKField>);
     const emit = defineEmits(FieldEditEmitsDef as FieldEditEmitsDefType<DeepFKField>);

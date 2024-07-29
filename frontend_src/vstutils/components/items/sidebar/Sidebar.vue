@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-    import * as $ from 'jquery';
+    import $ from 'jquery';
     import SidebarItem from './SidebarItem.vue';
     import type { MenuItem } from './utils';
     import { hideSidebar, openSidebar } from './utils';

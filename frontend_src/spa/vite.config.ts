@@ -20,6 +20,12 @@ export default defineConfig(({ mode }) => {
             minify: !isDev,
             outDir: join(frontendSrc, '..', 'vstutils', 'static', 'spa'),
             emptyOutDir: true,
+            resolve: {
+                alias: {
+                    'moment-timezone':
+                        'moment-timezone/builds/moment-timezone-with-data-10-year-range.min.js',
+                },
+            },
         },
     };
 });
