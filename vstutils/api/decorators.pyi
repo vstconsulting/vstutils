@@ -151,6 +151,7 @@ class nested_view(BaseClassDecorator):
             subs: Optional[Iterable[str]] = None,
             append_arg: Optional[str] = None,
             empty_arg: bool = False,
+            allow_bulk: bool = True,
             *args,
             **kwargs
     ): ...

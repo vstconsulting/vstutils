@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-10 19:41+0000\n"
+"POT-Creation-Date: 2024-07-30 08:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -544,7 +544,7 @@ msgstr ""
 "действий, которые работают без дополнительных параметров."
 
 #: of vstutils.api.base.FileResponseRetrieveMixin:3
-#: vstutils.api.decorators.nested_view:37
+#: vstutils.api.decorators.nested_view:39
 #: vstutils.api.fields.AutoCompletionField:28
 #: vstutils.api.fields.Barcode128Field:24
 #: vstutils.api.fields.CommaMultiSelect:20
@@ -3315,22 +3315,26 @@ msgid "Flag for allowing to append existed instances."
 msgstr "Флаг, разрешающий добавление существующих экземпляров."
 
 #: of vstutils.api.decorators.nested_view:21
+msgid "Flag for forbidding bulk queries in related manager add method."
+msgstr "Флаг, запрещающий выполнение bulk запросов в методе add связанного менеджера."
+
+#: of vstutils.api.decorators.nested_view:23
 msgid "Name of model-object attr which contains nested queryset."
 msgstr "Имя атрибута объекта модели, который содержит вложенный queryset."
 
-#: of vstutils.api.decorators.nested_view:24
+#: of vstutils.api.decorators.nested_view:26
 msgid "List of allowed methods to nested view endpoints."
 msgstr "Список разрешенных методов для endpoint'ов вложенных view."
 
-#: of vstutils.api.decorators.nested_view:26
+#: of vstutils.api.decorators.nested_view:28
 msgid "List of allowed subviews or actions to nested view endpoints."
 msgstr "Список разрешенных subviews или экшенов для endpoint'ов вложенных views."
 
-#: of vstutils.api.decorators.nested_view:28
+#: of vstutils.api.decorators.nested_view:30
 msgid "List of callable objects which returns filtered queryset of main."
 msgstr "Список вызываемых объектов, которые возвращают отфильтрованный queryset."
 
-#: of vstutils.api.decorators.nested_view:32
+#: of vstutils.api.decorators.nested_view:34
 msgid ""
 "Some view methods will not call for performance reasons. This also "
 "applies to some of the class attributes that are usually initialized in "
@@ -3343,23 +3347,23 @@ msgstr ""
 "вызван. Каждый viewset обернут вложенным классом с дополнительной "
 "логикой."
 
-#: of vstutils.api.decorators.nested_view:57
+#: of vstutils.api.decorators.nested_view:59
 msgid "This code generates api paths:"
 msgstr "Данный код генерирует пути api:"
 
-#: of vstutils.api.decorators.nested_view:59
+#: of vstutils.api.decorators.nested_view:61
 msgid "`/tasks/` - GET, POST"
 msgstr "`/tasks/` - GET, POST"
 
-#: of vstutils.api.decorators.nested_view:60
+#: of vstutils.api.decorators.nested_view:62
 msgid "`/tasks/{id}/` - GET, PUT, PATCH, DELETE"
 msgstr "`/tasks/{id}/` - GET, PUT, PATCH, DELETE"
 
-#: of vstutils.api.decorators.nested_view:61
+#: of vstutils.api.decorators.nested_view:63
 msgid "`/tasks/{id}/stages/` - GET, POST"
 msgstr "`/tasks/{id}/stages/` - GET, POST"
 
-#: of vstutils.api.decorators.nested_view:62
+#: of vstutils.api.decorators.nested_view:64
 msgid "`/tasks/{id}/stages/{stages_id}/` - GET, PUT, PATCH, DELETE"
 msgstr "`/tasks/{id}/stages/{stages_id}/` - GET, PUT, PATCH, DELETE"
 

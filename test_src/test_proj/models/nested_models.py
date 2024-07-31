@@ -74,6 +74,7 @@ class Store(BaseModel):
             'products': {
                 'allow_append': True,
                 'model': Product,
+                'allow_bulk': False,
             },
             'manufacturers': {
                 'allow_append': False,

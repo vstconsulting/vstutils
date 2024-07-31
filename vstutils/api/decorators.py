@@ -194,7 +194,7 @@ class NestedViewMixin:
             # pylint: disable=import-outside-toplevel
             from vstutils.models import notify_clients
 
-            self.nested_manager.remove(instance)
+            self.nested_manager.remove(instance, **self.nested_manager_kwargs)
             notify_clients(instance.__class__, {'pk': instance.pk})
             notify_clients(self.nested_parent_object.__class__, {'pk': self.nested_parent_object.pk})
 
@@ -264,7 +264,7 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
             filter_arg: (i.get(nested_append_arg) for i in request_data)
         })
         self._check_permission_obj(objects)
-        self.nested_manager.add(*objects)
+        self.nested_manager.add(*objects, **self.nested_manager_kwargs)
         id_list = [o.pk for o in objects]
 
         label = objects.model._meta.label
@@ -341,6 +341,8 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         vstutils.api.base.ReadOnlyModelViewSet
     :param allow_append: Flag for allowing to append existed instances.
     :type allow_append: bool
+    :param allow_bulk: Flag for forbidding bulk queries in related manager add method.
+    :type allow_bulk: bool
     :param manager_name: Name of model-object attr which contains nested queryset.
     :type manager_name: str,typing.Callable
     :param methods: List of allowed methods to nested view endpoints.
@@ -395,6 +397,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         'allow_append',
         'manager_name',
         'schema',
+        'allow_bulk',
     )
 
     filter_subs = ('filter',)
@@ -411,6 +414,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         self.empty_arg = kwargs.pop('empty_arg', False)
         self.allow_append = bool(kwargs.pop('allow_append', False))
         self.manager_name = kwargs.pop('manager_name', name)
+        self.allow_bulk = kwargs.pop('allow_bulk', True)
 
         super().__init__(name, arg, *args, **kwargs)
 
@@ -507,6 +511,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             NestedView.nested_parent_object = nested_parent_object
             NestedView.nested_id = nested_id
             NestedView.nested_manager = nested_manager
+            NestedView.nested_manager_kwargs =  {} if self.allow_bulk else {'bulk': self.allow_bulk}
 
             getattr(view_obj, 'nested_allow_check', lambda *_, **__: None)()
             return nested_view_function(view_obj, NestedView, request, *args, **kwargs)
