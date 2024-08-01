@@ -56,8 +56,8 @@ def get_nested_view_obj(view, nested_view: 'View', view_action_func, method):
     # Get nested view recursively
     nested_view: 'View' = utils.get_if_lazy(_get_nested_view_class(nested_view, view_action_func))
     # Get action suffix
-    replace_pattern = view_action_func._nested_subname + '_'
-    replace_index = view.action.index(replace_pattern) + len(replace_pattern)
+    replace_pattern = view_action_func._nested_subname + '-'
+    replace_index = view_action_func.url_name.index(replace_pattern) + len(replace_pattern)
     action_suffix = view.action[replace_index:]
     # Check detail or list action
     is_detail = action_suffix.endswith('detail')

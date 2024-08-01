@@ -143,8 +143,9 @@ release_packages:
     - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/* -type f -name '*.tar.gz') $(find dist/* -type f -name '*.whl')
     # npm
     - |
-      VERSION=$(grep "__version__" vstutils/__init__.py | sed -E "s/__version__: str = '(.+)'/\1/")
+      VERSION=$(grep "__version__" vstutils/__init__.py | sed -E "s/__version__: str = '(.+)'/\1/" | sed -E "s/(a|b|rc|post)/-\1/")
       sed -i -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" package.json
+    - echo NPM_VERSION=$VERSION >> variables.env
     - yarn build-lib
     - cd dist
     - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'>.npmrc
@@ -176,5 +177,5 @@ release_job:
           url: "https://pypi.org/project/vstutils/${CI_COMMIT_TAG}/"
           link_type: 'other'
         - name: 'npm'
-          url: "https://www.npmjs.com/package/@vstconsulting/vstutils/v/${CI_COMMIT_TAG}"
+          url: "https://www.npmjs.com/package/@vstconsulting/vstutils/v/${NPM_VERSION}"
           link_type: 'other'

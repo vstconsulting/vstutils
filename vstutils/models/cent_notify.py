@@ -88,32 +88,36 @@ class Notificator:
             return asyncio.run(self.asend())
 
     async def asend(self):
-        self.queue, objects = [], tuple(self.queue)
+        try:
+            self.queue, objects = [], tuple(self.queue)
 
-        sent_channels = set()
-        provided_label = self.label
+            sent_channels = set()
+            provided_label = self.label
 
-        if objects and self.cent_client is None:
-            self.cent_client = self.get_client()
-            if not self.cent_client:
-                return
+            if objects and self.cent_client is None:
+                self.cent_client = self.get_client()
+                if not self.cent_client:
+                    return
 
-        publish_requests: list[PublishRequest] = []
+            publish_requests: list[PublishRequest] = []
 
-        for obj_labels, data in objects:
-            with contextlib.suppress(Exception):
-                for obj_label in obj_labels:
-                    channel = self.get_subscription_channel(provided_label or obj_label)
-                    publish_requests.append(PublishRequest(
-                        channel=channel,
-                        data=data,
-                    ))
-                    sent_channels.add(channel)
-        if publish_requests:
-            logger.debug(f'Send notifications about {len(objects)} updates to channel(s) {sent_channels}.')
-            return await self.cent_client.batch(
-                BatchRequest(requests=publish_requests),
-            )
+            for obj_labels, data in objects:
+                with contextlib.suppress(Exception):
+                    for obj_label in obj_labels:
+                        channel = self.get_subscription_channel(provided_label or obj_label)
+                        publish_requests.append(PublishRequest(
+                            channel=channel,
+                            data=data,
+                        ))
+                        sent_channels.add(channel)
+            if publish_requests:
+                logger.debug(f'Send notifications about {len(objects)} updates to channel(s) {sent_channels}.')
+                return await self.cent_client.batch(
+                    BatchRequest(requests=publish_requests),
+                )
+        except Exception:  # nocv
+            # Hack for problems with async middleware
+            pass
 
     def disconnect_all(self):
         for signal in self._signals:
