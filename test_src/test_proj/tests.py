@@ -1296,6 +1296,9 @@ class APIAuthViewsTestCase(BaseTestCase):
                 'email': 'test@user.test',
             },
             content_type='application/json',
+            headers={
+                'Accept-Language': 'ru,en-US;q=0.9,en;q=0.8,ru-RU;q=0.7,es;q=0.6',
+            },
         )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), {
@@ -1312,6 +1315,12 @@ class APIAuthViewsTestCase(BaseTestCase):
         content = str(msg.message())
         match = re.search(r'href="http://testserver/#/auth/registration/confirm-email/([\w\$]+)"', content)
         self.assertIsNotNone(match)
+        self.assertIn('Подтвердите свой аккаунт', content)
+        self.assertIn(f'Пожалуйста, подтвердите свой {self._settings("PROJECT_GUI_NAME")} аккаунт, проверив адрес электронной почты. Просто нажмите на ссылку ниже, и вы активируете свой аккаунт.', content)
+        self.assertIn('Если вы получили это письмо по ошибке, пожалуйста, удалите его.', content)
+        self.assertIn('Завершить регистрацию', content)
+        self.assertIn('Если у вас возникли проблемы с кнопкой выше, скопируйте и вставьте URL-адрес ниже в свой веб-браузер.', content)
+        self.assertEqual(msg.subject, 'Подтверждение Регистрации.')
 
         # Verify email
         with self.captureOnCommitCallbacks(execute=True):
@@ -1376,6 +1385,9 @@ class APIAuthViewsTestCase(BaseTestCase):
             '/api/oauth2/password_reset/',
             {'email': 'test_user@email.com'},
             content_type='application/json',
+            headers={
+                'Accept-Language': 'ru,en-US;q=0.9,en;q=0.8,ru-RU;q=0.7,es;q=0.6',
+            },
         )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), {})
@@ -1386,6 +1398,13 @@ class APIAuthViewsTestCase(BaseTestCase):
         self.assertIsNotNone(match)
         uid = match.group(1)
         token = match.group(2)
+        self.assertIn('Вы получили это письмо, потому что вы (или кто-то другой) запросили восстановление пароля от учётной записи на сайте Example Project, которая связана с этим адресом электронной почты.', content)
+        self.assertIn('Пожалуйста, перейдите на эту страницу и введите новый пароль:', content)
+        self.assertIn('Ваше имя пользователя (на случай, если вы его забыли):', content)
+        self.assertIn(user.username, content)
+        self.assertIn('Спасибо, что используете наш сайт!', content)
+        self.assertIn(f'Команда сайта {self._settings("PROJECT_GUI_NAME")}', content)
+        self.assertEqual(msg.subject, f'Сброс пароля на {self._settings("PROJECT_GUI_NAME")}')
 
         # Check invalid uid
         response = self.client_class().post(

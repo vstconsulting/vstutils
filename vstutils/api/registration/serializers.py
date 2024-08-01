@@ -8,7 +8,7 @@ from rest_framework import fields
 from rest_framework.exceptions import ValidationError
 from vstutils.api.fields import PasswordField
 from vstutils.api.serializers import VSTSerializer
-from vstutils.utils import lazy_translate as __
+from vstutils.utils import lazy_translate as __, translate as _
 from vstutils.utils import send_template_email
 
 from .utils import hash_data, secure_pickle
@@ -58,10 +58,11 @@ class UserRegistrationWithEmailConfirmationMixin(VSTSerializer):
         return {
             "action_url": self.build_confirmation_url(code),
             "application_name": settings.PROJECT_GUI_NAME,
-            "title": __("Confirm your account"),
-            "text": settings.EMAIL_CONFIRMATION_MESSAGE.format(
+            "title": _("Confirm your account"),
+            "text": _(settings.EMAIL_CONFIRMATION_MESSAGE).format(
                 application_name=settings.PROJECT_GUI_NAME
             ),
+            "__lang__": self.context["request"].language,
         }
 
     def send_confirmation_email(self, data: dict):

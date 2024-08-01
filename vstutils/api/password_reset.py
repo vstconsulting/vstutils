@@ -65,6 +65,7 @@ class PasswordResetSerializer(BaseSerializer):
                     uid=urlsafe_b64encode(force_bytes(user.pk)).decode(),
                     token=default_token_generator.make_token(user),
                 ),
+                "__lang__": self.context["request"].language,
             }
             subject = loader.render_to_string(self.subject_template_name, context)
             # Email subject *must not* contain newlines
