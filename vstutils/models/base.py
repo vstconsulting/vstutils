@@ -11,6 +11,7 @@ from django.core.cache import caches as django_caches
 from django.core.cache.backends.base import DEFAULT_TIMEOUT as DEFAULT_CACHE_TIMEOUT
 from django.db.models.base import ModelBase
 from django.db.models import fields as django_model_fields
+from django.db.models.fields.generated import GeneratedField
 from django.db.models.fields.related import ManyToManyField, OneToOneField, ForeignKey
 from django.utils.functional import SimpleLazyObject, lazy
 from django.db.models.signals import post_save, post_delete
@@ -525,6 +526,11 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                     filterset_fields_types[field_name] = filters.ChoiceFilter(
                         choices=tuple(serializer.fields.get(field_name).choices.items())
                     )
+                elif isinstance(field, GeneratedField):
+                    if filter_settings := filterset.FILTER_FOR_DBFIELD_DEFAULTS.get(field.output_field.__class__):
+                        filterset_fields_types[field_name] = filter_settings['filter_class'](
+                            **filter_settings.get('extra', lambda _: {})(field.output_field)
+                        )
 
             return filterset.FilterSetMetaclass(
                 f'{cls.__name__}FilterSetClass',

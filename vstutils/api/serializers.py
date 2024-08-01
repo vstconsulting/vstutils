@@ -5,6 +5,7 @@ Read more in Django REST Framework documentation for
 `Serializers <https://www.django-rest-framework.org/api-guide/serializers/>`_.
 """
 import copy
+from decimal import Decimal as D
 import typing as _t
 
 import orjson
@@ -190,6 +191,10 @@ class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer, me
         if issubclass(field_class, fields.NamedBinaryFileInJsonField) and isinstance(model_field, models.TextField):
             if isinstance(model_field.default, str):
                 field_kwargs['default'] = orjson.loads(model_field.default) if model_field.default else drf_fields.empty
+
+        if issubclass(field_class, drf_fields.DecimalField):
+            for key in filter(field_kwargs.__contains__, ('min_value', 'max_value')):
+                field_kwargs[key] = D(str(field_kwargs[key]))
 
         return field_class, field_kwargs
 

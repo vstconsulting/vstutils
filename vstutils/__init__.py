@@ -1,2 +1,2 @@
 # pylint: disable=django-not-available
-__version__: str = '5.10.0b25'
+__version__: str = '5.10.0rc1'
