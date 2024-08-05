@@ -125,7 +125,7 @@ export class ApiConnector {
         this.defaultVersion = this.openapi.info.version;
         this.endpointURL = String(new URL(app.config.api.endpointPath, app.config.api.url)); // TODO fetchMock does not support URL
         this.baseURL = new URL(app.config.api.url).toString().replace(/\/$/, '');
-        this.bulk = createBulkApiFetch({ config: this.appConfig });
+        this.bulk = createBulkApiFetch({ config: this.appConfig, cacheKey: app.userProfile.sub });
 
         this.fetchAuth = createApiFetch({ config: app.config });
         this.disableBulk = app.config.api.disableBulk;
