@@ -7654,3 +7654,10 @@ class Oauth2TestCase(BaseTestCase):
             oauth2_server_jwk_set,
         )
         self.assertEqual(id_token['locale'], 'fr-CA')
+        
+        response = self.client_class().get(
+            '/api/oauth2/userinfo/',
+            HTTP_AUTHORIZATION=f'Bearer {response.json()["access_token"]}',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['anon'], True)

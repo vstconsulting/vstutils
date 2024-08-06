@@ -15,6 +15,7 @@ from vstutils.api.permissions import IsOpenApiRequest
 from vstutils.api.responses import HTTP_200_OK
 
 from .authentication import JWTBearerTokenAuthentication
+from .user import UserWrapper
 
 if TYPE_CHECKING:
     from authlib.oauth2.rfc6749 import AuthorizationServer  # nocv
@@ -186,24 +187,10 @@ class UserInfoView(APIView):
         user = request.user
         token = request.auth
 
-        if user.is_anonymous:
-            return HTTP_200_OK(
-                {
-                    "sub": token['sub'],
-                    "anon": True,
-                }
-            )
-
-        return HTTP_200_OK(
-                {
-                    "sub": token['sub'],
-                    "name": user.get_full_name(),
-                    "given_name": user.first_name,
-                    "family_name": user.last_name,
-                    "preferred_username": user.get_username(),
-                    "email": user.email,
-                }
-            )
+        return HTTP_200_OK({
+            'sub': token['sub'],
+            **UserWrapper(user).get_profile_claims(),
+        })
 
 
 def oauth_authorization_server(request: Request):
