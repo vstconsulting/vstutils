@@ -2,8 +2,19 @@ import { createApiFetch } from './api-fetch';
 import type { InitAppConfig } from './init-app';
 import { BulkType, makeQueryString, type HttpMethod } from './utils';
 
-const CACHE_NAME = 'bulk-etags';
+const CACHE_NAME_PREFIX = 'bulk-etags-';
 const IS_NATIVE_CACHE_AVAILABLE = 'caches' in window;
+
+async function removeOldCaches(cacheKey: string) {
+    const actualName = getCacheName(cacheKey);
+    const cacheNames = await caches.keys();
+    const oldCaches = cacheNames.filter((name) => name.startsWith(CACHE_NAME_PREFIX) && name !== actualName);
+    await Promise.all(oldCaches.map((name) => caches.delete(name)));
+}
+
+function getCacheName(cacheKey: string) {
+    return `${CACHE_NAME_PREFIX}${cacheKey}`;
+}
 
 type RawBulk = {
     method: HttpMethod | Uppercase<HttpMethod>;
@@ -51,7 +62,7 @@ export type BulkApiFetch = _BulkApiFetch & { raw: _BulkApiFetchRaw };
 
 const _cached = new WeakMap<InitAppConfig, BulkApiFetch>();
 
-export function createBulkApiFetch(params: { config: InitAppConfig }): BulkApiFetch {
+export function createBulkApiFetch(params: { config: InitAppConfig; cacheKey?: string }): BulkApiFetch {
     let bulk = _cached.get(params.config);
     if (!bulk) {
         bulk = _createBulkApiFetch(params);
@@ -60,7 +71,13 @@ export function createBulkApiFetch(params: { config: InitAppConfig }): BulkApiFe
     return bulk;
 }
 
-function _createBulkApiFetch({ config }: { config: InitAppConfig }): BulkApiFetch {
+function _createBulkApiFetch({
+    config,
+    cacheKey,
+}: {
+    config: InitAppConfig;
+    cacheKey?: string;
+}): BulkApiFetch {
     const apiFetch = createApiFetch({ config });
     const endpointUrl = new URL(config.api.endpointPath, config.api.url);
     let collectedBulks: CollectedBulkRequest[] = [];
@@ -97,7 +114,7 @@ function _createBulkApiFetch({ config }: { config: InitAppConfig }): BulkApiFetc
         requests: BulkRequest[],
         params?: { type?: BulkType; forceAuthRequired?: boolean },
     ) => {
-        const cache = await window.caches.open(CACHE_NAME);
+        const cache = await window.caches.open(getCacheName(cacheKey!));
         const cachedValues = new Map();
         for (let i = 0; i < requests.length; i++) {
             const item = requests[i];
@@ -143,7 +160,11 @@ function _createBulkApiFetch({ config }: { config: InitAppConfig }): BulkApiFetc
         return responses;
     };
 
-    const sendBulk = IS_NATIVE_CACHE_AVAILABLE ? sendBulkCached : sendBulkNotCached;
+    const useCache = cacheKey && IS_NATIVE_CACHE_AVAILABLE;
+    const sendBulk = useCache ? sendBulkCached : sendBulkNotCached;
+    if (useCache) {
+        removeOldCaches(cacheKey);
+    }
 
     async function sendCollectedBulks() {
         const bulks = [...collectedBulks];
