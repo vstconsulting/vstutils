@@ -33,3 +33,10 @@ def get_file_value(filename, default='', raise_error=False, strip=True):
             raise  # nocv
 
     return result
+
+
+try:
+    # pylint: disable=unused-import
+    from ._tools import get_file_value  # noqa: F811,F401
+except ImportError:  # nocv
+    pass

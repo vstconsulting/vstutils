@@ -75,6 +75,7 @@ kwargs = dict(
 if RustExtension is not None and os.path.exists("vstutils_utils/Cargo.toml") and os.environ.get('BUILD_OPTIMIZATION', 'false') == 'true':
     kwargs['rust_extensions'] = [
         RustExtension("vstutils._utils", path="vstutils_utils/Cargo.toml", binding=Binding.PyO3),
+        RustExtension("vstutils._tools", path="vstutils_tools/Cargo.toml", binding=Binding.PyO3),
     ]
 
 all_deps = []

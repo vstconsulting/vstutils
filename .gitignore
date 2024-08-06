@@ -1,6 +1,7 @@
 node_modules
 vstutils/static/spa
 vstutils_utils/target
+vstutils_tools/target
 *.pyc
 *.c
 *.so

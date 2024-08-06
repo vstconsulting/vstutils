@@ -1,0 +1,14 @@
+[package]
+name = "vstutils_tools"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+pyo3 = { version = "0.21.2", features = ["extension-module", "abi3"] }
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+# Strip symbols to minimize size
+strip = true

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.2", "vstcompile~=3.0", "cython~=3.0.10", "setuptools-rust~=1.9"]
+requires = ["setuptools>=61.2", "vstcompile~=3.0", "cython~=3.0.11", "setuptools-rust~=1.9"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -17,8 +17,10 @@ description = "VST Utils Framework for fast create web-application"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
+    "Framework :: Celery",
     "Framework :: Django",
     "Framework :: Django :: 5.0",
+    "Framework :: Pydantic :: 2",
     "Operating System :: POSIX",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python",
@@ -29,12 +31,16 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: User Interfaces",
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: User Interfaces",
     "Topic :: Utilities",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Typing :: Typed",
 ]
 requires-python = ">=3.10"
 dynamic = ["version", "dependencies", "optional-dependencies"]
