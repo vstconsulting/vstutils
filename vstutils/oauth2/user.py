@@ -1,4 +1,4 @@
-from typing import Optional, Union, TYPE_CHECKING
+from typing import Optional, Union, TYPE_CHECKING, Any
 from uuid import uuid4
 
 if TYPE_CHECKING:  # nocv
@@ -30,10 +30,24 @@ class UserWrapper:
     def validate_second_factor(self, code):
         return self.django_user.twofa.verify(code)
 
-    def get_profile_claims(self) -> Optional[dict]:
+    def get_profile_claims(self) -> dict:
+        claims: dict[str, Any] = {}
+
+        if self.django_user.is_anonymous:
+            claims['anon'] = True
+        else:
+            claims.update({
+                "name": self.django_user.get_full_name(),
+                "given_name": self.django_user.first_name,
+                "family_name": self.django_user.last_name,
+                "preferred_username": self.django_user.get_username(),
+                "email": self.django_user.email,
+            })
+
         if hasattr(self.django_user, 'get_profile_claims'):
-            return self.django_user.get_profile_claims()
-        return None
+            claims.update(self.django_user.get_profile_claims())
+
+        return claims
 
     def get_access_token_claims(self) -> Optional[dict]:
         if hasattr(self.django_user, 'get_access_token_claims'):
