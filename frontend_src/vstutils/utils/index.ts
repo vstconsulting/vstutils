@@ -515,3 +515,5 @@ export function escapeHtml(unsafe: string) {
 }
 
 export const OBJECT_NOT_FOUND_TEXT = '[Object not found]';
+
+export type MaybePromise<T> = T | Promise<T>;

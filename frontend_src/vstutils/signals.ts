@@ -6,7 +6,7 @@ import { capitalize, getApp } from '#vstutils/utils';
 import type { Model } from '#vstutils/models';
 import type { IAppInitialized } from '#vstutils/app';
 import type { RepresentData } from '#vstutils/utils';
-import type { Action, Sublink } from '#vstutils/views';
+import type { Action, OperationOnBeforeHook, Sublink } from './views/operations';
 import type { RouteConfig } from 'vue-router';
 import type { AppSchema } from './schema';
 
@@ -90,6 +90,29 @@ export const onAppBeforeInit = createHook<[{ app: IAppInitialized }]>(APP_BEFORE
 export const onSchemaViewsCreated = createHook<[{ views: IAppInitialized['views'] }]>(SCHEMA_VIEWS_CREATED);
 export const onRoutesCreated = createHook<[RouteConfig[]]>(ROUTES_CREATED);
 export const onSchemaLoaded = createHook<[AppSchema]>(SCHEMA_LOADED);
+export const hookViewOperation = (params: {
+    path: string;
+    operation: string;
+    onBefore?: OperationOnBeforeHook;
+}) => {
+    onSchemaViewsCreated(({ views }) => {
+        const view = views.get(params.path);
+        if (!view) {
+            console.error(`View "${params.path}" not found`);
+            return;
+        }
+
+        const operation = view.actions.get(params.operation) || view.sublinks.get(params.operation);
+        if (!operation) {
+            console.error(`Operation "${params.operation}" for view ${params.path} not found`);
+            return;
+        }
+
+        if (params.onBefore) {
+            operation.onBefore = params.onBefore;
+        }
+    });
+};
 
 export const onSchemaModelsCreated =
     createHook<[{ app: IAppInitialized; models: Map<string, Model> }]>(SCHEMA_MODELS_CREATED);

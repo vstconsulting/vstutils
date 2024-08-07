@@ -95,6 +95,31 @@ Example of simple frontend entrypoint:
     });
 
 
+Operation views hooks
+---------------------
+Function `hookViewOperation` can be used to execute some custom code before action execution.
+Action may be prevented if `prevent` is set to true on returned object.
+
+.. sourcecode:: typescript
+
+    import { hookViewOperation, showConfirmationModal } from '@vstconsulting/vstutils';
+
+    hookViewOperation({
+      path: '/category/{id}/change_parent/',
+      operation: 'execute',
+      onBefore: async () => {
+        const isConfirmed = await showConfirmationModal({
+          title: 'Are you sure?',
+          text: 'Changing category parent is irreversible',
+          confirmButtonText: 'Change',
+          cancelButtonText: 'Cancel',
+        });
+        return {
+          prevent: !isConfirmed,
+        };
+      },
+    });
+
 
 .. _field-section:
 

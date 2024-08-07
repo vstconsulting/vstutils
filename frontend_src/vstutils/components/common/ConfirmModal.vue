@@ -8,10 +8,10 @@
             </div>
         </template>
         <template #footer>
-            <button class="btn btn-success" @click="callConfirm">
+            <button class="btn btn-success" type="button" @click="callConfirm">
                 {{ $t(confirmTitle) }}
             </button>
-            <button class="btn btn-secondary" style="float: right" @click="callReject">
+            <button class="btn btn-secondary" style="float: right" type="button" @click="callReject">
                 {{ $t(rejectTitle) }}
             </button>
         </template>

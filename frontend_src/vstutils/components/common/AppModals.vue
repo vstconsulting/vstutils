@@ -26,21 +26,40 @@
             @confirm="reloadPage"
         />
 
+        <ConfirmModal
+            v-if="_currentConfirmationModal"
+            ref="customConfirmationModal"
+            :title="_currentConfirmationModal.title"
+            :message="_currentConfirmationModal.text"
+            :confirm-title="_currentConfirmationModal.confirmButtonText"
+            :reject-title="_currentConfirmationModal.cancelButtonText"
+            @confirm="_currentConfirmationModal.confirm"
+            @reject="_currentConfirmationModal.reject"
+        />
+
         <slot />
     </div>
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { ref, watchEffect } from 'vue';
     import { i18n } from '#vstutils/translation';
     import { getApp, saveAllSettings } from '#vstutils/utils';
     import ConfirmModal from './ConfirmModal.vue';
+    import { _currentConfirmationModal } from '#vstutils/confirmation-modal';
 
     const app = getApp();
 
     const saveSettingsModal = ref<InstanceType<typeof ConfirmModal>>();
     const confirmationModal = ref<InstanceType<typeof ConfirmModal>>();
     const reloadPageModal = ref<InstanceType<typeof ConfirmModal>>();
+    const customConfirmationModal = ref<InstanceType<typeof ConfirmModal>>();
+
+    watchEffect(() => {
+        if (customConfirmationModal.value) {
+            customConfirmationModal.value.openModal();
+        }
+    });
 
     const confirmation = ref<{ callback: null | (() => void); actionName: string }>({
         callback: null,
