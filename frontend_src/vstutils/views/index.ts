@@ -5,3 +5,4 @@ export { ViewConstructor, ViewsTree };
 
 export * from './View';
 export * from './props';
+export * from './operations';

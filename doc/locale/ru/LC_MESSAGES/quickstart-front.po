@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-26 04:59+0000\n"
+"POT-Creation-Date: 2024-08-06 08:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -186,11 +186,26 @@ msgstr ""
 msgid "Example of simple frontend entrypoint:"
 msgstr "Пример точки входа фронтенда:"
 
-#: ../../quickstart-front.rst:102
+#: ../../quickstart-front.rst:99
+msgid "Operation views hooks"
+msgstr "Хуки операций страниц"
+
+#: ../../quickstart-front.rst:100
+msgid ""
+"Function `hookViewOperation` can be used to execute some custom code "
+"before action execution. Action may be prevented if `prevent` is set to "
+"true on returned object."
+msgstr ""
+"Функция `hookViewOperation` может быть использована для выполнения "
+"произвольного кода перед выполнением действия. Действие "
+"может быть прервано, если `prevent` на возвращаемом объекте установлено "
+"на `true`."
+
+#: ../../quickstart-front.rst:127
 msgid "Field customization"
 msgstr "Настройка поля"
 
-#: ../../quickstart-front.rst:103
+#: ../../quickstart-front.rst:128
 msgid ""
 "In `main.js` create new field by extending it from BaseField (or any "
 "other appropriate field)"
@@ -198,7 +213,7 @@ msgstr ""
 "В `main.js` создайте новое поле, расширив его от BaseField (или любого "
 "другого подходящего поля)"
 
-#: ../../quickstart-front.rst:105
+#: ../../quickstart-front.rst:130
 msgid ""
 "For example lets create a field that renders HTML h1 element with 'Hello "
 "World!` text:"
@@ -206,11 +221,11 @@ msgstr ""
 "Например, создадим поле, которое отображает элемент HTML h1 с текстом "
 "'Привет, мир!'"
 
-#: ../../quickstart-front.rst:119
+#: ../../quickstart-front.rst:144
 msgid "Or render person's name with some prefix"
 msgstr "Или отобразите имя человека с некоторым префиксом"
 
-#: ../../quickstart-front.rst:134
+#: ../../quickstart-front.rst:159
 msgid ""
 "Register this field to `app.fieldsResolver` to provide appropriate field "
 "format and type to a new field"
@@ -218,7 +233,7 @@ msgstr ""
 "Зарегистрируйте это поле в `app.fieldsResolver`, чтобы предоставить "
 "соответствующий формат и тип поля для нового поля"
 
-#: ../../quickstart-front.rst:141
+#: ../../quickstart-front.rst:166
 msgid ""
 "Listen for a appropriate "
 "`models[ModelWithFieldToChange].fields.beforeInit` signal to change field"
@@ -228,7 +243,7 @@ msgstr ""
 "`models[ModelWithFieldToChange].fields.beforeInit` для изменения формата "
 "поля"
 
-#: ../../quickstart-front.rst:150
+#: ../../quickstart-front.rst:175
 msgid ""
 "List of  models and their fields is available during runtime in console "
 "at `app.modelsClasses`"
@@ -236,7 +251,7 @@ msgstr ""
 "Список моделей и их полей доступен во время выполнения в консоли по "
 "адресу `app.modelsClasses`"
 
-#: ../../quickstart-front.rst:152
+#: ../../quickstart-front.rst:177
 msgid ""
 "To change Filed behavior, create new field class with a desired logic. "
 "Let's say you need to send number of milliseconds to API, user however "
@@ -248,7 +263,7 @@ msgstr ""
 "пользователь хочет вводить количество секунд. Решением будет "
 "переопределить методы `toInner` и `toRepresent` поля."
 
-#: ../../quickstart-front.rst:173
+#: ../../quickstart-front.rst:198
 msgid ""
 "Now you have field that show seconds, but saves/receives data in "
 "milliseconds on detail view of AllFieldsModel."
@@ -257,7 +272,7 @@ msgstr ""
 " данные в миллисекундах в виде детализированного представления модели "
 "AllFieldsModel."
 
-#: ../../quickstart-front.rst:176
+#: ../../quickstart-front.rst:201
 msgid ""
 "If you need to show some warning or error to developer console you can "
 "use field `warn` and `error` methods. You can pass some message and it "
@@ -268,11 +283,11 @@ msgstr ""
 "можете передать сообщение, и оно будет выведено с типом поля, именем "
 "модели и именем поля."
 
-#: ../../quickstart-front.rst:180
+#: ../../quickstart-front.rst:205
 msgid "Change path to FkField"
 msgstr "Изменение пути к полю FkField"
 
-#: ../../quickstart-front.rst:181
+#: ../../quickstart-front.rst:206
 msgid ""
 "Sometime you may need to request different set of objects for FkField. "
 "For example to choose from only famous authors, create `famous_author` "
@@ -284,7 +299,7 @@ msgstr ""
 "конечную точку `famous_author` на бэкенде и установите путь запроса "
 "FkField в `famous_author`. Слушайте сигнал `app.beforeInit`."
 
-#: ../../quickstart-front.rst:191
+#: ../../quickstart-front.rst:216
 msgid ""
 "Now when we create new post on `/post/` endpoint Author FkField makes get"
 " request to `/famous_author/` instead of `/author/`. It's useful to get "
@@ -296,15 +311,15 @@ msgstr ""
 "полезно для получения другого набора авторов (которые могли быть ранее "
 "отфильтрованы на бэкенде)."
 
-#: ../../quickstart-front.rst:195
+#: ../../quickstart-front.rst:220
 msgid "CSS Styling"
 msgstr "Стилизация CSS"
 
-#: ../../quickstart-front.rst:197
+#: ../../quickstart-front.rst:222
 msgid "Like scripts, css files may be added to `index.ts`"
 msgstr "Как скрипты, файлы CSS могут быть добавлены в `index.ts`"
 
-#: ../../quickstart-front.rst:212
+#: ../../quickstart-front.rst:237
 msgid ""
 "Let's inspect page and find css class for our customField. It is `column-"
 "format-customField` and  generated with `column-format-{Field.format}` "
@@ -314,11 +329,11 @@ msgstr ""
 "пользовательского поля. Это `column-format-customField` и создается с "
 "использованием шаблона `column-format-{Field.format}`."
 
-#: ../../quickstart-front.rst:215
+#: ../../quickstart-front.rst:240
 msgid "Use regular css styling to change appearance of the field."
 msgstr "Используйте обычные стили CSS для изменения внешнего вида поля."
 
-#: ../../quickstart-front.rst:225
+#: ../../quickstart-front.rst:250
 msgid ""
 "Other page elements are also available for styling: for example, to hide "
 "certain column set corresponding field to none."
@@ -327,11 +342,11 @@ msgstr ""
 "скрыть определенный столбец, установите соответствующее поле в значение "
 "none."
 
-#: ../../quickstart-front.rst:234
+#: ../../quickstart-front.rst:259
 msgid "Show primary key column on list"
 msgstr "Показать столбец первичных ключей в списке"
 
-#: ../../quickstart-front.rst:236
+#: ../../quickstart-front.rst:261
 msgid ""
 "Every pk column has `pk-column` CSS class and hidden by default (using "
 "`display: none;`)."
@@ -339,7 +354,7 @@ msgstr ""
 "Каждый столбец первичного ключа имеет класс CSS `pk-column` и по "
 "умолчанию скрыт (с использованием `display: none;`)."
 
-#: ../../quickstart-front.rst:238
+#: ../../quickstart-front.rst:263
 msgid ""
 "For example this style will show pk column on all list views of `Order` "
 "model:"
@@ -347,11 +362,11 @@ msgstr ""
 "Например, этот стиль покажет столбец первичных ключей во всех "
 "представлениях списка модели `Order`."
 
-#: ../../quickstart-front.rst:248
+#: ../../quickstart-front.rst:273
 msgid "View customization"
 msgstr "Настройка представления"
 
-#: ../../quickstart-front.rst:250
+#: ../../quickstart-front.rst:275
 msgid ""
 "Listen for signal `\"allViews.created\"` and add new custom mixin to the "
 "view."
@@ -359,13 +374,13 @@ msgstr ""
 "Слушайте сигнал `\"allViews.created\"` и добавьте новый пользовательский "
 "миксин в представление."
 
-#: ../../quickstart-front.rst:252
+#: ../../quickstart-front.rst:277
 msgid "Next code snippet depicts rendering new view instead of default view."
 msgstr ""
 "В следующем фрагменте кода показано отображение нового представления "
 "вместо представления по умолчанию."
 
-#: ../../quickstart-front.rst:265
+#: ../../quickstart-front.rst:290
 msgid ""
 "Learn more about Vue `render()` function at `Vue documentation "
 "<https://v3.vuejs.org/guide/render-function.html>`_."
@@ -373,7 +388,7 @@ msgstr ""
 "Узнайте больше о функции `render()` Vue в `документации Vue "
 "<https://v3.vuejs.org/guide/render-function.html>`_."
 
-#: ../../quickstart-front.rst:268
+#: ../../quickstart-front.rst:293
 msgid ""
 "It is also possible to fine tune View by overriding default computed "
 "properties and methods of existing mixins. For example, override "
@@ -384,7 +399,7 @@ msgstr ""
 "вычисляемое свойство `breadcrumbs` для отключения хлебных крошек в "
 "представлении списка авторов."
 
-#: ../../quickstart-front.rst:285
+#: ../../quickstart-front.rst:310
 msgid ""
 "Sometimes you may need to hide detail page for some reason, but still "
 "want all actions and sublinks to be accessible from list page. To do it "
@@ -397,11 +412,11 @@ msgstr ""
 "`\"allViews.created\"` и изменить параметр `hidden` с значения `false` по"
 " умолчанию на `true`, например:"
 
-#: ../../quickstart-front.rst:297
+#: ../../quickstart-front.rst:322
 msgid "Changing title of the view"
 msgstr "Изменение заголовка представления"
 
-#: ../../quickstart-front.rst:299
+#: ../../quickstart-front.rst:324
 msgid ""
 "To change title and string displayed in the breadcrumbs change `title` "
 "property of the view or method `getTitle` for more complex logic."
@@ -410,11 +425,11 @@ msgstr ""
 "измените свойство `title` представления или метод `getTitle` для более "
 "сложной логики."
 
-#: ../../quickstart-front.rst:313
+#: ../../quickstart-front.rst:338
 msgid "Page store"
 msgstr "Хранилище страницы"
 
-#: ../../quickstart-front.rst:314
+#: ../../quickstart-front.rst:339
 msgid ""
 "Every page has store that can be accessed globally `app.store.page` or "
 "from page component using `this.store`."
@@ -423,17 +438,17 @@ msgstr ""
 "`app.store.page` или из компонента страницы с использованием "
 "`this.store`."
 
-#: ../../quickstart-front.rst:316
+#: ../../quickstart-front.rst:341
 msgid "View method `extendStore` can be used to add custom logic to page's store."
 msgstr ""
 "Метод представления `extendStore` можно использовать для добавления "
 "пользовательской логики в хранилище страницы."
 
-#: ../../quickstart-front.rst:342
+#: ../../quickstart-front.rst:367
 msgid "Overriding root component"
 msgstr "Переопределение корневого компонента"
 
-#: ../../quickstart-front.rst:343
+#: ../../quickstart-front.rst:368
 msgid ""
 "Root component of the application can be overridden using "
 "`app.beforeInit` signal. This can be useful for such things as changing "
@@ -444,15 +459,15 @@ msgstr ""
 " классов CSS макета, поведения кнопки назад или основных компонентов "
 "макета."
 
-#: ../../quickstart-front.rst:346
+#: ../../quickstart-front.rst:371
 msgid "Example of customizing sidebar component:"
 msgstr "Пример настройки компонента боковой панели:"
 
-#: ../../quickstart-front.rst:360
+#: ../../quickstart-front.rst:385
 msgid "Translating values of fields"
 msgstr "Перевод значений полей"
 
-#: ../../quickstart-front.rst:361
+#: ../../quickstart-front.rst:386
 msgid ""
 "Values tha displayed by `FKField` of `ChoicesField` can be translated "
 "using standard translations files."
@@ -460,7 +475,7 @@ msgstr ""
 "Значения, отображаемые с использованием `FKField` или `ChoicesField`, "
 "могут быть переведены с использованием стандартных файлов перевода."
 
-#: ../../quickstart-front.rst:363
+#: ../../quickstart-front.rst:388
 msgid ""
 "Translation key must be defined as "
 "`:model:<ModelName>:<fieldName>:<value>`. For example:"
@@ -468,7 +483,7 @@ msgstr ""
 "Ключ перевода должен быть определен как "
 "`:model:<ModelName>:<fieldName>:<value>`. Например:"
 
-#: ../../quickstart-front.rst:371
+#: ../../quickstart-front.rst:396
 msgid ""
 "Translation of values can be taxing as every model on backend usually "
 "generates more than one model on frontend, To avoid this, add "
@@ -480,11 +495,11 @@ msgstr ""
 "этого добавьте атрибут `_translate_model = 'Category'` к модели на "
 "бэкенде. Это сокращает"
 
-#: ../../quickstart-front.rst:381
+#: ../../quickstart-front.rst:406
 msgid "to"
 msgstr "в"
 
-#: ../../quickstart-front.rst:387
+#: ../../quickstart-front.rst:412
 msgid ""
 "For `FKField` name of the related model is used. And `fieldName` should "
 "be equal to `viewField`."
@@ -492,11 +507,11 @@ msgstr ""
 "Для `FKField` используется имя связанной модели. И `fieldName` должно "
 "быть равно `viewField`."
 
-#: ../../quickstart-front.rst:393
+#: ../../quickstart-front.rst:418
 msgid "Changing actions or sublinks"
 msgstr "Изменение действий или подссылок"
 
-#: ../../quickstart-front.rst:395
+#: ../../quickstart-front.rst:420
 msgid ""
 "Sometimes using only schema for defining actions or sublinks is not "
 "enough."
@@ -504,7 +519,7 @@ msgstr ""
 "Иногда использование только схемы для определения действий или подссылок "
 "недостаточно."
 
-#: ../../quickstart-front.rst:397
+#: ../../quickstart-front.rst:422
 msgid ""
 "For example we have an action to make user a superuser "
 "(`/user/{id}/make_superuser/`) and we want to hide that action if user is"
@@ -517,15 +532,15 @@ msgstr ""
 "(`is_superuser` равно `true`). Сигнал `<${PATH}>filterActions` может быть"
 " использован для достижения такого результата."
 
-#: ../../quickstart-front.rst:409
+#: ../../quickstart-front.rst:434
 msgid "`<${PATH}>filterActions` recieves {actions, data}"
 msgstr "`<${PATH}>filterActions` получает {actions, data}"
 
-#: ../../quickstart-front.rst:410
+#: ../../quickstart-front.rst:435
 msgid "`<${PATH}>filterSublinks` recieves {sublinks, data}"
 msgstr "`<${PATH}>filterSublinks` получает {sublinks, data}"
 
-#: ../../quickstart-front.rst:412
+#: ../../quickstart-front.rst:437
 msgid ""
 "Data property will contain instance's data. Actions and sublinks "
 "properties will contain arrays with default items (not hidden action or "
@@ -535,11 +550,11 @@ msgstr ""
 "`sublinks` будут содержать массивы с элементами по умолчанию (не скрытыми"
 " действиями или подссылками), их можно изменить или полностью заменить."
 
-#: ../../quickstart-front.rst:418
+#: ../../quickstart-front.rst:443
 msgid "LocalSettings"
 msgstr "Локальные настройки"
 
-#: ../../quickstart-front.rst:420
+#: ../../quickstart-front.rst:445
 msgid ""
 "This model's fields are displayed in the left sidebar. All data from this"
 " model saves in browser Local Storage. If you want to add another "
@@ -550,15 +565,15 @@ msgstr ""
 "добавить другие варианты, вы можете сделать это, используя сигнал "
 "`beforeInit`, например:"
 
-#: ../../quickstart-front.rst:434
+#: ../../quickstart-front.rst:459
 msgid "Store"
 msgstr "Хранилище"
 
-#: ../../quickstart-front.rst:436
+#: ../../quickstart-front.rst:461
 msgid "There are three ways to store data:"
 msgstr "Есть три способа сохранения данных:"
 
-#: ../../quickstart-front.rst:438
+#: ../../quickstart-front.rst:463
 msgid ""
 "userSettingsStore - saves data on the server. By default, there are "
 "options for changing language and a button to turn on/off the dark mode. "
@@ -568,7 +583,7 @@ msgstr ""
 "варианты изменения языка и кнопка включения/выключения темного режима. "
 "Данные для userSettingsStore поступают из схемы."
 
-#: ../../quickstart-front.rst:440
+#: ../../quickstart-front.rst:465
 msgid ""
 "localSettingsStore - saves data in the browser Local Storage. This is "
 "where you can store your own fields, as described in "
@@ -578,11 +593,11 @@ msgstr ""
 "Здесь вы можете хранить свои собственные поля, как описано в "
 ":ref:`localSettings`."
 
-#: ../../quickstart-front.rst:441
+#: ../../quickstart-front.rst:466
 msgid "store - stores current page data."
 msgstr "store - хранит данные текущей страницы."
 
-#: ../../quickstart-front.rst:443
+#: ../../quickstart-front.rst:468
 msgid ""
 "To use any of this stores you need to run the following command: "
 ":code:`app.[storeName]`, for example: :code:`app.userSettingsStore`."
@@ -591,7 +606,7 @@ msgstr ""
 "команду: :code:`app.[storeName]`, например: "
 ":code:`app.userSettingsStore`."
 
-#: ../../quickstart-front.rst:445
+#: ../../quickstart-front.rst:470
 msgid ""
 "If you are accessing the userSettingsStore from within the component then"
 " you need to use :code:`this.$app` instead :code:`app`."
@@ -599,11 +614,11 @@ msgstr ""
 "Если вы обращаетесь к userSettingsStore изнутри компонента, тогда вам "
 "нужно использовать :code:`this.$app` вместо :code:`app`."
 
-#: ../../quickstart-front.rst:447
+#: ../../quickstart-front.rst:472
 msgid "From `app.store` you may need:"
 msgstr "Из `app.store` вам может потребоваться:"
 
-#: ../../quickstart-front.rst:449
+#: ../../quickstart-front.rst:474
 msgid ""
 "`vewsItems` and `viewItemsMap` - stores information about parent views "
 "for this page. It is used for example in breadcrumbs. The difference "
@@ -616,11 +631,11 @@ msgstr ""
 "информации: `viewItems` - это массив объектов, а `viewItemsMap` - это "
 "карта."
 
-#: ../../quickstart-front.rst:451
+#: ../../quickstart-front.rst:476
 msgid "`page` - saves all information about current page."
 msgstr "`page` - сохраняет всю информацию о текущей странице."
 
-#: ../../quickstart-front.rst:452
+#: ../../quickstart-front.rst:477
 msgid "`title` - title of current page."
 msgstr "`title` - заголовок текущей страницы."
 

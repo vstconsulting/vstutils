@@ -1,16 +1,8 @@
 import { defineAsyncComponent } from 'vue';
 import { getApp, ViewTypes } from '#vstutils/utils';
 
-import type {
-    Action,
-    ActionView,
-    IView,
-    ListView,
-    PageEditView,
-    PageNewView,
-    PageView,
-    ViewStore,
-} from './View';
+import type { ActionView, IView, ListView, PageEditView, PageNewView, PageView, ViewStore } from './View';
+import type { Action } from './operations';
 
 type Operations = Record<string, Record<string, Action>>;
 

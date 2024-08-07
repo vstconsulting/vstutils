@@ -27,7 +27,7 @@ export class ActionsManager {
         return this.app.router.currentRoute.meta?.view as IView;
     }
 
-    execute(args: {
+    async execute(args: {
         action: Action;
         instance?: Model;
         instances?: Model[];
@@ -43,6 +43,13 @@ export class ActionsManager {
             fromList = false,
             disablePopUp = false,
         } = args;
+
+        if (action.onBefore) {
+            const { prevent } = (await action.onBefore({ operation: action })) ?? {};
+            if (prevent) {
+                return;
+            }
+        }
 
         if (action.confirmationRequired && !skipConfirmation) {
             return this.app.initActionConfirmationModal({ title: action.title }).then(() => {

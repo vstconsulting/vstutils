@@ -28,7 +28,6 @@ import {
 import { i18n } from '#vstutils/translation';
 
 import type { ComponentOptionsMixin } from 'vue/types/v3-component-options';
-import type { IAppInitialized } from '#vstutils/app';
 import type { Model, ModelConstructor } from '#vstutils/models';
 import type {
     BaseViewStore,
@@ -47,67 +46,13 @@ import type { Operation as SwaggerOperation } from 'swagger-schema-official';
 import type { QuerySet } from '../querySet';
 import type { BaseField, Field } from '../fields/base';
 import type { ViewProps } from './props';
+import type { Action, NotEmptyAction, Sublink } from './operations';
 
 export { ViewTypes };
-
-export interface Operation {
-    name: string;
-    title: string;
-    style?: Record<string, string | number> | string;
-    classes?: string[];
-    iconClasses?: string[];
-    appendFragment?: string;
-    hidden?: boolean;
-    doNotShowOnList?: boolean;
-    doNotGroup?: boolean;
-    isFileResponse?: boolean;
-    auth?: boolean;
-}
-
-export interface Sublink extends Operation {
-    href?: string | (() => string);
-    external?: boolean;
-}
 
 type ViewMixin = unknown;
 
 const getViewStoreId = createUniqueIdGenerator();
-
-/**
- * Object that describes one action.
- * For empty action path and method are required.
- * For non empty action component or href must me provided.
- */
-export interface Action extends Operation {
-    isEmpty?: boolean;
-    isMultiAction?: boolean;
-    component?: any;
-    path?: string;
-    href?: string;
-    method?: HttpMethod;
-    auth?: boolean;
-    confirmationRequired?: boolean;
-    view?: ActionView;
-    responseModel?: ModelConstructor;
-    handler?: (args: {
-        action: Action;
-        instance?: Model;
-        fromList?: boolean;
-        disablePopUp?: boolean;
-    }) => Promise<any> | any;
-    handlerMany?: (args: {
-        action: Action;
-        instances: Model[];
-        disablePopUp?: boolean;
-    }) => Promise<any> | any;
-    redirectPath?: string | (() => string);
-    onAfter?: (args: { app: IAppInitialized; action: Action; response: unknown; instance?: Model }) => void;
-}
-
-export interface NotEmptyAction extends Action {
-    isEmpty: false;
-    requestModel: ModelConstructor;
-}
 
 type ViewType = keyof typeof ViewTypes;
 
