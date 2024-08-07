@@ -3,9 +3,9 @@
 </template>
 
 <script setup lang="ts">
-    import { useViewStore } from '@/vstutils/store';
-    import { ViewTypes } from '@/vstutils/utils';
-    import { type DetailView } from '@/vstutils/views';
+    import { useViewStore } from '#vstutils/store';
+    import { ViewTypes } from '#vstutils/utils';
+    import { type DetailView } from '#vstutils/views';
     import { computed } from 'vue';
     import TabbedDetail from './TabbedDetail.vue';
 

@@ -1,20 +1,16 @@
-import { jest, expect, test, beforeAll } from '@jest/globals';
-import { createApp, createSchema, mountApp, waitForPageLoading } from '@/unittests';
+import { createApp, createSchema, expectRequest, fetchMockCallAt, waitForPageLoading } from '#unittests';
 import { screen, fireEvent, waitFor } from '@testing-library/dom';
-import fetchMock from 'jest-fetch-mock';
-import { getApp } from '@/vstutils/utils';
-import { useViewStore } from '@/vstutils/store';
-import type { PageEditView } from '@/vstutils/views';
+import { getApp } from '#vstutils/utils';
+import { useViewStore } from '#vstutils/store';
+import type { PageEditView } from '#vstutils/views';
 
 beforeAll(async () => {
     await createApp({ schema: createSchema() });
-    await mountApp();
-    fetchMock.enableMocks();
 });
 
 test('entity update race', async () => {
     const app = getApp();
-    const confirm = jest.spyOn(globalThis, 'confirm');
+    const confirm = vitest.spyOn(globalThis, 'confirm');
 
     fetchMock.mockResponse(
         JSON.stringify([
@@ -52,7 +48,8 @@ test('entity update race', async () => {
     fireEvent.click(screen.getByTitle('Save'));
     await waitForPageLoading();
     expect(fetchMock).toBeCalledTimes(1);
-    expect(fetchMock).toBeCalledWith('http://localhost/api/endpoint/', {
+    expectRequest(fetchMockCallAt(0), {
+        url: 'http://localhost/api/endpoint/',
         body: JSON.stringify([
             {
                 method: 'patch',
@@ -81,7 +78,8 @@ test('entity update race', async () => {
     fireEvent.click(screen.getByTitle('Save'));
     await waitForPageLoading();
     await waitFor(() => expect(fetchMock).toBeCalledTimes(2));
-    expect(fetchMock).toBeCalledWith('http://localhost/api/endpoint/', {
+    expectRequest(fetchMockCallAt(0), {
+        url: 'http://localhost/api/endpoint/',
         body: JSON.stringify([
             {
                 method: 'patch',
@@ -93,7 +91,8 @@ test('entity update race', async () => {
         headers: { 'Content-Type': 'application/json' },
         method: 'put',
     });
-    expect(fetchMock).toBeCalledWith('http://localhost/api/endpoint/', {
+    expectRequest(fetchMockCallAt(1), {
+        url: 'http://localhost/api/endpoint/',
         body: JSON.stringify([
             {
                 method: 'patch',

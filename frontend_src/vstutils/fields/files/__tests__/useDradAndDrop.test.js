@@ -1,12 +1,11 @@
-import { expect, test, jest } from '@jest/globals';
 import { ref, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { useDragAndDrop } from '../useDragAndDrop';
 
 test('useDragAndDrop', async () => {
-    const onDragOver = jest.fn();
-    const onDragLeave = jest.fn();
-    const onDragFinished = jest.fn();
+    const onDragOver = vitest.fn();
+    const onDragLeave = vitest.fn();
+    const onDragFinished = vitest.fn();
 
     const wrapper = mount({
         template: '<div ref="div" />',

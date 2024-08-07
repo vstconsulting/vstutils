@@ -13,11 +13,11 @@
 
 <script setup lang="ts">
     import { computed } from 'vue';
-    import { i18n } from '@/vstutils/translation';
-    import { makeDataImageUrl } from '@/vstutils/utils';
-    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
+    import { i18n } from '#vstutils/translation';
+    import { makeDataImageUrl } from '#vstutils/utils';
+    import BootstrapModal from '#vstutils/components/BootstrapModal.vue';
     import type { CSSProperties } from 'vue/types/jsx';
-    import type { Field } from '@/vstutils/fields/base';
+    import type { Field } from '#vstutils/fields/base';
     import type { NamedFile } from '../named-binary-file';
 
     const props = defineProps<{

@@ -1,6 +1,6 @@
 import { defineComponent } from 'vue';
 
-import { BaseFieldMixin } from '@/vstutils/fields/base';
+import { BaseFieldMixin } from '#vstutils/fields/base';
 
 import MultipleNamedBinaryFileFieldContentEdit from './MultipleNamedBinaryFileFieldContentEdit.vue';
 import MultipleNamedBinaryFileFieldContentList from './MultipleNamedBinaryFileFieldContentList.vue';

@@ -4,7 +4,7 @@
 </template>
 
 <script lang="ts">
-    import { FieldReadonlyPropsDef, type FieldReadonlyPropsDefType } from '@/vstutils/fields/base';
+    import { FieldReadonlyPropsDef, type FieldReadonlyPropsDefType } from '#vstutils/fields/base';
     import type { HTMLField } from './HTMLField';
 
     export default {

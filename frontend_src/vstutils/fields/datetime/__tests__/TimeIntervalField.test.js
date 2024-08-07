@@ -1,4 +1,3 @@
-import { expect, test, describe } from '@jest/globals';
 import TimeIntervalField from '../TimeIntervalField';
 
 describe('TimeIntervalField', () => {

@@ -1,7 +1,6 @@
-import { expect, test } from '@jest/globals';
-import { makeModel, BaseModel } from '@/vstutils/models';
-import { StringField } from '@/vstutils/fields/text';
-import { IntegerField } from '@/vstutils/fields/numbers/integer';
+import { makeModel, BaseModel } from '#vstutils/models';
+import { StringField } from '#vstutils/fields/text';
+import { IntegerField } from '#vstutils/fields/numbers/integer';
 import { createPinia } from 'pinia';
 import { createLocalSettingsStore } from './../localSettingsStore.ts';
 

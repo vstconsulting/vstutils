@@ -365,7 +365,6 @@ Developers often switch between these backends based on the context of their wor
 * **password** - Auth password for smtp-server connection. Default: ``""``.
 * **tls** - Enable/disable tls for smtp-server connection. Default: ``False``.
 * **send_confirmation** - Enable/disable confirmation message after registration. Default: ``False``.
-* **authenticate_after_registration** - Enable/disable autologin after registration confirmation. Default: ``False``.
 
 
 .. _web:
@@ -590,6 +589,33 @@ Section ``[webpuwsh]``.
 For more detailed guidance on using and implementing web push notifications in VSTUtils, refer to the Web Push manual provided :ref:`here<webpush-manual>`.
 
 Remember, these settings are crucial for the proper functioning and reliability of web push notifications in your application. Ensure that they are configured accurately for optimal performance.
+
+
+OAuth 2 settings
+----------------
+
+Section ``[oauth]``.
+
+For custom OAuth2 server use the following settings:
+
+* **server_url**: URL of OAuth2 server.
+* **server_token_endpoint_path**: Path of OAuth2 server token endpoint (used in swagger schema). If not provided, `/{API_URL}/oauth2/token/` will be used instead.
+
+For custom OAuth2 server use the following settings:
+
+* **server_enable**: Enable or disable OAuth2 server. Default: `True`.
+* **server_issuer**: Issuer for JWT tokens. Must be provided.
+* **server_jwt_key**: JWT key. Octet sequence (used to represent symmetric keys). Must be provided.
+* **server_jwt_alg**: JWT algorithm. Default: `HS256`.
+* **server_class**: Import path to OAuth2 server class. See `authlib docs <https://docs.authlib.org/en/latest/specs/rfc6749.html#authlib.oauth2.rfc6749.AuthorizationServer>`_ for more information. Default: `vstutils.oauth2.authorization_server.AuthorizationServer`.
+* **server_enable_anon_login**: Enable or disable anonymous login using empty strings as username and password. Default: `False`.
+* **server_jwt_extra_claims_provider**: Import path to function that receives user and returns extra claims for JWT token. Default: `None`.
+* **server_allow_insecure**: If enabled then server will allow HTTP requests. Default: `False`.
+* **server_token_expires_in**: Token expiration time in seconds. Duration values can be used, for example `3d2h32m`. Default: `864000`.
+* **server_client_authentication_methods**: List of client authentication methods. Default server supports following values `'client_secret_basic', 'client_secret_post', 'none'`. Default: `['client_secret_basic', 'client_secret_post']`.
+* **server_authorization_endpoint**: Url of OAuth 2 Authorization endpoint. Will appear in output of `/.well-known/oauth-authorization-server` and `/.well-known/openid-configuration` discovery endpoints.
+
+By default one client can be configured using **server_simple_client_id** and **server_simple_client_secret**. Any other clients can be configured using **OAUTH_SERVER_CLIENTS** dictionary in `settings.py` where key is `client_id` and value is `client_secret`.
 
 
 Production web settings
@@ -845,7 +871,7 @@ This section contains additional information for configure additional elements.
    For project without special settings and project levels named ``project`` these variables will start with ``PROJECT_`` prefix.
    There is a list of these variables: ``{ENV_NAME}_ENABLE_ADMIN_PANEL``, ``{ENV_NAME}_ENABLE_REGISTRATION``, ``{ENV_NAME}_MAX_TFA_ATTEMPTS``,
    ``{ENV_NAME}_ETAG_TIMEOUT``, ``{ENV_NAME}_SEND_CONFIRMATION_EMAIL``, ``{ENV_NAME}_SEND_EMAIL_RETRIES``,
-   ``{ENV_NAME}_SEND_EMAIL_RETRY_DELAY``, ``{ENV_NAME}_AUTHENTICATE_AFTER_REGISTRATION``,
+   ``{ENV_NAME}_SEND_EMAIL_RETRY_DELAY``,
    ``{ENV_NAME}_MEDIA_ROOT`` (dir with uploads), ``{ENV_NAME}_GLOBAL_THROTTLE_RATE``,
    and ``{ENV_NAME}_GLOBAL_THROTTLE_ACTIONS``.
 

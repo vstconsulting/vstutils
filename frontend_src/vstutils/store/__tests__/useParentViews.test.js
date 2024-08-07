@@ -1,6 +1,5 @@
-import { expect, test, beforeAll, jest } from '@jest/globals';
-import { createApp } from '@/unittests/create-app';
-import { createSchema } from '@/unittests/schema';
+import { createApp } from '#unittests/create-app';
+import { createSchema } from '#unittests/schema';
 import { useParentViews } from '../helpers';
 
 let app;
@@ -10,15 +9,16 @@ beforeAll(async () => {
 });
 
 test('useParentViews', async () => {
-    const { items, itemsMap, push } = useParentViews();
+    let currentPath = '';
+    const { items, itemsMap, push } = useParentViews({ getPath: () => currentPath });
 
     const usersView = app.views.get('/user/');
-    usersView.resolveState = jest.fn(() => Promise.resolve());
+    usersView.resolveState = vitest.fn(() => Promise.resolve());
 
     const userView = app.views.get('/user/{id}/');
-    userView.resolveState = jest.fn(() => Promise.resolve());
+    userView.resolveState = vitest.fn(() => Promise.resolve());
 
-    await app.router.push('/user/1337/');
+    currentPath = '/user/1337/';
     await push(userView._createStore());
     expect(items.value.length).toBe(2);
     expect(itemsMap.value.get('/user/')).toBe(items.value[0]);
@@ -27,7 +27,7 @@ test('useParentViews', async () => {
     expect(usersView.resolveState).toBeCalledTimes(1);
     expect(userView.resolveState).toBeCalledTimes(1);
 
-    await app.router.push('/user/123/');
+    currentPath = '/user/123/';
     await push(userView._createStore());
     expect(items.value.length).toBe(2);
     expect(itemsMap.value.get('/user/')).toBe(items.value[0]);

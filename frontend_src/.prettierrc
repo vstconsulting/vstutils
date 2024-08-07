@@ -1,7 +1,6 @@
 {
     "arrowParens": "always",
     "bracketSpacing": true,
-    "htmlWhitespaceSensitivity": "ignore",
     "insertPragma": false,
     "bracketSameLine": false,
     "jsxSingleQuote": false,

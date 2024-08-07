@@ -2,6 +2,7 @@ import typing as _t
 import warnings
 import contextlib
 
+import pydantic
 from django.db import models
 from django.utils.encoding import force_str
 from django_filters import filters, filterset
@@ -42,14 +43,14 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
             field_type = openapi.TYPE_NUMBER
         elif isinstance(field, filters.BooleanFilter):
             field_type = openapi.TYPE_BOOLEAN
-        elif isinstance(field, filters.ChoiceFilter):
+        elif isinstance(field, (filters.ChoiceFilter, filters.MultipleChoiceFilter)):
             kwargs['enum'] = tuple(dict(field.field.choices).keys())
         elif field_name in {'id', 'id__not'}:
             search_field = field_name.split('__')[0]
             m_field = next((f for f in queryset.model._meta.fields if f.name == search_field), None)
             field_type, kwargs_update = get_field_type_from_queryset(m_field)
 
-        if field.method == extra_filter:
+        if field.method == extra_filter or isinstance(field, (filters.MultipleChoiceFilter, filters.BaseCSVFilter)):
             kwargs = {
                 'items': {
                     'type': field_type,
@@ -96,7 +97,13 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
 
 class OrderingFilterBackend(OrderingFilter):
     def _get_fields_for_schema(self, view):
-        for field in self.get_valid_fields(view.get_queryset(), view, {'request': view.request}):
+        serializer_class = view.get_serializer_class()
+        if issubclass(serializer_class, pydantic.BaseModel):
+            valid_fields = serializer_class.model_fields.items()
+        else:
+            valid_fields = self.get_valid_fields(view.get_queryset(), view, {'request': view.request})
+
+        for field in valid_fields:
             yield field[0]
             yield f'-{field[0]}'
 

@@ -1,14 +1,11 @@
-import { expect, test, describe, beforeAll, beforeEach } from '@jest/globals';
-import fetchMock from 'jest-fetch-mock';
-import { setupJestCanvasMock } from 'jest-canvas-mock';
-import { createApp, createSchema, mountApp, openPage, useTestCtx, waitForPageLoading } from '@/unittests';
+import { createApp, createSchema, useTestCtx, waitForPageLoading } from '#unittests';
 import schema from './fields-schema.json';
-import type { BaseModel } from '@/vstutils/models';
+import type { BaseModel } from '#vstutils/models';
 import { QRCodeField } from '../QRCodeField';
 import { Barcode128Field } from '../Barcode128Field';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent, waitFor } from '@testing-library/dom';
 import { nextTick } from 'vue';
-import { fitToWrapper } from '@/vstutils/utils';
+import { fitToWrapper } from '#vstutils/utils';
 
 // this function is used for box finder sizes calculation
 describe('fitToBox', () => {
@@ -147,19 +144,15 @@ describe('Barcode fields', () => {
     let instance: BaseModel;
 
     beforeAll(async () => {
-        fetchMock.enableMocks();
-        setupJestCanvasMock();
         // @ts-expect-error it works on my pc really
         await createApp({ schema: createSchema(schema) });
-        await mountApp();
         const { app } = useTestCtx();
         SomeModel = app.modelsResolver.byReferencePath('#/definitions/SomeModel');
         instance = new SomeModel();
     });
 
-    beforeEach(async () => {
+    beforeEach(() => {
         fetchMock.resetMocks();
-        await openPage('/');
     });
 
     test('resolving', () => {
@@ -191,8 +184,10 @@ describe('Barcode fields', () => {
         expect(fetchMock).toBeCalledTimes(1);
 
         // check qrcode's canvas rendered
-        const qrCodeCanvas = document.querySelector('.field-component.name-qrcode canvas');
-        expect(qrCodeCanvas).toBeTruthy();
+        await waitFor(() => {
+            const qrCodeCanvas = document.querySelector('.field-component.name-qrcode canvas');
+            expect(qrCodeCanvas).toBeTruthy();
+        });
 
         // check barcode128's canvas rendered
         const barcode128Canvas = document.querySelector('.field-component.name-barcode128 canvas');

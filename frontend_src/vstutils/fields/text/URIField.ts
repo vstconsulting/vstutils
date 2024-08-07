@@ -1,9 +1,9 @@
 import { h } from 'vue';
-import { defineFieldComponent } from '@/vstutils/fields/base';
-import { StringField } from '@/vstutils/fields/text';
-import { ValidationError } from '@/vstutils/fields/validation';
-import type { RepresentData } from '@/vstutils/utils';
-import type { FieldReadonlySetupFunction, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
+import { defineFieldComponent } from '#vstutils/fields/base';
+import { StringField } from '#vstutils/fields/text';
+import { ValidationError } from '#vstutils/fields/validation';
+import type { RepresentData } from '#vstutils/utils';
+import type { FieldReadonlySetupFunction, FieldOptions, FieldXOptions } from '#vstutils/fields/base';
 
 const createUrlValidator = (allowedSchemes: string[]) => {
     const error = new ValidationError('Invalid URL');

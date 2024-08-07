@@ -1,5 +1,5 @@
 import * as Visibility from 'visibilityjs';
-import type * as Centrifuge from 'centrifuge';
+import type { Centrifuge, Subscription, PublicationContext } from 'centrifuge';
 import { guiLocalSettings, randomSleep } from '../utils';
 
 export interface AutoUpdateAction {
@@ -30,7 +30,7 @@ type ActionId = string;
 type SubscriberId = string;
 type SubscriptionPk = string | number | undefined;
 
-interface PublicationContext extends Centrifuge.PublicationContext {
+interface PublicationContextWithData extends PublicationContext {
     data:
         | {
               pk?: string | number;
@@ -55,7 +55,7 @@ export class AutoUpdateController {
     nextBulkExecutionPromise: Promise<unknown> = Promise.resolve();
 
     centrifugoSubscribers = new Map<SubscriberId, SubscribedCentrifugoAction>();
-    channelSubscriptions = new Map<CentrifugoChannel, { sub: Centrifuge.Subscription; count: number }>();
+    channelSubscriptions = new Map<CentrifugoChannel, { sub: Subscription; count: number }>();
     channelSubscribers = new Map<CentrifugoChannel, Map<SubscriptionPk, SubscribedCentrifugoAction[]>>();
 
     subscriptionsPrefix: string;
@@ -107,9 +107,15 @@ export class AutoUpdateController {
         for (const channel of centAction.channels) {
             let subscription = this.channelSubscriptions.get(channel);
             if (!subscription) {
-                subscription = { sub: this.centrifugo!.subscribe(channel), count: 0 };
+                const sub =
+                    this.centrifugo?.getSubscription(channel) || this.centrifugo?.newSubscription(channel);
+                if (!sub) {
+                    continue;
+                }
+                sub.subscribe();
+                subscription = { sub, count: 0 };
                 this.channelSubscriptions.set(channel, subscription);
-                subscription.sub.on('publish', (event: PublicationContext) =>
+                sub.on('publication', (event: PublicationContextWithData) =>
                     this.onCentrifugoUpdate(channel, event),
                 );
             }
@@ -239,7 +245,7 @@ export class AutoUpdateController {
         }
     }
 
-    private onCentrifugoUpdate(channel: string, { data }: PublicationContext) {
+    private onCentrifugoUpdate(channel: string, { data }: PublicationContextWithData) {
         const subscribers = this.channelSubscribers.get(channel);
         if (subscribers) {
             this.bulkInvoke(subscribers.get(undefined));

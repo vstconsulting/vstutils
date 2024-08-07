@@ -1,5 +1,3 @@
-import { beforeAll, beforeEach, describe, expect, test } from '@jest/globals';
-import fetchMock from 'jest-fetch-mock';
 import { apiConnector } from '../../api';
 import { BaseModel, makeModel } from '../../models';
 import { QuerySet } from '../QuerySet.ts';
@@ -12,7 +10,6 @@ describe('bulk or non bulk selection', () => {
     beforeAll(() => {
         apiConnector.defaultVersion = 'v1';
         apiConnector.baseURL = 'http://localhost/api';
-        fetchMock.enableMocks();
     });
 
     beforeEach(() => {

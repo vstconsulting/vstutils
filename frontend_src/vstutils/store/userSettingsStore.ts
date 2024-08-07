@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia';
-import { signals } from '@/vstutils/signals';
-import { HttpMethods } from '@/vstutils/utils';
+import { signals } from '#vstutils/signals';
+import { HttpMethods } from '#vstutils/utils';
 
-import type { ApiConnector } from '@/vstutils/api';
-import type { ModelConstructor } from '@/vstutils/models';
-import type { InnerData } from '@/vstutils/utils';
-import type { SetFieldValueOptions } from '@/vstutils/fields/base';
+import type { ApiConnector } from '#vstutils/api';
+import type { ModelConstructor } from '#vstutils/models';
+import type { InnerData } from '#vstutils/utils';
+import type { SetFieldValueOptions } from '#vstutils/fields/base';
 import { computed, readonly, ref } from 'vue';
 
 type Section = Record<string, unknown>;
@@ -40,10 +40,12 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: ModelCons
             instance.value._validateAndSetData();
             const dataToSave = instance.value._getInnerData();
             try {
-                const { data } = await api.bulkQuery<InnerData<Settings>>({
+                const { data } = await api.makeRequest<InnerData<Settings>>({
                     method: HttpMethods.PUT,
                     path: USER_SETTINGS_PATH,
                     data: dataToSave,
+                    useBulk: true,
+                    auth: true,
                 });
                 setData(data);
             } finally {
@@ -55,9 +57,11 @@ export const createUserSettingsStore = (api: ApiConnector, modelClass: ModelCons
             return save();
         }
         async function init() {
-            const { data } = await api.bulkQuery<InnerData<Settings>>({
+            const { data } = await api.makeRequest<InnerData<Settings>>({
                 method: HttpMethods.GET,
                 path: USER_SETTINGS_PATH,
+                useBulk: true,
+                auth: true,
             });
             signals.once('app.afterInit', () => {
                 setData(data);

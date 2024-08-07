@@ -1,10 +1,12 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Full" type="Tox" factoryName="Tox" singleton="false">
     <module name="vst-utils" />
+    <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="DJANGO_LOG_LEVEL" value="DEBUG" />
+      <env name="CC" value="ccache gcc" />
     </envs>
     <option name="SDK_HOME" value="$PROJECT_DIR$/env/bin/python" />
     <option name="SDK_NAME" value="Python 3.8 (vst-utils)" />

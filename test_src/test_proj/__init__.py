@@ -18,9 +18,7 @@ settings = {
     "DJANGO_SETTINGS_MODULE": 'test_proj.settings',
     "TEST_PROJ_UWSGI_HARAKIRI": "120",
     "TEST_PROJ_UWSGI_VACUUM": "true",
+    "VST_DEV_SETTINGS": os.path.join(os.path.dirname(__file__), 'test_settings.ini'),
 }
-
-if 'test' in sys.argv:
-    settings["VST_DEV_SETTINGS"] = os.path.join(os.path.dirname(__file__), 'test_settings.ini')
 
 prepare_environment(**settings)

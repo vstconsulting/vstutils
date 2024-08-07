@@ -39,18 +39,18 @@
 
 <script setup lang="ts">
     import { computed, ref, set } from 'vue';
-    import Card from '@/vstutils/components/Card.vue';
-    import ModelFields from '@/vstutils/components/page/ModelFields.vue';
-    import { emptyRepresentData } from '@/vstutils/utils';
-    import type { NestedObjectField } from '@/vstutils/fields/nested-object/index';
-    import type ArrayField from '@/vstutils/fields/array/ArrayField';
-    import type { FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import Card from '#vstutils/components/Card.vue';
+    import ModelFields from '#vstutils/components/page/ModelFields.vue';
+    import { emptyRepresentData } from '#vstutils/utils';
+    import type { NestedObjectField } from '#vstutils/fields/nested-object/index';
+    import type ArrayField from '#vstutils/fields/array/ArrayField';
+    import type { FieldEditPropsDefType } from '#vstutils/fields/base';
     import {
         FieldEditPropsDef,
         type ExtractRepresent,
         type SetFieldValueOptions,
-    } from '@/vstutils/fields/base';
-    import { HideButton } from '@/vstutils/fields/buttons';
+    } from '#vstutils/fields/base';
+    import { HideButton } from '#vstutils/fields/buttons';
 
     type Value = ExtractRepresent<ArrayField<NestedObjectField>>;
 

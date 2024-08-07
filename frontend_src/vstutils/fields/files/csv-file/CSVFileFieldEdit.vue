@@ -28,17 +28,18 @@
     </div>
 </template>
 <script setup lang="ts">
-    import { computed, ref } from 'vue';
+    import { computed, defineAsyncComponent, ref } from 'vue';
 
-    import { i18n } from '@/vstutils/translation';
-    import { readFileAsText } from '@/vstutils/utils';
-    import { FieldEditPropsDef } from '@/vstutils/fields/base';
-    import ConfirmModal from '@/vstutils/components/common/ConfirmModal.vue';
-    import DataTable from './DataTable.vue';
+    import { i18n } from '#vstutils/translation';
+    import { readFileAsText } from '#vstutils/utils';
+    import { FieldEditPropsDef } from '#vstutils/fields/base';
+    import ConfirmModal from '#vstutils/components/common/ConfirmModal.vue';
     import FileFieldSelector from '../FileFieldSelector.vue';
 
-    import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import type { ExtractRepresent, FieldEditPropsDefType } from '#vstutils/fields/base';
     import type { CsvFileField } from './index';
+
+    const DataTable = defineAsyncComponent(() => import('./DataTable.vue'));
 
     const props = defineProps(FieldEditPropsDef as FieldEditPropsDefType<CsvFileField>);
 

@@ -12,12 +12,12 @@
 
 <script setup lang="ts">
     import { toRef } from 'vue';
-    import { readFileAsObject } from '@/vstutils/utils';
-    import { FieldEditPropsDef } from '@/vstutils/fields/base';
+    import { readFileAsObject } from '#vstutils/utils';
+    import { FieldEditPropsDef } from '#vstutils/fields/base';
     import SingleFileInput from '../SingleFileInput.vue';
     import { useNamedFileText, validateNamedFilesContentSize } from './utils';
 
-    import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import type { ExtractRepresent, FieldEditPropsDefType } from '#vstutils/fields/base';
     import type NamedBinaryFileField from './NamedBinaryFileField';
 
     const props = defineProps(FieldEditPropsDef as FieldEditPropsDefType<NamedBinaryFileField>);

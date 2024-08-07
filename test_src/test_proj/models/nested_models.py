@@ -1,10 +1,6 @@
 from django.db import models
-from django.dispatch import receiver
-from django.db.models.signals import pre_delete
-from django.core.validators import ValidationError
+from django.core.validators import MinValueValidator
 from rest_framework.permissions import BasePermission
-from rest_framework.request import Request
-from rest_framework.views import APIView
 
 from vstutils.models import BaseModel
 
@@ -35,14 +31,14 @@ class Attribute(BaseModel):
 
 class Product(BaseModel):
     name = models.CharField(max_length=255)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     store = models.ForeignKey('Store', on_delete=models.CASCADE)
     manufacturer = models.ForeignKey('Manufacturer', on_delete=models.CASCADE)
 
     class Meta:
         default_related_name = 'products'
         constraints = [
-            models.UniqueConstraint(fields=['name', 'store'], name='uniq_name_store')
+            models.UniqueConstraint(models.F('name'), models.F('store'), name='uniq_name_store')
         ]
         _nested = {
             'options': {
@@ -79,6 +75,7 @@ class Store(BaseModel):
             'products': {
                 'allow_append': True,
                 'model': Product,
+                'allow_bulk': False,
             },
             'manufacturers': {
                 'allow_append': False,

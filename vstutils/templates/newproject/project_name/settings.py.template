@@ -3,18 +3,3 @@ from vstutils.settings import *  # noqa: F403
 INSTALLED_APPS += [  # noqa: F405
     '{{project_name}}',
 ]
-
-# Uncomment lines below if you want to use default webpack config
-# SPA_STATIC_FILES_PROVIDERS[VST_PROJECT] = {
-#     'BACKEND': 'vstutils.static_files.WebpackJsonStaticObjectHandler',
-#     'OPTIONS': {
-#         'priority': 10,
-#         'json_file': os.path.join(
-#             os.path.dirname(vst_lib_module.__file__),
-#             'static',
-#             '{{project_name}}',
-#             'bundle',
-#             'output.json'
-#         ),
-#     }
-# }

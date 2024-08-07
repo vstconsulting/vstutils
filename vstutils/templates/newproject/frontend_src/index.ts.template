@@ -1,0 +1,7 @@
+import { initApp } from '@vstconsulting/vstutils';
+
+initApp({
+  api: {
+    url: new URL('/api/', window.location.origin).toString(),
+  },
+});

@@ -4,6 +4,7 @@ import inspect
 
 from django.db import models
 from django.db.models.expressions import RawSQL
+from django.core.exceptions import EmptyResultSet
 from django.utils.functional import cached_property, lazy
 from django.conf import settings
 
@@ -146,12 +147,19 @@ class BQuerySet(models.QuerySet):
         initial_qs.query.clear_select_fields()
         initial_qs.query.clear_select_clause()
         initial_qs = initial_qs.values(origin_model_pk)
+        initial_qs.query.clear_limits()
+
+        try:
+            initial_sql = str(initial_qs.query)
+        except EmptyResultSet:
+            return initial_qs.none()
+
         sql = ' '.join((
             'WITH RECURSIVE NRQ777 as (',
                     f'SELECT NU777.{sql_column_to_get}, NU777.{sql_deep_column}',  # noqa: E131
                     f'FROM {sql_table} NU777',
                     f'WHERE NU777.{sql_deep_column}',
-                        f'IN ({str(initial_qs.query)})',  # noqa: E131
+                        f'IN ({initial_sql})',  # noqa: E131
                 'UNION',  # noqa: E131
                     f'SELECT NU777_1.{sql_column_to_get}, NU777_1.{sql_deep_column}',
                     f'FROM {sql_table} NU777_1',
@@ -162,8 +170,10 @@ class BQuerySet(models.QuerySet):
         ))
 
         if with_current:
-            sql += f' UNION {initial_qs.query}'
-        return self.model.objects.filter(id__in=RawSQL(sql, []))  # nosec
+            sql += f' UNION {initial_sql}'
+        chain = self.model.objects.filter(id__in=RawSQL(sql, []))  # nosec
+        chain.query.set_limits(self.query.low_mark, self.query.high_mark)
+        return chain
 
     def _deep_nested_ids_without_cte(self, accumulated=None, deep_children=True):
         deep_parent_field = self.model.deep_parent_field

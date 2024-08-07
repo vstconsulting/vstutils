@@ -15,11 +15,11 @@ import {
     watch,
 } from 'vue';
 
-import { useAutoUpdate } from '@/vstutils/autoupdate';
-import { useBreadcrumbs } from '@/vstutils/breadcrumbs';
-import { ModelValidationError } from '@/vstutils/models';
-import { filterOperations, signals } from '@/vstutils/signals';
-import { i18n } from '@/vstutils/translation';
+import { useAutoUpdate } from '#vstutils/autoupdate';
+import { useBreadcrumbs } from '#vstutils/breadcrumbs';
+import { ModelValidationError } from '#vstutils/models';
+import { filterOperations, signals } from '#vstutils/signals';
+import { i18n } from '#vstutils/translation';
 import { useRoute } from 'vue-router/composables';
 import {
     getApp,
@@ -33,19 +33,19 @@ import {
     emptyRepresentData,
     emptyInnerData,
     classesFromFields,
-} from '@/vstutils/utils';
+} from '#vstutils/utils';
 
 import type { Ref } from 'vue';
 import type { NavigationGuard, Route } from 'vue-router';
-import type { QuerySet } from '@/vstutils/querySet';
-import type { IView, ActionView, NotEmptyAction, ViewStore, DetailView } from '@/vstutils/views';
-import type { Model, ModelConstructor } from '@/vstutils/models';
-import type { IApp } from '@/vstutils/app';
-import type { RepresentData, InnerData } from '@/vstutils/utils';
+import type { QuerySet } from '#vstutils/querySet';
+import type { IView, ActionView, NotEmptyAction, ViewStore, DetailView } from '#vstutils/views';
+import type { Model, ModelConstructor } from '#vstutils/models';
+import type { IApp } from '#vstutils/app';
+import type { RepresentData, InnerData } from '#vstutils/utils';
 import type { BaseViewStore } from './page-types';
 import type { SetFieldValueOptions } from '../fields/base';
 
-export function useParentViews() {
+export function useParentViews(params?: { getPath?: () => string }) {
     interface Item {
         view: IView;
         state: unknown;
@@ -55,10 +55,12 @@ export function useParentViews() {
     const items = ref<Item[]>([]);
     const itemsMap = computed(() => new Map(items.value.map((item) => [item.view.path, item])));
 
+    const getPath = params?.getPath ?? (() => getApp().router.currentRoute.path);
+
     async function push(store: BaseViewStore): Promise<void> {
         const view = store.view;
         const router = getApp().router;
-        const path = router.currentRoute.path;
+        const path = getPath();
 
         const promises: Promise<Item>[] = [];
 
@@ -269,7 +271,7 @@ export function filterNonEmpty(obj: Record<string, any>) {
 export function useListFilters(qs: Ref<QuerySet>) {
     const app = getApp();
     const count = ref(0);
-    const pageSize = ref(app.config.defaultPageLimit);
+    const pageSize = ref(app.defaultPageLimit);
     const pageNumber = ref(1);
     const filters = ref<InnerData>(emptyInnerData());
 
@@ -471,6 +473,7 @@ export const createActionStore = (view: ActionView) => {
                 method: view.method,
                 path: view.getRequestPath(app.router.currentRoute),
                 throwError: true,
+                auth: view.isSecure,
             });
             pageWithEditableData.instance.value!.sandbox.markUnchanged();
             pageWithEditableData.fieldsErrors.value = {};

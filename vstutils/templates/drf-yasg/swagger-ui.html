@@ -2,3 +2,24 @@
 {% load static %}
 
 {% block title %}{{ project_gui_name }} – OpenApi</title>{% endblock %}
+
+{% block extra_scripts %}
+    <script type="application/javascript">
+        swaggerUiConfig.responseInterceptor = function (response) {
+            // Parse the response body to modify it
+            let body = JSON.parse(response.text);
+
+            // Remove specific authentication method
+            const authMethodToHide = 'session'; // Replace with the actual method name
+            if (body.securityDefinitions && body.securityDefinitions[authMethodToHide]) {
+                delete body.securityDefinitions[authMethodToHide];
+            }
+
+            // Convert the modified body back to JSON string
+            response.text = JSON.stringify(body);
+
+            return response;
+        }
+        window.addEventListener('load', initSwaggerUi);
+    </script>
+{% endblock %}

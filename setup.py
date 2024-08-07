@@ -1,6 +1,10 @@
 import os
 import sys
 from vstcompile import make_setup, load_requirements
+try:
+    from setuptools_rust import RustExtension, Binding
+except ImportError:
+    RustExtension = None
 
 
 # allow setup.py to be run from any path
@@ -38,14 +42,14 @@ requirements_rpc = load_requirements('requirements-rpc.txt')
 kwargs = dict(
     ext_modules_list=ext_list,
     static_exclude_min=[
-        'vstutils/templates/.*\.js$',
-        'vstutils/static/bundle/.*\.js$'
+        r'vstutils/templates/.*\.js$',
+        r'vstutils/static/spa/.*\.js$'
+        r'vstutils/static/spa/.*\.css$'
     ],
     install_requires=[
-        "django~=" + (os.environ.get('DJANGO_DEP', "") or "4.2.10"),
+        "django~=" + (os.environ.get('DJANGO_DEP', "") or "5.0.8"),
     ]
-    + requirements
-    + load_requirements('requirements-doc.txt'),
+    + requirements,
     extras_require={
         'test': load_requirements('requirements-test.txt'),
         'rpc': requirements_rpc,
@@ -53,7 +57,7 @@ kwargs = dict(
         'doc': load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
         'stubs': load_requirements('requirements-stubs.txt'),
-        'pil': ['Pillow~=10.2.0'],
+        'pil': ['Pillow~=10.4.0'],
         'boto3': [
             i.replace('libcloud', 'libcloud,s3')
             for i in requirements
@@ -67,6 +71,12 @@ kwargs = dict(
         'console_scripts': ['vstutilsctl=vstutils.__main__:cmd_execution']
     },
 )
+
+if RustExtension is not None and os.path.exists("vstutils_utils/Cargo.toml") and os.environ.get('BUILD_OPTIMIZATION', 'false') == 'true':
+    kwargs['rust_extensions'] = [
+        RustExtension("vstutils._utils", path="vstutils_utils/Cargo.toml", binding=Binding.PyO3),
+        RustExtension("vstutils._tools", path="vstutils_tools/Cargo.toml", binding=Binding.PyO3),
+    ]
 
 all_deps = []
 for key, deps in kwargs['extras_require'].items():

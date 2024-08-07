@@ -1,5 +1,4 @@
-import { test, expect } from '@jest/globals';
-import { createApp, createSchema, schemaListOf } from '@/unittests';
+import { createApp, createSchema, schemaListOf } from '#unittests';
 
 test('app will return an error if the path for the FK request is not found', async () => {
     const fk = {

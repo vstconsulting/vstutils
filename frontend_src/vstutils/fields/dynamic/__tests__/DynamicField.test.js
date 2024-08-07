@@ -1,9 +1,8 @@
-import { beforeAll, describe, expect, test } from '@jest/globals';
-import { createApp } from '@/unittests/create-app';
-import { BooleanField } from '@/vstutils/fields/boolean';
-import { ChoicesField } from '@/vstutils/fields/choices';
-import { StringField } from '@/vstutils/fields/text';
-import { X_OPTIONS } from '@/vstutils/utils';
+import { createApp } from '#unittests/create-app';
+import { BooleanField } from '#vstutils/fields/boolean';
+import { ChoicesField } from '#vstutils/fields/choices';
+import { StringField } from '#vstutils/fields/text';
+import { X_OPTIONS } from '#vstutils/utils';
 import { DynamicField } from '../DynamicField';
 
 describe('DynamicField', () => {

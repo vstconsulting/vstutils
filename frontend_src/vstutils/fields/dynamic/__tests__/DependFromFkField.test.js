@@ -1,6 +1,11 @@
-import { describe, expect, test, beforeAll, beforeEach } from '@jest/globals';
-import { createApp, createSchema, schemaListOf, mountApp, waitForPageLoading, openPage } from '@/unittests';
-import fetchMock from 'jest-fetch-mock';
+import {
+    createApp,
+    createSchema,
+    schemaListOf,
+    waitForPageLoading,
+    openPage,
+    expectNthRequest,
+} from '#unittests';
 
 const schema = createSchema({
     paths: {
@@ -110,8 +115,6 @@ describe('DependFromFkField', () => {
 
     beforeAll(async () => {
         app = await createApp({ schema });
-        await mountApp();
-        fetchMock.enableMocks();
     });
 
     beforeEach(async () => {
@@ -165,7 +168,7 @@ describe('DependFromFkField', () => {
 
         expect(fetchMock).toBeCalledTimes(2);
         // page hit
-        expect(fetchMock.mock.calls[0][1]).toStrictEqual({
+        expectNthRequest(0, {
             method: 'put',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify([
@@ -176,7 +179,7 @@ describe('DependFromFkField', () => {
             ]),
         });
         // prefetch hit
-        expect(fetchMock.mock.calls[1][1]).toStrictEqual({
+        expectNthRequest(1, {
             method: 'put',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify([

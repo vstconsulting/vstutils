@@ -1,8 +1,7 @@
-import { expect, test } from '@jest/globals';
-import { createApp, createSchema } from '@/unittests';
-import { useEntityViewClasses } from '@/vstutils/store';
+import { createApp, createSchema } from '#unittests';
+import { useEntityViewClasses } from '#vstutils/store';
 import { ref } from 'vue';
-import { emptyRepresentData } from '@/vstutils/utils';
+import { emptyRepresentData } from '#vstutils/utils';
 
 test('fields container classes', async () => {
     const app = await createApp({ schema: createSchema() });

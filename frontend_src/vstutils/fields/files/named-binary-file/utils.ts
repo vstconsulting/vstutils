@@ -1,8 +1,8 @@
 import { computed } from 'vue';
-import { i18n } from '@/vstutils/translation';
-import { guiPopUp } from '@/vstutils/popUp';
+import { i18n } from '#vstutils/translation';
+import { guiPopUp } from '#vstutils/popUp';
 import type { Ref } from 'vue';
-import type { Field } from '@/vstutils/fields/base';
+import type { Field } from '#vstutils/fields/base';
 import { fileIsTooLarge, fileIsTooSmall } from '../file';
 
 export interface NamedFile {

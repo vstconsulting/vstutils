@@ -1,52 +1,61 @@
-import type { Vue } from 'vue/types/vue';
 import type { ComponentOptions } from 'vue';
 import type VueRouter from 'vue-router';
+import Vue from 'vue';
 
-import Centrifuge from 'centrifuge';
+import type { Centrifuge as CentrifugeBase } from 'centrifuge';
 import { defineStore } from 'pinia';
-import type VueI18n from 'vue-i18n';
+import type { CustomVueI18n } from './translation';
 
-import { ActionsManager } from '@/vstutils/actions';
-import type { ApiConnector } from '@/vstutils/api';
-import { apiConnector } from '@/vstutils/api';
-import type { Language } from '@/vstutils/api/TranslationsManager';
-import { TranslationsManager } from '@/vstutils/api/TranslationsManager';
-import type { AppConfiguration } from '@/vstutils/AppConfiguration';
-import AppRoot from '@/vstutils/AppRoot.vue';
-import { AutoUpdateController } from '@/vstutils/autoupdate';
-import type { ComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
-import { globalComponentsRegistrator } from '@/vstutils/ComponentsRegistrator';
-import { addDefaultFields, FieldsResolver } from '@/vstutils/fields';
-import type { Model, ModelConstructor } from '@/vstutils/models';
-import { ModelsResolver } from '@/vstutils/models';
-import { ErrorHandler } from '@/vstutils/popUp';
-import { QuerySetsResolver } from '@/vstutils/querySet';
-import { RouterConstructor } from '@/vstutils/router';
+import { ActionsManager } from '#vstutils/actions';
+import type { ApiConnector } from '#vstutils/api';
+import { apiConnector } from '#vstutils/api';
+import type { Language } from '#vstutils/api/TranslationsManager';
+import { TranslationsManager } from '#vstutils/api/TranslationsManager';
+import type { AppSchema } from '#vstutils/schema';
+import AppRoot from '#vstutils/AppRoot.vue';
+import { AutoUpdateController } from '#vstutils/autoupdate';
+import type { ComponentsRegistrator } from '#vstutils/ComponentsRegistrator';
+import { globalComponentsRegistrator } from '#vstutils/ComponentsRegistrator';
+import { addDefaultFields, FieldsResolver } from '#vstutils/fields';
+import type { ModelConstructor } from '#vstutils/models';
+import { ModelsResolver } from '#vstutils/models';
+import { ErrorHandler } from '#vstutils/popUp';
+import { QuerySetsResolver } from '#vstutils/querySet';
+import { RouterConstructor } from '#vstutils/router';
 import {
     APP_AFTER_INIT,
     APP_BEFORE_INIT,
     APP_CREATED,
     SCHEMA_MODELS_CREATED,
     signals,
-} from '@/vstutils/signals';
-import type { GlobalStore, LocalSettingsStore, UserSettingsStore } from '@/vstutils/store';
-import { createLocalSettingsStore, createUserSettingsStore, GLOBAL_STORE, pinia } from '@/vstutils/store';
-import { i18n } from '@/vstutils/translation';
-import * as utils from '@/vstutils/utils';
-import type { IView, BaseView } from '@/vstutils/views';
-import { ListView, PageNewView, PageView, ViewsTree } from '@/vstutils/views';
-import ViewConstructor from '@/vstutils/views/ViewConstructor.js';
-import { setupPushNotifications } from '@/vstutils/webpush';
+} from '#vstutils/signals';
+import type { GlobalStore, LocalSettingsStore, UserSettingsStore } from '#vstutils/store';
+import { createLocalSettingsStore, createUserSettingsStore, GLOBAL_STORE, pinia } from '#vstutils/store';
+import { i18n } from '#vstutils/translation';
+import * as utils from '#vstutils/utils';
+import type { IView, BaseView } from '#vstutils/views';
+import { ListView, PageNewView, PageView, ViewsTree } from '#vstutils/views';
+import ViewConstructor from '#vstutils/views/ViewConstructor.js';
+import { setupPushNotifications } from '#vstutils/webpush';
+import type { UserProfile, InitAppConfig } from './init-app';
 
-import type { Cache } from '@/cache';
-import type { InnerData } from '@/vstutils/utils';
-import type { GlobalStoreInitialized } from '@/vstutils/store/globalStore';
+import type { GlobalStoreInitialized } from '#vstutils/store/globalStore';
 
-export function getCentrifugoClient(address?: string, token?: string) {
+export interface Centrifuge extends CentrifugeBase {
+    isConnected: boolean;
+}
+
+export async function getCentrifugoClient(address?: string, token?: string): Promise<Centrifuge | undefined> {
     if (!address) {
-        return null;
+        return;
     }
-    const client = new Centrifuge(address);
+    const { Centrifuge, State } = await import('centrifuge');
+    class CentrifugoClient extends Centrifuge {
+        get isConnected() {
+            return this.state === State.Connected;
+        }
+    }
+    const client = new CentrifugoClient(address);
     if (token) {
         client.setToken(token);
     }
@@ -56,11 +65,13 @@ export function getCentrifugoClient(address?: string, token?: string) {
 type TAppRoot = InstanceType<typeof AppRoot>;
 
 export interface IApp {
-    config: AppConfiguration;
+    config: InitAppConfig;
     vue: typeof Vue;
-    cache: Cache;
-
-    schema: AppConfiguration['schema'];
+    version: string;
+    defaultPageLimit: number;
+    schema: AppSchema;
+    userProfile: UserProfile;
+    projectName: string;
 
     fieldsResolver: FieldsResolver;
     modelsResolver: ModelsResolver;
@@ -70,14 +81,13 @@ export interface IApp {
     viewsTree: ViewsTree | null;
     global_components: ComponentsRegistrator;
 
-    centrifugoClient: Centrifuge | null;
+    centrifugoClient?: Centrifuge;
 
     router: VueRouter | null;
-    i18n: VueI18n;
+    i18n: CustomVueI18n;
 
     api: ApiConnector;
     languages: Language[] | null;
-    user: Model | null;
 
     appRootComponent: ComponentOptions<Vue>;
     additionalRootMixins: ComponentOptions<Vue>[];
@@ -98,17 +108,18 @@ export interface IApp {
 
     darkModeEnabled: boolean;
 
-    start(): void;
+    start(): Promise<void>;
     mount(target: HTMLElement | string): void;
 
     initActionConfirmationModal(options: { title: string }): Promise<void>;
     openReloadPageModal(): void;
     setLanguage(lang: string): void;
+
+    _mounted?: InstanceType<typeof Vue>;
 }
 
 export interface IAppInitialized extends IApp {
     router: VueRouter;
-    user: Model;
     rootVm: TAppRoot;
     localSettingsStore: LocalSettingsStore;
     localSettingsModel: ModelConstructor;
@@ -117,12 +128,20 @@ export interface IAppInitialized extends IApp {
     store: GlobalStoreInitialized;
 }
 
-export class App implements IApp {
-    config: AppConfiguration;
-    vue: typeof Vue;
-    cache: Cache;
+interface AppParams {
+    config: InitAppConfig;
+    schema: AppSchema;
+    userProfile: UserProfile;
+    vue?: typeof Vue;
+}
 
-    schema: AppConfiguration['schema'];
+export class App implements IApp {
+    config: InitAppConfig;
+    vue: typeof Vue;
+    version: string;
+    defaultPageLimit: number;
+    schema: AppSchema;
+    projectName: string;
 
     fieldsResolver: FieldsResolver;
     modelsResolver: ModelsResolver;
@@ -132,15 +151,15 @@ export class App implements IApp {
     viewsTree: ViewsTree | null = null;
     global_components: ComponentsRegistrator;
 
-    centrifugoClient: Centrifuge | null;
+    centrifugoClientPromise: Promise<Centrifuge | undefined>;
+    centrifugoClient?: Centrifuge;
 
     router: VueRouter | null;
-    i18n: VueI18n;
+    i18n: CustomVueI18n;
 
     api: ApiConnector;
     languages: Language[] | null;
-    rawUser: InnerData | null;
-    user: Model | null;
+    userProfile: UserProfile;
 
     appRootComponent: ComponentOptions<Vue>;
     additionalRootMixins: ComponentOptions<Vue>[];
@@ -159,25 +178,29 @@ export class App implements IApp {
 
     rootVm: TAppRoot | null = null;
     application: unknown | null = null;
+    _mounted?: InstanceType<typeof Vue>;
 
-    constructor(config: AppConfiguration, cache: Cache, vue?: typeof Vue) {
+    constructor({ config, schema, vue, userProfile }: AppParams) {
         globalThis.__currentApp = this;
         this.config = config;
 
-        this.vue = vue ?? globalThis.Vue;
-        this.schema = config.schema;
+        this.vue = vue ?? Vue;
+        this.schema = schema;
+        this.userProfile = userProfile;
         this.router = null;
-        this.cache = cache;
         this.i18n = i18n;
+        this.version = this.schema.info['x-versions'].application;
+        this.defaultPageLimit = this.schema.info['x-page-limit'] ?? 20;
+        this.projectName = this.schema.info.title;
 
         /**
          * Object, that manages connection with API (sends API requests).
          */
-        this.api = apiConnector.initConfiguration(config);
+        this.api = apiConnector.initConfiguration(this);
 
-        this.translationsManager = new TranslationsManager(apiConnector, cache);
+        this.translationsManager = new TranslationsManager(config);
 
-        this.centrifugoClient = getCentrifugoClient(
+        this.centrifugoClientPromise = getCentrifugoClient(
             this.schema.info['x-centrifugo-address'],
             this.schema.info['x-centrifugo-token'],
         );
@@ -189,14 +212,6 @@ export class App implements IApp {
 
         this.languages = null;
         /**
-         * Property that stores raw user response
-         */
-        this.rawUser = null;
-        /**
-         * Object, that stores data of authorized user.
-         */
-        this.user = null;
-        /**
          * Object that stores Vue components which are must be registered globally
          */
         this.global_components = globalComponentsRegistrator;
@@ -206,9 +221,9 @@ export class App implements IApp {
         this.appRootComponent = AppRoot as unknown as ComponentOptions<Vue>;
         this.additionalRootMixins = [];
 
-        this.fieldsResolver = new FieldsResolver(this.config.schema);
+        this.fieldsResolver = new FieldsResolver(this.schema);
         addDefaultFields(this.fieldsResolver);
-        this.modelsResolver = new ModelsResolver(this.fieldsResolver, this.config.schema);
+        this.modelsResolver = new ModelsResolver(this.fieldsResolver, this.schema);
 
         /** @type {QuerySetsResolver} */
         this.qsResolver = null;
@@ -226,12 +241,25 @@ export class App implements IApp {
 
         setupPushNotifications(this);
 
+        config.auth.userManager.startSilentRenew();
+        config.auth.userManager.events.addSilentRenewError((e) => {
+            if ('error' in e && e.error === 'invalid_request') {
+                window.location.reload();
+                return;
+            }
+            console.log('Silent renew error', e);
+        });
+
         signals.emit(APP_CREATED, this);
     }
 
     async start() {
-        if (this.centrifugoClient) {
-            this.centrifugoClient.connect();
+        await this.api.initialized();
+        if (this.centrifugoClientPromise) {
+            this.centrifugoClient = await this.centrifugoClientPromise;
+            if (this.centrifugoClient) {
+                this.centrifugoClient.connect();
+            }
         }
 
         let userSettingsModel: ModelConstructor;
@@ -243,23 +271,17 @@ export class App implements IApp {
         }
         this.userSettingsStore = createUserSettingsStore(this.api, userSettingsModel)(pinia);
 
-        const [languages, translations, rawUser] = await Promise.all([
-            this.translationsManager.getLanguages(),
-            this.translationsManager.getTranslations(this.i18n.locale),
-            this.api.loadUser(),
+        const [languages, translations] = await Promise.all([
+            this.translationsManager.loadLanguages(),
+            this.translationsManager.loadTranslations(this.i18n.locale),
             this.userSettingsStore.init(),
         ]);
         this.languages = languages;
-        this.i18n.messages[this.i18n.locale] = translations;
-        this.rawUser = rawUser;
+        this.i18n.setLocaleMessage(this.i18n.locale, translations);
 
-        void this.setLanguage(this.i18n.locale);
+        void this.setLanguage(this.i18n.locale, { skipLoad: true });
 
         this.afterInitialDataBeforeMount();
-
-        const usersQs = this.views.get('/user/')?.objects;
-        const UserModel = usersQs?.getResponseModelClass(utils.RequestTypes.RETRIEVE);
-        this.user = new UserModel!(this.rawUser, usersQs);
 
         this.global_components.registerAll(this.vue);
 
@@ -277,7 +299,7 @@ export class App implements IApp {
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         this.views = new ViewConstructor(undefined, this.modelsResolver, this.fieldsResolver).generateViews(
-            this.config.schema,
+            this.schema,
         );
 
         this.viewsTree = new ViewsTree(this.views);
@@ -287,7 +309,7 @@ export class App implements IApp {
     }
 
     generateDefinitionsModels() {
-        for (const name of Object.keys(this.config.schema.definitions)) {
+        for (const name of Object.keys(this.schema.definitions)) {
             this.modelsResolver.byReferencePath(`#/definitions/${name}`);
         }
         signals.emit(SCHEMA_MODELS_CREATED, { app: this, models: this.modelsResolver._definitionsModels });
@@ -370,14 +392,15 @@ export class App implements IApp {
      * Method returns a promise of applying some language to app interface.
      * This method is supposed to be called after app was mounted.
      */
-    setLanguage(lang: string) {
-        return this._prefetchTranslation(lang).then(() => {
-            this.i18n.locale = lang;
-            signals.emit('app.language.changed', { lang });
-            document.documentElement.setAttribute('lang', lang);
-            document.cookie = `lang=${lang}`;
-            return lang;
-        });
+    async setLanguage(lang: string, opts?: { skipLoad?: boolean }) {
+        if (!opts?.skipLoad) {
+            await this._prefetchTranslation(lang);
+        }
+        this.i18n.locale = lang;
+        signals.emit('app.language.changed', { lang });
+        document.documentElement.setAttribute('lang', lang);
+        document.cookie = `lang=${lang}`;
+        return lang;
     }
 
     /**
@@ -390,7 +413,7 @@ export class App implements IApp {
         }
 
         return this.translationsManager
-            .getTranslations(lang)
+            .loadTranslations(lang)
             .then((transitions) => this.i18n.setLocaleMessage(lang, transitions));
     }
 
@@ -434,9 +457,9 @@ export class App implements IApp {
         this.rootVm = new Vue({
             mixins: [this.appRootComponent, ...this.additionalRootMixins],
             propsData: {
-                info: this.config.schema.info,
-                x_menu: this.config.schema.info['x-menu'],
-                x_docs: this.config.schema.info['x-docs'],
+                info: this.schema.info,
+                x_menu: this.schema.info['x-menu'],
+                x_docs: this.schema.info['x-docs'],
             },
             pinia,
             router: this.router,
@@ -451,11 +474,12 @@ export class App implements IApp {
         return (this.userSettingsStore?.settings.main?.dark_mode as boolean | undefined) ?? false;
     }
 
-    mount(target: HTMLElement | string = '#RealBody') {
+    mount(target: HTMLElement | string) {
         if (!this.rootVm) {
             throw new Error('Please initialize app first');
         }
-        this.rootVm.$mount(target);
+        // @ts-expect-error Vue 2 types is a mess
+        this._mounted = this.rootVm.$mount(target);
     }
 
     initActionConfirmationModal({ title }: { title: string }): Promise<void> {

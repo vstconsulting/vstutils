@@ -202,11 +202,11 @@
 
             /**
              * Method, that parse value of single crontab element from crontab string.
-             * @param {array} resArr
+             * @param {Array} resArr
              * @param {string} str
              * @param {number} minInt
              * @param {number} maxInt
-             * @return {array}
+             * @return {Array}
              */
             parseItem(resArr, str, minInt, maxInt) {
                 for (let i = minInt; i <= maxInt; i++) {
@@ -401,7 +401,7 @@
             },
             /**
              * Method, that compiles value of single crontab element.
-             * @param {array} resArr
+             * @param {Array} resArr
              * @param {number} minInt
              * @param {number} maxInt
              * @return {string}

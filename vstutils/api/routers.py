@@ -16,7 +16,6 @@ class _AbstractRouter(routers.DefaultRouter):
         super().__init__(*args, **kwargs)
 
     def get_method_map(self, viewset, method_map):
-        # TODO: Remove it after 3.15 release with https://github.com/encode/django-rest-framework/pull/9057
         bound_methods = {}
         for method, action in method_map.items():
             if getattr(viewset, action, None) is not None:
@@ -90,11 +89,13 @@ class _AbstractRouter(routers.DefaultRouter):
                 view = import_string(options['view'])
             elif 'model' in options:
                 view = import_string(options['model']).generated_view
+
             args = [prefix, view]
             if 'name' in options:
                 args.append(options['name'])
             elif getattr(view, 'base_name', None) is None:
                 args.append(prefix)
+
             view_type = options.get('type', 'viewset')
             if view_type == 'viewset':
                 self.register(*args)

@@ -1,8 +1,8 @@
 import type { ComponentOptions } from 'vue';
 import { FKField } from '../fk/FKField';
 import FKAutocompleteFieldMixin from './FKAutocompleteFieldMixin';
-import type { FieldOptions } from '@/vstutils/fields/base';
-import type { FKFieldXOptions, TInner } from '@/vstutils/fields/fk/fk/FKField';
+import type { FieldOptions } from '#vstutils/fields/base';
+import type { FKFieldXOptions, TInner } from '#vstutils/fields/fk/fk/FKField';
 
 /**
  * FkField with autocomplete feature for GUI.

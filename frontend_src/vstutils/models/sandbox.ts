@@ -1,11 +1,11 @@
 import Vue, { computed, customRef, markRaw, ref } from 'vue';
 
-import { emptyRepresentData } from '@/vstutils/utils';
-import { emptyInnerData } from '@/vstutils/utils';
+import { emptyRepresentData } from '#vstutils/utils';
+import { emptyInnerData } from '#vstutils/utils';
 import { ModelValidationError, type FieldValidationErrorInfo } from './errors';
 
-import type { RepresentData } from '@/vstutils/utils';
-import type { SetFieldValueOptions } from '@/vstutils/fields/base';
+import type { RepresentData } from '#vstutils/utils';
+import type { SetFieldValueOptions } from '#vstutils/fields/base';
 import type { Model, ModelConstructor } from './Model';
 import { getAdditionalPropertiesField, hasAdditionalProperties } from '../additionalProperties';
 
@@ -219,7 +219,7 @@ export function createModelSandbox(instance: Model) {
         _changedFields.value.clear();
     }
 
-    return markRaw({
+    const sandbox = {
         set,
         setPrefetchedValue,
         reset,
@@ -240,5 +240,7 @@ export function createModelSandbox(instance: Model) {
             // (https://blog.vuejs.org/posts/vue-2-7-naruto)
             return getData();
         },
-    });
+    };
+
+    return markRaw(sandbox) as typeof sandbox;
 }

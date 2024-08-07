@@ -1,7 +1,7 @@
 import type { Field, FieldOptions, FieldXOptions } from './base';
 import { BaseField } from './base';
 import { ENUM_TYPES, hasOwnProp, SCHEMA_DATA_TYPE, SCHEMA_DATA_TYPE_VALUES } from '../utils';
-import type { AppSchema } from '../AppConfiguration';
+import type { AppSchema } from '../schema';
 import type { ParameterType } from 'swagger-schema-official';
 
 const X_FORMAT = 'x-format';
@@ -21,7 +21,7 @@ export class FieldsResolver {
     _schema: AppSchema;
     _types = new Map<
         ParameterType,
-        Map<string | typeof FieldsResolver['DEFAULT_FIELD_KEY'], new (options: any) => Field>
+        Map<string | (typeof FieldsResolver)['DEFAULT_FIELD_KEY'], new (options: any) => Field>
     >([
         ['string', new Map()],
         ['number', new Map()],
@@ -48,7 +48,7 @@ export class FieldsResolver {
 
     registerField(
         type: ParameterType,
-        format: string | typeof FieldsResolver['DEFAULT_FIELD_KEY'],
+        format: string | (typeof FieldsResolver)['DEFAULT_FIELD_KEY'],
         fieldClass: new (options: any) => Field,
     ) {
         const typeMap = this._types.get(type);

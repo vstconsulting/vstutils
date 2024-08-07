@@ -1,6 +1,6 @@
 import jQuery from 'jquery';
+import select2 from 'select2/dist/js/select2.full.min.js';
 
-// For jest tests
 let $ = jQuery;
 if (typeof jQuery.default === 'function') {
     $ = jQuery.default;
@@ -9,9 +9,6 @@ if (typeof jQuery.default === 'function') {
 window.jQuery = $;
 window.$ = $;
 
-const select2 = require('select2');
-
-// For jest tests
 if (typeof $.prototype.select2 !== 'function') {
     select2($);
 }

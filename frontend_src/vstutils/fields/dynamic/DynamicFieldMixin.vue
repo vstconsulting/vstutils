@@ -13,15 +13,15 @@
 
 <script lang="ts">
     import { computed, defineComponent, ref, watch } from 'vue';
-    import { deepEqual } from '@/vstutils/utils';
+    import { deepEqual } from '#vstutils/utils';
     import type {
         FieldPropsDefType,
         SetFieldValueOptions,
         Field,
         FieldEmitsDefType,
-    } from '@/vstutils/fields/base';
-    import { FieldEmitsDef } from '@/vstutils/fields/base';
-    import { FieldPropsDef } from '@/vstutils/fields/base';
+    } from '#vstutils/fields/base';
+    import { FieldEmitsDef } from '#vstutils/fields/base';
+    import { FieldPropsDef } from '#vstutils/fields/base';
     import type { DynamicField } from './DynamicField';
 
     export default defineComponent({

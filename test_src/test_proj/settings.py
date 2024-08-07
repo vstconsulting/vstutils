@@ -9,6 +9,14 @@ INSTALLED_APPS += [
 
 MIDDLEWARE.append('vstutils.middleware.TimezoneHeadersMiddleware')
 MIDDLEWARE.insert(0, 'django.middleware.gzip.GZipMiddleware')
+MIDDLEWARE.insert(5, 'django.middleware.security.SecurityMiddleware')
+MIDDLEWARE.insert(6, 'django.contrib.sessions.middleware.SessionMiddleware')
+MIDDLEWARE.insert(8, 'django.contrib.auth.middleware.AuthenticationMiddleware')
+MIDDLEWARE.insert(9, 'django.contrib.messages.middleware.MessageMiddleware')
+
+AUTHENTICATION_BACKENDS.append(
+    'test_proj.user_claims_auth_backend.CustomUserAuthBackend',
+)
 
 HEALTH_BACKEND_CLASS = 'test_proj.health.TestDefaultBackend'
 
@@ -110,6 +118,9 @@ API[VST_API_VERSION][r'cacheable'] = dict(
 API[VST_API_VERSION][r'dynamic_fields'] = dict(
     model='test_proj.models.dynamic_fields.DynamicFields'
 )
+API[VST_API_VERSION][r'oauth2_tests'] = dict(
+    view='test_proj.views.TestOauth2ViewSet',
+)
 API['v2']['testbinaryfiles2'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )
@@ -132,13 +143,19 @@ API[VST_API_VERSION][r'test_changed_fk'] = dict(
     model='test_proj.models.ModelWithChangedFk'
 )
 
-GUI_VIEWS[r'^gui/$'] = ''
+GUI_VIEWS[r'^gui/$'] = r'^csrf_disable_gui/$'
 GUI_VIEWS[r'^csrf_disable_gui/$'] = {
-    'BACKEND': 'vstutils.gui.views.GUIView',
+    'BACKEND': 'vstutils.gui.views.SWView',
     'CSRF_ENABLE': False
 }
+GUI_VIEWS['login'] = {
+    'BACKEND': 'django.contrib.auth.views.LoginView',
+    'OPTIONS': {
+        'name': 'login'
+    }
+}
 GUI_VIEWS[r'^suburls/'] = {
-    'BACKEND': 'test_proj.suburls.urlpatterns'
+    'BACKEND': 'test_proj.suburls.urlpatterns',
 }
 GUI_VIEWS[r'^suburls_namespaced/'] = {
     'BACKEND': 'test_proj.suburls.urlpatterns',
@@ -168,6 +185,21 @@ DATABASE_ROUTERS = ['test_proj.db_router.TestDbRouter']
 DOCKER_DATABASES_TO_MIGRATE = ('primary1',)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.BasicAuthentication',)
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += (
+    'rest_framework.authentication.BasicAuthentication',
+)
 
 WEBPUSH_USER_SETTINGS_VIEW_SUBPATH = 'custom_path'
+
+OAUTH_SERVER_CLIENTS['test-client'] = {
+    'allowed_grant_types': ['password', 'refresh_token'],
+    'token_endpoint_auth_methods': ['client_secret_post', 'client_secret_basic'],
+    'secret': 'test-client-secret',
+}
+
+OAUTH_SERVER_CLIENTS['some-app'] = {
+    'allowed_grant_types': ['authorization_code'],
+    'token_endpoint_auth_methods': ['none'],
+    'allowed_redirect_uris': 'https://some-app.com/auth-callback',
+    'allowed_response_types': ['code'],
+}

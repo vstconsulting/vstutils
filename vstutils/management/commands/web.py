@@ -73,6 +73,7 @@ class Command(BaseCommand):
     uwsgi_default_config = Path(os.path.dirname(__file__)).parent.parent / 'web.ini'
     default_addrport = settings.WEB_ADDRPORT
     prefix = getattr(settings, 'VST_PROJECT_LIB', 'vstutils').upper()
+    requires_system_checks = "__all__"
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
@@ -139,7 +140,7 @@ class Command(BaseCommand):
             f'--set-ph=lib_name={settings.VST_PROJECT_LIB}',
             f'--set-ph=api_path={settings.API_URL}',
             f'--set-ph=vstutils_version={settings.VSTUTILS_VERSION}',
-            f'--env=DJANGO_SETTINGS_MODULE={os.getenv("DJANGO_SETTINGS_MODULE")}',
+            f'--env=DJANGO_SETTINGS_MODULE={settings.DJANGO_SETTINGS_MODULE}',
             f'--python-worker-override={settings.UWSGI_WORKER_PATH}',
             f'--socket={opts["addrport"]}'
         ]

@@ -9,10 +9,10 @@
 
 <script setup lang="ts">
     import { computed } from 'vue';
-    import { i18n } from '@/vstutils/translation';
+    import { i18n } from '#vstutils/translation';
     import Carousel from './Carousel.vue';
 
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type { ExtractRepresent } from '#vstutils/fields/base';
     import type MultipleNamedBinaryImageField from './MultipleNamedBinaryImageField';
 
     const props = defineProps<{

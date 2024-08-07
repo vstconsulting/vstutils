@@ -47,7 +47,7 @@
     import AppModals from './components/common/AppModals.vue';
 
     import type { Component, PropType } from 'vue';
-    import type { XMenu } from './AppConfiguration';
+    import type { XMenu } from './schema';
 
     const DARK_MODE_CLASS = 'dark-mode';
 
@@ -110,7 +110,7 @@
                 return menu;
             },
             showBackButton() {
-                return this.$route.name !== 'home' && this.$route.meta?.view.showBackButton;
+                return this.$route.name !== 'home' && this.$route.meta?.view?.showBackButton;
             },
             showTitle() {
                 return true;
@@ -202,7 +202,6 @@
             async setLanguage(value: string) {
                 if (value && this.$i18n.locale !== value) {
                     await this.$app.setLanguage(value);
-                    await this.$app.cache.delete(window.schemaLoader.cacheKey);
                     await window.schemaLoader.loadSchema();
                 }
             },
@@ -211,6 +210,9 @@
 </script>
 
 <style>
+    .content-wrapper {
+        overflow: hidden;
+    }
     .control-sidebar-enter,
     .control-sidebar-leave-to {
         right: -300px !important;
@@ -220,3 +222,4 @@
         right: 0 !important;
     }
 </style>
+./schema

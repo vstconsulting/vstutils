@@ -1,4 +1,4 @@
-import type { Field } from '@/vstutils/fields/base';
+import type { Field } from '#vstutils/fields/base';
 
 export interface SetFieldValueParams {
     markChanged?: boolean;

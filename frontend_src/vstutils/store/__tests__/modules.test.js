@@ -1,5 +1,4 @@
-import { expect, test, describe, beforeAll } from '@jest/globals';
-import { createApp, createSchema, openPage } from '@/unittests';
+import { createApp, createSchema, openPage } from '#unittests';
 
 describe('List store module', () => {
     let app;

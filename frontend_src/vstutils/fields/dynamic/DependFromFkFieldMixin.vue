@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
     import { watch, ref } from 'vue';
-    import { type FieldPropsDefType, type SetFieldValueOptions, FieldPropsDef } from '@/vstutils/fields/base';
+    import { type FieldPropsDefType, type SetFieldValueOptions, FieldPropsDef } from '#vstutils/fields/base';
     import type { DependFromFkField } from './DependFromFkField';
 
     const props = defineProps(FieldPropsDef as FieldPropsDefType<DependFromFkField>);

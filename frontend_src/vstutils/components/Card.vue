@@ -28,7 +28,7 @@
 </template>
 
 <script>
-    import OverlayLoader from '@/vstutils/components/OverlayLoader.vue';
+    import OverlayLoader from '#vstutils/components/OverlayLoader.vue';
 
     export default {
         components: { OverlayLoader },
@@ -47,6 +47,9 @@
 </script>
 
 <style scoped>
+    .card {
+        word-break: break-all;
+    }
     .card-header {
         display: flex;
         align-items: center;

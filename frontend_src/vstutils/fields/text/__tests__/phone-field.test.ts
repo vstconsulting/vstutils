@@ -1,5 +1,4 @@
-import { expect, test, describe } from '@jest/globals';
-import { createApp, createSchema, mount } from '@/unittests';
+import { createApp, createSchema, mount } from '#unittests';
 
 describe('PhoneField', () => {
     test('country code selector is rendered', async () => {

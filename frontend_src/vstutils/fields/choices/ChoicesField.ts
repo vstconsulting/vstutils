@@ -1,10 +1,10 @@
-import type { Model } from '@/vstutils/models';
-import type { CustomMatcher, TemplateResult, TemplateSelection } from '@/vstutils/select2';
-import { i18n } from '@/vstutils/translation';
+import type { Model } from '#vstutils/models';
+import type { CustomMatcher, TemplateResult, TemplateSelection } from '#vstutils/select2';
+import { i18n } from '#vstutils/translation';
 import type { FieldOptions, FieldXOptions } from '../base';
 import { StringField } from '../text';
 import ChoicesFieldMixin from './ChoicesFieldMixin.js';
-import type { RepresentData } from '@/vstutils/utils';
+import type { RepresentData } from '#vstutils/utils';
 import { ChoicesArrayFieldMixin } from './array';
 
 export type RawEnumItem = string | [string, string] | { value: string; prefetch_value: string } | Model;

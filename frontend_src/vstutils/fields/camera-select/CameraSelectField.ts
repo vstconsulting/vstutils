@@ -1,9 +1,9 @@
 import { computed, h, ref } from 'vue';
 import type { VNode } from 'vue';
 
-import { defineFieldComponent, BaseField } from '@/vstutils/fields/base';
-import type { FieldEditSetupFunction } from '@/vstutils/fields/base';
-import { getApp } from '@/vstutils/utils';
+import { defineFieldComponent, BaseField } from '#vstutils/fields/base';
+import type { FieldEditSetupFunction } from '#vstutils/fields/base';
+import { getApp } from '#vstutils/utils';
 
 const CameraSelectFieldContentEdit: FieldEditSetupFunction<CameraSelectField> = (props, ctx) => {
     const app = getApp();

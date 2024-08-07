@@ -1,4 +1,4 @@
-import { createUniqueIdGenerator } from '@/vstutils/utils';
+import { createUniqueIdGenerator } from '#vstutils/utils';
 
 const DEFAULT_GENERATOR = createUniqueIdGenerator();
 

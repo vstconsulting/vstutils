@@ -1,3 +1,4 @@
+import pathlib
 import json
 import sys
 
@@ -50,7 +51,10 @@ class Command(DockerCommand):
         task = options['task']
         self._print(f'Run "{task}"', 'WARNING')
 
-        kwargs, task = self._parse_arg(json.loads, options['kwargs']), self._parse_arg(import_string, options['task'])()
+        opt_kwargs = options['kwargs'].strip()
+        if not (opt_kwargs.startswith('{') and opt_kwargs.endswith('}')):
+            opt_kwargs = pathlib.Path(opt_kwargs).read_text('utf-8').strip()
+        kwargs, task = self._parse_arg(json.loads, opt_kwargs), self._parse_arg(import_string, options['task'])()
         task_result: AsyncResult = self._parse_arg(task.apply if options['sync'] else task.apply_async, kwargs=kwargs)
 
         self._print(f'Task "{task}" is executed with id "{task_result.task_id}".', 'SUCCESS')

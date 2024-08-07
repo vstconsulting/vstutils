@@ -1,5 +1,5 @@
-import type { FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
-import { BaseField } from '@/vstutils/fields/base';
+import type { FieldOptions, FieldXOptions } from '#vstutils/fields/base';
+import { BaseField } from '#vstutils/fields/base';
 
 import FileFieldMixin from './FileFieldMixin';
 

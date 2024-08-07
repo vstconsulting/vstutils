@@ -1,4 +1,4 @@
-import type { IApp, IAppInitialized } from '@/vstutils/app';
+import type { IApp, IAppInitialized } from '#vstutils/app';
 import { guiPopUp, pop_up_msg } from './popUp';
 import { downloadResponse, emptyInnerData } from './utils';
 import {
@@ -27,7 +27,7 @@ export class ActionsManager {
         return this.app.router.currentRoute.meta?.view as IView;
     }
 
-    execute(args: {
+    async execute(args: {
         action: Action;
         instance?: Model;
         instances?: Model[];
@@ -43,6 +43,13 @@ export class ActionsManager {
             fromList = false,
             disablePopUp = false,
         } = args;
+
+        if (action.onBefore) {
+            const { prevent } = (await action.onBefore({ operation: action })) ?? {};
+            if (prevent) {
+                return;
+            }
+        }
 
         if (action.confirmationRequired && !skipConfirmation) {
             return this.app.initActionConfirmationModal({ title: action.title }).then(() => {
@@ -104,13 +111,16 @@ export class ActionsManager {
         instance,
         redirect = true,
         disablePopUp = false,
+        auth,
     }: {
         action: Action;
         instance?: Model;
         redirect?: boolean;
         disablePopUp?: boolean;
+        auth?: boolean;
     }): Promise<void> {
         const path = formatPath(action.path!, this.app.router.currentRoute.params, instance);
+        auth = auth || action.auth;
 
         try {
             let response: APIResponse<InnerData> | undefined;
@@ -120,10 +130,16 @@ export class ActionsManager {
                     method: action.method!,
                     path,
                     rawResponse: true,
+                    auth,
                 });
                 await downloadResponse(response);
             } else {
-                response = await this.app.api.makeRequest({ useBulk: true, method: action.method!, path });
+                response = await this.app.api.makeRequest({
+                    useBulk: true,
+                    method: action.method!,
+                    path,
+                    auth,
+                });
             }
 
             if (!disablePopUp) {
@@ -175,6 +191,7 @@ export class ActionsManager {
         throwError = false,
         disablePopUp = false,
         sendAll,
+        auth,
     }: {
         action: NotEmptyAction;
         instance: Model;
@@ -183,6 +200,7 @@ export class ActionsManager {
         throwError?: boolean;
         disablePopUp?: boolean;
         sendAll?: boolean;
+        auth?: boolean;
     }): Promise<void | APIResponse<T>> {
         if (!method) {
             method = action.method!;
@@ -213,6 +231,7 @@ export class ActionsManager {
                     path: path ?? formatPath(action.path!, this.app.router.currentRoute.params),
                     data,
                     rawResponse: true,
+                    auth,
                 });
                 await downloadResponse(response);
             } else {
@@ -221,6 +240,7 @@ export class ActionsManager {
                     path: path ?? formatPath(action.path!, this.app.router.currentRoute.params),
                     data,
                     useBulk: instance.shouldUseBulk(method),
+                    auth,
                 });
             }
 

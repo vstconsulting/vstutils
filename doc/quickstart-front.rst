@@ -69,21 +69,62 @@ There is a flowchart representing application initialization process (signal nam
 
     classDef classSignal stroke:#333,color:#f00;
 
+
+.. _frontend_customization:
+
+Frontend customization
+----------------------
+To use custom frontend in you project rename `vite.config.ts.default` to `vite.config.ts`.
+Every project based on vst-utils contains `index.ts` in `/frontend_src/` directory.
+This file is intended for your code. Run `yarn` command to install all dependencies. Then run `yarn devBuild`
+from root dir of your project to build static files.
+
+Output files will be built into `{AppName}/static/spa` directory. During vstutils installation through `pip`
+frontend code are being build automatically, so you may need to add `spa` directory to `.gitignore`.
+
+Example of simple frontend entrypoint:
+
+.. sourcecode:: typescript
+
+    import { initApp } from '@vstconsulting/vstutils';
+
+    initApp({
+      api: {
+        url: new URL('/api/', window.location.origin).toString(),
+      },
+    });
+
+
+Operation views hooks
+---------------------
+Function `hookViewOperation` can be used to execute some custom code before action execution.
+Action may be prevented if `prevent` is set to true on returned object.
+
+.. sourcecode:: typescript
+
+    import { hookViewOperation, showConfirmationModal } from '@vstconsulting/vstutils';
+
+    hookViewOperation({
+      path: '/category/{id}/change_parent/',
+      operation: 'execute',
+      onBefore: async () => {
+        const isConfirmed = await showConfirmationModal({
+          title: 'Are you sure?',
+          text: 'Changing category parent is irreversible',
+          confirmButtonText: 'Change',
+          cancelButtonText: 'Cancel',
+        });
+        return {
+          prevent: !isConfirmed,
+        };
+      },
+    });
+
+
 .. _field-section:
 
 Field customization
 -------------------
-To add custom script to the project, set script name in settings.py
-
-.. sourcecode:: python
-
-    SPA_STATIC += [
-        {'priority': 101, 'type': 'js', 'name': 'main.js', 'source': 'project_lib'},
-    ]
-
-
-and put the script (`main.js`) in `{appName}/static/` directory.
-
 1. In `main.js` create new field by extending it from BaseField (or any other appropriate field)
 
     For example lets create a field that renders HTML h1 element with 'Hello World!` text:
@@ -178,14 +219,18 @@ useful to get different set of authors (that may have been previously filtered o
 CSS Styling
 -----------
 
-1. Like scripts, css files may be added to SPA_STATIC in setting.py
+1. Like scripts, css files may be added to `index.ts`
 
-.. sourcecode:: python
+.. sourcecode:: typescript
 
-    SPA_STATIC += [
+    import { initApp } from '@vstconsulting/vstutils';
+    import './style.css';
 
-        {'priority': 101, 'type': 'css', 'name': 'style.css', 'source': 'project_lib'},
-    ]
+    initApp({
+      api: {
+        url: new URL('/api/', window.location.origin).toString(),
+      },
+    });
 
 
 
@@ -287,36 +332,6 @@ To change title and string displayed in the breadcrumbs change `title` property 
         const userDetail = views.get('/user/{id}/');
         userDetail.getTitle = (state) => (state?.instance ? `User: ${state.instance.id}` : 'User');
     });
-
-
-Basic Webpack configuration
----------------------------
-To use webpack in you project rename `webpack.config.js.default` to `webpack.config.js`.
-Every project based on vst-utils contains `index.js` in `/frontend_src/app/` directory.
-This file is intended for your code. Run `yarn` command to install all dependencies. Then run `yarn devBuild`
-from root dir of your project to build static files. Final step is to add built file to `SPA_STATIC` in `settings.py`
-
-.. sourcecode:: python
-
-    SPA_STATIC += [
-        {'priority': 101, 'type': 'js', 'name': '{AppName}/bundle/app.js', 'source': 'project_lib'},
-    ]
-
-Webpack configuration file allows to add more static files. In `webpack.config.js` add more entries
-
-.. sourcecode:: javascript
-
-    const config = {
-      mode: setMode(),
-      entry: {
-        'app': entrypoints_dir + "/app/index.js" // default,
-        'myapp': entrypoints_dir + "/app/myapp.js" // just added
-      },
-
-Output files will be built into `frontend_src/{AppName}/static/{AppName}/bundle` directory. Name of output file
-corresponds to name of entry in `config`. In the example above output files will have names `app.js` and `myapp.js`.
-Add all of these files to `STATIC_SPA` in `settings.py`. During vstutils installation trough `pip`
-frontend code are being build automatically, so you may need to add `bundle` directory to `gitignore`.
 
 
 Page store

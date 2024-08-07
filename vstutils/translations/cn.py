@@ -64,6 +64,25 @@ TRANSLATION = {
     'Go back': '返回',
     'Selected instances were successfully removed': '选定的实例已成功删除',
     'Cannot parse CSV file in field "{fieldName}"': '无法解析字段“{fieldName}”中的CSV文件',
+    'sign in to start your session': '登录开始会议',
+    'sign in': '进入',
+    'sign up': '请注册',
+    'forgot password': '忘记密码',
+    'register': '注册',
+    'You have successfully registered. Please check your email for a confirmation link.': '您已成功注册。 请检查您的电子邮件以获取确认链接。',
+    'An error occurred. Please try again later.': '发生错误。 请稍后再试。',
+    'User with this username already exists.': '具有此用户名的用户已存在。',
+    'Confirmation link is invalid or expired.': '确认链接无效或已过期。',
+    'Reset my Password': '问密码',
+    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': '忘记密码了吗？ 输入您的地址，我们将向您发送恢复指示',
+    'Confirm password': '确认密码',
+    'Invalid link. Please request a new one.': '无效的链接。 请请求一个新的。',
+    'Change my Password': '更改密码',
+    'Invalid username or password': '无效的用户名或密码',
+    'Authentication code': '验证代码',
+    'Confirmation code is invalid or expired.': '确认代码无效或已过期。',
+    'Error! Try again later': '错误！ 稍后再试',
+    'Invalid code': '无效代码',
 
     # fields
     'Id': '标识符',
@@ -229,22 +248,26 @@ TRANSLATION = {
     # create
     'New "<b>{0}</b>" instance was successfully created.': '新对象“ <b> {0} </ b>”已成功创建.',
     # remove
-    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} 已成功删除."',
+    '<b>{1}</b> "<b>{0}</b>" was successfully removed.': '<b>{1}</b> "<b>{0}</b>" 已成功删除."',
     # save
-    'Changes in "<b>{0}</b>" {1} were successfully saved.': '对象变化{1}“ <b> {0} </ b>”的更改已成功保存.',
+    'Changes in <b>{1}</b> <b>{0}</b> were successfully saved.': '对象变化 <b>{1}</b> <b>{0}</b>”的更改已成功保存.',
     # execute
-    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': '在对象“ <b> {1} </ b>”上成功启动了操作“ <b> {0} </ b>”。',
+    'Action <b>{0}</b> was successfully executed on <b>{1}</b>.<br>{2}': '在对象 <b>{0}</b> 上成功启动了操作 <b>{1}</b>.<br>{2}',
     # instance operation error
     # add:
     'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': '将对象“ <b> {0} </ b>”添加到目级列表时发生错误。<br>更多详细信息：{1}',
     # create:
     'An error occurred during creation.<br>Error details:<br>{0}': '创建新对象时发生错误<br>更多详细信息：{0}',
     # remove:
-    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': '删除{1}“ <b> {0} </ b>”时发生错误<br>更多详细信息：{2}',
+    'An error occurred during removal process of <b>{1}</b>  "<b>{0}</b>". <br> Error details: {2}': '删除{1}“ <b> {0} </ b>”时发生错误<br>更多详细信息：{2}',
+    # removeMany:
+    'An error occurred during removal process. Error details: {0}': '刪除過程中發生錯誤。錯誤詳細資訊：{0}',
     # save:
     'An error occurred during process.<br>Error details:<br>{0}': '保存时发生错误。<br>更多详细信息：{0}',
     # execute:
     'An error occurred during <b>{0}</b>. Error details:<br>{1}': '<b>{0}</b> 期间发生了一些错误。 错误详情：<br>{1}',
+    # Execute Empty:
+    'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>. <br> Error details: {2} <br>{3}': '<b>{1}</b> 上的 <b>{0}</b> 操作執行期間發生了一些錯誤。 <br>錯誤詳細資料：{2} <br>{3}',
     'Link': '链接',
 
     # csv
@@ -306,17 +329,9 @@ SERVER_TRANSLATION = {
     'terms of agreement': '协议条款',
 
     #auth/reg
-    'sign in to start your session': '登录开始会议',
     'confirm your email before logging in': '登录前确认您的电子邮件',
     'Confirmation link is invalid or expired': '确认链接无效或过期',
-    'sign in': '进入',
-    'sign up': '请注册',
-    'forgot password': '忘记密码',
-    'confirm password': '确认密码',
-    'register': '注册',
     'fields with * is required': '标有*为必填项',
-    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': '忘记密码了吗？ 输入您的地址，我们将向您发送恢复指示',
-    'reset my Password': '问密码',
     'Invalid authentication code': '无效的授权码',
     'Secret string must be provided': '必须提供秘密字符串',
     'Confirm your account': '确认您的帐户',

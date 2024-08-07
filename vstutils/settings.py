@@ -3,6 +3,7 @@ import os
 import gc
 import pwd
 import sys
+from hashlib import blake2s
 from tempfile import gettempdir
 
 import environ
@@ -50,6 +51,7 @@ PROJECT_LIB_VERSION: _t.Text = getattr(vst_lib_module, '__version__', VSTUTILS_V
 PROJECT_VERSION: _t.Text = getattr(vst_project_module, '__version__', PROJECT_LIB_VERSION)
 FULL_VERSION: _t.Text = f'{PROJECT_VERSION}_{PROJECT_LIB_VERSION}_{VSTUTILS_VERSION}'
 PROJECT_GUI_NAME: _t.Text = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME[0].upper()+ENV_NAME[1:].lower())
+DJANGO_SETTINGS_MODULE: _t.Text = os.getenv("DJANGO_SETTINGS_MODULE")
 
 PY_VER: _t.SupportsInt = sys.version_info.major
 TMP_DIR: _t.Text = gettempdir() or '/tmp'  # nosec
@@ -156,7 +158,6 @@ class MainSection(BaseAppendSection):
         'debug': ConfigBoolType,
         'enable_admin_panel': ConfigBoolType,
         'enable_registration': ConfigBoolType,
-        'enable_custom_translations': ConfigBoolType,
         'allowed_hosts': ConfigListType,
         'first_day_of_week': ConfigIntType,
         'enable_agreement_terms': ConfigBoolType,
@@ -336,7 +337,6 @@ class MailSection(BaseAppendSection):
         'tls': ConfigBoolType,
         'ssl': ConfigBoolType,
         'send_confirmation': ConfigBoolType,
-        'authenticate_after_registration': ConfigBoolType,
         'agreement_terms': ConfigBoolType,
     }
 
@@ -366,6 +366,11 @@ class RPCBrokerSection(BaseAppendSection):
         'max_retries': ConfigIntType,
         'polling_interval': FloatType(),
     }
+
+class RPCBrokerPredefinedQueuesSection(cconfig.Section):
+    def key_handler_to_all(self, key):
+        key = super().key_handler_to_all(key)
+        return key.replace('_fifo', '.fifo')
 
 
 class WorkerSection(BaseAppendSection):
@@ -428,6 +433,29 @@ class WebPushSection(BackendSection):
     }
 
 
+class OAuthServerSection(cconfig.Section):
+    types_map = {
+        'server_url': ConfigStringType,
+        'server_token_endpoint_path': ConfigStringType,
+        'server_schema_client_id': ConfigStringType,
+
+        'server_enable': ConfigBoolType,
+        'server_issuer': ConfigStringType,
+        'server_allow_insecure': ConfigBoolType,
+        'server_enable_anon_login': ConfigBoolType,
+        'server_class': ConfigStringType,
+        'server_jwt_alg': ConfigStringType,
+        'server_jwt_key': ConfigStringType,
+        'server_jwt_extra_claims_provider': ConfigStringType,
+        'server_token_expires_in': ConfigIntSecondsType,
+        'server_id_token_expires_in': ConfigIntSecondsType,
+        'server_client_authentication_methods': ConfigListType,
+        'server_authorization_endpoint': ConfigStringType,
+        'server_simple_client_id': ConfigStringType,
+        'server_simple_client_secret': ConfigStringType,
+    }
+
+
 class DjangoEnv(environ.Env):
     BOOLEAN_TRUE_STRINGS = environ.Env.BOOLEAN_TRUE_STRINGS + ('enable', 'ENABLE')
 
@@ -450,7 +478,6 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'log_level': env('DJANGO_LOG_LEVEL'),
             'enable_admin_panel': env.bool(f'{ENV_NAME}_ENABLE_ADMIN_PANEL', default=False),
             'enable_registration': env.bool(f'{ENV_NAME}_ENABLE_REGISTRATION', default=False),
-            'enable_custom_translations': False,
             'ldap-server': env.str(f'{ENV_NAME}_LDAP_CONNECTION', default=None),
             'ldap-default-domain': env.str(f'{ENV_NAME}_LDAP_DOMAIN', default=''),
             'ldap-auth_format': env.str(f'{ENV_NAME}_LDAP_AUTH_FORMAT', default='cn=<username>,<domain>'),
@@ -534,7 +561,6 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'send_confirmation': os.getenv(f'{ENV_NAME}_SEND_CONFIRMATION_EMAIL', False),
             'send_email_retries': os.getenv(f'{ENV_NAME}_SEND_EMAIL_RETRIES', 3),
             'send_email_retry_delay': os.getenv(f'{ENV_NAME}_SEND_EMAIL_RETRY_DELAY', 10),
-            'authenticate_after_registration': os.getenv(f'{ENV_NAME}_AUTHENTICATE_AFTER_REGISTRATION', False),
         },
         'contact': {
             'name': 'System Administrator'
@@ -562,7 +588,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'pidfile': env.str(f'{ENV_NAME}_WORKER_PID', default='/run/{PROG_NAME}_worker.pid'),
             'autoscale': '{this[rpc][concurrency]},1',
             'hostname': f'{pwd.getpwuid(os.getuid()).pw_name}@%h',
-            'beat': env.bool(f'{ENV_NAME}_SCHEDULER_ENABLE', default=True)
+            'beat': env.bool(f'{ENV_NAME}_SCHEDULER_ENABLE', default=True),
+            'pool': 'prefork'
         },
         'storages': {
             'filesystem': {
@@ -577,7 +604,32 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         },
         'uvicorn': {
             'loop': 'auto',
-        }
+        },
+        'oauth': {
+            'server_url': '',
+            'server_token_endpoint_path': '',
+            'server_schema_client_id': '',
+
+            'server_enable': True,
+            'server_issuer': '',
+            'server_allow_insecure': False,
+            'server_class': 'vstutils.oauth2.authorization_server.AuthorizationServer',
+            'server_enable_anon_login': False,
+            'server_jwt_alg': 'HS256',
+            'server_jwt_key': None,
+            'server_jwt_extra_claims_provider': '',
+            'server_token_expires_in': 864000,
+            'server_id_token_expires_in': 3600,
+            'server_client_authentication_methods': [
+                'same_origin_client_secret_post',
+                'client_secret_post',
+                'client_secret_basic',
+                'none',
+            ],
+            'server_authorization_endpoint': '',
+            'server_simple_client_id': 'simple-client-id',
+            'server_simple_client_secret': 'simple-client-secret',
+        },
     },
     section_overload={
         'main': MainSection,
@@ -611,11 +663,13 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'uwsgi': UWSGISection,
         'rpc': RPCSection,
         'rpc.broker_transport_options': RPCBrokerSection,
+        'rpc.broker_transport_options.predefined_queues': RPCBrokerPredefinedQueuesSection,
         'centrifugo': CentrifugoSection,
         'throttle': ThrottleSection,
         'storages.boto3': Boto3Subsection,
         'uvicorn': UvicornSection,
         'webpush': WebPushSection,
+        'oauth': OAuthServerSection,
     },
     format_exclude_sections=('uwsgi',)
 )
@@ -657,6 +711,7 @@ SECURE_PROXY_SSL_HEADER: _t.Tuple[_t.Text, _t.Text] = (
     web.get('secure_proxy_ssl_header_name', fallback='HTTP_X_FORWARDED_PROTOCOL'),
     web.get('secure_proxy_ssl_header_value', fallback='https')
 )
+ENABLE_ADMIN_PANEL = main['enable_admin_panel']
 
 # Include some addons if packages exists in env
 ##############################################################
@@ -672,7 +727,6 @@ RPC_ENABLED: bool = has_django_celery_beat
 # Applications definition
 ##############################################################
 INSTALLED_APPS: _t.List[_t.Text] = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -698,10 +752,23 @@ ADDONS: _t.List[_t.Text] = [
 
 INSTALLED_APPS += ADDONS
 
+if ENABLE_ADMIN_PANEL:
+    INSTALLED_APPS.insert(0, 'django.contrib.admin')
+
+
 # Additional middleware and auth
 ##############################################################
 MIDDLEWARE: _t.List[_t.Text] = [
     'vstutils.middleware.ExecuteTimeHeadersMiddleware',
+    'vstutils.middleware.FrontendChangesNotifications',
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'vstutils.middleware.LangMiddleware',
+]
+
+ADMIN_MIDDLEWARE = [
     'vstutils.middleware.FrontendChangesNotifications',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
@@ -713,7 +780,6 @@ MIDDLEWARE: _t.List[_t.Text] = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'vstutils.middleware.LangMiddleware',
-    'vstutils.middleware.TwoFaMiddleware',
 ]
 
 EXCLUDE_FROM_MINIFYING = []
@@ -731,7 +797,6 @@ MIDDLEWARE_ENDPOINT_CONTROL = {
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'vstutils.middleware.LangMiddleware',
-        'vstutils.middleware.TwoFaMiddleware',
     ],
     'prepend': [
         'vstutils.api.endpoint.BulkMiddleware'
@@ -799,7 +864,7 @@ SESSION_COOKIE_DOMAIN: _t.Optional[_t.Text] = os.getenv(
     'DJANGO_SESSION_COOKIE_DOMAIN',
     _t.cast(_t.Any, web.get('session_cookie_domain', fallback=None))
 )
-SESSION_SERIALIZER = 'vstutils.session.YamlSessionSerializer'
+SESSION_SERIALIZER = 'vstutils.session.MsgpackSessionSerializer'
 
 CSRF_COOKIE_AGE: int = SESSION_COOKIE_AGE
 CSRF_COOKIE_DOMAIN: _t.Optional[_t.Text] = SESSION_COOKIE_DOMAIN
@@ -826,8 +891,6 @@ AUTH_PASSWORD_VALIDATORS: _t.List[_t.Dict] = [
         },
     },
 ]
-LOGIN_URL: _t.Text = '/login/'
-LOGOUT_URL: _t.Text = '/logout/'
 LOGIN_REDIRECT_URL: _t.Text = '/'
 
 PASSWORD_RESET_TIMEOUT_DAYS: int = web['password_reset_timeout_days']
@@ -1017,7 +1080,6 @@ EMAIL_FROM_ADDRESS = mail.get("from_address", EMAIL_HOST_USER)
 SEND_CONFIRMATION_EMAIL: bool = mail["send_confirmation"]
 SEND_EMAIL_RETRIES: int = mail['send_email_retries']
 SEND_MESSAGE_RETRY_DELAY: int = mail['send_email_retry_delay']
-AUTHENTICATE_AFTER_REGISTRATION: bool = mail["authenticate_after_registration"]
 REGISTRATION_HASHERS: tuple = mail.getlist(
     'send_confirmation_uid_hashers',
     'django.contrib.auth.hashers.MD5PasswordHasher'
@@ -1062,14 +1124,16 @@ SWAGGER_SETTINGS: _t.Dict = {
         'vstutils.api.schema.renderers.OpenAPIRenderer',
     ],
     'DEEP_LINKING': True,
+    'USE_SESSION_AUTH': False,
+    'REFETCH_SCHEMA_WITH_AUTH': True,
+    'REFETCH_SCHEMA_ON_LOGOUT': True,
     'SECURITY_DEFINITIONS': {},
-    'LOGIN_URL': 'login',
-    'LOGOUT_URL': 'logout',
 }
 
 
 API: SIMPLE_OBJECT_SETTINGS_TYPE = {
-    VST_API_VERSION: {}
+    VST_API_VERSION: {},
+    'oauth2': {},
 }
 
 HEALTH_BACKEND_CLASS: _t.Text = 'vstutils.api.health.DefaultBackend'
@@ -1082,6 +1146,7 @@ ENABLE_METRICS_VIEW: bool = web['enable_metrics']
 PAGE_LIMIT: int = web["page_limit"]
 REST_FRAMEWORK: _t.Dict = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'vstutils.oauth2.authentication.JWTBearerTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
@@ -1131,7 +1196,12 @@ REST_FRAMEWORK: _t.Dict = {
     },
     'DEFAULT_THROTTLE_CLASSES': (
         'vstutils.api.throttling.ActionBasedThrottle',
-    )
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'oauth2': '50/hour',
+        'registration': '50/hour',
+        'password_reset': '50/hour',
+    },
 }
 
 OPTIMIZE_GET_BY_VALUES = True
@@ -1155,7 +1225,6 @@ USE_L10N: bool = True
 USE_TZ: bool = True
 FIRST_DAY_OF_WEEK = main['first_day_of_week']
 LANGUAGE_COOKIE_NAME = main['language_cookie_name']
-ENABLE_CUSTOM_TRANSLATIONS = main['enable_custom_translations']
 
 
 # LOGGING settings
@@ -1199,6 +1268,7 @@ LOGGING: _t.Dict = {
         VST_PROJECT: default_logger_data,
         'vstutils': default_logger_data,
         'drf_yasg.generators': default_logger_data,
+        'authlib': default_logger_data,
     }
 }
 
@@ -1211,6 +1281,9 @@ SILENCED_SYSTEM_CHECKS: _t.List = [
     "urls.W005",
     "fields.W122",
     "staticfiles.W004",
+    "admin.E408",
+    "admin.E409",
+    "admin.E410",
 ]
 
 
@@ -1263,22 +1336,10 @@ if RPC_ENABLED:
 
 # View settings
 ##############################################################
-ENABLE_ADMIN_PANEL = main['enable_admin_panel']
 MANIFEST_CLASS = 'vstutils.gui.pwa_manifest.PWAManifest'
+ENABLE_BACKEND_MANIFEST = True
 
 VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
-    "GUI": {
-        "BACKEND": 'vstutils.gui.views.GUIView',
-        "OPTIONS": {
-            'name': 'gui'
-        }
-    },
-    "MANIFEST": {
-        "BACKEND": 'vstutils.gui.views.ManifestView',
-        "OPTIONS": {
-            'name': 'pwa_manifest'
-        }
-    },
     "SERVICE_WORKER": {
         "BACKEND": 'vstutils.gui.views.SWView',
         "OPTIONS": {
@@ -1289,52 +1350,6 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
         "BACKEND": 'vstutils.gui.views.OfflineView',
         "OPTIONS": {
             'name': 'offline_gui'
-        }
-    },
-    "LOGIN": {
-        "BACKEND": 'vstutils.gui.views.Login',
-        "OPTIONS": {
-            'name': 'login'
-        }
-    },
-    "LOGOUT": {
-        "BACKEND": 'vstutils.gui.views.Logout',
-        "OPTIONS": {
-            'view_args': [{'next_page': '/'}],
-            'name': 'logout'
-        }
-    },
-    "PASSWORD_RESET": {
-        "BACKEND": 'django.contrib.auth.views.PasswordResetView',
-        "OPTIONS": {
-            'name': 'password_reset',
-            'view_kwargs': {
-                'from_email': EMAIL_FROM_ADDRESS
-            }
-        }
-    },
-    "PASSWORD_RESET_CONFIRM": {
-        "BACKEND": 'django.contrib.auth.views.PasswordResetConfirmView',
-        "OPTIONS": {
-            'name': 'password_reset_confirm'
-        }
-    },
-    "PASSWORD_RESET_DONE": {
-        "BACKEND": 'django.contrib.auth.views.PasswordResetDoneView',
-        "OPTIONS": {
-            'name': 'password_reset_done'
-        }
-    },
-    "PASSWORD_RESET_COMPLETE": {
-        "BACKEND": 'django.contrib.auth.views.PasswordResetCompleteView',
-        "OPTIONS": {
-            'name': 'password_reset_complete'
-        }
-    },
-    "USER_REGISTRATION": {
-        "BACKEND": 'vstutils.gui.views.Registration',
-        "OPTIONS": {
-            'name': 'user_registration'
         }
     },
     "TERMS": {
@@ -1352,33 +1367,17 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
 }
 
 GUI_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
-    r'': 'GUI',
-    'manifest.json': 'MANIFEST',
     'service-worker.js': 'SERVICE_WORKER',
     'offline.html': 'OFFLINE',
 }
 
-ACCOUNT_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
-    'LOGIN_URL': 'LOGIN',
-    'LOGOUT_URL': 'LOGOUT',
-    'password_reset/': 'PASSWORD_RESET',
-    'password_reset_done/': 'PASSWORD_RESET_DONE',
-    'password_reset_complete/': 'PASSWORD_RESET_COMPLETE',
-    'password_reset_confirm/<uidb64>/<token>/': 'PASSWORD_RESET_CONFIRM',
-}
-
-
 def get_accounts_views_mapping():
-    mapping = {**ACCOUNT_VIEWS}
-    if REGISTRATION_URL not in mapping and REGISTRATION_URL not in ACCOUNT_VIEWS and REGISTRATION_ENABLED:
-        mapping[REGISTRATION_URL] = 'USER_REGISTRATION'
+    mapping = {}
+    if ENABLE_AGREEMENT_TERMS and AGREEMENT_TEMRS_URL:
+        mapping[AGREEMENT_TEMRS_URL] = 'TERMS'
 
-    if REGISTRATION_URL in mapping:
-        if ENABLE_AGREEMENT_TERMS and AGREEMENT_TEMRS_URL:
-            mapping[AGREEMENT_TEMRS_URL] = 'TERMS'
-
-        if ENABLE_CONSENT_TO_PROCESSING and CONSENT_TO_PROCESSING_URL:
-            mapping[CONSENT_TO_PROCESSING_URL] = 'CONSENT_TO_PROCESSING'
+    if ENABLE_CONSENT_TO_PROCESSING and CONSENT_TO_PROCESSING_URL:
+        mapping[CONSENT_TO_PROCESSING_URL] = 'CONSENT_TO_PROCESSING'
 
     return mapping
 
@@ -1387,15 +1386,12 @@ URLS = lazy(lambda: {**GUI_VIEWS}, dict)()
 ACCOUNT_URLS = lazy(get_accounts_views_mapping, dict)()
 ACCOUNT_URL = 'account/'
 
-REGISTRATION_URL = 'registration/'
-REGISTRATION_ENABLED = main['enable_registration']
-
 AGREEMENT_TEMRS_URL = 'terms/'
-ENABLE_AGREEMENT_TERMS: bool = main.getboolean('enable_agreement_terms', fallback=REGISTRATION_ENABLED)
+ENABLE_AGREEMENT_TERMS: bool = main.getboolean('enable_agreement_terms', fallback=False)
 AGREEMENT_TERMS_PATH: str = main['agreement_terms_path']
 
 CONSENT_TO_PROCESSING_URL = 'consent_to_processing/'
-ENABLE_CONSENT_TO_PROCESSING: bool = main.getboolean('enable_consent_to_processing', fallback=REGISTRATION_ENABLED)
+ENABLE_CONSENT_TO_PROCESSING: bool = main.getboolean('enable_consent_to_processing', fallback=False)
 CONSENT_TO_PROCESSING_PATH: str = main['consent_to_processing_path']
 
 ENABLE_USER_SELF_REMOVE: bool = main.getboolean('enable_user_self_remove', fallback=False)
@@ -1416,19 +1412,6 @@ PROJECT_GUI_MENU: _t.List[_t.Dict] = [
 ]
 
 SPA_STATIC: _t.List[_t.Dict] = []
-
-SPA_STATIC_FILES_PROVIDERS = {
-    'vstutils': {
-        'BACKEND': 'vstutils.static_files.WebpackJsonStaticObjectHandler',
-        'OPTIONS': {
-            'priority': 1,
-            'entrypoint_name': 'spa',
-        }
-    },
-    'oldstyle': {
-        'BACKEND': 'vstutils.static_files.SPAStaticObjectHandler',
-    }
-}
 
 # Centrifugo settings
 CENTRIFUGO_CLIENT_KWARGS = config['centrifugo'].all()
@@ -1491,6 +1474,18 @@ DOCKERRUN_MIGRATE_LOCK_ID = config['docker'].get('migrate_lock_id', VST_PROJECT_
 
 DOCKERRUN_MIGRATE_LOCK_TIMEOUT = config['docker'].getint('migrate_lock_timeout', 15)
 
+API_ONLY = False
+
+# Default auth views
+##############################################################
+DEFAULT_REGISTRATION_VIEW_ENABLE: bool = True
+DEFAULT_REGISTRATION_VIEW_SERIALIZER_CLASS: str = 'vstutils.api.registration.serializers.UserRegistrationSerializer'
+DEFAULT_REGISTRATION_VIEW_CONFIRMATION_LINK: str = '/#/auth/registration/confirm-email/{code}'
+
+DEFAULT_PASSWORD_RESET_VIEW_ENABLE: bool = True
+DEFAULT_PASSWORD_RESET_VIEW_CONFIRMATION_LINK: str = '/#/auth/password-reset/{uid}/{token}'
+
+
 # WebPush settings
 ##############################################################
 webpush_section = config['webpush']
@@ -1502,6 +1497,117 @@ WEBPUSH_DEFAULT_NOTIFICATIONS_ICON: _t.Optional[str] = webpush_section.get('defa
 WEBPUSH_CREATE_USER_SETTINGS_VIEW = WEBPUSH_ENABLED
 WEBPUSH_USER_SETTINGS_VIEW_SUBPATH = 'push_notifications'
 
+
+# OAuth
+##############################################################
+class OauthServerClientConfig(_t.TypedDict):
+    allowed_grant_types: list[
+        _t.Literal[
+            'authorization_code',
+            'implicit',
+            'client_credentials',
+            'password',
+            'refresh_token',
+        ]
+    ]
+    secret: _t.Optional[str]
+    allowed_redirect_uris: _t.Optional[list[str]]
+    allowed_response_types: _t.Optional[
+        list[
+            _t.Literal[
+                'code id_token token',
+                'code id_token',
+                'code token',
+                'code',
+                'id_token token',
+                'id_token',
+                'token',
+            ]
+        ]
+    ]
+    token_endpoint_auth_methods: _t.Optional[
+        list[
+            _t.Literal[
+                'same_origin_client_secret_post',
+                'client_secret_post',
+                'client_secret_basic',
+                'none',
+            ]
+        ]
+    ]
+    default_redirect_uri: _t.Optional[str]
+
+OauthServerClientsConfig = dict[str, OauthServerClientConfig]
+
+OAUTH_SERVER_URL: str = config['oauth']['server_url']
+OAUTH_SERVER_TOKEN_ENDPOINT_PATH: str = config['oauth']['server_token_endpoint_path']
+OAUTH_SERVER_SCHEMA_CLIENT_ID: str = (
+    config['oauth']['server_schema_client_id'] or
+    config['oauth']['server_simple_client_id']
+)
+
+OAUTH_SERVER_ENABLE: bool = config['oauth']['server_enable']
+OAUTH_SERVER_ISSUER: str = (
+    env.str(f'{ENV_NAME}_OAUTH_SERVER_ISSUER', None) or
+    config['oauth']['server_issuer'] or
+    VST_PROJECT
+)
+OAUTH_SERVER_CLASS: str = config['oauth']['server_class']
+OAUTH_SERVER_ENABLE_ANON_LOGIN: bool = config['oauth']['server_enable_anon_login']
+OAUTH_SERVER_PASSWORD_GRANT_ADDITIONAL_EXTENSIONS: list[str] = []
+OAUTH_SERVER_AUTHORIZATION_CODE_GRANT_ADDITIONAL_EXTENSIONS: list[str] = []
+OAUTH_SERVER_JWT_ALG: str = config['oauth']['server_jwt_alg']
+OAUTH_SERVER_JWT_KEY: str = (
+    env.str(f'{ENV_NAME}_OAUTH_SERVER_JWT_KEY', None)
+    or config['oauth'].get('server_jwt_key', fallback=None)
+)
+OAUTH_SERVER_JWT_KEY = OAUTH_SERVER_JWT_KEY or blake2s(SECRET_KEY.encode()).hexdigest()
+OAUTH_SERVER_JWT_EXTRA_CLAIMS_PROVIDER: _t.Optional[str] = config['oauth']['server_jwt_extra_claims_provider']
+OAUTH_SERVER_TOKEN_EXPIRES_IN: int = config['oauth']['server_token_expires_in']
+OAUTH_SERVER_ID_TOKEN_EXPIRES_IN: int = config['oauth']['server_id_token_expires_in']
+OAUTH_SERVER_CLIENT_AUTHENTICATION_METHODS: list[str] = config['oauth']['server_client_authentication_methods']
+OAUTH_SERVER_AUTHORIZATION_ENDPOINT: _t.Optional[str] = config['oauth']['server_authorization_endpoint']
+OAUTH_SERVER_AUTHORIZATION_CODE_CACHE_NAME: str = 'session'
+OAUTH_SERVER_CLIENTS: OauthServerClientsConfig = {
+    config['oauth']['server_simple_client_id']: {
+        'token_endpoint_auth_methods': [
+            'same_origin_client_secret_post',
+        ],
+        'allowed_grant_types': ['password', 'refresh_token'],
+        'secret': None,
+        'allowed_redirect_uris': None,
+        'allowed_response_types': None,
+        'default_redirect_uri': None,
+    }
+}
+
+if OAUTH_SERVER_ENABLE:
+    if config['oauth']['server_allow_insecure']:
+        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+    if OAUTH_SERVER_ENABLE_ANON_LOGIN:
+        AUTHENTICATION_BACKENDS.append(
+            'vstutils.oauth2.anonymous.AnonymousUserAuthBackend',
+        )
+
+    API['oauth2'].update({
+        'token': {
+            'view': 'vstutils.oauth2.endpoints.TokenViewSet',
+            'type': 'view',
+        },
+        'revoke': {
+            'view': 'vstutils.oauth2.endpoints.RevokeTokenViewSet',
+            'type': 'view',
+        },
+        'userinfo': {
+            'view': 'vstutils.oauth2.endpoints.UserInfoView',
+            'type': 'view',
+        },
+        'introspect': {
+            'view': 'vstutils.oauth2.endpoints.TokenIntrospectionViewSet',
+            'type': 'view',
+        },
+    })
 
 # Test settings for speedup tests
 ##############################################################

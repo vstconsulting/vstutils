@@ -65,6 +65,25 @@ TRANSLATION = {
     'Go back': 'Quay lại',
     'Selected instances were successfully removed': 'Các trường hợp đã chọn đã được xóa thành công',
     'Cannot parse CSV file in field "{fieldName}"': 'Không thể phân tích tệp CSV trong trường "{fieldName}"',
+    'sign in to start your session': 'đăng nhập để bắt đầu',
+    'sign in': 'đăng nhập',
+    'sign up': 'đăng ký',
+    'forgot password': 'quên mật khẩu',
+    'register': 'đăng ký',
+    'You have successfully registered. Please check your email for a confirmation link.': 'Bạn đã đăng ký thành công. Vui lòng kiểm tra email của bạn để xác nhận liên kết.',
+    'An error occurred. Please try again later.': 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
+    'User with this username already exists.': 'Người dùng với tên người dùng này đã tồn tại.',
+    'Confirmation link is invalid or expired.': 'Liên kết xác nhận không hợp lệ hoặc đã hết hạn.',
+    'Reset my Password': 'Đặt lại mật khẩu của tôi',
+    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Quên mật khẩu? Nhập E-mail để nhận hướng dẫn khôi phục mật khẩu',
+    'Confirm password': 'Xác nhận mật khẩu',
+    'Invalid link. Please request a new one.': 'Liên kết không hợp lệ. Vui lòng yêu cầu một liên kết mới.',
+    'Change my Password': 'Thay đổi mật khẩu của tôi',
+    'Invalid username or password': 'Tên người dùng hoặc mật khẩu không hợp lệ',
+    'Authentication code': 'Mã xác thực',
+    'Confirmation code is invalid or expired.': 'Mã xác nhận không hợp lệ hoặc đã hết hạn.',
+    'Error! Try again later': 'Lỗi! Thử lại sau',
+    'Invalid code': 'Mã không hợp lệ',
 
     # fields
     'Id': 'định danh',
@@ -229,22 +248,26 @@ TRANSLATION = {
     # create
     'New "<b>{0}</b>" instance was successfully created.': 'Đối tượng mới "<b> {0} </b>" đã được tạo thành công.',
     # remove
-    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} đã được xóa thành công."',
+    '<b>{1}</b> "<b>{0}</b>" was successfully removed.': '<b>{1}</b> "<b>{0}</b>" đã được xóa thành công."',
     # save
-    'Changes in "<b>{0}</b>" {1} were successfully saved.': 'Thay đổi đối tượng {1} "<b> {0} </ b>" đã được lưu thành công.',
+    'Changes in <b>{1}</b> <b>{0}</b> were successfully saved.': 'Thay đổi đối tượng <b>{1}</b> <b>{0}</b> đã được lưu thành công.',
     # execute
-    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': 'Thao tác "<b> {0} </b>" đã được thực hiện thành công trên đối tượng "<b> {1} </b>".',
+    'Action <b>{0}</b> was successfully executed on <b>{1}</b>.<br>{2}': 'Thao tác "<b> {0} </b>" đã được thực hiện thành công trên đối tượng <b>{1}</b>.<br>{2}',
     # instance operation error
     # add:
     'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': 'Khi thêm đối tượng con "<b> {0} </b>" vào danh sách mẹ đã xảy ra lỗi <br> thêm chi tiết: {1}',
     # create:
     'An error occurred during creation.<br>Error details:<br>{0}': 'Đã xảy ra một số lỗi khi tạo phiên bản mới. <br> Chi tiết lỗi: <br> {0}',
     # remove:
-    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': 'Khi xóa {1} "<b> {0} </b>". đã xảy ra lỗi <br> thêm chi tiết: {2}',
+    'An error occurred during removal process of <b>{1}</b>  "<b>{0}</b>". <br> Error details: {2}': 'Khi xóa {1} "<b> {0} </b>". đã xảy ra lỗi <br> thêm chi tiết: {2}',
+    # removeMany:
+    'An error occurred during removal process. Error details: {0}': 'Đã xảy ra lỗi trong quá trình xóa. Chi tiết lỗi: {0}',
     # save:
     'An error occurred during process.<br>Error details:<br>{0}': 'Đã xảy ra một số lỗi trong quá trình lưu. <br> Chi tiết lỗi: <br> {0}',
     # execute:
     'An error occurred during <b>{0}</b>. Error details:<br>{1}': 'Đã xảy ra một số lỗi trong <b> {0} </b>. Chi tiết lỗi: <br> {1}',
+    # Execute Empty:
+    'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>. <br> Error details: {2} <br>{3}': 'Đã xảy ra một số lỗi trong quá trình thực thi hành động <b>{0</b> trên <b>{1</b>. <br> Chi tiết lỗi: {2} <br>{3}',
     'Link': 'Liên kết',
 
     # csv
@@ -309,17 +332,9 @@ SERVER_TRANSLATION = {
     'terms of agreement': 'các điều khoản của thỏa thuận',
 
     # auth/reg
-    'sign in to start your session': 'đăng nhập để bắt đầu',
     'confirm your email before logging in': 'xác nhận email của bạn trước khi đăng nhập',
     'Confirmation link is invalid or expired': 'Liên kết xác nhận không hợp lệ hoặc hết hạn',
-    'sign in': 'đăng nhập',
-    'sign up': 'đăng ký',
-    'forgot password': 'quên mật khẩu',
-    'confirm password': 'xác nhận mật khẩu',
-    'register': 'đăng ký',
     'fields with * is required': 'các mục có dấu * là bắt buộc',
-    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Quên mật khẩu? Nhập E-mail để nhận hướng dẫn khôi phục mật khẩu',
-    'reset my Password': 'đặt lại mật khẩu của tôi',
     'Invalid authentication code': 'Mã xác thực không hợp lệ',
     'Secret string must be provided': 'Chuỗi bí mật phải được cung cấp',
     'Confirm your account': 'Xác nhận tài khoản của bạn',

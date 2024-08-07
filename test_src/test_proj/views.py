@@ -1,15 +1,19 @@
+import typing as _t
+import mimetypes
 import time
 import json
 
+import pydantic
 from django.utils.functional import SimpleLazyObject
+from rest_framework.permissions import AllowAny
 
 from vstutils.api import responses, filter_backends, fields
 from vstutils.api.views import SettingsViewSet
-from vstutils.api.base import NonModelsViewSet
+from vstutils.api.base import GenericViewSet, NonModelsViewSet
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
-from vstutils.api.serializers import DataSerializer, JsonObjectSerializer
+from vstutils.api.serializers import DataSerializer, JsonObjectSerializer, EmptySerializer
 from vstutils.api.auth import UserViewSet
-from vstutils.api.actions import Action
+from vstutils.api.actions import Action, SimpleAction, SimpleFileAction
 from vstutils.utils import create_view
 from vstutils.gui.context import gui_version
 
@@ -130,7 +134,45 @@ except AssertionError:
     pass
 
 
+class TestBinaryFilesPydantic(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(
+        extra='ignore',
+        from_attributes=True,
+        title="TestBinaryFilesObject",
+        strict=True,
+    )
+    id: int
+
+
 class TestBinaryFilesViewSet(ModelWithBinaryFiles.generated_view):
+    @SimpleAction(serializer_class=TestBinaryFilesPydantic)
+    def test_pydantic(self, request, *args, **kwargs):
+        return self.get_object()
+
+    @SimpleAction(serializer_class=TestBinaryFilesPydantic, is_list=True)
+    def test_pydantic_list(self, request, *args, **kwargs):
+        return self.get_queryset()
+
+    @SimpleFileAction(as_attachment=True)
+    def test_some_filefield_default(self, request, *args, **kwargs):
+        return self.get_object().some_filefield
+
+    @SimpleFileAction(as_attachment=True)
+    def test_some_filefield(self, request, *args, **kwargs):
+        return self.get_object()
+
+    @test_some_filefield.modified_since
+    def test_some_filefield(self, obj):
+        return obj.some_filefield.storage.get_modified_time(obj.some_filefield.name)
+
+    @test_some_filefield.pre_data
+    def test_some_filefield(self, obj):
+        file = obj.some_filefield
+        filename = file.name
+        content_type, _ = mimetypes.guess_type(filename)
+        content_type = content_type or 'application/octet-stream'
+        return file, filename, content_type
+
     @action(methods=['get'], detail=True)
     def test_nested_view_inspection(self, *args, **kwargs):
         raise Exception  # nocv
@@ -220,6 +262,8 @@ HostWithoutAuthViewSet = create_view(
     Host,
     view_class=(HostCreateDummyMixin, 'read_only'),
     override_authentication_classes=None,
+    permission_classes=[AllowAny],
+    override_permission_classes=True,
 )
 
 CacheableView = create_view(CachableProxyModel)
@@ -228,3 +272,19 @@ CacheableView = create_view(CachableProxyModel)
 class CacheableViewSet(CacheableView):
     def get_etag_value(self, model_class, request):
         return super().get_etag_value((model_class, gui_version), request)
+
+
+
+class TestOauth2ViewSet(GenericViewSet):
+    serializer_class = EmptySerializer
+    permission_classes = [AllowAny]
+
+    @subaction(methods=['POST', 'GET'], detail=False)
+    def counter(self, request):
+        value = request.session.get('test_counter', 0)
+        if request.method == 'POST':
+            value += 1
+            request.session['test_counter'] = value
+        # Some tests run with session middleware disabled so it needs to be saved manually
+        request.session.save()
+        return responses.Response200({'value': value})

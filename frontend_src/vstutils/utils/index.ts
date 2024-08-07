@@ -3,10 +3,10 @@ import { getApp } from './app-helpers';
 
 import type { ParameterType } from 'swagger-schema-official';
 import type { defineStore } from 'pinia';
-import type { Field } from '../fields/base/';
+import type { Field } from '../fields/base/Field';
 import type { Route, Location } from 'vue-router';
-import type { Model, ModelConstructor } from '@/vstutils/models';
-import type { IView, PageView, Sublink } from '@/vstutils/views';
+import type { Model, ModelConstructor } from '#vstutils/models';
+import type { IView, PageView, Sublink } from '#vstutils/views';
 
 export * from './todo.js';
 export * from './app-helpers';
@@ -21,7 +21,7 @@ export const HttpMethods = {
     DELETE: 'delete',
 } as const;
 
-export type HttpMethod = typeof HttpMethods[keyof typeof HttpMethods];
+export type HttpMethod = (typeof HttpMethods)[keyof typeof HttpMethods];
 
 export enum BulkType {
     SIMPLE = 'put',
@@ -142,7 +142,7 @@ export const RequestTypes = {
     REMOVE: 'remove',
 } as const;
 
-export type RequestType = typeof RequestTypes[keyof typeof RequestTypes];
+export type RequestType = (typeof RequestTypes)[keyof typeof RequestTypes];
 
 /**
  * Method, that converts query object into string
@@ -192,10 +192,12 @@ export function createPropertyProxy<Obj extends object, Prop extends keyof Obj>(
     });
 }
 
-declare const innerDataMarker: unique symbol;
-declare const representDataMarker: unique symbol;
+export const innerDataMarker = '__inner_data';
+export const representDataMarker = '__represent_data';
 
-export type InnerData<T extends object = Record<string, unknown>> = T & { readonly [innerDataMarker]: true };
+export type InnerData<T extends object = Record<string, unknown>> = T & {
+    readonly [innerDataMarker]: true;
+};
 
 export type RepresentData<T extends object = Record<string, unknown>> = T & {
     readonly [representDataMarker]: true;
@@ -287,10 +289,6 @@ export function joinPaths(...paths: (string | number | undefined | null)[]) {
 
 /**
  * Function that formats path from params and replaces last param with instance's id
- * @param {string} path
- * @param {Object} params
- * @param {Model} instance
- * @return {string}
  */
 export function formatPath(path: string, params: Record<string, unknown>, instance?: Model) {
     for (const [name, value] of Object.entries(params)) {
@@ -319,7 +317,7 @@ export async function openSublink(sublink: Sublink, instance?: Model) {
         try {
             const response = sublink.external
                 ? await fetch(path)
-                : await api.makeRequest({ rawResponse: true, method: 'get', path: path });
+                : await api.makeRequest({ rawResponse: true, method: 'get', path: path, auth: sublink.auth });
             await downloadResponse(response);
         } catch (e) {
             error_handler.defineErrorAndShow(e);
@@ -486,3 +484,36 @@ export function fitToWrapper({
 
     return { width, height };
 }
+
+export function capitalize(string: string) {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}
+
+export function nameToTitle(name: string) {
+    return String(name)
+        .replace(/_/g, ' ')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+}
+
+export function lower(value: string) {
+    if (!value) {
+        return '';
+    }
+    value = value.toString();
+    return value.toLowerCase();
+}
+
+export function escapeHtml(unsafe: string) {
+    return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+export const OBJECT_NOT_FOUND_TEXT = '[Object not found]';
+
+export type MaybePromise<T> = T | Promise<T>;

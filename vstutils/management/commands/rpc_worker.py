@@ -98,7 +98,7 @@ class Command(DockerCommand):
                     raise exc
         except KeyboardInterrupt:  # nocv
             self._print('Exit by user...', 'WARNING')
-        except BaseException as err:  # nocv
-            self._print(traceback.format_exc())
-            self._print(str(err), 'ERROR')
-            sys.exit(1)
+        except BaseException as err:  # noqa: B036
+            self._print(traceback.format_exc())  # nocv
+            self._print(str(err), 'ERROR')  # nocv
+            sys.exit(1)  # nocv

@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-    import { BaseFieldContentReadonlyMixin } from '@/vstutils/fields/base';
+    import { BaseFieldContentReadonlyMixin } from '#vstutils/fields/base';
 
     export default {
         mixins: [BaseFieldContentReadonlyMixin],

@@ -1,11 +1,11 @@
 import { computed } from 'vue';
-import { signals } from '@/vstutils/signals';
-import Gravatar from './Gravatar.js';
+import { signals } from '#vstutils/signals';
+import Gravatar from './Gravatar.ts';
 import TFAPage from './TFAPage.vue';
 import { IntegerField } from '../fields/numbers/integer.js';
 import { guiPopUp, pop_up_msg } from '../popUp';
 import { generatePassword, getApp, generateBase32String, generateRandomString } from '../utils';
-import { useViewStore } from '@/vstutils/store';
+import { useViewStore } from '#vstutils/store';
 import './settings.js';
 export { Gravatar };
 
@@ -86,8 +86,9 @@ signals.once('allViews.created', ({ views }) => {
         const secretUri = computed(() => {
             const secret = store.sandbox.value.secret;
             if (secret) {
-                const username = app.user.getViewFieldValue();
-                return `otpauth://totp/${app.config.projectName}:${username}?secret=${secret}`;
+                const username =
+                    app.userProfile.preferred_username || app.userProfile.email || app.userProfile.given_name;
+                return `otpauth://totp/${app.projectName}:${username}?secret=${secret}`;
             }
             return null;
         });

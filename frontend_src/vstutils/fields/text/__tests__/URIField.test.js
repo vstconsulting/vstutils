@@ -1,4 +1,3 @@
-import { test, describe, expect } from '@jest/globals';
 import { URIField } from '../URIField';
 
 describe('URIField', () => {

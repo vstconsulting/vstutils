@@ -27,12 +27,12 @@
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import { getApp, mergeDeep } from '@/vstutils/utils';
-    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
-    import ModelFields from '@/vstutils/components/page/ModelFields.vue';
-    import type { PageView, ViewStore } from '@/vstutils/views';
-    import type { InnerData } from '@/vstutils/utils';
-    import type { Model } from '@/vstutils/models';
+    import { getApp, mergeDeep } from '#vstutils/utils';
+    import BootstrapModal from '#vstutils/components/BootstrapModal.vue';
+    import ModelFields from '#vstutils/components/page/ModelFields.vue';
+    import type { PageView, ViewStore } from '#vstutils/views';
+    import type { InnerData } from '#vstutils/utils';
+    import type { Model } from '#vstutils/models';
 
     const props = defineProps<{
         view: PageView;

@@ -64,6 +64,25 @@ TRANSLATION = {
     'Go back': 'Вернуться назад',
     'Selected instances were successfully removed': 'Выбранные объекты были успешно удалены',
     'Cannot parse CSV file in field "{fieldName}"': 'Не удалось разобрать CSV файл в поле "{fieldName}"',
+    'sign in to start your session': 'Войдите, чтобы начать сеанс',
+    'sign in': 'войти',
+    'sign up': 'зарегистрируйтесь',
+    'forgot password': 'забыли пароль',
+    'register': 'регистрация',
+    'You have successfully registered. Please check your email for a confirmation link.': 'Вы успешно зарегистрировались. Пожалуйста, проверьте свою электронную почту на наличие ссылки для подтверждения.',
+    'An error occurred. Please try again later.': 'Произошла ошибка. Пожалуйста, попробуйте позже.',
+    'User with this username already exists.': 'Пользователь с таким именем уже существует.',
+    'Confirmation link is invalid or expired.': 'Ссылка для подтверждения недействительна или устарела.',
+    'Reset my Password': 'Сбросить пароль',
+    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Забыли пароль? Введите свой адрес, и мы отправим вам инструкцию для восстановления.',
+    'Confirm password': 'Подтвердите пароль',
+    'Invalid link. Please request a new one.': 'Неверная ссылка. Пожалуйста, запросите новую.',
+    'Change my Password': 'Изменить пароль',
+    'Invalid username or password': 'Неверное имя пользователя или пароль',
+    'Authentication code': 'Код аутентификации',
+    'Confirmation code is invalid or expired.': 'Код подтверждения недействителен или устарел.',
+    'Error! Try again later': 'Ошибка! Попробуйте позже',
+    'Invalid code': 'Неверный код',
 
     # fields
     'Id': 'Идентификатор',
@@ -228,22 +247,26 @@ TRANSLATION = {
     # create
     'New "<b>{0}</b>" instance was successfully created.': 'Новый объект "<b>{0}</b>" был успешно создан.',
     # remove
-    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} был(а) успешно удален.',
+    '<b>{1}</b> "<b>{0}</b>" was successfully removed.': '<b>{1}</b> "<b>{0}</b>" был(а) успешно удален.',
     # save
-    'Changes in "<b>{0}</b>" {1} were successfully saved.': 'Изменения в объекте {1} "<b>{0}</b>" были успешно сохранены.',
+    'Changes in <b>{1}</b> <b>{0}</b> were successfully saved.': 'Изменения в объекте <b>{1}</b> <b>{0}</b> были успешно сохранены.',
     # execute
-    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': 'Действие "<b>{0}</b>" было успешно запущено на объекте "<b>{1}</b>".',
+    'Action <b>{0}</b> was successfully executed on <b>{1}</b>.<br>{2}': 'Действие <b>{0}</b> было успешно запущено на объекте <b>{1}</b>.<br>{2}',
     # instance operation error
     # add:
     'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': 'Во время добавления дочернего объекта "<b>{0}</b>" к родительскому списку произошла ошибка.<br> Подробнее: {1}',
     # create:
     'An error occurred during creation.<br>Error details:<br>{0}': 'Во время создания нового объекта произошла ошибка.<br>Подробнее:<br>{0}',
     # remove:
-    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': 'Во время удаления {1} "<b>{0}</b>" произошла ошибка.<br> Подробнее: {2}',
+    'An error occurred during removal process of <b>{1}</b>  "<b>{0}</b>". <br> Error details: {2}': 'Во время удаления {1} "<b>{0}</b>" произошла ошибка. <br> Подробнее: {2}',
+    # removeMany:
+    'An error occurred during removal process. Error details: {0}': 'Во время удаления произошла ошибка. Подробнее: {0}',
     # save:
     'An error occurred during process.<br>Error details:<br>{0}': 'Во время сохранения произошла ошибка.<br>Подробнее:<br>{0}',
     # execute:
     'An error occurred during <b>{0}</b>. Error details:<br>{1}': 'Во время запуска действия <b>{0}</b> произошла ошибка. Подробнее:<br>{1}',
+    # Execute Empty:
+    'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>. <br> Error details: {2} <br>{3}': 'Произошла ошибка во время выполнения действия <b>{0}</b> на <b>{1}</b>. <br> Подробнее: {2} <br>{3}',
     'Link': 'Ссылка',
     # csv
     'Actions': 'Действия',
@@ -306,17 +329,9 @@ SERVER_TRANSLATION = {
     'terms of agreement': 'лицензионное соглашение',
 
     # auth/reg
-    'sign in to start your session': 'Войдите, чтобы начать сеанс',
     'confirm your email before logging in': 'подтвердите свою электронную почту перед входом',
     'Confirmation link is invalid or expired': 'Ссылка для подтверждения неверна или устарела',
-    'sign in': 'войти',
-    'sign up': 'зарегистрируйтесь',
-    'forgot password': 'забыли пароль',
-    'confirm password': 'подтвердите пароль',
-    'register': 'регистрация',
     'fields with * is required': 'поля отмеченые * обязательны для заполнения',
-    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Забыли пароль? Введите свой адрес, и мы отправим вам инструкцию для восстановления.',
-    'reset my Password': 'сбросить пароль',
     'Invalid authentication code': 'Неверный код авторизации',
     'Secret string must be provided': 'Секретная строка должна быть заполнена',
     'Confirm your account': 'Подтвердите свой аккаунт',

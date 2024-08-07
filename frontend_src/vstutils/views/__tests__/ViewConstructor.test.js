@@ -1,4 +1,3 @@
-import { describe, expect, test, beforeAll } from '@jest/globals';
 import { HttpMethods, RequestTypes } from '../../utils';
 import ViewConstructor from '../ViewConstructor.js';
 import testSchema from './../../../__mocks__/testSchema.json';
@@ -9,7 +8,7 @@ import { createSchema } from '../../../unittests/schema';
 import { StringField } from '../../fields/text';
 import { ArrayField } from '../../fields/array';
 import { NumberField } from '../../fields/numbers';
-import { OrderingChoicesField } from '@/vstutils/fields/choices';
+import { OrderingChoicesField } from '#vstutils/fields/choices';
 import { createApp } from '../../../unittests/create-app';
 
 describe('ViewConstructor', () => {

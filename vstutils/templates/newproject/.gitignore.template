@@ -153,3 +153,5 @@ node_modules/
 
 # sqlite
 {{project_name}}/db.{{project_name}}.sqlite3
+
+/*/static/spa/

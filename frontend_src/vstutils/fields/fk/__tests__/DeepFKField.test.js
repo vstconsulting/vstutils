@@ -1,9 +1,7 @@
-import { expect, test, describe, beforeAll, beforeEach } from '@jest/globals';
 import { reactive } from 'vue';
 import { within } from '@testing-library/dom';
 import { userEvent } from '@testing-library/user-event';
-import fetchMock from 'jest-fetch-mock';
-import { createApp, createSchema, waitFor, mount } from '@/unittests';
+import { createApp, createSchema, waitFor, mount } from '#unittests';
 import schema from './DeepFKField-schema.json';
 
 describe('DeepFKfield', () => {
@@ -13,7 +11,6 @@ describe('DeepFKfield', () => {
     let deepFkArray;
 
     beforeAll(async () => {
-        fetchMock.enableMocks();
         app = await createApp({ schema: createSchema(schema) });
         Category = app.modelsResolver.byReferencePath('#/definitions/Category');
         deepFk = app.fieldsResolver.resolveField({

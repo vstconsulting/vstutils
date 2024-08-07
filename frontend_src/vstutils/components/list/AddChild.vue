@@ -50,16 +50,16 @@
     import { computed, ref, watch } from 'vue';
     import { useRoute } from 'vue-router/composables';
 
-    import { i18n } from '@/vstutils/translation';
-    import { formatPath, getApp, RequestTypes } from '@/vstutils/utils';
-    import { usePagination, useSelection } from '@/vstutils/store';
-    import { guiPopUp, pop_up_msg } from '@/vstutils/popUp';
-    import { createInstancesList } from '@/vstutils/models';
-    import ListTable from '@/vstutils/components/list/ListTable.vue';
-    import Pagination from '@/vstutils/components/list/Pagination.vue';
-    import OverlayLoader from '@/vstutils/components/OverlayLoader.vue';
-    import type { ListView } from '@/vstutils/views';
-    import type { InstancesList } from '@/vstutils/models';
+    import { i18n } from '#vstutils/translation';
+    import { formatPath, getApp, RequestTypes } from '#vstutils/utils';
+    import { usePagination, useSelection } from '#vstutils/store';
+    import { guiPopUp, pop_up_msg } from '#vstutils/popUp';
+    import { createInstancesList } from '#vstutils/models';
+    import ListTable from '#vstutils/components/list/ListTable.vue';
+    import Pagination from '#vstutils/components/list/Pagination.vue';
+    import OverlayLoader from '#vstutils/components/OverlayLoader.vue';
+    import type { ListView } from '#vstutils/views';
+    import type { InstancesList } from '#vstutils/models';
 
     const emit = defineEmits<{
         (e: 'close'): void;
@@ -125,6 +125,7 @@
                     method: 'post',
                     path,
                     data: { id },
+                    auth: qs.isAuthRequired(RequestTypes.CREATE),
                 }),
             ),
         );

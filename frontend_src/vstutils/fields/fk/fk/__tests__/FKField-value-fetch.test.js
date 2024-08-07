@@ -1,7 +1,5 @@
-import { test, describe, beforeAll, expect } from '@jest/globals';
-import { createApp, mount } from '@/unittests';
-import fetchMock from 'jest-fetch-mock';
-import { deferredPromise } from '@/vstutils/utils';
+import { createApp, mount } from '#unittests';
+import { deferredPromise } from '#vstutils/utils';
 
 describe('FKField value loader indicator', () => {
     let app;
@@ -26,7 +24,6 @@ describe('FKField value loader indicator', () => {
                 makeLink: true,
             },
         });
-        fetchMock.enableMocks();
     });
 
     test.each(['readonly', 'edit'])('%s with loader', async (type) => {

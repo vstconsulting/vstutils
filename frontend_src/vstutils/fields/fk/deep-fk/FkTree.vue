@@ -49,30 +49,37 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, onMounted, nextTick } from 'vue';
+    import { ref, computed, onMounted, nextTick, shallowRef } from 'vue';
     // @ts-expect-error liquor-tree has no types
     import * as LiquorTree from 'liquor-tree';
-    import { i18n } from '@/vstutils/translation';
-    import { type Model } from '@/vstutils/models';
+    import { i18n } from '#vstutils/translation';
+    import { type Model } from '#vstutils/models';
     import type DeepFKField from './DeepFKField';
     import { type SetFieldValueParams } from '../../base';
 
     // imports in tests are broken
     const Tree = LiquorTree.default || LiquorTree;
 
-    const props = defineProps<{
-        value: (number | string | Model)[];
-        field: DeepFKField;
-        multiple?: boolean;
-    }>();
+    const props = withDefaults(
+        defineProps<{
+            value: (number | string | Model)[];
+            field: DeepFKField;
+            multiple?: boolean;
+            minItems?: number;
+            maxItems?: number;
+        }>(),
+        {
+            minItems: 0,
+            maxItems: Number.POSITIVE_INFINITY,
+        },
+    );
     const emit = defineEmits<{
         (e: 'update:value', value: (number | string | Model)[], options?: SetFieldValueParams): void;
     }>();
 
-    const onlyLastChild = computed(() => props.field.onlyLastChild);
     const initialized = ref(false);
     const tree = ref();
-    const treeData = ref<any[]>([]);
+    const treeData = shallowRef<any[]>([]);
     const treeFilter = ref('');
     const treeOptions = {
         multiple: props.multiple,
@@ -131,10 +138,16 @@
                 const selection = tree.value.find((node: any) => String(node.id) === nodeElId);
                 const node = selection[0];
                 if (node) {
-                    if (props.value.some((item) => props.field.getValueFieldValue(item) === node.id)) {
+                    const isAlreadySelected = props.value.some(
+                        (item) => props.field.getValueFieldValue(item) === node.id,
+                    );
+                    if (isAlreadySelected) {
                         node.unselect();
-                    } else {
+                        return;
+                    }
+                    if (props.value.length < props.maxItems) {
                         node.select(props.multiple);
+                        return;
                     }
                 }
             }
@@ -143,9 +156,6 @@
 
     function selected(node: any) {
         if (!initialized.value) {
-            return;
-        }
-        if (onlyLastChild.value && node.children.length) {
             return;
         }
         updateValue(node.tree.selectedNodes.map((node: any) => node.data.instance));

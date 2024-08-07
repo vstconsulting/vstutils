@@ -1,10 +1,15 @@
+import mimetypes
+from contextlib import suppress
+
 from django.db import transaction
 from django.http.response import FileResponse
+from django.utils.http import http_date, parse_http_date_safe
 from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.utils.serializer_helpers import ReturnDict, ReturnList
 from drf_yasg.utils import swagger_auto_schema
 
+from .. import exceptions as vstexceptions
 from .responses import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from .serializers import EmptySerializer, DataSerializer
 from .pagination import SimpleCountedListPagination
@@ -409,5 +414,163 @@ class SimpleAction(Action):
 
         resulted_action.setter = setter
         resulted_action.deleter = deleter
+        resulted_action.__doc__ = self.extra_actions['get'].__doc__
+        return resulted_action
+
+
+class SimpleFileAction(Action):
+    """
+    Action for handling file responses. This action always returns a FileResponse.
+
+    This class is designed to simplify the process of creating actions that return file responses.
+    It ensures that the file is only sent if it has been modified since the client's last request,
+    and it sets appropriate headers to facilitate caching and attachment handling.
+
+    Examples:
+
+       .. sourcecode:: python
+
+        from vstutils.api.base import ModelViewSet
+        from vstutils.api.actions import SimpleFileAction
+        ...
+
+        class AuthorViewSet(ModelViewSet):
+            model = ...
+            ...
+
+            @SimpleFileAction()
+            def download_resume(self, request, *args, **kwargs):
+                ''' Get resume file for the author. '''
+                instance = self.get_object()
+                return instance.resume_file
+
+       .. sourcecode:: python
+
+        from vstutils.api.base import ModelViewSet
+        from vstutils.api.actions import SimpleFileAction
+        ...
+
+        class AuthorViewSet(ModelViewSet):
+            model = ...
+            ...
+
+            @SimpleFileAction()
+            def download_archives(self, request, *args, **kwargs):
+                ''' Get archive of multiple files for the author. '''
+                instance = self.get_object()
+                return instance.multiple_files
+
+            @download_archives.modified_since
+            def modified_since(self, view, obj):
+                ''' Custom modified_since for multiple files. '''
+                modified_times = [file.storage.get_modified_time(file.name) for file in obj]
+                latest_modified_time = max(modified_times, default=datetime.datetime(1970, 1, 1))
+                return latest_modified_time
+
+            @download_archives.pre_data
+            def pre_data(self, view, obj):
+                ''' Custom pre_data for multiple files, creating a zip archive. '''
+                zip_buffer = BytesIO()
+                with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
+                    for file in obj:
+                        zip_file.writestr(file.name, file.read())
+                zip_buffer.seek(0)
+                filename = 'archive.zip'
+                content_type = 'application/zip'
+                return zip_buffer, filename, content_type
+
+
+    :param cache_control: Cache-Control header value. Defaults to 'max-age=3600'.
+    :param as_attachment: Boolean indicating if the file should be sent as an attachment. Defaults to False.
+    :param kwargs: Additional named arguments for :func:`rest_framework.decorators.action`.
+    """
+    __slots__ = ('extra_actions', 'cache_control', 'as_attachment')
+
+    def __init__(self, cache_control='max-age=3600', as_attachment=False, *args, **kwargs):
+        kwargs.setdefault('methods', ['GET'])
+        kwargs['serializer_class'] = EmptySerializer
+        kwargs['result_serializer_class'] = FileResponse
+        super().__init__(*args, **kwargs)
+        self.extra_actions = {}
+        self.cache_control = cache_control
+        self.as_attachment = as_attachment
+
+    def modified_since(self, view, obj):
+        """
+        Default modified_since method that checks the modification time of a file.
+
+        :param view: The view instance.
+        :param obj: The file object, typically a FileField or ImageField.
+
+        :return: The modification time of the file, or None if it cannot be determined.
+        """
+        with suppress(AttributeError):
+            return obj.storage.get_modified_time(obj.name)
+
+    def pre_data(self, view, obj):
+        """
+        Default pre_data method that returns the file, its name, and content type.
+
+        :param view: The view instance.
+        :param obj: The file object, typically a FileField or ImageField.
+
+        :return: A tuple containing the file, its name, and its content type.
+        """
+        file = obj
+        filename = file.name
+        content_type, _ = mimetypes.guess_type(filename)
+        content_type = content_type or 'application/octet-stream'
+        return file, filename, content_type
+
+    def __call__(self, getter=None):
+        """
+        Main method for handling the action call.
+
+        :param getter: A function that retrieves the file object.
+
+        :return: The wrapped action method.
+        """
+        self.extra_actions['get'] = getter
+
+        def action_method(view, request, *args, **kwargs):
+            get_instance_method = self.extra_actions.get('get')
+            if not get_instance_method:
+                raise ValueError("Getter method must be defined.")  # nocv
+
+            instance = get_instance_method(view, request, *args, **kwargs)
+            modified = self.extra_actions.get('modified_since', self.modified_since)(view, instance)
+
+            if modified and (if_modified_since := request.headers.get('If-Modified-Since')):
+                if modified.timestamp() <= parse_http_date_safe(if_modified_since):
+                    raise vstexceptions.NotModifiedException()
+
+            file, filename, content_type = self.extra_actions.get('pre_data', self.pre_data)(view, instance)
+            response = FileResponse(
+                file,
+                as_attachment=self.as_attachment,
+                filename=filename,
+                content_type=content_type
+            )
+            if modified:
+                response['Last-Modified'] = http_date(modified.timestamp())
+            response['Cache-Control'] = self.cache_control
+            return response
+
+        action_method.__name__ = getter.__name__ if getter else self.action_kwargs['name']
+        action_method.__doc__ = self.extra_actions['get'].__doc__
+        resulted_action = super().__call__(action_method)
+
+        def modified_since_method(modified_since):
+            self.extra_actions['modified_since'] = modified_since
+            modified_since.__name__ = f'{action_method.__name__}__modified_since_method'
+            return self(self.extra_actions.get('get'))
+
+        def pre_data_method(pre_data):
+            self.extra_actions['pre_data'] = pre_data
+            pre_data.__name__ = f'{action_method.__name__}__pre_data_method'
+            return self(self.extra_actions.get('get'))
+
+        resulted_action.modified_since = modified_since_method
+        resulted_action.pre_data = pre_data_method
         resulted_action.__doc__ = self.extra_actions['get'].__doc__
         return resulted_action

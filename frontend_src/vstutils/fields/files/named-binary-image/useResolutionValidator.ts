@@ -1,8 +1,8 @@
 import { ref } from 'vue';
 
-import { guiPopUp } from '@/vstutils/popUp';
-import { i18n } from '@/vstutils/translation';
-import { loadImage, makeDataImageUrl, readFileAsObject } from '@/vstutils/utils';
+import { guiPopUp } from '#vstutils/popUp';
+import { i18n } from '#vstutils/translation';
+import { loadImage, makeDataImageUrl, readFileAsObject } from '#vstutils/utils';
 import { validateNamedFilesContentSize } from '../named-binary-file';
 
 import type { NamedFile } from '../named-binary-file';

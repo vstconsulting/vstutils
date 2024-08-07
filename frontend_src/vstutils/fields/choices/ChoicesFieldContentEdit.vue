@@ -4,10 +4,10 @@
 
 <script lang="ts">
     import { computed, defineComponent, onMounted, ref, toRef, watch } from 'vue';
-    import { useSelect2 } from '@/vstutils/select2';
-    import { FieldEditPropsDef } from '@/vstutils/fields/base';
-    import type { FieldEditPropsDefType } from '@/vstutils/fields/base';
-    import type { SelectedData } from '@/vstutils/select2';
+    import { useSelect2 } from '#vstutils/select2';
+    import { FieldEditPropsDef } from '#vstutils/fields/base';
+    import type { FieldEditPropsDefType } from '#vstutils/fields/base';
+    import type { SelectedData } from '#vstutils/select2';
     import type { ChoicesField } from './ChoicesField';
 
     export default defineComponent({

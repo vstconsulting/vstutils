@@ -59,13 +59,14 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed } from 'vue';
-    import { getApp } from '@/vstutils/utils';
-    import type { FieldEditPropsDefType } from '@/vstutils/fields/base';
-    import { FieldEditPropsDef } from '@/vstutils/fields/base';
+    import { ref, computed, defineAsyncComponent } from 'vue';
+    import { getApp } from '#vstutils/utils';
+    import type { FieldEditPropsDefType } from '#vstutils/fields/base';
+    import { FieldEditPropsDef } from '#vstutils/fields/base';
     import type { BarcodeField } from './base';
-    import ScannerCamera from './ScannerCamera.vue';
-    import { useWidthResizeObserver } from '@/vstutils/composables';
+    import { useWidthResizeObserver } from '#vstutils/composables';
+
+    const ScannerCamera = defineAsyncComponent(() => import('./ScannerCamera.vue'));
 
     const emit = defineEmits<{
         (e: 'set-value', value: string | null | undefined): void;
@@ -79,7 +80,7 @@
     const isScanning = ref(scanImmediately);
     const scannerIsInitialized = ref(false);
     const isEditing = ref(false);
-    const scannerCameraEl = ref<InstanceType<typeof ScannerCamera>>();
+    const scannerCameraEl = ref<InstanceType<typeof import('./ScannerCamera.vue').default>>();
 
     const camera = computed(
         () => app.localSettingsStore.settings.scannerCamera as MediaDeviceInfo | undefined,

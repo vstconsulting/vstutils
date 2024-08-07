@@ -85,7 +85,7 @@
     import OperationButton from './OperationButton.vue';
     import CompactOperations from './CompactOperations.vue';
 
-    import type { Action, IView, Sublink } from '@/vstutils/views';
+    import type { Action, IView, Sublink } from '#vstutils/views';
 
     const props = withDefaults(
         defineProps<{

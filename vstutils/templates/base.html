@@ -18,72 +18,29 @@
     {% block flavicon %}
         <link rel="shortcut icon" href="{% static_path '/img/logo/favicon.ico' %}">
     {% endblock %}
-
-    {% block gui_init_scripts %}
-        <script defer src="{% static_path 'bundle/base.js' %}?v={{ vstutils_version }}"></script>
-    {% endblock %}
-
-    {% block style %}
-
-            {% block gui_init_inline_styles %}
-            {% endblock %}
-
-            {% block bootstrap_theme %}
-            {% endblock %}
-
-
-            {% block custom_style %}
-            {% endblock %}
-
-    {% endblock %}
-    {% block resource_list %}
-    {% endblock %}
-
-    {% block common_script %}
-    {% endblock %}
-
     {% block pwa_block %}
-        <!-- PWA Manifest -->
-        <link rel="manifest" href="/manifest.json">
-        <!-- Theme color for PWA -->
-        <meta name="theme-color" content="{{ manifest_object.data.theme_color }}">
+            <!-- PWA Manifest -->
+            <link rel="manifest" href="/manifest.json">
+            <!-- Theme color for PWA -->
+            <meta name="theme-color" content="{{ manifest_object.data.theme_color }}">
 
-       {% block pwa_icons %}
-            <!-- Icons for PWA -->
-            {% cache block_timeout pwa_icons_block gui_named_version %}
-            {% for icon in manifest_object.icons %}
-                <link rel="icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
-                <link rel="apple-touch-icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
-            {% endfor %}
-            {% endcache %}
-        {% endblock %}
+           {% block pwa_icons %}
+                <!-- Icons for PWA -->
+                {% cache block_timeout pwa_icons_block gui_named_version %}
+                {% for icon in manifest_object.icons %}
+                    <link rel="icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
+                    <link rel="apple-touch-icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
+                {% endfor %}
+                {% endcache %}
+            {% endblock %}
     {% endblock %}
 </head>
 {% endblock %}
 
 {% block body %}
-    <body class="{% block bodyclass %}hold-transition login-page{% endblock %}">
-        <div class="login-box">
-            {% include "auth/language_selector.html" %}
-
-            {% block login_logo %}
-                <div class="login-logo">
-                    <a>{{ project_gui_name }}</a>
-                </div>
-            {% endblock %}
-
-            {% block login_body %}
-                <div class="login-box-body rounded">
-                    {% block login_body_content %}{% endblock %}
-                </div>
-                {% block alter_auth %}{% endblock %}
-            {% endblock %}
-          <!-- /.login-box-body -->
-        </div>
-        <!-- /.login-box -->
-
-        {% block script %}
-        {% endblock %}
+    <body>
+    {% block body_content %}
+    {% endblock %}
     </body>
 {% endblock %}
 </html>

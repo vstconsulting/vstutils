@@ -3,7 +3,7 @@ import { ResolutionValidatorConfig } from '../named-binary-image';
 import MultipleNamedBinaryImageFieldMixin from './MultipleNamedBinaryImageFieldMixin';
 
 import type { ComponentOptions } from 'vue';
-import type { FieldOptions } from '@/vstutils/fields/base';
+import type { FieldOptions } from '#vstutils/fields/base';
 import type { IImageField, NamedBinaryImageFieldXOptions } from '../named-binary-image';
 import type { NamedFile } from '../named-binary-file';
 

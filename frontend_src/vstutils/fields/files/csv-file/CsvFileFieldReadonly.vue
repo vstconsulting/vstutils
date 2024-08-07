@@ -14,11 +14,12 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, ref } from 'vue';
-    import DataTable from './DataTable.vue';
+    import { computed, defineAsyncComponent, ref } from 'vue';
 
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type { ExtractRepresent } from '#vstutils/fields/base';
     import type { CsvFileField } from './index';
+
+    const DataTable = defineAsyncComponent(() => import('./DataTable.vue'));
 
     const props = defineProps<{
         field: CsvFileField;

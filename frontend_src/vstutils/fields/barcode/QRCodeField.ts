@@ -1,13 +1,14 @@
-import { defineComponent, h, ref } from 'vue';
+import { defineAsyncComponent, defineComponent, h, ref } from 'vue';
 
-import type { FieldReadonlyPropsDefType } from '@/vstutils/fields/base';
-import { BaseField, BaseFieldMixin, FieldReadonlyPropsDef } from '@/vstutils/fields/base';
-import { Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import type { FieldReadonlyPropsDefType } from '#vstutils/fields/base';
+import { BaseField, BaseFieldMixin, FieldReadonlyPropsDef } from '#vstutils/fields/base';
+import { Html5QrcodeSupportedFormats } from 'html5-qrcode/esm/core';
+import { getApp } from '#vstutils/utils';
 import type { BarcodeFieldXOptions, BarcodeField } from './base';
 import BarcodeFieldContentEdit from './BarcodeFieldContentEdit.vue';
-import { getApp } from '@/spa';
-import CanvasRenderer from './CanvasRenderer.vue';
-import FullScreenView from '@/vstutils/components/FullScreenView.vue';
+import FullScreenView from '#vstutils/components/FullScreenView.vue';
+
+const CanvasRenderer = defineAsyncComponent(() => import('./CanvasRenderer.vue'));
 
 const QRFieldReadOnly = defineComponent({
     props: FieldReadonlyPropsDef as FieldReadonlyPropsDefType<QRCodeField>,

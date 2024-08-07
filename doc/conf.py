@@ -256,7 +256,7 @@ django_version_docs = 'https://docs.djangoproject.com/en/{version}/'.format(vers
 
 intersphinx_mapping = {
     'django': (django_version_docs, django_version_docs + '_objects/'),
-    'python': ('https://docs.python.org/3.8', None),
+    'python': ('https://docs.python.org/3.10', None),
 }
 extlinks = {
     'wiki': ('https://en.wikipedia.org/wiki/%s', None),

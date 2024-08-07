@@ -1,12 +1,12 @@
 /* eslint-disable */
 
-import { type IApp } from '@/vstutils/app';
-import { BooleanField, BooleanFieldMixin } from '@/vstutils/fields/boolean';
-import { type Model } from '@/vstutils/models';
-import { guiPopUp } from '@/vstutils/popUp';
-import { onFilterOperations, onSchemaViewsCreated, signals, useSignalSubscription } from '@/vstutils/signals';
-import { HttpMethods, formatPath, getApp, joinPaths } from '@/vstutils/utils';
-import { type PageEditView } from '@/vstutils/views';
+import { type IApp } from '#vstutils/app';
+import { BooleanField, BooleanFieldMixin } from '#vstutils/fields/boolean';
+import { type Model } from '#vstutils/models';
+import { guiPopUp } from '#vstutils/popUp';
+import { onFilterOperations, onSchemaViewsCreated, signals, useSignalSubscription } from '#vstutils/signals';
+import { HttpMethods, formatPath, getApp, joinPaths } from '#vstutils/utils';
+import { type PageEditView } from '#vstutils/views';
 import { defineComponent, ref } from 'vue';
 import { type DefaultXOptions, type FieldOptions } from './fields/base';
 
@@ -120,6 +120,7 @@ async function setupAppNotifications(app: IApp, view: PageEditView) {
             throw new Error(`WebPush subscription data is missing ${JSON.stringify(data)}`);
         }
         await app.api.makeRequest({
+            auth: true,
             useBulk: true,
             method: HttpMethods.PATCH,
             path: qs.url,
@@ -240,8 +241,7 @@ export function setupPushNotifications(app: IApp) {
 
     onFilterOperations('sublinks', '/user/{id}/', (obj) => {
         const notificationSettingsViewSubpath = getUserNotificationSettingsViewSubpath(app);
-        // @ts-expect-error User actually has id
-        if (obj.data!.id !== app.user!.id) {
+        if (String(obj.data!.id) !== app.userProfile.sub) {
             obj.sublinks = obj.sublinks.filter((sublink) => sublink.name !== notificationSettingsViewSubpath);
         }
     });
@@ -278,6 +278,7 @@ export function setupPushNotifications(app: IApp) {
                         throw new Error(`WebPush subscription data is missing ${JSON.stringify(data)}`);
                     }
                     await app.api.makeRequest({
+                        auth: true,
                         useBulk: true,
                         method: HttpMethods.PATCH,
                         path: app.router!.currentRoute.path,

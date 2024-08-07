@@ -1,12 +1,12 @@
 import type { Ref } from 'vue';
 
-import { createInstancesList } from '@/vstutils/models';
-import { signals } from '@/vstutils/signals';
+import { createInstancesList } from '#vstutils/models';
+import { signals } from '#vstutils/signals';
 
 import type { FKField } from './FKField';
-import type { InstancesList, Model } from '@/vstutils/models';
-import type { QuerySet } from '@/vstutils/querySet';
-import type { RepresentData } from '@/vstutils/utils';
+import type { InstancesList, Model } from '#vstutils/models';
+import type { QuerySet } from '#vstutils/querySet';
+import type { RepresentData } from '#vstutils/utils';
 
 const pageSize = 20;
 

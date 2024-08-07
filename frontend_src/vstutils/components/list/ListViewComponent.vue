@@ -68,14 +68,14 @@
     import { computed, provide, ref } from 'vue';
     import { storeToRefs } from 'pinia';
 
-    import { ViewPropsDef } from '@/vstutils/views/props';
-    import { useViewStore } from '@/vstutils/store';
+    import { ViewPropsDef } from '#vstutils/views/props';
+    import { useViewStore } from '#vstutils/store';
 
     import ListTable from './ListTable.vue';
     import MultiActions from './MultiActions.vue';
     import Pagination from './Pagination.vue';
 
-    import type { ListView, ViewPropsDefType } from '@/vstutils/views';
+    import type { ListView, ViewPropsDefType } from '#vstutils/views';
 
     const props = defineProps(ViewPropsDef as ViewPropsDefType<ListView>);
 

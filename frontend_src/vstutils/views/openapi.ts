@@ -1,15 +1,8 @@
-import { getApp, ViewTypes } from '@/vstutils/utils';
+import { defineAsyncComponent } from 'vue';
+import { getApp, ViewTypes } from '#vstutils/utils';
 
-import type {
-    Action,
-    ActionView,
-    IView,
-    ListView,
-    PageEditView,
-    PageNewView,
-    PageView,
-    ViewStore,
-} from './View';
+import type { ActionView, IView, ListView, PageEditView, PageNewView, PageView, ViewStore } from './View';
+import type { Action } from './operations';
 
 type Operations = Record<string, Record<string, Action>>;
 
@@ -51,7 +44,9 @@ export const openapi_dictionary = {
                     isMultiAction: true,
                     style: { order: 100, marginLeft: 'auto' },
                     doNotGroup: true,
-                    component: () => import('@/vstutils/components/common/NestedDeletionModal.vue'),
+                    component: defineAsyncComponent(
+                        () => import('#vstutils/components/common/NestedDeletionModal.vue'),
+                    ),
                 },
             },
             list: {
@@ -66,7 +61,9 @@ export const openapi_dictionary = {
                 add: {
                     name: 'add',
                     title: 'Add',
-                    component: () => import('@/vstutils/components/list/AddChildModal.vue'),
+                    component: defineAsyncComponent(
+                        () => import('#vstutils/components/list/AddChildModal.vue'),
+                    ),
                     classes: ['btn', 'btn-primary'],
                     iconClasses: ['fa', 'fa-folder-open'],
                     style: { order: -10 },
@@ -76,7 +73,9 @@ export const openapi_dictionary = {
                     name: 'filters',
                     title: '',
                     iconClasses: ['fas', 'fa-filter'],
-                    component: () => import('@/vstutils/components/list/FiltersModal.vue'),
+                    component: defineAsyncComponent(
+                        () => import('#vstutils/components/list/FiltersModal.vue'),
+                    ),
                     style: { order: -5 },
                     doNotGroup: true,
                 },
@@ -94,7 +93,9 @@ export const openapi_dictionary = {
                     name: 'filters',
                     title: '',
                     iconClasses: ['fas', 'fa-filter'],
-                    component: () => import('@/vstutils/components/page/FiltersModalDetail.vue'),
+                    component: defineAsyncComponent(
+                        () => import('#vstutils/components/page/FiltersModalDetail.vue'),
+                    ),
                     style: { order: -5 },
                     doNotGroup: true,
                 },

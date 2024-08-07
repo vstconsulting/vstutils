@@ -1,4 +1,3 @@
-import { expect, test, describe, jest } from '@jest/globals';
 import { useResolutionValidator } from '../named-binary-image/useResolutionValidator';
 import { NamedBinaryImageField } from '../named-binary-image';
 import { X_OPTIONS } from '../../../utils';
@@ -12,7 +11,7 @@ describe('File fields', () => {
             },
         });
 
-        const validatedCallback = jest.fn();
+        const validatedCallback = vitest.fn();
 
         const { readFiles } = useResolutionValidator(field, validatedCallback);
 

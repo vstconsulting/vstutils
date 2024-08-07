@@ -4,7 +4,8 @@ Default serializer classes for web-api.
 Read more in Django REST Framework documentation for
 `Serializers <https://www.django-rest-framework.org/api-guide/serializers/>`_.
 """
-
+import copy
+from decimal import Decimal as D
 import typing as _t
 
 import orjson
@@ -172,13 +173,29 @@ class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer, me
     })
 
     def build_standard_field(self, field_name, model_field):
-        field_class, field_kwargs = super().build_standard_field(field_name, model_field)
+        if isinstance(model_field, models.GeneratedField):
+            model_field_copy = copy.copy(model_field.output_field)
+            model_field_copy.model = model_field.model
+            field_class, field_kwargs = super().build_standard_field(field_name, model_field_copy)
+            field_kwargs['read_only'] = True
+        else:
+            field_class, field_kwargs = super().build_standard_field(field_name, model_field)
+
         if isinstance(model_field, models.FileField) and issubclass(field_class, fields.NamedBinaryFileInJsonField):
             field_kwargs['file'] = True
             if model_field.max_length:
                 field_kwargs['max_length'] = model_field.max_length
                 if isinstance(model_field.upload_to, str):
                     field_kwargs['max_length'] -= len(model_field.upload_to)
+
+        if issubclass(field_class, fields.NamedBinaryFileInJsonField) and isinstance(model_field, models.TextField):
+            if isinstance(model_field.default, str):
+                field_kwargs['default'] = orjson.loads(model_field.default) if model_field.default else drf_fields.empty
+
+        if issubclass(field_class, drf_fields.DecimalField):
+            for key in filter(field_kwargs.__contains__, ('min_value', 'max_value')):
+                field_kwargs[key] = D(str(field_kwargs[key]))
+
         return field_class, field_kwargs
 
     def build_relational_field(self, field_name, relation_info):

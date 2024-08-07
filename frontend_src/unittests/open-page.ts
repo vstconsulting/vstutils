@@ -1,7 +1,7 @@
 import { effectScope } from 'vue';
 import { isNavigationFailure, NavigationFailureType } from 'vue-router';
-import { getApp, NOT_FOUND_ROUTE_NAME } from '@/vstutils/utils';
-import type { IView } from '@/vstutils/views';
+import { getApp, NOT_FOUND_ROUTE_NAME } from '#vstutils/utils';
+import type { IView } from '#vstutils/views';
 import type { RawLocation } from 'vue-router';
 
 export async function openPage(to: RawLocation) {

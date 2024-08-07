@@ -1,12 +1,12 @@
-import type { Field, FieldOptions, FieldXOptions } from '@/vstutils/fields/base';
-import { BaseField } from '@/vstutils/fields/base';
-import { onAppAfterInit } from '@/vstutils/signals';
+import type { Field, FieldOptions, FieldXOptions } from '#vstutils/fields/base';
+import { BaseField } from '#vstutils/fields/base';
+import { onAppAfterInit } from '#vstutils/signals';
 
 import DynamicFieldMixin from './DynamicFieldMixin.vue';
 
-import type { FieldDefinition } from '@/vstutils/fields/FieldsResolver';
-import type { PageView, BaseView } from '@/vstutils/views';
-import type { InnerData, RepresentData } from '@/vstutils/utils';
+import type { FieldDefinition } from '#vstutils/fields/FieldsResolver';
+import type { PageView, BaseView } from '#vstutils/views';
+import type { InnerData, RepresentData } from '#vstutils/utils';
 
 export interface DynamicFieldXOptions extends FieldXOptions {
     source_view?: string;

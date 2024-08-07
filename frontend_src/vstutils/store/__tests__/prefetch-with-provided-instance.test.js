@@ -1,25 +1,13 @@
-import { beforeAll, expect, test } from '@jest/globals';
-import fetchMock from 'jest-fetch-mock';
-import { createApp } from '@/unittests/create-app';
-import { createSchema } from '@/unittests/schema';
+import { createApp } from '#unittests/create-app';
+import { createSchema, expectRequest, fetchMockCallAt, waitFor } from '#unittests';
 import schema from './prefetch-with-provided-instance-schema.json';
 
-let app;
-
-beforeAll(async () => {
-    app = await createApp({ schema: createSchema(schema) });
-    fetchMock.enableMocks();
-});
-
 test('prefetch with provided instance', async () => {
+    const app = await createApp({ schema: createSchema(schema) });
     const view = app.views.get('/some/{id}/');
-    const store = view._createStore();
 
     const Some = app.modelsResolver.get('Some');
     const providedInstance = new Some({ id: 123, name: 'test', related: 456 }, view.objects);
-
-    await app.router.push({ name: '/some/{id}/', params: { id: 123, providedInstance } });
-    await app.store.setPage(store);
 
     fetchMock.mockResponseOnce(
         JSON.stringify([
@@ -39,16 +27,20 @@ test('prefetch with provided instance', async () => {
             },
         ]),
     );
-    await store.fetchData();
+
+    app.router.push({ name: '/some/{id}/', params: { id: 123, providedInstance } });
 
     // Expected 1 request to prefetch related object with id 456
-
-    expect(fetchMock.mock.calls.length).toBe(1);
-    const [, request] = fetchMock.mock.calls[0];
-    const body = JSON.parse(request.body);
-    expect(body.length).toBe(1);
-    expect(body[0].path).toStrictEqual(['related']);
-    expect(body[0].query).toBe('id=456&limit=1');
-    expect(store.sandbox.related).toBeInstanceOf(app.modelsResolver.get('Related'));
-    expect(store.sandbox.related.name).toBe('related object');
+    await waitFor(() => expect(fetchMock.mock.calls.length).toBe(1));
+    expectRequest(fetchMockCallAt(0), {
+        body: [
+            {
+                method: 'get',
+                path: ['related'],
+                query: 'id=456&limit=1',
+            },
+        ],
+    });
+    expect(app.store.page.sandbox.related).toBeInstanceOf(app.modelsResolver.get('Related'));
+    expect(app.store.page.sandbox.related.name).toBe('related object');
 });

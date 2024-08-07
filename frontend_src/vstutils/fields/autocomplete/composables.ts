@@ -1,7 +1,6 @@
 import type { Ref } from 'vue';
 import { onMounted } from 'vue';
-// @ts-expect-error JavaScript-autoComplete has no types
-import autoComplete from 'JavaScript-autoComplete/auto-complete';
+import autoComplete from '#libs/auto-complete.js';
 
 interface AutocompleteDropdownParams<T> {
     element: Ref<HTMLInputElement | null>;
@@ -17,7 +16,6 @@ export function useAutocompleteDropdown<T>({
     filterItems,
 }: AutocompleteDropdownParams<T>) {
     onMounted(() => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
         return new autoComplete({
             selector: element.value,
             minChars: 0,

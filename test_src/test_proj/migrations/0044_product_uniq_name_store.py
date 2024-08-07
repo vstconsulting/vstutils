@@ -12,6 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name='product',
-            constraint=models.UniqueConstraint(fields=('name', 'store'), name='uniq_name_store'),
+            constraint=models.UniqueConstraint(models.F('name'), models.F('store'), name='uniq_name_store'),
         ),
     ]

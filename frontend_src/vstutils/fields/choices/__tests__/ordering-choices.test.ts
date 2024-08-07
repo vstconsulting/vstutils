@@ -1,4 +1,3 @@
-import { test, describe, expect } from '@jest/globals';
 import OrderingChoicesField from '../OrderingChoicesField';
 
 describe('OrderingChoicesField', () => {

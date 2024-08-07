@@ -16,7 +16,7 @@ export default defineComponent({
             return (this.view as BaseView | null)?.subscriptionLabels;
         },
         autoupdateTriggerType() {
-            if (this.$app.centrifugoClient?.isConnected() && this.autoupdateSubscriptionLabels) {
+            if (this.$app.centrifugoClient?.isConnected && this.autoupdateSubscriptionLabels) {
                 return 'centrifugo';
             }
             return 'timer';

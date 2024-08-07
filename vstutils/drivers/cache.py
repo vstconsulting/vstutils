@@ -2,7 +2,7 @@ import time
 
 import tarantool
 from django.core.cache.backends.base import BaseCache, DEFAULT_TIMEOUT
-from django.core.cache.backends.redis import RedisSerializer as Serializer  # type: ignore[import-untyped]
+from django.core.cache.backends.redis import RedisSerializer as Serializer
 from django.utils.functional import cached_property
 
 
@@ -68,7 +68,7 @@ class TarantoolCache(BaseCache):
         host, _, port = self._servers.rpartition(':')
         user = self._options.get('user', 'guest')
         password = self._options.get('password')
-        client = tarantool.connect(host, int(port), user, password)
+        client = tarantool.connect(host, int(port), None, user, password)
         return client
 
     @cached_property
@@ -180,7 +180,7 @@ class TarantoolCache(BaseCache):
         for key, value in data.items():
             key = f"'{self.make_and_validate_key(key, version=version)}'"
             quote = "'" if not type(value) is int else ""
-            safe_data[key] = f"{quote}{self._serializer.dumps(value)}{quote}"
+            safe_data[key] = f"{quote}{self._serializer.dumps(value)}{quote}"  # type: ignore[str-bytes-safe]
 
         timeout = self.get_backend_timeout(timeout=timeout)
         if timeout != -1:

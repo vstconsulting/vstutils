@@ -1,9 +1,7 @@
-import { expect, test, beforeAll, beforeEach } from '@jest/globals';
-import { createApp, createSchema, schemaListOf, mountApp, waitForPageLoading, openPage } from '@/unittests';
-import type { getApp } from '@/vstutils/utils';
+import { createApp, createSchema, schemaListOf, waitForPageLoading, openPage } from '#unittests';
+import type { getApp } from '#vstutils/utils';
 import { ModelValidationError } from '..';
-import { emptyInnerData } from '@/vstutils/utils';
-import fetchMock from 'jest-fetch-mock';
+import { emptyInnerData } from '#vstutils/utils';
 import { screen } from '@testing-library/dom';
 
 let app: Awaited<ReturnType<typeof getApp>>;
@@ -172,11 +170,7 @@ const schema = createSchema({
 });
 
 beforeAll(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    // @ts-expect-error this is just a test
     app = await createApp({ schema });
-    await mountApp();
-    fetchMock.enableMocks();
 });
 
 beforeEach(async () => {

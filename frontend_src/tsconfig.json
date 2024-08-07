@@ -1,27 +1,32 @@
 {
     "include": [
-        "./**/*"
+        "./**/*",
     ],
     "compilerOptions": {
         "outDir": "./dist",
-        "baseUrl": "./",
         "allowJs": true,
         "target": "esnext",
+        "isolatedModules": true,
         "strict": true,
         "noImplicitAny": true,
         "noImplicitThis": true,
         "noImplicitReturns": true,
-        "module": "es2020",
-        "moduleResolution": "node",
+        "module": "es2022",
+        "moduleResolution": "Node",
         "esModuleInterop": true,
         "skipLibCheck": true,
         "resolveJsonModule": true,
         "types": [
+            "vite/client",
+            "vitest/globals",
             "jquery",
-            "bootstrap"
+            "bootstrap",
         ],
         "paths": {
-            "@/*": ["*"]
+            "#vstutils/*": ["./vstutils/*"],
+            "#libs/*": ["./libs/*"],
+            "#unittests/*": ["./unittests/*"],
+            "#unittests": ["./unittests"],
         }
     },
     "vueCompilerOptions": {

@@ -29,11 +29,11 @@
 <script setup lang="ts">
     import { computed, toRef } from 'vue';
     import { ensureValueFetched, useQuerySets } from './composables';
-    import { FieldReadonlyPropsDef } from '@/vstutils/fields/base';
-    import { getApp } from '@/vstutils/utils';
+    import { FieldReadonlyPropsDef } from '#vstutils/fields/base';
+    import { getApp } from '#vstutils/utils';
 
-    import type { Model } from '@/vstutils/models';
-    import type { FieldReadonlyPropsDefType } from '@/vstutils/fields/base';
+    import type { Model } from '#vstutils/models';
+    import type { FieldReadonlyPropsDefType } from '#vstutils/fields/base';
     import type { FKField } from './FKField';
 
     const props = defineProps(FieldReadonlyPropsDef as FieldReadonlyPropsDefType<FKField>);

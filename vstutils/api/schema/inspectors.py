@@ -10,7 +10,7 @@ from drf_yasg import openapi
 from rest_framework.fields import Field, JSONField, DecimalField, ListField, empty
 from rest_framework.serializers import Serializer
 
-from .. import fields, serializers, validators
+from .. import fields, serializers, validators, base as api_base
 from ...models.base import get_first_match_name
 from ...utils import raise_context_decorator_with_default
 
@@ -388,12 +388,12 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
                 x_nullable=v is None,
             )
             for k, v in fields.DEFAULT_NAMED_FILE_DATA.items()
-        }
+        },
     }
 
     default_multiple_schema_data = {
         'type': openapi.TYPE_ARRAY,
-        'items': openapi.Items(**default_schema_data)  # type: ignore
+        'items': openapi.Items(**default_schema_data),  # type: ignore
     }
 
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
@@ -686,3 +686,10 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
             self.handle_schema(field, result, use_references)
 
         return result
+
+
+class PydanticSerializerInspector(ReferencingSerializerInspector):
+    def field_to_swagger_object(self, field: Any, swagger_object_type: Any, use_references: Any, **kwargs: Any):
+        if isinstance(field, api_base.ProxyPydanticSerializer):
+            return openapi.Schema(**field.schema_model.model_json_schema())
+        return NotHandled

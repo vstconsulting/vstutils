@@ -4,7 +4,7 @@
     </div>
 </template>
 <script>
-    import { BaseViewMixin, ErrorPage } from '@/vstutils/components';
+    import { BaseViewMixin, ErrorPage } from '#vstutils/components';
 
     export default {
         components: { ErrorPage },

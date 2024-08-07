@@ -1,13 +1,13 @@
-from cent import Client as CentrifugoClient
+from cent import AsyncClient as CentrifugoClient, CentRequest
 from vstutils.models.cent_notify import Notificator
 
 
-messages_log = []
+messages_log: list[CentRequest] = []
 
 
 class Client(CentrifugoClient):
-    def send(self, method=None, params=None):
-        messages_log.append(self._messages)
+    async def _send(self, request: CentRequest, *args, **kwargs):
+        messages_log.append(request)
 
 
 class DummyNotificator(Notificator):

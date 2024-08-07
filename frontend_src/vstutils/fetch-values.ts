@@ -1,15 +1,14 @@
-import { i18n } from '@/vstutils/translation';
-import { AggregatedQueriesExecutor } from '@/vstutils/AggregatedQueriesExecutor';
-import { RequestTypes, createPropertyProxy, getApp } from '@/vstutils/utils';
-import { FKField } from '@/vstutils/fields/fk/fk/FKField';
-import { ArrayField } from '@/vstutils/fields/array/ArrayField';
-import { DynamicField } from '@/vstutils/fields/dynamic';
+import { i18n } from '#vstutils/translation';
+import { AggregatedQueriesExecutor } from '#vstutils/AggregatedQueriesExecutor';
+import { OBJECT_NOT_FOUND_TEXT, RequestTypes, createPropertyProxy, getApp } from '#vstutils/utils';
+import { ArrayField } from '#vstutils/fields/array/ArrayField';
+import { DynamicField } from '#vstutils/fields/dynamic';
 
-import type { BaseView } from '@/vstutils/views';
-import type { Model, ModelConstructor } from '@/vstutils/models';
-import type { Field } from '@/vstutils/fields/base';
-import type { QuerySet } from '@/vstutils/querySet';
-import type { InnerData } from '@/vstutils/utils';
+import type { BaseView } from '#vstutils/views';
+import type { Model, ModelConstructor } from '#vstutils/models';
+import type { Field } from '#vstutils/fields/base';
+import type { QuerySet } from '#vstutils/querySet';
+import type { InnerData } from '#vstutils/utils';
 import { RelatedListField } from './fields/related-list';
 
 export interface IFetchableField extends Field<string | number> {
@@ -67,7 +66,7 @@ export function fetchPKs(
                 const model = qs!.getResponseModelClass(RequestTypes.LIST);
                 const notFound = new model({
                     [field.valueField]: pk,
-                    [field.viewField]: i18n.t(FKField.NOT_FOUND_TEXT),
+                    [field.viewField]: i18n.t(OBJECT_NOT_FOUND_TEXT),
                 } as InnerData);
                 notFound.__notFound = true;
                 return notFound;

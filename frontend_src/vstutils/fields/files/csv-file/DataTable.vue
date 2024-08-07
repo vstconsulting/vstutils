@@ -1,6 +1,6 @@
 <template>
     <div class="csv-table">
-        <button v-if="!readonly" class="btn btn-outline-primary my-2" @click="add">
+        <button v-if="!readonly" class="btn btn-outline-primary my-2" type="button" @click="add">
             <i class="fa fa-plus" />
         </button>
         <CustomVirtualTable
@@ -13,10 +13,15 @@
             language="en"
         >
             <template v-if="!readonly" #actionCommon="{ index, row }">
-                <button class="btn btn-outline-secondary" @click="edit(index, row)">
+                <button class="btn btn-outline-secondary" type="button" @click="edit(index, row)">
                     <i class="fa fa-edit" />
                 </button>
-                <button class="btn btn-outline-warning" style="margin-left: 5px" @click="del(index)">
+                <button
+                    class="btn btn-outline-warning"
+                    type="button"
+                    style="margin-left: 5px"
+                    @click="del(index)"
+                >
                     <i class="fa fa-times" />
                 </button>
             </template>
@@ -43,10 +48,10 @@
 
 <script setup lang="ts">
     import { computed, ref } from 'vue';
-    import { i18n } from '@/vstutils/translation';
-    import { guiPopUp } from '@/vstutils/popUp';
-    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
-    import type { Model, ModelConstructor } from '@/vstutils/models';
+    import { i18n } from '#vstutils/translation';
+    import { guiPopUp } from '#vstutils/popUp';
+    import BootstrapModal from '#vstutils/components/BootstrapModal.vue';
+    import type { Model, ModelConstructor } from '#vstutils/models';
 
     const props = withDefaults(
         defineProps<{
@@ -120,9 +125,9 @@
     import { defineComponent } from 'vue';
     // @ts-expect-error - no types
     import VueVirtualTable from 'vue-virtual-table';
-    import ModelFields from '@/vstutils/components/page/ModelFields.vue';
-    import type { InnerData } from '@/vstutils/utils';
-    import { getApp } from '@/vstutils/utils';
+    import ModelFields from '#vstutils/components/page/ModelFields.vue';
+    import type { InnerData } from '#vstutils/utils';
+    import { getApp } from '#vstutils/utils';
 
     const CustomVirtualTable = defineComponent({
         mixins: [VueVirtualTable],

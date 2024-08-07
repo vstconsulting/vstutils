@@ -1,5 +1,5 @@
 import { defineComponent } from 'vue';
-import { formatPath } from '@/vstutils/utils';
+import { formatPath } from '#vstutils/utils';
 
 /**
  * Mixin for content components of FK field.

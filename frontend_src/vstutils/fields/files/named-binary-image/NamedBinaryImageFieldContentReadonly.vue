@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-    import type { ExtractRepresent } from '@/vstutils/fields/base';
+    import type { ExtractRepresent } from '#vstutils/fields/base';
     import type NamedBinaryImageField from './NamedBinaryImageField';
     import ImageBlock from './ImageBlock.vue';
 

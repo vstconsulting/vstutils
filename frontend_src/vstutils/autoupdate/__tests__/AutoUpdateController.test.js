@@ -1,12 +1,11 @@
-import { expect, describe, test, jest } from '@jest/globals';
-import Centrifuge from 'centrifuge';
+import { Centrifuge } from 'centrifuge';
 import { AutoUpdateController } from '../AutoUpdateController.ts';
 
 describe('AutoUpdateController', () => {
     test('timer subscriptions', () => {
         const controller = new AutoUpdateController(null);
 
-        const callback = jest.fn();
+        const callback = vitest.fn();
         expect(controller.timerSubscribers.size).toBe(0);
 
         controller.subscribe({
@@ -32,8 +31,8 @@ describe('AutoUpdateController', () => {
         const channelSubscriptions = controller.channelSubscriptions;
         const channelSubscribers = controller.channelSubscribers;
 
-        const callback1 = jest.fn();
-        const callback2 = jest.fn();
+        const callback1 = vitest.fn();
+        const callback2 = vitest.fn();
 
         expect(subscribers.size).toBe(0);
 

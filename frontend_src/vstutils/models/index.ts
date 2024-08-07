@@ -1,4 +1,4 @@
-import { StringField } from '@/vstutils/fields/text';
+import { StringField } from '#vstutils/fields/text';
 import { makeModel } from './utils';
 import { BaseModel } from './Model';
 import type { Model } from './Model';

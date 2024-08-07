@@ -1,5 +1,5 @@
 import DependFromFkFieldMixin from './DependFromFkFieldMixin.vue';
-import type { FieldOptions } from '@/vstutils/fields/base';
+import type { FieldOptions } from '#vstutils/fields/base';
 import type { DynamicFieldXOptions } from './DynamicField';
 import { DynamicField } from './DynamicField';
 

@@ -27,11 +27,11 @@
 
 <script lang="ts" setup>
     import { computed, ref, set } from 'vue';
-    import { emptyRepresentData, getApp, mapObjectValues } from '@/vstutils/utils';
+    import { emptyRepresentData, getApp, mapObjectValues } from '#vstutils/utils';
     import BootstrapModal from '../BootstrapModal.vue';
-    import type { RepresentData } from '@/vstutils/utils';
-    import type { ListView, ViewStore } from '@/vstutils/views';
-    import type { SetFieldValueOptions } from '@/vstutils/fields/base';
+    import type { RepresentData } from '#vstutils/utils';
+    import type { ListView, ViewStore } from '#vstutils/views';
+    import type { SetFieldValueOptions } from '#vstutils/fields/base';
 
     const props = defineProps<{
         view: ListView;

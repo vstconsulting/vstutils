@@ -21,7 +21,10 @@ def get_web_pushes_classes() -> Set['BaseWebPush']:
         try:
             module = importlib.import_module(app_config.name + ".webpushes")
             for obj in module.__dict__.values():
-                if _is_custom_class(obj):
+                if _is_custom_class(obj) and (
+                    obj.project is None or
+                    obj.project == settings.VST_PROJECT
+                ):
                     classes.add(obj)
         except ImportError:
             pass

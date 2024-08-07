@@ -102,7 +102,10 @@ Here is main functionality provided for working with ETag's mechanism:
 
 
 .. automodule:: vstutils.api.base
-    :members: CachableHeadMixin,check_request_etag,get_etag_value,EtagDependency
+    :members: CachableHeadMixin,get_etag_value,EtagDependency
+
+.. automodule:: vstutils.utils
+    :members: check_request_etag
 
 Actions
 ~~~~~~~
@@ -160,7 +163,7 @@ The vstutils library offers a convenient request handler class for elegant OOP d
 Middleware is used to process incoming requests and send responses before they reach final destination.
 
 .. automodule:: vstutils.middleware
-    :members: BaseMiddleware
+    :members: BaseMiddleware,AsyncBaseMiddleware
 
 Filter Backends
 ~~~~~~~~~~~~~~~

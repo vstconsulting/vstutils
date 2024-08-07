@@ -27,13 +27,13 @@
 
 <script setup lang="ts">
     import { computed } from 'vue';
-    import { i18n } from '@/vstutils/translation';
-    import { FieldEditPropsDef } from '@/vstutils/fields/base';
+    import { i18n } from '#vstutils/translation';
+    import { FieldEditPropsDef } from '#vstutils/fields/base';
     import { ResolutionValidatorModal, useResolutionValidator } from '../named-binary-image';
     import MultipleFilesInput from '../MultipleFilesInput.vue';
     import Carousel from './Carousel.vue';
 
-    import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import type { ExtractRepresent, FieldEditPropsDefType } from '#vstutils/fields/base';
     import type { NamedFile } from '../named-binary-file';
     import type MultipleNamedBinaryImageField from './MultipleNamedBinaryImageField';
 

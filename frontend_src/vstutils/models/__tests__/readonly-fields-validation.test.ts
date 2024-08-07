@@ -1,6 +1,4 @@
-import { expect, test, beforeAll } from '@jest/globals';
-import { enableFetchMocks } from 'jest-fetch-mock';
-import { createApp, createSchema, mountApp, useTestCtx } from '@/unittests';
+import { createApp, createSchema, useTestCtx } from '#unittests';
 
 beforeAll(async () => {
     await createApp({
@@ -59,8 +57,6 @@ beforeAll(async () => {
             },
         }),
     });
-    await mountApp();
-    enableFetchMocks();
 });
 
 test('readonly fields validation', async () => {
@@ -78,7 +74,7 @@ test('readonly fields validation', async () => {
 
     // Save value and mock response
     fetchMock.mockResponseOnce(async (req) => {
-        expect(req.url).toBe('http://test.vst/api/v1/some_path/1/');
+        expect(req.url).toBe('http://localhost/api/v1/some_path/1/');
         expect(req.method).toBe('PATCH');
         expect(await req.json()).toStrictEqual({ name: 'Some new name' });
 

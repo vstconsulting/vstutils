@@ -1,6 +1,4 @@
-import { test, describe, beforeAll, expect, jest, beforeEach } from '@jest/globals';
-import fetchMock from 'jest-fetch-mock';
-import { createApp } from '../../unittests/create-app.js';
+import { expectNthRequest, createApp } from '#unittests';
 
 describe('Actions', () => {
     /** @type {App} */
@@ -9,7 +7,6 @@ describe('Actions', () => {
     beforeAll(() => {
         return createApp().then((a) => {
             app = a;
-            fetchMock.enableMocks();
         });
     });
 
@@ -19,7 +16,7 @@ describe('Actions', () => {
 
     test('empty actions execution', async () => {
         fetchMock.mockOnce(JSON.stringify([{ status: 200, data: { some: 'value' } }]));
-        const callback = jest.fn();
+        const callback = vitest.fn();
         const action = {
             name: 'test_action',
             title: 'Test actions',
@@ -31,9 +28,11 @@ describe('Actions', () => {
 
         await app.actions.execute({ action });
         expect(fetchMock.mock.calls).toHaveLength(1);
-        const [url, req] = fetchMock.mock.calls[0];
-        expect(url).toBe('http://localhost/api/endpoint/');
-        expect(JSON.parse(req.body)).toEqual([{ method: 'put', path: '/test/path/' }]);
+        expectNthRequest(0, {
+            method: 'PUT',
+            url: 'http://localhost/api/endpoint/',
+            body: [{ method: 'put', path: '/test/path/' }],
+        });
 
         expect(callback).toBeCalledTimes(1);
         const arg = callback.mock.calls[0][0];
@@ -45,7 +44,7 @@ describe('Actions', () => {
     });
 
     test('action with custom handler', () => {
-        const action = { name: 'test_action', handler: jest.fn() };
+        const action = { name: 'test_action', handler: vitest.fn() };
         app.actions.execute({ action });
 
         expect(action.handler).toBeCalledTimes(1);
@@ -80,10 +79,10 @@ describe('Actions', () => {
         });
         expect(result.data).toEqual({ some: 'return val' });
         expect(fetchMock).toBeCalledTimes(1);
-        const [url, req] = fetchMock.mock.calls[0];
-        expect(url).toBe('http://localhost/api/endpoint/');
-        expect(JSON.parse(req.body)).toEqual([
-            { method: 'patch', data: { testField: 'some val' }, path: 'execute' },
-        ]);
+        expectNthRequest(0, {
+            method: 'PUT',
+            path: '/api/endpoint/',
+            body: [{ method: 'patch', data: { testField: 'some val' }, path: 'execute' }],
+        });
     });
 });

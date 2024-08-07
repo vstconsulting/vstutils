@@ -1,5 +1,5 @@
 import { MaskedField, MaskedFieldMixin } from './masked';
-import PhoneFieldContentEdit from './PhoneFieldContentEdit';
+import PhoneFieldContentEdit from './PhoneFieldContentEdit.vue';
 import { BaseFieldContentReadonlyMixin, BaseFieldListView } from '../base';
 import IMask from 'imask';
 import { X_OPTIONS } from '../../utils';

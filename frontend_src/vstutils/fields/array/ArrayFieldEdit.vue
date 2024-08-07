@@ -24,7 +24,8 @@
 
 <script>
     import $ from 'jquery';
-    import { createUniqueIdGenerator } from '@/vstutils/utils';
+    import Vue from 'vue';
+    import { createUniqueIdGenerator } from '#vstutils/utils';
     import { BaseFieldContentEdit } from '../base';
 
     const idGenerator = createUniqueIdGenerator();

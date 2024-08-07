@@ -9,11 +9,11 @@ import orjson
 from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, HttpRequest
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.test.client import Client, ClientHandler
 from django.test.utils import modify_settings
 from drf_yasg.views import SPEC_RENDERERS
-from rest_framework import serializers, views, versioning, request as drf_request
+from rest_framework import serializers, views, versioning, request as drf_request, exceptions
 from rest_framework.authentication import (
     SessionAuthentication,
     BasicAuthentication,
@@ -28,6 +28,7 @@ from .validators import UrlQueryStringValidator
 from .renderers import ORJSONRenderer
 from ..utils import Dict, raise_context, patch_gzip_response
 from ..middleware import BaseMiddleware
+from ..oauth2.authentication import JWTBearerTokenAuthentication
 
 RequestType = _t.Union[drf_request.Request, HttpRequest]
 logger: logging.Logger = logging.getLogger('vstutils')
@@ -42,7 +43,8 @@ REST_METHODS: _t.List[_t.Text] = [
 default_authentication_classes = (
     SessionAuthentication,
     BasicAuthentication,
-    TokenAuthentication
+    TokenAuthentication,
+    JWTBearerTokenAuthentication,
 )
 
 append_to_list = list.append
@@ -80,8 +82,7 @@ def _iter_request(request, operation_handler, context):
         return operation_handler(operation, context)
 
     with executor_class(max_workers=THREADS_COUNT) as executor:
-        for operation_result in executor.map(handler, _get_request_data(request.data)):
-            yield operation_result
+        yield from executor.map(handler, _get_request_data(request.data))
 
 
 def _join_paths(*args) -> _t.Text:
@@ -376,7 +377,11 @@ class EndpointViewSet(views.APIView):
         if request.user.is_authenticated:
             if isinstance(request.successful_authenticator, SessionAuthentication):
                 kwargs['HTTP_COOKIE'] = str(request.META.get('HTTP_COOKIE'))
-            elif isinstance(request.successful_authenticator, (BasicAuthentication, TokenAuthentication)):
+            elif isinstance(request.successful_authenticator, (
+                BasicAuthentication,
+                TokenAuthentication,
+                JWTBearerTokenAuthentication,
+            )):
                 kwargs['HTTP_AUTHORIZATION'] = str(request.META.get('HTTP_AUTHORIZATION'))
             kwargs['user'] = request.user
         kwargs['language'] = getattr(request, 'language', None)
@@ -495,6 +500,16 @@ class EndpointViewSet(views.APIView):
 
     def patch(self, request: BulkRequestType) -> responses.BaseResponseClass:
         return self.put(request)
+
+    def perform_authentication(self, request):
+        try:
+            super().perform_authentication(request)
+        except exceptions.PermissionDenied as perm_err:  # nocv
+            # Required for some reasons when bulk request has both session and token
+            if perm_err.detail.startswith('CSRF Failed: '):
+                request.user = AnonymousUser()
+            else:
+                raise
 
     def initial(self, request: drf_request.Request, *args, **kwargs):
         super().initial(request, *args, **kwargs)

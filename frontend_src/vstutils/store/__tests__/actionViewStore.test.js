@@ -1,19 +1,12 @@
-import { test, expect, beforeAll } from '@jest/globals';
-import { createApp, createSchema, mountApp, waitForPageLoading } from '@/unittests';
+import { createApp, createSchema, expectNthRequest, waitForPageLoading } from '#unittests';
 import detailPageSchema from './detailPage-schema.json';
 import { ActionView } from '../../views';
-import fetchMock from 'jest-fetch-mock';
-
-beforeAll(() => {
-    fetchMock.enableMocks();
-});
 
 test('createActionViewStore', async () => {
     // Created schema and Model
     const app = await createApp({
         schema: createSchema(detailPageSchema),
     });
-    await mountApp();
 
     const actionView = app.views.get('/some_list/some_action/');
     expect(actionView).toBeInstanceOf(ActionView);
@@ -52,12 +45,14 @@ test('createActionViewStore', async () => {
         );
         await store.execute();
         expect(fetchMock).toBeCalledTimes(1);
-        let [, request] = fetchMock.mock.calls[0];
-        let bulk = JSON.parse(request.body);
-        expect(bulk[0].method).toBe('post');
-        expect(bulk[0].path).toStrictEqual('/some_list/some_action/');
-        // expecting that 'choices' is sent too because it's required and has
-        // enum, so the first value of this enum should be sent
-        expect(bulk[0].data).toStrictEqual({ text: 'Mshvill', choice: 'one' });
+        expectNthRequest(0, {
+            body: [
+                {
+                    method: 'post',
+                    path: '/some_list/some_action/',
+                    data: { choice: 'one', text: 'Mshvill' },
+                },
+            ],
+        });
     }
 });

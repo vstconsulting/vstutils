@@ -18,17 +18,17 @@
 
 <script lang="ts">
     import { defineComponent, onMounted, ref, toRef, watch } from 'vue';
-    import { useAutocompleteDropdown } from '@/vstutils/fields/autocomplete';
-    import { BaseFieldContentEdit, FieldEditPropsDef } from '@/vstutils/fields/base';
-    import { escapeHtml, getDependenceValueAsString, guiLocalSettings, RequestTypes } from '@/vstutils/utils';
-    import { signals } from '@/vstutils/signals';
-    import { useQuerySets } from '@/vstutils/fields/fk/fk';
+    import { useAutocompleteDropdown } from '#vstutils/fields/autocomplete';
+    import { BaseFieldContentEdit, FieldEditPropsDef } from '#vstutils/fields/base';
+    import { escapeHtml, getDependenceValueAsString, guiLocalSettings, RequestTypes } from '#vstutils/utils';
+    import { signals } from '#vstutils/signals';
+    import { useQuerySets } from '#vstutils/fields/fk/fk';
 
-    import type { ExtractRepresent, FieldEditPropsDefType } from '@/vstutils/fields/base';
+    import type { ExtractRepresent, FieldEditPropsDefType } from '#vstutils/fields/base';
     import type FKAutocompleteField from './FKAutocompleteField';
-    import type { QuerySet } from '@/vstutils/querySet';
-    import type { Model } from '@/vstutils/models';
-    import type { InnerData } from '@/vstutils/utils';
+    import type { QuerySet } from '#vstutils/querySet';
+    import type { Model } from '#vstutils/models';
+    import type { InnerData } from '#vstutils/utils';
 
     type Repr = ExtractRepresent<FKAutocompleteField>;
 

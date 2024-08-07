@@ -1,10 +1,4 @@
 import Vue from 'vue';
-import * as Vue27 from 'vue';
-window.Vue = Vue;
-window.Vue27 = Vue27;
-
-import VueI18n from 'vue-i18n';
-window.VueI18n = VueI18n;
 
 import * as pinia from 'pinia';
 window.pinia = pinia;
@@ -20,4 +14,6 @@ Vue.directive('element-bound', {
     },
 });
 
-export { Vue, VueI18n, PortalVue };
+Vue.config.productionTip = false;
+
+export { Vue, PortalVue };

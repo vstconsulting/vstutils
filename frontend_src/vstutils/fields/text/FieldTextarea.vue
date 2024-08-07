@@ -14,8 +14,8 @@
 
 <script setup lang="ts">
     import { toRef } from 'vue';
-    import type { Field } from '@/vstutils/fields/base';
-    import { useTextAreaAttrs } from '@/vstutils/fields/base';
+    import type { Field } from '#vstutils/fields/base';
+    import { useTextAreaAttrs } from '#vstutils/fields/base';
 
     const props = withDefaults(
         defineProps<{

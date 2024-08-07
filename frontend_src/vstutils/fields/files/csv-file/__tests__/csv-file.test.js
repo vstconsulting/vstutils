@@ -1,8 +1,7 @@
-import { describe, test, expect, beforeAll } from '@jest/globals';
 import { CsvFileField } from '../index';
 import { getTableConfig } from '../DataTable.vue';
-import { createApp, createSchema } from '@/unittests';
-import { guiPopUp } from '@/vstutils/popUp';
+import { createApp, createSchema } from '#unittests';
+import { guiPopUp } from '#vstutils/popUp';
 
 const tableConfig = [
     { prop: '_index', name: 'Index' },
@@ -70,7 +69,7 @@ describe('CSVFileFieldEdit', () => {
     });
 
     test('invalid file', () => {
-        guiPopUp.error = jest.fn();
+        guiPopUp.error = vitest.fn();
 
         expect(field.parseFile('"""')).toBeUndefined();
         expect(guiPopUp.error).toBeCalledTimes(1);

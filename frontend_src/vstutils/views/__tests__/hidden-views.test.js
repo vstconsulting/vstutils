@@ -1,6 +1,5 @@
-import { expect, test, beforeAll } from '@jest/globals';
-import { createApp, createSchema, schemaListOf } from '@/unittests';
-import { getApp } from '@/vstutils/utils';
+import { createApp, createSchema, schemaListOf } from '#unittests';
+import { getApp } from '#vstutils/utils';
 
 beforeAll(async () => {
     const some = {
@@ -82,7 +81,7 @@ beforeAll(async () => {
     });
 });
 
-test.only('hidden views generation', () => {
+test('hidden views generation', () => {
     const { views } = getApp();
 
     expect(views.get('/hidden/').hidden).toBeTruthy();

@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import type { RawLocation } from 'vue-router';
 import type { Action } from '../../../views';
-import type { XMenu } from '../../../AppConfiguration';
+import type { XMenu } from '../../../schema';
 import { getApp } from '../../../utils';
 
 export interface MenuItem {

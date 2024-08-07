@@ -28,14 +28,14 @@
     import { defineStore } from 'pinia';
     import { useRoute } from 'vue-router/composables';
 
-    import { guiPopUp, pop_up_msg } from '@/vstutils/popUp';
-    import { i18n } from '@/vstutils/translation';
-    import { formatPath, parseResponseMessage, getUniqueId, getApp } from '@/vstutils/utils';
-    import { createActionStore } from '@/vstutils/store/helpers';
-    import BootstrapModal from '@/vstutils/components/BootstrapModal.vue';
-    import ModelFields from '@/vstutils/components/page/ModelFields.vue';
+    import { guiPopUp, pop_up_msg } from '#vstutils/popUp';
+    import { i18n } from '#vstutils/translation';
+    import { formatPath, parseResponseMessage, getUniqueId, getApp } from '#vstutils/utils';
+    import { createActionStore } from '#vstutils/store/helpers';
+    import BootstrapModal from '#vstutils/components/BootstrapModal.vue';
+    import ModelFields from '#vstutils/components/page/ModelFields.vue';
 
-    import type { Action, ListView, ViewStore } from '@/vstutils/views';
+    import type { Action, ListView, ViewStore } from '#vstutils/views';
 
     const props = defineProps<{
         action: Action;
@@ -76,6 +76,7 @@
                     path,
                     data: instance._getInnerData(),
                     useBulk: instance.shouldUseBulk(method),
+                    auth: view.value.isSecure,
                 }),
             ),
         );

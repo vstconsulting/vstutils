@@ -1,4 +1,4 @@
-import type { AppSchema } from '@/vstutils/AppConfiguration';
+import type { AppSchema } from '#vstutils/schema';
 import { mergeDeep } from '../vstutils/utils';
 import simpleSchema from './simple-schema.json';
 
