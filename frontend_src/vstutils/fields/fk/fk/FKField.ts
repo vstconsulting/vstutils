@@ -34,13 +34,17 @@ function getPk() {
 
 function getParentPk() {
     const app = getApp();
-    let parentView = app.store.page.view.parent?.parent;
-
-    if (app.store.page.view.isEditPage() && !app.store.page.view.isEditStyleOnly) {
-        parentView = parentView?.parent;
+    for (let idx = app.store.viewItems.length - 2; idx >= 0; idx--) {
+        const item = app.store.viewItems[idx];
+        if (item?.view.isDetailPage()) {
+            const pk = item.view.getSavedState()?.instance?.getPkValue();
+            if (pk) {
+                return String(pk);
+            }
+            break;
+        }
     }
-
-    return app.router.currentRoute.params[(parentView as PageView).pkParamName!] || '';
+    return '';
 }
 
 const dependenceTemplates = new Map<

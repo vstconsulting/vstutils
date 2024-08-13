@@ -521,11 +521,16 @@ export const createActionViewStore = (view: ActionView) => {
 
     base.setLoadingSuccessful();
 
+    function fetchData() {
+        actionStore.init();
+    }
+
     return {
         ...base,
         ...actionStore,
         ...useOperations({ view, data: actionStore.sandbox }),
         entityViewClasses: useEntityViewClasses(actionStore.model, actionStore.sandbox),
         execute,
+        fetchData,
     };
 };

@@ -1,7 +1,15 @@
 import type { ParameterType } from 'swagger-schema-official';
 import { defineComponent, markRaw, toRaw } from 'vue';
 import type { InnerData, RepresentData } from '../../utils';
-import { _translate, deepEqual, X_OPTIONS, stringToCssClass, nameToTitle, capitalize } from '../../utils';
+import {
+    _translate,
+    deepEqual,
+    X_OPTIONS,
+    stringToCssClass,
+    nameToTitle,
+    capitalize,
+    assertNever,
+} from '../../utils';
 import { pop_up_msg } from '../../popUp';
 import type { ModelConstructor } from '../../models';
 import BaseFieldMixin from './BaseFieldMixin.vue';
@@ -145,10 +153,35 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
      * Returns field default value if any, or empty value otherwise
      */
     getInitialValue({ requireValue = false } = {}): Inner | undefined | null {
+        const customInitialValue = this.getCustomInitialValue();
+        if (customInitialValue) {
+            return customInitialValue;
+        }
         if (this.required || requireValue) {
             return this.hasDefault ? this.default : this.getEmptyValue();
         }
         return undefined;
+    }
+
+    protected getCustomInitialValue(): Inner | undefined | null {
+        const initialValueConfig = this.props?.initialValue;
+        if (!initialValueConfig) {
+            return;
+        }
+
+        if (initialValueConfig.type === 'from_first_parent_detail_view_that_has_field') {
+            for (const item of this.app.store.viewItems.slice(0, -1).toReversed()) {
+                if (item.view.isDetailPage()) {
+                    const state = item.view.getSavedState();
+                    if (state?.instance && state.instance._fields.has(initialValueConfig.field_name)) {
+                        return state.instance.getInnerValue(initialValueConfig.field_name) as any;
+                    }
+                }
+            }
+            return;
+        }
+
+        assertNever(initialValueConfig.type);
     }
 
     /**

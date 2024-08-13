@@ -18,7 +18,7 @@ export interface BaseViewStore extends StoreGeneric {
     initLoading: () => void;
     setLoadingSuccessful: () => void;
     setLoadingError: (error: unknown) => void;
-    fetchData: (options?: Record<string, unknown>) => Promise<void>;
+    fetchData: (options?: Record<string, unknown>) => Promise<void> | void;
     getAutoUpdatePk?: () => number | string | undefined;
     startAutoUpdate: () => void;
     stopAutoUpdate: () => void;

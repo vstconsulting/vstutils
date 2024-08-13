@@ -18,8 +18,8 @@ test('createActionViewStore', async () => {
     expect(store).not.toBeNull();
     expect(store.response).toBeTruthy();
     expect(store.sandbox).toStrictEqual({
-        bool: undefined,
-        text: undefined,
+        bool: false,
+        text: '',
         choice: 'one',
     });
 
@@ -50,7 +50,7 @@ test('createActionViewStore', async () => {
                 {
                     method: 'post',
                     path: '/some_list/some_action/',
-                    data: { choice: 'one', text: 'Mshvill' },
+                    data: { bool: false, choice: 'one', text: 'Mshvill' },
                 },
             ],
         });

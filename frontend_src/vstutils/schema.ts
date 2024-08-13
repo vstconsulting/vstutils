@@ -53,6 +53,15 @@ export interface AppInfo extends swagger.Info {
 
 export const MODEL_MODES = ['DEFAULT', 'STEP'] as const;
 
+export type FieldInitialValueConfig = {
+    type: 'from_first_parent_detail_view_that_has_field';
+    field_name: string;
+};
+
+export type ModelInitialValuesConfig = {
+    [key: string]: FieldInitialValueConfig;
+};
+
 export type ModelDefinition = swagger.Schema & {
     properties?: Record<string, FieldDefinition>;
     'x-properties-groups'?: Record<string, string[]>;
@@ -62,6 +71,7 @@ export type ModelDefinition = swagger.Schema & {
     'x-hide-not-required'?: boolean;
     'x-display-mode'?: (typeof MODEL_MODES)[number];
     'x-visibility-data-field-name'?: string;
+    'x-initial-values'?: ModelInitialValuesConfig;
 };
 
 export interface Operation extends swagger.Operation {

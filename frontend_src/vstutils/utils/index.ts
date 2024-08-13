@@ -517,3 +517,7 @@ export function escapeHtml(unsafe: string) {
 export const OBJECT_NOT_FOUND_TEXT = '[Object not found]';
 
 export type MaybePromise<T> = T | Promise<T>;
+
+export function assertNever(value: never): never {
+    throw new Error(`Unexpected value: ${value}`);
+}

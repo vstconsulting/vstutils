@@ -75,13 +75,25 @@ export class ModelsResolver {
         // Set required
         const requiredProperties = modelSchema.required ?? [];
 
+        const initialValuesConfig = modelSchema['x-initial-values'] ?? {};
+
         signals.emit('models[' + modelName + '].fields.beforeInit', properties);
 
         const fields = Object.entries(properties).map(([fieldName, fieldSchema]) => {
+            const schema: any = Object.assign({}, fieldSchema);
+
+            if (!('x-options' in schema)) {
+                schema['x-options'] = {};
+            }
+
+            if (initialValuesConfig[fieldName] && !schema['x-options'].initialValue) {
+                schema['x-options'].initialValue = initialValuesConfig[fieldName];
+            }
+
             const field =
                 fieldSchema instanceof BaseField
                     ? fieldSchema
-                    : this.fieldsResolver.resolveField(Object.assign({}, fieldSchema), fieldName);
+                    : this.fieldsResolver.resolveField(schema, fieldName);
             if (requiredProperties.includes(fieldName)) {
                 field.required = true;
             }
