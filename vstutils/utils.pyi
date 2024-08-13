@@ -29,6 +29,10 @@ def deprecated(func: TCallable) -> TCallable:
     ...
 
 
+def raise_misconfiguration(ok: tp.Any, message: str = None) -> tp.NoReturn | None:
+    ...
+
+
 def list_to_choices(items_list: tp.Iterable, response_type: tp.Callable = ...) -> tp.Iterable[tp.Tuple[str, str]]:
     ...
 

@@ -29,6 +29,7 @@ from django.urls import re_path, path, include
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
+from django.core.exceptions import ImproperlyConfigured
 from django.template import loader
 from django.utils import translation, functional
 from django.utils.cache import cc_delim_re
@@ -64,6 +65,35 @@ def deprecated(func):
         return func(*args, **kwargs)
 
     return new_func
+
+
+def raise_misconfiguration(ok, message=None):
+    """
+    Helper function that raises an `ImproperlyConfigured` exception if a condition is not met.
+
+    This function acts as a replacement for the `assert` statement, providing clearer error handling
+    in cases where the application configuration is incorrect.
+
+    :param ok:
+        A value of any type that can be evaluated as a boolean. If the boolean evaluation returns False,
+        the exception will be raised.
+    :type ok: Any
+
+    :param message:
+        An optional message to include in the exception.
+        If not provided, the exception will be raised without a message.
+    :type message: str, optional
+
+    :raises ImproperlyConfigured:
+        Raised if the boolean evaluation of the `ok` parameter is False,
+        indicating a misconfiguration in the application.
+
+    :return:
+        This function does not return any value. It either passes silently or raises an exception.
+    :rtype: None
+    """
+    if not ok:
+        raise ImproperlyConfigured(message)
 
 
 def list_to_choices(items_list, response_type=list):

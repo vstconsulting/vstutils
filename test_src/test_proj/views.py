@@ -5,13 +5,14 @@ import json
 
 import pydantic
 from django.utils.functional import SimpleLazyObject
+from rest_framework.fields import IntegerField
 from rest_framework.permissions import AllowAny
 
 from vstutils.api import responses, filter_backends, fields
 from vstutils.api.views import SettingsViewSet
 from vstutils.api.base import GenericViewSet, NonModelsViewSet
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
-from vstutils.api.serializers import DataSerializer, JsonObjectSerializer, EmptySerializer
+from vstutils.api.serializers import DataSerializer, JsonObjectSerializer, EmptySerializer, BaseSerializer, DisplayModeList
 from vstutils.api.auth import UserViewSet
 from vstutils.api.actions import Action, SimpleAction, SimpleFileAction
 from vstutils.utils import create_view
@@ -144,7 +145,21 @@ class TestBinaryFilesPydantic(pydantic.BaseModel):
     id: int
 
 
+class RowListSerializer(BaseSerializer):
+    _display_mode_list = DisplayModeList.TABLE
+
+    id = IntegerField(read_only=True)
+
+
+class PrettyTableSerializer(BaseSerializer):
+    items = RowListSerializer(many=True)
+
+
 class TestBinaryFilesViewSet(ModelWithBinaryFiles.generated_view):
+    @SimpleAction(serializer_class=PrettyTableSerializer, detail=False)
+    def test_list(self, request, *args, **kwargs):
+        return {"items": self.get_queryset()}
+
     @SimpleAction(serializer_class=TestBinaryFilesPydantic)
     def test_pydantic(self, request, *args, **kwargs):
         return self.get_object()

@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-30 08:17+0000\n"
+"POT-Creation-Date: 2024-08-09 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.15.0\n"
+"Generated-By: Babel 2.16.0\n"
 
 #: ../../backend.rst:2
 msgid "Backend API manual"
@@ -559,6 +559,8 @@ msgstr ""
 #: vstutils.api.filter_backends.VSTFilterBackend:22
 #: vstutils.api.filters.FkFilterHandler:15
 #: vstutils.api.serializers.BaseSerializer:12
+#: vstutils.api.serializers.DisplayMode:5
+#: vstutils.api.serializers.DisplayModeList:6
 #: vstutils.api.serializers.VSTSerializer:10
 #: vstutils.middleware.AsyncBaseMiddleware:41
 #: vstutils.middleware.BaseMiddleware:38
@@ -748,7 +750,8 @@ msgstr "is_sliced (bool): Булево значение, указывающее,
 #: vstutils.utils.classproperty vstutils.utils.create_view
 #: vstutils.utils.decode vstutils.utils.deprecated vstutils.utils.encode
 #: vstutils.utils.get_render vstutils.utils.lazy_translate
-#: vstutils.utils.list_to_choices vstutils.utils.send_template_email
+#: vstutils.utils.list_to_choices vstutils.utils.raise_misconfiguration
+#: vstutils.utils.send_template_email
 #: vstutils.utils.send_template_email_handler vstutils.utils.tmp_file
 #: vstutils.utils.tmp_file.write vstutils.utils.translate
 msgid "Parameters"
@@ -780,8 +783,8 @@ msgstr "Объект, содержащий параметры фильтраци
 #: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
 #: vstutils.utils.check_request_etag vstutils.utils.decode
 #: vstutils.utils.encode vstutils.utils.get_render
-#: vstutils.utils.list_to_choices vstutils.utils.send_template_email_handler
-#: vstutils.utils.tmp_file.write
+#: vstutils.utils.list_to_choices vstutils.utils.raise_misconfiguration
+#: vstutils.utils.send_template_email_handler vstutils.utils.tmp_file.write
 msgid "Returns"
 msgstr "Возвращает"
 
@@ -817,13 +820,15 @@ msgstr "Генератор, возвращающий запрошенные да
 #: vstutils.utils.ModelHandlers.get_object
 #: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
 #: vstutils.utils.create_view vstutils.utils.decode vstutils.utils.encode
-#: vstutils.utils.get_render vstutils.utils.tmp_file.write
+#: vstutils.utils.get_render vstutils.utils.raise_misconfiguration
+#: vstutils.utils.tmp_file.write
 msgid "Return type"
 msgstr "Тип возвращаемого значения"
 
 #: of vstutils.api.validators.RegularExpressionValidator
 #: vstutils.models.custom_model.ExternalCustomModel.get_data_generator
 #: vstutils.models.custom_model.ViewCustomModel.get_view_queryset
+#: vstutils.utils.raise_misconfiguration
 msgid "Raises"
 msgstr "Выбрасывает"
 
@@ -2612,6 +2617,16 @@ msgstr ""
 "предоставлен, будет использован :class:`.VSTCharField` для каждого поля "
 "из списка `fields`."
 
+#: of vstutils.api.fields.RelatedListField:30
+msgid ""
+"This field is deprecated. Use serializers with the ``many=True`` "
+"attribute. To change the display on the page, use "
+":const:`vstutils.api.serializers.DisplayModeList`."
+msgstr ""
+"Это поле устарело. Используйте сериализаторы с атрибутом ``many=True``. "
+"Чтобы изменить отображение на странице, используйте "
+":const:`vstutils.api.serializers.DisplayModeList`."
+
 #: of vstutils.api.fields.SecretFileInString:1
 msgid ""
 "This field extends :class:`.FileInStringField` but hides its value in the"
@@ -2974,11 +2989,37 @@ msgstr ""
 
 #: of vstutils.api.serializers.DisplayMode:1
 msgid ""
-"For any serializer displayed on frontend property `_display_mode` can be "
-"set to one of this values."
+"Enumeration for specifying how a serializer should be displayed on the "
+"frontend."
 msgstr ""
-"Для любого сериализатора, показанного на фронтенде, аттрибут "
-"`_display_mode` может принимать одно из следующих значений."
+"Перечисление для указания того, как сериализатор должен отображаться на "
+"фронтенде."
+
+#: of vstutils.api.serializers.DisplayMode:3
+msgid ""
+"This class is used to set the ``_display_mode`` property in a serializer "
+"to control its UI behavior."
+msgstr ""
+"Этот класс используется для установки свойства ``_display_mode`` в сериализаторе "
+"для управления его поведением в пользовательском интерфейсе."
+
+#: of vstutils.api.serializers.DisplayMode:7
+msgid "To set the display mode to steps:"
+msgstr "Чтобы установить режим отображения в виде последовательных шагов:"
+
+#: of vstutils.api.serializers.DisplayMode:15
+msgid "To use the default display mode:"
+msgstr "Чтобы использовать режим отображения по умолчанию:"
+
+#: of vstutils.api.serializers.DisplayMode:23
+msgid ""
+"Using `DisplayMode` allows developers to customize the interface based on"
+" the workflow needs, making forms and data entry more user-friendly and "
+"intuitive."
+msgstr ""
+"Использование `DisplayMode` позволяет разработчикам настраивать интерфейс в соответствии с "
+"потребностями рабочего процесса, делая формы и ввод данных более удобными и "
+"интуитивно понятными."
 
 #: ../../docstring of vstutils.api.serializers.DisplayMode.DEFAULT:1
 msgid "Will be used if no mode provided."
@@ -2991,6 +3032,55 @@ msgid ""
 msgstr ""
 "Каждая группа параметров отображается на раздельных вкладках. При "
 "создании выглядит как пошаговый мастер."
+
+#: of vstutils.api.serializers.DisplayModeList:1
+msgid ""
+"Enumeration for specifying how a list serializer should be displayed on "
+"the frontend."
+msgstr ""
+"Перечисление для указания того, как сериализатор списка должен отображаться на "
+"фронтенде."
+
+#: of vstutils.api.serializers.DisplayModeList:3
+msgid ""
+"This class is used to set the ``_display_mode_list`` property in a list "
+"serializer to control its UI behavior when dealing with multiple "
+"instances."
+msgstr ""
+"Этот класс используется для установки свойства ``_display_mode_list`` в сериализаторе списка "
+"для управления его поведением в пользовательском интерфейсе при работе с несколькими "
+"экземплярами."
+
+#: of vstutils.api.serializers.DisplayModeList:8
+msgid "To set the list display mode to table view:"
+msgstr "Чтобы установить режим отображения списка в виде таблицы:"
+
+#: of vstutils.api.serializers.DisplayModeList:20
+msgid ""
+"To use the default list display mode ensure that class doesn't have "
+"``_display_mode_list`` class property or set value to "
+"``DisplayModeList.DEFAULT``."
+msgstr ""
+"Чтобы использовать режим отображения списка по умолчанию, убедитесь, что класс не содержит "
+"свойства ``_display_mode_list`` или установите значение в "
+"``DisplayModeList.DEFAULT``."
+
+#: of vstutils.api.serializers.DisplayModeList:23
+msgid ""
+"`DisplayModeList` enables developers to tailor the appearance of list "
+"serializers, ensuring that users can interact with multiple data entries "
+"effectively in the interface."
+msgstr ""
+"`DisplayModeList` позволяет разработчикам настраивать внешний вид сериализаторов списка, "
+"обеспечивая эффективное взаимодействие пользователей с несколькими записями данных в интерфейсе."
+
+#: ../../docstring of vstutils.api.serializers.DisplayModeList.DEFAULT:1
+msgid "It will be displayed as a standard list of JSON objects."
+msgstr "Будет отображаться как стандартный список объектов JSON."
+
+#: ../../docstring of vstutils.api.serializers.DisplayModeList.TABLE:1
+msgid "It will be displayed as a table view."
+msgstr "Будет отображаться в виде таблицы."
 
 #: of vstutils.api.serializers.EmptySerializer:1
 msgid ""
@@ -3316,7 +3406,9 @@ msgstr "Флаг, разрешающий добавление существую
 
 #: of vstutils.api.decorators.nested_view:21
 msgid "Flag for forbidding bulk queries in related manager add method."
-msgstr "Флаг, запрещающий выполнение bulk запросов в методе add связанного менеджера."
+msgstr ""
+"Флаг, запрещающий выполнение bulk запросов в методе add связанного "
+"менеджера."
 
 #: of vstutils.api.decorators.nested_view:23
 msgid "Name of model-object attr which contains nested queryset."
@@ -5825,6 +5917,55 @@ msgstr "Контекст для игнорирования исключений.
 #: of vstutils.utils.raise_context_decorator_with_default:1
 msgid "Context for exclude errors and return default value."
 msgstr "Контекст для предотвращения исключений и возврата значения по умолчанию."
+
+#: of vstutils.utils.raise_misconfiguration:1
+msgid ""
+"Helper function that raises an `ImproperlyConfigured` exception if a "
+"condition is not met."
+msgstr ""
+"Вспомогательная функция, которая вызывает исключение "
+"`ImproperlyConfigured`, если условие не выполнено."
+
+#: of vstutils.utils.raise_misconfiguration:3
+msgid ""
+"This function acts as a replacement for the `assert` statement, providing"
+" clearer error handling in cases where the application configuration is "
+"incorrect."
+msgstr ""
+"Эта функция заменяет оператор `assert`, обеспечивая более четкую "
+"обработку ошибок в случаях, когда конфигурация приложения неверна."
+
+#: of vstutils.utils.raise_misconfiguration:7
+msgid ""
+"A value of any type that can be evaluated as a boolean. If the boolean "
+"evaluation returns False, the exception will be raised."
+msgstr ""
+"Значение любого типа, которое может быть оценено как логическое. Если "
+"логическая оценка возвращает False, будет вызвано исключение."
+
+#: of vstutils.utils.raise_misconfiguration:13
+msgid ""
+"An optional message to include in the exception. If not provided, the "
+"exception will be raised without a message."
+msgstr ""
+"Необязательное сообщение, которое будет включено в исключение. Если оно "
+"не указано, исключение будет вызвано без сообщения."
+
+#: of vstutils.utils.raise_misconfiguration:18
+msgid ""
+"Raised if the boolean evaluation of the `ok` parameter is False, "
+"indicating a misconfiguration in the application."
+msgstr ""
+"Вызывается, если логическая оценка параметра `ok` равна False, что "
+"указывает на ошибку конфигурации в приложении."
+
+#: of vstutils.utils.raise_misconfiguration:22
+msgid ""
+"This function does not return any value. It either passes silently or "
+"raises an exception."
+msgstr ""
+"Эта функция не возвращает никакого значения. Она либо выполняется без "
+"ошибок, либо вызывает исключение."
 
 #: of vstutils.utils.redirect_stdany:1
 msgid "Context for redirect any output to own stream."
