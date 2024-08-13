@@ -42,6 +42,8 @@ export interface Model {
     _data: InnerData;
     readonly sandbox: ModelSandbox;
 
+    getInnerValue(fieldName: string): unknown;
+    getRepresentValue(fieldName: string): unknown;
     getPkValue(): string | number | undefined | null;
     getViewFieldString(escapeResult?: boolean): string | undefined;
     getViewFieldValue(defaultValue?: unknown): unknown;

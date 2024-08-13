@@ -1,6 +1,7 @@
+import type { Schema, ParameterCollectionFormat, ParameterType } from 'swagger-schema-official';
 import type { ModelConstructor, Model } from '#vstutils/models/Model';
 import type { RepresentData, InnerData } from '#vstutils/utils';
-import type { Schema, ParameterCollectionFormat, ParameterType } from 'swagger-schema-official';
+import type { FieldInitialValueConfig } from '../../schema';
 import type { Component } from 'vue';
 
 export interface ModelPropertyDescriptor<Represent> extends PropertyDescriptor {
@@ -20,6 +21,7 @@ export interface FieldXOptions {
     redirect?: RedirectOptions;
     translateFieldName?: string;
     disableLabelTranslation?: boolean;
+    initialValue?: FieldInitialValueConfig;
     [key: string]: unknown;
 }
 

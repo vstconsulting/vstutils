@@ -498,11 +498,16 @@ export const createActionStore = (view: ActionView) => {
         }
     }
 
-    pageWithEditableData.setInstance(new pageWithEditableData.model.value());
+    function init() {
+        pageWithEditableData.setInstance(
+            new pageWithEditableData.model.value(pageWithEditableData.model.value.getInitialData()),
+        );
+    }
 
     return {
         ...pageWithEditableData,
         execute,
+        init,
     };
 };
 

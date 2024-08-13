@@ -2202,6 +2202,18 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertFalse(api['paths']['/hosts/instance_suffix_action_test/']['get']['x-list'])
         self.assertEqual(len(api['paths']['/hosts/instance_suffix_action_test/']['get']['parameters']), 0)
 
+        # Test custom initial values
+        self.assertDictEqual(
+            api['definitions']['PropertyAuthor']['x-initial-values'],
+            {
+                'phone': {
+                    'field_name': 'phone',
+                    'type': 'from_first_parent_detail_view_that_has_field',
+                },
+            },
+        )
+
+
         # Check x-list param on get methods
         self.assertFalse(api['paths']['/files/query_serializer_test/']['get']['x-list'])
         self.assertTrue(api['paths']['/files/query_serializer_test_list/']['get']['x-list'])
@@ -7654,7 +7666,7 @@ class Oauth2TestCase(BaseTestCase):
             oauth2_server_jwk_set,
         )
         self.assertEqual(id_token['locale'], 'fr-CA')
-        
+
         response = self.client_class().get(
             '/api/oauth2/userinfo/',
             HTTP_AUTHORIZATION=f'Bearer {response.json()["access_token"]}',

@@ -666,6 +666,9 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
         if display_mode:
             schema['x-display-mode'] = display_mode
 
+        if initial_frontend_values := getattr(serializer_class, '_initial_frontend_values', None):
+            schema['x-initial-values'] = initial_frontend_values
+
         schema._handled = True  # pylint: disable=protected-access
 
         # TODO: return it when swagger become openapi 3.0.1

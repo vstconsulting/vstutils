@@ -70,6 +70,13 @@ def check_named_response_as_result_serializer(view, request, *args, **kwargs):
 class PropertyAuthorSerializer(BaseSerializer):
     phone = PhoneField(allow_null=True, required=False)
 
+    _initial_frontend_values = {
+        'phone': {
+            'type': 'from_first_parent_detail_view_that_has_field',
+            'field_name': 'phone',
+        },
+    }
+
 
 @actions.SimpleAction(serializer_class=PropertyAuthorSerializer, atomic=True, require_confirmation=True)
 def simple_property_action(self, request, *args, **kwargs):
