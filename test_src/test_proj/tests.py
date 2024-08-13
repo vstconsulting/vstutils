@@ -2127,7 +2127,10 @@ class OpenapiEndpointTestCase(BaseTestCase):
 
         # Check hide non required fields option
         self.assertTrue(api['definitions']['SubVariables']['x-hide-not-required'])
+
+        # Check display mode settings
         self.assertEqual(api['definitions']['SubVariables']['x-display-mode'], 'STEP')
+        self.assertEqual(api['definitions']['RowList']['x-display-mode-list'], 'TABLE')
 
         # Check public centrifugo address when absolute path is provided
         self.assertEqual(api['info']['x-centrifugo-address'], 'wss://vstutilstestserver/notify/connection/websocket')
@@ -4636,6 +4639,7 @@ class ProjectTestCase(BaseTestCase):
             {'method': 'post', 'path': ['testbinaryfiles'], 'data': {'some_validatedmultiplenamedbinimage': [valid_image_content_dict]}},
             {'method': 'get', 'path': ['testbinaryfiles', instance_without_mediaType.id, 'test_pydantic']},
             {'method': 'get', 'path': ['testbinaryfiles', instance_without_mediaType.id, 'test_pydantic_list']},
+            {'method': 'get', 'path': ['testbinaryfiles', 'test_list']},
         ]
         results = self.bulk(bulk_data)
         self.assertEqual(results[0]['status'], 201)
@@ -4698,6 +4702,8 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[36]['data']['id'], instance_without_mediaType.id)
         self.assertEqual(results[37]['data']['count'], 2)
         self.assertEqual(results[37]['data']['results'], [{'id': 1}, {'id': 2}])
+
+        self.assertEqual(results[38]['data'], {"items": [{'id': 1}, {'id': 2}]})
 
     def test_file_field(self):
         with open(os.path.join(DIR_PATH, 'cat.jpeg'), 'rb') as cat1:
@@ -6151,18 +6157,18 @@ class BarcodeFieldsTestCase(BaseTestCase):
             "Remove `source=` from the field declaration."
         )
 
-        with self.assertRaises(AssertionError, msg=msg_to_check):
+        with self.assertRaises(ImproperlyConfigured, msg=msg_to_check):
             vstfields.QrCodeField(child=fields.CharField(source='some_source'))
 
-        with self.assertRaises(AssertionError, msg=msg_to_check):
+        with self.assertRaises(ImproperlyConfigured, msg=msg_to_check):
             vstfields.Barcode128Field(child=fields.CharField(source='some_source'))
 
         msg_to_check = '`child` has not been instantiated.'
 
-        with self.assertRaises(AssertionError, msg=msg_to_check):
+        with self.assertRaises(ImproperlyConfigured, msg=msg_to_check):
             vstfields.QrCodeField(child=fields.CharField)
 
-        with self.assertRaises(AssertionError, msg=msg_to_check):
+        with self.assertRaises(ImproperlyConfigured, msg=msg_to_check):
             vstfields.Barcode128Field(child=fields.CharField)
 
     def test_barcode128_validation(self):

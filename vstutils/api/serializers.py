@@ -48,7 +48,31 @@ def update_declared_fields(
 
 class DisplayMode(utils.BaseEnum):
     """
-    For any serializer displayed on frontend property `_display_mode` can be set to one of this values.
+    Enumeration for specifying how a serializer should be displayed on the frontend.
+
+    This class is used to set the ``_display_mode`` property in a serializer to control its UI behavior.
+
+    Example:
+
+        To set the display mode to steps:
+
+        .. code-block:: python
+
+            class MySerializer(serializers.Serializer):
+                _display_mode = DisplayMode.STEP
+                # Define serializer fields here
+
+        To use the default display mode:
+
+        .. code-block:: python
+
+            class MySerializer(serializers.Serializer):
+                _display_mode = DisplayMode.DEFAULT
+                # Define serializer fields here
+
+    Using `DisplayMode` allows developers to customize the interface based on the workflow needs,
+    making forms and data entry more user-friendly and intuitive.
+
     """
 
     DEFAULT = utils.BaseEnum.SAME
@@ -56,6 +80,41 @@ class DisplayMode(utils.BaseEnum):
 
     STEP = utils.BaseEnum.SAME
     """Each properties group displayed as separate tab. On creation displayed as multiple steps."""
+
+
+class DisplayModeList(utils.BaseEnum):
+    """
+    Enumeration for specifying how a list serializer should be displayed on the frontend.
+
+    This class is used to set the ``_display_mode_list`` property in a list serializer
+    to control its UI behavior when dealing with multiple instances.
+
+    Example:
+
+        To set the list display mode to table view:
+
+        .. code-block:: python
+
+            class MyRowSerializer(serializers.Serializer):
+                _display_mode_list = DisplayModeList.TABLE
+                # Define serializer fields here
+
+
+            class MySerializer(serializers.Serializer):
+                items = MyRowSerializer(many=True)
+
+        To use the default list display mode ensure that class doesn't have ``_display_mode_list`` class property or
+        set value to ``DisplayModeList.DEFAULT``.
+
+    `DisplayModeList` enables developers to tailor the appearance of list serializers,
+    ensuring that users can interact with multiple data entries effectively in the interface.
+    """
+
+    DEFAULT = utils.BaseEnum.SAME
+    """It will be displayed as a standard list of JSON objects."""
+
+    TABLE = utils.BaseEnum.SAME
+    """It will be displayed as a table view."""
 
 
 class DependFromFkSerializerMixin:

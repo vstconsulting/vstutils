@@ -14,7 +14,6 @@ from .. import fields, serializers, validators, base as api_base
 from ...models.base import get_first_match_name
 from ...utils import raise_context_decorator_with_default
 
-
 # Extra types
 
 # Extra formats
@@ -636,8 +635,6 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
         translate_model = getattr(serializer_class, '_translate_model', None)
 
         view_field_name = getattr(serializer_class, '_view_field_name', None)
-        hide_not_required = getattr(serializer_class, '_hide_not_required', None)
-        display_mode = getattr(serializer_class, '_display_mode', None)
 
         if view_field_name is None and schema_properties:
             view_field_name = get_first_match_name(schema_properties, schema_properties[0])
@@ -660,11 +657,14 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
         if translate_model:
             schema['x-translate-model'] = translate_model
 
-        if hide_not_required:
+        if hide_not_required := getattr(serializer_class, '_hide_not_required', None):
             schema['x-hide-not-required'] = bool(hide_not_required)
 
-        if display_mode:
+        if display_mode := getattr(serializer_class, '_display_mode', None):
             schema['x-display-mode'] = display_mode
+
+        if display_mode_list := getattr(serializer_class, '_display_mode_list', None):
+            schema['x-display-mode-list'] = display_mode_list
 
         if initial_frontend_values := getattr(serializer_class, '_initial_frontend_values', None):
             schema['x-initial-values'] = initial_frontend_values

@@ -179,7 +179,6 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
         vst_inspectors.VSTReferencingSerializerInspector,
         vst_inspectors.RelatedListFieldInspector,
         vst_inspectors.RatingFieldInspector,
-        vst_inspectors.RelatedListFieldInspector,
         vst_inspectors.NamedBinaryImageInJsonFieldInspector,
         vst_inspectors.MaskedFieldInspector,
         vst_inspectors.DecimalFieldInspector,

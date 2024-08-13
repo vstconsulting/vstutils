@@ -26,7 +26,14 @@ from vstutils.api.validators import ascii_string_validator
 
 from .renderers import ORJSONRenderer
 from ..models import fields as vst_model_fields
-from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default, translate, lazy_translate
+from ..utils import (
+    raise_context,
+    get_if_lazy,
+    raise_context_decorator_with_default,
+    translate,
+    lazy_translate,
+    raise_misconfiguration,
+)
 
 DependenceType = _t.Optional[_t.Dict[_t.Text, _t.Text]]
 DEFAULT_NAMED_FILE_DATA = {"name": None, "content": None, 'mediaType': None}
@@ -595,11 +602,11 @@ class _BaseBarcodeField(Field):
 
     def __init__(self, **kwargs):
         self.child = kwargs.pop('child', copy.deepcopy(self.child))
-        assert not inspect.isclass(self.child), '`child` has not been instantiated.'
-        assert self.child.source is None, (
+        raise_misconfiguration(not inspect.isclass(self.child), '`child` has not been instantiated.')
+        raise_misconfiguration(self.child.source is None, (
             "The `source` argument is not meaningful when applied to a `child=` field. "
             "Remove `source=` from the field declaration."
-        )
+        ))
 
         super().__init__(**kwargs)
         self.child.bind(field_name='', parent=self)
@@ -801,7 +808,7 @@ class FkModelField(FkField):
             kwargs['select'] = self._get_lazy_select_name_from_model()
         elif isinstance(select, str):
             select = select.split('.')
-            assert len(select) == 2, "'select' must match 'app_name.model_name' pattern."
+            raise_misconfiguration(len(select) == 2, "'select' must match 'app_name.model_name' pattern.")
             self.model_class = SimpleLazyObject(lambda: apps.get_model(require_ready=True, *select))
             kwargs['select'] = self._get_lazy_select_name_from_model()
         elif issubclass(select, ModelSerializer):
@@ -1305,6 +1312,12 @@ class RelatedListField(VSTCharField):
     :param serializer_class: Serializer to customize types of fields. If no serializer is provided,
                              :class:`.VSTCharField` will be used for every field in the `fields` list.
     :type serializer_class: type
+
+    .. warning::
+        This field is deprecated.
+        Use serializers with the ``many=True`` attribute.
+        To change the display on the page, use :const:`vstutils.api.serializers.DisplayModeList`.
+
     """
 
     def __init__(
@@ -1319,9 +1332,9 @@ class RelatedListField(VSTCharField):
         self.fields_custom_handlers_mapping = kwargs.pop('fields_custom_handlers', {})
         super().__init__(**kwargs)
         # fields for 'values' in qs
-        assert isinstance(fields, (tuple, list)), "fields must be list or tuple"
-        assert fields, "fields must have one or more values"
-        assert view_type in ('list', 'table')
+        raise_misconfiguration(isinstance(fields, (tuple, list)), "fields must be list or tuple")
+        raise_misconfiguration(fields, "fields must have one or more values")
+        raise_misconfiguration(view_type in ('list', 'table'))
         self._serializer_class = serializer_class
         self.fields = fields
         self.related_name = related_name
@@ -1481,14 +1494,26 @@ class RatingField(FloatField):
             front_style: _t.Text = 'stars',
             **kwargs,
     ):
-        assert front_style in self.valid_front_styles, f"front_style should be one of {self.valid_front_styles}"
+        raise_misconfiguration(
+            front_style in self.valid_front_styles,
+            f"front_style should be one of {self.valid_front_styles}"
+        )
         self.front_style = front_style
         self.color = kwargs.pop('color', None)
-        assert isinstance(self.color, str) or self.color is None, "color should be str"
+        raise_misconfiguration(
+            isinstance(self.color, str) or self.color is None,
+            "color should be str"
+        )
         self.fa_class = kwargs.pop('fa_class', None)
-        assert isinstance(self.fa_class, str) or self.fa_class is None, "fa_class should be str"
+        raise_misconfiguration(
+            isinstance(self.fa_class, str) or self.fa_class is None,
+            "fa_class should be str"
+        )
         self.step = step
-        assert not (step != 1 and front_style != 'slider'), 'custom step can be used only with front_style "slider"'
+        raise_misconfiguration(
+            not (step != 1 and front_style != 'slider'),
+            'custom step can be used only with front_style "slider"'
+        )
         super(RatingField, self).__init__(min_value=min_value, max_value=max_value, **kwargs)
 
 
