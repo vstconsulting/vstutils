@@ -7,7 +7,7 @@ from authlib.jose import jwt, OctKey
 from rest_framework import request as drf_request
 from django.conf import settings
 from django.utils.module_loading import import_string
-from drf_yasg import generators
+from drf_yasg import generators, openapi
 from drf_yasg.inspectors import field as field_insp
 from vstutils.utils import raise_context_decorator_with_default
 
@@ -140,6 +140,44 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         for secDef in operation.get('security') or []:
             self.required_security_definitions.add(tuple(secDef.keys())[0])
         return operation
+
+    def get_paths(self, endpoints, components, request, public):
+        # pylint: disable=too-many-locals
+        if not endpoints:
+            return openapi.Paths(paths={}), ''
+
+        prefix = self.determine_path_prefix(list(endpoints.keys())) or ''
+        assert '{' not in prefix, "base path cannot be templated in swagger 2.0"
+
+        paths = {}
+        for path, (view_cls, methods) in sorted(endpoints.items()):
+            operations = {}
+            extra_path_data = {}
+            for method, view in methods:
+                if not self.should_include_endpoint(path, method, view, public):
+                    continue
+
+                action_name = getattr(view, 'action', None)
+                if action_name and (action_object := getattr(getattr(view, action_name, None), 'action', None)):
+                    extra_path_data.update(action_object.get_extra_path_data(method))
+                operation = self.get_operation(view, path, prefix, method, components, request)
+                if operation is not None:
+                    operations[method.lower()] = operation
+
+            if operations:
+                # since the common prefix is used as the API basePath, it must be stripped
+                # from individual paths when writing them into the swagger document
+                path_suffix = path[len(prefix):]
+                if not path_suffix.startswith('/'):
+                    # copied from original method
+                    # may be unnecessary
+                    path_suffix = '/' + path_suffix  # nocv
+                path_item = self.get_path_item(path, view_cls, operations)
+                if extra_path_data:
+                    path_item.update(extra_path_data)
+                paths[path_suffix] = path_item
+
+        return self.get_paths_object(paths), prefix
 
     def get_operation_keys(self, subpath, method, view):
         keys = super().get_operation_keys(subpath, method, view)

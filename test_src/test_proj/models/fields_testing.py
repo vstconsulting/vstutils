@@ -78,7 +78,7 @@ class PropertyAuthorSerializer(BaseSerializer):
     }
 
 
-@actions.SimpleAction(serializer_class=PropertyAuthorSerializer, atomic=True, require_confirmation=True)
+@actions.SimpleAction(serializer_class=PropertyAuthorSerializer, atomic=True, require_confirmation=True, edit_only=True)
 def simple_property_action(self, request, *args, **kwargs):
     """
     Simple property description

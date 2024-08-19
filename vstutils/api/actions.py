@@ -81,6 +81,9 @@ class Action:
     :param icons: List of icons for UI button.
     :param is_list: Flag indicating whether the action type is a list or a single entity.
                     Typically used with GET actions.
+    :param edit_only: Flag indicating whether the action will only use edit mode, without a view page.
+                      This is used for actions where there is a GET method and
+                      any other modifying methods (POST, PUT, PATCH).
     :param require_confirmation: If true user will be asked to confirm action execution on frontend.
     :param kwargs: Set of named arguments for :func:`rest_framework.decorators.action`.
 
@@ -96,6 +99,7 @@ class Action:
         'title',
         'icons',
         'is_list',
+        'edit_only',
         'hidden',
         'require_confirmation',
     )
@@ -121,6 +125,7 @@ class Action:
         is_list=False,
         hidden=False,
         require_confirmation=False,
+        edit_only=False,
         **kwargs,
     ):
         # pylint: disable=too-many-arguments
@@ -133,6 +138,7 @@ class Action:
         self.title = title
         self.icons = icons
         self.is_list = is_list
+        self.edit_only = edit_only
         self.hidden = hidden
         self.require_confirmation = require_confirmation
         self.action_kwargs = kwargs
@@ -143,6 +149,13 @@ class Action:
     @property
     def is_page(self):
         return 'GET' in self.methods
+
+    def get_extra_path_data(self, method_name):
+        extra_path_data = {}
+        if method_name.upper() == 'GET':
+            if not self.is_list and self.edit_only and self.is_page and len(set(self.methods) - {'DELETE', 'GET'}):
+                extra_path_data['x-edit-only'] = True
+        return extra_path_data
 
     def wrap_function(self, func):
         res = action(

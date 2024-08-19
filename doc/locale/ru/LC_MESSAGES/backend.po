@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-09 05:35+0000\n"
+"POT-Creation-Date: 2024-08-16 02:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -471,9 +471,10 @@ msgid ""
 "current instance's QuerySet. All args and kwargs go to to Paginator's "
 "constructor."
 msgstr ""
-"Возвращает инициализированные объекты класса `vstutils.utils.Paginator` "
-"через текущий экземпляр QuerySet. Все аргументы и (args) и именованные "
-"аргументы (kwargs) попадают в конструктор класса Paginator."
+"Возвращает инициализированные объекты класса "
+":class:`vstutils.utils.Paginator` через текущий экземпляр QuerySet. Все "
+"аргументы и (args) и именованные аргументы (kwargs) попадают в "
+"конструктор класса Paginator."
 
 #: of vstutils.models.queryset.BQuerySet.paged:1
 msgid ""
@@ -565,7 +566,7 @@ msgstr ""
 #: vstutils.middleware.AsyncBaseMiddleware:41
 #: vstutils.middleware.BaseMiddleware:38
 #: vstutils.models.decorators.register_view_action:24
-#: vstutils.tasks.TaskClass:4 vstutils.utils.BaseEnum:4 vstutils.utils.Lock:35
+#: vstutils.tasks.TaskClass:4 vstutils.utils.BaseEnum:22 vstutils.utils.Lock:35
 #: vstutils.utils.ObjectHandlers:31 vstutils.utils.SecurePickling:22
 #: vstutils.utils.URLHandlers:10 vstutils.utils.apply_decorators:18
 #: vstutils.utils.classproperty:20 vstutils.utils.create_view:17
@@ -684,76 +685,8 @@ msgstr "high_mark (int): Верхний индекс для среза (если
 msgid "is_sliced (bool): A boolean indicating whether the query is sliced."
 msgstr "is_sliced (bool): Булево значение, указывающее, является ли запрос срезом."
 
-#: of vstutils.api.actions.Action vstutils.api.actions.SimpleFileAction
-#: vstutils.api.actions.SimpleFileAction.modified_since
-#: vstutils.api.actions.SimpleFileAction.pre_data
-#: vstutils.api.base.GenericViewSet.create_action_serializer
-#: vstutils.api.base.GenericViewSet.get_query_serialized_data
-#: vstutils.api.base.get_etag_value vstutils.api.decorators.nested_view
-#: vstutils.api.decorators.subaction vstutils.api.endpoint.EndpointViewSet.get
-#: vstutils.api.endpoint.EndpointViewSet.get_client
-#: vstutils.api.endpoint.EndpointViewSet.operate
-#: vstutils.api.endpoint.EndpointViewSet.post
-#: vstutils.api.endpoint.EndpointViewSet.put
-#: vstutils.api.fields.AutoCompletionField vstutils.api.fields.Barcode128Field
-#: vstutils.api.fields.BinFileInStringField vstutils.api.fields.CSVFileField
-#: vstutils.api.fields.CommaMultiSelect vstutils.api.fields.DeepFkField
-#: vstutils.api.fields.DependEnumField vstutils.api.fields.DependFromFkField
-#: vstutils.api.fields.DynamicJsonTypeField
-#: vstutils.api.fields.FileInStringField vstutils.api.fields.FkField
-#: vstutils.api.fields.FkModelField vstutils.api.fields.MaskedField
-#: vstutils.api.fields.MultipleNamedBinaryImageInJsonField
-#: vstutils.api.fields.NamedBinaryFileInJsonField
-#: vstutils.api.fields.NamedBinaryImageInJsonField
-#: vstutils.api.fields.QrCodeField vstutils.api.fields.RatingField
-#: vstutils.api.fields.RedirectFieldMixin vstutils.api.fields.RelatedListField
-#: vstutils.api.fields.SecretFileInString vstutils.api.fields.WYSIWYGField
-#: vstutils.api.filters.FkFilterHandler vstutils.api.filters.extra_filter
-#: vstutils.api.filters.name_filter vstutils.api.responses.BaseResponseClass
+#: ../../backend.rst of vstutils.api.decorators.nested_view
 #: vstutils.api.validators.FileMediaTypeValidator
-#: vstutils.api.validators.ImageBaseSizeValidator
-#: vstutils.api.validators.ImageHeightValidator
-#: vstutils.api.validators.ImageOpenValidator
-#: vstutils.api.validators.ImageResolutionValidator
-#: vstutils.api.validators.ImageValidator
-#: vstutils.api.validators.ImageWidthValidator
-#: vstutils.api.validators.RegularExpressionValidator
-#: vstutils.api.validators.UrlQueryStringValidator
-#: vstutils.api.validators.resize_image
-#: vstutils.api.validators.resize_image_from_to
-#: vstutils.middleware.BaseMiddleware.get_response_handler
-#: vstutils.middleware.BaseMiddleware.handler
-#: vstutils.middleware.BaseMiddleware.request_handler
-#: vstutils.models.custom_model.ExternalCustomModel.get_data_generator
-#: vstutils.tests.BaseTestCase.assertCheckDict
-#: vstutils.tests.BaseTestCase.assertCount
-#: vstutils.tests.BaseTestCase.assertRCode vstutils.tests.BaseTestCase.bulk
-#: vstutils.tests.BaseTestCase.bulk_transactional
-#: vstutils.tests.BaseTestCase.details_test
-#: vstutils.tests.BaseTestCase.endpoint_call
-#: vstutils.tests.BaseTestCase.endpoint_schema
-#: vstutils.tests.BaseTestCase.get_count
-#: vstutils.tests.BaseTestCase.get_model_class
-#: vstutils.tests.BaseTestCase.get_model_filter
-#: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.list_test
-#: vstutils.tests.BaseTestCase.patch_field_default
-#: vstutils.tests.BaseTestCase.user_as
-#: vstutils.utils.BaseVstObject.get_django_settings vstutils.utils.Executor
-#: vstutils.utils.Executor.aexecute vstutils.utils.Executor.execute
-#: vstutils.utils.Executor.post_execute vstutils.utils.Executor.pre_execute
-#: vstutils.utils.Executor.working_handler vstutils.utils.Executor.write_output
-#: vstutils.utils.Lock vstutils.utils.ModelHandlers
-#: vstutils.utils.ModelHandlers.get_object vstutils.utils.ObjectHandlers
-#: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers
-#: vstutils.utils.URLHandlers.get_object vstutils.utils.UnhandledExecutor
-#: vstutils.utils.add_in_vary vstutils.utils.check_request_etag
-#: vstutils.utils.classproperty vstutils.utils.create_view
-#: vstutils.utils.decode vstutils.utils.deprecated vstutils.utils.encode
-#: vstutils.utils.get_render vstutils.utils.lazy_translate
-#: vstutils.utils.list_to_choices vstutils.utils.raise_misconfiguration
-#: vstutils.utils.send_template_email
-#: vstutils.utils.send_template_email_handler vstutils.utils.tmp_file
-#: vstutils.utils.tmp_file.write vstutils.utils.translate
 msgid "Parameters"
 msgstr "Параметры"
 
@@ -761,30 +694,7 @@ msgstr "Параметры"
 msgid "An object containing filtering, limiting, and sorting parameters."
 msgstr "Объект, содержащий параметры фильтрации, лимитирования и сортировки."
 
-#: of vstutils.api.actions.SimpleFileAction.modified_since
-#: vstutils.api.actions.SimpleFileAction.pre_data
-#: vstutils.api.base.GenericViewSet.create_action_serializer
-#: vstutils.api.base.get_etag_value vstutils.api.filters.extra_filter
-#: vstutils.api.filters.name_filter vstutils.api.validators.resize_image
-#: vstutils.api.validators.resize_image_from_to
-#: vstutils.middleware.BaseMiddleware.handler
-#: vstutils.middleware.BaseMiddleware.request_handler
-#: vstutils.models.custom_model.ExternalCustomModel.get_data_generator
-#: vstutils.models.custom_model.ViewCustomModel.get_view_queryset
-#: vstutils.tests.BaseTestCase.bulk
-#: vstutils.tests.BaseTestCase.bulk_transactional
-#: vstutils.tests.BaseTestCase.endpoint_call
-#: vstutils.tests.BaseTestCase.get_count
-#: vstutils.tests.BaseTestCase.get_model_class
-#: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.get_url
-#: vstutils.utils.BaseVstObject.get_django_settings
-#: vstutils.utils.Executor.aexecute vstutils.utils.Executor.execute
-#: vstutils.utils.Executor.write_output vstutils.utils.ModelHandlers.get_object
-#: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
-#: vstutils.utils.check_request_etag vstutils.utils.decode
-#: vstutils.utils.encode vstutils.utils.get_render
-#: vstutils.utils.list_to_choices vstutils.utils.raise_misconfiguration
-#: vstutils.utils.send_template_email_handler vstutils.utils.tmp_file.write
+#: ../../backend.rst
 msgid "Returns"
 msgstr "Возвращает"
 
@@ -792,43 +702,11 @@ msgstr "Возвращает"
 msgid "A generator that yields the requested data."
 msgstr "Генератор, возвращающий запрошенные данные."
 
-#: of vstutils.api.base.GenericViewSet.create_action_serializer
-#: vstutils.api.base.get_etag_value vstutils.api.endpoint.EndpointViewSet.get
-#: vstutils.api.endpoint.EndpointViewSet.get_client
-#: vstutils.api.endpoint.EndpointViewSet.get_serializer
-#: vstutils.api.endpoint.EndpointViewSet.get_serializer_context
-#: vstutils.api.endpoint.EndpointViewSet.operate
-#: vstutils.api.endpoint.EndpointViewSet.post
-#: vstutils.api.endpoint.EndpointViewSet.put vstutils.api.filters.extra_filter
-#: vstutils.api.filters.name_filter vstutils.api.validators.resize_image
-#: vstutils.api.validators.resize_image_from_to
-#: vstutils.middleware.BaseMiddleware.get_response_handler
-#: vstutils.middleware.BaseMiddleware.handler
-#: vstutils.middleware.BaseMiddleware.request_handler
-#: vstutils.models.custom_model.ExternalCustomModel.get_data_generator
-#: vstutils.models.custom_model.ViewCustomModel.get_view_queryset
-#: vstutils.tasks.TaskClass.do vstutils.tests.BaseTestCase.bulk
-#: vstutils.tests.BaseTestCase.bulk_transactional
-#: vstutils.tests.BaseTestCase.endpoint_call
-#: vstutils.tests.BaseTestCase.get_count
-#: vstutils.tests.BaseTestCase.get_model_class
-#: vstutils.tests.BaseTestCase.get_model_filter
-#: vstutils.tests.BaseTestCase.get_result vstutils.tests.BaseTestCase.get_url
-#: vstutils.tests.BaseTestCase.patch
-#: vstutils.tests.BaseTestCase.patch_field_default
-#: vstutils.tests.BaseTestCase.random_name vstutils.utils.Executor.write_output
-#: vstutils.utils.ModelHandlers.get_object
-#: vstutils.utils.ObjectHandlers.backend vstutils.utils.URLHandlers.get_object
-#: vstutils.utils.create_view vstutils.utils.decode vstutils.utils.encode
-#: vstutils.utils.get_render vstutils.utils.raise_misconfiguration
-#: vstutils.utils.tmp_file.write
+#: ../../backend.rst
 msgid "Return type"
 msgstr "Тип возвращаемого значения"
 
-#: of vstutils.api.validators.RegularExpressionValidator
-#: vstutils.models.custom_model.ExternalCustomModel.get_data_generator
-#: vstutils.models.custom_model.ViewCustomModel.get_view_queryset
-#: vstutils.utils.raise_misconfiguration
+#: ../../backend.rst
 msgid "Raises"
 msgstr "Выбрасывает"
 
@@ -890,8 +768,7 @@ msgstr ""
 "`setup_custom_queryset_kwargs`, и каждый последующий вызов в цепочке "
 "методов будет работать с этими данными."
 
-#: of vstutils.api.base.ModelViewSet vstutils.api.responses.BaseResponseClass
-#: vstutils.models.custom_model.ListModel
+#: ../../backend.rst
 msgid "Variables"
 msgstr "Переменные"
 
@@ -3000,8 +2877,9 @@ msgid ""
 "This class is used to set the ``_display_mode`` property in a serializer "
 "to control its UI behavior."
 msgstr ""
-"Этот класс используется для установки свойства ``_display_mode`` в сериализаторе "
-"для управления его поведением в пользовательском интерфейсе."
+"Этот класс используется для установки свойства ``_display_mode`` в "
+"сериализаторе для управления его поведением в пользовательском "
+"интерфейсе."
 
 #: of vstutils.api.serializers.DisplayMode:7
 msgid "To set the display mode to steps:"
@@ -3017,9 +2895,9 @@ msgid ""
 " the workflow needs, making forms and data entry more user-friendly and "
 "intuitive."
 msgstr ""
-"Использование `DisplayMode` позволяет разработчикам настраивать интерфейс в соответствии с "
-"потребностями рабочего процесса, делая формы и ввод данных более удобными и "
-"интуитивно понятными."
+"Использование `DisplayMode` позволяет разработчикам настраивать интерфейс"
+" в соответствии с потребностями рабочего процесса, делая формы и ввод "
+"данных более удобными и интуитивно понятными."
 
 #: ../../docstring of vstutils.api.serializers.DisplayMode.DEFAULT:1
 msgid "Will be used if no mode provided."
@@ -3038,8 +2916,8 @@ msgid ""
 "Enumeration for specifying how a list serializer should be displayed on "
 "the frontend."
 msgstr ""
-"Перечисление для указания того, как сериализатор списка должен отображаться на "
-"фронтенде."
+"Перечисление для указания того, как сериализатор списка должен "
+"отображаться на фронтенде."
 
 #: of vstutils.api.serializers.DisplayModeList:3
 msgid ""
@@ -3047,9 +2925,9 @@ msgid ""
 "serializer to control its UI behavior when dealing with multiple "
 "instances."
 msgstr ""
-"Этот класс используется для установки свойства ``_display_mode_list`` в сериализаторе списка "
-"для управления его поведением в пользовательском интерфейсе при работе с несколькими "
-"экземплярами."
+"Этот класс используется для установки свойства ``_display_mode_list`` в "
+"сериализаторе списка для управления его поведением в пользовательском "
+"интерфейсе при работе с несколькими экземплярами."
 
 #: of vstutils.api.serializers.DisplayModeList:8
 msgid "To set the list display mode to table view:"
@@ -3061,9 +2939,9 @@ msgid ""
 "``_display_mode_list`` class property or set value to "
 "``DisplayModeList.DEFAULT``."
 msgstr ""
-"Чтобы использовать режим отображения списка по умолчанию, убедитесь, что класс не содержит "
-"свойства ``_display_mode_list`` или установите значение в "
-"``DisplayModeList.DEFAULT``."
+"Чтобы использовать режим отображения списка по умолчанию, убедитесь, что "
+"класс не содержит свойства ``_display_mode_list`` или установите значение"
+" в ``DisplayModeList.DEFAULT``."
 
 #: of vstutils.api.serializers.DisplayModeList:23
 msgid ""
@@ -3071,8 +2949,9 @@ msgid ""
 "serializers, ensuring that users can interact with multiple data entries "
 "effectively in the interface."
 msgstr ""
-"`DisplayModeList` позволяет разработчикам настраивать внешний вид сериализаторов списка, "
-"обеспечивая эффективное взаимодействие пользователей с несколькими записями данных в интерфейсе."
+"`DisplayModeList` позволяет разработчикам настраивать внешний вид "
+"сериализаторов списка, обеспечивая эффективное взаимодействие "
+"пользователей с несколькими записями данных в интерфейсе."
 
 #: ../../docstring of vstutils.api.serializers.DisplayModeList.DEFAULT:1
 msgid "It will be displayed as a standard list of JSON objects."
@@ -3986,12 +3865,23 @@ msgstr ""
 "сущностью. Обычно используется с действиями GET."
 
 #: of vstutils.api.actions.Action:62
+msgid ""
+"Flag indicating whether the action will only use edit mode, without a "
+"view page. This is used for actions where there is a GET method and any "
+"other modifying methods (POST, PUT, PATCH)."
+msgstr ""
+"Флаг, который показывает, что на экшене будет использоваться только режим"
+" редактирования, без применения страницы для просмотра. Используется для "
+"экшенов, где есть метод GET и любые другие изменяющие методы (POST, PUT, "
+"PATCH)."
+
+#: of vstutils.api.actions.Action:66
 msgid "If true user will be asked to confirm action execution on frontend."
 msgstr ""
 "Если истина, то в интерфейсе пользователь должен будет подтвердить "
 "действие перед выполнением."
 
-#: of vstutils.api.actions.Action:64
+#: of vstutils.api.actions.Action:68
 msgid "Set of named arguments for :func:`rest_framework.decorators.action`."
 msgstr "Набор именованных аргументов для :func:`rest_framework.decorators.action`."
 
@@ -4635,8 +4525,8 @@ msgstr ""
 "аргументы будут переданы методу задачи :meth:`TaskClass.run`."
 
 #: of vstutils.tasks.TaskClass.do:5
-msgid ":py:class:`celery.result.AsyncResult`"
-msgstr ":py:class:`celery.result.AsyncResult`"
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`celery.result.AsyncResult\\``"
+msgstr ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`celery.result.AsyncResult\\``"
 
 #: of vstutils.tasks.TaskClass.name:1
 msgid ""
@@ -4685,8 +4575,8 @@ msgstr ""
 "?format=openapi"
 
 #: of vstutils.api.endpoint.EndpointViewSet.get:5
-msgid ":py:class:`django.http.response.HttpResponse`"
-msgstr ":py:class:`django.http.response.HttpResponse`"
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`django.http.response.HttpResponse\\``"
+msgstr ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`django.http.response.HttpResponse\\``"
 
 #: of vstutils.api.endpoint.EndpointViewSet.get_client:1
 msgid ""
@@ -4698,11 +4588,11 @@ msgstr ""
 "аутентифицирован тем же самым пользователем."
 
 #: of vstutils.api.endpoint.EndpointViewSet.get_client:6
-msgid ":py:class:`vstutils.api.endpoint.BulkClient`"
-msgstr ":py:class:`vstutils.api.endpoint.BulkClient`"
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`vstutils.api.endpoint.BulkClient\\``"
+msgstr ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`vstutils.api.endpoint.BulkClient\\``"
 
 #: of vstutils.api.endpoint.EndpointViewSet.get_serializer:5
-msgid ":py:class:`vstutils.api.endpoint.OperationSerializer`"
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`vstutils.api.endpoint.OperationSerializer\\``"
 msgstr ":py:class:`vstutils.api.endpoint.OperationSerializer`"
 
 #: of vstutils.api.endpoint.EndpointViewSet.get_serializer_context:1
@@ -4710,8 +4600,8 @@ msgid "Extra context provided to the serializer class."
 msgstr "Дополнительный контекст, предоставляемый классу сериализатора."
 
 #: of vstutils.api.endpoint.EndpointViewSet.get_serializer_context:4
-msgid ":py:class:`dict`"
-msgstr ":py:class:`dict`"
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`dict\\``"
+msgstr ""
 
 #: of vstutils.api.endpoint.EndpointViewSet.operate:1
 msgid "Method used to handle one operation and return result of it"
@@ -4721,11 +4611,13 @@ msgstr ""
 
 #: of vstutils.api.endpoint.EndpointViewSet.operate:7
 msgid ""
-":py:data:`typing.Tuple`\\[:py:class:`typing.Dict`, "
-":py:class:`typing.SupportsFloat`]"
+":sphinx_autodoc_typehints_type:`\\:py\\:data\\:\\`typing.Tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`typing.Dict\\`\\, "
+"\\:py\\:class\\:\\`typing.SupportsFloat\\`\\]`"
 msgstr ""
-":py:data:`typing.Tuple`\\[:py:class:`typing.Dict`, "
-":py:class:`typing.SupportsFloat`]"
+":sphinx_autodoc_typehints_type:`\\:py\\:data\\:\\`typing.Tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`typing.Dict\\`\\, "
+"\\:py\\:class\\:\\`typing.SupportsFloat\\`\\]`"
 
 #: of vstutils.api.endpoint.EndpointViewSet.post:1
 msgid "Execute transactional bulk request"
@@ -4733,8 +4625,8 @@ msgstr "Выполнить транзакционный bulk-запрос"
 
 #: of vstutils.api.endpoint.EndpointViewSet.post:5
 #: vstutils.api.endpoint.EndpointViewSet.put:5
-msgid ":py:class:`vstutils.api.responses.BaseResponseClass`"
-msgstr ":py:class:`vstutils.api.responses.BaseResponseClass`"
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`vstutils.api.responses.BaseResponseClass\\``"
+msgstr ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`vstutils.api.responses.BaseResponseClass\\``"
 
 #: of vstutils.api.endpoint.EndpointViewSet.put:1
 msgid "Execute non transaction bulk request"
@@ -5121,19 +5013,35 @@ msgstr "именованные аргументы для :meth:`.get_result`"
 #: vstutils.tests.BaseTestCase.endpoint_call:11
 #: vstutils.tests.BaseTestCase.get_result:26
 msgid ""
-":py:data:`typing.Union`\\[:py:class:`typing.List`\\[:py:class:`typing.Dict`\\[:py:class:`str`,"
-" :py:data:`typing.Any`]], :py:class:`str`, :py:class:`bytes`, "
-":py:class:`bytearray`, :py:class:`typing.Dict`, "
-":py:class:`typing.Sequence`\\[:py:data:`typing.Union`\\[:py:class:`typing.List`\\[:py:class:`typing.Dict`\\[:py:class:`str`,"
-" :py:data:`typing.Any`]], :py:class:`str`, :py:class:`bytes`, "
-":py:class:`bytearray`]]]"
+":sphinx_autodoc_typehints_type:`\\:py\\:data\\:\\`typing.Union\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`typing.List\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`typing.Dict\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`str\\`\\, "
+"\\:py\\:data\\:\\`typing.Any\\`\\]\\]\\, \\:py\\:class\\:\\`str\\`\\, "
+"\\:py\\:class\\:\\`bytes\\`\\, \\:py\\:class\\:\\`bytearray\\`\\, "
+"\\:py\\:class\\:\\`typing.Dict\\`\\, "
+"\\:py\\:class\\:\\`typing.Sequence\\`\\\\ "
+"\\\\\\[\\:py\\:data\\:\\`typing.Union\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`typing.List\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`typing.Dict\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`str\\`\\, "
+"\\:py\\:data\\:\\`typing.Any\\`\\]\\]\\, \\:py\\:class\\:\\`str\\`\\, "
+"\\:py\\:class\\:\\`bytes\\`\\, \\:py\\:class\\:\\`bytearray\\`\\]\\]\\]`"
 msgstr ""
-":py:data:`typing.Union`\\[:py:class:`typing.List`\\[:py:class:`typing.Dict`\\[:py:class:`str`,"
-" :py:data:`typing.Any`]], :py:class:`str`, :py:class:`bytes`, "
-":py:class:`bytearray`, :py:class:`typing.Dict`, "
-":py:class:`typing.Sequence`\\[:py:data:`typing.Union`\\[:py:class:`typing.List`\\[:py:class:`typing.Dict`\\[:py:class:`str`,"
-" :py:data:`typing.Any`]], :py:class:`str`, :py:class:`bytes`, "
-":py:class:`bytearray`]]]"
+":sphinx_autodoc_typehints_type:`\\:py\\:data\\:\\`typing.Union\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`typing.List\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`typing.Dict\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`str\\`\\, "
+"\\:py\\:data\\:\\`typing.Any\\`\\]\\]\\, \\:py\\:class\\:\\`str\\`\\, "
+"\\:py\\:class\\:\\`bytes\\`\\, \\:py\\:class\\:\\`bytearray\\`\\, "
+"\\:py\\:class\\:\\`typing.Dict\\`\\, "
+"\\:py\\:class\\:\\`typing.Sequence\\`\\\\ "
+"\\\\\\[\\:py\\:data\\:\\`typing.Union\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`typing.List\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`typing.Dict\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`str\\`\\, "
+"\\:py\\:data\\:\\`typing.Any\\`\\]\\]\\, \\:py\\:class\\:\\`str\\`\\, "
+"\\:py\\:class\\:\\`bytes\\`\\, \\:py\\:class\\:\\`bytearray\\`\\]\\]\\]`"
 
 #: of vstutils.tests.BaseTestCase.bulk:10
 #: vstutils.tests.BaseTestCase.bulk_transactional:10
@@ -5330,8 +5238,8 @@ msgstr ""
 
 #: of vstutils.tests.BaseTestCase.get_url:4
 #: vstutils.tests.BaseTestCase.random_name:4
-msgid ":py:class:`str`"
-msgstr ":py:class:`str`"
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`str\\``"
+msgstr ""
 
 #: of vstutils.tests.BaseTestCase.get_url:5
 msgid "string like ``/api/v1/.../.../`` where ``...`` is args of function."
@@ -5367,8 +5275,12 @@ msgstr "Простая обертка над :func:`unittest.mock.patch`."
 
 #: of vstutils.tests.BaseTestCase.patch:4
 #: vstutils.tests.BaseTestCase.patch_field_default:10
-msgid ":py:class:`typing.ContextManager`\\[:py:class:`unittest.mock.Mock`]"
-msgstr ":py:class:`typing.ContextManager`\\[:py:class:`unittest.mock.Mock`]"
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`typing.ContextManager\\`\\\\"
+" \\\\\\[\\:py\\:class\\:\\`unittest.mock.Mock\\`\\]`"
+msgstr ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`typing.ContextManager\\`\\\\"
+" \\\\\\[\\:py\\:class\\:\\`unittest.mock.Mock\\`\\]`"
 
 #: of vstutils.tests.BaseTestCase.patch_field_default:1
 msgid ""
@@ -5422,20 +5334,20 @@ msgstr ""
 
 #: of vstutils.utils.BaseEnum:1
 msgid ""
-"BaseEnum extends `Enum` class and used to create enum-like objects that "
-"can be used in django serializers or django models."
+"BaseEnum extends :class:`enum.Enum` class and used to create enum-like "
+"objects that can be used in django serializers or django models."
 msgstr ""
-"BaseEnum расширяет класс `Enum` и используется для создания enum-подобных"
-" объектов, которые могут использоваться django-сериализаторами или "
-"django-моделями."
+"BaseEnum расширяет класс :class:`enum.Enum` и используется для создания "
+"enum-подобных объектов, которые могут использоваться "
+"django-сериализаторами или django-моделями."
 
 #: of vstutils.utils.BaseEnum:25
 msgid ""
 "For special cases, when value must be in lower or upper case, you can "
-"setup value as ``BaseEnum.LOWER` or ``BaseEnum.UPPER``. But in default "
+"setup value as ``BaseEnum.LOWER`` or ``BaseEnum.UPPER``. But in default "
 "cases we recommend use ``BaseEnum.SAME`` for memory optimization."
 msgstr ""
-"вы можете установить значение как ``BaseEnum.LOWER` или "
+"вы можете установить значение как ``BaseEnum.LOWER`` или "
 "``BaseEnum.UPPER``. Однако в обычных случаях рекомендуется использовать "
 "``BaseEnum.SAME`` для оптимизации памяти."
 
@@ -5781,11 +5693,11 @@ msgstr ""
 #: of vstutils.utils.create_view:23
 msgid ""
 "This function is oldstyle and will be deprecated in future versions. Use "
-"native call of method :method:`vstutils.models.BModel.get_view_class`."
+"native call of method :meth:`vstutils.models.BModel.get_view_class`."
 msgstr ""
 "Эта функция олдскульная и будет объявлена устаревшей в будущих версиях. "
 "Используйте встроенный вызов метода "
-":method:`vstutils.models.BModel.get_view_class`."
+":meth:`vstutils.models.BModel.get_view_class`."
 
 #: of vstutils.utils.create_view:28
 msgid ""
@@ -6096,7 +6008,7 @@ msgstr ""
 
 #: of vstutils.utils.tmp_file_context:5
 msgid "This context manager over :class:`.tmp_file`"
-msgstr "Данный менеджер контекста работает с class:`.tmp_file`"
+msgstr "Данный менеджер контекста работает с :class:`.tmp_file`"
 
 #: of vstutils.utils.translate:1
 msgid ""

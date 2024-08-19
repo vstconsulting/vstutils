@@ -38,6 +38,7 @@ class Action:
     title: _t.Optional[_t.Text]
     icons: _t.Optional[_t.Union[_t.Text, _t.Iterable]]
     is_list: bool
+    edit_only: bool
     hidden: bool
     action_kwargs: _t.Dict[_t.Text, _t.Any]
     def __init__(
@@ -51,11 +52,13 @@ class Action:
         title: _t.Optional[_t.Text] = ...,
         icons: _t.Optional[_t.Union[_t.Text, _t.Iterable]] = ...,
         is_list: bool = ...,
+        edit_only: bool = ...,
         hidden: bool = ...,
         **kwargs
     ) -> None: ...
     @property
     def is_page(self) -> bool: ...
+    def get_extra_path_data(self, method_name: str) -> dict[str, _t.Any]: ...
     def wrap_function(self, func: _t.Callable) -> ViewSetAction: ...
     def __call__(self, method: _t.Callable) -> ViewSetAction:
         def action_method(

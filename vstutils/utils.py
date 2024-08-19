@@ -357,7 +357,7 @@ def create_view(model, **meta_options):
 
     .. warning::
         This function is oldstyle and will be deprecated in future versions.
-        Use native call of method :method:`vstutils.models.BModel.get_view_class`.
+        Use native call of method :meth:`vstutils.models.BModel.get_view_class`.
 
     :type model: Type[vstutils.models.BaseModel]
     :param model: Model class with `.get_view_class` method. This method also has :class:`vstutils.models.BModel`.
@@ -1438,31 +1438,31 @@ class VstEnum(Enum, metaclass=VstEnumMeta):
 
 class BaseEnum(str, VstEnum):
     """
-    BaseEnum extends `Enum` class and used to create enum-like objects that can be used in django serializers or
-    django models.
+    BaseEnum extends :class:`enum.Enum` class and used to create enum-like objects that can be used in
+    django serializers or django models.
 
     Example:
-
         .. sourcecode:: python
 
             from vstutils.models import BModel
 
-            class ItemCLasses(BaseEnum):
+
+            class ItemClasses(BaseEnum):
                 FIRST = BaseEnum.SAME
                 SECOND = BaseEnum.SAME
                 THIRD = BaseEnum.SAME
 
 
             class MyDjangoModel(BModel):
-                item_class = models.CharField(max_length=ItemCLasses.max_len, choices=ItemCLasses.to_choices())
+                item_class = models.CharField(max_length=ItemClasses.max_len, choices=ItemClasses.to_choices())
 
                 @property
                 def is_second(self):
                     # Function check is item has second class of instance
-                    return ItemCLasses.SECOND.is_equal(self.item_class)
+                    return ItemClasses.SECOND.is_equal(self.item_class)
 
     .. note::
-        For special cases, when value must be in lower or upper case, you can setup value as ``BaseEnum.LOWER` or
+        For special cases, when value must be in lower or upper case, you can setup value as ``BaseEnum.LOWER`` or
         ``BaseEnum.UPPER``. But in default cases we recommend use ``BaseEnum.SAME`` for memory optimization.
     """
 
