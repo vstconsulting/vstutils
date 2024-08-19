@@ -2260,11 +2260,12 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertFalse(api['paths'][path]['put']['x-multiaction'])
 
         path = '/author/{id}/simple_property_action/'
-        self.assertCount(api['paths'][path], 5)
+        self.assertCount(api['paths'][path], 6)
         self.assertIn('get', api['paths'][path])
         self.assertIn('put', api['paths'][path])
         self.assertIn('patch', api['paths'][path])
         self.assertIn('delete', api['paths'][path])
+        self.assertIn('x-edit-only', api['paths'][path])
         self.assertIn('parameters', api['paths'][path])
         self.assertEqual(api['paths'][path]['get']['responses']['200']['schema']['$ref'], '#/definitions/PropertyAuthor')
         self.assertEqual(api['paths'][path]['put']['responses']['200']['schema']['$ref'], '#/definitions/PropertyAuthor')
@@ -2275,6 +2276,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertNotIn('x-title', api['paths'][path]['get'])
         self.assertEqual(len(api['paths'][path]['get']['parameters']), 0)
         self.assertEqual(api['paths'][path]['patch']['x-require-confirmation'], True)
+        # Test edit only view in schema
+        self.assertTrue(api['paths'][path]['x-edit-only'])
 
         path = '/author/{id}/simple_property_action_with_query/'
         self.assertCount(api['paths'][path], 2)

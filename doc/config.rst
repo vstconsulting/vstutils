@@ -725,6 +725,7 @@ Ensure that Traefik is installed on your server. You can download the binary fro
 Create a Traefik configuration file ``/path/to/traefik.toml``. Here's a basic example:
 
 .. sourcecode:: toml
+
     [experimental]
       http3 = true
 
@@ -776,6 +777,7 @@ Make sure to replace ``your_domain.com`` with your actual domain.
 Ensure that your vstutils settings have the correct configurations for HTTPS. In your ``/etc/vstutils/settings.ini`` (or project ``settings.ini``):
 
 .. sourcecode:: ini
+
     [web]
     secure_proxy_ssl_header_name = HTTP_X_FORWARDED_PROTO
     secure_proxy_ssl_header_value = https
@@ -828,6 +830,7 @@ Replace ``your_domain.com`` with your actual domain and update the paths for SSL
 Ensure that your vstutils settings have the correct configurations for HTTPS. In your ``/etc/vstutils/settings.ini`` (or project ``settings.ini``):
 
 .. sourcecode:: ini
+
     [web]
     secure_proxy_ssl_header_name = HTTP_X_FORWARDED_PROTO
     secure_proxy_ssl_header_value = https
