@@ -248,22 +248,6 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
             }
         }
 
-        if (typeof value === 'number') {
-            if (this.options.maximum && value > this.options.maximum) {
-                throw {
-                    error: 'validation',
-                    message: $t(samples.max).format([this.options.maximum]),
-                };
-            }
-
-            if (this.options.minimum && value < this.options.minimum) {
-                throw {
-                    error: 'validation',
-                    message: $t(samples.min).format([this.options.maximum]),
-                };
-            }
-        }
-
         if (
             (value === undefined && this.required && !this.options.default) ||
             (value === null && !this.nullable)

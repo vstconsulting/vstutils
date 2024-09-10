@@ -2,7 +2,7 @@ import { computed } from 'vue';
 import { signals } from '#vstutils/signals';
 import Gravatar from './Gravatar.ts';
 import TFAPage from './TFAPage.vue';
-import { IntegerField } from '../fields/numbers/integer.js';
+import { IntegerField } from '../fields/numbers/integer';
 import { guiPopUp, pop_up_msg } from '../popUp';
 import { generatePassword, getApp, generateBase32String, generateRandomString } from '../utils';
 import { useViewStore } from '#vstutils/store';

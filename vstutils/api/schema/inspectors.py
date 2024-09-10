@@ -42,6 +42,8 @@ FORMAT_WYSIWYG = 'wysiwyg'
 FORMAT_CRONTAB = 'crontab'
 FORMAT_QRCODE = 'qrcode'
 FORMAT_BARCODE128 = 'barcode128'
+FORMAT_CHECKBOX = 'checkbox'
+FORMAT_PLUSMINUS = 'plusminus'
 
 X_OPTIONS = 'x-options'
 
@@ -98,6 +100,14 @@ basic_type_info[fields.QrCodeField] = {
 basic_type_info[fields.Barcode128Field] = {
     'type': openapi.TYPE_STRING,
     'format': FORMAT_BARCODE128,
+}
+basic_type_info[fields.CheckboxBooleanField] = {
+    'type': openapi.TYPE_BOOLEAN,
+    'format': FORMAT_CHECKBOX,
+}
+basic_type_info[fields.PlusMinusIntegerField] = {
+    'type': openapi.TYPE_INTEGER,
+    'format': FORMAT_PLUSMINUS,
 }
 
 

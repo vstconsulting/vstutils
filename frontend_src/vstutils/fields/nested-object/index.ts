@@ -2,6 +2,7 @@ import { type Component, computed, defineComponent, h } from 'vue';
 
 import { ModelFields } from '#vstutils/components/page';
 import type {
+    DisplayModeList,
     Field,
     FieldOptions,
     FieldPropsDefType,
@@ -11,8 +12,9 @@ import type {
 } from '#vstutils/fields/base';
 import { BaseField, FieldPropsDef, useFieldWrapperClasses } from '#vstutils/fields/base';
 import { onAppBeforeInit } from '#vstutils/signals';
-import { emptyInnerData, emptyRepresentData, mapObjectValues } from '#vstutils/utils';
+import { assertNever, emptyInnerData, emptyRepresentData, mapObjectValues } from '#vstutils/utils';
 import { NestedObjectArrayFieldMixin } from './array';
+import NestedObjectArrayTableField from './NestedObjectArrayTableField.vue';
 
 import type { ModelConstructor } from '#vstutils/models';
 import type { InnerData, RepresentData } from '#vstutils/utils';
@@ -142,10 +144,12 @@ export class NestedObjectField
 {
     nestedModel: ModelConstructor | null = null;
     hideNotRequired?: boolean;
+    displayModeList: DisplayModeList;
 
     constructor(options: FieldOptions<NestedObjectFieldXOptions, TInner>) {
         super(options);
         this.hideNotRequired = this.props.hideNotRequired;
+        this.displayModeList = options['x-display-mode-list'] ?? 'DEFAULT';
         onAppBeforeInit(() => this.resolveNestedModel());
     }
     getEmptyValue() {
@@ -204,6 +208,12 @@ export class NestedObjectField
     }
 
     override getArrayComponent(): Component {
-        return NestedObjectArrayFieldMixin;
+        if (this.displayModeList === 'TABLE') {
+            return NestedObjectArrayTableField;
+        }
+        if (this.displayModeList === 'DEFAULT') {
+            return NestedObjectArrayFieldMixin;
+        }
+        assertNever(this.displayModeList);
     }
 }

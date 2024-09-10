@@ -1,3 +1,3 @@
-import { NumberField } from './number.js';
+import { NumberField } from './number';
 
 export class FloatField extends NumberField {}

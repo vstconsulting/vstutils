@@ -19,3 +19,4 @@ export { type AppSchema } from './vstutils/schema';
 export { defineFieldComponent } from './vstutils/fields/base/defineFieldComponent';
 export { BaseField } from './vstutils/fields/base/BaseField';
 export { showConfirmationModal } from './vstutils/confirmation-modal';
+export { onNestedObjectsTableRowBeforeChange } from './vstutils/fields/nested-object/signals';

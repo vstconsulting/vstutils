@@ -13,7 +13,7 @@ from urllib.parse import quote
 
 import orjson
 from rest_framework.serializers import CharField, IntegerField, FloatField, ModelSerializer, Serializer
-from rest_framework.fields import empty, SkipField, get_error_detail, Field
+from rest_framework.fields import empty, SkipField, get_error_detail, Field, BooleanField
 from rest_framework.exceptions import ValidationError
 from django.apps import apps
 from django.db import models
@@ -1725,3 +1725,15 @@ class CrontabField(CharField):
             intervals[interval]
             for interval in self.intervals
         )
+
+
+class CheckboxBooleanField(BooleanField):
+    """
+    Boolean field that renders checkbox.
+    """
+
+
+class PlusMinusIntegerField(IntegerField):
+    """
+    Integer field that renders +/- buttons.
+    """

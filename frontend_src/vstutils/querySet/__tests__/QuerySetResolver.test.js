@@ -1,4 +1,4 @@
-import { IntegerField } from '../../fields/numbers/integer.js';
+import { IntegerField } from '../../fields/numbers/integer';
 import { BaseModel, makeModel } from '../../models';
 import { RequestTypes } from '../../utils';
 import { QuerySet } from '../QuerySet.ts';

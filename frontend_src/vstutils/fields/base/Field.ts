@@ -27,6 +27,8 @@ export interface FieldXOptions {
 
 export type DefaultXOptions = FieldXOptions | undefined;
 
+export type DisplayModeList = 'DEFAULT' | 'TABLE';
+
 export type FieldOptions<XOptions extends DefaultXOptions, Inner> = Omit<Schema, 'default' | 'items'> & {
     allowEmptyValue?: boolean;
     collectionFormat?: ParameterCollectionFormat;
@@ -40,6 +42,9 @@ export type FieldOptions<XOptions extends DefaultXOptions, Inner> = Omit<Schema,
     'x-format'?: string;
     'x-hidden'?: boolean;
     'x-nullable'?: boolean;
+    'x-display-mode-list'?: DisplayModeList;
+    'x-dynamic-minimum'?: string;
+    'x-dynamic-maximum'?: string;
     'x-validators'?: {
         extensions?: string[];
         min_width?: number;

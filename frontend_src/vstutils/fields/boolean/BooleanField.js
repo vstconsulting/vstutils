@@ -1,11 +1,12 @@
 import { stringToBoolean } from '../../utils';
 import { BaseField } from '../base';
 import BooleanFieldMixin from './BooleanFieldMixin.js';
+import CheckboxBooleanFieldComponent from './CheckboxBooleanField.vue';
 
 /**
  * Field to store bool value
  */
-class BooleanField extends BaseField {
+export class BooleanField extends BaseField {
     /**
      * Custom method for toInner and toRepresent methods.
      * @param {*} value
@@ -52,11 +53,8 @@ class BooleanField extends BaseField {
         return false;
     }
 
-    /**
-     * Redefinition of base guiField static property 'mixins'.
-     */
-    static get mixins() {
-        return [BooleanFieldMixin];
+    getComponent() {
+        return BooleanFieldMixin;
     }
 
     getContainerCssClasses(data) {
@@ -68,3 +66,9 @@ class BooleanField extends BaseField {
 }
 
 export default BooleanField;
+
+export class CheckboxBooleanField extends BooleanField {
+    getComponent() {
+        return CheckboxBooleanFieldComponent;
+    }
+}

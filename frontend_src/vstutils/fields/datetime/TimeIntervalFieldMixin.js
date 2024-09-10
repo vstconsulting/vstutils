@@ -1,4 +1,4 @@
-import { IntegerFieldContentMixin } from '../numbers/integer.js';
+import { IntegerFieldContentMixin } from '../numbers/integer';
 import { BaseFieldContentEdit } from '../base';
 
 const TimeIntervalFieldMixin = {
