@@ -122,13 +122,19 @@ export function addDefaultFields(fieldsResolver: FieldsResolver) {
         ['choices', ChoicesField],
         ['fk', fk.fk.FKField],
         ['deep_fk', fk.deepFk.DeepFKField],
+        ['plusminus', numbers.integer.PlusMinusIntegerField],
         ['uptime', datetime.UptimeField],
     ] as [string | typeof FieldsResolver.DEFAULT_FIELD_KEY, new (options: any) => Field][]) {
         fieldsResolver.registerField(SCHEMA_DATA_TYPE.integer, format, field);
     }
 
     // Set BOOLEAN fields
-    fieldsResolver.registerDefaultForType(SCHEMA_DATA_TYPE.boolean, boolean.BooleanField);
+    for (const [format, field] of [
+        [FieldsResolver.DEFAULT_FIELD_KEY, boolean.BooleanField],
+        ['checkbox', boolean.CheckboxBooleanField],
+    ] as [string | typeof FieldsResolver.DEFAULT_FIELD_KEY, new (options: any) => Field][]) {
+        fieldsResolver.registerField(SCHEMA_DATA_TYPE.boolean, format, field);
+    }
 
     // Set ARRAY fields
     for (const [format, field] of [

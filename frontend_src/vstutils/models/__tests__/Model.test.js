@@ -1,6 +1,6 @@
 import { BaseModel, makeModel } from '../index.ts';
 import { StringField } from '../../fields/text';
-import { IntegerField } from '../../fields/numbers/integer.js';
+import { IntegerField } from '../../fields/numbers/integer';
 import JSONField from '../../fields/json/JSONField';
 
 const emailField = new StringField({ name: 'email', maxLength: 60 });

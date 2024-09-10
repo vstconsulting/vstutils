@@ -2,7 +2,7 @@ import { createSchema, createApp } from '#unittests';
 import { makeModel, BaseModel } from '../models';
 import { QuerySet } from '../querySet/QuerySet.ts';
 import { StringField } from '../fields/text/';
-import { IntegerField } from '../fields/numbers/integer.js';
+import { IntegerField } from '../fields/numbers/integer';
 import { RequestTypes } from '../utils';
 import { AggregatedQueriesExecutor } from '../AggregatedQueriesExecutor.js';
 import { NotFoundError } from '../querySet/errors.js';

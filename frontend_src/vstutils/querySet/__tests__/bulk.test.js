@@ -2,7 +2,7 @@ import { apiConnector } from '../../api';
 import { BaseModel, makeModel } from '../../models';
 import { QuerySet } from '../QuerySet.ts';
 import { RequestTypes } from '../../utils';
-import { IntegerField } from '../../fields/numbers/integer.js';
+import { IntegerField } from '../../fields/numbers/integer';
 
 describe('bulk or non bulk selection', () => {
     const idField = new IntegerField({ name: 'id', readOnly: true });

@@ -7,15 +7,18 @@ export interface FieldValidationErrorInfo {
     message: string | Record<string, unknown>;
 }
 
-function* objToErrorsLines(obj: Record<string, unknown>, indent = 1): Generator<string> {
+function* objToErrorsLines(obj: Record<string, unknown>, indent = 1): Generator<string, void, undefined> {
     for (const [key, value] of Object.entries(obj)) {
         if (typeof value === 'string') {
             yield `${'&nbsp;'.repeat(indent * 3)}<b>${i18n.ts(escapeHtml(key))}</b>: ${i18n.ts(
                 escapeHtml(value),
             )}`;
         } else {
-            yield `${'&nbsp;'.repeat(indent * 3)}<b>${i18n.ts(escapeHtml(key))}</b>:`;
-            yield* objToErrorsLines(value as Record<string, unknown>, indent + 1);
+            const nestedLines = [...objToErrorsLines(value as Record<string, unknown>, indent + 1)];
+            if (nestedLines.length > 0) {
+                yield `${'&nbsp;'.repeat(indent * 3)}<b>${i18n.ts(escapeHtml(key))}</b>:`;
+                yield* nestedLines;
+            }
         }
     }
 }
@@ -53,7 +56,10 @@ export class ModelValidationError extends Error {
             if (typeof message === 'string') {
                 lines.push(`<b>${title}</b>: ${i18n.ts(escapeHtml(message))}`);
             } else {
-                lines.push(`<b>${title}</b>:`, ...objToErrorsLines(message));
+                const newLines = [...objToErrorsLines(message)];
+                if (newLines.length > 0) {
+                    lines.push(`<b>${title}</b>:`, ...newLines);
+                }
             }
         }
         return lines.join('<br />');
