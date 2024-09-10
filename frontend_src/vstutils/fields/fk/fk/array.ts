@@ -22,6 +22,10 @@ export const FKArrayEdit = defineComponent({
             transport: createTransport(props.field, querysets.value, toRef(props, 'data')),
         };
     },
+    beforeDestroy() {
+        // @ts-expect-error Select2 has no types
+        $(this.$refs.selectEl).off().select2('destroy');
+    },
     mounted() {
         this.initSelect2(this.$refs.selectEl as HTMLSelectElement);
 

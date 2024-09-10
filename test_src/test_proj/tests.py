@@ -1660,7 +1660,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Grouping model properties for GUI
         self.assertEqual(
             api['definitions']['OneAuthor']['x-properties-groups'],
-            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked', 'decimal']}
+            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked', 'decimal', 'decimal_without_max_digits']}
         )
         # Check view field name
         self.assertEqual(api['definitions']['OneExtraPost']['x-view-field-name'], 'title')
@@ -2216,6 +2216,11 @@ class OpenapiEndpointTestCase(BaseTestCase):
             },
         )
 
+        # Check decimal_without_max_digits schema
+        self.assertEqual(
+            api['definitions']['OneAuthor']['properties']['decimal_without_max_digits']['x-options']['mask'],
+            r'/^-?\d+(\.\d{0,2})?$/',
+        )
 
         # Check x-list param on get methods
         self.assertFalse(api['paths']['/files/query_serializer_test/']['get']['x-list'])
@@ -4161,6 +4166,7 @@ class ProjectTestCase(BaseTestCase):
             'phone': None,
             'masked': None,
             'decimal': '13.37',
+            'decimal_without_max_digits': '13.37',
             'registerDate': date,
             'posts': [
                 {
