@@ -562,11 +562,15 @@ class DecimalFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
+        if field.max_digits is None:
+            mask = rf'/^-?\d+(\.\d{{0,{field.decimal_places}}})?$/'
+        else:
+            mask = rf'/^-?\d{{0,{field.max_digits - field.decimal_places}}}(\.\d{{0,{field.decimal_places}}})?$/'
         kwargs = {
             'type': decimal_field_type(field),
             'format': FORMAT_MASKED,
             X_OPTIONS: {
-                'mask': rf'/^-?\d{{0,{field.max_digits - field.decimal_places}}}(\.\d{{0,{field.decimal_places}}})?$/'
+                'mask': mask
             }
         }
 

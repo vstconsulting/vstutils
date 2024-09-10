@@ -136,7 +136,7 @@ class Author(BModel):
         default_related_name = 'author'
         _non_bulk_methods = ('post',)
         _list_fields = ['name', 'hidden']
-        _detail_fields = ['name', 'registerDate', 'posts', 'phone', 'masked', 'decimal']
+        _detail_fields = ['name', 'registerDate', 'posts', 'phone', 'masked', 'decimal', 'decimal_without_max_digits']
         _extra_serializer_classes = {
             'serializer_class_update': UpdateAuthorSerializer,
             'serializer_class_partial_update': UpdateAuthorSerializer,
@@ -154,6 +154,7 @@ class Author(BModel):
             'phone': PhoneField(allow_null=True, required=False),
             'masked': MaskedField(allow_null=True, required=False, mask={'mask': '000-000'}),
             'decimal': DecimalField(default='13.37', decimal_places=2, max_digits=5),
+            'decimal_without_max_digits': DecimalField(source='decimal', decimal_places=2, max_digits=None, read_only=True),
         }
         _nested = {
             'post': {
