@@ -54,7 +54,9 @@ class LimitOffsetPagination(DRFLimitOffsetPagination):
     def get_paginated_response(self, data):
         response = self.response_class(self.get_response_data(data))
         if self.identifier is not None:
-            response.headers['Pagination-Identifiers'] = ','.join(map(str, (d[self.identifier] for d in data)))
+            response.headers['Pagination-Identifiers'] = ','.join(
+                sorted(set(map(str, (d[self.identifier] for d in data))))
+            )
         return response
 
     def get_paginated_response_schema(self, schema):

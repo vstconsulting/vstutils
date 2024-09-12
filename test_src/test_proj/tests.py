@@ -2135,6 +2135,13 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Check public centrifugo address when absolute path is provided
         self.assertEqual(api['info']['x-centrifugo-address'], 'wss://vstutilstestserver/notify/connection/websocket')
 
+        param_filter_csv = api['paths']['/post/']['get']['parameters'][1]
+        self.assertEqual(param_filter_csv['name'], 'extra_author')
+        self.assertEqual(param_filter_csv['in'], 'query')
+        self.assertEqual(param_filter_csv['type'], 'array')
+        self.assertEqual(param_filter_csv['items']['type'], 'integer')
+        self.assertEqual(param_filter_csv['collectionFormat'], 'multi')
+
         # Check csvfile schema
         self.assertDictEqual(
             api['definitions']['OnePost']['properties']['some_data'],
@@ -4231,6 +4238,7 @@ class ProjectTestCase(BaseTestCase):
             {"method": "get", "path": ['post'], "query": "__authors=<<2[headers][Pagination-Identifiers]>>"},
             {"method": "get", "path": ['author'], "headers": {"Identifiers-List-Name": "id"}, "query": f"id={author_2.id}"},
             {"method": "get", "path": ['post'], "query": "__authors=<<4[headers][Pagination-Identifiers]>>"},
+            {"method": "get", "path": ['post'], "headers": {"Identifiers-List-Name": "author"}, "query": f"extra_author={author_1.id}&extra_author={author_3.id}"},
         ])
         self.assertEqual(results[0]['status'], 200)
         self.assertTrue('Pagination-Identifiers' not in results[0]['headers'])
@@ -4243,6 +4251,8 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[4]['data']['count'], 1)
         self.assertEqual(results[5]['status'], 200, results[5])
         self.assertEqual(results[5]['data']['count'], 0)
+        self.assertEqual(results[6]['status'], 200)
+        self.assertEqual(results[6]['headers']['Pagination-Identifiers'], expected_authors_identifiers)
 
     def test_model_rating_field(self):
         date = '2021-01-20T00:26:38Z'

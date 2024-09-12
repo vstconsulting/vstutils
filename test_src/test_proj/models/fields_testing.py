@@ -3,6 +3,10 @@ import uuid
 
 from django.db import models
 from django.http.response import FileResponse
+from django.forms.widgets import SelectMultiple
+from django.forms.fields import IntegerField
+from django.utils import timezone
+from django_filters import Filter
 
 from vstutils.api import fields, filters, actions
 from vstutils.models import BModel, BaseModel
@@ -20,7 +24,6 @@ from vstutils.api.fields import (
     WYSIWYGField,
     CrontabField,
 )
-from django.utils import timezone
 from rest_framework.fields import DecimalField, CharField
 
 
@@ -204,6 +207,24 @@ class SomeDataCsvSerializer(BaseSerializer):
     some_data = CharField(max_length=300, required=True)
 
 
+class MultipleSelectField(IntegerField):
+    widget = SelectMultiple
+
+    def clean(self, value):
+        return [super(IntegerField, self).clean(v) for v in value]
+
+
+class InFilter(Filter):
+    field_class = MultipleSelectField
+
+    def __init__(
+            self,
+            field_name=None,
+            lookup_expr='in',
+            **kwargs):
+        super().__init__(field_name, lookup_expr, **kwargs)
+
+
 class Post(BModel):
     author = models.ForeignKey(Author, on_delete=models.CASCADE, null=True)
     title = models.CharField(max_length=255)
@@ -229,6 +250,7 @@ class Post(BModel):
         }
         _filterset_fields = {
             '__authors': filters.CharFilter(method=filters.extra_filter, field_name='author'),
+            'extra_author': InFilter(field_name='author'),
             'author': None,
             'author__not': filters.CharFilter(method=filters.FkFilterHandler()),
             'title': None,
