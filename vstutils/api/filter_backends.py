@@ -4,6 +4,7 @@ import contextlib
 
 import pydantic
 from django.db import models
+from django.forms import BooleanField, DecimalField, IntegerField
 from django.utils.encoding import force_str
 from django_filters import filters, filterset
 from django_filters.rest_framework.backends import DjangoFilterBackend as BaseDjangoFilterBackend
@@ -38,10 +39,13 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
         # pylint: disable=unused-variable,comparison-with-callable
         field_type: str = openapi.TYPE_STRING
         kwargs: dict = {}
+        filter_field = field.field_class
 
-        if isinstance(field, filters.NumberFilter):
+        if issubclass(filter_field, DecimalField):
             field_type = openapi.TYPE_NUMBER
-        elif isinstance(field, filters.BooleanFilter):
+        elif issubclass(filter_field, IntegerField):
+            field_type = openapi.TYPE_INTEGER
+        elif issubclass(filter_field, BooleanField):
             field_type = openapi.TYPE_BOOLEAN
         elif isinstance(field, (filters.ChoiceFilter, filters.MultipleChoiceFilter)):
             kwargs['enum'] = tuple(dict(field.field.choices).keys())
@@ -50,7 +54,17 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
             m_field = next((f for f in queryset.model._meta.fields if f.name == search_field), None)
             field_type, kwargs_update = get_field_type_from_queryset(m_field)
 
-        if field.method == extra_filter or isinstance(field, (filters.MultipleChoiceFilter, filters.BaseCSVFilter)):
+        if getattr(field.field_class.widget, 'allow_multiple_selected', False):
+            kwargs = {
+                'items': {
+                    'type': field_type,
+                    **kwargs,
+                },
+                'uniqueItems': True,
+                'collectionFormat': 'multi',
+            }
+            field_type = openapi.TYPE_ARRAY
+        elif field.method == extra_filter or isinstance(field, filters.BaseCSVFilter):
             kwargs = {
                 'items': {
                     'type': field_type,

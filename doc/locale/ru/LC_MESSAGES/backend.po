@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-16 02:46+0000\n"
+"POT-Creation-Date: 2024-09-12 01:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1216,6 +1216,10 @@ msgstr ""
 "Список MIME-типов, доступных для выбора пользователем. Поддерживается "
 "синтаксис с использованием ``*``. По умолчанию ``['text/csv']``"
 
+#: of vstutils.api.fields.CheckboxBooleanField:1
+msgid "Boolean field that renders checkbox."
+msgstr "Булево поле, которое отрисовывается как чекбокс."
+
 #: of vstutils.api.fields.CommaMultiSelect:1
 msgid ""
 "Field that allows users to input multiple values, separated by a "
@@ -2280,6 +2284,10 @@ msgid ""
 msgstr ""
 "Поле будет отображаться в клиентском приложении в виде поля ввода для "
 "ввода номера телефона, включая код страны."
+
+#: of vstutils.api.fields.PlusMinusIntegerField:1
+msgid "Integer field that renders +/- buttons."
+msgstr "Целочисленное поле, которое отрисовывается как кнопки +/-."
 
 #: of vstutils.api.fields.QrCodeField:1
 msgid "A versatile field for encoding various types of data into QR codes."
