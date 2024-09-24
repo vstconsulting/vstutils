@@ -263,6 +263,20 @@ class DBOptionsSection(cconfig.Section):
     }
 
 
+class DBOptionsPoolSection(cconfig.Section):
+    types_map = {
+        'min_size': ConfigIntType,
+        'max_size': ConfigIntType,
+        'open': ConfigBoolType,
+        'timeout': ConfigIntSecondsType,
+        'max_waiting': ConfigIntSecondsType,
+        'max_lifetime': ConfigIntSecondsType,
+        'max_idle': ConfigIntSecondsType,
+        'reconnect_timeout': ConfigIntSecondsType,
+        'num_workers': ConfigIntType,
+    }
+
+
 class CacheSection(BackendSection):
     types_map = {
         'timeout': ConfigIntSecondsType,
@@ -637,6 +651,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'databases': DatabasesSection,
         'database': DBSection,
         'database.options': DBOptionsSection,
+        'database.options.pool': DBOptionsPoolSection,
         'database.test': DBTestSection,
         'worker': WorkerSection,
         'cache': CacheSection,
