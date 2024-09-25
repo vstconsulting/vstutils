@@ -744,7 +744,7 @@ class FileResponseRetrieveMixin(GenericViewSet):
     Example:
 
         .. literalinclude:: ../test_src/test_proj/models/files.py
-           :lines: 1-22,59-77
+           :lines: 1-33,117-131
     """
 
     instance_field_filename = 'filename'
