@@ -142,6 +142,7 @@ describe('QuerySet', () => {
 
     test('delete', async () => {
         fetchMock.resetMocks();
+        fetchMock.mockResponseOnce('{}');
         await qs.delete([new User({ id: 3 })]);
         expectNthRequest(0, {
             method: 'delete',

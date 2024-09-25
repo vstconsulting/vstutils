@@ -8,7 +8,7 @@ from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_fi
 from drf_yasg.inspectors.query import DrfAPICompatInspector, force_real_str  # type: ignore
 from drf_yasg import openapi
 from rest_framework.fields import Field, JSONField, DecimalField, ListField, empty
-from rest_framework.serializers import Serializer
+from rest_framework.serializers import Serializer, ListSerializer
 
 from .. import fields, serializers, validators, base as api_base
 from ...models.base import get_first_match_name
@@ -614,27 +614,41 @@ class NestedFilterInspector(DrfAPICompatInspector):
         return result
 
 
-class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
-    def get_serializer_ref_name(self, serializer: Any):
-        if isinstance(serializer, serializers.serializers.ListSerializer):
-            return super().get_serializer_ref_name(serializer.child)
-        return super().get_serializer_ref_name(serializer)
+class ListInspector(ReferencingSerializerInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kwargs):
+        if not isinstance(field, (ListSerializer, ListField)):
+            return NotHandled
 
-    def handle_schema(self, field: Serializer, schema: openapi.SwaggerDict, use_references: bool = True):
+        SwaggerType, ChildSwaggerType = self._get_partial_types(  # pylint: disable=invalid-name
+            field,
+            swagger_object_type,
+            use_references,
+            **kwargs,
+        )
+
+        child_schema = self.probe_field_inspectors(field.child, ChildSwaggerType, use_references)
+        limits = find_limits(field) or {}
+        title = force_real_str(field.label) if field.label else None
+
+        return SwaggerType(
+            type=openapi.TYPE_ARRAY,
+            items=child_schema,
+            title=title,
+            **limits
+        )
+
+
+class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
+    def handle_schema(
+        self,
+        field: Serializer,
+        schema: openapi.SwaggerDict,
+        use_references: bool = True,
+    ):  # pylint: disable=too-many-locals,too-many-branches
         if use_references:
             ref_name = self.get_serializer_ref_name(field)
             definitions = self.components.with_scope(openapi.SCHEMA_DEFINITIONS)
-
-            if ref_name not in definitions:
-                return
-
             schema = definitions[ref_name]
-
-        if isinstance(field, ListField):
-            return
-
-        if schema['type'] == openapi.TYPE_ARRAY:
-            schema = schema['items']
 
         if getattr(schema, '_handled', False):
             return
@@ -682,6 +696,9 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
 
         if initial_frontend_values := getattr(serializer_class, '_initial_frontend_values', None):
             schema['x-initial-values'] = initial_frontend_values
+
+        if hidden_on_frontend := getattr(serializer_class, '_hidden_on_frontend', None):
+            schema['x-hidden-fields'] = hidden_on_frontend
 
         schema._handled = True  # pylint: disable=protected-access
 

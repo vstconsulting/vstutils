@@ -1,4 +1,4 @@
-import type { IAppInitialized } from '#vstutils/app';
+import type { IAppInitialized } from '../app';
 
 let __appRef = null as unknown as IAppInitialized;
 

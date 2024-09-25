@@ -34,10 +34,11 @@
                 <ListTable
                     :instances="instances"
                     :selection="selection"
-                    :fields="fields"
+                    :fields="columns"
                     :has-multi-actions="view.multiActions.size > 0"
                     :instance-actions="instanceActions"
                     :instance-sublinks="instanceSublinks"
+                    :operationsAvailabilityFieldName="detailOperationsAvailabilityFieldName"
                     @row-clicked="(instance) => view.openPageView(instance)"
                     @execute-instance-action="
                         ({ action, instance }) => $app.actions.execute({ action, instance, fromList: true })
@@ -86,14 +87,19 @@
 
     const searchField = computed(() => props.view?.filters?.['__search']);
 
+    const detailOperationsAvailabilityFieldName = computed(() => {
+        if (store.view.pageView) {
+            return store.view.pageView.params['x-detail-operations-availability-field-name'];
+        }
+        return undefined;
+    });
+
     /**
      * Returns total number of instances, or -1 if instances has no count
      */
     const totalNumberOfInstances = computed(() => {
         return store.instances?.extra?.count ?? -1;
     });
-
-    const fields = computed(() => Array.from(store.model.fields.values()).filter((field) => !field.hidden));
 
     const searchFieldValue = ref('');
 
@@ -107,6 +113,7 @@
         multiActions,
         paginationItems,
         selection,
+        columns,
     } = storeToRefs(store);
 </script>
 

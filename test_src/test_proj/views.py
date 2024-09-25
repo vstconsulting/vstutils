@@ -279,6 +279,7 @@ HostWithoutAuthViewSet = create_view(
     override_authentication_classes=None,
     permission_classes=[AllowAny],
     override_permission_classes=True,
+    detail_operations_availability_field_name='operations_availability',
 )
 
 CacheableView = create_view(CachableProxyModel)

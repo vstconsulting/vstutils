@@ -76,11 +76,16 @@ export class ModelsResolver {
         const requiredProperties = modelSchema.required ?? [];
 
         const initialValuesConfig = modelSchema['x-initial-values'] ?? {};
+        const hiddenFields = modelSchema['x-hidden-fields'];
 
         signals.emit('models[' + modelName + '].fields.beforeInit', properties);
 
         const fields = Object.entries(properties).map(([fieldName, fieldSchema]) => {
             const schema: any = Object.assign({}, fieldSchema);
+
+            if (hiddenFields && hiddenFields.includes(fieldName)) {
+                schema['x-hidden'] = true;
+            }
 
             if (!('x-options' in schema)) {
                 schema['x-options'] = {};

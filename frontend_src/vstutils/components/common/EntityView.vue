@@ -68,8 +68,11 @@
     const containerClass = computed(() => (props.isContainerFluid ? 'container-fluid' : 'container'));
     const rootClasses = computed(() => app.store.entityViewClasses);
 
-    function executeAction(action: Action) {
-        app.actions.execute({ action, instance: app.store.page.instance });
+    async function executeAction(action: Action) {
+        await app.actions.execute({ action, instance: app.store.page.instance });
+        if (store.value?.view.isDetailPage() && action.isEmpty) {
+            store.value?.updateData?.();
+        }
     }
 
     function openSublink(sublink: Sublink) {

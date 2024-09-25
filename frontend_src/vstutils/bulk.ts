@@ -58,7 +58,13 @@ type _BulkApiFetchRaw = <Responses = unknown>(
     params?: { type?: BulkType; forceAuthRequired?: boolean },
 ) => Promise<BulkResponses<Responses>>;
 
-export type BulkApiFetch = _BulkApiFetch & { raw: _BulkApiFetchRaw };
+export type BulkApiFetch = _BulkApiFetch & {
+    raw: _BulkApiFetchRaw;
+    /**
+     * @internal
+     */
+    _getCollectedBulks: () => CollectedBulkRequest[];
+};
 
 const _cached = new WeakMap<InitAppConfig, BulkApiFetch>();
 
@@ -203,6 +209,7 @@ function _createBulkApiFetch({
 
     const bulkApiFetchRaw: _BulkApiFetchRaw = sendBulk;
 
+    (bulkApiFetch as BulkApiFetch)._getCollectedBulks = () => collectedBulks;
     (bulkApiFetch as BulkApiFetch).raw = bulkApiFetchRaw;
 
     return bulkApiFetch as BulkApiFetch;

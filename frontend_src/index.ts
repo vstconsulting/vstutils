@@ -6,14 +6,15 @@ export { initApp, type InitAppConfig, type LogoutHandler } from './vstutils/init
 export { type AuthAppFactory } from './vstutils/auth-app';
 export { getApp } from './vstutils/utils';
 export {
+    hookViewOperation,
     onAppAfterInit,
     onAppBeforeInit,
+    onFilterListViewColumns,
     onFilterOperations,
     onRoutesCreated,
     onSchemaLoaded,
     onSchemaModelsCreated,
     onSchemaViewsCreated,
-    hookViewOperation,
 } from './vstutils/signals';
 export { type AppSchema } from './vstutils/schema';
 export { defineFieldComponent } from './vstutils/fields/base/defineFieldComponent';

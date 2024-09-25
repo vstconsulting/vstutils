@@ -201,6 +201,18 @@ test('putEditViewStore', async () => {
 
     store.setFieldValue({ field: 'name', value: 'Shop' });
     expect(store.sandbox.name).toEqual('Shop');
+    fetchMock.mockResponseOnce(
+        JSON.stringify([
+            {
+                status: 200,
+                data: {},
+            },
+            {
+                status: 200,
+                data: { id: 15, name: 'Shop', phone: '79658964562' },
+            },
+        ]),
+    );
     await store.save();
 
     expectRequest(fetchMockCallAt(-1), {
@@ -227,7 +239,8 @@ test('createNewViewStore', async () => {
     });
 
     fetchMock.resetMocks();
-    fetchMock.mockResponseOnce(
+    fetchMock.mockResponses(
+        // Save new
         JSON.stringify([
             {
                 data: {
@@ -239,6 +252,21 @@ test('createNewViewStore', async () => {
                 status: 201,
             },
         ]),
+        // Redirect to list
+        JSON.stringify([
+            {
+                data: {
+                    results: {
+                        id: 1,
+                        name: 'Shop',
+                        active: true,
+                        phone: '79586545544',
+                    },
+                    count: 1,
+                },
+                status: 200,
+            },
+        ]),
     );
 
     app.store.page.setFieldValue({ field: 'name', value: 'Shop' });
@@ -248,6 +276,7 @@ test('createNewViewStore', async () => {
     expect(app.store.page.sandbox.name).toEqual('Shop');
     expect(app.store.page.sandbox.phone).toEqual('79586545544');
     await app.store.page.save();
+    await waitFor(() => expect(fetchMock).toBeCalledTimes(2));
 
     expectRequest(fetchMockCallAt(0), {
         body: [
