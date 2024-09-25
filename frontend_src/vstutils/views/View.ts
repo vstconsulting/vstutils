@@ -67,6 +67,7 @@ export interface ViewParams extends SwaggerOperation {
     isDeepNested?: boolean;
     'x-hidden'?: boolean;
     'x-subscribe-labels'?: string[];
+    'x-detail-operations-availability-field-name'?: string;
     requestModel?: ModelConstructor;
     responseModel?: ModelConstructor;
     autoupdate?: boolean;

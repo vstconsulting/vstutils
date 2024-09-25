@@ -176,6 +176,7 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
         vst_inspectors.AutoCompletionFieldInspector,
         vst_inspectors.VSTFieldInspector,
         vst_inspectors.PydanticSerializerInspector,
+        vst_inspectors.ListInspector,
         vst_inspectors.VSTReferencingSerializerInspector,
         vst_inspectors.RelatedListFieldInspector,
         vst_inspectors.RatingFieldInspector,
@@ -302,5 +303,12 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
         for param in params_to_override:
             if param in self.overrides and self.overrides[param] is not None:
                 result[param] = self.overrides[param]
+
+        if self.method.lower() == 'get' and not result.get('x-list'):
+            if value := (
+                getattr(self.view, "detail_operations_availability_field_name", None) or
+                self.overrides.get("x-detail-operations-availability-field-name")
+            ):
+                result["x-detail-operations-availability-field-name"] = value
 
         return result

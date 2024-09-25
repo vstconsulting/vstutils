@@ -7,7 +7,7 @@ import { defineStore } from 'pinia';
 import type { CustomVueI18n } from './translation';
 
 import { ActionsManager } from '#vstutils/actions';
-import type { ApiConnector } from '#vstutils/api';
+import type { ApiConnector } from './api';
 import { apiConnector } from '#vstutils/api';
 import type { Language } from '#vstutils/api/TranslationsManager';
 import { TranslationsManager } from '#vstutils/api/TranslationsManager';

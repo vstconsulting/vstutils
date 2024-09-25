@@ -4,6 +4,7 @@ import { createInstancesList, ModelValidationError } from '#vstutils/models';
 import { guiPopUp, pop_up_msg } from '#vstutils/popUp';
 import { i18n } from '#vstutils/translation';
 import { emptyInnerData } from '#vstutils/utils';
+import { emitFilterListViewColumns } from '#vstutils/signals';
 import { getApp, isInstancesEqual, openPage, RequestTypes } from '#vstutils/utils';
 import { fetchInstances } from '#vstutils/fetch-values';
 import {
@@ -27,6 +28,7 @@ import type { Route } from 'vue-router';
 import type { InnerData, RepresentData } from '#vstutils/utils';
 import type { Model, InstancesList } from '#vstutils/models';
 import type { PageEditView, PageNewView, PageView, ActionView, Action, ListView } from '#vstutils/views';
+import { filterOperationsBasedOnAvailabilityField } from '#vstutils/views/operations';
 import type { PageViewStore } from './page-types';
 export { innerDataMarker, representDataMarker } from './../utils/index';
 
@@ -197,6 +199,13 @@ export const createListViewStore = (view: ListView) => {
         await app.actions.execute({ action, instances: selected });
     }
 
+    const columns = computed(() => {
+        return emitFilterListViewColumns(view.path, {
+            filters: filters.value,
+            columns: Array.from(model.value.fields.values()).filter((field) => !field.hidden),
+        });
+    });
+
     return {
         ...base,
         ...qsStore,
@@ -213,6 +222,7 @@ export const createListViewStore = (view: ListView) => {
         instanceActions,
         multiActions,
         filters,
+        columns,
         setInstances,
         setQuery,
         updateData,
@@ -328,11 +338,30 @@ export const createDetailViewStore = (view: PageView) => {
         return Promise.resolve();
     }
 
+    const operations = useOperations({ view, data: pageWithInstance.sandbox });
+
+    const actions = computed(() => {
+        return filterOperationsBasedOnAvailabilityField(
+            operations.actions.value,
+            pageWithInstance.sandbox.value,
+            view.params['x-detail-operations-availability-field-name'],
+        );
+    });
+
+    const sublinks = computed(() => {
+        return filterOperationsBasedOnAvailabilityField(
+            operations.sublinks.value,
+            pageWithInstance.sandbox.value,
+            view.params['x-detail-operations-availability-field-name'],
+        );
+    });
+
     return {
         ...base,
         ...qsStore,
         ...pageWithInstance,
-        ...useOperations({ view, data: pageWithInstance.sandbox }),
+        actions,
+        sublinks,
         entityViewClasses: useEntityViewClasses(pageWithInstance.model, pageWithInstance.sandbox),
         filtersQuery,
         filters,

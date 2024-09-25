@@ -1,6 +1,6 @@
 from typing import Any, Optional, Sequence, Iterable, Text, Tuple, List, Dict, TypedDict, Union, Literal, Unpack
 
-from rest_framework.serializers import Serializer
+from rest_framework.serializers import Serializer, Field
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet as DrfGenericViewSet
 from django_filters.filters import Filter
@@ -100,15 +100,18 @@ class ModelBaseClass(ModelBase):
 
         list_fields: Optional[Iterable[Text]] = None,
         detail_fields: Optional[Iterable[Text]] = None,
-        override_list_fields: Optional[bool] = None,
-        override_detail_fields: Optional[bool] = None,
+        override_list_fields: Optional[Dict[str, Field]] = None,
+        override_detail_fields: Optional[Dict[str, Field]] = None,
+        hidden_on_frontend_list_fields: Optional[List[str]] = None,
+        hidden_on_frontend_detail_fields: Optional[List[str]] = None,
 
         view_field_name: Optional[Text] = None,
         non_bulk_methods: Optional[Union[MethodsType, Iterable[MethodsType]]] = None,
         properties_groups: Optional[Dict[Text, Sequence[Text]]] = None,
+        detail_operations_availability_field_name: Optional[Text] = None,
 
         extra_serializer_classes: Optional[Dict[Text, Serializer]] = None,
-        filterset_fields: Optional[Dict[Text, Union[FilterFieldsListType, FilterFieldsDictType]]] = None,
+        filterset_fields: Optional[Union[FilterFieldsListType, FilterFieldsDictType]] = None,
         search_fields: Optional[Iterable[Text]] = None,
         copy_attrs: Optional[Dict[Text, Any]] = None,
 

@@ -1,4 +1,4 @@
-import { waitForPageLoading, createApp, createSchema } from '#unittests';
+import { waitForPageLoading, createApp, createSchema, waitFor } from '#unittests';
 import schema from './detailPageFilters-schema.json';
 
 beforeEach(() => {
@@ -34,8 +34,20 @@ test('detail page filters', async () => {
     expect(app.store.page.filtersQuery).toStrictEqual({});
     expect(app.store.page.filters).toStrictEqual({ date_filter: '2001-11-01', boolean_filter: 'false' });
 
+    fetchMock.resetMocks();
+    fetchMock.mockResponseOnce(
+        JSON.stringify([
+            {
+                status: 200,
+                data: {
+                    id: 1,
+                    name: 'name',
+                },
+            },
+        ]),
+    );
     app.store.page.applyFilters({ string_filter: 'string', boolean_filter: true, date_filter: '2001-11-01' });
-    await app.store.page.fetchData();
+    await waitFor(() => expect(fetchMock).toBeCalledTimes(1));
 
     expect(app.store.page.appliedDefaultFilterNames).toStrictEqual([]);
 

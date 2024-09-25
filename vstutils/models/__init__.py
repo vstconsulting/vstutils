@@ -64,7 +64,7 @@ class BModel(BaseModel):
                     ]
                     # make order as choices from 0 to 9
                     _override_detail_fields = {
-                        'order': ChoiceField((str(i) for i in range(10)))
+                        'order': ChoiceField([str(i) for i in range(10)])
                     }
 
 
@@ -158,7 +158,10 @@ class BModel(BaseModel):
           when you need to override generated view parameters for nested view (works only with ``model`` as view).
         - ``_extra_view_attributes`` - key-value mapping with additional view attributes,
           but has less priority over generated attributes.
-
+        - ``_hidden_on_frontend_list_fields`` - list with fields names which will be hidden in list view on frontend.
+        - ``_hidden_on_frontend_detail_fields`` - list with fields names which will be hidden in detail view on frontend.
+        - ``_detail_operations_availability_field_name`` - name of field which indicates availability of operations, field
+          value can be dict where key is operation name and value is boolean flag or simply list of available operations.
 
         In common, you can also add custom attributes to override or extend the default list of processing classes.
         Supported view attributes are ``filter_backends``, ``permission_classes``, ``authentication_classes``,

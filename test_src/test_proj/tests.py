@@ -1660,7 +1660,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Grouping model properties for GUI
         self.assertEqual(
             api['definitions']['OneAuthor']['x-properties-groups'],
-            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked', 'decimal', 'decimal_without_max_digits']}
+            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked', 'decimal', 'decimal_without_max_digits', 'some_hidden_field']}
         )
         # Check view field name
         self.assertEqual(api['definitions']['OneExtraPost']['x-view-field-name'], 'title')
@@ -1787,6 +1787,14 @@ class OpenapiEndpointTestCase(BaseTestCase):
             img_res_validator_data
         )
 
+        # Test query parameter label
+        filter_with_label = next(
+            parameter
+            for parameter in api['paths']['/testbinarymodelschema/']['get']['parameters']
+            if parameter['name'] == 'some_binfile'
+        )
+        self.assertEqual(filter_with_label['x-title'], 'Some label for binfile')
+
         # Check property format for qrcode field
         self.assertEqual(
             api['definitions']['ModelWithBinaryFiles']['properties']['some_imagefield_qr_code_url']['type'],
@@ -1880,6 +1888,11 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(
             api['definitions']['Variable']['properties']['value'][X_OPTIONS],
             {"field": 'key', 'field_attribute': 'val_type', 'types': {}}
+        )
+
+        self.assertEqual(
+            api['paths']['/hosts_without_auth/{id}/']['get']['x-detail-operations-availability-field-name'],
+            'operations_availability',
         )
 
         # Check that's schema is correct and fields are working
@@ -2055,6 +2068,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
                     'boolean': 'boolean',
                     'many_serializers': {
                         'type': 'array',
+                        'title': 'Many serializers custom label',
                         'items': nested_model,
                     },
                     'integer': {
@@ -2116,7 +2130,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
                         'required': ['list_field'],
                         'type': 'object',
                         'properties': {
-                            'list_field': {'type': 'array', 'items': {'type': 'string', 'minLength': 1}}
+                            'list_field': {'type': 'array', 'title': 'List field', 'items': {'type': 'string', 'minLength': 1}}
                         },
                         'x-properties-groups': {'': ['list_field']},
                         'x-view-field-name': 'list_field',
@@ -2227,6 +2241,12 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(
             api['definitions']['OneAuthor']['properties']['decimal_without_max_digits']['x-options']['mask'],
             r'/^-?\d+(\.\d{0,2})?$/',
+        )
+
+        # Check some_hidden_field field schema that should be hidden on frontend
+        self.assertEqual(
+            api['definitions']['OneAuthor']['x-hidden-fields'],
+            ['some_hidden_field'],
         )
 
         # Check x-list param on get methods

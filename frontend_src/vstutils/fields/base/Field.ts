@@ -38,6 +38,7 @@ export type FieldOptions<XOptions extends DefaultXOptions, Inner> = Omit<Schema,
     name: string;
     required?: boolean;
     title?: string;
+    'x-title'?: string;
     'x-collectionFormat'?: ParameterCollectionFormat;
     'x-format'?: string;
     'x-hidden'?: boolean;

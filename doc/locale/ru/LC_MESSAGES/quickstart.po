@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-10 23:37+0000\n"
+"POT-Creation-Date: 2024-09-25 05:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.14.0\n"
+"Generated-By: Babel 2.16.0\n"
 
 #: ../../quickstart.rst:2
 msgid "Quick Start"
@@ -441,7 +441,7 @@ msgstr ""
 "сериализаторы для list() и retrieve(), фильтры, эндпоинты API и вложенные"
 " view"
 
-#: of vstutils.models.BModel:162 vstutils.models.BModel:187
+#: of vstutils.models.BModel:165 vstutils.models.BModel:190
 msgid "Examples:"
 msgstr "Примеры:"
 
@@ -704,7 +704,35 @@ msgstr ""
 "атрибутами view, но имеет меньший приоритет перед сгенерированными "
 "атрибутами."
 
+#: of vstutils.models.BModel:125
+msgid ""
+"``_hidden_on_frontend_list_fields`` - list with fields names which will "
+"be hidden in list view on frontend."
+msgstr ""
+"``_hidden_on_frontend_list_fields`` - список имен полей, которые будут "
+"скрыты в списковом представлении на фронтенде."
+
+#: of vstutils.models.BModel:126
+msgid ""
+"``_hidden_on_frontend_detail_fields`` - list with fields names which will"
+" be hidden in detail view on frontend."
+msgstr ""
+"``_hidden_on_frontend_detail_fields`` - список имен полей, которые будут "
+"скрыты в детальном представлении на фронтенде."
+
 #: of vstutils.models.BModel:127
+msgid ""
+"``_detail_operations_availability_field_name`` - name of field which "
+"indicates availability of operations, field value can be dict where key "
+"is operation name and value is boolean flag or simply list of available "
+"operations."
+msgstr ""
+"``_detail_operations_availability_field_name`` - имя поля, которое "
+"указывает доступность операции, значение может быть словарем, где ключ "
+"это имя операции, а значение - логическое значение или просто список "
+"доступных операций."
+
+#: of vstutils.models.BModel:130
 msgid ""
 "In common, you can also add custom attributes to override or extend the "
 "default list of processing classes. Supported view attributes are "
@@ -719,17 +747,17 @@ msgstr ""
 " ``renderer_classes`` и ``parser_classes``. Список мета-атрибутов для "
 "настроек view выглядит следующим образом:"
 
-#: of vstutils.models.BModel:132
+#: of vstutils.models.BModel:135
 msgid "``_pre_{attribute}`` - List of classes included before defaults."
 msgstr ""
 "``_pre_{attribute}`` - список классов, включаемых перед значениями по "
 "умолчанию."
 
-#: of vstutils.models.BModel:133
+#: of vstutils.models.BModel:136
 msgid "``_{attribute}`` - List of classes included after defaults."
 msgstr "``_{attribute}`` - список классов, включаемых после значений по умолчанию."
 
-#: of vstutils.models.BModel:134
+#: of vstutils.models.BModel:137
 msgid ""
 "``_override_{attribute}`` - boolean flag indicates that attribute "
 "override default viewset (otherwise appends). Default is ``False``."
@@ -738,7 +766,7 @@ msgstr ""
 "переопределяет ли атрибут view по умолчанию (в противном случае "
 "добавляется). По умолчанию False."
 
-#: of vstutils.models.BModel:138
+#: of vstutils.models.BModel:141
 msgid ""
 "You may need to create an `action <https://www.django-rest-framework.org"
 "/api-guide/viewsets/#marking-extra-actions-for-routing>`_ on generated "
@@ -755,7 +783,7 @@ msgstr ""
 "В этом случае декорированный метод будет принимать объект view в качестве"
 " атрибута ``self``."
 
-#: of vstutils.models.BModel:145
+#: of vstutils.models.BModel:148
 msgid ""
 "In some cases, inheriting models may require to inherit Meta class from "
 "the base model. If the Meta is explicitly declared in the base class, "
@@ -767,7 +795,7 @@ msgstr ""
 "базовом классе, вы можете получить ее через атрибут `OriginalMeta` и "
 "использовать для наследования."
 
-#: of vstutils.models.BModel:150
+#: of vstutils.models.BModel:153
 msgid ""
 "Docstring of model will be reused for view descriptions. It is possible "
 "to write both a general description for all actions and description for "
@@ -777,7 +805,7 @@ msgstr ""
 "как общее описание для всех действий, так и описание для каждого "
 "действия, используя следующий синтаксис:"
 
-#: of vstutils.models.BModel:164
+#: of vstutils.models.BModel:167
 msgid ""
 "The ``get_view_class()`` method is a utility method in the Django ORM "
 "model designed to facilitate the configuration and instantiation of "
@@ -785,12 +813,11 @@ msgid ""
 "define and customize various aspects of the associated DRF view class."
 msgstr ""
 "Метод ``get_view_class()`` — это служебный метод в ORM Django моделях, "
-"предназначенный для облегчения настройки и создания "
-"экземпляров представлений Django Rest Framework (DRF). Это позволяет "
-"разработчикам определить и настроить различные аспекты класса "
-"представления DRF."
+"предназначенный для облегчения настройки и создания экземпляров "
+"представлений Django Rest Framework (DRF). Это позволяет разработчикам "
+"определить и настроить различные аспекты класса представления DRF."
 
-#: of vstutils.models.BModel:189
+#: of vstutils.models.BModel:192
 msgid ""
 "Developers can use this method to customize various aspects of the "
 "associated view, such as serializer classes, field configurations, filter"
@@ -800,8 +827,8 @@ msgstr ""
 "Разработчики могут использовать этот метод для изменения различных "
 "аспектов получаемого представления, таких как классы сериализаторов, "
 "конфигурацию полей, фильтры,классы разрешений и т.п. Этот метод "
-"использует такие же атрибуты, которые были объявлены в мета-атрибутах, но "
-"позволяет перегружать отдельные части."
+"использует такие же атрибуты, которые были объявлены в мета-атрибутах, но"
+" позволяет перегружать отдельные части."
 
 #: ../../quickstart.rst:206
 msgid ""
