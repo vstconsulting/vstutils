@@ -40,7 +40,7 @@
                     }
                     return true;
                 },
-                threshold: 150,
+                threshold: 250,
                 preventDefaultEvents: false,
             });
         }

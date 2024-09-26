@@ -32,6 +32,7 @@
             </template>
             <template v-else>
                 <ListTable
+                    class="table"
                     :instances="instances"
                     :selection="selection"
                     :fields="columns"
@@ -163,6 +164,10 @@
         top: auto;
         border: none;
         background-color: transparent;
+    }
+
+    .table {
+        margin-bottom: 1rem;
     }
 
     .slide-from-left-leave-active,
