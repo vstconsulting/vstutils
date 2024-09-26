@@ -76,6 +76,9 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
             }
             field_type = openapi.TYPE_ARRAY
 
+        if field.label:
+            kwargs['x-title'] = field.label
+
         return {
             **kwargs,
             'type': field_type

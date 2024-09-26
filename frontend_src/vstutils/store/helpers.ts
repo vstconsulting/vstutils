@@ -154,7 +154,7 @@ export const useOperations = ({
     return { actions, sublinks };
 };
 
-export const useBasePageData = (view: IView) => {
+export const useBasePageData = <T extends IView>(view: T) => {
     const loading = ref(false);
     const error = ref<unknown>(null);
     const response = ref<unknown>(null);

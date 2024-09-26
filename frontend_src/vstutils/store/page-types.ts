@@ -1,10 +1,10 @@
 import type { Route } from 'vue-router';
 import type { StoreGeneric } from 'pinia';
-import type { Action, IView, Sublink } from '#vstutils/views';
+import type { Action, IView, ListView, Sublink } from '#vstutils/views';
 import type { Breadcrumb } from '#vstutils/breadcrumbs';
 import type { InnerData, RepresentData } from '#vstutils/utils';
 import type { FieldsGroup, InstancesList, Model, ModelConstructor } from '#vstutils/models';
-import type { SetFieldValueOptions } from '#vstutils/fields/base';
+import type { Field, SetFieldValueOptions } from '#vstutils/fields/base';
 import type { PaginationItem } from './helpers';
 
 export interface BaseViewStore extends StoreGeneric {
@@ -31,6 +31,7 @@ export interface BaseViewStore extends StoreGeneric {
 }
 
 export interface ListViewStore extends BaseViewStore {
+    view: ListView;
     count: number;
     pageNumber: number;
     pageSize: number;
@@ -42,6 +43,7 @@ export interface ListViewStore extends BaseViewStore {
     instanceActions: Action[];
     multiActions: Action[];
     filters: InnerData;
+    columns: Field[] | void;
     setInstances: (newInstances: InstancesList) => void;
     setQuery: (query: Route['query']) => void;
     removeInstance: (args: {

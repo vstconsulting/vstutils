@@ -7,7 +7,7 @@ import schema from './depend-on-parent-view-schema.json';
 test('DynamicField depending on value from parent view', async () => {
     const app = await createApp({ schema: createSchema(schema) });
 
-    fetchMock.mockResponseOnce(
+    fetchMock.mockResponses(
         JSON.stringify([
             {
                 status: 200,
@@ -21,6 +21,8 @@ test('DynamicField depending on value from parent view', async () => {
                 status: 200,
                 data: { id: 2, name: 'root' },
             },
+        ]),
+        JSON.stringify([
             {
                 status: 200,
                 data: {

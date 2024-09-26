@@ -47,7 +47,7 @@ export default defineConfig(() => ({
         coverage: {
             enabled: true,
             include: ['frontend_src/**'],
-            provider: 'istanbul',
+            provider: 'v8',
             reporter: ['text', 'text-summary'],
             reportsDirectory: join(frontendSrc, '..', 'node_modules', '.coverage'),
         },

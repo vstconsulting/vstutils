@@ -9,6 +9,7 @@ import type { RepresentData } from '#vstutils/utils';
 import type { Action, OperationOnBeforeHook, Sublink } from './views/operations';
 import type { RouteConfig } from 'vue-router';
 import type { AppSchema } from './schema';
+import type { Field } from './fields/base';
 
 export const signals = new TabSignal('application');
 
@@ -146,3 +147,41 @@ export function onFilterOperations<T extends 'actions' | 'sublinks'>(
     // @ts-expect-error Missing typing
     signals.connect(`<${path}>filter${capitalize(type)}`, callback);
 }
+
+export const { emit: emitFilterListViewColumns, on: onFilterListViewColumns } = (() => {
+    type Context = Readonly<{
+        filters: Record<string, unknown>;
+        columns: Field[];
+    }>;
+    type InternalCtx = {
+        ctx: Context;
+        _returnValue: Field[];
+    };
+
+    /**
+     * @internal
+     */
+    function emit(viewPath: string, ctx: Context): Field[] | void {
+        const internalCtx: InternalCtx = {
+            ctx,
+            _returnValue: ctx.columns,
+        };
+        signals.emit(`<${viewPath}>filterListViewColumns`, internalCtx);
+        return internalCtx._returnValue;
+    }
+
+    function on(viewPath: string, handler: (ctx: Context) => Field[] | void) {
+        signals.connect(
+            `<${viewPath}>filterListViewColumns`,
+            // @ts-expect-error Missing typing
+            (ctx: InternalCtx) => {
+                const newValue = handler(ctx.ctx);
+                if (newValue) {
+                    ctx._returnValue = newValue;
+                }
+            },
+        );
+    }
+
+    return { emit, on };
+})();

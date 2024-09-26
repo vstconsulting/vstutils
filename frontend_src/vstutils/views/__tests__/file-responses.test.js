@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import {
+    assertNoCollectedBulksInApiConnector,
     createApp,
     createSchema,
     expectRequest,
@@ -100,6 +101,7 @@ describe('file response', () => {
     });
 
     beforeEach(async () => {
+        assertNoCollectedBulksInApiConnector();
         window.open.mockClear();
         fetchMock.resetMocks();
         await openPage('/');

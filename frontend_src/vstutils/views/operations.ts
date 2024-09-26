@@ -1,6 +1,6 @@
 import type { IAppInitialized } from '../app';
 import type { Model, ModelConstructor } from '../models';
-import type { HttpMethod, MaybePromise } from '../utils';
+import type { HttpMethod, MaybePromise, RepresentData } from '../utils';
 import type { ActionView } from './View';
 
 export type OperationOnBeforeParams = {
@@ -69,4 +69,25 @@ export interface Action extends Operation {
 export interface NotEmptyAction extends Action {
     isEmpty: false;
     requestModel: ModelConstructor;
+}
+
+export function filterOperationsBasedOnAvailabilityField<T extends { name: string }>(
+    operations: T[],
+    data: RepresentData,
+    operationsAvailabilityFieldName: string | undefined,
+) {
+    if (operationsAvailabilityFieldName) {
+        const availability = data[operationsAvailabilityFieldName] as
+            | Record<string, boolean>
+            | string[]
+            | undefined;
+        if (availability) {
+            if (Array.isArray(availability)) {
+                return operations.filter((op) => availability.includes(op.name));
+            } else {
+                return operations.filter((op) => availability[op.name]);
+            }
+        }
+    }
+    return operations;
 }

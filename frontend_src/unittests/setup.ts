@@ -2,6 +2,12 @@ import $ from 'jquery';
 import createFetchMock from 'vitest-fetch-mock';
 import { vi } from 'vitest';
 import QRCode from 'qrcode';
+// @ts-expect-error No types here :(
+import Vue from 'vue/dist/vue.runtime.common.dev.js';
+
+// Hide annoying Vue messages
+Vue.config.productionTip = false;
+Vue.config.devtools = false;
 
 // @ts-expect-error Mock canvas
 // eslint-disable-next-line @typescript-eslint/no-empty-function

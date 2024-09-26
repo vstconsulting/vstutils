@@ -86,9 +86,11 @@ test('createListViewStore', async () => {
     expect(app.store.page.pageNumber).toBe(1);
 
     // Check query params
-    app.router.push('/some_list/?page=2');
-    await app.store.page.fetchData();
-    expect(app.store.page.filters).toStrictEqual({ page: '2' });
+    fetchMock.resetMocks();
+    fetchMock.mockResponseOnce(JSON.stringify({ count: 0, results: [] }));
+    await app.router.push('/some_list/?page=2');
+    await waitFor(() => expect(app.store.page.filters).toStrictEqual({ page: '2' }));
+    await waitFor(() => expect(fetchMock).toBeCalledTimes(1));
 
     fetchMock.resetMocks();
     fetchMock.mockResponseOnce(

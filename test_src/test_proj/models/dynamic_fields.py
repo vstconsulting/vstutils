@@ -39,7 +39,7 @@ class DynamicFields(BModel):
         _override_list_fields = {
             'dynamic_with_types': fields.DynamicJsonTypeField(field='field_type', types={
                 'serializer': SomeSerializer(),
-                'many_serializers': SomeSerializer(many=True),
+                'many_serializers': SomeSerializer(many=True, label='Many serializers custom label'),
                 'integer': IntegerField(max_value=1337),
                 'boolean': 'boolean',
                 'image':  fields.NamedBinaryImageInJsonField(),

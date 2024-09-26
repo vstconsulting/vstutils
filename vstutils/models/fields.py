@@ -240,6 +240,7 @@ class MultipleNamedBinaryImageInJSONField(MultipleNamedBinaryFileInJSONField):
 
 
 class FkModelField(ForeignKey):
+    # pylint: disable=abstract-method
     """
     Extends :class:`django.db.models.ForeignKey`. Use this field in :class:`vstutils.models.BModel` to get
     `vstutils.api.FkModelField` in serializer. To set Foreign Key relation set `to` argument to string path to model

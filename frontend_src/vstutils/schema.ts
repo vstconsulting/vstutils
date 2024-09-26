@@ -72,6 +72,7 @@ export type ModelDefinition = swagger.Schema & {
     'x-display-mode'?: (typeof MODEL_MODES)[number];
     'x-visibility-data-field-name'?: string;
     'x-initial-values'?: ModelInitialValuesConfig;
+    'x-hidden-fields'?: string[];
 };
 
 export interface Operation extends swagger.Operation {

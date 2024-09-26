@@ -94,3 +94,17 @@ export function expectNthRequest(
 export function fetchMockCallAt(idx: number) {
     return fetchMock.mock.calls.at(idx);
 }
+
+/**
+ * Helper used to find bulk requests that were left from previous tests.
+ * Such requests must be awaited and properly mocked in tests that called them.
+ */
+export function assertNoCollectedBulksInApiConnector() {
+    const collectedBulks = getApp()
+        .api.bulk!._getCollectedBulks()
+        .map(({ request }) => request);
+
+    if (collectedBulks.length > 0) {
+        throw new Error(`Collected bulks left: ${JSON.stringify(collectedBulks, null, 2)}`);
+    }
+}
