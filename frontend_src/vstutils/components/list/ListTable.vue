@@ -1,43 +1,45 @@
 <template>
-    <table class="table table-bordered table-bordered-custom table-hover multiple-select">
-        <thead>
-            <tr :class="classes">
-                <th
-                    v-if="hasMultiActions"
-                    style="width: 50px"
-                    class="global-select td_select_btn"
-                    @click="$emit('toggle-all-selection')"
-                >
-                    <SelectToggleButton :is-selected="allSelected" />
-                </th>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover multiple-select">
+            <thead>
+                <tr :class="classes">
+                    <th
+                        v-if="hasMultiActions"
+                        style="width: 50px"
+                        class="global-select td_select_btn"
+                        @click="$emit('toggle-all-selection')"
+                    >
+                        <SelectToggleButton :is-selected="allSelected" />
+                    </th>
 
-                <th v-for="(field, idx) in fields" :key="idx" :class="tableColumnClasses(field)">
-                    {{ $t(field.title) }}
-                    <Popover v-if="field.description" :content="field.description" />
-                </th>
+                    <th v-for="(field, idx) in fields" :key="idx" :class="tableColumnClasses(field)">
+                        {{ $t(field.title) }}
+                        <Popover v-if="field.description" :content="field.description" />
+                    </th>
 
-                <th v-if="showInstanceOperations" style="width: 60px" class="column column-actions" />
-            </tr>
-        </thead>
-        <tbody>
-            <ListTableRow
-                v-for="{ instance, actions, sublinks } in instancesWithOperations"
-                :key="instance.getPkValue()"
-                :is-selected="isSelected(instance)"
-                :instance="instance"
-                :fields="fields"
-                :has-multi-actions="hasMultiActions"
-                :show-operations="showInstanceOperations"
-                :actions="actions"
-                :sublinks="sublinks"
-                :opt="opt"
-                @row-clicked="$emit('row-clicked', $event)"
-                @open-sublink="$emit('open-instance-sublink', $event)"
-                @execute-action="$emit('execute-instance-action', $event)"
-                @toggle-selection="$emit('toggle-selection', $event)"
-            />
-        </tbody>
-    </table>
+                    <th v-if="showInstanceOperations" style="width: 60px" class="column column-actions" />
+                </tr>
+            </thead>
+            <tbody>
+                <ListTableRow
+                    v-for="{ instance, actions, sublinks } in instancesWithOperations"
+                    :key="instance.getPkValue()"
+                    :is-selected="isSelected(instance)"
+                    :instance="instance"
+                    :fields="fields"
+                    :has-multi-actions="hasMultiActions"
+                    :show-operations="showInstanceOperations"
+                    :actions="actions"
+                    :sublinks="sublinks"
+                    :opt="opt"
+                    @row-clicked="$emit('row-clicked', $event)"
+                    @open-sublink="$emit('open-instance-sublink', $event)"
+                    @execute-action="$emit('execute-instance-action', $event)"
+                    @toggle-selection="$emit('toggle-selection', $event)"
+                />
+            </tbody>
+        </table>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -116,3 +118,9 @@
         return props.selection.includes(instance.getPkValue()!);
     }
 </script>
+
+<style scoped>
+    .table {
+        margin: 0;
+    }
+</style>

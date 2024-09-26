@@ -121,10 +121,6 @@
     line-height: 32px;
 }
 
-table {
-    table-layout: fixed;
-}
-
 .popover-title {
     color: #000;
 }
@@ -1545,14 +1541,6 @@ input[type='color'] {
     display: inline-block;
     width: 100%;
     padding-bottom: 15px;
-}
-
-.table-bordered-custom {
-    margin: 0;
-    padding: 0;
-    border: none;
-    max-width: none;
-    margin-bottom: 15px;
 }
 
 .card-header-custom {
