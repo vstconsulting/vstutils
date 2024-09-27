@@ -193,6 +193,9 @@ def exception_handler(exc, context):
     if isinstance(exc, exceptions.NotAuthenticated):  # nocv
         default_response["X-Anonymous"] = "true"  # type: ignore
 
+    if default_response.status_code == status.HTTP_304_NOT_MODIFIED:
+        default_response.data = None
+
     return default_response
 
 

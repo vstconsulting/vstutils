@@ -11,7 +11,6 @@ import asyncio
 import sys
 import tempfile
 import time
-import json
 import traceback
 import types
 import typing as tp
@@ -22,6 +21,7 @@ from pathlib import Path
 from enum import Enum, EnumMeta
 from importlib import import_module
 
+import orjson
 from asgiref.sync import sync_to_async, async_to_sync
 from django.conf import settings
 from django.middleware.gzip import GZipMiddleware
@@ -105,6 +105,12 @@ def list_to_choices(items_list, response_type=list):
     :return: list of tuples from `items_list` values
     """
     return response_type(((x, x) for x in items_list))
+
+
+def json_dumps(obj):
+    return orjson\
+        .dumps(obj, option=orjson.OPT_NON_STR_KEYS | orjson.OPT_SERIALIZE_DATACLASS | orjson.OPT_SERIALIZE_UUID)\
+        .decode('utf-8')
 
 
 def is_member_descriptor(obj):
@@ -513,7 +519,7 @@ class Dict(dict):
         return self.__str__()
 
     def __str__(self):
-        return json.dumps(self.copy())
+        return json_dumps(self.copy())
 
 
 class tmp_file:

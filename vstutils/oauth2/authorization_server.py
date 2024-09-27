@@ -2,11 +2,14 @@ from functools import cached_property
 from time import time
 from typing import Callable, Optional, TYPE_CHECKING
 
+import orjson
 from authlib.integrations.django_oauth2 import (
     AuthorizationServer as BaseAuthorizationServer,
     ResourceProtector,
 )
+from authlib.common import encoding
 from authlib.jose import jwt
+from authlib.jose.rfc7519 import jwt as jwt_rfc7519
 from authlib.oauth2.rfc6749 import (
     InvalidRequestError,
     RefreshTokenGrant as BaseRefreshTokenGrant,
@@ -26,6 +29,7 @@ from authlib.oauth2.rfc9068 import (
     JWTBearerTokenValidator as BaseJWTBearerTokenValidator,
 )
 from authlib.oauth2.rfc9068.claims import JWTAccessTokenClaims, JWTClaims
+from authlib.integrations.django_oauth2 import requests as django_oauth2_requests
 from django.conf import settings
 from django.contrib.auth import authenticate, login, get_user
 from django.utils.module_loading import import_string
@@ -42,11 +46,29 @@ if TYPE_CHECKING:  # nocv
     from django.contrib.auth.models import AbstractBaseUser
 
 
+SESSION_STORE = get_session_store()
 extra_claims_provider: 'Optional[Callable[[AbstractBaseUser], Optional[dict]]]' = (
     import_string(settings.OAUTH_SERVER_JWT_EXTRA_CLAIMS_PROVIDER)
     if settings.OAUTH_SERVER_JWT_EXTRA_CLAIMS_PROVIDER
     else None
 )
+_json_options = (
+    orjson.OPT_SERIALIZE_NUMPY |
+    orjson.OPT_NON_STR_KEYS |
+    orjson.OPT_SERIALIZE_DATACLASS |
+    orjson.OPT_SERIALIZE_UUID
+)
+
+
+def json_dumps(data, ensure_ascii=False):
+    result = orjson.dumps(data, option=_json_options)
+    if ensure_ascii:
+        return result.decode('utf-8').encode('ascii', 'backslashreplace').decode('ascii')  # nocv
+    return result.decode('utf-8')
+
+
+def expires_generator(client, grant_type):
+    return settings.OAUTH_SERVER_TOKEN_EXPIRES_IN
 
 
 class MissingOrInvalidSecondFactorError(InvalidRequestError):
@@ -57,10 +79,6 @@ class MissingOrInvalidSecondFactorError(InvalidRequestError):
         body = super().get_body()
         body.append(('second_factor_missing_or_invalid', True))
         return body
-
-
-def expires_generator(client, grant_type):
-    return settings.OAUTH_SERVER_TOKEN_EXPIRES_IN
 
 
 class JWTBearerTokenGenerator(BaseJWTBearerTokenGenerator):
@@ -237,7 +255,7 @@ class JWTSessionRefreshToken(TokenMixin):  # pylint: disable=abstract-method
 
     @cached_property
     def _session(self):
-        session = get_session_store()(self.claims['jti'])
+        session = SESSION_STORE(self.claims['jti'])
         if session.exists(session.session_key):
             return session
 
@@ -358,3 +376,7 @@ class AuthorizationServer(BaseAuthorizationServer):
 
 protector = ResourceProtector()
 protector.register_token_validator(JWTBearerTokenValidator())
+
+# Monkey-patching for use orjson
+encoding.json_dumps = jwt_rfc7519.json_dumps = json_dumps
+encoding.json_loads = jwt_rfc7519.json_loads = django_oauth2_requests.json_loads = orjson.loads
