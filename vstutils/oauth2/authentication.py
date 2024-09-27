@@ -8,9 +8,9 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.request import Request
 from rest_framework.response import Response
 from vstutils.exceptions import HttpResponseException
-from vstutils.utils import get_session_store, add_in_vary
+from vstutils.utils import add_in_vary
 
-from .authorization_server import protector
+from .authorization_server import protector, SESSION_STORE
 
 
 class OAuth2ErrorWrapper(HttpResponseException, AuthenticationFailed):
@@ -46,7 +46,7 @@ def _get_request_token(request: "Request"):
 
 
 def get_session(session_key):
-    session = get_session_store()(session_key)
+    session = SESSION_STORE(session_key)
     session._from_jwt = True  # pylint: disable=protected-access
     return session
 

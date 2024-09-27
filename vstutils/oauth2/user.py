@@ -7,6 +7,7 @@ if TYPE_CHECKING:  # nocv
 
 
 class UserWrapper:
+    __slots__ = ("django_user", "pk")
     request: 'Optional[DjangoOAuth2Request]' = None
 
     def __init__(self, user: 'Union[AbstractBaseUser, AnonymousUser]'):
