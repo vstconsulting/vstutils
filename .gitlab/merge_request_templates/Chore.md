@@ -6,8 +6,6 @@
 ### Changelog:
 * What was done?
 
-Parsed bundle size: 0.00 MB. (not changed)
-
 Closes: group/project#issue
 WIP: group/project#issue
 
