@@ -22,7 +22,6 @@ export const useBreadcrumbs = () => {
             }
             let link = path;
             let iconClasses = '';
-            // @ts-expect-error Same as view.getTitle(view.getSavedState()) so will be ok
             let name = view.getTitle(state);
 
             if (view.isNewPage()) {

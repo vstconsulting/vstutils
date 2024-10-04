@@ -9,10 +9,21 @@ const DateTimeFieldContent = {
     },
     computed: {
         preparedValue() {
-            return this.value ? this.value.format(this.format) : '';
+            const value = this.value;
+            if (!value) {
+                return '';
+            }
+            if (this.format) {
+                return value.format(this.format);
+            }
+            const formatter = Intl.DateTimeFormat(this.$i18n.locale, {
+                dateStyle: 'medium',
+                timeStyle: 'medium',
+            });
+            return formatter.format(value.toDate());
         },
         format() {
-            return this.field?.dateRepresentFormat || 'llll';
+            return this.field?.dateRepresentFormat;
         },
     },
 };

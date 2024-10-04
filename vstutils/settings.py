@@ -183,6 +183,7 @@ class WebSection(BaseAppendSection):
         'rest_page_limit': ConfigIntType,
         'openapi_cache_timeout': ConfigIntType,
         'enable_gravatar': ConfigBoolType,
+        'gravatar_url': ConfigStringType,
         'rest_swagger': ConfigBoolType,
         'request_max_size': cconfig.BytesSizeType(),
         'x_frame_options': cconfig.StrType(),
@@ -518,6 +519,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             ).replace('\n', '\\n').replace('\r', '\\r'),
             'openapi_cache_timeout': env.int(f'{ENV_NAME}_WEB_OPENAPI_CACHE_TIMEOUT', default=120),
             'enable_gravatar': env.bool(f'{ENV_NAME}_WEB_ENABLE_GRAVATAR', default=True),
+            'gravatar_url': env.str(f'{ENV_NAME}_WEB_GRAVATAR_URL', default=''),
             'request_max_size': env.int(f'{ENV_NAME}_WEB_REQUEST_MAX_SIZE', default=2621440),
             'x_frame_options': 'SAMEORIGIN',
             'use_x_forwarded_host': env.bool(f'{ENV_NAME}_WEB_USE_X_FORWARDED_HOST', default=False),
@@ -1660,6 +1662,7 @@ if not TESTSERVER_RUN and TESTS_RUN:
 # User settings
 ##############################################################
 ENABLE_GRAVATAR: bool = web["enable_gravatar"]
+GRAVATAR_URL: bool = web["gravatar_url"]
 
 # Auto resize image settings
 ##############################################################

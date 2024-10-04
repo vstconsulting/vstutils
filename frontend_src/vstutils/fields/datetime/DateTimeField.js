@@ -9,7 +9,7 @@ class DateTimeField extends BaseField {
     constructor(options) {
         super(options);
 
-        this.dateRepresentFormat = this.props.format || 'llll';
+        this.dateRepresentFormat = this.props.format;
     }
     toInner(data) {
         const value = super.toInner(data);

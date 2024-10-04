@@ -1,6 +1,5 @@
-import type { StoreState } from 'pinia';
 import { defineStore } from 'pinia';
-import type { Component, ComponentOptions, Ref } from 'vue';
+import type { Component, ComponentOptions, Ref, UnwrapRef } from 'vue';
 import { ref, toRef } from 'vue';
 
 import {
@@ -117,9 +116,9 @@ export interface IView<
     showBackButton: boolean;
 
     resolveState(args: ResolveStateArg<TStore>): Promise<TStateToSave>;
-    getSavedState(): StoreState<TStateToSave> | undefined;
+    getSavedState(): UnwrapRef<TStateToSave> | undefined;
 
-    getTitle(state?: StoreState<TStateToSave>): string;
+    getTitle(state?: UnwrapRef<TStateToSave>): string;
 
     /**
      * Creates new store instance for currently opened page
@@ -223,7 +222,7 @@ export abstract class BaseView<
         return Promise.resolve({} as TStateToSave);
     }
     getSavedState() {
-        return getApp().store.viewItemsMap.get(this.path)?.state as StoreState<TStateToSave> | undefined;
+        return getApp().store.viewItemsMap.get(this.path)?.state as UnwrapRef<TStateToSave> | undefined;
     }
 
     /**
@@ -233,7 +232,7 @@ export abstract class BaseView<
         return [this.params.requestModel || null, this.params.responseModel || null];
     }
 
-    getTitle(state?: StoreState<TStateToSave>): string {
+    getTitle(state?: UnwrapRef<TStateToSave>): string {
         return i18n.st(this.title);
     }
 
@@ -464,7 +463,7 @@ export class PageView extends DetailView<PageViewStore, PageViewParams, PageView
         };
     }
 
-    getTitle(state?: StoreState<PageViewStateToSave>): string {
+    getTitle(state?: UnwrapRef<PageViewStateToSave>): string {
         if (this.useViewFieldAsTitle && state?.instance) {
             const value = state.instance.getViewFieldString(false);
             if (value) {

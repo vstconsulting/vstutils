@@ -40,7 +40,7 @@ interface PublicationContextWithData extends PublicationContext {
 }
 
 export class AutoUpdateController {
-    centrifugo?: Centrifuge | null;
+    centrifugoProvider?: () => Centrifuge | undefined;
     isStarted = false;
 
     // Timer related
@@ -60,8 +60,8 @@ export class AutoUpdateController {
 
     subscriptionsPrefix: string;
 
-    constructor(centrifuge?: Centrifuge | null, subscriptionsPrefix?: string | null) {
-        this.centrifugo = centrifuge;
+    constructor(centrifugoProvider: () => Centrifuge | undefined, subscriptionsPrefix?: string | null) {
+        this.centrifugoProvider = centrifugoProvider;
         this.subscriptionsPrefix = subscriptionsPrefix ?? '';
     }
 
@@ -88,6 +88,10 @@ export class AutoUpdateController {
         }
 
         // Centrifugo subscription
+        const centrifugo = this.centrifugoProvider?.();
+        if (!centrifugo) {
+            return;
+        }
         const centAction: SubscribedCentrifugoAction = {
             id: action.id,
             type: 'centrifugo',
@@ -107,8 +111,7 @@ export class AutoUpdateController {
         for (const channel of centAction.channels) {
             let subscription = this.channelSubscriptions.get(channel);
             if (!subscription) {
-                const sub =
-                    this.centrifugo?.getSubscription(channel) || this.centrifugo?.newSubscription(channel);
+                const sub = centrifugo.getSubscription(channel) || centrifugo.newSubscription(channel);
                 if (!sub) {
                     continue;
                 }
