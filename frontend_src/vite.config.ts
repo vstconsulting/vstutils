@@ -10,7 +10,7 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
 export const frontendSrc = currentDir;
 export const dist = join(frontendSrc, '..', 'dist');
 
-export default defineConfig(() => ({
+export default defineConfig({
     plugins: [
         tsconfigPaths({ root: frontendSrc }),
         vue(),
@@ -27,7 +27,7 @@ export default defineConfig(() => ({
                 index: join(frontendSrc, 'index.ts'),
                 'auth-app': join(frontendSrc, 'auth-app.ts'),
             },
-            formats: ['es' as const],
+            formats: ['es'],
         },
         rollupOptions: {
             external: ['vue', /@toast-ui\/vue-editor/, /@toast-ui\/editor/],
@@ -52,4 +52,4 @@ export default defineConfig(() => ({
             reportsDirectory: join(frontendSrc, '..', 'node_modules', '.coverage'),
         },
     },
-}));
+});

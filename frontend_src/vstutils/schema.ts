@@ -25,9 +25,8 @@ export type XMenu = XMenuItem[];
 export interface AppInfo extends swagger.Info {
     'x-settings': {
         static_path: string;
-        login_url: string;
-        logout_url: string;
         enable_gravatar?: boolean;
+        gravatar_url?: string;
         [key: string]: any;
     };
     'x-versions': {

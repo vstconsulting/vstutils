@@ -16,7 +16,7 @@ describe('DateTimeField', () => {
     const dateTimeField = new DateTimeField({
         name: 'date',
     });
-    const dateTimeFormatedField = new DateTimeField({
+    const dateTimeFormattedField = new DateTimeField({
         name: 'date',
         'x-options': { format: 'll' },
     });
@@ -41,11 +41,11 @@ describe('DateTimeField', () => {
     });
 
     test('DateTimeField format setup', () => {
-        expect(dateTimeField.dateRepresentFormat).toBe(defaultFormat);
-        expect(dateTimeFormatedField.dateRepresentFormat).toBe('ll');
+        expect(dateTimeField.dateRepresentFormat).toBeUndefined();
+        expect(dateTimeFormattedField.dateRepresentFormat).toBe('ll');
     });
 
-    test('DateTameField format output', () => {
+    test('DateTameField custom format output', () => {
         const newDateTimeField = new DateTimeField({
             name: 'date',
             'x-options': { format: 'dddd, MMMM Do YYYY, h:mm:ss a' },
@@ -66,5 +66,28 @@ describe('DateTimeField', () => {
         );
 
         expect(wrapper.element.textContent).toContain('Tuesday, November 1st 2022, 9:30:26 am');
+    });
+
+    test('DateTameField default format output', () => {
+        const newDateTimeField = new DateTimeField({
+            name: 'date',
+        });
+
+        const wrapper = mount(
+            {
+                template: `<date-time-field :field="field" :data="data" :type="type" />`,
+                components: { DateTimeField: newDateTimeField.getComponent() },
+                data() {
+                    return {
+                        field: newDateTimeField,
+                        data: { date: moment('2022-11-01 09:30:26.34553') },
+                        type: 'readonly',
+                    };
+                },
+            },
+            { localVue: app.vue, i18n: new VueI18n({ locale: 'vi' }) },
+        );
+
+        expect(wrapper.element.textContent).toContain('09:30:26 1 thg 11, 2022');
     });
 });

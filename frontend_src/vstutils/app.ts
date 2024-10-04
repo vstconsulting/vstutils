@@ -231,7 +231,7 @@ export class App implements IApp {
         this.store = defineStore('global', GLOBAL_STORE)(pinia);
 
         this.autoUpdateController = new AutoUpdateController(
-            this.centrifugoClient,
+            () => this.centrifugoClient,
             this.schema.info['x-subscriptions-prefix'],
         );
 

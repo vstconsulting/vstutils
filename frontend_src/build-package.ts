@@ -4,7 +4,7 @@ import { build } from 'vite';
 import config, { frontendSrc, dist } from './vite.config';
 import packageJson from '../package.json';
 
-await build(config({ command: 'build', mode: 'production' }));
+await build(config);
 await Promise.all([
     cp(join(frontendSrc, '..', 'LICENSE'), join(dist, 'LICENSE')),
     cp(join(frontendSrc, '..', 'NOTICE'), join(dist, 'NOTICE')),

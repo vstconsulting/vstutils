@@ -4,17 +4,16 @@ import { getApp } from '#vstutils/utils';
 import { type ReadonlyRefOrGetter, toValue } from '@vueuse/core';
 import { computed, ref } from 'vue';
 
-/**
- * Class, that defines urls to users gravatars.
- */
+const DEFAULT_GRAVATAR_URL = 'https://www.gravatar.com/avatar/[email_hash]?d=mp';
+
 export default class Gravatar {
     base_url: string;
     default_gravatar: string;
 
     constructor(opt: { base_url?: string } = {}) {
-        this.base_url = opt?.base_url || 'https://www.gravatar.com/avatar/{hash}?d=mp';
-
-        this.default_gravatar = getApp().schema.info['x-settings'].static_path + 'img/anonymous.png';
+        const settings = getApp().schema.info['x-settings'];
+        this.base_url = opt.base_url || settings.gravatar_url || DEFAULT_GRAVATAR_URL;
+        this.default_gravatar = settings.static_path + 'img/anonymous.png';
     }
 
     getDefaultGravatar() {
@@ -25,7 +24,7 @@ export default class Gravatar {
         if (!email) {
             return this.getDefaultGravatar();
         }
-        return this.base_url.replace('{hash}', md5(email));
+        return this.base_url.replace('[email_hash]', md5(email));
     }
 }
 

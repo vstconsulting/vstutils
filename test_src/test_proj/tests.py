@@ -1650,6 +1650,17 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertIn('djangorestframework', api['info']['x-versions'])
         self.assertIn('drf_yasg', api['info']['x-versions'])
 
+        # Check x-settings
+        self.assertDictEqual(
+            api['info']['x-settings'],
+            {
+                'enable_gravatar': True,
+                'gravatar_url': 'http://gravatar.test/[email_hash]?d=retro',
+                'static_path': '/static/',
+                'time_zone': 'UTC',
+            },
+        )
+
         # Checking generated view correct schema
         self.assertIn('Author', api['definitions'])
         self.assertIn('OneAuthor', api['definitions'])

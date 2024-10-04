@@ -3,7 +3,7 @@ import { AutoUpdateController } from '../AutoUpdateController.ts';
 
 describe('AutoUpdateController', () => {
     test('timer subscriptions', () => {
-        const controller = new AutoUpdateController(null);
+        const controller = new AutoUpdateController(() => undefined);
 
         const callback = vitest.fn();
         expect(controller.timerSubscribers.size).toBe(0);
@@ -25,7 +25,7 @@ describe('AutoUpdateController', () => {
 
     test('centrifugo subscriptions', () => {
         const centrifuge = new Centrifuge('localhost');
-        const controller = new AutoUpdateController(centrifuge);
+        const controller = new AutoUpdateController(() => centrifuge);
 
         const subscribers = controller.centrifugoSubscribers;
         const channelSubscriptions = controller.channelSubscriptions;

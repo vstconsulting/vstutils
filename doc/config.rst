@@ -523,6 +523,7 @@ These settings are related to the web server. They include configurations for se
 * **cors_allowed_credentials** - Indicate that cookies and authorization headers should be supported for cross-origin requests.
   Default: ``true`` if allow_cors else ``false``.
 * **enable_gravatar** - Enable/disable gravatar service using for users. Default: ``True``.
+* **gravatar_url** - URL for Gravatar service. Placeholder `[email_hash]` can be used.
 * **rest_swagger_description** - Help string in Swagger schema. Useful for dev-integrations.
 * **openapi_cache_timeout** - Cache timeout for storing schema data. Default: ``120``.
 * **health_throttle_rate** - Count of requests to ``/api/health/`` endpoint. Default: ``60``.

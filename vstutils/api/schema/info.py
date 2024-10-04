@@ -50,6 +50,9 @@ api_info_dict = OrderedDict(
     }
 )
 
+if settings.GRAVATAR_URL:
+    api_info_dict['x-settings']['gravatar_url'] = settings.GRAVATAR_URL
+
 if settings.WEBPUSH_ENABLED:
     api_info_dict['x-webpush'] = {
         'public_key': settings.WEBPUSH_PUBLIC_KEY,
