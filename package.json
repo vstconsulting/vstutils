@@ -67,7 +67,7 @@
     "@vueuse/core": "^11.1.0",
     "admin-lte": "3.2.0-rc",
     "ansi_up": "^5.2.1",
-    "bootstrap": "4.6.2",
+    "bootstrap": "5.0.0",
     "centrifuge": "^5.2.2",
     "compressorjs": "^1.2.1",
     "concurrently": "^9.0.1",
