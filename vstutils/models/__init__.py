@@ -228,6 +228,10 @@ class BModel(BaseModel):
     Developers can use this method to customize various aspects of the associated view, such as serializer classes,
     field configurations, filter backends, permission classes, etc. It uses attributes declared in meta attributes,
     but allows individual parts to be overriden.
+
+    An important aspect that distinguishes ``get_view_class()`` is the ``ignore_meta`` argument.
+    It takes ``True`` when it's necessary to completely ignore the values set in the model's ``Meta`` class.
+    This allows ``get_view_class()`` to generate a fully independent view.
     """
 
     #: Primary field for select and search in API.
