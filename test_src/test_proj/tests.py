@@ -4150,6 +4150,10 @@ class ProjectTestCase(BaseTestCase):
         self.assertIn('Etag', data['paths']['/cacheable/{id}/']['put']['responses']['200']['headers'])
         self.assertIn('412', data['paths']['/cacheable/{id}/']['put']['responses'])
 
+        # check that generated view ignore values from CachableProxyModel.Meta
+        self.assertCount(data['paths']['/cacheable_check_generation/'].keys(), 2, data['paths']['/cacheable_check_generation/'].keys())  # get and parameters
+        self.assertFalse('/cacheable_check_generation/{id}/' in data['paths'])  # list only view
+
         self.assertEqual(
             data['paths']['/testbinaryfiles/{id}/test_some_filefield_default/']['get']['responses']['200']['schema']['type'],
             'file'

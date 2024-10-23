@@ -40,7 +40,7 @@ class Action:
 
         ...
         from vstutils.api.fields import VSTCharField
-        from vstutils.api.serializers import BaseSerializer
+        from vstutils.api.serializers import BaseSerializer, DetailsResponseSerializer
         from vstutils.api.base import ModelViewSet
         from vstutils.api.actions import Action
         ...
@@ -50,15 +50,11 @@ class Action:
             ...
 
 
-        class ResponseSerializer(BaseSerializer):
-            detail = VSTCharField(read_only=True)
-
-
         class AuthorViewSet(ModelViewSet):
             model = ...
             ...
 
-            @Action(serializer_class=RequestSerializer, result_serializer_class=ResponseSerializer, ...)
+            @Action(serializer_class=RequestSerializer, result_serializer_class=DetailsResponseSerializer, ...)
             def profile(self, request, *args, **kwargs):
                 ''' Got `serializer_class` body and response with `result_serializer_class`. '''
                 serializer = self.get_serializer(self.get_object(), data=request.data)

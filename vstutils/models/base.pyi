@@ -29,6 +29,7 @@ class NestedViewOptionArgs(TypedDict, total=False):
 NestedOptionType = Dict[Text, Union[NestedModelOptionArgs, NestedViewOptionArgs, dict]]
 
 class ExtraMetadata(TypedDict, total=False):
+    ignore_meta: Optional[bool]
     view_class: Optional[Union[Tuple, List[Union[Text, ConstantViewType]], Text, ConstantViewType]]
     serializer_class: Optional[Serializer]
     serializer_class_name: Optional[Text]
@@ -93,6 +94,8 @@ class ModelBaseClass(ModelBase):
 
     def get_view_class(
         cls,
+        *,
+        ignore_meta: Optional[bool],
         view_class: Optional[Union[Tuple, List[Union[Text, ConstantViewType]], Text, ConstantViewType]] = None,
 
         serializer_class: Optional[Serializer] = None,

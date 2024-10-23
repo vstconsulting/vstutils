@@ -290,6 +290,11 @@ class CacheableViewSet(CacheableView):
         return super().get_etag_value((model_class, gui_version), request)
 
 
+CacheableViewCheckGeneration = CachableProxyModel.get_view_class(
+    ignore_meta=True,
+    view_class=('list_only',),
+)
+
 
 class TestOauth2ViewSet(GenericViewSet):
     serializer_class = EmptySerializer

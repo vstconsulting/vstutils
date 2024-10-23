@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 05:35+0000\n"
+"POT-Creation-Date: 2024-10-23 02:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -451,6 +451,19 @@ msgstr ""
 "конфигурацию полей, фильтры,классы разрешений и т.п. Этот метод "
 "использует такие же атрибуты, которые были объявлены в мета-атрибутах, но"
 " позволяет перегружать отдельные части."
+
+#: of vstutils.models.BModel:196
+msgid ""
+"An important aspect that distinguishes ``get_view_class()`` is the "
+"``ignore_meta`` argument. It takes ``True`` when it's necessary to "
+"completely ignore the values set in the model's ``Meta`` class. This "
+"allows ``get_view_class()`` to generate a fully independent view."
+msgstr ""
+"Важным аспектом, который отличает ``get_view_class()``, является аргумент"
+" ``ignore_meta``. Он принимает значение ``True``, когда необходимо "
+"полностью игнорировать значения, установленные в классе ``Meta`` модели. "
+"Это позволяет ``get_view_class()`` создать полностью независимое "
+"представление."
 
 #: ../../docstring of vstutils.models.BModel.hidden:1
 msgid "If hidden is set to True, entry will be excluded from query in BQuerySet."
@@ -2900,6 +2913,38 @@ msgstr ""
 "В этом примере класс ``MySerializer`` расширяет ``BaseSerializer`` и "
 "включает дополнительное созданное поле."
 
+#: of vstutils.api.serializers.DetailsResponseSerializer:1
+msgid "Serializer class inheriting from :class:`.BaseSerializer`."
+msgstr "Класс сериализатора, наследующийся от :class:`.BaseSerializer`."
+
+#: of vstutils.api.serializers.DetailsResponseSerializer:3
+msgid ""
+"This serializer is primarily intended for use as the "
+"``result_serializer_class`` argument in "
+":class:`vstutils.api.actions.Action` and its derivatives. It defines a "
+"single read-only ``details`` field, which is useful for returning detail "
+"messages in API responses."
+msgstr ""
+"Этот сериализатор в первую очередь предназначен для использования в качестве "
+"аргумента ``result_serializer_class`` в "
+":class:`vstutils.api.actions.Action` и его производных. Он определяет одно "
+"поле только для чтения ``details``, которое полезно для возврата сообщений "
+"с деталями в ответах API."
+
+#: of vstutils.api.serializers.DetailsResponseSerializer:7
+msgid ""
+"Additionally, it can serve as a placeholder for schemas involving various"
+" errors, where the error text is placed in the ``details`` field (the "
+"default behavior in Django REST Framework)."
+msgstr ""
+"Кроме того, он может служить в качестве шаблона для схем, связанных с "
+"различными ошибками, где текст ошибки помещается в поле ``details`` (это "
+"поведение по умолчанию в Django REST Framework)."
+
+#: of vstutils.api.serializers.DetailsResponseSerializer:10
+msgid "Example usage with an Action:"
+msgstr "Пример использования с Action:"
+
 #: of vstutils.api.serializers.DisplayMode:1
 msgid ""
 "Enumeration for specifying how a serializer should be displayed on the "
@@ -3832,7 +3877,7 @@ msgstr ""
 "использованием :class:`.SimpleAction` или алгоритм значительно более "
 "сложный, чем стандартные операции CRUD."
 
-#: of vstutils.api.actions.Action:39
+#: of vstutils.api.actions.Action:35
 msgid ""
 "Flag indicating which type of action is used: on a list or on a single "
 "entity. Affects where this action will be displayed - on a detailed "
@@ -3842,19 +3887,19 @@ msgstr ""
 "отдельной сущности. Влияет на то, где будет отображаться это действие - "
 "на детальной записи или на списке записей."
 
-#: of vstutils.api.actions.Action:42
+#: of vstutils.api.actions.Action:38
 msgid ""
 "List of available HTTP-methods for this action. Default has only `POST` "
 "method."
 msgstr "Список доступных методов HTTP. По умолчанию ``[\"post\"]``."
 
-#: of vstutils.api.actions.Action:44
+#: of vstutils.api.actions.Action:40
 msgid "Request body serializer. Also used for default response."
 msgstr ""
 "Сериализатор для тела запроса. Используется также для формирования ответа"
 " по умолчанию."
 
-#: of vstutils.api.actions.Action:46
+#: of vstutils.api.actions.Action:42
 msgid ""
 "Response body serializer. Required, when request and response has "
 "different set of fields."
@@ -3862,7 +3907,7 @@ msgstr ""
 "Сериализатор для тела ответа. Необходим, когда запрос и ответ имеют "
 "различные наборы полей."
 
-#: of vstutils.api.actions.Action:49
+#: of vstutils.api.actions.Action:45
 msgid ""
 "GET-request query data serializer. It is used when it is necessary to get"
 " valid data in the query data of a GET-request and cast it to the "
@@ -3872,7 +3917,7 @@ msgstr ""
 "получить корректные данные в строке запроса типа GET и привести их к "
 "нужному типу."
 
-#: of vstutils.api.actions.Action:52
+#: of vstutils.api.actions.Action:48
 msgid ""
 "Used only with non-GET requests and notify GUI, that this action should "
 "be rendered over the selected list items."
@@ -3880,7 +3925,7 @@ msgstr ""
 "Используется только с не-GET запросами и уведомляет GUI, что это действие"
 " должно быть применено к выбранным элементам списка."
 
-#: of vstutils.api.actions.Action:55
+#: of vstutils.api.actions.Action:51
 msgid ""
 "Title for action in UI. For non-GET actions, title is generated from "
 "method's name."
@@ -3888,11 +3933,11 @@ msgstr ""
 "Заголовок действия в пользовательском интерфейсе. Для действий, отличных "
 "от GET, заголовок генерируется на основе имени метода."
 
-#: of vstutils.api.actions.Action:57
+#: of vstutils.api.actions.Action:53
 msgid "List of icons for UI button."
 msgstr "Список иконок для кнопки пользовательского интерфейса."
 
-#: of vstutils.api.actions.Action:59
+#: of vstutils.api.actions.Action:55
 msgid ""
 "Flag indicating whether the action type is a list or a single entity. "
 "Typically used with GET actions."
@@ -3900,7 +3945,7 @@ msgstr ""
 "Флаг, указывающий, является ли тип действия списком или отдельной "
 "сущностью. Обычно используется с действиями GET."
 
-#: of vstutils.api.actions.Action:62
+#: of vstutils.api.actions.Action:58
 msgid ""
 "Flag indicating whether the action will only use edit mode, without a "
 "view page. This is used for actions where there is a GET method and any "
@@ -3911,13 +3956,13 @@ msgstr ""
 "экшенов, где есть метод GET и любые другие изменяющие методы (POST, PUT, "
 "PATCH)."
 
-#: of vstutils.api.actions.Action:66
+#: of vstutils.api.actions.Action:62
 msgid "If true user will be asked to confirm action execution on frontend."
 msgstr ""
 "Если истина, то в интерфейсе пользователь должен будет подтвердить "
 "действие перед выполнением."
 
-#: of vstutils.api.actions.Action:68
+#: of vstutils.api.actions.Action:64
 msgid "Set of named arguments for :func:`rest_framework.decorators.action`."
 msgstr "Набор именованных аргументов для :func:`rest_framework.decorators.action`."
 

@@ -64,7 +64,7 @@ Serializers
 ~~~~~~~~~~~
 
 .. automodule:: vstutils.api.serializers
-    :members: DisplayMode,DisplayModeList,BaseSerializer,VSTSerializer,EmptySerializer,JsonObjectSerializer
+    :members: DisplayMode,DisplayModeList,BaseSerializer,VSTSerializer,DetailsResponseSerializer,EmptySerializer,JsonObjectSerializer
 
 Views
 ~~~~~

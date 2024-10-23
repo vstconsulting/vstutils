@@ -284,6 +284,39 @@ class VSTSerializer(DependFromFkSerializerMixin, serializers.ModelSerializer, me
         return super().build_relational_field(field_name, relation_info)
 
 
+class DetailsResponseSerializer(BaseSerializer):
+    """
+    Serializer class inheriting from :class:`.BaseSerializer`.
+
+    This serializer is primarily intended for use as the ``result_serializer_class`` argument in
+    :class:`vstutils.api.actions.Action` and its derivatives. It defines a single read-only
+    ``details`` field, which is useful for returning detail messages in API responses.
+
+    Additionally, it can serve as a placeholder for schemas involving various errors, where the
+    error text is placed in the ``details`` field (the default behavior in Django REST Framework).
+
+    Example usage with an Action:
+
+        .. sourcecode:: python
+
+            class AuthorViewSet(ModelViewSet):
+                model = ...
+                ...
+
+                @Action(
+                    serializer_class=RequestSerializer,
+                    result_serializer_class=DetailsResponseSerializer,  # used
+                    ...
+                )
+                def profile(self, request, *args, **kwargs):
+                    '''Process the request data and respond with a detail message.'''
+                    serializer = self.get_serializer(data=request.data)
+                    serializer.is_valid(raise_exception=True)
+                    return {"details": "Executed!"}
+    """
+    details = drf_fields.CharField(read_only=True, allow_blank=True)
+
+
 class EmptySerializer(BaseSerializer):
     """
     Default serializer for empty responses.
@@ -320,14 +353,8 @@ class JsonObjectSerializer(DataSerializer):
     pass
 
 
-class ErrorSerializer(DataSerializer):
+class ErrorSerializer(DetailsResponseSerializer):
     detail = fields.VSTCharField(required=True)
-
-    def to_internal_value(self, data):
-        return data
-
-    def to_representation(self, instance):
-        return instance
 
 
 class ValidationErrorSerializer(ErrorSerializer):
