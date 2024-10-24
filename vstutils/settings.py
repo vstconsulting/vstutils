@@ -204,6 +204,13 @@ class WebSection(BaseAppendSection):
     }
 
 
+class UvicornAsteriskList(cconfig.ListType):
+    def convert(self, value: str) -> _t.Union[_t.Iterable, _t.Text]:
+        if value == "*":
+            return ["0.0.0.0/0", "::/0"]
+        return super().convert(value)
+
+
 class UvicornSection(BaseAppendSection):
     types_map = {
         'ws_max_size': ConfigIntType,
@@ -214,7 +221,7 @@ class UvicornSection(BaseAppendSection):
         'use_colors': ConfigBoolType,
         'reload': ConfigBoolType,
         'reload_dirs': ConfigListType,
-        'forwarded_allow_ips': ConfigListType,
+        'forwarded_allow_ips': UvicornAsteriskList(),
         'workers': ConfigIntType,
         'proxy_headers': ConfigBoolType,
         'server_header': ConfigBoolType,

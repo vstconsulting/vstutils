@@ -107,7 +107,8 @@ class VarBasedModel(BModel):
             'variables_list',
             'variables_ser',
         ]
-        _override_detail_fields = {
+        # _override_list_fields required for checking declared fields' types
+        _override_detail_fields = _override_list_fields = {
             'variables_list': drf_fields.ListField(read_only=True, child=drf_fields.DictField(read_only=True)),
             'variables_ser': SubVariablesSerializer(many=True, read_only=True)
         }

@@ -17,7 +17,7 @@ from django.utils.functional import SimpleLazyObject, lazy
 from django.db.models.signals import post_save, post_delete
 from django.utils.module_loading import import_string
 from django.dispatch import receiver
-from rest_framework.fields import ModelField, JSONField, CharField as drfCharField, ChoiceField
+from rest_framework.fields import ModelField, JSONField, CharField as drfCharField, ChoiceField, empty
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from vstutils.utils import translate as _
 
@@ -407,13 +407,19 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if hidden_on_frontend:
             attributes['_hidden_on_frontend'] = hidden_on_frontend
 
+        typed_fields = {
+            n: f
+            for n, f in (field_overrides or {}).items()
+            if n in fields
+        }
+
         return api_serializers.update_declared_fields(type(serializer_class)(
             serializer_class_name,
             (serializer_class,),
             {
                 "Meta": meta,
                 **attributes,
-                **(field_overrides or {})
+                **typed_fields
             }
         ))
 
@@ -428,7 +434,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                 field_overrides = {
                     n: f
                     for n, f in (metadata.get(f'override_{inject_from}_fields', {}) or {}).items()
-                    if extra_serializer_class._declared_fields.get(n, None) is None
+                    if extra_serializer_class._declared_fields.get(n, empty) is empty
                 } or None
                 extra_serializer_class = cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
                     serializer_class=extra_serializer_class,
