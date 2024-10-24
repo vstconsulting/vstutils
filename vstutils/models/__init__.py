@@ -129,6 +129,8 @@ class BModel(BaseModel):
           Same as DRF serializers meta-attribute "fields".
         - ``_override_list_fields`` or ``_override_detail_fields`` - mapping with names and field types
           that will be redeclared in serializer attributes(think of it as declaring fields in DRF ModelSerializer).
+          Keep in mind that the fields specified here do not necessarily end up in the serializer class,
+          but only if they are included in the corresponding lists.
         - ``_properties_groups`` - dict with key as group name and value as list of fields(str). Allows to
           group fields in sections on frontend.
         - ``_view_field_name`` - name of field frontend shows as main view name.
@@ -203,6 +205,8 @@ class BModel(BaseModel):
     The ``get_view_class()`` method is a utility method in the Django ORM model designed to facilitate
     the configuration and instantiation of Django Rest Framework (DRF) Generic ViewSets.
     It allows developers to define and customize various aspects of the associated DRF view class.
+    The arguments passed to the function fully correspond to those specified earlier
+    for the ``Meta`` class of the model, but without the underscore prefix.
 
     Examples:
         .. sourcecode:: python

@@ -1,55 +1,62 @@
-from typing import Any, Optional, Sequence, Iterable, Text, Tuple, List, Dict, TypedDict, Union, Literal, Unpack
+from typing import Any, Optional, Sequence, Iterable, Text, Tuple, List, Dict, TypedDict, Literal, Unpack, Type, Protocol
 
 from rest_framework.serializers import Serializer, Field
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet as DrfGenericViewSet
+from rest_framework.request import Request
 from django_filters.filters import Filter
 from django.db.models.base import ModelBase
+from django.db.models.query import QuerySet
 from ..api.base import GenericViewSet
 
 
 MethodsType = Literal['post', 'get', 'put', 'patch', 'delete', 'options', 'head']
-ConstantViewType = Literal['read_only', 'list_only', 'history']
+ConstantViewType = Literal['read_only', 'list_only', 'history'] | Type
 FilterFieldsListType = Iterable[Text]
-FilterFieldsDictType = Dict[Text, Union[Filter, None]]
+FilterFieldsDictType = Dict[Text, Filter | None]
 
 DEFAULT_VIEW_FIELD_NAMES: Tuple[Text,Text,Text,Text,Text]
 LAZY_MODEL: object
 
 
+class FilterBackendProtocol(Protocol):
+    def filter_queryset(self, request: Request, queryset: QuerySet, view: GenericViewSet | DrfGenericViewSet) -> QuerySet:
+        ...
+
+
 class NestedModelOptionArgs(TypedDict, total=False):
-    model: Union[Text, 'ModelBaseClass']
+    model: Text | Type['ModelBaseClass']
     override_params: Optional['ExtraMetadata']
 
 
 class NestedViewOptionArgs(TypedDict, total=False):
-    view: Union[Text, GenericViewSet]
+    view: Text | Type[GenericViewSet]
 
 
-NestedOptionType = Dict[Text, Union[NestedModelOptionArgs, NestedViewOptionArgs, dict]]
+NestedOptionType = Dict[Text, NestedModelOptionArgs | NestedViewOptionArgs | dict]
 
 class ExtraMetadata(TypedDict, total=False):
     ignore_meta: Optional[bool]
-    view_class: Optional[Union[Tuple, List[Union[Text, ConstantViewType]], Text, ConstantViewType]]
-    serializer_class: Optional[Serializer]
+    view_class: Optional[Tuple | List[Text | ConstantViewType] | Text | ConstantViewType]
+    serializer_class: Optional[Type[Serializer]]
     serializer_class_name: Optional[Text]
     list_fields: Optional[Iterable[Text]]
     detail_fields: Optional[Iterable[Text]]
     override_list_fields: Optional[bool]
     override_detail_fields: Optional[bool]
     view_field_name: Optional[Text]
-    non_bulk_methods: Optional[Union[MethodsType, Iterable[MethodsType]]]
+    non_bulk_methods: Optional[MethodsType | Iterable[MethodsType]]
     properties_groups: Optional[Dict[Text, Sequence[Text]]]
-    extra_serializer_classes: Optional[Dict[Text, Serializer]]
-    filterset_fields: Optional[Dict[Text, Union[FilterFieldsListType, FilterFieldsDictType]]]
+    extra_serializer_classes: Optional[Dict[Text, Type[Serializer]]]
+    filterset_fields: Optional[Dict[Text, FilterFieldsListType | FilterFieldsDictType]]
     search_fields: Optional[Iterable[Text]]
     copy_attrs: Optional[Dict[Text, Any]]
     nested: Optional[NestedOptionType]
     extra_view_attributes: Optional[NestedOptionType]
     hidden: Optional[bool]
 
-    pre_filter_backends: Optional[DrfGenericViewSet.filter_backends]
-    filter_backends: Optional[DrfGenericViewSet.filter_backends]
+    pre_filter_backends: Optional[Type[FilterBackendProtocol] | DrfGenericViewSet.filter_backends]
+    filter_backends: Optional[Type[FilterBackendProtocol] | DrfGenericViewSet.filter_backends]
     override_filter_backends: Optional[bool]
 
     pre_permission_classes: Optional[APIView.permission_classes]
@@ -96,9 +103,9 @@ class ModelBaseClass(ModelBase):
         cls,
         *,
         ignore_meta: Optional[bool],
-        view_class: Optional[Union[Tuple, List[Union[Text, ConstantViewType]], Text, ConstantViewType]] = None,
+        view_class: Optional[Tuple | List[Text | ConstantViewType] | Text | ConstantViewType] = None,
 
-        serializer_class: Optional[Serializer] = None,
+        serializer_class: Optional[Type[Serializer]] = None,
         serializer_class_name: Optional[Text] = None,
 
         list_fields: Optional[Iterable[Text]] = None,
@@ -109,12 +116,12 @@ class ModelBaseClass(ModelBase):
         hidden_on_frontend_detail_fields: Optional[List[str]] = None,
 
         view_field_name: Optional[Text] = None,
-        non_bulk_methods: Optional[Union[MethodsType, Iterable[MethodsType]]] = None,
+        non_bulk_methods: Optional[MethodsType | Iterable[MethodsType]] = None,
         properties_groups: Optional[Dict[Text, Sequence[Text]]] = None,
         detail_operations_availability_field_name: Optional[Text] = None,
 
-        extra_serializer_classes: Optional[Dict[Text, Serializer]] = None,
-        filterset_fields: Optional[Union[FilterFieldsListType, FilterFieldsDictType]] = None,
+        extra_serializer_classes: Optional[Dict[Text, Type[Serializer]]] = None,
+        filterset_fields: Optional[Dict[Text, FilterFieldsListType | FilterFieldsDictType]] = None,
         search_fields: Optional[Iterable[Text]] = None,
         copy_attrs: Optional[Dict[Text, Any]] = None,
 
@@ -123,8 +130,8 @@ class ModelBaseClass(ModelBase):
 
         hidden: Optional[bool] = None,
 
-        pre_filter_backends: Optional[DrfGenericViewSet.filter_backends] = None,
-        filter_backends: Optional[DrfGenericViewSet.filter_backends] = None,
+        pre_filter_backends: Optional[Type[FilterBackendProtocol] | DrfGenericViewSet.filter_backends] = None,
+        filter_backends: Optional[Type[FilterBackendProtocol] | DrfGenericViewSet.filter_backends] = None,
         override_filter_backends: Optional[bool] = None,
 
         pre_permission_classes: Optional[APIView.permission_classes] = None,
