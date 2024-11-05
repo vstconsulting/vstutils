@@ -177,6 +177,7 @@ class VSTAutoSchema(ExtendedSwaggerAutoSchema):
         vst_inspectors.VSTFieldInspector,
         vst_inspectors.PydanticSerializerInspector,
         vst_inspectors.ListInspector,
+        vst_inspectors.RouterLinkFieldInspector,
         vst_inspectors.VSTReferencingSerializerInspector,
         vst_inspectors.RelatedListFieldInspector,
         vst_inspectors.RatingFieldInspector,

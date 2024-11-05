@@ -12,8 +12,8 @@ import uuid
 from urllib.parse import quote
 
 import orjson
-from rest_framework.serializers import CharField, IntegerField, FloatField, ModelSerializer, Serializer
-from rest_framework.fields import empty, SkipField, get_error_detail, Field, BooleanField
+from rest_framework.serializers import CharField, IntegerField, FloatField, ModelSerializer, Serializer, DictField
+from rest_framework.fields import empty, SkipField, get_error_detail, Field, BooleanField, get_attribute
 from rest_framework.exceptions import ValidationError
 from django.apps import apps
 from django.db import models
@@ -1737,3 +1737,106 @@ class PlusMinusIntegerField(IntegerField):
     """
     Integer field that renders +/- buttons.
     """
+
+
+class RouterLinkField(DictField):
+    """
+    A read-only serializer field that displays a link to another page or a simple text label in the interface.
+
+    **Expected Input:**
+
+    This field expects a dictionary with the following keys:
+
+    - **link** *(optional)*: The URL or route to another page. If provided, the
+      label will be displayed as a clickable link.
+      If not provided, only the text label is shown. The value should be compatible
+      with the `Vue Router's push method parameter
+      <https://router.vuejs.org/api/interfaces/Router.html#push>`_. Ensure that the link points
+      to an existing resource in the interface to avoid 404 errors.
+
+    - **label**: The text to display. This is required whether or not a link is provided.
+
+    .. Note::
+       For simpler use cases, you might consider using :class:`.FkField`.
+
+    **Examples:**
+
+    *Using a model class method:*
+
+    .. code-block:: python
+
+        from django.db.models import CharField
+        from vstutils.api.fields import RouterLinkField
+        from vstutils.models import BaseModel
+
+        class Author(BaseModel):
+            name = CharField()
+
+            def get_link(self):
+                return {
+                    'link': f'/author/{self.id}/',
+                    'label': f'Author: {self.name}',
+                }
+
+        AuthorViewSet = Author.get_view_class(
+            detail_fields=['name', 'link'],
+            override_detail_fields={
+                'link': RouterLinkField(source='get_link'),
+            },
+        )
+
+    In this example, the ``get_link`` method in the ``Author`` model returns
+    a dictionary containing the ``link`` and ``label``.
+    The ``RouterLinkField`` uses this method to display the author's name as
+    a clickable link to their detail page.
+
+    *Using a custom field class:*
+
+    .. code-block:: python
+
+        from django.db.models import CharField
+        from vstutils.api.fields import RouterLinkField
+        from vstutils.models import BaseModel
+
+        class Author(BaseModel):
+            name = CharField()
+
+        class AuthorLinkField(RouterLinkField):
+            def to_representation(self, instance: Author):
+                return super().to_representation({
+                    'link': f'/author/{instance.id}/',
+                    'label': f'Author: {instance.name}',
+                })
+
+        AuthorViewSet = Author.get_view_class(
+            detail_fields=['name', 'link'],
+            override_detail_fields={
+                'link': AuthorLinkField(source='*'),
+            },
+        )
+
+    In this example, we create a custom field ``AuthorLinkField`` by subclassing ``RouterLinkField``.
+    We override the ``to_representation`` method to return a dictionary with
+    the ``link`` and ``label`` for each ``Author`` instance.
+    This custom field is then used in the viewset to display each author's name as a clickable link.
+
+    .. TIP::
+       - The field is read-only and is intended to display dynamic links based on the instance data.
+       - If the ``link`` key is omitted or ``None``, the field will display the ``label``
+         as plain text instead of a link.
+
+    .. WARNING::
+       Always ensure that the ``link`` provided points to a valid route within your application
+       to prevent users from encountering 404 errors.
+    """
+    child = CharField(allow_blank=True)
+
+    def __init__(self, **kwargs):
+        kwargs['read_only'] = True
+        super().__init__(**kwargs)
+
+    def to_representation(self, value):
+        return {
+            'link': get_attribute(value, ['link']),
+            'label': get_attribute(value, ['label']),
+        }

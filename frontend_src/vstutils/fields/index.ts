@@ -63,6 +63,7 @@ import { WYSIWYGField } from './text/WYSIWYGField';
 import { UUIDField } from './text/UUIDField';
 import { URIField } from './text/URIField';
 import type { Field } from './base';
+import { RouterLinkField } from './router-link';
 export { FieldLabelIdMixin, ModalWindowAndButtonMixin, TableRowMixin };
 
 export function addDefaultFields(fieldsResolver: FieldsResolver) {
@@ -156,6 +157,7 @@ export function addDefaultFields(fieldsResolver: FieldsResolver) {
         ['json', JSONField],
         ['namedbinfile', files.namedBinaryFile.NamedBinaryFileField],
         ['namedbinimage', files.namedBinaryImage.NamedBinaryImageField],
+        ['router-link', RouterLinkField],
     ] as [string | typeof FieldsResolver.DEFAULT_FIELD_KEY, new (options: any) => Field][]) {
         fieldsResolver.registerField(SCHEMA_DATA_TYPE.object, format, field);
     }

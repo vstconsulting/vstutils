@@ -727,3 +727,32 @@ class PydanticSerializerInspector(ReferencingSerializerInspector):
         if isinstance(field, api_base.ProxyPydanticSerializer):
             return openapi.Schema(**field.schema_model.model_json_schema())
         return NotHandled
+
+
+class RouterLinkFieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kwargs):
+        if not isinstance(field, fields.RouterLinkField):
+            return NotHandled
+
+        SwaggerType, _ = self._get_partial_types(  # pylint: disable=invalid-name
+            field,
+            swagger_object_type,
+            use_references,
+            **kwargs,
+        )
+
+        child_schema = self.probe_field_inspectors(
+            field.child,
+            swagger_object_type,
+            use_references=False,
+        )
+
+        return SwaggerType(
+            type=openapi.TYPE_OBJECT,
+            x_format='router-link',
+            required=['label'],
+            properties={
+                'link': child_schema,
+                'label': child_schema,
+            },
+        )
