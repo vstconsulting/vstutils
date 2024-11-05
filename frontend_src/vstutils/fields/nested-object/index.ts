@@ -128,7 +128,7 @@ export const NestedObjectFieldMixin = defineComponent({
         return () =>
             h(
                 'div',
-                { staticClass: 'field-component', class: wrapperClasses },
+                { staticClass: 'field-component', class: wrapperClasses.value },
                 props.type === 'list' ? renderList() : renderDetail(),
             );
     },

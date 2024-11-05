@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-24 00:09+0000\n"
+"POT-Creation-Date: 2024-11-05 03:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -208,8 +208,8 @@ msgid ""
 "serializer class, but only if they are included in the corresponding "
 "lists."
 msgstr ""
-"``_override_list_fields`` или ``_override_detail_fields`` — отображение с "
-"именами и типами полей, которые будут переопределены в атрибутах "
+"``_override_list_fields`` или ``_override_detail_fields`` — отображение с"
+" именами и типами полей, которые будут переопределены в атрибутах "
 "сериализатора (считайте это как объявление полей в DRF ModelSerializer). "
 "Имейте в виду, что указанные здесь поля не обязательно окажутся в классе "
 "сериализатора, а только если они включены в соответствующие списки."
@@ -444,9 +444,10 @@ msgstr ""
 "Метод ``get_view_class()`` — это служебный метод в ORM Django моделях, "
 "предназначенный для облегчения настройки и создания экземпляров "
 "представлений Django Rest Framework (DRF). Это позволяет разработчикам "
-"определить и настроить различные аспекты класса представления DRF."
-"Аргументы, переданные в функцию, полностью соответствуют тем, которые были указаны ранее для класса ``Meta`` модели, "
-"но без префикса подчёркивания."
+"определить и настроить различные аспекты класса представления "
+"DRF.Аргументы, переданные в функцию, полностью соответствуют тем, которые"
+" были указаны ранее для класса ``Meta`` модели, но без префикса "
+"подчёркивания."
 
 #: of vstutils.models.BModel:196
 msgid ""
@@ -2561,6 +2562,112 @@ msgstr ""
 "Это поле устарело. Используйте сериализаторы с атрибутом ``many=True``. "
 "Чтобы изменить отображение на странице, используйте "
 ":const:`vstutils.api.serializers.DisplayModeList`."
+
+#: of vstutils.api.fields.RouterLinkField:1
+msgid ""
+"A read-only serializer field that displays a link to another page or a "
+"simple text label in the interface."
+msgstr ""
+"Поле сериализатора, позволяющее отображать ссылку на другую страницу или "
+"простой текст в интерфейсе."
+
+#: of vstutils.api.fields.RouterLinkField:3
+msgid "**Expected Input:**"
+msgstr "**Ожидаемый ввод:**"
+
+#: of vstutils.api.fields.RouterLinkField:5
+msgid "This field expects a dictionary with the following keys:"
+msgstr "Этот поле ожидает словарь с следующими ключами:"
+
+#: of vstutils.api.fields.RouterLinkField:7
+msgid ""
+"**link** *(optional)*: The URL or route to another page. If provided, the"
+" label will be displayed as a clickable link. If not provided, only the "
+"text label is shown. The value should be compatible with the `Vue "
+"Router's push method parameter "
+"<https://router.vuejs.org/api/interfaces/Router.html#push>`_. Ensure that"
+" the link points to an existing resource in the interface to avoid 404 "
+"errors."
+msgstr ""
+"**link** *(необязательно)*: URL для другой страницы. Если "
+"указан, будет отображаться текст как ссылка. Если не указан, будет "
+"отображаться просто текст. Значение должно быть совместимым с "
+"`параметром метода push Vue Router <https://router.vuejs.org/api/interfaces/Router.html#push>`_. "
+"Убедитесь, что ссылка указывает на существующий ресурс в интерфейсе для "
+"избежания ошибок 404."
+
+#: of vstutils.api.fields.RouterLinkField:11
+msgid ""
+"**label**: The text to display. This is required whether or not a link is"
+" provided."
+msgstr "**label**: Текст для отображения. Обязательное поле."
+
+#: of vstutils.api.fields.RouterLinkField:14
+msgid "For simpler use cases, you might consider using :class:`.FkField`."
+msgstr "Для простых случаев использования см. :class:`.FkField`."
+
+#: of vstutils.api.fields.RouterLinkField:16
+msgid "**Examples:**"
+msgstr "**Примеры:**"
+
+#: of vstutils.api.fields.RouterLinkField:18
+msgid "*Using a model class method:*"
+msgstr "*Использование метода класса модели:*"
+
+#: of vstutils.api.fields.RouterLinkField:42
+msgid ""
+"In this example, the ``get_link`` method in the ``Author`` model returns "
+"a dictionary containing the ``link`` and ``label``. The "
+"``RouterLinkField`` uses this method to display the author's name as a "
+"clickable link to their detail page."
+msgstr ""
+"В этом примере метод ``get_link`` в модели ``Author`` возвращает словарь "
+"с ключами ``link`` и ``label``. Поле ``RouterLinkField`` использует этот "
+"метод для отображения имени автора как ссылку на страницу с "
+"подробностями."
+
+#: of vstutils.api.fields.RouterLinkField:45
+msgid "*Using a custom field class:*"
+msgstr "*Использование пользовательского класса поля:*"
+
+#: of vstutils.api.fields.RouterLinkField:70
+msgid ""
+"In this example, we create a custom field ``AuthorLinkField`` by "
+"subclassing ``RouterLinkField``. We override the ``to_representation`` "
+"method to return a dictionary with the ``link`` and ``label`` for each "
+"``Author`` instance. This custom field is then used in the viewset to "
+"display each author's name as a clickable link."
+msgstr ""
+"В этом примере мы создаем пользовательский класс ``AuthorLinkField`` "
+"подклассом ``RouterLinkField``. Мы переопределяем метод "
+"``to_representation`` для возвращения словаря с ключами ``link`` и "
+"``label`` для каждого экземпляра ``Author``. Этот пользовательский поле "
+"используется в вьюсете для отображения имени автора как кликабельной "
+"ссылки."
+
+#: of vstutils.api.fields.RouterLinkField:75
+msgid ""
+"The field is read-only and is intended to display dynamic links based on "
+"the instance data."
+msgstr ""
+"Поле является только для чтения и предназначено для отображения "
+"динамических ссылок на основе данных экземпляра."
+
+#: of vstutils.api.fields.RouterLinkField:76
+msgid ""
+"If the ``link`` key is omitted or ``None``, the field will display the "
+"``label`` as plain text instead of a link."
+msgstr ""
+"Если ключ ``link`` отсутствует или имеет значение ``None``, поле "
+"отображает текст как обычный текст вместо ссылки."
+
+#: of vstutils.api.fields.RouterLinkField:79
+msgid ""
+"Always ensure that the ``link`` provided points to a valid route within "
+"your application to prevent users from encountering 404 errors."
+msgstr ""
+"Всегда убедитесь, что предоставленная ссылка указывает на действительную"
+" страницу в вашем приложении для избежания ошибок 404."
 
 #: of vstutils.api.fields.SecretFileInString:1
 msgid ""
@@ -6243,4 +6350,31 @@ msgid ""
 msgstr ""
 "``VE100`` - Код ошибки целостности. Используется при появляении "
 "``django.db.utils.IntegrityError``."
+
+#~ msgid "Field that shows link to another page. Expected dict with fields:"
+#~ msgstr ""
+#~ "Поле, которое показывает ссылку на "
+#~ "другую страницу. Ожидается словарь с "
+#~ "полями:"
+
+#~ msgid "``link`` - link to another page, if not provided simple text is shown."
+#~ msgstr ""
+#~ "``link`` - ссылка на другую страницу,"
+#~ " если не указана то будет показан "
+#~ "просто текст."
+
+#~ msgid ""
+#~ "For details see `parameter of Vue "
+#~ "Router's push method "
+#~ "<https://router.vuejs.org/api/interfaces/Router.html#push>`_."
+#~ msgstr ""
+#~ "Подробнее см. `параметр метода Vue "
+#~ "Router's push "
+#~ "<https://router.vuejs.org/api/interfaces/Router.html#push>`_."
+
+#~ msgid "``label`` - text to show."
+#~ msgstr "``label`` - текст ссылки."
+
+#~ msgid "**Usage Tips:**"
+#~ msgstr "**Примеры:**"
 

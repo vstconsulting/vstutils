@@ -12,8 +12,7 @@ from ..api.base import GenericViewSet
 
 MethodsType = Literal['post', 'get', 'put', 'patch', 'delete', 'options', 'head']
 ConstantViewType = Literal['read_only', 'list_only', 'history'] | Type
-FilterFieldsListType = Iterable[Text]
-FilterFieldsDictType = Dict[Text, Filter | None]
+FilterFieldsType = Literal["serializer"] | Iterable[Text] | Dict[Text, Filter | None]
 
 DEFAULT_VIEW_FIELD_NAMES: Tuple[Text,Text,Text,Text,Text]
 LAZY_MODEL: object
@@ -48,7 +47,7 @@ class ExtraMetadata(TypedDict, total=False):
     non_bulk_methods: Optional[MethodsType | Iterable[MethodsType]]
     properties_groups: Optional[Dict[Text, Sequence[Text]]]
     extra_serializer_classes: Optional[Dict[Text, Type[Serializer]]]
-    filterset_fields: Optional[Dict[Text, FilterFieldsListType | FilterFieldsDictType]]
+    filterset_fields: Optional[FilterFieldsType]
     search_fields: Optional[Iterable[Text]]
     copy_attrs: Optional[Dict[Text, Any]]
     nested: Optional[NestedOptionType]
@@ -102,7 +101,7 @@ class ModelBaseClass(ModelBase):
     def get_view_class(
         cls,
         *,
-        ignore_meta: Optional[bool],
+        ignore_meta: Optional[bool] = None,
         view_class: Optional[Tuple | List[Text | ConstantViewType] | Text | ConstantViewType] = None,
 
         serializer_class: Optional[Type[Serializer]] = None,
@@ -121,7 +120,7 @@ class ModelBaseClass(ModelBase):
         detail_operations_availability_field_name: Optional[Text] = None,
 
         extra_serializer_classes: Optional[Dict[Text, Type[Serializer]]] = None,
-        filterset_fields: Optional[Dict[Text, FilterFieldsListType | FilterFieldsDictType]] = None,
+        filterset_fields: Optional[FilterFieldsType] = None,
         search_fields: Optional[Iterable[Text]] = None,
         copy_attrs: Optional[Dict[Text, Any]] = None,
 

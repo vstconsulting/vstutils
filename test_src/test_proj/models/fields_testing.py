@@ -152,6 +152,7 @@ class Author(BModel):
             'decimal',
             'decimal_without_max_digits',
             'some_hidden_field',
+            'router_link',
         ]
         _extra_serializer_classes = {
             'serializer_class_update': UpdateAuthorSerializer,
@@ -172,6 +173,11 @@ class Author(BModel):
             'decimal': DecimalField(default='13.37', decimal_places=2, max_digits=5),
             'decimal_without_max_digits': DecimalField(source='decimal', decimal_places=2, max_digits=None, read_only=True),
             'some_hidden_field': SomeHiddenFieldSerializer(required=False),
+            'router_link': fields.RouterLinkField(
+                # read_only expected to be True in schema
+                read_only=False,
+                source='get_router_link',
+            ),
         }
         _hidden_on_frontend_detail_fields=['some_hidden_field']
         _nested = {
@@ -203,6 +209,13 @@ class Author(BModel):
                 is_list=True,
                 serializer_class=PhoneBookSerializer
             )(),
+        }
+
+    def get_router_link(self):
+        return {
+            'link': f'/author/{self.id}/',
+            'label': f'Author: {self.name}',
+            'unexpected_key': 'some value',
         }
 
 

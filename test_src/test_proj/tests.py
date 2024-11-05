@@ -1671,7 +1671,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Grouping model properties for GUI
         self.assertEqual(
             api['definitions']['OneAuthor']['x-properties-groups'],
-            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked', 'decimal', 'decimal_without_max_digits', 'some_hidden_field']}
+            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked', 'decimal', 'decimal_without_max_digits', 'some_hidden_field', 'router_link']}
         )
         # Check view field name
         self.assertEqual(api['definitions']['OneExtraPost']['x-view-field-name'], 'title')
@@ -1704,6 +1704,22 @@ class OpenapiEndpointTestCase(BaseTestCase):
 
         # Check that minLength is set if field allow_null is False
         self.assertEqual(api['definitions']['OneAuthor']['properties']['decimal']['minLength'], 1)
+
+        # Check RouterLinkField
+        self.assertEqual(
+            api["definitions"]["OneAuthor"]["properties"]["router_link"],
+            {
+                "type": "object",
+                "x-format": "router-link",
+                "title": "Router link",
+                "readOnly": True,
+                "required": ["label"],
+                "properties": {
+                    "label": {"type": "string"},
+                    "link": {"type": "string"},
+                },
+            },
+        )
 
         # Check properly format for RatingField
         self.assertEqual(
@@ -4218,6 +4234,10 @@ class ProjectTestCase(BaseTestCase):
                     'title': post_2.title
                 }
             ],
+            'router_link': {
+                'label': 'Author: author_1',
+                'link': f'/author/{author_1.id}/',
+            },
         }
         results = self.bulk([
             {'method': 'get', 'path': ['author']},

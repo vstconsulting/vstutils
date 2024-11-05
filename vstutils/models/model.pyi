@@ -12,7 +12,7 @@ class ObjectDoesNotExist(Exception):
 
 class BaseModel(models.Model, metaclass=ModelBaseClass):
     objects: models.manager.from_queryset(BQuerySet)
-    DoesNotExist: ObjectDoesNotExist
+    DoesNotExist: type[ObjectDoesNotExist]
     generated_view: _t.Type[api_base.GenericViewSet]
 
     def __unicode__(self) -> _t.Text:
