@@ -38,7 +38,7 @@
     "@toast-ui/vue-editor": "^3.2.3"
   },
   "peerDependencies": {
-    "vue": "^2.7.16"
+    "vue": "^3.0.0"
   },
   "resolutions": {
     "izimodal/jquery": "3.7.1",
@@ -109,7 +109,7 @@
     "vite-tsconfig-paths": "^5.0.1",
     "vitest": "^2.1.2",
     "vitest-fetch-mock": "^0.3.0",
-    "vue": "^2.7.16",
+    "vue": "^3.0.0",
     "vue-i18n": "^8.28.2",
     "vue-router": "^3.6.5",
     "vue-template-compiler": "^2.7.16",
