@@ -10,7 +10,7 @@ from rest_framework.utils.serializer_helpers import ReturnDict, ReturnList
 from drf_yasg.utils import swagger_auto_schema
 
 from .. import exceptions as vstexceptions
-from .responses import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from .responses import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, NO_CONTENT_STATUS_CODES
 from .serializers import EmptySerializer, DataSerializer
 from .pagination import SimpleCountedListPagination
 
@@ -214,7 +214,8 @@ class Action:
 
             if self.is_list and (paginator := view.paginator):
                 result = paginator.get_paginated_response(result).data
-            return response_class(result)
+
+            return response_class(None if response_class.status_code in NO_CONTENT_STATUS_CODES else result)
 
         action_method.__name__ = self.action_kwargs.get('name', method.__name__)
         action_method.__doc__ = method.__doc__
@@ -392,7 +393,7 @@ class SimpleAction(Action):
                     serializer.save()
                     if 'set' in self.extra_actions:
                         self.extra_actions['set'](view, instance, request, serializer, *args, **kwargs)
-                    else:
+                    elif not isinstance(serializer, serializers.ModelSerializer):
                         instance.save()
                 elif request.method == "DELETE":
                     if 'del' in self.extra_actions:

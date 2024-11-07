@@ -7,7 +7,10 @@
 # for name, code in st: print(template.format(name=name, code=code), end='')
 
 from rest_framework import response, status
-from typing import Any, Dict, Text, SupportsFloat, Optional
+from typing import Any, Dict, Text, SupportsFloat, Optional, Set
+
+
+NO_CONTENT_STATUS_CODES: Set[int]
 
 
 class BaseResponseClass(response.Response):
@@ -29,6 +32,22 @@ class HTTP_101_SWITCHING_PROTOCOLS(BaseResponseClass):
 
 
 class Response101(HTTP_101_SWITCHING_PROTOCOLS):
+    ...
+
+
+class HTTP_102_PROCESSING(BaseResponseClass):
+    status_code = status.HTTP_102_PROCESSING
+
+
+class Response102(HTTP_102_PROCESSING):
+    ...
+
+
+class HTTP_103_EARLY_HINTS(BaseResponseClass):
+    status_code = status.HTTP_103_EARLY_HINTS
+
+
+class Response103(HTTP_103_EARLY_HINTS):
     ...
 
 
@@ -336,6 +355,14 @@ class Response418(HTTP_418_IM_A_TEAPOT):
     ...
 
 
+class HTTP_421_MISDIRECTED_REQUEST(BaseResponseClass):
+    status_code = status.HTTP_421_MISDIRECTED_REQUEST
+
+
+class Response421(HTTP_421_MISDIRECTED_REQUEST):
+    ...
+
+
 class HTTP_422_UNPROCESSABLE_ENTITY(BaseResponseClass):
     status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -357,6 +384,14 @@ class HTTP_424_FAILED_DEPENDENCY(BaseResponseClass):
 
 
 class Response424(HTTP_424_FAILED_DEPENDENCY):
+    ...
+
+
+class HTTP_425_TOO_EARLY(BaseResponseClass):
+    status_code = status.HTTP_425_TOO_EARLY
+
+
+class Response425(HTTP_425_TOO_EARLY):
     ...
 
 
