@@ -1,5 +1,5 @@
 default:
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v3
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v4
   cache: &global_cache
     paths:
       - node_modules/
@@ -24,7 +24,7 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v3
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v4
   coverage: '/\d+\%\s*$/'
   variables:
     TOX_ENVS: ""
