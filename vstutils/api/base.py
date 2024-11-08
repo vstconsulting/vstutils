@@ -251,15 +251,15 @@ class AutoSchema(DRFAutoSchema):
             return str(submethod.__doc__).strip()  # nocv
         if method == 'GET' and '{' not in path[:-1].split('/')[-1]:
             action = 'list'
-        elif method == 'POST':
+        elif method == 'POST':  # nocv
             action = 'create'
-        elif method == 'GET':
+        elif method == 'GET':  # nocv
             action = 'retrieve'
-        elif method == 'PUT':
+        elif method == 'PUT':  # nocv
             action = 'update'
-        elif method == 'PATCH':
+        elif method == 'PATCH':  # nocv
             action = 'partial_update'
-        elif method == 'DELETE':
+        elif method == 'DELETE':  # nocv
             action = 'destroy'
         method_view_obj.action = action
         if method_view_obj.schema is None:

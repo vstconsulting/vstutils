@@ -81,7 +81,7 @@ functional_test:
       - TOX_ENVS:
           - py310-django51-install
       - TOX_ENVS:
-          - py312-django51-coverage
+          - py313-django51-coverage
 
 js_tests:
   <<: *branch_js_tests
