@@ -560,20 +560,20 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         else:
             model_fields = cls.get_model_fields_mapping()  # pylint: disable=no-value-for-parameter
             serializer_fields = serializer().fields
-            avail_fields = filter(
-                tuple(model_fields.keys()).__contains__,
-                tuple(
-                    k if v.source is None or v.source == '*' else v.source
-                    for k, v in serializer_fields.items()
-                    if not isinstance(v, EXCLUDED_FIELDS)
+            for field_name, field in serializer_fields.items():
+                if isinstance(field, EXCLUDED_FIELDS):
+                    continue
+                filter_prop = (
+                    field_name
+                    if field.source is None or field.source == '*'
+                    else field.source
                 )
-            )
-            for field in avail_fields:
-                serializer_field = serializer_fields[field]
-                if isinstance(serializer_field, FkField):
-                    yield f'{field}__{serializer_field.autocomplete_represent}'
-                elif isinstance(serializer_field, drfCharField):
-                    yield field
+                if filter_prop not in model_fields:
+                    continue
+                if isinstance(field, FkField):
+                    yield f'{filter_prop}__{field.autocomplete_represent}'
+                elif isinstance(field, drfCharField):
+                    yield filter_prop
 
     def _get_view_class(cls, view_base_class):
         """

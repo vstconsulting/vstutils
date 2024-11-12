@@ -121,6 +121,9 @@ API[VST_API_VERSION][r'cacheable_check_generation'] = dict(
 API[VST_API_VERSION][r'dynamic_fields'] = dict(
     model='test_proj.models.dynamic_fields.DynamicFields'
 )
+API[VST_API_VERSION][r'test_search_fields_generation'] = dict(
+    view='test_proj.views.TestSearchFieldGenerationViewSet',
+)
 API[VST_API_VERSION][r'oauth2_tests'] = dict(
     view='test_proj.views.TestOauth2ViewSet',
 )

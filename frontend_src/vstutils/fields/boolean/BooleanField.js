@@ -53,6 +53,9 @@ export class BooleanField extends BaseField {
         return false;
     }
 
+    /**
+     * @returns {import('vue').Component}
+     */
     getComponent() {
         return BooleanFieldMixin;
     }
