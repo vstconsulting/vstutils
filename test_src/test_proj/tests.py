@@ -108,6 +108,7 @@ from .models import (
     Product
 )
 from .webpushes import TestNotification, TestWebPush, StaffOnlyNotification
+from .views import TestSearchFieldGenerationViewSet
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
 from PIL import Image
@@ -2395,6 +2396,10 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(
             self.get_model_class('test_proj.Author').generated_view.search_fields,
             ('name', 'phone', 'masked')
+        )
+        self.assertEqual(
+            TestSearchFieldGenerationViewSet.search_fields,
+            ('value',),
         )
 
     def test_etag(self):

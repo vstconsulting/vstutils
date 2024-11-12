@@ -5,7 +5,7 @@ import json
 
 import pydantic
 from django.utils.functional import SimpleLazyObject
-from rest_framework.fields import IntegerField
+from rest_framework.fields import IntegerField, CharField
 from rest_framework.permissions import AllowAny
 
 from vstutils.api import responses, filter_backends, fields
@@ -18,7 +18,7 @@ from vstutils.api.actions import Action, SimpleAction, SimpleFileAction
 from vstutils.utils import create_view
 from vstutils.gui.context import gui_version
 
-from .models import Host, HostList, HostGroup, ModelWithBinaryFiles, ModelWithFK, CachableProxyModel
+from .models import Host, HostList, HostGroup, ModelWithBinaryFiles, ModelWithFK, CachableProxyModel, Variable
 
 
 class TestFilterBackend(filter_backends.VSTFilterBackend):
@@ -309,3 +309,18 @@ class TestOauth2ViewSet(GenericViewSet):
         # Some tests run with session middleware disabled so it needs to be saved manually
         request.session.save()
         return responses.Response200({'value': value})
+
+
+TestSearchFieldGenerationViewSet = Variable.get_view_class(
+    ignore_meta=True,
+    serializer_class_name='TestSearchFieldGenerationSerializer',
+    list_fields=['value_alias'],
+    override_list_fields={
+        # Check that when
+        #   field has custom source
+        #   and field's source matches model's field name
+        #   and serializer has no field with name matching source
+        # search fields generation will not fail
+        'value_alias': CharField(source='value'),
+    },
+)
