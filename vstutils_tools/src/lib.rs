@@ -29,7 +29,7 @@ fn get_file_value(filename: &str, default: Option<&str>, raise_error: Option<boo
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn _tools(_py: Python, m: &PyModule) -> PyResult<()> {
+fn _tools(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_file_value, m)?)?;
     Ok(())
 }

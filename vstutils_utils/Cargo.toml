@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-pyo3 = { version = "0.21.2", features = ["extension-module", "abi3"] }
+pyo3 = { version = "0.22.6", features = ["extension-module", "abi3"] }
 base64 = "0.22.1"
 
 [lib]
