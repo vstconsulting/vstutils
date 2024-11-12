@@ -247,19 +247,19 @@ class AutoSchema(DRFAutoSchema):
         method_view_obj = method_view()
         action = path.split('/')[-2]
         submethod = getattr(method_view, action, None)
-        if submethod.__doc__:
+        if submethod is not None and submethod.__doc__:
             return str(submethod.__doc__).strip()  # nocv
         if method == 'GET' and '{' not in path[:-1].split('/')[-1]:
             action = 'list'
-        elif method == 'POST':  # nocv
+        elif method == 'POST':
             action = 'create'
-        elif method == 'GET':  # nocv
+        elif method == 'GET':
             action = 'retrieve'
-        elif method == 'PUT':  # nocv
+        elif method == 'PUT':
             action = 'update'
-        elif method == 'PATCH':  # nocv
+        elif method == 'PATCH':
             action = 'partial_update'
-        elif method == 'DELETE':  # nocv
+        elif method == 'DELETE':
             action = 'destroy'
         method_view_obj.action = action
         if method_view_obj.schema is None:

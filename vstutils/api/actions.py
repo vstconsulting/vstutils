@@ -404,7 +404,7 @@ class SimpleAction(Action):
             return serializer.data
 
         action_method.__name__ = getter.__name__ if getter else self.action_kwargs['name']
-        action_method.__doc__ = self.extra_actions['get'].__doc__
+        action_method.__doc__ = self.extra_actions['get'].__doc__ if self.extra_actions['get'] else None
         resulted_action = super().__call__(action_method)
 
         def setter(setter_method):
