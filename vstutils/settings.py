@@ -1604,6 +1604,7 @@ OAUTH_SERVER_CLIENTS: OauthServerClientsConfig = {
         'default_redirect_uri': None,
     }
 }
+OAUTH_SERVER_USER_WRAPPER = 'vstutils.oauth2.user.UserWrapper'
 
 if OAUTH_SERVER_ENABLE:
     if config['oauth']['server_allow_insecure']:

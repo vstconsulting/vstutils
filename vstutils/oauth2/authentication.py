@@ -59,7 +59,13 @@ def get_session(session_key):
 
 class JWTBearerTokenAuthentication(BaseAuthentication):
     def authenticate(self, request: "Request"):
+        # pylint: disable=protected-access
+        if getattr(request._request, "is_bulk", False) and getattr(request, "auth_obj", 0).__class__ is self.__class__:
+            # Hack for Bulk requests performance
+            return request._request.user, request.auth_obj.token
+
         if token := _get_request_token(request):
+            self.token = token
             request._request.session = get_session(token['jti'])  # pylint: disable=protected-access
             self.patch_vary(request)
             return get_user(request._request), token  # pylint: disable=protected-access

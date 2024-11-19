@@ -150,6 +150,7 @@ class BulkMiddleware(BaseMiddleware):
             request.user = request.META.pop('user')
             # pylint: disable=protected-access
             request._cached_user = request.user  # type: ignore
+            request.auth_obj = request.META.pop('auth_obj')
         if 'language' in request.META:
             request.language = request.META.pop('language')  # type: ignore
         if 'session' in request.META:
@@ -175,6 +176,7 @@ class BulkClient(Client):
     def __init__(self, enforce_csrf_checks=False, **defaults):
         # pylint: disable=bad-super-call
         self.user = defaults.pop('user', None)
+        self.auth_obj = defaults.pop('auth_obj', None)
         self.language = defaults.pop('language', None)
         self.session = defaults.pop('session', None)
         self.notificator = defaults.pop('notificator', None)
@@ -184,6 +186,8 @@ class BulkClient(Client):
     def request(self, **request):
         if self.user:
             request['user'] = self.user
+        if self.auth_obj:
+            request['auth_obj'] = self.auth_obj
         if self.language:
             request['language'] = self.language
         if self.session:
@@ -369,7 +373,7 @@ class EndpointViewSet(views.APIView):
 
     def original_environ_data(self, request: BulkRequestType, *args) -> _t.Dict:
         get_environ = request.META.get
-        kwargs: _t.Dict[str, _t.Optional[_t.Any]] = {}
+        kwargs: _t.Dict[str, _t.Optional[_t.Any]] = {"auth_obj": None}
         for env_var in tuple(self.client_environ_keys_copy) + args:
             value = get_environ(env_var, None)
             if value:
@@ -377,6 +381,7 @@ class EndpointViewSet(views.APIView):
 
         if request.user.is_authenticated:
             kwargs['user'] = request.user
+            kwargs['auth_obj'] = request.successful_authenticator
 
         if cookies := get_environ('HTTP_COOKIE'):
             kwargs['HTTP_COOKIE'] = str(cookies)

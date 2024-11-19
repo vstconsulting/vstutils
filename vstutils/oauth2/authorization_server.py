@@ -39,7 +39,6 @@ from .authorization_code import AuthorizationCodeGrant, OpenIDCode
 from .client import query_simple_client, SimpleClient
 from .jwk import jwk_set
 from .requests import DjangoOAuth2Request, DjangoOAuthJsonRequest
-from .user import UserWrapper
 
 if TYPE_CHECKING:  # nocv
     from authlib.jose import KeySet
@@ -47,6 +46,7 @@ if TYPE_CHECKING:  # nocv
 
 
 SESSION_STORE = get_session_store()
+UserWrapper = import_string(settings.OAUTH_SERVER_USER_WRAPPER)
 extra_claims_provider: 'Optional[Callable[[AbstractBaseUser], Optional[dict]]]' = (
     import_string(settings.OAUTH_SERVER_JWT_EXTRA_CLAIMS_PROVIDER)
     if settings.OAUTH_SERVER_JWT_EXTRA_CLAIMS_PROVIDER

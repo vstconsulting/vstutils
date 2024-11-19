@@ -15,13 +15,13 @@ from vstutils.api.permissions import IsOpenApiRequest
 from vstutils.api.responses import HTTP_200_OK
 
 from .authentication import JWTBearerTokenAuthentication
-from .user import UserWrapper
 
 if TYPE_CHECKING:
     from authlib.oauth2.rfc6749 import AuthorizationServer  # nocv
 
 ServerClass = import_string(settings.OAUTH_SERVER_CLASS)
 server: "AuthorizationServer" = ServerClass()
+UserWrapper = import_string(settings.OAUTH_SERVER_USER_WRAPPER)
 
 
 class Oauth2Throttle(AnonRateThrottle):

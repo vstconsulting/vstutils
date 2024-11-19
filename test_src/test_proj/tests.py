@@ -936,7 +936,7 @@ class ViewsTestCase(BaseTestCase):
             password2='12345'
         )
         user_get_request = {"method": "get", "path": ['user', 'profile']}
-        self._login()
+        self.login_user()
         results = self.bulk([
             {"method": "post", "path": ['user', 'profile', 'change_password'], "data": i}
             for i in (invalid_old_password, not_identical_passwords, update_password)
@@ -951,7 +951,7 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[0]['data']['username'], self.user.username)
 
-        self._logout(self.client)
+        self.logout_user()
 
         self.change_identity(True)
         data = [
@@ -1501,7 +1501,7 @@ class DefaultBulkTestCase(BaseTestCase):
             headers={'accept-language': 'ru,en-US;q=0.9,en;q=0.8,ru-RU;q=0.7,es;q=0.6'},
             relogin=False
         )
-        self._logout(self.client)
+        self.logout_user()
 
         self.assertEqual(result[0]['status'], 204)
         self.assertEqual(result[1]['status'], 404)
@@ -1602,7 +1602,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         del expected['some_barcode128']
         self.assertDictEqual(expected, from_api)
         # Test swagger ui
-        client = self._login()
+        client = self.login_user()
         response = client.get('/api/endpoint/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'drf-yasg/swagger-ui.html')
@@ -2416,7 +2416,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         response3 = client.get('/api/endpoint/?format=openapi&version=v2', headers=headers)
         self.assertEqual(response3.status_code, 200)
 
-        self._login()
+        self.login_user()
         headers['Cookie'] = f'{settings.SESSION_COOKIE_NAME}={self.client.session.session_key}; lang=en'
         response4 = client.get('/api/endpoint/?format=openapi', headers=headers)
         self.assertEqual(response4.status_code, 200, response4.content)
@@ -3414,7 +3414,7 @@ class LangTestCase(BaseTestCase):
         self.assertEqual(to_soup(response.content).html['lang'], 'en')
 
     def test_server_translation(self):
-        self._logout(self.client)
+        self.logout_user()
         bulk_data = [
             dict(path=['_lang', 'ru'], method='get'),
         ]
@@ -5893,7 +5893,7 @@ class WebSocketTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-        self.client = self._login()
+        self.client = self.login_user()
         self.cookie = f"{self.client.cookies.output(header='', sep='; ').strip()};"
         self.cookie += f"csrftoken={_get_new_csrf_token()}"
 
@@ -7087,6 +7087,7 @@ class Oauth2TestCase(BaseTestCase):
         self.assertDictEqual(response.json(), {
             "sub": access_token_jwt['sub'],
             "anon": True,
+            "test_value": "test_value",
         })
 
     def test_schema(self):
@@ -7319,6 +7320,7 @@ class Oauth2TestCase(BaseTestCase):
             "family_name": "Doe",
             "preferred_username": "j.doe",
             "email": "janedoe@example.com",
+            "test_value": "test_value",
         })
 
     def test_auth_with_scope(self):

@@ -46,10 +46,10 @@ class BaseTestCase(TestCase):
     server_class = import_string(settings.OAUTH_SERVER_CLASS)
 
     #: oAuth2 client id
-    client_token_app_id = 'simple-client-id'
+    client_token_app_id = list(settings.OAUTH_SERVER_CLIENTS.keys())[0]
 
     #: oAuth2 grant type
-    client_token_grant_type = 'password'
+    client_token_grant_type = settings.OAUTH_SERVER_CLIENTS[client_token_app_id]['allowed_grant_types'][0]
 
     #: oAuth2 scopes
     client_token_scopes = 'openid read write'
@@ -136,6 +136,19 @@ class BaseTestCase(TestCase):
             'typ': 'at+jwt'
         }
         return jwt.encode(header, payload, key=jwk_set).decode('utf-8')
+
+    def login_user(self, user=None, client=None):
+        client = client or self.client
+        client.force_login(user or self.user)
+        # Make OAuth2 auth over session auth
+        if self.client_oauth_session:
+            client.session.save()
+            client.defaults.setdefault('Sec-Fetch-Site', 'same-origin')
+            client.defaults['HTTP_AUTHORIZATION'] = f'Bearer {self.generate_token_for_session(client.session)}'
+        return client
+
+    def logout_user(self, client=None):
+        self._logout(client or self.client)
 
     def _login(self):
         client = self.client

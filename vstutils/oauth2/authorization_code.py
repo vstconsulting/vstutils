@@ -12,15 +12,17 @@ from authlib.oidc.core.grants import OpenIDCode as BaseOpenIDCode
 from django.conf import settings
 from django.contrib.auth import load_backend
 from django.core.cache import caches
+from django.utils.module_loading import import_string
 
 from .client import SimpleClient
 from .requests import DjangoOAuth2Request
-from .user import UserWrapper
 from .jwk import jwk_set
 
 
 _auth_code_cache = caches[settings.OAUTH_SERVER_AUTHORIZATION_CODE_CACHE_NAME]
 _auth_code_ttl = 300
+
+UserWrapper = import_string(settings.OAUTH_SERVER_USER_WRAPPER)
 
 
 @dataclass

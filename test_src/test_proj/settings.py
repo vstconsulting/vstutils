@@ -209,3 +209,5 @@ OAUTH_SERVER_CLIENTS['some-app'] = {
     'allowed_redirect_uris': 'https://some-app.com/auth-callback',
     'allowed_response_types': ['code'],
 }
+
+OAUTH_SERVER_USER_WRAPPER = 'test_proj.oauth_user.OAuthUser'
