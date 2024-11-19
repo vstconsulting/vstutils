@@ -2,7 +2,7 @@ import typing as _t
 from copy import deepcopy
 
 import pyotp
-from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.contrib.auth import get_user_model, HASH_SESSION_KEY
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import AbstractUser
@@ -131,6 +131,7 @@ class ChangePasswordSerializer(BaseSerializer):
     password = fields.PasswordField(required=True, label='New password')
     password2 = fields.PasswordField(required=True, label='Confirm new password')
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         if not instance.check_password(validated_data['old_password']):
             raise exceptions.AuthenticationFailed()
@@ -138,9 +139,9 @@ class ChangePasswordSerializer(BaseSerializer):
             raise exceptions.ValidationError(
                 translate("New passwords values are not equal.")
             )
-        validate_password(validated_data['password'])
+        validate_password(validated_data['password'], user=instance)
         instance.set_password(validated_data['password'])
-        instance.save()
+        instance.save(update_fields=['password'])
         return instance
 
     def to_representation(self, instance):
@@ -307,7 +308,9 @@ class UserViewSet(base.ModelViewSet):
         serializer = self.get_serializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        update_session_auth_hash(request, user)
+        if hasattr(user, "get_session_auth_hash") and request.user == user:
+            request.session[HASH_SESSION_KEY] = user.get_session_auth_hash()
+            request.session.save()
         return responses.HTTP_201_CREATED(serializer.data)
 
     @deco.action(['get', 'put'], detail=True, permission_classes=(ChangePasswordPermission,))

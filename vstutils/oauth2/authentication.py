@@ -45,8 +45,14 @@ def _get_request_token(request: "Request"):
         raise AuthenticationFailed() from exc
 
 
+def _get_session_store():  # nocv
+    # We have to mock this method in tests
+    # because performance preferred
+    return SESSION_STORE
+
+
 def get_session(session_key):
-    session = SESSION_STORE(session_key)
+    session = _get_session_store()(session_key)
     session._from_jwt = True  # pylint: disable=protected-access
     return session
 

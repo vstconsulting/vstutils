@@ -26,7 +26,7 @@ class IsAuthenticatedOpenApiRequest(permissions.IsAuthenticated):
 class SuperUserPermission(IsAuthenticatedOpenApiRequest):
 
     def has_permission(self, request, view):
-        if request.user.is_staff or request.method in permissions.SAFE_METHODS:
+        if request.user.is_staff or request.user.is_superuser or request.method in permissions.SAFE_METHODS:
             # pylint: disable=bad-super-call
             return super(IsAuthenticatedOpenApiRequest, self).has_permission(request, view)
         with raise_context():

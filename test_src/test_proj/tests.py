@@ -936,7 +936,7 @@ class ViewsTestCase(BaseTestCase):
             password2='12345'
         )
         user_get_request = {"method": "get", "path": ['user', 'profile']}
-        self.client.force_login(self.user)
+        self._login()
         results = self.bulk([
             {"method": "post", "path": ['user', 'profile', 'change_password'], "data": i}
             for i in (invalid_old_password, not_identical_passwords, update_password)
@@ -2525,7 +2525,6 @@ class EndpointTestCase(BaseTestCase):
         self.assertEqual('get', response[0]['method'])
         self.assertEqual('/api/v1/user/1/', response[0]['path'])
         self.assertEqual(200, response[0]['status'])
-        # self.assertEqual('v1', response[0]['version'])
 
         expected_user = user_from_db_to_user_from_api_detail(user1)
         actual_user = response[0]['data']
@@ -3861,12 +3860,13 @@ class ProjectTestCase(BaseTestCase):
 
     @override_settings(SESSION_ENGINE='django.contrib.sessions.backends.db')
     def test_hierarchy(self):
+        # self.client_oauth_session = False
         Host.objects.all().delete()
         HostGroup.objects.all().delete()
         bulk_data = list(self.objects_bulk_data)
         results = self.bulk(bulk_data)
-        for result in results:
-            self.assertEqual(result['status'], 201, result)
+        for num, result in enumerate(results):
+            self.assertEqual(result['status'], 201, f'Attempt: {num}, {result}')
             del result
         self._check_subhost(results[0]['data']['id'], name='a')
         self._check_subhost(

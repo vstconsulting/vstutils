@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-05 03:35+0000\n"
+"POT-Creation-Date: 2024-11-19 06:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2589,32 +2589,32 @@ msgid ""
 " the link points to an existing resource in the interface to avoid 404 "
 "errors."
 msgstr ""
-"**link** *(необязательно)*: URL для другой страницы. Если "
-"указан, будет отображаться текст как ссылка. Если не указан, будет "
-"отображаться просто текст. Значение должно быть совместимым с "
-"`параметром метода push Vue Router <https://router.vuejs.org/api/interfaces/Router.html#push>`_. "
+"**link** *(необязательно)*: URL для другой страницы. Если указан, будет "
+"отображаться текст как ссылка. Если не указан, будет отображаться просто "
+"текст. Значение должно быть совместимым с `параметром метода push Vue "
+"Router <https://router.vuejs.org/api/interfaces/Router.html#push>`_. "
 "Убедитесь, что ссылка указывает на существующий ресурс в интерфейсе для "
 "избежания ошибок 404."
 
-#: of vstutils.api.fields.RouterLinkField:11
+#: of vstutils.api.fields.RouterLinkField:14
 msgid ""
 "**label**: The text to display. This is required whether or not a link is"
 " provided."
 msgstr "**label**: Текст для отображения. Обязательное поле."
 
-#: of vstutils.api.fields.RouterLinkField:14
+#: of vstutils.api.fields.RouterLinkField:17
 msgid "For simpler use cases, you might consider using :class:`.FkField`."
 msgstr "Для простых случаев использования см. :class:`.FkField`."
 
-#: of vstutils.api.fields.RouterLinkField:16
+#: of vstutils.api.fields.RouterLinkField:19
 msgid "**Examples:**"
 msgstr "**Примеры:**"
 
-#: of vstutils.api.fields.RouterLinkField:18
+#: of vstutils.api.fields.RouterLinkField:21
 msgid "*Using a model class method:*"
 msgstr "*Использование метода класса модели:*"
 
-#: of vstutils.api.fields.RouterLinkField:42
+#: of vstutils.api.fields.RouterLinkField:45
 msgid ""
 "In this example, the ``get_link`` method in the ``Author`` model returns "
 "a dictionary containing the ``link`` and ``label``. The "
@@ -2626,11 +2626,11 @@ msgstr ""
 "метод для отображения имени автора как ссылку на страницу с "
 "подробностями."
 
-#: of vstutils.api.fields.RouterLinkField:45
+#: of vstutils.api.fields.RouterLinkField:50
 msgid "*Using a custom field class:*"
 msgstr "*Использование пользовательского класса поля:*"
 
-#: of vstutils.api.fields.RouterLinkField:70
+#: of vstutils.api.fields.RouterLinkField:75
 msgid ""
 "In this example, we create a custom field ``AuthorLinkField`` by "
 "subclassing ``RouterLinkField``. We override the ``to_representation`` "
@@ -2645,7 +2645,7 @@ msgstr ""
 "используется в вьюсете для отображения имени автора как кликабельной "
 "ссылки."
 
-#: of vstutils.api.fields.RouterLinkField:75
+#: of vstutils.api.fields.RouterLinkField:81
 msgid ""
 "The field is read-only and is intended to display dynamic links based on "
 "the instance data."
@@ -2653,7 +2653,7 @@ msgstr ""
 "Поле является только для чтения и предназначено для отображения "
 "динамических ссылок на основе данных экземпляра."
 
-#: of vstutils.api.fields.RouterLinkField:76
+#: of vstutils.api.fields.RouterLinkField:82
 msgid ""
 "If the ``link`` key is omitted or ``None``, the field will display the "
 "``label`` as plain text instead of a link."
@@ -2661,7 +2661,7 @@ msgstr ""
 "Если ключ ``link`` отсутствует или имеет значение ``None``, поле "
 "отображает текст как обычный текст вместо ссылки."
 
-#: of vstutils.api.fields.RouterLinkField:79
+#: of vstutils.api.fields.RouterLinkField:86
 msgid ""
 "Always ensure that the ``link`` provided points to a valid route within "
 "your application to prevent users from encountering 404 errors."
@@ -5252,6 +5252,18 @@ msgstr ""
 "Делает транзакционный bulk-запрос и проверяет код состояния (200 по "
 "умолчанию)"
 
+#: ../../docstring of vstutils.tests.BaseTestCase.client_token_app_id:1
+msgid "oAuth2 client id"
+msgstr "ID клиента для тестов в oAuth2"
+
+#: ../../docstring of vstutils.tests.BaseTestCase.client_token_grant_type:1
+msgid "oAuth2 grant type"
+msgstr "Тип авторизации в oAuth2"
+
+#: ../../docstring of vstutils.tests.BaseTestCase.client_token_scopes:1
+msgid "oAuth2 scopes"
+msgstr ""
+
 #: of vstutils.tests.BaseTestCase.details_test:1
 msgid ""
 "Test for get details of model. If you setup additional named arguments, "
@@ -5492,6 +5504,10 @@ msgstr ""
 #: of vstutils.tests.BaseTestCase.random_name:1
 msgid "Simple function which returns uuid1 string."
 msgstr "Простая функция, возвращающая строку uuid1."
+
+#: of vstutils.oauth2.authorization_server.AuthorizationServer:1
+msgid "oAuth2 server class"
+msgstr "Класс авторизации для oAuth2"
 
 #: ../../docstring of vstutils.tests.BaseTestCase.std_codes:1
 msgid ""

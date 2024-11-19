@@ -374,16 +374,16 @@ class EndpointViewSet(views.APIView):
             value = get_environ(env_var, None)
             if value:
                 kwargs[env_var] = str(value)
+
         if request.user.is_authenticated:
-            if isinstance(request.successful_authenticator, SessionAuthentication):
-                kwargs['HTTP_COOKIE'] = str(request.META.get('HTTP_COOKIE'))
-            elif isinstance(request.successful_authenticator, (
-                BasicAuthentication,
-                TokenAuthentication,
-                JWTBearerTokenAuthentication,
-            )):
-                kwargs['HTTP_AUTHORIZATION'] = str(request.META.get('HTTP_AUTHORIZATION'))
             kwargs['user'] = request.user
+
+        if cookies := get_environ('HTTP_COOKIE'):
+            kwargs['HTTP_COOKIE'] = str(cookies)
+
+        if auth_header := get_environ('HTTP_AUTHORIZATION'):
+            kwargs['HTTP_AUTHORIZATION'] = str(auth_header)
+
         kwargs['language'] = getattr(request, 'language', None)
         kwargs['session'] = getattr(request, 'session', None)
         kwargs['notificator'] = getattr(request, 'notificator', None)
