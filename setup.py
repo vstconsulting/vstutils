@@ -23,6 +23,7 @@ elif os.environ.get('BUILD_OPTIMIZATION', 'false') == 'true':
         'vstutils.api.endpoint',
         'vstutils.api.validators',
         'vstutils.api.actions',
+        'vstutils.oauth2.authentication',
         'vstutils.models.base',
         'vstutils.models.queryset',
         'vstutils.models.cent_notify',

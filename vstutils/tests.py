@@ -5,14 +5,18 @@ import string  # noqa: F401
 import os  # noqa: F401
 import uuid
 import warnings
+from time import time
+from importlib import import_module
 from unittest.mock import patch, Mock
 import json  # noqa: F401
 
 import ormsgpack
+from authlib.jose import jwt
 from django.apps import apps
 from django.http import StreamingHttpResponse
 from django.db import transaction, models as django_models
 from django.core.exceptions import BadRequest
+from django.contrib.sessions.backends.base import SessionBase
 from django.conf import settings
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
@@ -21,11 +25,15 @@ from fastapi.testclient import TestClient
 
 from .utils import raise_context_decorator_with_default
 from .api.renderers import ORJSONRenderer
+from .oauth2.jwk import jwk_set
 
 User = get_user_model()
 
 BulkDataType = _t.Union[_t.List[_t.Dict[_t.Text, _t.Any]], str, bytes, bytearray]
 ApiResultType = _t.Union[BulkDataType, _t.Dict, _t.Sequence[BulkDataType]]
+
+patched_get_session = patch("vstutils.oauth2.authentication._get_session_store").start()
+patched_get_session.side_effect = lambda: import_module(settings.SESSION_ENGINE).SessionStore
 
 
 class BaseTestCase(TestCase):
@@ -33,6 +41,20 @@ class BaseTestCase(TestCase):
     Main test case class extends :class:`django.test.TestCase`.
     """
     server_name = 'vstutilstestserver'
+
+    #: oAuth2 server class
+    server_class = import_string(settings.OAUTH_SERVER_CLASS)
+
+    #: oAuth2 client id
+    client_token_app_id = 'simple-client-id'
+
+    #: oAuth2 grant type
+    client_token_grant_type = 'password'
+
+    #: oAuth2 scopes
+    client_token_scopes = 'openid read write'
+
+    client_oauth_session = True
 
     #: Attribute with default project models module.
     models = None
@@ -93,15 +115,43 @@ class BaseTestCase(TestCase):
         user.data = {'username': username, 'password': password}
         return user
 
+    def get_oauth2_server(self):
+        return self.server_class()
+
+    def generate_token_for_session(self, session: SessionBase):
+        oauth_server = self.get_oauth2_server()
+        client = oauth_server.query_client(self.client_token_app_id)
+        payload = {
+            'iss': settings.OAUTH_SERVER_ISSUER,
+            'aud': client.get_client_id(),
+            'client_id': client.get_client_id(),
+            'jti': str(session.session_key),
+            'sub': str(session.get('user_id', None)),
+            'scope': self.client_token_scopes,
+            'exp': int(time()) + 3600,
+            'iat': int(time()),
+        }
+        header = {
+            'alg': settings.OAUTH_SERVER_JWT_ALG,
+            'typ': 'at+jwt'
+        }
+        return jwt.encode(header, payload, key=jwk_set).decode('utf-8')
+
     def _login(self):
         client = self.client
         client.force_login(self.user)
-        # TODO: Make OAuth2 auth
+        # Make OAuth2 auth over session auth
+        if self.client_oauth_session:
+            client.session.save()
+            client.defaults.setdefault('Sec-Fetch-Site', 'same-origin')
+            client.defaults['HTTP_AUTHORIZATION'] = f'Bearer {self.generate_token_for_session(client.session)}'
         return client
 
     def _logout(self, client):
         saved_cookies = client.cookies
         client.logout()
+        client.defaults.pop('Sec-Fetch-Site', None)
+        client.defaults.pop('HTTP_AUTHORIZATION', None)
         client.cookies = saved_cookies
 
     def _check_update(self, url, data, **fields):

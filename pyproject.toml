@@ -121,6 +121,9 @@ exclude_lines = [
 ]
 
 [tool.bandit]
+exclude_dirs = [
+    'vstutils/tests.py',
+]
 skips = [
     "B403",
     "B404",
@@ -132,7 +135,7 @@ skips = [
 ]
 
 [tool.mypy]
-python_version = 3.8
+python_version = "3.10"
 #strict = true
 allow_redefinition = true
 check_untyped_defs = true

@@ -1656,6 +1656,7 @@ if TESTS_RUN:
     for storage_name in filter('staticfiles'.__ne__, STORAGES):
         STORAGES[storage_name] = {"BACKEND": 'django.core.files.storage.InMemoryStorage'}
     CENTRIFUGO_CLIENT_KWARGS = {}
+    OAUTH_SERVER_TOKEN_EXPIRES_IN = 60 * 60
     try:
         __import__('pysqlite3')
         sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')  # nocv
