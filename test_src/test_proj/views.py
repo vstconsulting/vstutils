@@ -265,6 +265,8 @@ ModelWithFKViewSet = create_view(
 
 
 class HostCreateDummyMixin:
+    destroy = None
+
     def create(self, request, *args, **kwargs):
         return responses.HTTP_201_CREATED("OK")
 
@@ -285,6 +287,7 @@ HostWithoutAuthViewSet = create_view(
 CacheableView = create_view(CachableProxyModel)
 
 
+@nested_view('host', 'id', manager_name=lambda *_, **__: Host.objects.all(), view=HostWithoutAuthViewSet)
 class CacheableViewSet(CacheableView):
     def get_etag_value(self, model_class, request):
         return super().get_etag_value((model_class, gui_version), request)

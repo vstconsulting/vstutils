@@ -1923,6 +1923,16 @@ class OpenapiEndpointTestCase(BaseTestCase):
             'operations_availability',
         )
 
+        # check None actions
+        self.assertNotIn(
+            'delete',
+            api['paths']['/hosts_without_auth/{id}/'],
+        )
+        self.assertNotIn(
+            'delete',
+            api['paths']['/cacheable/{id}/host/{host_id}/'],
+        )
+
         # Check that's schema is correct and fields are working
         host_obj = self.get_model_class('test_proj.HostList').objects.create(name='123')
         results = self.bulk([

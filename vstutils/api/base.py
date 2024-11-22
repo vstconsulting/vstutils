@@ -497,15 +497,15 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         if methods is not None:
             return methods
         methods = []
-        if not detail and hasattr(cls, 'create'):
+        if not detail and getattr(cls, 'create', None):
             methods.append('post')
-        if hasattr(cls, 'list') or hasattr(cls, 'retrieve'):
+        if getattr(cls, 'list', None) or getattr(cls, 'retrieve', None):
             methods.append('get')
-        if detail and hasattr(cls, 'update'):
+        if detail and getattr(cls, 'update', None):
             methods.append('put')
-        if detail and hasattr(cls, 'partial_update'):
+        if detail and getattr(cls, 'partial_update', None):
             methods.append('patch')
-        if detail and hasattr(cls, 'destroy'):
+        if detail and getattr(cls, 'destroy', None):
             methods.append('delete')
         setattr(cls, attr_name, methods)
         return methods
