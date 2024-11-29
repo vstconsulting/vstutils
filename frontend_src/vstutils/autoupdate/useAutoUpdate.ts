@@ -6,7 +6,6 @@ import type {
     TimerAutoUpdateAction,
 } from './AutoUpdateController';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 async function EMPTY_CALLBACK() {}
 
 export function useAutoUpdate({

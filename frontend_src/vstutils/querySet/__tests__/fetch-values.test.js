@@ -99,7 +99,7 @@ test('fk fetching', async () => {
     expect(instances[5].some_fk).toBeUndefined();
 
     expect(fetchMock).toBeCalledTimes(1);
-    expectNthRequest(0, {
+    await expectNthRequest(0, {
         body: [
             {
                 method: 'get',
@@ -152,7 +152,7 @@ test('dynamic with fk fetching', async () => {
     await fetchInstances(instances);
 
     expect(fetchMock).toBeCalledTimes(1);
-    expectNthRequest(0, {
+    await expectNthRequest(0, {
         body: [
             {
                 method: 'get',
@@ -231,7 +231,7 @@ test('related list with array with dynamic with fk fetching', async () => {
     await fetchInstances(instances);
 
     expect(fetchMock).toBeCalledTimes(1);
-    expectNthRequest(0, {
+    await expectNthRequest(0, {
         body: [
             {
                 method: 'get',

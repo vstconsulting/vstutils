@@ -1,4 +1,4 @@
-import { createApp, createSchema, useTestCtx } from '#unittests';
+import { createApp, createSchema, expectNthRequest, useTestCtx } from '#unittests';
 
 beforeAll(async () => {
     await createApp({
@@ -73,16 +73,15 @@ test('readonly fields validation', async () => {
     await user.keyboard('{Backspace}{Backspace}{Backspace}{Backspace}new name');
 
     // Save value and mock response
-    fetchMock.mockResponseOnce(async (req) => {
-        expect(req.url).toBe('http://localhost/api/v1/some_path/1/');
-        expect(req.method).toBe('PATCH');
-        expect(await req.json()).toStrictEqual({ name: 'Some new name' });
-
-        return JSON.stringify({ id: 1, name: 'Some new name', rating: 0 });
-    });
+    fetchMock.mockResponseOnce(JSON.stringify({ id: 1, name: 'Some new name', rating: 0 }));
     await user.click(screen.getByTitle('Save'));
 
     // Check that new value saved and redirected to detail page
     await waitFor(() => expect(fetchMock).toBeCalledTimes(2));
+    await expectNthRequest(1, {
+        url: 'http://localhost/api/v1/some_path/1/',
+        method: 'PATCH',
+        body: { name: 'Some new name' },
+    });
     await waitFor(() => expect(app.router.currentRoute.fullPath).toBe('/some_path/1'));
 });

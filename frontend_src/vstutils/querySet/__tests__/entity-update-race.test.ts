@@ -48,7 +48,7 @@ test('entity update race', async () => {
     fireEvent.click(screen.getByTitle('Save'));
     await waitForPageLoading();
     expect(fetchMock).toBeCalledTimes(1);
-    expectRequest(fetchMockCallAt(0), {
+    await expectRequest(fetchMockCallAt(0), {
         url: 'http://localhost/api/endpoint/',
         body: JSON.stringify([
             {
@@ -78,7 +78,7 @@ test('entity update race', async () => {
     fireEvent.click(screen.getByTitle('Save'));
     await waitForPageLoading();
     await waitFor(() => expect(fetchMock).toBeCalledTimes(2));
-    expectRequest(fetchMockCallAt(0), {
+    await expectRequest(fetchMockCallAt(0), {
         url: 'http://localhost/api/endpoint/',
         body: JSON.stringify([
             {
@@ -91,7 +91,7 @@ test('entity update race', async () => {
         headers: { 'Content-Type': 'application/json' },
         method: 'put',
     });
-    expectRequest(fetchMockCallAt(1), {
+    await expectRequest(fetchMockCallAt(1), {
         url: 'http://localhost/api/endpoint/',
         body: JSON.stringify([
             {

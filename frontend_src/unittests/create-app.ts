@@ -3,7 +3,7 @@ import { createLocalVue } from '@vue/test-utils';
 import VueI18n from 'vue-i18n';
 import { type AppSchema } from '#vstutils/schema';
 import { type InitAppConfigRaw, _createUserManager, type UserProfile } from '#vstutils/init-app';
-import { getApp } from '#vstutils/utils';
+import { getApp, streamToString } from '#vstutils/utils';
 import testSchema from '../__mocks__/testSchema.json';
 
 // Important to import from index to trigger side effects as if it was a real app
@@ -56,9 +56,11 @@ export async function createApp(params?: { schema?: Partial<AppSchema>; disableB
 
     // Start app
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     fetchMock.mockResponse(async (request) => {
-        const body = (request.body as Buffer | null)?.toString();
+        let body: undefined | string = undefined;
+        if (request.body) {
+            body = await streamToString(request.body);
+        }
 
         if (
             request.url === 'https://auth.test/.well-known/openid-configuration' &&

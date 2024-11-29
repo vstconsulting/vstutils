@@ -234,7 +234,7 @@ describe('Barcode fields', () => {
         await nextTick();
 
         // after clicking input must appear
-        // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
+
         const editManuallyInput = qrcodeFieldWrapperEl?.querySelector(
             'input[type="text"]',
         ) as HTMLInputElement;
@@ -259,11 +259,11 @@ describe('Barcode fields', () => {
         expect(scannerCameraSelectEl?.getAttribute('disabled')).toBeTruthy();
 
         // check that qrcode field editing updates sandbox
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
         expect(app.store.page.sandbox.qrcode).toBe('qrcode');
         fireEvent.input(editManuallyInput, { target: { value: 'some new value' } });
         expect(editManuallyInput.value).toBe('some new value');
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
         expect(app.store.page.sandbox.qrcode).toBe('some new value');
     });
 });

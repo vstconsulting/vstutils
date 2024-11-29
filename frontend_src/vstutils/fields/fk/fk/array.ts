@@ -55,7 +55,6 @@ export const FKArrayEdit = defineComponent({
          * Method, that mounts select2 to current field's select.
          */
         initSelect2(el: HTMLSelectElement) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             $(el)
                 // @ts-expect-error select2
                 .select2({
@@ -68,7 +67,7 @@ export const FKArrayEdit = defineComponent({
                 })
                 .on('change', () => {
                     // @ts-expect-error select2
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+
                     const data = $(el).select2('data') as { id: string | number }[];
                     const newValue = data ? data.map(({ id }) => this.instancesCache.get(String(id))!) : [];
 
@@ -78,9 +77,8 @@ export const FKArrayEdit = defineComponent({
                 })
                 .on('select2:selecting', (event: any) => {
                     this.instancesCache.set(
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                         String(event.params.args.data.id),
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+
                         event.params.args.data.instance,
                     );
                 });
@@ -108,7 +106,7 @@ export const FKArrayEdit = defineComponent({
         setValue(value: (TRepresent | null | undefined)[] | undefined): void {
             if (!value) {
                 // @ts-expect-error jquery
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+
                 $(this.$refs.selectEl).val(null).trigger('change');
                 return;
             }
@@ -120,11 +118,11 @@ export const FKArrayEdit = defineComponent({
                     const text = this.field.getViewFieldValue(item);
                     this.instancesCache.set(id, item as Model);
                     // @ts-expect-error jquery
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+
                     $(this.$refs.selectEl).append(new Option(text as string, id, false, true));
                 }
                 // @ts-expect-error jquery
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+
                 $(this.$refs.selectEl).trigger('change');
             }
         },

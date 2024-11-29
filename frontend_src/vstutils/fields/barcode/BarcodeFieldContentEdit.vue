@@ -109,7 +109,7 @@
 
     function openSidebar(e: Event) {
         e.stopPropagation();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
         app.rootVm.openControlSidebar();
     }
 

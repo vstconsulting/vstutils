@@ -17,7 +17,7 @@
         mixins: [BaseFieldContentMixin, BaseFieldInnerComponentMixin, FieldLabelIdMixin],
         props: {
             field: { type: Object as PropType<Field>, required: true },
-            // eslint-disable-next-line vue/require-prop-types
+
             value: { default: undefined },
             data: { type: Object, required: true },
         },

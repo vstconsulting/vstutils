@@ -102,7 +102,6 @@ export class ActionsManager {
             return this.app.router.push(formatPath(path, this.app.router.currentRoute.params, instance));
         }
 
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         throw new Error(`Cannot execute action ${action.name} on instance ${instance}`);
     }
 
@@ -169,8 +168,7 @@ export class ActionsManager {
                 }
             }
         } catch (error) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const str = this.app.error_handler.errorToString(error) as string;
+            const str = this.app.error_handler.errorToString(error);
 
             const srt_to_show = i18n.ts(pop_up_msg.instance.error.executeEmpty, [
                 i18n.t(action.name),

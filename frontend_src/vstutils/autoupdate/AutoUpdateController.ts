@@ -193,7 +193,6 @@ export class AutoUpdateController {
             clearTimeout(this.timeoutId);
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         this.timeoutId = setTimeout(async () => {
             if (Visibility.state() !== 'hidden') {
                 await this.updateTimerData();

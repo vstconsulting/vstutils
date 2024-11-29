@@ -21,7 +21,6 @@ export class DependFromFkField extends DynamicField<XOptions> {
     }
 
     static get mixins() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return [DependFromFkFieldMixin as any];
     }
 

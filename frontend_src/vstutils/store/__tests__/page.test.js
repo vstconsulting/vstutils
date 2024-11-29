@@ -118,7 +118,7 @@ test('createListViewStore', async () => {
     expect(app.store.page.error).toBeFalsy();
     expect(app.store.page.instances.length).toBe(1);
 
-    expectNthRequest(0, {
+    await expectNthRequest(0, {
         method: 'PUT',
         url: 'http://localhost/api/endpoint/',
         body: [
@@ -138,7 +138,7 @@ test('createListViewStore', async () => {
         fromList: true,
         purge: true,
     });
-    expectNthRequest(0, {
+    await expectNthRequest(0, {
         method: 'PUT',
         url: 'http://localhost/api/endpoint/',
         body: [
@@ -168,7 +168,7 @@ test('createListViewStore', async () => {
         instances: [app.store.page.instances[0], app.store.page.instances[1]],
         purge: true,
     });
-    expectNthRequest(0, {
+    await expectNthRequest(0, {
         method: 'PUT',
         url: 'http://localhost/api/endpoint/',
         body: [

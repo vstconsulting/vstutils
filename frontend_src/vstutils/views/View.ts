@@ -250,7 +250,6 @@ export abstract class BaseView<
      */
     getComponent(): ComponentOptions<Vue> | typeof Vue | Component {
         // If we provide `this` in `data` directly then `view` will become Vue component
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const thisView = this;
         return {
             mixins: this.mixins as ComponentOptionsMixin[],

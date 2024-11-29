@@ -215,7 +215,6 @@ export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> impl
             return qs;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         qs = this.app.qsResolver?.findQuerySet(this.fkModel!.name, this.app.store.page!.view.path);
         if (qs) {
             return this._formatQuerysetPath(qs);
@@ -300,7 +299,6 @@ export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> impl
     }
 
     getFallbackQs(): QuerySet {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this.app.qsResolver!.findQuerySet(this.fkModel!.name);
     }
 

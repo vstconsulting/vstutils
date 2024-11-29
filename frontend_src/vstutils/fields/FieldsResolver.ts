@@ -37,13 +37,11 @@ export class FieldsResolver {
     }
 
     _resolveJsonPointer(pointer: string): unknown {
-        return (
-            pointer
-                .split('/')
-                .slice(1)
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                .reduce((obj, fragment) => obj[fragment], this._schema)
-        );
+        return pointer
+            .split('/')
+            .slice(1)
+
+            .reduce((obj, fragment) => obj[fragment], this._schema);
     }
 
     registerField(
@@ -101,7 +99,6 @@ export class FieldsResolver {
 
         const typeMap = this._types.get(obj.type!);
         if (!typeMap) {
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             console.warn(`Unknown type: ${obj.type}`);
             return this._defaultField(obj);
         }

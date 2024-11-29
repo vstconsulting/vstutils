@@ -1,5 +1,5 @@
 import { createApp } from '#unittests/create-app';
-import { createSchema, expectRequest, fetchMockCallAt, waitFor } from '#unittests';
+import { createSchema, expectNthRequest, waitFor } from '#unittests';
 import schema from './prefetch-with-provided-instance-schema.json';
 
 test('prefetch with provided instance', async () => {
@@ -32,7 +32,7 @@ test('prefetch with provided instance', async () => {
 
     // Expected 1 request to prefetch related object with id 456
     await waitFor(() => expect(fetchMock.mock.calls.length).toBe(1));
-    expectRequest(fetchMockCallAt(0), {
+    await expectNthRequest(0, {
         body: [
             {
                 method: 'get',

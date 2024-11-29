@@ -297,7 +297,6 @@ export class App implements IApp {
     afterInitialDataBeforeMount() {
         this.generateDefinitionsModels();
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         this.views = new ViewConstructor(undefined, this.modelsResolver, this.fieldsResolver).generateViews(
             this.schema,
         );
@@ -328,10 +327,8 @@ export class App implements IApp {
             const models = new Set<ModelConstructor>();
 
             if (view.objects) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 for (const m of Object.values(view.objects.models)) {
                     if (Array.isArray(m)) {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                         for (const model of m) models.add(model);
                     } else {
                         models.add(m!);
@@ -347,7 +344,6 @@ export class App implements IApp {
             for (const model of models) {
                 if (model) {
                     for (const field of model.fields.values()) {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                         field.prepareFieldForView(path);
                     }
                 }
@@ -363,7 +359,6 @@ export class App implements IApp {
             // Call hook for detail view filters
             if (view instanceof PageView && view.filtersModelClass) {
                 for (const field of view.filtersModelClass.fields.values()) {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                     field.prepareFieldForView(path);
                 }
             }
@@ -377,7 +372,6 @@ export class App implements IApp {
                 const modelName = listView.objects.getResponseModelClass(utils.RequestTypes.LIST)!.name;
                 try {
                     // @ts-expect-error TODO refactor qs resolver to ts
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     listView.nestedQueryset = this.qsResolver.findQuerySetForNested(modelName, listView.path);
                 } catch (e) {
                     console.warn(e);
@@ -422,7 +416,6 @@ export class App implements IApp {
         this.localSettingsStore = createLocalSettingsStore(
             window.localStorage,
             'localSettings',
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
             this.localSettingsModel as ModelConstructor,
         )(pinia);
         this.localSettingsStore.load();
@@ -447,12 +440,10 @@ export class App implements IApp {
         //                  in tests, so use router.constructor instead.
         Vue.use(this.router.constructor);
 
-        /* eslint-disable */
         Vue.prototype.$app = this;
         Vue.prototype.$u = utils;
         Vue.prototype.$st = i18n.st.bind(i18n);
         Vue.prototype.$ts = i18n.ts.bind(i18n);
-        /* eslint-enable */
 
         this.rootVm = new Vue({
             mixins: [this.appRootComponent, ...this.additionalRootMixins],
@@ -485,7 +476,6 @@ export class App implements IApp {
     initActionConfirmationModal({ title }: { title: string }): Promise<void> {
         return new Promise((resolve) => {
             if (this.rootVm?.appModals) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 this.rootVm.appModals!.initActionConfirmationModal(() => resolve(), title);
             }
         });
@@ -493,7 +483,6 @@ export class App implements IApp {
 
     openReloadPageModal() {
         if (this.rootVm?.appModals) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             this.rootVm.appModals!.openReloadPageModal();
         }
     }

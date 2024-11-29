@@ -40,7 +40,6 @@ export function createTransport(field: FKField, querysets: QuerySet[], data: Ref
             nest_prom: undefined,
         } as FKFieldFilterSignalObj;
 
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
         signals.emit(`filter.${field.format}.${field.fkModel!.name}.${field.name}`, signalObj);
 
         let req;
@@ -57,7 +56,6 @@ export function createTransport(field: FKField, querysets: QuerySet[], data: Ref
 
         const items = instances.map((instance) => ({
             // @ts-expect-error Model.js missing types
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             id: instance[field.valueField],
             text: field.translateValue(instance),
             instance,

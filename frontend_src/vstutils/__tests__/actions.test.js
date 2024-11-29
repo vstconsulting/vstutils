@@ -28,7 +28,7 @@ describe('Actions', () => {
 
         await app.actions.execute({ action });
         expect(fetchMock.mock.calls).toHaveLength(1);
-        expectNthRequest(0, {
+        await expectNthRequest(0, {
             method: 'PUT',
             url: 'http://localhost/api/endpoint/',
             body: [{ method: 'put', path: '/test/path/' }],
@@ -79,7 +79,7 @@ describe('Actions', () => {
         });
         expect(result.data).toEqual({ some: 'return val' });
         expect(fetchMock).toBeCalledTimes(1);
-        expectNthRequest(0, {
+        await expectNthRequest(0, {
             method: 'PUT',
             path: '/api/endpoint/',
             body: [{ method: 'patch', data: { testField: 'some val' }, path: 'execute' }],
