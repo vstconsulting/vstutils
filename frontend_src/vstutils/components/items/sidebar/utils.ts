@@ -16,14 +16,14 @@ export interface MenuItem {
 
 export function openSidebar() {
     // @ts-expect-error AdminLTE has no types
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
     $('[data-widget="pushmenu"]').PushMenu('expand');
 }
 
 export function hideSidebar() {
     if (document.body.classList.contains('sidebar-open')) {
         // @ts-expect-error AdminLTE has no types
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
         $('[data-widget="pushmenu"]').PushMenu('collapse');
     }
 }

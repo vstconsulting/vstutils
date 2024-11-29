@@ -38,7 +38,6 @@
 
             const validIds = computed(() => enumItems.value.map((value) => value.id));
 
-            // eslint-disable-next-line no-undef
             function handleChange(data: SelectedData[], event: JQuery.ChangeEvent) {
                 let value;
                 const selected = data[0];

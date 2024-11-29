@@ -9,6 +9,7 @@ export {
     hookViewOperation,
     onAppAfterInit,
     onAppBeforeInit,
+    onAppCreated,
     onFilterListViewColumns,
     onFilterOperations,
     onRoutesCreated,

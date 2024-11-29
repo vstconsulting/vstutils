@@ -20,7 +20,6 @@ export function useSelect2(
     function destroy() {
         if (initialized && el.value) {
             // @ts-expect-error Select2
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             $(el.value).select2('destroy');
             el.value.innerHTML = '';
             initialized = false;
@@ -32,13 +31,11 @@ export function useSelect2(
             destroy();
         }
         if (el.value) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             $(el.value)
                 // @ts-expect-error Select2
                 .select2({ theme: window.SELECT2_THEME, ...options })
                 .on('change', (e: JQuery.ChangeEvent) => {
                     // @ts-expect-error Select2
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
                     const value = $(el.value).select2('data') as SelectedData[];
                     handleChange(value, e);
                 });
@@ -52,7 +49,6 @@ export function useSelect2(
 
     function setValue(value: unknown) {
         // @ts-expect-error Select2
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         $(el.value!).val(value).trigger('change');
     }
 

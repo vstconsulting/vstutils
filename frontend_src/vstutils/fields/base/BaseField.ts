@@ -146,7 +146,7 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
      * Method, that prepares instance of field for usage. Method is called after models and views are
      * created, for every field instance that is part of view.
      */
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     prepareFieldForView(path: string): void {}
 
     /**
@@ -261,7 +261,6 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
         return value;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     validateInner(data: InnerData): Inner | null | undefined {
         return this.getValue(data);
     }
@@ -294,7 +293,6 @@ export class BaseField<Inner, Represent, XOptions extends DefaultXOptions = Defa
      * Method that creates property descriptor from current field
      */
     toDescriptor(): ModelPropertyDescriptor<Represent> {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const fieldThis = this;
 
         return {

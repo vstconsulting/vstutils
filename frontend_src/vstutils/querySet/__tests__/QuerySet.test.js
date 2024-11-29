@@ -64,7 +64,7 @@ describe('QuerySet', () => {
     test('get list', async () => {
         fetchMock.mockResponseOnce(JSON.stringify({ count: 0, next: null, previous: null, results: [] }));
         expect((await qs.items()).length).toBe(0);
-        expectNthRequest(0, { method: 'get', url: 'http://localhost/api/v1/users/' });
+        await expectNthRequest(0, { method: 'get', url: 'http://localhost/api/v1/users/' });
     });
 
     test('create', async () => {
@@ -74,7 +74,7 @@ describe('QuerySet', () => {
         expect(user.id).toBe(1);
         expect(user.name).toBe('test_name');
         expect(user.email).toBe('test_mail');
-        expectNthRequest(0, { method: 'post', url: 'http://localhost/api/v1/users/' });
+        await expectNthRequest(0, { method: 'post', url: 'http://localhost/api/v1/users/' });
     });
 
     test('create with invalid instance', async () => {
@@ -91,7 +91,7 @@ describe('QuerySet', () => {
         fetchMock.mockResponses('{"id": 2}');
         let [user] = await qs.update(new OneUser({ id: 2 }), [new User({ id: 2 })]);
         expect(user.id).toBe(2);
-        expectNthRequest(0, {
+        await expectNthRequest(0, {
             method: 'patch',
             url: 'http://localhost/api/v1/users/2/',
         });
@@ -114,11 +114,11 @@ describe('QuerySet', () => {
         expect(user).toBeTruthy();
         expect(user.id).toBe(2);
 
-        expectNthRequest(0, {
+        await expectNthRequest(0, {
             method: 'get',
             url: 'http://localhost/api/v1/users/',
         });
-        expectNthRequest(1, {
+        await expectNthRequest(1, {
             method: 'patch',
             url: 'http://localhost/api/v1/users/2/',
         });
@@ -128,7 +128,7 @@ describe('QuerySet', () => {
         fetchMock.mockResponses('{"id": 1}');
         let user = await qs.get(1);
         expect(user.id).toBe(1);
-        expectNthRequest(0, {
+        await expectNthRequest(0, {
             method: 'get',
             url: 'http://localhost/api/v1/users/1/',
         });
@@ -144,7 +144,7 @@ describe('QuerySet', () => {
         fetchMock.resetMocks();
         fetchMock.mockResponseOnce('{}');
         await qs.delete([new User({ id: 3 })]);
-        expectNthRequest(0, {
+        await expectNthRequest(0, {
             method: 'delete',
             url: 'http://localhost/api/v1/users/3/',
         });
@@ -440,11 +440,11 @@ describe('QuerySet', () => {
         fetchMock.once(JSON.stringify({ count: 0, next: null, previous: null, results: [] }));
         const itemsRequest = qs.items(true, { pk1: 12, pk2: 15 }).then((items) => items.length);
         await expect(itemsRequest).resolves.toBe(0);
-        expectNthRequest(0, { url: 'http://localhost/api/v1/fragment1/12/fragment2/15/' });
+        await expectNthRequest(0, { url: 'http://localhost/api/v1/fragment1/12/fragment2/15/' });
 
         fetchMock.once(JSON.stringify({ id: 1337 }));
         const itemRequest = qs.get(1337, { pk1: 9, pk2: 8 }).then((instance) => instance.id);
         await expect(itemRequest).resolves.toBe(1337);
-        expectNthRequest(1, { url: 'http://localhost/api/v1/fragment1/9/fragment2/8/1337/' });
+        await expectNthRequest(1, { url: 'http://localhost/api/v1/fragment1/9/fragment2/8/1337/' });
     });
 });

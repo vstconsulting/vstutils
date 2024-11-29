@@ -129,9 +129,7 @@ export const useQuerySet = (view: IView) => {
 };
 
 export const useEntityViewClasses = (modelClass: Ref<ModelConstructor>, data: Ref<RepresentData>) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
     const flatFields = computed(() => Array.from(modelClass.value.fields.values()));
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return computed<string[]>(() => classesFromFields(flatFields.value, data.value));
 };
 
@@ -534,7 +532,6 @@ export async function createViewStore<T extends IView>(
         store.$dispose();
         const pinia = getActivePinia();
         if (pinia) {
-            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             delete pinia.state.value[store.$id];
         }
     });

@@ -65,9 +65,7 @@
         },
         props: {
             info: { type: Object, required: true },
-            // eslint-disable-next-line vue/prop-name-casing
             x_menu: { type: Array as PropType<XMenu>, required: true },
-            // eslint-disable-next-line vue/prop-name-casing
             x_docs: { type: Object, required: true },
         },
         setup() {

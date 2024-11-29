@@ -1,7 +1,7 @@
 import { mount as vueMount, createWrapper, type Wrapper } from '@vue/test-utils';
 import { waitFor as _waitFor, within } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
-import { getApp } from '#vstutils/utils';
+import { getApp, streamToString } from '#vstutils/utils';
 
 import type { ComponentOptions } from 'vue';
 
@@ -49,27 +49,23 @@ export async function waitForPageLoading() {
     await waitFor(() => expect(isLoading()).toBeFalsy());
 }
 
-export function expectRequest(
-    request: undefined | Request | [string | Request | undefined, RequestInit | undefined],
+export async function expectRequest(
+    params: undefined | Parameters<typeof global.fetch>,
     expected: { url?: string; method?: string; body: string | object; headers?: Record<string, string> },
 ) {
-    if (!request) {
+    if (!params) {
         throw new Error('Request expected');
     }
-    if (Array.isArray(request)) {
-        // @ts-expect-error It's actually a Request
-        request = new Request(...request);
-    }
+    const request = new Request(...params);
     if (expected.url) {
         expect(request.url).toBe(expected.url);
     }
     if (expected.method) {
-        expect(request.method).toBe(expected.method.toUpperCase());
+        expect(request.method.toUpperCase()).toBe(expected.method.toUpperCase());
     }
     if (expected.body) {
         expect(request.body).toBeTruthy();
-        // @ts-expect-error It's actually a Buffer
-        const body = (request.body as Buffer).toString();
+        const body = request.body ? await streamToString(request.body) : '';
         if (typeof expected.body === 'object') {
             expect(JSON.parse(body)).toEqual(expected.body);
         } else {
@@ -84,11 +80,11 @@ export function expectRequest(
     }
 }
 
-export function expectNthRequest(
+export async function expectNthRequest(
     idx: number,
     expected: { url?: string; method?: string; body: string | object; headers?: Record<string, string> },
 ) {
-    expectRequest(fetchMockCallAt(idx), expected);
+    await expectRequest(fetchMockCallAt(idx), expected);
 }
 
 export function fetchMockCallAt(idx: number) {

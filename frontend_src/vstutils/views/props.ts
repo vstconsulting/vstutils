@@ -8,7 +8,6 @@ export const ViewPropsDef: ViewPropsDefType = {
     params: { type: Object, default: () => ({}) },
 };
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ViewPropsDefType<T extends IView = IView> = {
     view: { type: PropType<T>; required: true };
     query: { type: PropType<Route['query']>; default: () => Route['query'] };

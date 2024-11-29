@@ -10,14 +10,12 @@ Vue.config.productionTip = false;
 Vue.config.devtools = false;
 
 // @ts-expect-error Mock canvas
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 QRCode.toCanvas = () => {};
 
 // @ts-expect-error Skip some properties
 global.$ = global.jQuery = $;
 
 // @ts-expect-error Mock adminlte jquery functions
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 $.fn.PushMenu = () => {};
 
 globalThis.IS_TESTS = true;
@@ -32,7 +30,6 @@ fetchMocker.enableMocks();
 
 if (typeof window.URL.createObjectURL === 'undefined') {
     // @ts-expect-error Skip some properties
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     window.URL.createObjectURL = vi.fn(() => globalThis.OBJECT_URL);
 }
 

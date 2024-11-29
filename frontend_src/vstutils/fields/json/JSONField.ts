@@ -14,7 +14,6 @@ const JSONFieldComponent = defineComponent({
     mixins: [BaseFieldMixin],
     provide() {
         return {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
             jsonMapper: (this.field as JSONField).jsonMapper,
         };
     },

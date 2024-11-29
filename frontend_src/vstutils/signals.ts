@@ -4,7 +4,7 @@ import TabSignal from '@vstconsulting/tabsignal';
 import { capitalize, getApp } from '#vstutils/utils';
 
 import type { Model } from '#vstutils/models';
-import type { IAppInitialized } from '#vstutils/app';
+import type { IAppInitialized } from './app';
 import type { RepresentData } from '#vstutils/utils';
 import type { Action, OperationOnBeforeHook, Sublink } from './views/operations';
 import type { RouteConfig } from 'vue-router';

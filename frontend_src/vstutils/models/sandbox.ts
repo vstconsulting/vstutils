@@ -12,7 +12,6 @@ import { getAdditionalPropertiesField, hasAdditionalProperties } from '../additi
 type ReadonlySet<T> = Omit<Set<T>, 'add' | 'clear' | 'delete'>;
 
 const refSet = <T>() => {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     let _triggerChange = () => {};
     const set = new Set<T>();
     const ref = customRef((track, trigger) => {

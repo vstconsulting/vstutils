@@ -173,7 +173,7 @@ describe('file response', () => {
 
         // Check request data
         expect(fetchMock).toBeCalledTimes(1);
-        expectRequest(fetchMockCallAt(0), {
+        await expectRequest(fetchMockCallAt(0), {
             url: 'http://localhost/api/v1/some/make_file_with_input/',
             method: 'post',
             body: { name: 'some-file-name' },

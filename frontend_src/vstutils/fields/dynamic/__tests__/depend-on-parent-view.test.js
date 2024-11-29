@@ -40,7 +40,7 @@ test('DynamicField depending on value from parent view', async () => {
     await app.router.push('/level_0/0/level_1/1/level_2/2/with_dynamic/');
     await waitFor(() => expect(fetchMock.mock.calls.length).toBe(2));
 
-    expectNthRequest(0, {
+    await expectNthRequest(0, {
         method: 'PUT',
         url: 'http://localhost/api/endpoint/',
         body: [
@@ -58,7 +58,7 @@ test('DynamicField depending on value from parent view', async () => {
             },
         ],
     });
-    expectNthRequest(1, {
+    await expectNthRequest(1, {
         method: 'PUT',
         url: 'http://localhost/api/endpoint/',
         body: [

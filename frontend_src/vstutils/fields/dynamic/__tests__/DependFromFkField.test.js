@@ -168,7 +168,7 @@ describe('DependFromFkField', () => {
 
         expect(fetchMock).toBeCalledTimes(2);
         // page hit
-        expectNthRequest(0, {
+        await expectNthRequest(0, {
             method: 'put',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify([
@@ -179,7 +179,7 @@ describe('DependFromFkField', () => {
             ]),
         });
         // prefetch hit
-        expectNthRequest(1, {
+        await expectNthRequest(1, {
             method: 'put',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify([

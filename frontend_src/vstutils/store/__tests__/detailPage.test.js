@@ -43,7 +43,7 @@ test('createDetailViewStore', async () => {
     await app.router.push('/some_list/15/');
     await waitForPageLoading();
 
-    expectRequest(fetchMockCallAt(0), {
+    await expectRequest(fetchMockCallAt(0), {
         body: [{ method: 'get', path: ['some_list', '15'] }],
     });
 
@@ -66,7 +66,7 @@ test('createDetailViewStore', async () => {
     fetchMock.resetMocks();
     fetchMock.mockResponseOnce('[{"status":204}]');
     await app.store.page.removeInstance({ instance: app.store.page.instance, fromList: false, purge: false });
-    expectRequest(fetchMockCallAt(0), {
+    await expectRequest(fetchMockCallAt(0), {
         body: [{ method: 'delete', path: ['some_list', 15] }],
     });
 });
@@ -122,7 +122,7 @@ test('createEditViewStore', async () => {
     await app.store.page.reload();
 
     await waitFor(() => expect(fetchMock.mock.calls.length).toBe(1));
-    expectRequest(fetchMockCallAt(0), {
+    await expectRequest(fetchMockCallAt(0), {
         body: [{ method: 'get', path: ['some_list', 15] }],
     });
     expect(app.store.page.sandbox.name).toBe('NewShop');
@@ -169,7 +169,7 @@ test('patchEditViewStore', async () => {
     await app.store.page.save();
 
     // Check request
-    expectRequest(fetchMockCallAt(0), {
+    await expectRequest(fetchMockCallAt(0), {
         body: [{ method: 'patch', path: ['some_list', 15], data: { name: 'Shop' } }],
     });
 });
@@ -215,7 +215,7 @@ test('putEditViewStore', async () => {
     );
     await store.save();
 
-    expectRequest(fetchMockCallAt(-1), {
+    await expectRequest(fetchMockCallAt(-1), {
         body: [
             { method: 'put', path: ['some_list', 15], data: { name: 'Shop', phone: '79658964562' } },
             { method: 'get', path: ['some_list', 15] },
@@ -278,7 +278,7 @@ test('createNewViewStore', async () => {
     await app.store.page.save();
     await waitFor(() => expect(fetchMock).toBeCalledTimes(2));
 
-    expectRequest(fetchMockCallAt(0), {
+    await expectRequest(fetchMockCallAt(0), {
         body: [
             {
                 method: 'post',

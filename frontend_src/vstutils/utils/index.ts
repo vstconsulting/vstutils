@@ -234,7 +234,6 @@ export function openPage(
         // Get name by path so additional params can be passed
         if (options.path && options.params) {
             const route = router.resolve(options as Location).route;
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (route.name && route.name !== NOT_FOUND_ROUTE_NAME && !route.meta?.view?.isDeepNested) {
                 options.name = route.name;
                 delete options.path;
@@ -346,7 +345,6 @@ export function getRedirectUrlFromResponse(responseData: any, modelClass: ModelC
     let operationId = '';
 
     if (redirect.depend_field) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         const dependFieldValue = responseData[redirect.depend_field];
         const dependFieldStrValue = dependFieldValue ? String(dependFieldValue) : '';
         operationId += dependFieldStrValue.toLowerCase();
@@ -366,7 +364,6 @@ export function getRedirectUrlFromResponse(responseData: any, modelClass: ModelC
         return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const value = responseData[field.name];
 
     if (value === undefined || value === null) {
@@ -520,4 +517,13 @@ export type MaybePromise<T> = T | Promise<T>;
 
 export function assertNever(value: never): never {
     throw new Error(`Unexpected value: ${value}`);
+}
+
+export async function streamToString(stream: ReadableStream): Promise<string> {
+    const decodedStream = stream.pipeThrough(new TextDecoderStream());
+    let result = '';
+    for await (const chunk of decodedStream) {
+        result += chunk;
+    }
+    return result;
 }

@@ -45,7 +45,7 @@ test('createActionViewStore', async () => {
         );
         await store.execute();
         expect(fetchMock).toBeCalledTimes(1);
-        expectNthRequest(0, {
+        await expectNthRequest(0, {
             body: [
                 {
                     method: 'post',

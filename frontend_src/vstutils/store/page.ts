@@ -314,7 +314,6 @@ export const createDetailViewStore = (view: PageView) => {
         try {
             if (pageWithInstance.providedInstance.value) {
                 const instance = pageWithInstance.providedInstance.value;
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 await fetchInstances([instance]);
                 pageWithInstance.setInstance(instance);
             } else {
@@ -421,7 +420,6 @@ export const createNewViewStore = (view: PageNewView) => {
             }
             return openPage({ path: getRedirectUrl(), params: { providedInstance } }) as Promise<void>;
         } catch (error) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
             const modelValidationError = instance.parseModelError((error as any).data);
             if (modelValidationError) {
                 pageWithEditableData.fieldsErrors.value = modelValidationError.toFieldsErrors();
@@ -498,7 +496,6 @@ export const createEditViewStore = (view: PageEditView) => {
             }
             return openPage({ path: getRedirectUrl(), params: { providedInstance } }) as Promise<void>;
         } catch (error) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
             const modelValidationError = instance.parseModelError((error as any).data);
             if (modelValidationError) {
                 pageViewStore.fieldsErrors.value = modelValidationError.toFieldsErrors();

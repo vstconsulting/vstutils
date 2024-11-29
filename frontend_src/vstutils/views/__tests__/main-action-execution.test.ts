@@ -114,14 +114,14 @@ describe('main action execution', () => {
 
         await waitFor(() => expect(fetchMock).toBeCalledTimes(2));
         // Create new
-        expectNthRequest(0, {
+        await expectNthRequest(0, {
             url: 'http://localhost/api/endpoint/',
             body: [{ method: 'post', path: ['some'], data: { name: 'some name' } }],
             headers: { 'Content-Type': 'application/json' },
             method: 'put',
         });
         // Redirect to list
-        expectNthRequest(1, {
+        await expectNthRequest(1, {
             url: 'http://localhost/api/endpoint/',
             body: [{ method: 'get', path: ['some'], query: 'limit=20&offset=0' }],
             headers: { 'Content-Type': 'application/json' },
@@ -144,14 +144,14 @@ describe('main action execution', () => {
 
         await waitFor(() => expect(fetchMock).toBeCalledTimes(2));
         // Execute action
-        expectNthRequest(0, {
+        await expectNthRequest(0, {
             url: 'http://localhost/api/endpoint/',
             body: [{ method: 'post', path: '/some/action/', data: { name: 'some value' } }],
             headers: { 'Content-Type': 'application/json' },
             method: 'put',
         });
         // Redirect to list
-        expectNthRequest(1, {
+        await expectNthRequest(1, {
             url: 'http://localhost/api/endpoint/',
             body: [{ method: 'get', path: ['some'], query: 'limit=20&offset=0' }],
             headers: { 'Content-Type': 'application/json' },
@@ -173,7 +173,7 @@ describe('main action execution', () => {
 
         await waitFor(() => expect(fetchMock).toBeCalledTimes(2));
         // Update
-        expectNthRequest(1, {
+        await expectNthRequest(1, {
             url: 'http://localhost/api/endpoint/',
             body: [{ method: 'patch', path: ['some', 5], data: { name: 'test namenew value' } }],
             headers: { 'Content-Type': 'application/json' },
