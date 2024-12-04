@@ -4,4 +4,4 @@
 # Advanced cache support
 redis[hiredis]~=5.2.0
 tarantool~=1.2.0
-pywebpush~=2.0.1
+pywebpush==2.0.1
