@@ -1,0 +1,40 @@
+{
+    "include": [
+        "./**/*",
+    ],
+    "exclude": [
+        "vite.config.ts",
+        "build-package.ts",
+    ],
+    "compilerOptions": {
+        "outDir": "./dist",
+        "allowJs": true,
+        "target": "esnext",
+        "isolatedModules": true,
+        "strict": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noImplicitReturns": true,
+        "module": "es2022",
+        "moduleResolution": "Node",
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "useDefineForClassFields": false,
+        "types": [
+            "vite/client",
+            "vitest/globals",
+            "jquery",
+            "bootstrap",
+        ],
+        "paths": {
+            "#vstutils/*": ["./vstutils/*"],
+            "#libs/*": ["./libs/*"],
+            "#unittests/*": ["./unittests/*"],
+            "#unittests": ["./unittests"],
+        }
+    },
+    "vueCompilerOptions": {
+        "target": 2.7
+    }
+}

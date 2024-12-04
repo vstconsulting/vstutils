@@ -1,6 +1,6 @@
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import vue from '@vitejs/plugin-vue2';
 import dts from 'vite-plugin-dts';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -28,6 +28,7 @@ export default defineConfig({
                 'auth-app': join(frontendSrc, 'auth-app.ts'),
             },
             formats: ['es'],
+            cssFileName: 'style',
         },
         rollupOptions: {
             external: ['vue', /@toast-ui\/vue-editor/, /@toast-ui\/editor/],

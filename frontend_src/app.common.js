@@ -40,7 +40,7 @@ import './libs/fontawesome.js';
 
 export { TabSignal };
 
-import * as colors from './libs/colors.js';
+import * as colors from './libs/colors.ts';
 export { colors };
 
 // vstutils code
