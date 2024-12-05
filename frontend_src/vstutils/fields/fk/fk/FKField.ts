@@ -304,7 +304,8 @@ export class FKField extends BaseField<TInner, TRepresent, FKFieldXOptions> impl
 
     getAllQuerysets(path: string) {
         return this._formatQuerysets(
-            this.querysets.get(path) || this.querysets.get(undefined) || [this.getFallbackQs()],
+            this.querysets.get(path) ||
+                this.querysets.get(undefined) || [this.getValueFetchQs(path) || this.getFallbackQs()],
         );
     }
 }
