@@ -85,7 +85,7 @@ const createHook = (() => {
     };
 })();
 
-export const onAppCreated = createHook<[{ app: IAppInitialized }]>(APP_CREATED);
+export const onAppCreated = createHook<[IAppInitialized]>(APP_CREATED);
 export const onAppAfterInit = createHook<[{ app: IAppInitialized }]>(APP_AFTER_INIT);
 export const onAppBeforeInit = createHook<[{ app: IAppInitialized }]>(APP_BEFORE_INIT);
 export const onSchemaViewsCreated = createHook<[{ views: IAppInitialized['views'] }]>(SCHEMA_VIEWS_CREATED);
