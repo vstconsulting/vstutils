@@ -65,14 +65,15 @@ code_style:
           - flake,bandit
           - mypy,pylint
 
-js_style:
+frontend:
   <<: *branch_js_tests
   stage: code_standarts
   cache:
     <<: *global_cache
     policy: pull-push
+  coverage: '/^\[test\] Statements\s*:\s*([^%]+)/'
   script:
-    - yarn lint
+    - yarn run ci
 
 functional_test:
   <<: *branch_tests
@@ -82,14 +83,6 @@ functional_test:
           - py310-django51-install
       - TOX_ENVS:
           - py313-django51-coverage
-
-js_tests:
-  <<: *branch_js_tests
-  needs: ["js_style"]
-  coverage: '/^Statements\s*:\s*([^%]+)/'
-  script:
-    - yarn test
-
 
 pages:
   <<: *branch_tests

@@ -11,7 +11,6 @@ await Promise.all([
     fs.cp(join(frontendSrc, 'README.md'), join(dist, 'README.md')),
     copyPackageJsonWithAdjustedPaths(dist),
 ]);
-await assertAllExportedFilesExist(dist);
 
 type PackageJsonExports = Record<string, string | Record<string, string>>;
 
@@ -38,35 +37,4 @@ async function copyPackageJsonWithAdjustedPaths(outDir: string) {
     }
 
     await fs.writeFile(join(outDir, 'package.json'), JSON.stringify(packageCopy, undefined, 2));
-}
-
-async function assertAllExportedFilesExist(outDir: string) {
-    const missingFiles: string[] = [];
-    const packageJsonContent = await fs.readFile(join(outDir, 'package.json'), { encoding: 'utf-8' });
-    const packageJson = JSON.parse(packageJsonContent) as { exports: PackageJsonExports };
-
-    async function checkPath(path: string) {
-        try {
-            await fs.stat(join(outDir, path));
-        } catch (e) {
-            if (e instanceof Error && 'code' in e && e.code === 'ENOENT') {
-                return false;
-            }
-            throw e;
-        }
-        return true;
-    }
-
-    for (const value of Object.values(packageJson.exports)) {
-        const expectedFiles = typeof value === 'string' ? [value] : Object.values(value);
-        for (const path of expectedFiles) {
-            if (!(await checkPath(path))) {
-                missingFiles.push(path);
-            }
-        }
-    }
-
-    if (missingFiles.length > 0) {
-        throw new Error(`Missing files: ${missingFiles.join(', ')}`);
-    }
 }

@@ -17,7 +17,7 @@ export default defineConfig({
         dts({
             insertTypesEntry: true,
             exclude: ['**/__tests__', '**/*.test.ts', '**/dist', 'unittests', '**/vite.config.ts'],
-            tsconfigPath: join(frontendSrc, 'tsconfig.json'),
+            tsconfigPath: join(frontendSrc, 'tsconfig.app.json'),
             rollupTypes: true,
         }),
     ],
