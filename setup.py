@@ -48,7 +48,7 @@ kwargs = dict(
         r'vstutils/static/spa/.*\.css$'
     ],
     install_requires=[
-        "django~=" + (os.environ.get('DJANGO_DEP', "") or "5.1.3"),
+        "django~=" + (os.environ.get('DJANGO_DEP', "") or "5.1.4"),
     ]
     + requirements,
     extras_require={

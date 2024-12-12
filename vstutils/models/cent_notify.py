@@ -1,10 +1,10 @@
 # cython: binding=True
-import asyncio
 import typing as _t
 import logging
 import contextlib
 
 import orjson
+from asgiref.sync import async_to_sync
 from django.db.models import signals
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -85,7 +85,7 @@ class Notificator:
 
     def send(self):
         with contextlib.suppress(Exception):
-            return asyncio.run(self.asend())
+            return async_to_sync(self.asend)()
 
     async def asend(self):
         try:
