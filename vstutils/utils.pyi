@@ -2,6 +2,7 @@ import asyncio
 import logging
 import subprocess
 import typing as tp
+from collections.abc import MutableMapping
 from .tools import multikeysort as multikeysort
 from collections.abc import Generator
 from django.http.response import HttpResponse
@@ -531,7 +532,7 @@ class BaseEnum(str, VstEnum):
 def get_session_store():
     ...
 
-def add_in_vary(headers: dict, value: str):
+def add_in_vary(headers: MutableMapping[str, str], value: str):
     ...
 
 def check_request_etag(

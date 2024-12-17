@@ -23,6 +23,7 @@
             <ModelFields
                 :model="modelClass"
                 :data="item.data"
+                :fieldsErrors="errorArray[idx]"
                 editable
                 flat-if-possible
                 flat-fields-classes="col-12"
@@ -68,6 +69,9 @@
             };
         });
     });
+    const errorArray = computed(() => {
+        return Array.isArray(props.error) ? props.error : [];
+    });
 
     const modelClass = props.field.itemField!.nestedModel!;
 
@@ -100,7 +104,7 @@
 
     function setValue(options: SetFieldValueOptions) {
         if (options.field) {
-            set(newItemData, options.field, options.value);
+            set(newItemData.value, options.field, options.value);
         }
     }
 </script>
