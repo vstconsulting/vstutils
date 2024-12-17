@@ -1505,7 +1505,7 @@ def get_session_store() -> 'SessionBase':
     return engine.SessionStore
 
 
-def add_in_vary(headers: dict, value: str):
+def add_in_vary(headers, value):
     """
     Adds provided value to Vary header if not added already
     """

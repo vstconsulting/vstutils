@@ -34,6 +34,7 @@
                 :value="value"
                 :data="data"
                 :hideable="hideable"
+                :error="error"
                 @hide-field="$emit('hide-field', field)"
                 @set-value="setValue"
                 @clear="clearValue"

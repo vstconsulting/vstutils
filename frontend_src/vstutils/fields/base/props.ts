@@ -60,6 +60,7 @@ export const FieldEditPropsDef = {
     data: { type: Object as PropType<RepresentData>, required: true as const },
     value: {},
     hideable: { type: Boolean, default: false },
+    error: { type: [String, Object, Array], default: null },
 };
 
 export type FieldEditPropsDefType<T> = Omit<typeof FieldEditPropsDef, 'field' | 'value'> & {
