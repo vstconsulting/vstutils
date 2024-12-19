@@ -278,7 +278,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         with self.patch('subprocess.check_call') as mock_obj:
             mock_obj.side_effect = lambda *args, **kwargs: 'OK'
             call_command('dockerrun', attempts=4, attempts_timeout=0.01)
-            self.assertEqual(mock_obj.call_count, 3)
+            self.assertEqual(mock_obj.call_count, 5)
             self.assertEqual(
                 mock_obj.call_args[0][0],
                 [sys.executable, '-m', 'test_proj', 'web']
@@ -5885,7 +5885,6 @@ class ConfigParserCTestCase(BaseTestCase):
             'app': 'test_proj.wapp:app',
             'loglevel': os.environ.get('DJANGO_LOG_LEVEL', 'WARNING'),
             'logfile': '/var/log/test_proj2/worker.log',
-            'pidfile': '/run/test_proj_worker.pid',
             'autoscale': '4,1',
             'hostname': f'{pwd.getpwuid(os.getuid()).pw_name}@%h',
             'beat': True,

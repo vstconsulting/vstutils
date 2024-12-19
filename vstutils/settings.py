@@ -608,7 +608,6 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'worker': {
             'app': os.getenv('VST_CELERY_APP', '{PROG_NAME}.wapp:app'),
             'loglevel': '{this[main][log_level]}',
-            'pidfile': env.str(f'{ENV_NAME}_WORKER_PID', default='/run/{PROG_NAME}_worker.pid'),
             'autoscale': '{this[rpc][concurrency]},1',
             'hostname': f'{pwd.getpwuid(os.getuid()).pw_name}@%h',
             'beat': env.bool(f'{ENV_NAME}_SCHEDULER_ENABLE', default=True),

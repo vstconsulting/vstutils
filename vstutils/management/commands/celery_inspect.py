@@ -1,8 +1,7 @@
 import sys
 from subprocess import check_call
 
-from ._base import DockerCommand
-from .web import get_celery_command
+from ._base import DockerCommand, get_celery_command
 
 
 class Command(DockerCommand):
@@ -39,7 +38,7 @@ class Command(DockerCommand):
         if opts['json']:
             cmd_kwargs['_args'].append('--json')
 
-        cmd = f'{sys.executable} -m {get_celery_command(command="inspect", **cmd_kwargs)}'
+        cmd = f'{sys.executable} -m {get_celery_command(celery_path="celery", command="inspect", **cmd_kwargs)}'
         self._print(f'Execute: {cmd}')
         sys.exit(check_call(
             cmd,

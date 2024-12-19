@@ -64,7 +64,7 @@ kwargs = dict(
             for i in requirements
             if isinstance(i, str) and 'django-storages' in i
         ],
-        'sqs': requirements_rpc + ['pycurl~=7.45.3'],
+        'sqs': requirements_rpc + ['pycurl~=7.45.4'],
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),

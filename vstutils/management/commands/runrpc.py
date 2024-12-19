@@ -15,11 +15,6 @@ class Command(DockerCommand):
             metavar='celery_arg=value', nargs='*',
             help='Args "name=value" for the celery app.',
         )
-        parser.add_argument(
-            '--nomigrate',
-            action='store_false', dest='migrate', default=True,
-            help="Do NOT run docker command for migration of databases.",
-        )
 
     def handle(self, *args, **opts):
         warnings.warn('This command is deprecated and will be removed in 6.x releases. Use "rpc_worker" instead.',
