@@ -10,12 +10,11 @@ try:
 except ImportError:  # nocv
     worker_command = None
 
-from ._base import DockerCommand
-from .web import get_celery_command
+from ._base import DockerCommand, get_celery_command
 
 
 class Command(DockerCommand):
-    interactive = True
+    interactive = False
     help = "Run celery worker with arguments from config."
 
     def add_arguments(self, parser):
@@ -25,11 +24,6 @@ class Command(DockerCommand):
             default=10,
             dest='graceful_timeout', help='Seconds before call SIGKILL.',
             type=int,
-        )
-        parser.add_argument(
-            '--nomigrate',
-            action='store_false', dest='migrate', default=True,
-            help="Do NOT run docker command for migration of databases.",
         )
         if worker_command is None:
             return  # nocv
@@ -60,9 +54,6 @@ class Command(DockerCommand):
     def handle(self, *args, **options):  # nocv
         super().handle(*args, **options)
 
-        if options['migrate']:
-            self.migrate(options)  # nocv
-
         # Environment
         env = os.environ.copy()
         if sys.prefix not in env["PATH"]:
@@ -80,8 +71,8 @@ class Command(DockerCommand):
                     cmd,
                     env=env,
                     shell=True,  # nosec
-                    stdout=sys.stdout,
-                    stderr=sys.stderr,
+                    stdout=None,
+                    stderr=None,
                     stdin=sys.stdin,
             ) as proc:
                 try:
@@ -99,6 +90,7 @@ class Command(DockerCommand):
         except KeyboardInterrupt:  # nocv
             self._print('Exit by user...', 'WARNING')
         except BaseException as err:  # noqa: B036
-            self._print(traceback.format_exc())  # nocv
+            if options['traceback']:  # nocv
+                self._print(traceback.format_exc())  # nocv
             self._print(str(err), 'ERROR')  # nocv
             sys.exit(1)  # nocv

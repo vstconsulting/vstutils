@@ -91,6 +91,7 @@ concurrency = [
 omit = [
     '*.tox/*',
     '*/management/commands/web.py',
+    '*/management/commands/web_worker.py',
     '*/management/commands/_base.py',
     '*ihsctl',
     '*setup.py',
