@@ -278,7 +278,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         with self.patch('subprocess.check_call') as mock_obj:
             mock_obj.side_effect = lambda *args, **kwargs: 'OK'
             call_command('dockerrun', attempts=4, attempts_timeout=0.01)
-            self.assertEqual(mock_obj.call_count, 5)
+            self.assertEqual(mock_obj.call_count, 3)
             self.assertEqual(
                 mock_obj.call_args[0][0],
                 [sys.executable, '-m', 'test_proj', 'web']
@@ -286,7 +286,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
             mock_obj.reset_mock()
 
             def check_call_error(*args, **kwargs):
-                raise Exception('Test exception.')
+                raise SystemExit('Test exception.')
 
             mock_obj.side_effect = check_call_error
             with self.assertRaises(SystemExit):
@@ -5852,9 +5852,6 @@ class ConfigParserCTestCase(BaseTestCase):
         )
         self.assertEqual(settings.SCHEMA_CACHE_TIMEOUT, 120)
         self.assertEqual(settings.ENABLE_GRAVATAR, True)
-
-        self.assertEqual(settings.WEB_DAEMON, True)
-        self.assertEqual(settings.WEB_DAEMON_LOGFILE, '/dev/null')
         self.assertEqual(settings.WEB_ADDRPORT, ':8080')
 
         for key in db_default_val.keys():
@@ -7121,6 +7118,7 @@ class Oauth2TestCase(BaseTestCase):
                 "description": "",
                 "operationId": "userinfo",
                 "parameters": [],
+                "produces": ['application/json'],
                 "responses": {
                     "200": {
                         "description": "User info",
@@ -7150,6 +7148,7 @@ class Oauth2TestCase(BaseTestCase):
             "parameters": [],
             "post": {
                 "consumes": ["application/json"],
+                'produces': ['application/json'],
                 "description": "",
                 "operationId": "get_token",
                 "parameters": [
@@ -7161,22 +7160,47 @@ class Oauth2TestCase(BaseTestCase):
                             "properties": {
                                 "client_id": {"type": "string"},
                                 "client_secret": {"type": "string"},
-                                "grant_type": {"enum": ["password"], "type": "string"},
+                                "grant_type": {
+                                    "enum": ["authorization_code", "password", "refresh_token"],
+                                    "type": "string"
+                                },
                                 "password": {"type": "string"},
                                 "second_factor": {"type": "string"},
                                 "username": {"type": "string"},
+                                'code': {'type': 'string'},
+                                'redirect_uri': {'type': 'string'},
+                                'refresh_token': {'type': 'string'},
+                                'scope': {'type': 'string'},
                             },
                             "required": [
                                 "grant_type",
-                                "username",
-                                "password",
+                                "client_id",
                             ],
                             "type": "object",
                         },
                     }
                 ],
                 "responses": {
-                    "200": {"description": "Token response"},
+                    "200": {
+                        "description": "Token response",
+                        "schema": {
+                            'type': 'object',
+                            "properties": {
+                                "access_token": {"type": "string"},
+                                "expires_in": {"type": "integer"},
+                                "id_token": {"type": "string"},
+                                "refresh_token": {"type": "string"},
+                                "scope": {"type": "string"},
+                                "token_type": {"type": "string"},
+                            },
+                            'required': [
+                                'access_token',
+                                 'token_type',
+                                 'expires_in',
+                                 'scope',
+                            ],
+                        }
+                    },
                     "400": {
                         "description": "Bad request",
                         "schema": {
@@ -7200,6 +7224,7 @@ class Oauth2TestCase(BaseTestCase):
             "parameters": [],
             "post": {
                 "consumes": ["application/json"],
+                'produces': ['application/json'],
                 "description": "",
                 "operationId": "token_introspection",
                 "parameters": [
@@ -7249,6 +7274,7 @@ class Oauth2TestCase(BaseTestCase):
             "parameters": [],
             "post": {
                 "consumes": ["application/json"],
+                'produces': ['application/json'],
                 "description": "",
                 "operationId": "revoke_token",
                 "parameters": [

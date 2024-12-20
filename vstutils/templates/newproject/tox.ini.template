@@ -78,7 +78,6 @@ setenv =
     CCACHE_DIR = {envdir}/.ccache
     BUILD_OPTIMIZATION = true
     BUILD_COMPILE = true
-    UWSGI_PROFILE = default
 passenv = *
 allowlist_externals = *
 commands =

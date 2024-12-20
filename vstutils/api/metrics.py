@@ -1,15 +1,10 @@
 from typing import Callable, ClassVar, Iterable, Tuple, Optional
 import types
 import sys
-from functools import partial
 
 from django.conf import settings
-try:
-    import uwsgi
-except ImportError:
-    uwsgi = None
 
-from ..utils import BaseVstObject, raise_context_decorator_with_default
+from ..utils import BaseVstObject
 
 
 METRICS_MAP_TYPE = Iterable[Tuple[Optional[str], Callable]]  # pylint: disable=invalid-name
@@ -19,40 +14,6 @@ def get_python_info():
     return {
         'version': f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}'
     }, 1
-
-
-def get_metrics_from_workers():  # nocv
-    if uwsgi is None:
-        return
-
-    workers = uwsgi.workers()
-
-    yield 'uwsgi_total_workers', len(workers)
-
-    for worker in workers:
-        worker_data = {
-            'id': worker['id'],
-            'pid': worker['pid'],
-            'status': worker['status'],
-        }
-
-        for param in ('requests', 'running_time', 'respawn_count', 'exceptions'):
-            yield f'uwsgi_worker_{param}', (worker_data, worker[param])
-
-
-@raise_context_decorator_with_default(default=0)
-def get_uwsgi_metric(metric_name, prep_data=None):  # nocv
-    result = uwsgi.metric_get(metric_name)
-    if prep_data is not None:
-        return prep_data, result
-    return result
-
-
-uwsgi_metrics: list = []
-if uwsgi is not None and hasattr(uwsgi, 'metric_get'):  # nocv
-    uwsgi_metrics.append(('uwsgi_avg_response_time', partial(get_uwsgi_metric, 'core.avg_response_time')))
-    uwsgi_metrics.append(('uwsgi_total_running_time', partial(get_uwsgi_metric, 'core.total_running_time')))
-    uwsgi_metrics.append(('uwsgi_idle_workers', partial(get_uwsgi_metric, 'core.idle_workers')))
 
 
 class BackendMetaClass(type):
@@ -120,4 +81,3 @@ class BaseBackend(
 
 class DefaultBackend(BaseBackend):
     __slots__ = ()
-    metrics_list = ((None, get_metrics_from_workers), *uwsgi_metrics)

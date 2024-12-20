@@ -1,37 +1,27 @@
+import warnings
 import sys
 from subprocess import check_call
+
+from django.conf import settings
 
 from ._base import DockerCommand
 
 
 class Command(DockerCommand):
     interactive = True
-    help = "Run uwsgi server with configuration from ENV."
-
-    def add_arguments(self, parser):
-        super().add_arguments(parser)
-        parser.add_argument(
-            'args',
-            metavar='uwsgi_arg=value', nargs='*',
-            help='Args "name=value" uwsgi server.',
-        )
+    help = "Run web server with configuration from ENV."
 
     def handle(self, *args, **options):
+        warnings.warn('This command is deprecated and will be removed in 6.x releases. Use "rpc_worker" instead.',
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        options['migrate'] = settings.CONFIG['docker'].getboolean('migration', fallback=options['migrate'])
         super().handle(*args, **options)
 
-        if not self.config['docker'].getboolean('migration', fallback=True):
-            success, error = True, ''  # nocv
-        else:
-            success, error = self.migrate(options)
-        if success:
-            try:
-                check_call(
-                    [sys.executable, '-m', self.project_name, self._settings('WEBSERVER_COMMAND', 'web')],
-                    env=self.env, bufsize=0, universal_newlines=True,
-                )
-            except KeyboardInterrupt:  # nocv
-                self._print('Exit by user...', 'WARNING')
-                return
-        else:
-            self._print(error, 'ERROR')
-            sys.exit(10)
+        try:
+            check_call(
+                [sys.executable, '-m', self.project_name, self._settings('WEBSERVER_COMMAND', 'web')],
+                env=self.env, bufsize=0, universal_newlines=True,
+            )
+        except KeyboardInterrupt:  # nocv
+            self._print('Exit by user...', 'WARNING')

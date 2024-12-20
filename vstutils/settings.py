@@ -363,10 +363,6 @@ class MailSection(BaseAppendSection):
     }
 
 
-class UWSGISection(cconfig.Section):
-    type_daemon = ConfigBoolType
-
-
 class RPCSection(BaseAppendSection):
     types_map = {
         'concurrency': ConfigIntType,
@@ -588,9 +584,6 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'contact': {
             'name': 'System Administrator'
         },
-        'uwsgi': {
-            'daemon': env.bool(f'{ENV_NAME}_DAEMON', default=True)
-        },
         'rpc': {
             'connection': env.str(f'{ENV_NAME}_RPC_ENGINE', default='file:///tmp'),
             'concurrency': env.int(f'{ENV_NAME}_RPC_CONCURRENCY', default=4),
@@ -683,7 +676,6 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'etag.options.connection_pool_kwargs': CachePoolKwargsSection,
         'etag.options.behaviors': CacheBehaviorsSection,
         'mail': MailSection,
-        'uwsgi': UWSGISection,
         'rpc': RPCSection,
         'rpc.broker_transport_options': RPCBrokerSection,
         'rpc.broker_transport_options.predefined_queues': RPCBrokerPredefinedQueuesSection,
@@ -694,7 +686,6 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'webpush': WebPushSection,
         'oauth': OAuthServerSection,
     },
-    format_exclude_sections=('uwsgi',)
 )
 
 config.parse_files(tuple(reversed(CONFIG_FILES)))
@@ -924,15 +915,9 @@ PASSWORD_RESET_TIMEOUT_DAYS: int = web['password_reset_timeout_days']
 ROOT_URLCONF: _t.Text = os.getenv('VST_ROOT_URLCONF', f'{VST_PROJECT}.urls')
 
 # wsgi appilcation settings
-UWSGI_WORKER_PATH: _t.Text = f'{VSTUTILS_DIR}/asgi_worker.py'
-
 ASGI: _t.Text = os.getenv('VST_ASGI', 'vstutils.asgi')
 ASGI_APPLICATION: _t.Text = f'{ASGI}.application'
-
-uwsgi_settings: cconfig.Section = config['uwsgi']
-WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)
-WEB_DAEMON_LOGFILE: _t.Text = uwsgi_settings.get('log_file', fallback='/dev/null')
-WEB_ADDRPORT: _t.Text = uwsgi_settings.get('addrport', fallback=':8080')
+WEB_ADDRPORT: _t.Text = web.get('addrport', fallback=':8080')
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = web['request_max_size']
 FILE_UPLOAD_TEMP_DIR = TMP_DIR
@@ -1258,7 +1243,7 @@ LOG_FORMAT: _t.Text = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(line
 LOG_DATE_FORMAT: _t.Text = "%d/%b/%Y %H:%M:%S"
 
 default_logger_data = {
-    'handlers': ['console', 'file'],
+    'handlers': ['console',],
     'level': LOG_LEVEL,
     'propagate': True,
 }
@@ -1279,11 +1264,6 @@ LOGGING: _t.Dict = {
             'class': 'logging.StreamHandler',
             'stream': sys.stdout,
         },
-        'file': {
-            'level': LOG_LEVEL,
-            'class': 'logging.FileHandler',
-            'filename': WEB_DAEMON_LOGFILE
-        } if WEB_DAEMON_LOGFILE != '/dev/null' else {'class': 'logging.NullHandler', 'level': LOG_LEVEL},
     },
     'loggers': {
         VST_PROJECT_LIB: default_logger_data,
