@@ -151,7 +151,7 @@ API[VST_API_VERSION][r'test_changed_fk'] = dict(
 
 GUI_VIEWS[r'^gui/$'] = r'^csrf_disable_gui/$'
 GUI_VIEWS[r'^csrf_disable_gui/$'] = {
-    'BACKEND': 'vstutils.gui.views.SWView',
+    'BACKEND': 'vstutils.gui.views.TermsView',
     'CSRF_ENABLE': False
 }
 GUI_VIEWS['login'] = {

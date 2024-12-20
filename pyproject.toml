@@ -168,5 +168,6 @@ module = [
     "pywebpush.*",
     "authlib.*",
     "uvloop.*",
+    "htmlmin.*",
 ]
 ignore_missing_imports = true

@@ -6,17 +6,30 @@ from markdown import markdown
 from django.http.response import Http404
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
-from django.template.response import TemplateResponse
+from django.template.response import TemplateResponse as BaseTemplateResponse
 from django.conf import settings
 from django.urls import reverse_lazy
+from htmlmin.minify import html_minify
 from jsmin import jsmin
 
 from ..utils import lazy_translate as __
 
 
+class TemplateResponse(BaseTemplateResponse):
+    minify_response = True
+
+    @property
+    def rendered_content(self):
+        content = super().rendered_content
+        if self.minify_response and 'text/html' in self.headers.get('Content-Type', ''):
+            return html_minify(content)
+        return content
+
+
 class BaseView(TemplateView):
     login_required = False
     minify_response = True
+    response_class = TemplateResponse
 
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)
@@ -28,11 +41,6 @@ class BaseView(TemplateView):
     def as_view(cls, *args, **kwargs):
         view = super().as_view(*args, **kwargs)
         return cls.login_required and login_required(view, login_url=reverse_lazy('login')) or view  # type: ignore
-
-
-class OfflineView(BaseView):
-    login_required = False
-    template_name = "gui/offline.html"
 
 
 class JSMinTemplateResponse(TemplateResponse):
@@ -50,7 +58,7 @@ class SWView(BaseView):
     response_class = JSMinTemplateResponse
 
 
-class BaseAgreementsView(TemplateView):
+class BaseAgreementsView(BaseView):
     template_name = 'registration/base_agreements.html'
     title_message = __('Terms')
     path_in_settings: str

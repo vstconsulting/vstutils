@@ -775,8 +775,6 @@ if ENABLE_ADMIN_PANEL:
 MIDDLEWARE: _t.List[_t.Text] = [
     'vstutils.middleware.ExecuteTimeHeadersMiddleware',
     'vstutils.middleware.FrontendChangesNotifications',
-    'htmlmin.middleware.HtmlMinifyMiddleware',
-    'htmlmin.middleware.MarkRequestMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'vstutils.middleware.LangMiddleware',
@@ -1349,12 +1347,6 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
             'name': 'service_worker'
         }
     },
-    "OFFLINE": {
-        "BACKEND": 'vstutils.gui.views.OfflineView',
-        "OPTIONS": {
-            'name': 'offline_gui'
-        }
-    },
     "TERMS": {
         "BACKEND": 'vstutils.gui.views.TermsView',
         "OPTIONS": {
@@ -1371,7 +1363,6 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
 
 GUI_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
     'service-worker.js': 'SERVICE_WORKER',
-    'offline.html': 'OFFLINE',
 }
 
 def get_accounts_views_mapping():
