@@ -12,10 +12,7 @@ ormsgpack~=1.7.0
 pyyaml~=6.0.2
 
 # web server
-uvicorn~=0.32.1
-pyuwsgi~=2.0.28.post1
-# Restore it if some problems with pyuwsgi
-# uwsgi==2.0.23
+uvicorn~=0.34.0
 fastapi-slim~=0.115.6
 aiofiles~=24.1.0
 
@@ -26,7 +23,6 @@ cent~=5.0.0
 Authlib~=1.3.2
 
 # Minificators
-jsmin~=3.0.1
 django-htmlmin~=0.11.0
 
 # 2fa

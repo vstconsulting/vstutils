@@ -144,6 +144,13 @@ if not settings.API_ONLY:
     async def root(request: Request):
         return await static('spa/index.html', request)
 
+    @application.get("/service-worker.js")
+    async def service_worker(request: Request):
+        """
+        This route intended to fix service worker allowed scope
+        """
+        return await static("spa/service-worker.js", request)
+
     @application.get('/spa/{file_path:path}')
     async def serve_spa(file_path: str, request: Request):
         response = await static(f'spa/{file_path}', request)

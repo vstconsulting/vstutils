@@ -1,13 +1,15 @@
 from django.db import transaction
 from rest_framework import fields
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.mixins import CreateModelMixin
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from vstutils.api.base import GenericViewSet
 from vstutils.api.actions import SimpleAction
 from vstutils.api.serializers import BaseSerializer, SerializerMetaClass
 
 from .autodiscovery import get_web_pushes_classes
 from .models import WebPushDeviceSubscription, WebPushNotificationSubscription
-from .utils import subscribe_device, unsubscribe_device, update_user_subscriptions
+from .utils import change_subscription, subscribe_device, unsubscribe_device, update_user_subscriptions
 
 
 def get_user_subscriptions(user_id: int):
@@ -134,3 +136,26 @@ def create_webpush_settings_action(view_subpath: str):
 
     notifications_settings.__name__ = view_subpath
     return notifications_settings
+
+
+class PushSubscriptionChangeSerializer(BaseSerializer):
+    old_endpoint = fields.CharField(write_only=True)
+    subscription_data = PushSubscriptionSerializer(write_only=True)
+
+    def create(self, validated_data):
+        change_subscription(
+            old_endpoint=validated_data.pop('old_endpoint'),
+            new_subscription_data=validated_data.pop('subscription_data'),
+        )
+        return {}
+
+
+PushSubscriptionChangeView = WebPushDeviceSubscription.get_view_class(
+    view_class=[GenericViewSet, CreateModelMixin],
+    permission_classes=[AllowAny],
+    authentication_classes=[],
+    override_permission_classes=True,
+    extra_serializer_classes={
+        'serializer_class_create': PushSubscriptionChangeSerializer
+    }
+)

@@ -6,23 +6,28 @@ from markdown import markdown
 from django.http.response import Http404
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
-from django.template.response import TemplateResponse
+from django.template.response import TemplateResponse as BaseTemplateResponse
 from django.conf import settings
 from django.urls import reverse_lazy
-from jsmin import jsmin
+from htmlmin.minify import html_minify
 
 from ..utils import lazy_translate as __
 
 
-class BaseView(TemplateView):
-    login_required = False
+class TemplateResponse(BaseTemplateResponse):
     minify_response = True
 
-    def dispatch(self, request, *args, **kwargs):
-        response = super().dispatch(request, *args, **kwargs)
-        if not self.minify_response:
-            response.minify_response = False  # type: ignore
-        return response
+    @property
+    def rendered_content(self):
+        content = super().rendered_content
+        if self.minify_response and 'text/html' in self.headers.get('Content-Type', ''):
+            return html_minify(content)
+        return content  # nocv
+
+
+class BaseView(TemplateView):
+    login_required = False
+    response_class = TemplateResponse
 
     @classmethod
     def as_view(cls, *args, **kwargs):
@@ -30,27 +35,7 @@ class BaseView(TemplateView):
         return cls.login_required and login_required(view, login_url=reverse_lazy('login')) or view  # type: ignore
 
 
-class OfflineView(BaseView):
-    login_required = False
-    template_name = "gui/offline.html"
-
-
-class JSMinTemplateResponse(TemplateResponse):
-    @property
-    def rendered_content(self):
-        content = super().rendered_content
-        return content.__class__(jsmin(content, quote_chars="'\"`"))
-
-
-class SWView(BaseView):
-    login_required = False
-    minify_response = False
-    content_type = 'text/javascript'
-    template_name = "gui/service-worker.js"
-    response_class = JSMinTemplateResponse
-
-
-class BaseAgreementsView(TemplateView):
+class BaseAgreementsView(BaseView):
     template_name = 'registration/base_agreements.html'
     title_message = __('Terms')
     path_in_settings: str

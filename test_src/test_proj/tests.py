@@ -81,7 +81,7 @@ from vstutils.utils import SecurePickling, BaseEnum, get_render, create_view
 from vstutils.api.validators import resize_image
 from vstutils.webpush.models import WebPushDeviceSubscription, WebPushNotificationSubscription
 from vstutils.webpush.utils import subscribe_device, update_user_subscriptions
-from vstutils.webpush.test_utils import subscribe_user_device_to_pushes
+from vstutils.webpush.test_utils import subscribe_user_device_to_pushes, change_user_device_subscription
 from vstutils.oauth2.jwk import jwk_set as oauth2_server_jwk_set
 from vstutils.oauth2.endpoints import server as authorization_server
 from vstutils.oauth2.user import UserWrapper
@@ -286,7 +286,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
             mock_obj.reset_mock()
 
             def check_call_error(*args, **kwargs):
-                raise Exception('Test exception.')
+                raise SystemExit('Test exception.')
 
             mock_obj.side_effect = check_call_error
             with self.assertRaises(SystemExit):
@@ -805,11 +805,6 @@ class ViewsTestCase(BaseTestCase):
         self.get_result('get', '/api/user/', code=404)
         self.get_result('get', '/api/v1/user/1000/', code=404)
         self.get_result('get', '/static/bundle/output.json_unknown', code=404)
-
-        # Test js urls minification
-        for js_url in ['service-worker.js']:
-            response = self.get_result('get', f'/{js_url}')
-            self.assertCount(str(response).split('\n'), 1, f'{js_url} is longer than 1 string.')
 
     def test_spa_routes(self):
         client = self.api_test_client
@@ -5852,9 +5847,6 @@ class ConfigParserCTestCase(BaseTestCase):
         )
         self.assertEqual(settings.SCHEMA_CACHE_TIMEOUT, 120)
         self.assertEqual(settings.ENABLE_GRAVATAR, True)
-
-        self.assertEqual(settings.WEB_DAEMON, True)
-        self.assertEqual(settings.WEB_DAEMON_LOGFILE, '/dev/null')
         self.assertEqual(settings.WEB_ADDRPORT, ':8080')
 
         for key in db_default_val.keys():
@@ -5885,7 +5877,6 @@ class ConfigParserCTestCase(BaseTestCase):
             'app': 'test_proj.wapp:app',
             'loglevel': os.environ.get('DJANGO_LOG_LEVEL', 'WARNING'),
             'logfile': '/var/log/test_proj2/worker.log',
-            'pidfile': '/run/test_proj_worker.pid',
             'autoscale': '4,1',
             'hostname': f'{pwd.getpwuid(os.getuid()).pw_name}@%h',
             'beat': True,
@@ -6462,6 +6453,48 @@ class WebPushesTestCase(BaseTestCase):
             },
         )
         self.assertEqual(len(WebPushDeviceSubscription.objects.filter(user_id=user.id)), 0)
+
+    def test_change_user_device_subscriptions(self):
+        user_device1 = self.client_class()
+        user_device1.force_login(self.user)
+        old_subscription, new_subscription_data = change_user_device_subscription(self.user, language="en")
+
+        self.assertTrue(
+            WebPushDeviceSubscription.objects.filter(
+                endpoint=old_subscription._sub.endpoint
+            ).exists()
+        )
+        self.assertFalse(
+            WebPushDeviceSubscription.objects.filter(
+                endpoint=new_subscription_data["endpoint"]
+            ).exists()
+        )
+
+        response = user_device1.post(
+            f'/api/webpush/pushsubscriptionchange/',
+            content_type='application/json',
+            data={
+                "old_endpoint": old_subscription._sub.endpoint,
+                "subscription_data": new_subscription_data,
+            },
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertFalse(
+            WebPushDeviceSubscription.objects.filter(
+                endpoint=old_subscription._sub.endpoint
+                ).exists()
+            )
+        self.assertTrue(
+            WebPushDeviceSubscription.objects.filter(
+                endpoint=new_subscription_data["endpoint"]
+            ).exists()
+        )
+
+    def test_service_worker_js(self):
+        response = self.api_test_client.get('/service-worker.js')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['content-type'], 'text/javascript; charset=utf-8')
 
     def test_settings_view_permissions(self):
         other_user = self._create_user(is_super_user=False, is_staff=False, username='other_user')
@@ -7122,6 +7155,7 @@ class Oauth2TestCase(BaseTestCase):
                 "description": "",
                 "operationId": "userinfo",
                 "parameters": [],
+                "produces": ['application/json'],
                 "responses": {
                     "200": {
                         "description": "User info",
@@ -7151,6 +7185,7 @@ class Oauth2TestCase(BaseTestCase):
             "parameters": [],
             "post": {
                 "consumes": ["application/json"],
+                'produces': ['application/json'],
                 "description": "",
                 "operationId": "get_token",
                 "parameters": [
@@ -7162,22 +7197,47 @@ class Oauth2TestCase(BaseTestCase):
                             "properties": {
                                 "client_id": {"type": "string"},
                                 "client_secret": {"type": "string"},
-                                "grant_type": {"enum": ["password"], "type": "string"},
+                                "grant_type": {
+                                    "enum": ["authorization_code", "password", "refresh_token"],
+                                    "type": "string"
+                                },
                                 "password": {"type": "string"},
                                 "second_factor": {"type": "string"},
                                 "username": {"type": "string"},
+                                'code': {'type': 'string'},
+                                'redirect_uri': {'type': 'string'},
+                                'refresh_token': {'type': 'string'},
+                                'scope': {'type': 'string'},
                             },
                             "required": [
                                 "grant_type",
-                                "username",
-                                "password",
+                                "client_id",
                             ],
                             "type": "object",
                         },
                     }
                 ],
                 "responses": {
-                    "200": {"description": "Token response"},
+                    "200": {
+                        "description": "Token response",
+                        "schema": {
+                            'type': 'object',
+                            "properties": {
+                                "access_token": {"type": "string"},
+                                "expires_in": {"type": "integer"},
+                                "id_token": {"type": "string"},
+                                "refresh_token": {"type": "string"},
+                                "scope": {"type": "string"},
+                                "token_type": {"type": "string"},
+                            },
+                            'required': [
+                                'access_token',
+                                 'token_type',
+                                 'expires_in',
+                                 'scope',
+                            ],
+                        }
+                    },
                     "400": {
                         "description": "Bad request",
                         "schema": {
@@ -7201,6 +7261,7 @@ class Oauth2TestCase(BaseTestCase):
             "parameters": [],
             "post": {
                 "consumes": ["application/json"],
+                'produces': ['application/json'],
                 "description": "",
                 "operationId": "token_introspection",
                 "parameters": [
@@ -7250,6 +7311,7 @@ class Oauth2TestCase(BaseTestCase):
             "parameters": [],
             "post": {
                 "consumes": ["application/json"],
+                'produces': ['application/json'],
                 "description": "",
                 "operationId": "revoke_token",
                 "parameters": [

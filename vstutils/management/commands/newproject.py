@@ -36,7 +36,6 @@ class Command(BaseCommand):
             '__main__.py': Path('__main__.py'),
             'settings.ini': Path('settings.ini'),
             'settings.py': Path('settings.py'),
-            'web.ini': Path('web.ini'),
             'wsgi.py': Path('wsgi.py'),
         },
         '.gitignore': Path('.gitignore'),

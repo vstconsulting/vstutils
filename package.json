@@ -17,7 +17,8 @@
   "exports": {
     ".": "./frontend_src/index.ts",
     "./auth-app": "./frontend_src/auth-app.ts",
-    "./style.css": "./frontend_src/style.css"
+    "./style.css": "./frontend_src/style.css",
+    "./sw": "./frontend_src/service-worker/service-worker.ts"
   },
   "imports": {
     "#unittests/*": "./frontend_src/unittests/*",
@@ -110,6 +111,7 @@
     "visibilityjs": "^2.0.2",
     "vite": "^6.0.3",
     "vite-plugin-dts": "^4.3.0",
+    "vite-plugin-pwa": "^0.21.1",
     "vite-tsconfig-paths": "^5.1.3",
     "vitest": "^2.1.8",
     "vitest-fetch-mock": "^0.4.2",

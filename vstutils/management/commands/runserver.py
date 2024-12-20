@@ -14,7 +14,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--addrport', '-p',
             default=self.default_addrport,
-            dest='addrport', help='Specifies the uwsgi address:port. Default: [:8080]',
+            dest='addrport', help='Specifies the web server address:port. Default: [:8080]',
         )
         parser.add_argument(
             '--no-access-log',
