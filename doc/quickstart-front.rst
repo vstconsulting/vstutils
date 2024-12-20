@@ -82,6 +82,8 @@ from root dir of your project to build static files.
 Output files will be built into `{AppName}/static/spa` directory. During vstutils installation through `pip`
 frontend code are being build automatically, so you may need to add `spa` directory to `.gitignore`.
 
+You can specify the `path` to the service worker and its `scope`. By default, these values are `'/service-worker.js'` and `'/'` respectively. The `defaultNotificationOptions` allows setting properties such as icon, title, or any other notification preferences for consistency across the app.
+
 Example of simple frontend entrypoint:
 
 .. sourcecode:: typescript
@@ -91,6 +93,13 @@ Example of simple frontend entrypoint:
     initApp({
       api: {
         url: new URL('/api/', window.location.origin).toString(),
+      },
+      sw: {
+        path: '/new-sw.js',
+        scope: '/some-route',
+      },
+      defaultNotificationOptions: {
+        icon: '/static/icons/logo.svg',
       },
     });
 

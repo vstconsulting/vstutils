@@ -115,3 +115,27 @@ def subscribe_user_device_to_pushes(user, language: Optional[str] = None):
         language_code=language,
     )
     return Device(WebPushDeviceSubscription.objects.get(endpoint=endpoint))
+
+
+def change_user_device_subscription(user, language: Optional[str] = None):
+    client = Client()
+    client.force_login(user)
+    old_data = _get_push_subscription_data(user.pk)
+    old_endpoint = old_data["endpoint"]
+    subscribe_device(
+        session_key=client.session.session_key,
+        user_id=user.id,
+        data=old_data,
+        language_code=language,
+    )
+    old_subscription =  Device(WebPushDeviceSubscription.objects.get(endpoint=old_endpoint))
+
+    new_data = _get_push_subscription_data(user.pk)
+    new_endpoint = new_data["endpoint"]
+    new_subscription_data = {
+        "endpoint": new_endpoint,
+        "expirationTime": None,
+        "keys": new_data["keys"],
+    }
+
+    return old_subscription, new_subscription_data

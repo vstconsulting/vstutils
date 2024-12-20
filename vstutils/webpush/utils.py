@@ -33,6 +33,22 @@ def subscribe_device(
     )
 
 
+def change_subscription(
+    old_endpoint: str,
+    new_subscription_data: SubscriptionData,
+):
+    """
+    See https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope/pushsubscriptionchange_event
+    """
+    endpoint = new_subscription_data.pop('endpoint')
+    WebPushDeviceSubscription.objects.filter(
+        endpoint=old_endpoint,
+    ).update(
+        endpoint=endpoint,
+        _data=orjson.dumps(new_subscription_data),
+    )
+
+
 def unsubscribe_device(session_key):
     WebPushDeviceSubscription.objects.filter(session_id=session_key).delete()
 
