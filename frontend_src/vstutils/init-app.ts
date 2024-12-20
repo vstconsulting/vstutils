@@ -31,6 +31,11 @@ export interface InitAppConfigRaw {
         endpointPath?: string;
         disableBulk?: boolean;
     };
+    sw?: {
+        path?: string;
+        scope?: string;
+    };
+    defaultNotificationOptions?: Record<string, any>;
 }
 
 export interface InitAppConfig {
@@ -42,6 +47,11 @@ export interface InitAppConfig {
     createAuthApp?: AuthAppFactory;
     vue?: typeof Vue;
     api: ApiConfig;
+    sw: {
+        path: string;
+        scope: string;
+    };
+    defaultNotificationOptions?: Record<string, any>;
 }
 
 interface Oauth2Config {
@@ -90,8 +100,6 @@ export interface PageLoader {
 async function _initApp(ctx: InitAppContextWithConfig) {
     ctx.config.pageLoader.show();
 
-    registerSw();
-
     const userProfile = await getUserProfile(ctx.config);
     if (!userProfile) {
         await ctx.config.auth.userManager.removeUser();
@@ -102,6 +110,18 @@ async function _initApp(ctx: InitAppContextWithConfig) {
     const schema = await loadSchema(ctx.config);
     if (!verifyAndSetCachedOauthParams(ctx, schema)) {
         throw new RestartAppError();
+    }
+
+    if ('serviceWorker' in navigator) {
+        const params = new URLSearchParams({
+            options: JSON.stringify({
+                apiUrl: ctx.config.api.url,
+                defaultOptions: ctx.config.defaultNotificationOptions,
+            }),
+        }).toString();
+        navigator.serviceWorker.register(`${ctx.config.sw.path}?${params}`, {
+            scope: ctx.config.sw.scope,
+        });
     }
 
     const app = new App({ config: ctx.config, schema, userProfile });
@@ -160,6 +180,11 @@ async function prepareConfig({ rawConfig }: InitAppContext): Promise<InitAppCont
                 userManager,
             },
             api: apiConfig,
+            sw: {
+                path: rawConfig.sw?.path ?? '/service-worker.js',
+                scope: rawConfig.sw?.scope ?? '/',
+            },
+            defaultNotificationOptions: rawConfig.defaultNotificationOptions ?? {},
         },
         isCachedOauthAuthorityUsed,
         isCachedOauthClientIdUsed,
@@ -201,14 +226,6 @@ function createChildEl(el: HTMLElement) {
     const wrapper = el.ownerDocument.createElement('div');
     el.appendChild(wrapper);
     return wrapper;
-}
-
-function registerSw() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js').catch((error) => {
-            console.error('Service Worker registration failed with ' + error);
-        });
-    }
 }
 
 async function getUserProfile(config: InitAppConfig): Promise<UserProfile | undefined> {

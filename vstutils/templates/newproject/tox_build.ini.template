@@ -30,7 +30,6 @@ deps =
     wheel==0.41.3
     setuptools>=61.2.0
     -rrequirements-doc.txt
-    jsmin~=3.0.0
     csscompressor==0.9.5
     vstcompile~=2.0
 

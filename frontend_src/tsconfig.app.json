@@ -1,11 +1,6 @@
 {
-    "include": [
-        "./**/*",
-    ],
-    "exclude": [
-        "vite.config.ts",
-        "build-package.ts",
-    ],
+    "include": ["./**/*"],
+    "exclude": ["vite.config.ts", "build-package.ts", "service-worker/**/*"],
     "compilerOptions": {
         "outDir": "./dist",
         "allowJs": true,
@@ -21,17 +16,12 @@
         "skipLibCheck": true,
         "resolveJsonModule": true,
         "useDefineForClassFields": false,
-        "types": [
-            "vite/client",
-            "vitest/globals",
-            "jquery",
-            "bootstrap",
-        ],
+        "types": ["vite/client", "vitest/globals", "jquery", "bootstrap"],
         "paths": {
             "#vstutils/*": ["./vstutils/*"],
             "#libs/*": ["./libs/*"],
             "#unittests/*": ["./unittests/*"],
-            "#unittests": ["./unittests"],
+            "#unittests": ["./unittests"]
         }
     },
     "vueCompilerOptions": {

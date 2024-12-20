@@ -26,6 +26,7 @@ export default defineConfig({
             entry: {
                 index: join(frontendSrc, 'index.ts'),
                 'auth-app': join(frontendSrc, 'auth-app.ts'),
+                sw: join(frontendSrc, 'service-worker/service-worker.ts'),
             },
             formats: ['es'],
             cssFileName: 'style',

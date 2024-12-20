@@ -157,7 +157,6 @@ module = [
     "django_celery_beat.*",
     "drf_orjson_renderer.*",
     "ldap.*",
-    "jsmin.*",
     "PIL.*",
     "environ.*",
     "ruamel.*",

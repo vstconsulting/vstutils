@@ -89,12 +89,13 @@ function getPermission() {
  * disabled.
  */
 async function setupAppNotifications(app: IApp, view: PageEditView) {
-    const notificationSettingsViewPath = getUserNotificationSettingsViewUrl(app);
-    if (!notificationSettingsViewPath) {
+    const settingsViewPath = getUserNotificationSettingsViewUrl(app);
+    if (!settingsViewPath) {
         return;
     }
+    const settingsViewPathFormatted = formatPath(settingsViewPath, { id: 'profile' });
     view.parent!.useViewFieldAsTitle = false;
-    const qs = view.objects.clone({ url: formatPath(notificationSettingsViewPath, { id: 'profile' }) });
+    const qs = view.objects.clone({ url: settingsViewPathFormatted });
     const notificationsSettings = await qs.get(undefined);
 
     const swRegistration = await getServiceWorkerRegistration();

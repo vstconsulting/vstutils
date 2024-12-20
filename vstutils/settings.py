@@ -447,7 +447,6 @@ class WebPushSection(BackendSection):
         'vapid_private_key': ConfigStringType,
         'vapid_public_key': ConfigStringType,
         'vapid_admin_email': ConfigStringType,
-        'default_notification_icon': ConfigStringType,
     }
 
 
@@ -1140,6 +1139,7 @@ SWAGGER_SETTINGS: _t.Dict = {
 API: SIMPLE_OBJECT_SETTINGS_TYPE = {
     VST_API_VERSION: {},
     'oauth2': {},
+    'webpush': {},
 }
 
 HEALTH_BACKEND_CLASS: _t.Text = 'vstutils.api.health.DefaultBackend'
@@ -1341,12 +1341,6 @@ MANIFEST_CLASS = 'vstutils.gui.pwa_manifest.PWAManifest'
 ENABLE_BACKEND_MANIFEST = True
 
 VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
-    "SERVICE_WORKER": {
-        "BACKEND": 'vstutils.gui.views.SWView',
-        "OPTIONS": {
-            'name': 'service_worker'
-        }
-    },
     "TERMS": {
         "BACKEND": 'vstutils.gui.views.TermsView',
         "OPTIONS": {
@@ -1361,9 +1355,7 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     }
 }
 
-GUI_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
-    'service-worker.js': 'SERVICE_WORKER',
-}
+GUI_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {}
 
 def get_accounts_views_mapping():
     mapping = {}
@@ -1487,9 +1479,15 @@ WEBPUSH_ENABLED: bool = webpush_section.get('enabled', False)
 WEBPUSH_PRIVATE_KEY: _t.Optional[str] = webpush_section.get('vapid_private_key', None)
 WEBPUSH_PUBLIC_KEY: _t.Optional[str] = webpush_section.get('vapid_public_key', None)
 WEBPUSH_SUB_EMAIL: _t.Optional[str] = webpush_section.get('vapid_admin_email', None)
-WEBPUSH_DEFAULT_NOTIFICATIONS_ICON: _t.Optional[str] = webpush_section.get('default_notification_icon', None)
 WEBPUSH_CREATE_USER_SETTINGS_VIEW = WEBPUSH_ENABLED
 WEBPUSH_USER_SETTINGS_VIEW_SUBPATH = 'push_notifications'
+if WEBPUSH_ENABLED:
+
+    API['webpush'] = {
+        'pushsubscriptionchange': {
+            'view': 'vstutils.webpush.api.PushSubscriptionChangeView',
+        }
+    }
 
 
 # OAuth

@@ -10,7 +10,6 @@ from django.template.response import TemplateResponse as BaseTemplateResponse
 from django.conf import settings
 from django.urls import reverse_lazy
 from htmlmin.minify import html_minify
-from jsmin import jsmin
 
 from ..utils import lazy_translate as __
 
@@ -23,39 +22,17 @@ class TemplateResponse(BaseTemplateResponse):
         content = super().rendered_content
         if self.minify_response and 'text/html' in self.headers.get('Content-Type', ''):
             return html_minify(content)
-        return content
+        return content  # nocv
 
 
 class BaseView(TemplateView):
     login_required = False
-    minify_response = True
     response_class = TemplateResponse
-
-    def dispatch(self, request, *args, **kwargs):
-        response = super().dispatch(request, *args, **kwargs)
-        if not self.minify_response:
-            response.minify_response = False  # type: ignore
-        return response
 
     @classmethod
     def as_view(cls, *args, **kwargs):
         view = super().as_view(*args, **kwargs)
         return cls.login_required and login_required(view, login_url=reverse_lazy('login')) or view  # type: ignore
-
-
-class JSMinTemplateResponse(TemplateResponse):
-    @property
-    def rendered_content(self):
-        content = super().rendered_content
-        return content.__class__(jsmin(content, quote_chars="'\"`"))
-
-
-class SWView(BaseView):
-    login_required = False
-    minify_response = False
-    content_type = 'text/javascript'
-    template_name = "gui/service-worker.js"
-    response_class = JSMinTemplateResponse
 
 
 class BaseAgreementsView(BaseView):

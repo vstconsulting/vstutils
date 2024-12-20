@@ -81,7 +81,7 @@ from vstutils.utils import SecurePickling, BaseEnum, get_render, create_view
 from vstutils.api.validators import resize_image
 from vstutils.webpush.models import WebPushDeviceSubscription, WebPushNotificationSubscription
 from vstutils.webpush.utils import subscribe_device, update_user_subscriptions
-from vstutils.webpush.test_utils import subscribe_user_device_to_pushes
+from vstutils.webpush.test_utils import subscribe_user_device_to_pushes, change_user_device_subscription
 from vstutils.oauth2.jwk import jwk_set as oauth2_server_jwk_set
 from vstutils.oauth2.endpoints import server as authorization_server
 from vstutils.oauth2.user import UserWrapper
@@ -805,11 +805,6 @@ class ViewsTestCase(BaseTestCase):
         self.get_result('get', '/api/user/', code=404)
         self.get_result('get', '/api/v1/user/1000/', code=404)
         self.get_result('get', '/static/bundle/output.json_unknown', code=404)
-
-        # Test js urls minification
-        for js_url in ['service-worker.js']:
-            response = self.get_result('get', f'/{js_url}')
-            self.assertCount(str(response).split('\n'), 1, f'{js_url} is longer than 1 string.')
 
     def test_spa_routes(self):
         client = self.api_test_client
@@ -6458,6 +6453,48 @@ class WebPushesTestCase(BaseTestCase):
             },
         )
         self.assertEqual(len(WebPushDeviceSubscription.objects.filter(user_id=user.id)), 0)
+
+    def test_change_user_device_subscriptions(self):
+        user_device1 = self.client_class()
+        user_device1.force_login(self.user)
+        old_subscription, new_subscription_data = change_user_device_subscription(self.user, language="en")
+
+        self.assertTrue(
+            WebPushDeviceSubscription.objects.filter(
+                endpoint=old_subscription._sub.endpoint
+            ).exists()
+        )
+        self.assertFalse(
+            WebPushDeviceSubscription.objects.filter(
+                endpoint=new_subscription_data["endpoint"]
+            ).exists()
+        )
+
+        response = user_device1.post(
+            f'/api/webpush/pushsubscriptionchange/',
+            content_type='application/json',
+            data={
+                "old_endpoint": old_subscription._sub.endpoint,
+                "subscription_data": new_subscription_data,
+            },
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertFalse(
+            WebPushDeviceSubscription.objects.filter(
+                endpoint=old_subscription._sub.endpoint
+                ).exists()
+            )
+        self.assertTrue(
+            WebPushDeviceSubscription.objects.filter(
+                endpoint=new_subscription_data["endpoint"]
+            ).exists()
+        )
+
+    def test_service_worker_js(self):
+        response = self.api_test_client.get('/service-worker.js')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['content-type'], 'text/javascript; charset=utf-8')
 
     def test_settings_view_permissions(self):
         other_user = self._create_user(is_super_user=False, is_staff=False, username='other_user')

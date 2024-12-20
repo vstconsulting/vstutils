@@ -37,6 +37,8 @@ async def run_process(
     :param env: Environment variables to use for the process. Defaults to None, using os.environ.
     :param timeout: Timeout (in seconds) to wait for the process to terminate gracefully. Defaults to 5 seconds.
     :param print_func: Function to handle log output. Defaults to the built-in print function.
+    :param print_warn: Function to handle warn output. Defaults to ``print_func``.
+    :param print_err: Function to handle error output. Defaults to ``print_func``.
 
     :return: Exit code of the terminated process.
     """
