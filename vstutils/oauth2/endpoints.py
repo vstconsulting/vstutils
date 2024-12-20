@@ -11,13 +11,21 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from drf_orjson_renderer.parsers import ORJSONParser as JSONParser
-from vstutils.api.permissions import IsOpenApiRequest
-from vstutils.api.responses import HTTP_200_OK
 
 from .authentication import JWTBearerTokenAuthentication
+from ..api.renderers import ORJSONRenderer
+from ..api.permissions import IsOpenApiRequest
+from ..api.responses import HTTP_200_OK
+
 
 if TYPE_CHECKING:
     from authlib.oauth2.rfc6749 import AuthorizationServer  # nocv
+
+GRANT_TYPES = sorted(tuple({
+    grant_type
+    for client_data in settings.OAUTH_SERVER_CLIENTS.values()
+    for grant_type in client_data.get('allowed_grant_types', [])
+}))
 
 ServerClass = import_string(settings.OAUTH_SERVER_CLASS)
 server: "AuthorizationServer" = ServerClass()
@@ -28,34 +36,58 @@ class Oauth2Throttle(AnonRateThrottle):
     scope = "oauth2"
 
 
-class TokenViewSet(APIView):
-    parser_classes = [JSONParser, FormParser]
+class BaseAPIView(APIView):
     throttle_classes = [Oauth2Throttle]
-    authentication_classes = set()
-    permission_classes = set()
+    parser_classes = [JSONParser, FormParser]
+    renderer_classes = [ORJSONRenderer]
+    authentication_classes = []
+    permission_classes = []
 
+    def perform_authentication(self, request):
+        pass
+
+
+class TokenViewSet(BaseAPIView):
     @swagger_auto_schema(
         operation_id="get_token",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
                 "grant_type": openapi.Schema(
-                    type=openapi.TYPE_STRING, enum=["password"]
+                    type=openapi.TYPE_STRING,
+                    enum=GRANT_TYPES
                 ),
                 "client_id": openapi.Schema(type=openapi.TYPE_STRING),
                 "client_secret": openapi.Schema(type=openapi.TYPE_STRING),
                 "username": openapi.Schema(type=openapi.TYPE_STRING),
                 "password": openapi.Schema(type=openapi.TYPE_STRING),
+                "code": openapi.Schema(type=openapi.TYPE_STRING),
+                "redirect_uri": openapi.Schema(type=openapi.TYPE_STRING),
+                "refresh_token": openapi.Schema(type=openapi.TYPE_STRING),
                 "second_factor": openapi.Schema(type=openapi.TYPE_STRING),
+                "scope": openapi.Schema(type=openapi.TYPE_STRING),
             },
             required=[
                 "grant_type",
-                "username",
-                "password",
+                "client_id",
             ],
         ),
         responses={
-            200: "Token response",
+            200: openapi.Response(
+                description="Token response",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "access_token": openapi.Schema(type=openapi.TYPE_STRING),
+                        "token_type": openapi.Schema(type=openapi.TYPE_STRING),
+                        "id_token": openapi.Schema(type=openapi.TYPE_STRING),
+                        "expires_in": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "refresh_token": openapi.Schema(type=openapi.TYPE_STRING),
+                        "scope": openapi.Schema(type=openapi.TYPE_STRING),
+                    },
+                    required=["access_token", "token_type", "expires_in", "scope"],
+                ),
+            ),
             400: openapi.Response(
                 description="Bad request",
                 schema=openapi.Schema(
@@ -72,17 +104,16 @@ class TokenViewSet(APIView):
                 ),
             ),
         },
+        consumes=[
+            "application/x-www-form-urlencoded",
+            "application/json",
+        ]
     )
     def post(self, request):
         return server.create_token_response(request)
 
 
-class RevokeTokenViewSet(APIView):
-    parser_classes = [JSONParser, FormParser]
-    throttle_classes = [Oauth2Throttle]
-    authentication_classes = []
-    permission_classes = []
-
+class RevokeTokenViewSet(BaseAPIView):
     @swagger_auto_schema(
         operation_id="revoke_token",
         request_body=openapi.Schema(
@@ -101,12 +132,7 @@ class RevokeTokenViewSet(APIView):
         return server.create_endpoint_response("revocation", request)
 
 
-class TokenIntrospectionViewSet(APIView):
-    parser_classes = [JSONParser, FormParser]
-    throttle_classes = [Oauth2Throttle]
-    authentication_classes = []
-    permission_classes = []
-
+class TokenIntrospectionViewSet(BaseAPIView):
     @swagger_auto_schema(
         operation_id="token_introspection",
         request_body=openapi.Schema(
@@ -155,12 +181,9 @@ class IsAnyUser(BasePermission):
         return bool(request.user)
 
 
-class UserInfoView(APIView):
-    throttle_classes = [Oauth2Throttle]
-    authentication_classes = []
+class UserInfoView(BaseAPIView):
     permission_classes = [IsOpenApiRequest | (IsAnonAllowed & IsAnyUser) | IsAuthenticated]
     authentication_classes = [JWTBearerTokenAuthentication]
-    parser_classes = [JSONParser, FormParser]
 
     @swagger_auto_schema(
         operation_id="userinfo",

@@ -72,8 +72,8 @@ include = ['vstutils', 'vstutils.*']
 namespaces = false
 
 [tool.flake8]
-ignore = "E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741,W504,B001,B008,B023,C812,C815,CFQ004,B019,B026,I100"
-exclude = "./vstutils/*/migrations/*,./vstutils/settings*.py,.tox/*,./etc/*,./*/__init__.py,./t_openstack.py,./vstutils/projects/*,vstutils/__main__.py,vstutils/compile.py"
+ignore = "E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741,W504,B001,B008,B023,C812,C815,C414,CFQ004,B019,B026,I100"
+exclude = "./vstutils/*/migrations/*,./vstutils/settings*.py,.tox/*,./*/__init__.py,./vstutils/projects/*,vstutils/__main__.py"
 max-line-length = 120
 import-order-style = 'pep8'
 
@@ -98,13 +98,10 @@ omit = [
     'test.py',
     'upload_big.py',
     '*/vstutils/__main__.py',
-    '*/vstutils/asgi_worker.py',
     '*/vstutils/admin_urls.py',
     '*/vstutils/celery_beat_scheduler.py',
     '*/vstutils/wsgi.py',
-    '*/vstutils/compile.py',
     '*/vstutils/api/admin.py',
-    '*/vstutils/api/doc_generator.py',
     '*/vstutils/drivers/*',
 ]
 
@@ -160,7 +157,6 @@ module = [
     "django_celery_beat.*",
     "drf_orjson_renderer.*",
     "ldap.*",
-    "uwsgi.*",
     "jsmin.*",
     "PIL.*",
     "environ.*",

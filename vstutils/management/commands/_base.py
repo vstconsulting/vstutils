@@ -144,7 +144,7 @@ def get_celery_command(celery_path=f'{sys.executable} -m celery', command='worke
     if '--queues' not in options and command == 'worker':
         options += ' --queues={}'.format(r'\,'.join(settings.WORKER_QUEUES))
 
-    # Add arguments to uwsgi cmd list.
+    # Add arguments to cmd list.
     return f'{celery_path} {app_option} {command} {options}'
 
 
@@ -269,10 +269,7 @@ class DockerCommand(BaseCommand):
         self.env = os.environ.copy()
         self.config = self.prepare_config()
         self.env[f'{settings.ENV_NAME}_DAEMON'] = 'false'
-        default_envs = {
-            'UWSGI_PROCESSES': 'UWSGI_WORKERS',
-            'UWSGI_THREADS': 'UWSGI_THREADS'
-        }
+        default_envs: dict[str, str] = {}
         for key in default_envs:  # pylint: disable=consider-using-dict-items
             value = os.environ.get(f"{self.prefix}_{key}", '')
             if value:
@@ -283,7 +280,9 @@ class DockerCommand(BaseCommand):
             logger.debug(f'Config:\n{self.config.generate_config_string()}')
 
         if self.with_migration and options['migrate']:
-            self.migrate(options)  # nocv
+            _, err = self.migrate(options)
+            if err:
+                self._print(f'Migration error: {err}', 'ERROR')
 
     @property
     def databases_to_migrate(self):

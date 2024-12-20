@@ -45,7 +45,7 @@ class Command(DockerCommand):
         parser.add_argument(
             '--addrport', '-p',
             default=settings.WEB_ADDRPORT,
-            dest='addrport', help='Specifies the uwsgi address:port. Default: [:8080]',
+            dest='addrport', help='Specifies the web server address:port. Default: [:8080]',
         )
 
         parser.add_argument('--access-log', action=argparse.BooleanOptionalAction,

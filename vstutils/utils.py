@@ -1514,7 +1514,7 @@ def add_in_vary(headers, value):
     )
     if value.lower() not in vary:
         vary.append(value)
-        headers['Vary'] = ', '.join(vary)
+        headers['Vary'] = ', '.join(filter(bool, vary))
 
 
 def check_request_etag(request, etag_value, header_name="If-None-Match", operation_handler=str.__eq__):
