@@ -20,7 +20,7 @@ aiofiles~=24.1.0
 cent~=5.0.0
 
 # Auth
-Authlib~=1.3.2
+Authlib~=1.4.0
 
 # Minificators
 django-htmlmin~=0.11.0

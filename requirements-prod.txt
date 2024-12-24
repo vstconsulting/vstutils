@@ -5,3 +5,4 @@
 redis[hiredis]~=5.2.1
 tarantool~=1.2.0
 pywebpush==2.0.3
+py-vapid<1.9.2

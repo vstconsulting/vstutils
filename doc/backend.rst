@@ -260,6 +260,11 @@ Transactional bulk request returns ``502 BAG GATEWAY`` and does rollback after f
     If you send non-transactional bulk request, you will get ``200`` status and must
     validate statuses on each operation responses.
 
+.. error::
+    It is very important to know that each view in a bulk request will use **ForcedAuthentication** as the successful authenticator.
+    Additionally, the session object will be shared across all requests.
+    In some cases, this allows you to write values into the session between requests without persisting them to storage.
+
 OpenAPI schema
 ~~~~~~~~~~~~~~
 

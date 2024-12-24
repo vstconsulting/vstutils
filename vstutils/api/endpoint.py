@@ -147,10 +147,11 @@ class BulkMiddleware(BaseMiddleware):
     def request_handler(self, request: HttpRequest) -> HttpRequest:
         request.is_bulk = True  # type: ignore
         if 'user' in request.META:
-            request.user = request.META.pop('user')
+            request.user = user = request.META.pop('user')
             # pylint: disable=protected-access
-            request._cached_user = request.user  # type: ignore
-            request.auth_obj = request.META.pop('auth_obj')
+            request._cached_user = user  # type: ignore
+            request._force_auth_user = user
+            request.auth_obj = request._force_auth_token = request.META.pop('auth_obj')
         if 'language' in request.META:
             request.language = request.META.pop('language')  # type: ignore
         if 'session' in request.META:
@@ -327,7 +328,7 @@ class OperationSerializer(serializers.Serializer):
                 url,
                 content_type=self.renderer.media_type,
                 secure=self.context['request']._request.is_secure(),
-                data=data,
+                data=data if data is not None else '',
                 headers=headers,
             )
         )

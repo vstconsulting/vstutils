@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-19 06:27+0000\n"
+"POT-Creation-Date: 2024-12-24 01:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4992,14 +4992,27 @@ msgstr ""
 "должны будете проверить статус каждого ответа операции отдельно."
 
 #: ../../backend.rst:264
+msgid ""
+"It is very important to know that each view in a bulk request will use "
+"**ForcedAuthentication** as the successful authenticator. Additionally, "
+"the session object will be shared across all requests. In some cases, "
+"this allows you to write values into the session between requests without"
+" persisting them to storage."
+msgstr ""
+"Очень важно знать, что каждое представление в запросе на выполнение нескольких операций "
+"будет использовать **ForcedAuthentication** в качестве успешного аутентификатора. "
+"Кроме того, объект сессии будет общим для всех запросов. В некоторых случаях это позволяет записывать "
+"значения в сессию между запросами без их сохранения в хранилище."
+
+#: ../../backend.rst:269
 msgid "OpenAPI schema"
 msgstr "Схема OpenAPI"
 
-#: ../../backend.rst:266
+#: ../../backend.rst:271
 msgid "Request on ``GET /{API_URL}/endpoint/`` returns Swagger UI."
 msgstr "Запрос на ``GET /{API_URL}/endpoint/`` возвращает Swagger UI."
 
-#: ../../backend.rst:268
+#: ../../backend.rst:273
 msgid ""
 "Request on ``GET /{API_URL}/endpoint/?format=openapi`` returns OpenAPI "
 "schema in json format. Also you can specify required version of schema "
@@ -5010,7 +5023,7 @@ msgstr ""
 "OpenAPI в формате json. Также вы можете указать нужную версию схемы, "
 "используя query-параметр ``version`` "
 
-#: ../../backend.rst:271
+#: ../../backend.rst:276
 msgid ""
 "To change the schema after generating and before sending to user use "
 "hooks. Define one or more function, each taking 2 named arguments:"
@@ -5019,15 +5032,15 @@ msgstr ""
 "используйте хуки. Напишите одну или несколько функций, каждая из которых "
 "принимает 2 именованных аргумента:"
 
-#: ../../backend.rst:274
+#: ../../backend.rst:279
 msgid "``request`` - user request object."
 msgstr "``request`` - объект запроса пользователя."
 
-#: ../../backend.rst:275
+#: ../../backend.rst:280
 msgid "``schema`` - ordered dict with OpenAPI schema."
 msgstr "``schema`` - ordered dict, содержащий схему OpenAPI."
 
-#: ../../backend.rst:278
+#: ../../backend.rst:283
 msgid ""
 "Sometimes hooks may raise an exception; in order to keep a chain of data "
 "modification, such exceptions are handled. The changes made to the schema"
@@ -5037,11 +5050,11 @@ msgstr ""
 "модификации данных, такие исключения обрабатываются. Изменения, сделанные"
 " в схеме перед выбросом исключения, в любом случае сохраняются."
 
-#: ../../backend.rst:287
+#: ../../backend.rst:292
 msgid "Example hook:"
 msgstr "Пример хука:"
 
-#: ../../backend.rst:289
+#: ../../backend.rst:294
 msgid ""
 "To connect hook(s) to your app add function import name to the "
 "``OPENAPI_HOOKS`` list in ``settings.py``"
@@ -5049,11 +5062,11 @@ msgstr ""
 "Чтобы присоединить хук(-и) к вашему приложению, добавьте строку импорта "
 "вашей функции в список ``OPENAPI_HOOKS`` в ``settings.py``"
 
-#: ../../backend.rst:299
+#: ../../backend.rst:304
 msgid "Testing Framework"
 msgstr "Фреймворк для тестирования"
 
-#: ../../backend.rst:301
+#: ../../backend.rst:306
 msgid ""
 "VST Utils Framework includes a helper in base test case class and "
 "improves support for making API requests. That means if you want make "
@@ -5065,11 +5078,11 @@ msgstr ""
 " что для отправления bulk-запроса на endpoint нет необходимости создавать"
 " и инициализировать test client, а можно сразу делать запрос."
 
-#: ../../backend.rst:312
+#: ../../backend.rst:317
 msgid "Creating test case"
 msgstr "Создание тест-кейса"
 
-#: ../../backend.rst:313
+#: ../../backend.rst:318
 msgid ""
 "``test.py`` module contains test case classes based on "
 ":class:`vstutils.tests.BaseTestCase`. At the moment, we officially "
@@ -5083,11 +5096,11 @@ msgstr ""
 "оберток запросов с проверкой выполнения и runtime-оптимизацией "
 "bulk-запросов с ручной проверкой значений."
 
-#: ../../backend.rst:320
+#: ../../backend.rst:325
 msgid "Simple example with classic tests"
 msgstr "Простой пример с классическими тестами"
 
-#: ../../backend.rst:322
+#: ../../backend.rst:327
 msgid ""
 "For example, if you have api endpoint like ``/api/v1/project/`` and model"
 " Project you can write test case like this:"
@@ -5095,7 +5108,7 @@ msgstr ""
 "Например, если у вас endpoint вида ``/api/v1/project/`` и модель Project,"
 " вы можете написать такой тест:"
 
-#: ../../backend.rst:357
+#: ../../backend.rst:362
 msgid ""
 "This example demonstrates functionality of default test case class. "
 "Default projects are initialized for the fastest and most efficient "
@@ -5109,11 +5122,11 @@ msgstr ""
 " в разные классы. В данном примере показан классический подход к "
 "тестированию, однако вы можете использовать bulk-запросы в ваших тестах."
 
-#: ../../backend.rst:365
+#: ../../backend.rst:370
 msgid "Bulk requests in tests"
 msgstr "Bulk-запросы в тестах"
 
-#: ../../backend.rst:367
+#: ../../backend.rst:372
 msgid ""
 "Bulk query system is well suited for testing and executing valid queries."
 " Previous example could be rewritten as follows:"
@@ -5121,7 +5134,7 @@ msgstr ""
 "Система bulk-запросов хорошо подходит для тестирования и запуска валидных"
 " запросов. Предыдущий пример может быть переписан так:"
 
-#: ../../backend.rst:417
+#: ../../backend.rst:422
 msgid ""
 "In this case, you have more code, but your tests are closer to GUI "
 "workflow, because vstutils-projects uses ``/api/endpoint/`` for requests."
@@ -5136,7 +5149,7 @@ msgstr ""
 " котором используется bulk меньше по сравнению с тестом, использующим "
 "стандартный механизм."
 
-#: ../../backend.rst:424
+#: ../../backend.rst:429
 msgid "Test case API"
 msgstr "API тест-кейса"
 
@@ -5530,11 +5543,11 @@ msgstr ""
 msgid "new user object for execution."
 msgstr "новый объект пользователя, от которого будет выполнение."
 
-#: ../../backend.rst:431
+#: ../../backend.rst:436
 msgid "Utils"
 msgstr "Утилиты"
 
-#: ../../backend.rst:433
+#: ../../backend.rst:438
 msgid ""
 "This is tested set of development utilities. Utilities include a "
 "collection of code that will be useful in one way or another for "
@@ -6239,11 +6252,11 @@ msgstr ""
 "Использует функцию :func:`django.utils.translation.get_language` для "
 "получения кода языка и пытается получить перевод из списка доступных."
 
-#: ../../backend.rst:445
+#: ../../backend.rst:450
 msgid "Integrating Web Push Notifications"
 msgstr "Интеграция Web Push-уведомлений"
 
-#: ../../backend.rst:447
+#: ../../backend.rst:452
 msgid ""
 "Web push notifications are an effective way to engage users with real-"
 "time messaging. To integrate web push notifications in your VSTUtils "
@@ -6253,7 +6266,7 @@ msgstr ""
 "с помощью реального времени. Чтобы интегрировать web-уведомления в ваш "
 "проект VSTUtils, выполните следующие шаги:"
 
-#: ../../backend.rst:450
+#: ../../backend.rst:455
 msgid ""
 "**Configuration**: First, include the ``vstutils.webpush`` module in the "
 "``INSTALLED_APPS`` section of your ``settings.py`` file. This enables the"
@@ -6268,7 +6281,7 @@ msgstr ""
 "настроек web-уведомлений (см. :ref:`здесь<webpush-settings>` для "
 "подробностей)."
 
-#: ../../backend.rst:453
+#: ../../backend.rst:458
 msgid ""
 "**Creating Notifications**: To create a web push notification, you need "
 "to define a class that inherits from either "
@@ -6286,19 +6299,19 @@ msgstr ""
 "``webpushes`` всех ``INSTALLED_APPS``. Ниже приведен пример, "
 "иллюстрирующий, как реализовать пользовательские классы web-уведомлений:"
 
-#: ../../backend.rst:463
+#: ../../backend.rst:468
 msgid "This example contains three classes:"
 msgstr "Этот пример содержит три класса:"
 
-#: ../../backend.rst:465
+#: ../../backend.rst:470
 msgid "`TestWebPush`: Sends notifications to all subscribed users."
 msgstr "`TestWebPush`: Отправляет уведомления всем подписанным пользователям."
 
-#: ../../backend.rst:466
+#: ../../backend.rst:471
 msgid "`TestNotification`: Targets notifications to specific users."
 msgstr "`TestNotification`: Направляет уведомления конкретным пользователям."
 
-#: ../../backend.rst:467
+#: ../../backend.rst:472
 msgid ""
 "`StaffOnlyNotification`: Restricts notifications to staff users only. "
 "Sometimes you may want to allow only some users to subscribe on specific "
@@ -6308,7 +6321,7 @@ msgstr ""
 " Иногда вы можете хотеть разрешить подписку на конкретные уведомления "
 "только некоторым пользователям."
 
-#: ../../backend.rst:469
+#: ../../backend.rst:474
 msgid ""
 "**Sending Notifications**: To dispatch a web push notification, invoke "
 "the ``send`` or ``send_in_task`` method on an instance of your web push "
@@ -6320,7 +6333,7 @@ msgstr ""
 "web-уведомления. Например, чтобы отправить уведомление с использованием "
 "`TestNotification`, вы можете сделать следующее:"
 
-#: ../../backend.rst:484
+#: ../../backend.rst:489
 msgid ""
 "The asynchronous sending of web push notifications (using methods like "
 "``send_in_task``) requires a configured Celery setup in your project, as "
@@ -6334,7 +6347,7 @@ msgstr ""
 "Убедитесь, что Celery правильно настроен и работает, чтобы использовать "
 "асинхронную отправку уведомлений."
 
-#: ../../backend.rst:489
+#: ../../backend.rst:494
 msgid ""
 "By following these steps, you can fast integrate and utilize web push "
 "notifications in projects with VSTUtils."
@@ -6342,11 +6355,11 @@ msgstr ""
 "Следуя этим шагам, вы быстро сможете интегрировать и использовать "
 "web-уведомления в проектах с VSTUtils."
 
-#: ../../backend.rst:493
+#: ../../backend.rst:498
 msgid "Troubleshooting"
 msgstr "Устранение и поиск неисправностей"
 
-#: ../../backend.rst:495
+#: ../../backend.rst:500
 msgid ""
 "Vstutils makes some errors more readable for common users and provides "
 "special error codes for administration to simplify troubleshooting."
@@ -6355,11 +6368,11 @@ msgstr ""
 "пользователей и предоставляет специальные коды ошибок для администрации, "
 "чтобы упростить поиск и устранение проблем."
 
-#: ../../backend.rst:497
+#: ../../backend.rst:502
 msgid "``VE100-VE199`` - Database related errors."
 msgstr "``VE100-VE199`` - Ошибки, связанные с базой данных."
 
-#: ../../backend.rst:498
+#: ../../backend.rst:503
 msgid ""
 "``VE100`` - Integrity error code. Used when "
 "``django.db.utils.IntegrityError`` appears."
