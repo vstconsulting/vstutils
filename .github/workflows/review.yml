@@ -27,24 +27,21 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --pure-lockfile --mutex network
 
-      - name: Run linters
-        run: yarn lint
-
-      - name: Run tests
-        run: yarn test
+      - name: Run frontend checks
+        run: yarn run ci
 
   py_review:
     name: Run linters and tests for python code
     runs-on: "ubuntu-22.04"
     strategy:
       matrix:
-        python: [3.8, "3.11", "3.12"]
+        python: ["3.10", "3.11", "3.13"]
 
     steps:
       - name: Checkout the source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set the node version
         uses: actions/setup-node@v3
@@ -53,7 +50,7 @@ jobs:
           cache: 'yarn'
 
       - name: Set the python version
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
 

@@ -770,21 +770,6 @@ For custom OAuth2 server use the following settings:
 By default one client can be configured using **server_simple_client_id** and **server_simple_client_secret**. Any other clients can be configured using **OAUTH_SERVER_CLIENTS** dictionary in `settings.py` where key is `client_id` and value is `client_secret`.
 
 
-Production web settings
------------------------
-
-Section ``[uwsgi]``.
-
-Settings related to web-server used by vstutils-based application in production
-(for deb and rpm packages by default). Most of them related to system paths
-(logging, PID-file and so on).
-More settings in `uWSGI docs
-<http://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_.
-
-But keep in mind that uWSGI is deprecated and may be removed in future releases.
-Use the uvicorn settings to manage your app server.
-
-
 Working behind the proxy server with TLS
 ----------------------------------------
 
@@ -1008,7 +993,7 @@ This section contains additional information for configure additional elements.
 
    .. sourcecode:: ini
 
-    [uwsgi]
+    [web]
     addrport = 0.0.0.0:8443
 
     [uvicorn]
