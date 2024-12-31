@@ -8,7 +8,7 @@ from asgiref.sync import async_to_sync
 from django.db.models import signals
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from cent import AsyncClient as CentrifugoClient, BatchRequest, PublishRequest
+from cent import AsyncClient, Client, BatchRequest, PublishRequest
 
 from .base import get_proxy_labels
 from ..utils import raise_context_decorator_with_default
@@ -20,7 +20,8 @@ logger = logging.getLogger('vstutils')
 
 class Notificator:
     __slots__ = ('queue', 'cent_client', 'label', '_signals', '__weakref__')
-    client_class = CentrifugoClient
+    client_class = AsyncClient
+    sync_client_class = Client
     _json_renderer = ORJSONRenderer()
 
     def __init__(self, queue=None, client=None, label=None, autoconnect=True):
@@ -53,14 +54,16 @@ class Notificator:
         return settings.CENTRIFUGO_CLIENT_KWARGS.get('token_hmac_secret_key', '')
 
     @raise_context_decorator_with_default(verbose=False)
-    def get_client(self):
+    def get_client(self, asynchronous=True):
         centrifugo_client_kwargs = {
             'api_url': settings.CENTRIFUGO_CLIENT_KWARGS['address'],
             'api_key': settings.CENTRIFUGO_CLIENT_KWARGS['api_key'],
             'timeout': settings.CENTRIFUGO_CLIENT_KWARGS.get('timeout'),
         }
         logger.debug(f"Getting Centrifugo client with kwargs: {centrifugo_client_kwargs}")
-        return self.client_class(**centrifugo_client_kwargs)
+        if asynchronous:
+            return self.client_class(**centrifugo_client_kwargs)
+        return self.sync_client_class(**centrifugo_client_kwargs)
 
     def create_notification_from_instance(self, instance):  # pylint: disable=invalid-name
         if not self.is_usable():
@@ -83,33 +86,58 @@ class Notificator:
     def clear_messages(self):
         self.queue.clear()
 
+    def _prep_messages(self, objects, provided_label):
+        publish_requests: list[PublishRequest] = []
+        sent_channels = set()
+
+        for obj_labels, data in objects:
+            with contextlib.suppress(Exception):
+                for obj_label in obj_labels:
+                    channel = self.get_subscription_channel(provided_label or obj_label)
+                    publish_requests.append(PublishRequest(
+                        channel=channel,
+                        data=data,
+                    ))
+                    sent_channels.add(channel)
+
+        return publish_requests, sent_channels
+
     def send(self):
         with contextlib.suppress(Exception):
-            return async_to_sync(self.asend)()
+            self.queue, objects = [], tuple(self.queue)
+
+            if objects:
+                cent_client = self.get_client(asynchronous=False)
+                if not cent_client:
+                    self.queue.extend(objects)
+                    async_to_sync(self.asend)()
+                    return
+
+            publish_requests: list[PublishRequest]
+            sent_channels: set[str]
+
+            publish_requests, sent_channels = self._prep_messages(objects, self.label)
+
+            if publish_requests:
+                logger.debug(f'Send notifications about {len(objects)} updates to channel(s) {sent_channels}.')
+                return cent_client.batch(
+                    BatchRequest(requests=publish_requests),
+                )
 
     async def asend(self):
         try:
             self.queue, objects = [], tuple(self.queue)
-
-            sent_channels = set()
-            provided_label = self.label
 
             if objects and self.cent_client is None:
                 self.cent_client = self.get_client()
                 if not self.cent_client:
                     return
 
-            publish_requests: list[PublishRequest] = []
+            publish_requests: list[PublishRequest]
+            sent_channels: set[str]
 
-            for obj_labels, data in objects:
-                with contextlib.suppress(Exception):
-                    for obj_label in obj_labels:
-                        channel = self.get_subscription_channel(provided_label or obj_label)
-                        publish_requests.append(PublishRequest(
-                            channel=channel,
-                            data=data,
-                        ))
-                        sent_channels.add(channel)
+            publish_requests, sent_channels = self._prep_messages(objects, self.label)
+
             if publish_requests:
                 logger.debug(f'Send notifications about {len(objects)} updates to channel(s) {sent_channels}.')
                 return await self.cent_client.batch(
