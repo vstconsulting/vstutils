@@ -5983,7 +5983,6 @@ class WebSocketTestCase(BaseTestCase):
         self.assertDictEqual(req.api_payload, {
             "commands": [
                 {"publish": {"channel": "test_proj.update.some-channel", "data": {"pk": host_obj.id}}},
-                {'publish': {'channel': 'test_proj.update.some-channel', 'data': {'pk': host_obj.id}}},
             ],
             "parallel": False,
         })

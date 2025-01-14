@@ -612,13 +612,17 @@ every 5 seconds (by default).
 * **api_key** - API key for clients.
 * **token_hmac_secret_key** - API key for jwt-token generation.
 * **timeout** - Connection timeout.
-* **verify** - Connection verification.
 * **subscriptions_prefix** - Prefix used for generating update channels, by default "{VST_PROJECT}.update".
 
 .. note::
     These settings also add parameters to the OpenAPI schema and change how the auto-update system works in the GUI.
     ``token_hmac_secret_key`` is used for jwt-token generation (based on
     session expiration time). Token will be used for Centrifugo-JS client.
+
+.. warning::
+    Please note that ``verify`` is no longer used. If you need to use self-signed certificates,
+    you must add them to the system's trusted list.
+    Otherwise, it makes more sense to communicate with the Centrifugo API over plain-HTTP and use a terminating proxy for clients.
 
 
 .. _storages:

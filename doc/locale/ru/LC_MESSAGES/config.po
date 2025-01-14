@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VST Utils 5.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-25 05:03+0000\n"
+"POT-Creation-Date: 2025-01-14 21:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1697,10 +1697,6 @@ msgid "**timeout** - Connection timeout."
 msgstr "**timeout** - Таймаут подключения."
 
 #: ../../config.rst:615
-msgid "**verify** - Connection verification."
-msgstr "**verify** - Проверка подключения."
-
-#: ../../config.rst:616
 msgid ""
 "**subscriptions_prefix** - Prefix used for generating update channels, by"
 " default \"{VST_PROJECT}.update\"."
@@ -1708,7 +1704,7 @@ msgstr ""
 "**subscriptions_prefix** -  Префикс, используемый для генерации каналов "
 "обновления, по умолчанию \"{VST_PROJECT}.update\"."
 
-#: ../../config.rst:619
+#: ../../config.rst:618
 msgid ""
 "These settings also add parameters to the OpenAPI schema and change how "
 "the auto-update system works in the GUI. ``token_hmac_secret_key`` is "
@@ -1720,15 +1716,23 @@ msgstr ""
 "генерации JWT-токена (на основе времени истечения сессии). Токен будет "
 "использоваться для клиента Centrifugo-JS."
 
-#: ../../config.rst:627
+#: ../../config.rst:623
+msgid ""
+"Please note that ``verify`` is no longer used. If you need to use self-"
+"signed certificates, you must add them to the system's trusted list. "
+"Otherwise, it makes more sense to communicate with the Centrifugo API "
+"over plain-HTTP and use a terminating proxy for clients."
+msgstr ""
+
+#: ../../config.rst:631
 msgid "Storage settings"
 msgstr "Настройки хранилища"
 
-#: ../../config.rst:629
+#: ../../config.rst:633
 msgid "Section ``[storages]``."
 msgstr "Раздел ``[storages]``."
 
-#: ../../config.rst:631
+#: ../../config.rst:635
 msgid ""
 "Applications based on ``vstutils`` supports filesystem storage out of "
 "box. Setup ``media_root`` and ``media_url`` in ``[storages.filesystem]`` "
@@ -1741,7 +1745,7 @@ msgstr ""
 "``media_url`` в разделе [storages.filesystem]. По умолчанию они будут "
 "равны ``{/path/to/project/module}/media`` и ``/media/``."
 
-#: ../../config.rst:636
+#: ../../config.rst:640
 msgid ""
 "Applications based on ``vstutils`` supports store files in external "
 "services with `Apache Libcloud <http://libcloud.apache.org/>`_ and `Boto3"
@@ -1752,7 +1756,7 @@ msgstr ""
 "<http://libcloud.apache.org/>`_ и `Boto3 "
 "<https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_."
 
-#: ../../config.rst:639
+#: ../../config.rst:643
 msgid ""
 "Apache Libcloud settings grouped by sections named "
 "``[storages.libcloud.provider]``, where ``provider`` is name of storage. "
@@ -1769,7 +1773,7 @@ msgstr ""
 "storages.readthedocs.io/en/latest/backends/apache_libcloud.html#libcloud-"
 "providers>`_."
 
-#: ../../config.rst:644
+#: ../../config.rst:648
 msgid ""
 "This setting is required to configure connections to cloud storage "
 "providers. Each entry corresponds to a single ‘bucket’ of storage. You "
@@ -1782,7 +1786,7 @@ msgstr ""
 "(например, несколько buckets S3), и вы можете определить buckets в "
 "нескольких провайдерах."
 
-#: ../../config.rst:649
+#: ../../config.rst:653
 msgid ""
 "For ``Boto3`` all settings grouped by section named ``[storages.boto3]``."
 " Section must contain following keys: ``access_key_id``, "
@@ -1797,7 +1801,7 @@ msgstr ""
 "amazon-S3 <https://django-"
 "storages.readthedocs.io/en/latest/backends/amazon-S3.html>`_."
 
-#: ../../config.rst:654
+#: ../../config.rst:658
 msgid ""
 "Storage has following priority to choose storage engine if multiple was "
 "provided:"
@@ -1805,19 +1809,19 @@ msgstr ""
 "При выборе движка хранилища используется следующий приоритет, если их "
 "было предоставлено несколько:"
 
-#: ../../config.rst:656
+#: ../../config.rst:660
 msgid "Libcloud store when config contains this section."
 msgstr "Хранилище Libcloud, когда конфигурация содержит этот раздел."
 
-#: ../../config.rst:658
+#: ../../config.rst:662
 msgid "Boto3 store, when you have section and has all required keys."
 msgstr "Хранилище Boto3, когда у вас есть раздел и имеются все необходимые ключи."
 
-#: ../../config.rst:660
+#: ../../config.rst:664
 msgid "FileSystem store otherwise."
 msgstr "В противном случае хранилище FileSystem."
 
-#: ../../config.rst:662
+#: ../../config.rst:666
 msgid ""
 "Once you have defined your Libcloud providers, you have an option of "
 "setting one provider as the default provider of Libcloud storage. You can"
@@ -1830,7 +1834,7 @@ msgstr ""
 "``[storages.libcloud.default]`` или же vstutils установит первое "
 "хранилище, как хранилище по умолчанию."
 
-#: ../../config.rst:667
+#: ../../config.rst:671
 msgid ""
 "If you configure default libcloud provider, vstutils will use it as "
 "global file storage. To override it set "
@@ -1851,7 +1855,7 @@ msgstr ""
 "``default=storages.backends.apache_libcloud.LibCloudStorage`` в разделе "
 "``[storages]`` и используйте провайдера Libcloud, как по умолчанию."
 
-#: ../../config.rst:675
+#: ../../config.rst:679
 msgid ""
 "Here is example for boto3 connection to minio cluster with public read "
 "permissions, external proxy domain and internal connection support:"
@@ -1859,15 +1863,15 @@ msgstr ""
 "Вот пример подключения boto3 к кластеру minio с публичными правами на "
 "чтение, внешним доменом прокси и поддержкой внутреннего подключения:"
 
-#: ../../config.rst:704
+#: ../../config.rst:708
 msgid "Throttle settings"
 msgstr "Настройки Throttle"
 
-#: ../../config.rst:706
+#: ../../config.rst:710
 msgid "Section ``[throttle]``."
 msgstr "Раздел ``[throttle]``."
 
-#: ../../config.rst:708
+#: ../../config.rst:712
 msgid ""
 "By including this section to your config, you can setup global and per-"
 "view throttle rates. Global throttle rates are specified under root "
@@ -1880,13 +1884,13 @@ msgstr ""
 "индивидуальные throttle rates для конкретного View, вам нужно добавить "
 "дочернюю секцию."
 
-#: ../../config.rst:712
+#: ../../config.rst:716
 msgid "For example, if you want to apply throttle to ``api/v1/author``:"
 msgstr ""
 "Например, если вы хотите применить ограничение количества запросов для "
 "``api/v1/author``:"
 
-#: ../../config.rst:720
+#: ../../config.rst:724
 msgid ""
 "**rate** - Throttle rate in format number_of_requests/time_period. "
 "Expected time_periods: second/minute/hour/day."
@@ -1895,7 +1899,7 @@ msgstr ""
 "number_of_requests/time_period. Expected time_periods: "
 "second/minute/hour/day."
 
-#: ../../config.rst:721
+#: ../../config.rst:725
 msgid ""
 "**actions** - Comma separated list of drf actions. Throttle will be "
 "applied only on specified here actions. Default: update, partial_update."
@@ -1904,7 +1908,7 @@ msgstr ""
 "количества запросов будет применяться только к указанным здесь действиям."
 " По умолчанию: update, partial_update."
 
-#: ../../config.rst:723
+#: ../../config.rst:727
 msgid ""
 "More on throttling at `DRF Throttle docs <https://www.django-rest-"
 "framework.org/api-guide/throttling/>`_."
@@ -1912,15 +1916,15 @@ msgstr ""
 "Подробнее об ограничении количества запросов в `документации DRF Throttle"
 " <https://www.django-rest-framework.org/api-guide/throttling/>`_."
 
-#: ../../config.rst:729
+#: ../../config.rst:733
 msgid "Web Push settings"
 msgstr "Настройки веб-уведомлений"
 
-#: ../../config.rst:731
+#: ../../config.rst:735
 msgid "Section ``[webpuwsh]``."
 msgstr "Раздел ``[webpuwsh]``."
 
-#: ../../config.rst:733
+#: ../../config.rst:737
 msgid ""
 "**enabled**: A boolean flag that enables or disables web push "
 "notifications. Set to `true` to activate web push notifications, and "
@@ -1935,7 +1939,7 @@ msgstr ""
 "пользователя будут скрыты, и метод `send` класса уведомлений ничего не "
 "будет делать."
 
-#: ../../config.rst:735
+#: ../../config.rst:739
 msgid ""
 "**vapid_private_key**, **vapid_public_key**: These are the application "
 "server keys used for sending push notifications. The VAPID (Voluntary "
@@ -1956,7 +1960,7 @@ msgstr ""
 "notifications-"
 "subscribing-a-user#how_to_create_application_server_keys>`_."
 
-#: ../../config.rst:737
+#: ../../config.rst:741
 msgid ""
 "**vapid_admin_email**: This setting specifies the email address of the "
 "administrator or the person responsible for the server. It is a contact "
@@ -1968,7 +1972,7 @@ msgstr ""
 "службы push, чтобы связаться в случае каких-либо проблем или нарушений "
 "политики."
 
-#: ../../config.rst:739
+#: ../../config.rst:743
 msgid ""
 "**default_notification_icon**: URL of the default icon image to be used "
 "for web push notifications, to avoid confusion absolute URL is preferred."
@@ -1985,7 +1989,7 @@ msgstr ""
 "<https://web.dev/articles/push-notifications-"
 "display-a-notification#icon>`_."
 
-#: ../../config.rst:741
+#: ../../config.rst:745
 msgid ""
 "For more detailed guidance on using and implementing web push "
 "notifications in VSTUtils, refer to the Web Push manual provided "
@@ -1995,7 +1999,7 @@ msgstr ""
 "веб-уведомлений в VSTUtils смотрите руководство по веб-уведомлениям, "
 ":ref:`here<webpush-manual>`."
 
-#: ../../config.rst:743
+#: ../../config.rst:747
 msgid ""
 "Remember, these settings are crucial for the proper functioning and "
 "reliability of web push notifications in your application. Ensure that "
@@ -2005,23 +2009,23 @@ msgstr ""
 "надежности веб-уведомлений в вашем приложении. Убедитесь, что они "
 "настроены правильно для оптимальной производительности."
 
-#: ../../config.rst:747
+#: ../../config.rst:751
 msgid "OAuth 2 settings"
 msgstr "Настройки OAuth 2"
 
-#: ../../config.rst:749
+#: ../../config.rst:753
 msgid "Section ``[oauth]``."
 msgstr "Раздел ``[oauth]``."
 
-#: ../../config.rst:751 ../../config.rst:756
+#: ../../config.rst:755 ../../config.rst:760
 msgid "For custom OAuth2 server use the following settings:"
 msgstr "Для пользовательского сервера OAuth2 используйте следующие настройки:"
 
-#: ../../config.rst:753
+#: ../../config.rst:757
 msgid "**server_url**: URL of OAuth2 server."
 msgstr "**server_url**: URL сервера OAuth2."
 
-#: ../../config.rst:754
+#: ../../config.rst:758
 msgid ""
 "**server_token_endpoint_path**: Path of OAuth2 server token endpoint "
 "(used in swagger schema). If not provided, `/{API_URL}/oauth2/token/` "
@@ -2031,17 +2035,17 @@ msgstr ""
 "сервера OAuth2 (используется в схеме swagger). Если не указано, будет "
 "использоваться `/{API_URL}/oauth2/token/`."
 
-#: ../../config.rst:758
+#: ../../config.rst:762
 msgid "**server_enable**: Enable or disable OAuth2 server. Default: `True`."
 msgstr ""
 "**server_enable**: Включить или отключить сервер OAuth2. По умолчанию: "
 "`True`."
 
-#: ../../config.rst:759
+#: ../../config.rst:763
 msgid "**server_issuer**: Issuer for JWT tokens. Must be provided."
 msgstr "**server_issuer**: Эмитент для JWT токенов. Должен быть указан."
 
-#: ../../config.rst:760
+#: ../../config.rst:764
 msgid ""
 "**server_jwt_key**: JWT key. Octet sequence (used to represent symmetric "
 "keys). Must be provided."
@@ -2049,11 +2053,11 @@ msgstr ""
 "**server_jwt_key**: Ключ JWT. Последовательность октетов (используется "
 "для представления симметричных ключей). Должен быть указан."
 
-#: ../../config.rst:761
+#: ../../config.rst:765
 msgid "**server_jwt_alg**: JWT algorithm. Default: `HS256`."
 msgstr "**server_jwt_alg**: Алгоритм JWT. По умолчанию: `HS256`."
 
-#: ../../config.rst:762
+#: ../../config.rst:766
 msgid ""
 "**server_class**: Import path to OAuth2 server class. See `authlib docs "
 "<https://docs.authlib.org/en/latest/specs/rfc6749.html#authlib.oauth2.rfc6749.AuthorizationServer>`_"
@@ -2066,7 +2070,7 @@ msgstr ""
 " для получения дополнительной информации. По умолчанию: "
 "`vstutils.oauth2.authorization_server.AuthorizationServer`."
 
-#: ../../config.rst:763
+#: ../../config.rst:767
 msgid ""
 "**server_enable_anon_login**: Enable or disable anonymous login using "
 "empty strings as username and password. Default: `False`."
@@ -2075,7 +2079,7 @@ msgstr ""
 "используя пустые строки в качестве имени пользователя и пароля. По "
 "умолчанию: `False`."
 
-#: ../../config.rst:764
+#: ../../config.rst:768
 msgid ""
 "**server_jwt_extra_claims_provider**: Import path to function that "
 "receives user and returns extra claims for JWT token. Default: `None`."
@@ -2084,7 +2088,7 @@ msgstr ""
 "принимает пользователя и возвращает дополнительные утверждения для JWT "
 "токена. По умолчанию: `None`."
 
-#: ../../config.rst:765
+#: ../../config.rst:769
 msgid ""
 "**server_allow_insecure**: If enabled then server will allow HTTP "
 "requests. Default: `False`."
@@ -2092,7 +2096,7 @@ msgstr ""
 "**server_allow_insecure**: Если включено, сервер будет разрешать HTTP "
 "запросы. По умолчанию: `False`."
 
-#: ../../config.rst:766
+#: ../../config.rst:770
 msgid ""
 "**server_token_expires_in**: Token expiration time in seconds. Duration "
 "values can be used, for example `3d2h32m`. Default: `864000`."
@@ -2101,7 +2105,7 @@ msgstr ""
 "использовать значения продолжительности, например `3d2h32m`. По "
 "умолчанию: `864000`."
 
-#: ../../config.rst:767
+#: ../../config.rst:771
 msgid ""
 "**server_client_authentication_methods**: List of client authentication "
 "methods. Default server supports following values `'client_secret_basic',"
@@ -2113,7 +2117,7 @@ msgstr ""
 "`'client_secret_basic', 'client_secret_post', 'none'`. По умолчанию: "
 "`['client_secret_basic', 'client_secret_post']`."
 
-#: ../../config.rst:768
+#: ../../config.rst:772
 msgid ""
 "**server_authorization_endpoint**: Url of OAuth 2 Authorization endpoint."
 " Will appear in output of `/.well-known/oauth-authorization-server` and "
@@ -2123,7 +2127,7 @@ msgstr ""
 "2. Появится в выводе `/.well-known/oauth-authorization-server` и `/.well-"
 "known/openid-configuration` точек обнаружения."
 
-#: ../../config.rst:770
+#: ../../config.rst:774
 msgid ""
 "By default one client can be configured using **server_simple_client_id**"
 " and **server_simple_client_secret**. Any other clients can be configured"
@@ -2136,15 +2140,15 @@ msgstr ""
 "**OAUTH_SERVER_CLIENTS** в `settings.py`, где ключ - это `client_id`, а "
 "значение - `client_secret`."
 
-#: ../../config.rst:774
+#: ../../config.rst:778
 msgid "Working behind the proxy server with TLS"
 msgstr "Работа за прокси-сервером с поддержкой TLS"
 
-#: ../../config.rst:777
+#: ../../config.rst:781
 msgid "Nginx"
 msgstr "Nginx"
 
-#: ../../config.rst:779
+#: ../../config.rst:783
 msgid ""
 "To configure vstutils for operation behind Nginx with TLS, follow these "
 "steps:"
@@ -2152,11 +2156,11 @@ msgstr ""
 "Чтобы настроить vstutils для работы через Nginx с поддержкой TLS, "
 "выполните следующие шаги:"
 
-#: ../../config.rst:781
+#: ../../config.rst:785
 msgid "**Install Nginx:**"
 msgstr "**Установка Nginx:**"
 
-#: ../../config.rst:783
+#: ../../config.rst:787
 msgid ""
 "Ensure that Nginx is installed on your server. You can install it using "
 "the package manager specific to your operating system."
@@ -2165,11 +2169,11 @@ msgstr ""
 "его с помощью менеджера пакетов, специфичного для вашей операционной "
 "системы."
 
-#: ../../config.rst:785
+#: ../../config.rst:789
 msgid "**Configure Nginx:**"
 msgstr "**Настройка Nginx:**"
 
-#: ../../config.rst:787
+#: ../../config.rst:791
 msgid ""
 "Create an Nginx configuration file for your vstutils application. Below "
 "is a basic example of an Nginx configuration. Adjust the values based on "
@@ -2179,7 +2183,7 @@ msgstr ""
 "приведен базовый пример конфигурации Nginx. Измените значения в "
 "соответствии с вашей конкретной настройкой."
 
-#: ../../config.rst:826
+#: ../../config.rst:830
 msgid ""
 "Replace ``your_domain.com`` with your actual domain, and update the paths"
 " for SSL certificates."
@@ -2187,11 +2191,11 @@ msgstr ""
 "Замените ``your_domain.com`` на ваш реальный домен и обновите пути к "
 "SSL-сертификатам."
 
-#: ../../config.rst:828 ../../config.rst:912 ../../config.rst:965
+#: ../../config.rst:832 ../../config.rst:916 ../../config.rst:969
 msgid "**Update vstutils settings:**"
 msgstr "**Обновление настроек vstutils:**"
 
-#: ../../config.rst:830 ../../config.rst:914 ../../config.rst:967
+#: ../../config.rst:834 ../../config.rst:918 ../../config.rst:971
 msgid ""
 "Ensure that your vstutils settings have the correct configurations for "
 "HTTPS. In your ``/etc/vstutils/settings.ini`` (or project "
@@ -2201,21 +2205,21 @@ msgstr ""
 "HTTPS. В вашем ``/etc/vstutils/settings.ini`` (или в проекте "
 "``settings.ini``):"
 
-#: ../../config.rst:838
+#: ../../config.rst:842
 msgid "This ensures that vstutils recognizes the HTTPS connection."
 msgstr "Это гарантирует, что vstutils распознает соединение по протоколу HTTPS."
 
-#: ../../config.rst:840
+#: ../../config.rst:844
 msgid "**Restart Nginx:**"
 msgstr "**Перезапустите Nginx:**"
 
-#: ../../config.rst:842
+#: ../../config.rst:846
 msgid "After making these changes, restart Nginx to apply the new configurations:"
 msgstr ""
 "После внесения этих изменений перезапустите Nginx, чтобы применить новые "
 "конфигурации:"
 
-#: ../../config.rst:848
+#: ../../config.rst:852
 msgid ""
 "Now, your vstutils application should be accessible via HTTPS through "
 "Nginx. Adjust these instructions based on your specific environment and "
@@ -2225,11 +2229,11 @@ msgstr ""
 "Nginx. Измените эти инструкции в зависимости от вашего конкретного "
 "окружения и требований к безопасности."
 
-#: ../../config.rst:852
+#: ../../config.rst:856
 msgid "Traefik"
 msgstr "Traefik"
 
-#: ../../config.rst:854
+#: ../../config.rst:858
 msgid ""
 "To configure vstutils for operation behind Traefik with TLS, follow these"
 " steps:"
@@ -2237,11 +2241,11 @@ msgstr ""
 "Чтобы настроить vstutils для работы через Traefik с поддержкой TLS, "
 "выполните следующие шаги:"
 
-#: ../../config.rst:856
+#: ../../config.rst:860
 msgid "**Install Traefik:**"
 msgstr "**Установка Traefik:**"
 
-#: ../../config.rst:858
+#: ../../config.rst:862
 msgid ""
 "Ensure that Traefik is installed on your server. You can download the "
 "binary from the official website or use a package manager specific to "
@@ -2251,11 +2255,11 @@ msgstr ""
 "двоичный файл с официального сайта или использовать менеджер пакетов, "
 "специфичный для вашей операционной системы."
 
-#: ../../config.rst:860
+#: ../../config.rst:864
 msgid "**Configure Traefik:**"
 msgstr "**Настройка Traefik:**"
 
-#: ../../config.rst:862
+#: ../../config.rst:866
 msgid ""
 "Create a Traefik configuration file ``/path/to/traefik.toml``. Here's a "
 "basic example:"
@@ -2263,29 +2267,29 @@ msgstr ""
 "Создайте файл конфигурации Traefik ``/path/to/traefik.toml``. Вот базовый"
 " пример:"
 
-#: ../../config.rst:885
+#: ../../config.rst:889
 msgid "**Create Traefik Toml Configuration:**"
 msgstr "**Создайте конфигурацию Traefik Toml:**"
 
-#: ../../config.rst:887
+#: ../../config.rst:891
 msgid ""
 "Create the ``/path/to/traefik_config.toml`` file with the following "
 "content:"
 msgstr "Создайте файл ``/path/to/traefik_config.toml`` с следующим содержимым:"
 
-#: ../../config.rst:910
+#: ../../config.rst:914
 msgid "Make sure to replace ``your_domain.com`` with your actual domain."
 msgstr "Обязательно замените ``your_domain.com`` на ваш реальный домен."
 
-#: ../../config.rst:922
+#: ../../config.rst:926
 msgid "**Start Traefik:**"
 msgstr "**Запустите Traefik:**"
 
-#: ../../config.rst:924
+#: ../../config.rst:928
 msgid "Start Traefik with the following command:"
 msgstr "Запустите Traefik следующей командой:"
 
-#: ../../config.rst:930
+#: ../../config.rst:934
 msgid ""
 "Now, your vstutils application should be accessible via HTTPS through "
 "Traefik. Adjust these instructions based on your specific environment and"
@@ -2295,15 +2299,15 @@ msgstr ""
 "Traefik. Измените эти инструкции в зависимости от вашего конкретного "
 "окружения и требований."
 
-#: ../../config.rst:934
+#: ../../config.rst:938
 msgid "HAProxy"
 msgstr "HAProxy"
 
-#: ../../config.rst:936
+#: ../../config.rst:940
 msgid "**Install HAProxy:**"
 msgstr "**Установка HAProxy:**"
 
-#: ../../config.rst:938
+#: ../../config.rst:942
 msgid ""
 "Ensure that HAProxy is installed on your server. You can install it using"
 " the package manager specific to your operating system."
@@ -2312,11 +2316,11 @@ msgstr ""
 "его с помощью менеджера пакетов, специфичного для вашей операционной "
 "системы."
 
-#: ../../config.rst:940
+#: ../../config.rst:944
 msgid "**Configure HAProxy:**"
 msgstr "**Настройка HAProxy:**"
 
-#: ../../config.rst:942
+#: ../../config.rst:946
 msgid ""
 "Create an HAProxy configuration file for your vstutils application. Below"
 " is a basic example of an HAProxy configuration. Adjust the values based "
@@ -2326,7 +2330,7 @@ msgstr ""
 "базовый пример конфигурации HAProxy. Измените значения в соответствии с "
 "вашей конкретной настройкой."
 
-#: ../../config.rst:963
+#: ../../config.rst:967
 msgid ""
 "Replace ``your_domain.com`` with your actual domain and update the paths "
 "for SSL certificates."
@@ -2334,11 +2338,11 @@ msgstr ""
 "Замените ``your_domain.com`` на ваш реальный домен и обновите пути к "
 "SSL-сертификатам."
 
-#: ../../config.rst:975
+#: ../../config.rst:979
 msgid "**Restart HAProxy:**"
 msgstr "**Перезапуск HAProxy:**"
 
-#: ../../config.rst:977
+#: ../../config.rst:981
 msgid ""
 "After making these changes, restart HAProxy to apply the new "
 "configurations:"
@@ -2346,7 +2350,7 @@ msgstr ""
 "После внесения этих изменений перезапустите HAProxy, чтобы применить "
 "новые конфигурации."
 
-#: ../../config.rst:983
+#: ../../config.rst:987
 msgid ""
 "Now, your vstutils application should be accessible via HTTPS through "
 "HAProxy. Adjust these instructions based on your specific environment and"
@@ -2356,11 +2360,11 @@ msgstr ""
 "HAProxy. Измените эти инструкции в зависимости от вашего конкретного "
 "окружения и требований к безопасности."
 
-#: ../../config.rst:987
+#: ../../config.rst:991
 msgid "Configuration options"
 msgstr "Параметры конфигурации"
 
-#: ../../config.rst:989
+#: ../../config.rst:993
 msgid ""
 "This section contains additional information for configure additional "
 "elements."
@@ -2368,7 +2372,7 @@ msgstr ""
 "В этом разделе содержится дополнительная информация для настройки "
 "дополнительных элементов."
 
-#: ../../config.rst:991
+#: ../../config.rst:995
 msgid ""
 "If you need set ``https`` for your web settings, you can do it using "
 "HAProxy, Nginx, Traefik or configure it in ``settings.ini``."
@@ -2377,7 +2381,7 @@ msgstr ""
 " сделать это с помощью HAProxy, Nginx, Traefik или настроить в файле "
 "``settings.ini``."
 
-#: ../../config.rst:1003
+#: ../../config.rst:1007
 msgid ""
 "We strictly do not recommend running the web server from root. Use HTTP "
 "proxy to run on privileged ports."
@@ -2385,7 +2389,7 @@ msgstr ""
 "Мы настоятельно не рекомендуем запускать веб-сервер от имени root. "
 "Используйте HTTP-прокси, чтобы работать на привилегированных портах."
 
-#: ../../config.rst:1005
+#: ../../config.rst:1009
 msgid ""
 "You can use ``{ENV[HOME:-value]}`` (where ``HOME`` is environment "
 "variable, ``value`` is default value) in configuration values."
@@ -2393,7 +2397,7 @@ msgstr ""
 "Вы можете использовать ``{ENV[HOME:-value]}`` (где ``HOME`` - переменная "
 "окружения, ``value`` - значение по умолчанию) в значениях конфигурации."
 
-#: ../../config.rst:1008
+#: ../../config.rst:1012
 msgid ""
 "You can use environment variables for setup important settings. But "
 "config variables has more priority then env. Available settings are: "
@@ -2406,7 +2410,7 @@ msgstr ""
 "``DJANGO_LOG_LEVEL``, ``TIMEZONE`` и некоторые настройки с префиксом "
 "``[ENV_NAME]``."
 
-#: ../../config.rst:1011
+#: ../../config.rst:1015
 msgid ""
 "For project without special settings and project levels named ``project``"
 " these variables will start with ``PROJECT_`` prefix. There is a list of "
@@ -2428,7 +2432,7 @@ msgstr ""
 "(директория с загрузками), ``{ENV_NAME}_GLOBAL_THROTTLE_RATE``, и "
 "``{ENV_NAME}_GLOBAL_THROTTLE_ACTIONS``."
 
-#: ../../config.rst:1018
+#: ../../config.rst:1022
 msgid ""
 "There are also URI-specific variables for connecting to various services "
 "such as databases and caches. There are ``DATABASE_URL``, ``CACHE_URL``, "
@@ -2442,7 +2446,7 @@ msgstr ""
 "``SESSIONS_CACHE_URL`` и ``ETAG_CACHE_URL``. Как видно из названий, они "
 "тесно связаны с ключами и именами соответствующих секций конфигурации."
 
-#: ../../config.rst:1022
+#: ../../config.rst:1026
 msgid ""
 "We recommend to install ``uvloop`` to your environment and setup ``loop ="
 " uvloop`` in ``[uvicorn]`` section for performance reasons."
@@ -2450,7 +2454,7 @@ msgstr ""
 "Мы рекомендуем установить ``uvloop`` в ваше окружение и настроить ``loop "
 "= uvloop`` в разделе ``[uvicorn]`` для повышения производительности."
 
-#: ../../config.rst:1024
+#: ../../config.rst:1028
 msgid ""
 "In the context of vstutils, the adoption of ``uvloop`` is paramount for "
 "optimizing the performance of the application, especially because "
@@ -2468,7 +2472,7 @@ msgstr ""
 "библиотеки высокопроизводительного цикла событий, и специально разработан"
 " для оптимизации скорости выполнения асинхронного кода."
 
-#: ../../config.rst:1028
+#: ../../config.rst:1032
 msgid ""
 "By leveraging ``uvloop``, developers can achieve substantial performance "
 "improvements in terms of reduced latency and increased throughput. This "

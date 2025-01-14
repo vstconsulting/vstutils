@@ -48,7 +48,7 @@ kwargs = dict(
         r'vstutils/static/spa/.*\.css$'
     ],
     install_requires=[
-        "django~=" + (os.environ.get('DJANGO_DEP', "") or "5.1.4"),
+        "django~=" + (os.environ.get('DJANGO_DEP', "") or "5.1.5"),
     ]
     + requirements,
     extras_require={
@@ -58,7 +58,7 @@ kwargs = dict(
         'doc': load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
         'stubs': load_requirements('requirements-stubs.txt'),
-        'pil': ['Pillow~=11.0.0'],
+        'pil': ['Pillow~=11.1.0'],
         'boto3': [
             i.replace('libcloud', 'libcloud,s3')
             for i in requirements

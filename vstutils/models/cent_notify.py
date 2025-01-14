@@ -93,12 +93,13 @@ class Notificator:
         for obj_labels, data in objects:
             with contextlib.suppress(Exception):
                 for obj_label in obj_labels:
-                    channel = self.get_subscription_channel(provided_label or obj_label)
-                    publish_requests.append(PublishRequest(
-                        channel=channel,
-                        data=data,
-                    ))
-                    sent_channels.add(channel)
+                    with contextlib.suppress(Exception):
+                        channel = self.get_subscription_channel(provided_label or obj_label)
+                        new_request = PublishRequest(channel=channel, data=data)
+                        if new_request in publish_requests:
+                            publish_requests.remove(new_request)
+                        publish_requests.append(new_request)
+                        sent_channels.add(channel)
 
         return publish_requests, sent_channels
 

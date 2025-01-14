@@ -1464,7 +1464,7 @@ API_ONLY = False
 
 # Default auth views
 ##############################################################
-DEFAULT_REGISTRATION_VIEW_ENABLE: bool = True
+DEFAULT_REGISTRATION_VIEW_ENABLE: bool = main.getboolean('enable_registration', fallback=False)
 DEFAULT_REGISTRATION_VIEW_SERIALIZER_CLASS: str = 'vstutils.api.registration.serializers.UserRegistrationSerializer'
 DEFAULT_REGISTRATION_VIEW_CONFIRMATION_LINK: str = '/#/auth/registration/confirm-email/{code}'
 

@@ -271,19 +271,14 @@ class DockerCommand(BaseCommand):
         self.env = os.environ.copy()
         self.config = self.prepare_config()
         self.env[f'{settings.ENV_NAME}_DAEMON'] = 'false'
-        default_envs: dict[str, str] = {}
-        for key in default_envs:  # pylint: disable=consider-using-dict-items
-            value = os.environ.get(f"{self.prefix}_{key}", '')
-            if value:
-                self.env[default_envs[key]] = value  # nocv
 
         if self.config['main']['debug'] or self._settings('TESTS_RUN', False):
             logger.debug(f'Env:\n{json.dumps(self.env, indent=4)}')
             logger.debug(f'Config:\n{self.config.generate_config_string()}')
 
         if self.with_migration and options['migrate']:
-            _, err = self.migrate(options)
-            if err:
+            success, err = self.migrate(options)
+            if not success:
                 self._print(f'Migration error: {err}', 'ERROR')
 
     @property
