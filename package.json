@@ -109,7 +109,7 @@
     "tsx": "^4.19.2",
     "typescript": "~5.6.2",
     "visibilityjs": "^2.0.2",
-    "vite": "^6.0.3",
+    "vite": "^6.0.9",
     "vite-plugin-dts": "^4.3.0",
     "vite-plugin-pwa": "^0.21.1",
     "vite-tsconfig-paths": "^5.1.3",
